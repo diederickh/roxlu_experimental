@@ -1,8 +1,11 @@
-#pragma once
+#ifndef ROXLU_AXISH
+#define ROXLU_AXISH
 
 #include "Vec3.h"
 #include "VBO.h"
 #include "VertexData.h"
+
+namespace roxlu {
 
 class Axis {
 public:
@@ -14,3 +17,6 @@ private:
 	VertexData vd;
 	int num_vertices;
 };
+
+} // roxlu
+#endif

@@ -5,6 +5,8 @@
 #include "roxlu/Camera.h"
 #include "roxlu/Color.h"
 #include "roxlu/Constants.h"
+#include "roxlu/Dictionary.h"
+#include "roxlu/DictionaryMap.h"
 #include "roxlu/EasyCam.h"
 #include "roxlu/Endianness.h"
 #include "roxlu/Error.h"
@@ -18,7 +20,10 @@
 #include "roxlu/PBO.h"
 #include "roxlu/Quad.h"
 #include "roxlu/Quat.h"
+#include "roxlu/Renderer.h"
 #include "roxlu/Ray.h"
+#include "roxlu/SceneItem.h"
+#include "roxlu/Scene.h"
 #include "roxlu/Shader.h"
 #include "roxlu/Sphere.h"
 #include "roxlu/Triangle.h"
@@ -30,5 +35,11 @@
 #include "roxlu/Vec4.h"
 #include "roxlu/VertexData.h"
 #include "roxlu/VertexTypes.h"
+
+#include "roxlu/experimental/File.h"
+#include "roxlu/experimental/StringUtil.h"
+
+using namespace roxlu;
+
 
 #endif

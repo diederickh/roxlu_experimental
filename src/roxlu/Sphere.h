@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ROXLU_SPHEREH
+#define ROXLU_SPHEREH
 #include "VertexData.h"
 #include "Vec3.h"
 #include "Vec2.h"
@@ -34,3 +35,5 @@ public:
 	int num_vertices;
 	int num_index_elements;
 };
+
+#endif

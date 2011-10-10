@@ -1,4 +1,6 @@
-#pragma once
+#ifndef ROXLU_VERTEXTYPESH
+#define ROXLU_VERTEXTYPESH
+
 #include "Vec3.h"
 #include "Vec2.h"
 #include "Color.h"
@@ -25,7 +27,7 @@ enum VertexAttribs {
 	,ARRAY_NORM		= (1 << 7)
 	,ARRAY_COL		= (1 << 8)
 	,ARRAY_TEX		= (1 << 9)
-	,ARRAY_INDEX		= (1 << 10)
+	,ARRAY_INDEX	= (1 << 10)
 };
 
 struct Vertex {
@@ -71,3 +73,5 @@ struct VertexPTNTB : public Vertex  { // can be used for normal mapping
 	Vec3 binorm;
 	Vec2 tex;
 };
+
+#endif

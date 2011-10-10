@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ROXLU_VEC3H
+#define ROXLU_VEC3H
 
 // When you're smarter than the compiler optimizer
 // -----------------------------------------------------------------------------
@@ -376,3 +377,5 @@ inline float dot(const Vec3& a, const Vec3& b) {
 	dot3(a,b,r);
 	return r;
 }
+
+#endif

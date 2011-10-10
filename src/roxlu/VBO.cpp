@@ -10,6 +10,8 @@
  * See the book:  Game Engine Architecture, Jason Gregory, 2009. Page. 415.
  */ 
 
+namespace roxlu {
+
 VBO::VBO() 
 :created_types(VBO_TYPE_NOT_USED)
 {
@@ -242,4 +244,6 @@ VBO& VBO::drawElements(int nDrawMode, int nTotal) {
         glDrawElements(nDrawMode, nTotal, GL_UNSIGNED_INT, NULL); eglGetError();
 	unbind();
 	return *this;
+}
+
 }

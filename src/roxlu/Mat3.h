@@ -1,5 +1,5 @@
-#ifndef MAT3H
-#define MAT3H
+#ifndef ROXLU_MAT3H
+#define ROXLU_MAT3H
 /*
  
  Using column major:

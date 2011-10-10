@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ROXLU_VEC2H
+#define ROXLU_VEC2H
 
 // If you're smarter then the optimizer!
 //------------------------------------------------------------------------------
@@ -154,3 +155,5 @@ inline std::istream& operator>>(std::istream& is, Vec2& rVec) {
 	is >> rVec.y;
 	return is;
 }
+
+#endif

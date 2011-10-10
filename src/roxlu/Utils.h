@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ROXLU_UTILSH
+#define ROXLU_UTILSH
 
 //#include "pstdint.h" /* Replace with <stdint.h> if appropriate */
 #include <stdint.h>
@@ -17,3 +18,5 @@ extern uint32_t gl_string_id(const char * data, int len);
 
 #define EPSILON 0.000001
 #define IS_ZERO(f) 	(fabs(f) < EPSILON)	
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ROXLU_QAUTH
+#define ROXLU_QAUTH
 
 #include "Mat4.h"
 #include "Vec3.h"
@@ -75,3 +76,5 @@ inline Quat Quat::operator-(const Quat& rOther) const {
 	q_out.w = w - rOther.w;
 	return q_out;
 }
+
+#endif

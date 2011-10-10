@@ -1,5 +1,5 @@
-#ifndef PBOH
-#define PBOH
+#ifndef ROXLU_PBOH
+#define ROXLU_PBOH
 
 #include "OpenGL.h"
 #include "Error.h"

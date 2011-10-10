@@ -1,4 +1,6 @@
 #include "VertexData.h"
+namespace roxlu {
+
 VertexData::VertexData() 
 :vertex_p(NULL)
 ,vertex_pn(NULL)
@@ -403,3 +405,4 @@ void VertexData::clear() {
 	bitangents.clear();
 }
 
+} // roxlu

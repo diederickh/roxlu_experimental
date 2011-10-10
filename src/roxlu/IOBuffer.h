@@ -1,5 +1,5 @@
-#ifndef IOBUFFERH
-#define IOBUFFERH
+#ifndef ROXLU_IOBUFFERH
+#define ROXLU_IOBUFFERH
 
 #include <inttypes.h>
 #include <string>

@@ -1,5 +1,5 @@
-#ifndef VBOH
-#define VBOH
+#ifndef ROXLU_VBOH
+#define ROXLU_VBOH
 
 #include "OpenGL.h"
 #include "Error.h"
@@ -10,6 +10,7 @@
 // by adding thyeps to the VBOType struct.
 #include "VertexTypes.h" 
 
+namespace roxlu {
 
 class VertexData;
 
@@ -87,4 +88,6 @@ private:
 	int vertex_size;
 	int vertex_stride;
 };
+
+} // roxlu
 #endif

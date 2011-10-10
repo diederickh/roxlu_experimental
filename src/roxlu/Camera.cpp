@@ -72,8 +72,8 @@ void Camera::place() {
 	glLoadMatrixf(projection_matrix.getPtr());
 
 	glMatrixMode(GL_MODELVIEW);
-	updateModelViewMatrix();
-	glLoadMatrixf(modelview_matrix.getPtr());
+	updateViewMatrix();
+	glLoadMatrixf(view_matrix.getPtr());
 }
 
 void Camera::translate(float nX, float nY, float nZ) {
@@ -99,10 +99,10 @@ void Camera::clearRotation() {
 
 // Updating the matrices.
 // -----------------------------------------------------------------------------
-void Camera::updateModelViewMatrix() {
-	modelview_matrix.identity();
-	modelview_matrix.translate(position);
-	modelview_matrix *= rotation.getMat4();
+void Camera::updateViewMatrix() {
+	view_matrix.identity();
+	view_matrix.translate(position);
+	view_matrix *= rotation.getMat4();
 }
 
 // TODO: check this great tutorial: http://www.vb6.us/tutorials/using-mouse-click-3d-space-directx-8
@@ -152,13 +152,13 @@ Vec3 Camera::screenToWorld(float nX, float nY, float nZ) {
 	float ndy = (1.0f - (mouse_y/(screen_h * 0.5))); // top: -1, bottom: 1
 	float ndz = 2.0*nZ-1.0;
 	//ndz = nZ;
-	updateModelViewMatrix(); 
+	updateViewMatrix(); 
 	updateProjectionMatrix();
 
 	Vec4 ndc(ndx, ndy, ndz, 1.0);
 //	cout << "ndc cam:" << ndc << endl;
 //	Mat4 mvp = mvm() * pm() ;
-	Mat4 mvp = pm() * mvm(); 
+	Mat4 mvp = pm() * vm(); 
 	mvp.inverse();
 	ndc = mvp * ndc;
 		
@@ -225,28 +225,28 @@ void Camera::setScreenHeight(float screenHeight) {
 	screen_height = screenHeight;
 }
 
-Mat4 Camera::getModelViewMatrix() {
-	return modelview_matrix;
+Mat4 Camera::getViewMatrix() {
+	return view_matrix;
 }
 
-Mat4 Camera::getModelViewProjectionMatrix() {
-	return modelview_matrix * projection_matrix;
+Mat4 Camera::getViewProjectionMatrix() {
+	return view_matrix * projection_matrix;
 }
 
-float* Camera::getInverseModelViewMatrixPtr() {
+float* Camera::getInverseViewMatrixPtr() {
 	printf("TODO: Camera::getInverseModelViewMatrixPtr\n");
 	return NULL;
 }
 
-Mat4 Camera::getInverseModelViewMatrix() {
-	updateModelViewMatrix();
-	return affine_inverse(modelview_matrix);
+Mat4 Camera::getInverseViewMatrix() {
+	updateViewMatrix();
+	return affine_inverse(view_matrix);
 }
 
-Mat4 Camera::getInverseModelViewProjectionMatrix() {
-	updateModelViewMatrix();
+Mat4 Camera::getInverseViewProjectionMatrix() {
+	updateViewMatrix();
 	updateProjectionMatrix();
-	Mat4 mvp = projection_matrix * modelview_matrix;
+	Mat4 mvp = projection_matrix * view_matrix;
 	return affine_inverse(mvp);
 	
 }

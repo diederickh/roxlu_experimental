@@ -1,5 +1,5 @@
-#ifndef TRIANGLEH
-#define TRIANGLEH
+#ifndef ROXLU_TRIANGLEH
+#define ROXLU_TRIANGLEH
 
 struct Triangle {
 	int a,b,c;

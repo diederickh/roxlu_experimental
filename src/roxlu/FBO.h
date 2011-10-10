@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ROXLU_FBOH
+#define ROXLU_FBOH
 
 #include "OpenGL.h"
 #include <map>
@@ -24,3 +25,5 @@ public:
  GLuint fbo_id;
  map<int, GLuint> textures; // <attachment_point, texture_id>
 };
+
+#endif

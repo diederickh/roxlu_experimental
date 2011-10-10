@@ -1,9 +1,9 @@
 // thanks to: http://www.netrino.com/Embedded-Systems/How-To/Big-Endian-Little-Endian
-#ifndef ENDIANNESSH
-#define ENDIANNESSH
+#ifndef ROXLU_ENDIANNESSH
+#define ROXLU_ENDIANNESSH
 
 //--------------
-#define OFX_LITTLE_ENDIAN 
+#define ROXLU_LITTLE_ENDIAN 
 
 // apache license, thanks to: http://www.google.com/codesearch#wZuuyuB8jKQ/chromium/src/third_party/sfntly/src/sfntly/port/endian.h
 static inline uint16_t EndianSwap16(uint16_t value) {
@@ -28,7 +28,7 @@ static inline uint64_t EndianSwap64(uint64_t value) {
           ((value & 0xff00000000000000LL) >> 56));
 }
 
-#ifdef OFX_LITTLE_ENDIAN
+#ifdef ROXLU_LITTLE_ENDIAN
   #define ToBE16(n) EndianSwap16(n)
   #define ToBE32(n) EndianSwap32(n)
   #define ToBE64(n) EndianSwap64(n)
@@ -41,7 +41,7 @@ static inline uint64_t EndianSwap64(uint64_t value) {
   #define FromLE16(n) (n)
   #define FromLE32(n) (n)
   #define FromLE64(n) (n)
-#else  // OFX_LITTLE_ENDIAN
+#else  // ROXLU_LITTLE_ENDIAN
   #define ToBE16(n) (n)
   #define ToBE32(n) (n)
   #define ToBE64(n) (n)

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ROXLU_ARCBALLH
+#define ROXLU_ARCBALLH
 #include "OpenGL.h"
 #include "Camera.h"
 #include "Quat.h"
@@ -30,3 +31,5 @@ protected:
 inline Vec3 ArcBall::getCenter() {
 	return center;
 }
+
+#endif

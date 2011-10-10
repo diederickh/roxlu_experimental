@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ROXLU_INIH
+#define ROXLU_INIH
 
 #include <stdint.h>
 #include <fstream>
@@ -140,3 +141,5 @@ inline ostream& operator<<(ostream& os, const INI& ini) {
 	}
 	return os;
 }
+
+#endif

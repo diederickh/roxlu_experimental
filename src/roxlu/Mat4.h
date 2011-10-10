@@ -1,5 +1,5 @@
-#ifndef MAT4H
-#define MAT4H
+#ifndef ROXLU_MAT4H
+#define ROXLU_MAT4H
 
 #include <iostream>
 #include <iomanip>

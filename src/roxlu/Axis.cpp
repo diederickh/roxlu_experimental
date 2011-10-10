@@ -1,4 +1,5 @@
 #include "Axis.h"
+namespace roxlu {
 
 Axis::Axis() {
 }
@@ -53,3 +54,5 @@ void Axis::draw() {
 	vbo.drawArrays(GL_LINES, 0, num_vertices); eglGetError();
 	glEnable(GL_TEXTURE_2D); eglGetError();
 }
+
+} // roxlu

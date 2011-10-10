@@ -1,5 +1,5 @@
-#ifndef VEC4H
-#define VEC4H
+#ifndef ROXLU_VEC4H
+#define ROXLU_VEC4H
 
 #include <iostream>
 #include <iomanip>

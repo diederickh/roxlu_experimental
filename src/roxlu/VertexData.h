@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ROXLU_VERTEXDATAH
+#define ROXLU_VERTEXDATAH
 
 #include "VertexTypes.h"
 #include "Color.h"
@@ -13,6 +14,8 @@
 using std::endl;
 using std::ostream;
 using std::vector;
+
+namespace roxlu {
 
 class VertexData {
 public:
@@ -80,7 +83,7 @@ public:
 	VertexPTN* 			vertex_ptn;
 	VertexPNC* 			vertex_pnc;
 	VertexPN* 			vertex_pn;
-	VertexPTNTB* 	vertex_ptntb;
+	VertexPTNTB* 		vertex_ptntb;
 };
 
 inline ostream& operator <<(ostream& os, const VertexData& data) {
@@ -113,3 +116,7 @@ inline ostream& operator <<(ostream& os, const VertexData& data) {
 	}
 	return os;	
 }
+
+} // roxlu
+
+#endif

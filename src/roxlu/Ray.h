@@ -1,5 +1,5 @@
-#ifndef VEC3RAYH
-#define VEC3RAYH
+#ifndef ROXLU_VEC3RAYH
+#define ROXLU_VEC3RAYH
 
 #include "Vec3.h"
 

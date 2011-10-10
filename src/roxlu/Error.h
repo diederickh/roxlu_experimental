@@ -1,17 +1,11 @@
-/*
-**  error.h
-**
-**  Copyright (c) 2008 Max Rupp (feelgood@cs.pdx.edu) All rights reserved.
-*/
-
-#ifndef __ERROR_H__
-#define __ERROR_H__
+#ifndef ROXLU_ERRORH
+#define ROXLU_ERRORH
 #define DEBUG
 #ifdef  DEBUG
 
 #include <stdlib.h>
 #include <assert.h>
-/*
+
 #define eglGetError( )\
         {\
             for ( GLenum Error = glGetError( ); ( GL_NO_ERROR != Error ); Error = glGetError( ) )\
@@ -28,8 +22,8 @@
                 }\
             }\
         }
-*/
-#define eglGetError()
+
+//#define eglGetError()
 #define eglCheckFramebufferStatus( )\
         {\
             switch ( glCheckFramebufferStatus( GL_FRAMEBUFFER ) )\

@@ -1,5 +1,5 @@
-#ifndef SHADERH
-#define SHADERH
+#ifndef ROXLU_SHADERH
+#define ROXLU_SHADERH
 
 #include "OpenGL.h"
 
@@ -9,6 +9,9 @@
 
 using std::string;
 typedef std::map<std::string, GLuint> ShaderMap;
+
+
+namespace roxlu {
 
 class Shader {
 	public:
@@ -69,4 +72,6 @@ class Shader {
 		GLuint frag_id;
 		GLuint prog_id;
 };
+
+} // roxlu
 #endif

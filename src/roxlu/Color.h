@@ -1,5 +1,5 @@
-#ifndef ROXLUCOLOR4FH
-#define ROXLUCOLOR4FH
+#ifndef ROXLU_COLOR4FH
+#define ROXLU_COLOR4FH
 
 // color
 struct Color4f {

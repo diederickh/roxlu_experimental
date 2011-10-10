@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ROXLU_CAMERAH
+#define ROXLU_CAMERAH
 
 #include "OpenGL.h"
 #include "Quat.h"
@@ -39,23 +40,23 @@ public:
 	void setUpVector(float nX, float nY, float nZ);
 
 	// matrices.	
-	float* getInverseModelViewMatrixPtr();
-	Mat4 getInverseModelViewMatrix();
-	Mat4 getInverseModelViewProjectionMatrix();
-	Mat4 getModelViewMatrix();
-	Mat4 getModelViewProjectionMatrix();
-	inline Mat4& mvm(); // model view matrix
+	float* getInverseViewMatrixPtr();
+	Mat4 getInverseViewMatrix();
+	Mat4 getInverseViewProjectionMatrix();
+	Mat4 getViewMatrix();
+	Mat4 getViewProjectionMatrix();
+	inline Mat4& vm(); // view matrix
 	inline Mat4& pm(); // projection matrix
 
 	
 	// internally used for caching
-	void updateModelViewMatrix();
+	void updateViewMatrix();
 	void updateProjectionMatrix();
 	
 	// members
 	Quat rotation;
 	Mat4 projection_matrix;
-	Mat4 modelview_matrix;
+	Mat4 view_matrix;
 	
 	Vec3 up;
 	Vec3 position;
@@ -85,9 +86,12 @@ inline float Camera::getScreenHeight() {
 	return screen_height;
 }
 
-inline Mat4& Camera::mvm() {
-	return modelview_matrix;
+inline Mat4& Camera::vm() {
+	return view_matrix;
 }
+
 inline Mat4& Camera::pm() {
 	return projection_matrix;
 }
+
+#endif

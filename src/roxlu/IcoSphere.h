@@ -1,5 +1,6 @@
-#pragma once
-
+#ifndef ROXLU_ICOSHPHEREH
+#define ROXLU_ICOSHPHEREH
+ 
 #include "OpenGL.h"
 #include "Vec3.h"
 #include "Vec2.h"
@@ -19,3 +20,5 @@ private:
 	vector<Vec2> coords;
 	vector<int> indices;
 };
+
+#endif

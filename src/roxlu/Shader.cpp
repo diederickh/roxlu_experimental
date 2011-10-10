@@ -1,5 +1,8 @@
 #include "Shader.h"
 #include "Error.h"
+#include "experimental/File.h"
+
+namespace roxlu {
 
 Shader::Shader() 
 :name("")
@@ -300,3 +303,5 @@ Shader& Shader::setTextureUnit(
 	glActiveTexture(GL_TEXTURE0);
 	return *this;
 }
+
+} // roxlu
