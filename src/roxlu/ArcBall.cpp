@@ -1,4 +1,7 @@
 #include "ArcBall.h"
+
+namespace roxlu {
+
 ArcBall::ArcBall()
 :center(0,0,0)
 ,radius(1.0)
@@ -108,3 +111,5 @@ Vec3 ArcBall::getSphereIntersection(Vec3 oPos) {
 	}
 	return to_center;
 }
+
+} // roxlu

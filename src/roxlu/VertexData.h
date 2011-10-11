@@ -117,6 +117,7 @@ inline ostream& operator <<(ostream& os, const VertexData& data) {
 	return os;	
 }
 
+
 } // roxlu
 
 #endif

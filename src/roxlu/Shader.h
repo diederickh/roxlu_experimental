@@ -6,8 +6,12 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include <iostream>
 
 using std::string;
+using std::cout;
+using std::endl;
+
 typedef std::map<std::string, GLuint> ShaderMap;
 
 
@@ -68,6 +72,8 @@ class Shader {
 		ShaderMap attributes;
 		bool enabled;
 		std::string name;
+		std::string vert_shader_source;
+		std::string frag_shader_source;
 		GLuint vert_id;
 		GLuint frag_id;
 		GLuint prog_id;

@@ -4,21 +4,21 @@
 #include "OpenGL.h"
 #include "Vec3.h"
 #include "Vec2.h"
+#include "Vertexdata.h"
 #include <vector>
 
+
 using namespace std;
+
+namespace roxlu {
 
 class IcoSphere {
 public:
     IcoSphere();
-    void create(int detail, float radius);
-	void draw();
-	Vec3 pos;
+    void create(int detail, float radius, VertexData& vertex_data);
 private:
-	vector<Vec3> verts;
-	vector<Vec3> norms;
-	vector<Vec2> coords;
-	vector<int> indices;
+	
 };
 
+} // roxlu
 #endif

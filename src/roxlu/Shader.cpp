@@ -67,10 +67,14 @@ string Shader::getFragmentSource() {
 }
 
 void Shader::create(std::string& rVertexSource, std::string& rFragmentSource) {
+	vert_shader_source = rVertexSource;
+	frag_shader_source = rFragmentSource;
+	
 	const char* vss_ptr = rVertexSource.c_str();
 	const char* fss_ptr = rFragmentSource.c_str();
-	//std::cout << rVertexSource << std::endl;
-	//std::cout << rFragmentSource << std::endl;
+	
+	std::cout << rVertexSource << std::endl;
+	std::cout << rFragmentSource << std::endl;
 	
 	// create shader.
 	vert_id = glCreateShader(GL_VERTEX_SHADER); eglGetError();
@@ -100,8 +104,9 @@ Shader& Shader::addAttribute(std::string sName) {
 	if(it != attributes.end()) {
 		return *this;
 	}
+	
 	GLuint attribute_id = glGetAttribLocation(prog_id, sName.c_str()); eglGetError();
-	printf("Added attribute: %d", attribute_id);
+	printf("Added attribute: %d for prog: %d\n", attribute_id, prog_id);
 	attributes[sName] = attribute_id;
 	disable();
 	return *this;
@@ -111,7 +116,7 @@ Shader& Shader::addUniform(std::string sName) {
 	enable();
 	GLuint uni_loc = -1;
 	uni_loc = glGetUniformLocation(prog_id, sName.c_str()); eglGetError();
-	printf("Added uniform: %s at %d", sName.c_str(), uni_loc);
+	printf("Added uniform: %s at %d for prog: %d\n", sName.c_str(), uni_loc, prog_id);
 	uniforms[sName] = uni_loc;
 	disable();
 	return *this;

@@ -1,5 +1,8 @@
 #include "Camera.h"
 #include "Constants.h"
+
+namespace roxlu {
+
 Camera::Camera() 
 :fov(45.0f)
 ,aspect(4.0f/3.0f)
@@ -248,5 +251,6 @@ Mat4 Camera::getInverseViewProjectionMatrix() {
 	updateProjectionMatrix();
 	Mat4 mvp = projection_matrix * view_matrix;
 	return affine_inverse(mvp);
-	
 }
+
+} // roxlu

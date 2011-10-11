@@ -79,6 +79,7 @@ public:
 	int created_types;
 	
 private:
+	void createIndexBuffer();
 	GLuint vbo_vertices; // this is used for the "combined" vertex struct VertexPT, VertexPTN etc..
 	GLuint vbo_normals;  
 	GLuint vbo_texcoords; 

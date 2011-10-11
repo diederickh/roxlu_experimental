@@ -4,6 +4,8 @@
 #include "Camera.h"
 #include "Quat.h"
 
+namespace roxlu {
+
 class ArcBall {
 public:
 	ArcBall();
@@ -32,4 +34,5 @@ inline Vec3 ArcBall::getCenter() {
 	return center;
 }
 
+} // roxlu
 #endif

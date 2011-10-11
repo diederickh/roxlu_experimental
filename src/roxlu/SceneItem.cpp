@@ -3,7 +3,12 @@
 
 namespace roxlu {
 
-SceneItem::SceneItem() {
+SceneItem::SceneItem() 
+:vertex_data(NULL)
+,vao(NULL)
+,vbo(NULL)
+,draw_mode(POINTS)
+{
 	vao = new VAO();
 }
 
@@ -20,6 +25,7 @@ bool SceneItem::createFromVertexData(VertexData* vd) {
 		printf("error SceneItem: you need to set the shader before creating from vertex data\n");
 		exit(1);
 	}	
+	vertex_data = vd;
 	
 	vao->bind();
 	shader->enable();
@@ -30,6 +36,12 @@ bool SceneItem::createFromVertexData(VertexData* vd) {
 	size_t stride = 0;
 	int pos_offset = 0;
 
+	// when we have shared vertices (aka indices) set them.
+	if(vd->getNumIndices() > 0) {
+		vbo->setIndices(vd->getIndices(), vd->getNumIndices());
+	}
+
+
 	// set data and set offsets
 	if(vd->attribs == VBO_TYPE_VERTEX_P) {
 		stride = sizeof(VertexP);
@@ -38,7 +50,6 @@ bool SceneItem::createFromVertexData(VertexData* vd) {
 			,vd->getNumVertices()
 		);
 	}
-	
 
 	// set attributes.
 	if(vd->attribs & VERT_POS) {
@@ -60,13 +71,56 @@ bool SceneItem::createFromVertexData(VertexData* vd) {
 	return true;
 }
 
+void SceneItem::debugDraw() {
+	if(vbo->hasIndices()) {
+		glColor3f(0,1,0.4);
+		shader->disable();
+		glBegin(GL_POINTS);
+		for(int i = 0; i < vertex_data->indices.size(); ++i) {
+			Vec3 p = vertex_data->vertices[vertex_data->indices[i]];
+			glVertex3fv(p.getPtr());
+		}
+		glEnd();
+		
+	}
+	else { 
+	}
+}
+
 void SceneItem::drawArrays() {
 	vao->bind();
 	shader->enable();
-	
-	glDrawArrays(GL_QUADS, 0, 4); eglGetError();
+		glDrawArrays(draw_mode, 0, vertex_data->getNumVertices()); eglGetError();
 	shader->disable();
 	vao->unbind();
 }
+
+void SceneItem::drawElements() {
+	vao->bind();
+	shader->enable();
+	vbo->bind();
+		glDrawElements(draw_mode, vertex_data->getNumIndices(), GL_UNSIGNED_INT, NULL); eglGetError();
+	shader->disable();
+	vao->unbind();
+}
+
+void SceneItem::draw() {
+	if(vbo == NULL) {
+		printf("SceneItem no vbo set.\n"); 
+		exit(1);
+	}
+	else if(vertex_data == NULL) {
+		printf("SceneItem no vertex data set\n");
+		exit(1);
+	}
+	
+	if(vbo->hasIndices()) {
+		drawElements();
+	}
+	else {
+		drawArrays();
+	}
+}
+
 
 } // roxlu

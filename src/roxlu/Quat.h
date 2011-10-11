@@ -3,9 +3,7 @@
 
 #include "Mat4.h"
 #include "Vec3.h"
-
-#include <iostream>
-#include <iomanip>
+#include "Constants.h"
 
 
 class Quat {

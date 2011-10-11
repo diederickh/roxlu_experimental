@@ -3,6 +3,7 @@
 
 #include "OpenGL.h"
 #include "Error.h"
+#include "Constants.h"
 
 
 // read: http://www.opengl.org/registry/specs/ARB/pixel_buffer_object.txt

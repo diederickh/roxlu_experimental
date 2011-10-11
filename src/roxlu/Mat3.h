@@ -11,9 +11,7 @@
 */
 
 #include "Vec3.h"
-#include <iostream>
-#include <iomanip>
-#include "ofMain.h"
+#include "Constants.h"
 
 using std::ostream;
 using std::setw;

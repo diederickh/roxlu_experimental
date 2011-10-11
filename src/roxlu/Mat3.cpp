@@ -327,6 +327,7 @@ Mat3 Mat3::operator-() {
 	m[6] = -f[6];
 	m[7] = -f[7];
 	m[8] = -f[8];
+	return *this;
 }
 
 

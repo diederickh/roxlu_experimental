@@ -39,6 +39,8 @@
 #include "roxlu/experimental/File.h"
 #include "roxlu/experimental/StringUtil.h"
 
+#include "external/jpeg/JPEGImage.h"
+
 using namespace roxlu;
 
 

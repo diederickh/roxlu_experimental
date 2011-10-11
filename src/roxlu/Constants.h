@@ -1,3 +1,9 @@
+#include <cstddef>
+#include <iostream>
+#include <iomanip>
+#include <stdio.h>
+#include <stdint.h>
+
 #ifndef PI
 	#define PI 3.14159265358979323846
 #endif

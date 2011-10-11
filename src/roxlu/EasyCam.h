@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "ArcBall.h"
 #include "Vec2.h"
+namespace roxlu {
 
 class EasyCam : public Camera {
 public:
@@ -23,4 +24,5 @@ inline void EasyCam::draw() {
 	arcball.draw();
 }
 
+} // roxlu
 #endif

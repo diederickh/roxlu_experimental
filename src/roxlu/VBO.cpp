@@ -188,6 +188,7 @@ VBO& VBO::setColors(const float* pColors, int nNumColors, int nUsage) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_colors);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 4 * nNumColors, pColors, nUsage);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	return *this;
 }
 
 VBO& VBO::setIndices(const int* pIndices, int nNum, int nUsage) {
@@ -200,7 +201,7 @@ VBO& VBO::setIndices(const int* pIndices, int nNum, int nUsage) {
 		glGenBuffers(1, &vbo_indices);
 		created_types |= VBO_TYPE_INDEX_ARRAY;
 	}
-	
+
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_indices);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLuint) * nNum, &pIndices[0], nUsage);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -218,7 +219,7 @@ VBO& VBO::setTexCoords(const float* pTexCoords, int nNum, int nUsage) {
 		glGenBuffers(1, &vbo_texcoords);eglGetError();
 		created_types |= VBO_TYPE_TEXCOORD_ARRAY;
 	}
-	
+
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_texcoords); eglGetError();
 	glBufferData(GL_ARRAY_BUFFER, nNum * sizeof(Vec2), pTexCoords, nUsage); eglGetError();
 	glBindBuffer(GL_ARRAY_BUFFER, 0); eglGetError();

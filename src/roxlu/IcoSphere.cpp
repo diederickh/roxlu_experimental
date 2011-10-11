@@ -1,10 +1,11 @@
 #include "IcoSphere.h"
 
+namespace roxlu {
 
 IcoSphere::IcoSphere() {
 }
 
-void IcoSphere::create(int detail, float radius) {
+void IcoSphere::create(int detail, float radius, VertexData& vertex_data) {
 	
 	// how we got these values:
 	// http://www.bobchapman.co.uk/The_Geometry_of_the_Singapore_Ball.pdf	
@@ -33,9 +34,12 @@ void IcoSphere::create(int detail, float radius) {
 		3,10,7, 10,6,7, 6,11,7, 6,0,11, 6,1,0,
 		10,1,6, 11,0,9, 2,11,9, 5,2,9, 11,2,7
 	};
+	
 	int num = 4 * 5 * 3;
+//	vector<int> indices;
 	for(int i = 0; i < num; ++i) {
-		indices.push_back(idxs[i]);
+		vertex_data.indices.push_back(idxs[i]);
+//		indices.push_back(idxs[i]);
 	}
 	
 	if(detail > 8) {
@@ -49,7 +53,7 @@ void IcoSphere::create(int detail, float radius) {
 	for(int i = 0; i < detail; ++i) {
 		vector<int> indices2;
 		vector<Vec3> tmp_verts2;
-		for(int j = 0, idx = 0; j < indices.size(); j+=3) {
+		for(int j = 0, idx = 0; j < vertex_data.indices.size(); j+=3) {
 			
 			// add triangle indices
 			indices2.push_back(idx++); 
@@ -69,10 +73,10 @@ void IcoSphere::create(int detail, float radius) {
 			indices2.push_back(idx++);
 						
 			// split triangle.
-			Vec3 v1 = tmp_verts[indices[j+0]]; 
-			Vec3 v2 = tmp_verts[indices[j+1]]; 
-			Vec3 v3 = tmp_verts[indices[j+2]]; 
-			
+			Vec3 v1 = tmp_verts[vertex_data.indices[j+0]]; 
+			Vec3 v2 = tmp_verts[vertex_data.indices[j+1]]; 
+			Vec3 v3 = tmp_verts[vertex_data.indices[j+2]]; 
+		
 			v1.normalize();
 			v2.normalize();
 			v3.normalize();
@@ -103,33 +107,15 @@ void IcoSphere::create(int detail, float radius) {
 		}
 		
 		tmp_verts = tmp_verts2;
-		indices = indices2;
+		vertex_data.indices = indices2;
 	}
-
-	// store normals and 
-	num = tmp_verts.size();
-	norms.resize(num);
-	
-	Vec3 point;
+			
 	vector<Vec3>::iterator it = tmp_verts.begin();
 	while(it != tmp_verts.end()) {
-		point = *it;
-		verts.push_back(point * radius);
-		Vec3 n = point;
-		n.normalize();
-		norms.push_back(n);
+		vertex_data.addVertex((*it) * radius);		
 		++it;
 	}
 }
 
-void IcoSphere::draw() {
-	glEnable(GL_DEPTH_TEST);
-	vector<Vec3>::iterator it = verts.begin();
-	glBegin(GL_TRIANGLES);
-	vector<int>::iterator in_it = indices.begin();
-	while(in_it != indices.end()) {
-		glVertex3fv(&verts[(*in_it)].x);
-		++in_it;
-	}
-	glEnd();
-}
+
+} // roxlu

@@ -6,6 +6,8 @@
 #include "Mat4.h"
 #include "Vec3.h"
 
+namespace roxlu {
+
 class Camera {
 public:
 	Camera();
@@ -94,4 +96,5 @@ inline Mat4& Camera::pm() {
 	return projection_matrix;
 }
 
+} // roxlu
 #endif

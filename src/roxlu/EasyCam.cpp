@@ -1,4 +1,6 @@
 #include "EasyCam.h"
+namespace roxlu {
+
 EasyCam::EasyCam():Camera()
 	,shift_down(false)
 {
@@ -13,7 +15,7 @@ void EasyCam::setup(float screenWidth, float screenHeight) {
 		,(float)screenHeight * 0.5)
 	);
 	arcball.setCenter(screenWidth * 0.5,screenHeight * 0.5);
-	translate(0,0,-12);
+	translate(0,0,-8);
 }
 
 void EasyCam::onMouseDown(float x, float y) {
@@ -23,3 +25,5 @@ void EasyCam::onMouseDown(float x, float y) {
 void EasyCam::onMouseDragged(float x, float y) {
 	arcball.onMouseDrag(x,y);
 }
+
+} // roxlu

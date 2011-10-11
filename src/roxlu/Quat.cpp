@@ -1,4 +1,3 @@
-#include "ofMain.h"
 #include "Quat.h"
 
 
