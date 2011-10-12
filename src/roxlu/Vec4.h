@@ -6,6 +6,8 @@
 
 using std::setw;
 
+namespace roxlu {
+
 class Vec4 {
 public:
 	inline Vec4()
@@ -44,11 +46,12 @@ inline void Vec4::set(float xx, float yy, float zz, float ww) {
 
 inline std::ostream& operator<<(std::ostream& os, const Vec4& v) {
 	int w = 6;
-	os 	<< setw(w) << v.x <<", " 
+	os 	<< std::setw(w) << v.x <<", " 
 		<< setw(w) << v.y << ", " 
 		<< setw(w) << v.z << ", " 
 		<< setw(w) << v.w;
 	return os;
 }
 
+} // roxlu
 #endif

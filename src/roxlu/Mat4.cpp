@@ -2,8 +2,8 @@
 #include "Mat4.h"
 #include "Utils.h"
 
+namespace roxlu {
 
-//using namespace roxlu;
 // copy
 Mat4::Mat4(const Mat4& o) {
 	m[0]  = o.m[0];
@@ -1210,3 +1210,5 @@ Mat4 operator*(float s, const Mat4& o) {
 	r.m[15] = o.m[15] * s;
 	return r;
 }
+
+} // roxlu

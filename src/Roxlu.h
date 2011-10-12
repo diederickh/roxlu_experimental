@@ -38,6 +38,7 @@
 
 #include "roxlu/experimental/File.h"
 #include "roxlu/experimental/StringUtil.h"
+#include "roxlu/experimental/UVSphere.h"
 
 #include "external/jpeg/JPEGImage.h"
 

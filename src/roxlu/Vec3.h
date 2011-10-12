@@ -50,6 +50,9 @@
 #include <iostream>
 #include <math.h>
 
+
+namespace roxlu {
+
 class Vec3;
 class Mat3;
 
@@ -60,7 +63,6 @@ float dot(const Vec3& a, const Vec3& b);
 // -----------------------------------------------------------------------------
 struct Vec3 {
 	friend class Mat3;
-	
 	Vec3(float nX = 0.0f, float nY = 0.0f, float nZ = 0.0f)
 		:x(nX)
 		,y(nY)
@@ -76,6 +78,7 @@ struct Vec3 {
 	}
 
 	// Basic methods.	
+	inline Vec3&	rotate(float angle, float x, float y, float z);
 	inline Vec3& 	rotate(float angle, Vec3 axis);
 	inline Vec3& 	rotate(float angle, Vec3 axis, Vec3 pivot);
 	inline void 	set(float nX, float nY, float nZ);
@@ -179,9 +182,13 @@ inline float Vec3::lengthSquared(const Vec3& other) {
 	return dx*dx + dy*dy + dz*dz;
 }
 
+inline Vec3& Vec3::rotate(float angle, float x, float y, float z) {
+	return rotate(angle, Vec3(x,y,z));
+}
+
 inline Vec3& Vec3::rotate(float a, Vec3 ax) {
-	float sina = sin( a );
-	float cosa = cos( a );
+	float sina = sin(a);
+	float cosa = cos(a);
 	float cosb = 1.0f - cosa;
 	Vec3 v( x*(ax.x*ax.x*cosb + cosa)
 				   + y*(ax.x*ax.y*cosb - ax.z*sina)
@@ -377,5 +384,7 @@ inline float dot(const Vec3& a, const Vec3& b) {
 	dot3(a,b,r);
 	return r;
 }
+
+} // roxlu
 
 #endif

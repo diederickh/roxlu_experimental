@@ -5,6 +5,7 @@
 #include "Vec3.h"
 #include "Constants.h"
 
+namespace roxlu {
 
 class Quat {
 public:	
@@ -75,4 +76,5 @@ inline Quat Quat::operator-(const Quat& rOther) const {
 	return q_out;
 }
 
+} // roxlu
 #endif

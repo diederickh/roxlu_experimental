@@ -23,7 +23,8 @@ public:
 	static string toDataPath(const char* file) {
 		#ifdef __APPLE__
 			#ifdef TARGET_OS_MAC 
-				return getCWD() +"/data/" +file;
+				return getCWD() +"/../../../data/" +file;
+				//return getCWD() +"/data/" +file;
 			#else
 				return getCWD() +"/../../../data/" +file;
 			#endif

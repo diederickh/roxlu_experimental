@@ -5,6 +5,13 @@
 #include "Vec2.h"
 #include "OpenGL.h"
 
+/*
+
+	WILL BE REPLACED BY UVSPHERE
+	
+*/
+namespace roxlu {
+
 class Sphere {
 public:
 	Sphere(float nRadius, float nStacks, float nSlices);
@@ -35,5 +42,7 @@ public:
 	int num_vertices;
 	int num_index_elements;
 };
+
+} // roxlu
 
 #endif

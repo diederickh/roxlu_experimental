@@ -1,5 +1,9 @@
 #include "Sphere.h"
 #include "Constants.h"
+/*
+	WILL BE REPLACED BY UVSPHERE
+*/
+namespace roxlu {
 
 Sphere::Sphere(float nRadius, float nStacks, float nSlices) 
 :radius(nRadius)
@@ -124,4 +128,6 @@ int Sphere::getNumIndices() {
 }
 int* Sphere::getIndices() {
 	return index_elements;
+}
+
 }

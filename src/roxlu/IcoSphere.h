@@ -7,7 +7,6 @@
 #include "Vertexdata.h"
 #include <vector>
 
-
 using namespace std;
 
 namespace roxlu {

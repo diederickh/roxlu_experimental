@@ -5,6 +5,7 @@
 #include "Vec2.h"
 #include "Color.h"
 
+namespace roxlu {
 
 // Here we define a couple of different vertex types; 
 // P = position
@@ -73,5 +74,7 @@ struct VertexPTNTB : public Vertex  { // can be used for normal mapping
 	Vec3 binorm;
 	Vec2 tex;
 };
+
+} // roxlu
 
 #endif

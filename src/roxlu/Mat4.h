@@ -9,6 +9,8 @@
 
 using std::ostream;
 
+namespace roxlu {
+
 class Mat3;
 
 class Mat4 {
@@ -143,6 +145,7 @@ inline Vec3 Mat4::transform(const Vec3& o) const {
 	return r;
 }
 
+} // roxlu
 
 /* create unrolled multiplication 
 

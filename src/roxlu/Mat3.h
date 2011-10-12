@@ -18,6 +18,8 @@ using std::setw;
 using std::endl; 
 using std::cout; 
 
+namespace roxlu {
+
 class Mat3 {
 public:
 	enum Flags {
@@ -157,4 +159,6 @@ inline ostream& operator<<(ostream& os, const Mat3& m) {
 		<< m.m[8] << std::endl;
 	return os;
 }
+
+} // roxlu
 #endif

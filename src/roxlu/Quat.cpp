@@ -1,5 +1,6 @@
 #include "Quat.h"
 
+namespace roxlu {
 
 Quat::Quat()
 :w(1)
@@ -80,3 +81,4 @@ void Quat::normalize() {
 	w = w * factor;
 }
 
+} // roxlu

@@ -33,6 +33,8 @@
 #include <iostream>
 #include <math.h>
 
+namespace roxlu { 
+
 struct Vec2 {
 public:
 	Vec2(float nX = 0.0f, float nY = 0.0f)
@@ -155,5 +157,7 @@ inline std::istream& operator>>(std::istream& is, Vec2& rVec) {
 	is >> rVec.y;
 	return is;
 }
+
+} // roxlu
 
 #endif

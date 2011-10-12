@@ -3,6 +3,8 @@
 
 #include "Vec3.h"
 
+namespace roxlu {
+
 struct Ray {
 	Ray() 
 		:origin(0)
@@ -29,4 +31,6 @@ struct Ray {
 	Vec3 origin;
 	Vec3 direction;
 };
+
+} // roxlu
 #endif

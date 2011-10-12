@@ -2,6 +2,7 @@
 #define ROXLU_JPEGIMAGEH
 
 #include "../../roxlu/experimental/Image.h"
+
 #include "include/jpeglib.h"
 #include <string>
 #include <tr1/memory>

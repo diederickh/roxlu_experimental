@@ -1,6 +1,7 @@
 #include "Mat3.h"
 #include "Utils.h"
 
+namespace roxlu {
 
 // copy constructor.
 Mat3::Mat3(const Mat3& o)
@@ -144,7 +145,7 @@ Mat3 inverse(Mat3& o) {
 
 // invert ourself, use inverse(Mat3) to get a copy
 Mat3& Mat3::inverse() {
-	*this = ::inverse(*this);
+	*this = roxlu::inverse(*this);
 	return *this;
 }
 
@@ -473,3 +474,5 @@ Mat3& Mat3::operator-=(const Mat3& o) {
 	m[8] = m[8] - o.m[8];
 	return *this;
 }
+
+} // roxlu
