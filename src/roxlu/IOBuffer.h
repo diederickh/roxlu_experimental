@@ -61,12 +61,13 @@ public:
 	// get the number of bytes published.
 	uint32_t getNumBytesStored();
 	void setNumBytesStored(uint32_t numBytes); // for direct manipulation of buffer.
+	void addNumBytesStored(uint32_t numBytes); 
 	bool hasBytesToRead();
 					
 	// reading data back from buffer moving read head
 	int consumeUntil(uint8_t until, string& found);
 	int consumeUntil(string until, string& found);
-	void consumeBytes(uint8_t* buff, uint32_t numBytes);
+	int consumeBytes(uint8_t* buff, uint32_t numBytes);
 
 	string consumeString(uint32_t upToNumBytes);
 	string consumeStringWithSize();
@@ -107,6 +108,8 @@ public:
 	void setMinChunkSize(uint32_t minSize);
 	uint32_t getMinChunkSize();
 	uint8_t* getPtr();
+	uint8_t* getStorePtr();
+	uint8_t* getConsumePtr();
 };
 
 

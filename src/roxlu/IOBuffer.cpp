@@ -120,6 +120,14 @@ uint8_t* IOBuffer::getPtr() {
 	return buffer;
 }
 
+uint8_t* IOBuffer::getStorePtr() {
+	return buffer+published;
+}
+
+uint8_t* IOBuffer::getConsumePtr() {
+	return buffer+consumed;
+}
+
 bool IOBuffer::moveData() {
 	if(published - consumed <= consumed) {
 		memcpy(buffer, buffer+consumed, published - consumed);
@@ -273,6 +281,10 @@ void IOBuffer::setNumBytesStored(uint32_t numBytes) {
 	published = numBytes;
 }
 
+void IOBuffer::addNumBytesStored(uint32_t numBytes) {
+	published += numBytes;
+}
+
 uint32_t IOBuffer::getNumBytesStored() {
 	return published;
 }
@@ -284,6 +296,7 @@ void IOBuffer::recycle() {
 	consumed = 0;
 	published = 0;
 }
+
 void IOBuffer::reset() {
 	consumed = 0; 
 	published = 0;
@@ -292,9 +305,25 @@ void IOBuffer::reset() {
 
 // Retrieve from buffer and return data
 //------------------------------------------------------------------------------
-void IOBuffer::consumeBytes(uint8_t* buf, uint32_t numBytes) {
+int IOBuffer::consumeBytes(uint8_t* buf, uint32_t numBytes) {
+	int32_t left = (published - consumed);
+	int32_t available = left - numBytes;
+	if(available <= 0) {
+		
+		return 0;
+	}
+	//printf("# still available: %d\n", available);
+	if(available < numBytes) {
+		printf("Resetting: %d\n", available);
+		printf("Current info is now: %d and published: %d want to read: %d available: %d\n", consumed, published, numBytes, available);
+
+		numBytes = available;
+	}
+	//printf("# going to read %d\n", numBytes);
 	memcpy(buf,buffer+consumed, numBytes);
 	consumed += numBytes;
+	printf("Consumed is now: %d and published: %d want to read: %d\n", consumed, published, numBytes);
+	return numBytes;
 }
 
 uint8_t IOBuffer::consumeByte() {
