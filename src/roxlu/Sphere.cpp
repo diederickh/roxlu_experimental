@@ -88,14 +88,20 @@ void Sphere::createIndices() {
 }
 
 void Sphere::draw() {
-	createVertices();
-	glDisable(GL_TEXTURE_2D);
+	//createVertices();
+	glEnable(GL_TEXTURE_2D);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	//glDisable(GL_TEXTURE_2D);
 	glBegin(GL_QUADS);
 	for(int i = 0; i < num_index_elements; ++i) {
 		setVertexForIndex(i);
 	}
 	glEnd();
-	
+	return;
+	glPushMatrix();
+	glScalef(1.1,1.1,1.1);
+	glColor3f(1.0,0.8,0.2);
+	glPointSize(4);
 	glBegin(GL_POINTS);
 	for(int i = 0; i < num_vertices; ++i) {
 		glVertex3f(
@@ -105,13 +111,16 @@ void Sphere::draw() {
 		);
 	}
 	glEnd();
+	glPopMatrix();
 	glEnable(GL_TEXTURE_2D);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	
 }
 
 void Sphere::setVertexForIndex(int nIndex) {
 	int dx = index_elements[nIndex];
 	VertexPTNC v = vertices[dx];
+	glTexCoord2f(v.tex.x, v.tex.y);
 	glVertex3f(v.pos.x, v.pos.y, v.pos.z);
 }
 

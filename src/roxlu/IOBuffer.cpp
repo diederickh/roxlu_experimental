@@ -9,7 +9,7 @@ IOBuffer::IOBuffer()
 ,size(0)
 ,published(0)
 ,consumed(0)
-,min_chunk_size(4096)
+,min_chunk_size(5)
 {
 	setup(); // should we do this? or its up to the user (?)
 }
@@ -75,6 +75,7 @@ void IOBuffer::setup(uint32_t expectedSize) {
 	}
 	
 	ensureSize(expectedSize);
+	//memset(buffer, 0, expectedSize);
 }
 
 bool IOBuffer::ensureSize(uint32_t expectedSize) {
@@ -139,7 +140,8 @@ bool IOBuffer::moveData() {
 
 void IOBuffer::cleanup() {
 	if(buffer != NULL) {
-		delete[] buffer;
+		//printf("* need to free memory in iobuffer \n");
+		//delete[] buffer;
 		buffer = NULL;
 	}	
 	size = 0;
@@ -163,6 +165,7 @@ void IOBuffer::storeByte(uint8_t byte) {
 }
 
 bool IOBuffer::storeBytes(const uint8_t* someData, const uint32_t numBytes) {
+	//printf("storeBytes: %d\n", numBytes);
 	if(!ensureSize(numBytes)) {
 		return false;
 	}
@@ -252,7 +255,7 @@ void IOBuffer::storeBuffer(IOBuffer& other) {
 	storeBuffer(other, other.getNumBytesStored());	
 }
 
-void IOBuffer::storeBuffer(IOBuffer& other, uint32_t numBytes) {
+int IOBuffer::storeBuffer(IOBuffer& other, uint32_t numBytes) {
 	/*
 	cout << "Store from other buffer. Bytes:" << numBytes << endl;
 	cout << "this.published: " << published << endl;
@@ -261,9 +264,35 @@ void IOBuffer::storeBuffer(IOBuffer& other, uint32_t numBytes) {
 	cout << "other.consumed: " << other.consumed << endl;
 	*/
 	
+	// check if we can read this many bytes from other buffer.
+	numBytes = other.getMostNumberOfBytesWeCanConsume(numBytes);
+	if(numBytes == 0) {
+		return 0;
+	}
 	ensureSize(numBytes);
 	memcpy(buffer+published, other.buffer+other.consumed, numBytes);
 	published += numBytes;
+//	printf("consumed after copying from other buffer: %d\n", consumed);
+	other.published += numBytes;
+	return numBytes;
+}
+
+uint32_t IOBuffer::getMostNumberOfBytesWeCanConsume(uint32_t tryToRead) {
+//	printf("@ published: %d consumed:%d trying to read: %d\n", published, consumed, tryToRead);
+	int space = published - consumed;
+	if(space <= 0) {
+//		printf("@ space is zero %d?\n", space);
+//		printf("@--------------\n");
+		return 0;
+	}
+
+//		printf("@--------------\n");	
+	if(tryToRead > space) {
+		tryToRead = space;
+	}
+//	printf("@ tell we can read all!: %d\n", tryToRead);
+//	printf("@--------------\n");
+	return tryToRead;
 }
 
 
@@ -285,9 +314,15 @@ void IOBuffer::addNumBytesStored(uint32_t numBytes) {
 	published += numBytes;
 }
 
+void IOBuffer::addNumBytesConsumed(uint32_t numBytes) {
+	consumed += numBytes;
+}
+
 uint32_t IOBuffer::getNumBytesStored() {
 	return published;
 }
+
+
 
 void IOBuffer::recycle() {
 	if(consumed != published) {
@@ -301,27 +336,39 @@ void IOBuffer::reset() {
 	consumed = 0; 
 	published = 0;
 }
-
+void IOBuffer::resetConsumed() {
+	consumed = 0;
+}
+void IOBuffer::resetStored() {
+	published = 0;
+}
 
 // Retrieve from buffer and return data
 //------------------------------------------------------------------------------
 int IOBuffer::consumeBytes(uint8_t* buf, uint32_t numBytes) {
 	int32_t left = (published - consumed);
+	if(left < numBytes) {
+		numBytes = left;
+	}
 	int32_t available = left - numBytes;
+
 	if(available <= 0) {
-		
+		printf("published: %d consumed: %d asking: %d, left:%d\n", published, consumed, numBytes, left);
 		return 0;
 	}
 	//printf("# still available: %d\n", available);
 	if(available < numBytes) {
-		printf("Resetting: %d\n", available);
-		printf("Current info is now: %d and published: %d want to read: %d available: %d\n", consumed, published, numBytes, available);
+	///	printf("Resetting: %d\n", available);
+	//	printf("Current info is now: %d and published: %d want to read: %d available: %d\n", consumed, published, numBytes, available);
 
 		numBytes = available;
 	}
-	//printf("# going to read %d\n", numBytes);
+
+	printf("# going to read %d\n", numBytes);
 	memcpy(buf,buffer+consumed, numBytes);
 	consumed += numBytes;
+
+	printf(">>> consumed: %d, this: %p, %c %c %c\n", consumed, this, buffer[consumed], buffer[consumed+1], buffer[consumed+2]);
 	printf("Consumed is now: %d and published: %d want to read: %d\n", consumed, published, numBytes);
 	return numBytes;
 }

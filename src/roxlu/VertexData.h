@@ -1,6 +1,7 @@
 #ifndef ROXLU_VERTEXDATAH
 #define ROXLU_VERTEXDATAH
 
+#include "OpenGL.h"
 #include "VertexTypes.h"
 #include "Color.h"
 #include "Vec3.h"
@@ -33,6 +34,8 @@ public:
 	int 			addTriangle(int nA, int nB, int nC); 
 	int 			addQuad(int nA, int nB, int nC, int nD);
 
+	void debugDraw(int drawMode = GL_TRIANGLES);
+	
 	const float* 	getVertices();
 	const float* 	getTexCoords();
 	const float* 	getColors();

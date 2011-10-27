@@ -39,6 +39,8 @@ public:
 	bool reuse(uint32_t numBytes); // opposite of ignore
 	bool ignore(uint32_t numBytes);
 	void reset(); // resets consume and publish positions to start.
+	void resetConsumed();
+	void resetStored();
 		
 	// store data
 	bool storeBytes(const char* someData, const uint32_t numBytes);
@@ -49,7 +51,7 @@ public:
 	void storeUI32(uint32_t data);
 	void storeRepeat(uint8_t byte, uint32_t numBytes); // rename!
 	void storeBuffer(IOBuffer& other); // copies only stored data
-	void storeBuffer(IOBuffer& other, uint32_t numBytes);
+	int storeBuffer(IOBuffer& other, uint32_t numBytes);
 
 	void storeString(string data);
 	void storeStringWithSize(string data); // adds a uint16_t with the size of the string 
@@ -63,6 +65,8 @@ public:
 	void setNumBytesStored(uint32_t numBytes); // for direct manipulation of buffer.
 	void addNumBytesStored(uint32_t numBytes); 
 	bool hasBytesToRead();
+	void addNumBytesConsumed(uint32_t numByes);
+	uint32_t getMostNumberOfBytesWeCanConsume(uint32_t tryToRead); // namin gwill change..
 					
 	// reading data back from buffer moving read head
 	int consumeUntil(uint8_t until, string& found);

@@ -321,6 +321,16 @@ void VertexData::calculateTangentAndBiTangent() {
 	
 };
 
+void VertexData::debugDraw(int drawMode) {
+	glBegin(drawMode);
+	vector<Vec3>::iterator it = vertices.begin();
+	while(it != vertices.end()) {	
+		glVertex3fv((*it).getPtr());
+		++it;
+	}
+	glEnd();
+}
+
 /*
 void VertexData::calculateTangentAndBiTangent() {
 	if(triangles.size() == 0 || texcoords.size() == 0) {
