@@ -18,9 +18,16 @@ void UVSphere::create(float radius, int slices, int stacks, VertexData& vertex_d
 	// calculate number of quads and indices.
 	int num_vertices = (stacks + 1) * (slices + 1);
 	int num_index_elements = (stacks) * (slices) * 4;
-	vertex_data.vertices.assign(num_vertices, Vec3());
-	vertex_data.texcoords.assign(num_vertices, Vec2());
-	vertex_data.indices.assign(num_index_elements, int());
+//	vertex_data.vertices.assign(num_index_elements, Vec3());
+//	vertex_data.texcoords.assign(num_index_elements, Vec2());
+//	vertex_data.indices.assign(num_index_elements, int());
+	
+	vector<Vec3> vertices;
+//	vector<Vec3> normals;
+	vector<Vec2> texcoords;
+	vertices.assign(num_index_elements, Vec3());
+//	normals.assign(num_index_elements, Vec3());
+	texcoords.assign(num_index_elements, Vec2());
 	
 	// create sphere coordinates + texture coords.
 	for(float stack = 0; stack <= stacks; ++stack) {
@@ -34,12 +41,22 @@ void UVSphere::create(float radius, int slices, int stacks, VertexData& vertex_d
 			float cos_phi = cosf(phi);
 		
 			int dx = SPHERE_GET_AT(stack, slice);
-			vertex_data.vertices[dx].x = radius * sin_theta * cos_phi;
-			vertex_data.vertices[dx].y = radius * sin_theta * sin_phi;
-			vertex_data.vertices[dx].z = radius * cos_theta;
+			
+			// when you want to use indices (but give problems with per face
+			// normals.
+			//vertex_data.vertices[dx].x = radius * sin_theta * cos_phi;
+			//vertex_data.vertices[dx].y = radius * sin_theta * sin_phi;
+			//vertex_data.vertices[dx].z = radius * cos_theta;
+			//vertex_data.texcoords[dx].x = phi / TWO_PI;
+			//vertex_data.texcoords[dx].y = theta / PI;
 
-			vertex_data.texcoords[dx].x = phi / TWO_PI;
-			vertex_data.texcoords[dx].y = theta / PI;
+			vertices[dx].x = radius * sin_theta * cos_phi;
+			vertices[dx].y = radius * sin_theta * sin_phi;
+			vertices[dx].z = radius * cos_theta;
+			
+
+			texcoords[dx].x = phi / TWO_PI;
+			texcoords[dx].y = theta / PI;
 		}
 	}
 	
@@ -47,10 +64,41 @@ void UVSphere::create(float radius, int slices, int stacks, VertexData& vertex_d
 	int dx = 0;
 	for(int slice = 0; slice < slices; ++slice) {
 		for(int stack = 0; stack < stacks; ++stack) {
-			vertex_data.indices[dx++] = SPHERE_GET_AT(stack,slice);
-			vertex_data.indices[dx++] = SPHERE_GET_AT(stack+1,slice);
-			vertex_data.indices[dx++] = SPHERE_GET_AT(stack+1,slice+1);
-			vertex_data.indices[dx++] = SPHERE_GET_AT(stack,slice+1);
+			// when you want to use an indexed sphere (but this gives problems 
+			// when you want a per face normal.
+			//vertex_data.indices[dx++] = SPHERE_GET_AT(stack+1,slice);
+			//vertex_data.indices[dx++] = SPHERE_GET_AT(stack+1,slice+1);
+			//vertex_data.indices[dx++] = SPHERE_GET_AT(stack,slice+1);
+			//vertex_data.indices[dx++] = SPHERE_GET_AT(stack,slice);
+			
+			int dxa = SPHERE_GET_AT(stack+1,slice);
+			int dxb = SPHERE_GET_AT(stack+1,slice+1);
+			int dxc = SPHERE_GET_AT(stack,slice+1);
+			int dxd = SPHERE_GET_AT(stack,slice);
+			
+			Vec3 va = vertices[dxa];
+			Vec3 vb = vertices[dxb];
+			Vec3 vc = vertices[dxc];
+			Vec3 vd = vertices[dxd];
+			
+			vertex_data.vertices.push_back(va);
+			vertex_data.vertices.push_back(vb);
+			vertex_data.vertices.push_back(vc);
+			vertex_data.vertices.push_back(vd);
+			
+			vertex_data.texcoords.push_back(texcoords[dxa]);
+			vertex_data.texcoords.push_back(texcoords[dxb]);
+			vertex_data.texcoords.push_back(texcoords[dxc]);
+			vertex_data.texcoords.push_back(texcoords[dxd]);
+			
+			// normal.
+			Vec3 ab = vb-va;
+			Vec3 bc = vb-vc;
+			Vec3 normal = bc.cross(ab).normalize();
+			vertex_data.normals.push_back(normal);
+			vertex_data.normals.push_back(normal);
+			vertex_data.normals.push_back(normal);
+			vertex_data.normals.push_back(normal);
 		}
 	}
 }

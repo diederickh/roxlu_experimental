@@ -71,6 +71,8 @@ bool SceneItem::createFromVertexData(VertexData* vd) {
 	return true;
 }
 
+// @todo: we created a debugDrag in vertex_data, this one should be removed 
+// mabye?
 void SceneItem::debugDraw() {
 	if(vbo->hasIndices()) {
 		glColor3f(0,1,0.4);

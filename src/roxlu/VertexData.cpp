@@ -322,13 +322,78 @@ void VertexData::calculateTangentAndBiTangent() {
 };
 
 void VertexData::debugDraw(int drawMode) {
-	glBegin(drawMode);
-	vector<Vec3>::iterator it = vertices.begin();
-	while(it != vertices.end()) {	
-		glVertex3fv((*it).getPtr());
-		++it;
+	// draw using indices
+	if(getNumIndices() > 0) {
+		if(getNumTexCoords() > 0) {
+			int len = indices.size();
+			glBegin(drawMode);
+			for(int i = 0; i < len; ++i) {
+				glTexCoord2fv(texcoords[indices[i]].getPtr());
+				glVertex3fv(vertices[indices[i]].getPtr());
+			}
+			glEnd();
+		}
+		else {
+			int len = indices.size();
+			int mod = (drawMode == GL_QUADS) ? 4 : 3;
+			Vec3 colors[4];
+			colors[0].set(1,0,0);
+			colors[1].set(0,1,0);
+			colors[2].set(0,0,1);
+			colors[3].set(1,1,0);
+			
+			glBegin(drawMode);
+			for(int i = 0; i < len; ++i) {
+				glColor3fv(colors[i%mod].getPtr());
+				glVertex3fv(vertices[indices[i]].getPtr());
+			}
+			glEnd();
+		}
 	}
-	glEnd();
+	// w/o indices
+	else {
+		if(getNumTexCoords() > 0) {
+			int len = vertices.size();
+			glBegin(drawMode);
+			for(int i = 0; i < len; ++i) {
+				glTexCoord2fv(texcoords[i].getPtr());
+				glVertex3fv(vertices[i].getPtr());
+			}
+			glEnd();
+		
+		}
+		else {
+			glBegin(drawMode);
+			vector<Vec3>::iterator it = vertices.begin();
+			while(it != vertices.end()) {	
+				glVertex3fv((*it).getPtr());
+				++it;
+			}
+			glEnd();
+		}
+		
+		// do we need to draw normals?	
+		int len = normals.size();
+		if(len == vertices.size()) {	
+		 	// somehow the colors arent set in my current test app...
+			glColor3f(1,1,1);
+			glLineWidth(0.5);
+			glDisable(GL_BLEND);
+			glBegin(GL_LINES);
+
+			for(int i = 0; i < len; ++i) {
+				Vec3 pos = vertices[i];
+				Vec3 norm = normals[i];
+				norm.normalize();
+				Vec3 end = pos + (norm.scale(0.5));
+				glColor4f(1.0f,1.0f,1.0f,1.0f);
+				glVertex3fv(pos.getPtr());
+				glColor4f(0.0f, 1.0f,1.0f,1.0f);
+				glVertex3fv(end.getPtr());
+			}
+			glEnd();
+		}
+	}
 }
 
 /*

@@ -921,7 +921,6 @@ Mat4& Mat4::frustumCenter(float w, float h, float n, float f) {
 }
 
 Mat4& Mat4::ortho(float l, float r, float b, float t, float n, float f) {
-
 	m[1]  = 0.0f;
 	m[2]  = 0.0f;
 	m[3]  = 0.0f;

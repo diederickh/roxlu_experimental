@@ -57,6 +57,5 @@ inline void Scene::addSceneItem(SceneItem* item) {
 }
 
 
-
 } // roxlu
 #endif
