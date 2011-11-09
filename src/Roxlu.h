@@ -39,7 +39,8 @@
 #include "roxlu/experimental/File.h"
 #include "roxlu/experimental/StringUtil.h"
 #include "roxlu/experimental/UVSphere.h"
-
+#include "roxlu/experimental/SimpleServer.h"
+#include "roxlu/experimental/SimpleClient.h"
 #include "external/jpeg/JPEGImage.h"
 
 using namespace roxlu;
