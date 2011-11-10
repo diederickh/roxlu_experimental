@@ -60,7 +60,7 @@ void UVSphere::create(float radius, int slices, int stacks, VertexData& vertex_d
 		}
 	}
 	
-	// create indices.
+	// create indices / vertices; commented code creates shared vertices.
 	int dx = 0;
 	for(int slice = 0; slice < slices; ++slice) {
 		for(int stack = 0; stack < stacks; ++stack) {
@@ -71,10 +71,15 @@ void UVSphere::create(float radius, int slices, int stacks, VertexData& vertex_d
 			//vertex_data.indices[dx++] = SPHERE_GET_AT(stack,slice+1);
 			//vertex_data.indices[dx++] = SPHERE_GET_AT(stack,slice);
 			
-			int dxa = SPHERE_GET_AT(stack+1,slice);
-			int dxb = SPHERE_GET_AT(stack+1,slice+1);
-			int dxc = SPHERE_GET_AT(stack,slice+1);
-			int dxd = SPHERE_GET_AT(stack,slice);
+//			int dxa = SPHERE_GET_AT(stack+1,slice);
+//			int dxb = SPHERE_GET_AT(stack+1,slice+1);
+//			int dxc = SPHERE_GET_AT(stack,slice+1);
+//			int dxd = SPHERE_GET_AT(stack,slice);
+			int dxa = SPHERE_GET_AT(stack,slice);
+			int dxb = SPHERE_GET_AT(stack+1,slice);
+			int dxc = SPHERE_GET_AT(stack+1,slice+1);
+			int dxd = SPHERE_GET_AT(stack,slice+1);
+	
 			
 			Vec3 va = vertices[dxa];
 			Vec3 vb = vertices[dxb];
@@ -99,8 +104,17 @@ void UVSphere::create(float radius, int slices, int stacks, VertexData& vertex_d
 			vertex_data.normals.push_back(normal);
 			vertex_data.normals.push_back(normal);
 			vertex_data.normals.push_back(normal);
+			
+			// created for export... not working correctly for the ply format
+			vertex_data.addQuad(dxa, dxb, dxc, dxd);
+			vertex_data.addTriangle(dxa, dxb, dxc);
+			vertex_data.addTriangle(dxc, dxd, dxa);
 		}
 	}
+	
+	vertex_data.enablePositionAttrib();
+	vertex_data.enableTexCoordAttrib();
+//	vertex_data.enableNormalAttrib();
 }
 
 } // roxlu

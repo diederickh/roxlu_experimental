@@ -18,6 +18,7 @@
 #include "roxlu/Mat4.h"
 #include "roxlu/OpenGL.h"
 #include "roxlu/PBO.h"
+#include "roxlu/Ply.h"
 #include "roxlu/Quad.h"
 #include "roxlu/Quat.h"
 #include "roxlu/Renderer.h"
@@ -41,7 +42,9 @@
 #include "roxlu/experimental/UVSphere.h"
 #include "roxlu/experimental/SimpleServer.h"
 #include "roxlu/experimental/SimpleClient.h"
+
 #include "external/jpeg/JPEGImage.h"
+#include "external/webp/WebPImage.h"
 
 using namespace roxlu;
 

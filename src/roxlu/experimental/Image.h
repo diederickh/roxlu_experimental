@@ -11,8 +11,8 @@ namespace roxlu {
 class Image {
 public:
 	Image();
-	~Image();
-	bool loadImageFromDataDir(string fileName);
+	virtual ~Image();
+	bool loadImageFromDataPath(string fileName);
 	virtual bool loadImage(string filePath) = 0;
 	unsigned char* getPixels();
 	int width;

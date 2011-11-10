@@ -25,34 +25,27 @@ VBO& VBO::setVertexData(VertexData& rVertexData) {
 
 VBO& VBO::setVertexData(VertexData* pData) {
 	if(pData->getNumVertices() > 0) {
-		setVertices(pData->getVertices(), 3, pData->getNumVertices(), GL_STATIC_DRAW);
+		setVertices(pData->getVerticesPtr(), 3, pData->getNumVertices(), GL_STATIC_DRAW);
 	}
 	
 	if(pData->getNumTexCoords() > 0) {
-		setTexCoords(pData->getTexCoords(), pData->getNumTexCoords(), GL_STATIC_DRAW);
+		setTexCoords(pData->getTexCoordsPtr(), pData->getNumTexCoords(), GL_STATIC_DRAW);
 	}
 	
 	if(pData->getNumIndices() > 0) {
-		setIndices(pData->getIndices(), pData->getNumIndices(), GL_STATIC_DRAW);
+		setIndices(pData->getIndicesPtr(), pData->getNumIndices(), GL_STATIC_DRAW);
 	}
 	
 	if(pData->getNumColors() > 0) {
-		setColors(pData->getColors(), pData->getNumColors(), GL_STATIC_DRAW);
+		setColors(pData->getColorsPtr(), pData->getNumColors(), GL_STATIC_DRAW);
 	}
 	return *this;
 }
 
 VBO& VBO::updateVertexData(VertexData* pVertexData) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices); eglGetError();
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vec3) * pVertexData->getNumVertices(), pVertexData->getVertices()); eglGetError();
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vec3) * pVertexData->getNumVertices(), pVertexData->getVerticesPtr()); eglGetError();
 	glBindBuffer(GL_ARRAY_BUFFER, 0); eglGetError();
-	/*
-	oid glBufferSubData(	GLenum  	target,
- 	GLintptr  	offset,
- 	GLsizeiptr  	size,
- 	const GLvoid *  	data);
-
-*/
 	return *this;
 }
 
@@ -83,45 +76,45 @@ VBO& VBO::setVertexData(VertexPTNTB* pData, int nNum) {
 VBO& VBO::bind() {
 	// VertexP
 	if(created_types == VBO_TYPE_VERTEX_P) {
-		glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices); eglGetError();
 		return *this;
 	}
 	// VertexPN
 	if(created_types == VBO_TYPE_VERTEX_PN) {
-		glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
-		return *this;
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices); eglGetError();
+		return *this; 
 	}
 
 	// VertexPT
 	if(created_types == VBO_TYPE_VERTEX_PT) {
-		glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices); eglGetError();
 		return *this;
 	}
 
 	// vertices
 	if(created_types & VBO_TYPE_VERTEX_ARRAY) {
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
-		glVertexPointer(vertex_size, GL_FLOAT, vertex_stride, 0);
-	}
+		glEnableClientState(GL_VERTEX_ARRAY); eglGetError();
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices); eglGetError();
+		glVertexPointer(vertex_size, GL_FLOAT, vertex_stride, 0); eglGetError();
+	} 
 	
 	// colors
 	if(created_types & VBO_TYPE_COLOR_ARRAY) {
-		glEnableClientState(GL_COLOR_ARRAY);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo_colors);
-		glColorPointer(4, GL_FLOAT, sizeof(GLfloat) * 4, 0);
+		glEnableClientState(GL_COLOR_ARRAY); eglGetError();
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_colors); eglGetError();
+		glColorPointer(4, GL_FLOAT, sizeof(GLfloat) * 4, 0); eglGetError();
 	}
 	
 	// texcoords
 	if(created_types & VBO_TYPE_TEXCOORD_ARRAY) {
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY); 
-		glBindBuffer(GL_ARRAY_BUFFER, vbo_texcoords); 
-		glTexCoordPointer(2, GL_FLOAT, sizeof(Vec2), 0); 
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);  eglGetError();
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_texcoords); eglGetError();
+		glTexCoordPointer(2, GL_FLOAT, sizeof(Vec2), 0); eglGetError();
 	}
 	
 	// indices
 	if(created_types & VBO_TYPE_INDEX_ARRAY) {
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_indices);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_indices); eglGetError();
 	}
 	
 	return *this;
@@ -129,13 +122,13 @@ VBO& VBO::bind() {
 
 VBO& VBO::unbind() {
 	if(created_types & VBO_TYPE_VERTEX_ARRAY)	{ 
-		glDisableClientState(GL_VERTEX_ARRAY);		
+		glDisableClientState(GL_VERTEX_ARRAY);eglGetError();
 	}
 	if(created_types & VBO_TYPE_TEXCOORD_ARRAY)	{ 
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY); 	
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY); eglGetError();
 	}	
 	if(created_types & VBO_TYPE_COLOR_ARRAY)	{ 
-		glDisableClientState(GL_COLOR_ARRAY); 	
+		glDisableClientState(GL_COLOR_ARRAY); eglGetError();
 	}	
 
 	glBindBuffer(GL_ARRAY_BUFFER,0);
@@ -169,9 +162,9 @@ VBO& VBO::setVertices(const float* pVertices, int nNumCoords, int nNum, int nUsa
 	}
 	
 	// Allocate and set the data.
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
-	glBufferData(GL_ARRAY_BUFFER, nNum * vertex_stride, pVertices, nUsage);
-	glBindBuffer(GL_ARRAY_BUFFER, 0); // do we ned this?
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices); eglGetError();
+	glBufferData(GL_ARRAY_BUFFER, nNum * vertex_stride, pVertices, nUsage); eglGetError();
+	glBindBuffer(GL_ARRAY_BUFFER, 0); eglGetError(); // do we ned this?
 	return *this;
 }
 
@@ -182,13 +175,13 @@ VBO& VBO::setColors(const float* pColors, int nNumColors, int nUsage) {
 		return *this;
 	}
 	if(!(created_types & VBO_TYPE_COLOR_ARRAY)) {
-		glGenBuffers(1, &vbo_colors);
+		glGenBuffers(1, &vbo_colors); eglGetError();
 		created_types |= VBO_TYPE_COLOR_ARRAY;
 	} 
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_colors);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 4 * nNumColors, pColors, nUsage);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	return *this;
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_colors); eglGetError();
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 4 * nNumColors, pColors, nUsage); eglGetError();
+	glBindBuffer(GL_ARRAY_BUFFER, 0); eglGetError();
+	return *this; 
 }
 
 VBO& VBO::setIndices(const int* pIndices, int nNum, int nUsage) {
@@ -198,13 +191,13 @@ VBO& VBO::setIndices(const int* pIndices, int nNum, int nUsage) {
 	}
 	
 	if(!(created_types & VBO_TYPE_INDEX_ARRAY)) {
-		glGenBuffers(1, &vbo_indices);
+		glGenBuffers(1, &vbo_indices); eglGetError();
 		created_types |= VBO_TYPE_INDEX_ARRAY;
 	}
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_indices);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLuint) * nNum, &pIndices[0], nUsage);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_indices); eglGetError();
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLuint) * nNum, &pIndices[0], nUsage); eglGetError();
+	glBindBuffer(GL_ARRAY_BUFFER, 0); eglGetError();
 	return *this;
 }
 
@@ -231,7 +224,7 @@ VBO& VBO::drawArrays(int nDrawMode, int nFirst, int nTotal) {
 		return *this;
 	}
 	bind();
-		glDrawArrays(nDrawMode, nFirst, nTotal);
+		glDrawArrays(nDrawMode, nFirst, nTotal); eglGetError();
 	unbind();
 	return *this;
 }

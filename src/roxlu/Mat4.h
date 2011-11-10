@@ -71,7 +71,8 @@ public:
 	
 	float m[16];
 	
-	// stream operator
+	// stream operator, debug.
+	void print();
 	friend ostream& operator<<(ostream& os, const Mat4& o);
 };
 
@@ -101,6 +102,14 @@ inline Mat4::Mat4() {
 	m[13] = 0.0f;
 	m[14] = 0.0f;
 	m[15] = 1.0f;
+}
+
+inline void Mat4::print() {
+	printf("%3.3f, %3.3f, %3.3f, %3.3f\n", m[0], m[4], m[8], m[12]);
+	printf("%3.3f, %3.3f, %3.3f, %3.3f\n", m[1], m[5], m[9], m[13]);
+	printf("%3.3f, %3.3f, %3.3f, %3.3f\n", m[2], m[6], m[10], m[14]);
+	printf("%3.3f, %3.3f, %3.3f, %3.3f\n", m[3], m[7], m[11], m[15]);
+	printf("\n");
 }
 
 inline ostream& operator<<(ostream& os, const Mat4& o) {

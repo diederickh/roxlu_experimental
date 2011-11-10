@@ -36,10 +36,8 @@ void IcoSphere::create(int detail, float radius, VertexData& vertex_data) {
 	};
 	
 	int num = 4 * 5 * 3;
-//	vector<int> indices;
 	for(int i = 0; i < num; ++i) {
 		vertex_data.indices.push_back(idxs[i]);
-//		indices.push_back(idxs[i]);
 	}
 	
 	if(detail > 8) {
@@ -59,7 +57,7 @@ void IcoSphere::create(int detail, float radius, VertexData& vertex_data) {
 			indices2.push_back(idx++); 
 			indices2.push_back(idx++); 
 			indices2.push_back(idx++);
-			
+						
 			indices2.push_back(idx++); 
 			indices2.push_back(idx++); 
 			indices2.push_back(idx++);
@@ -114,6 +112,16 @@ void IcoSphere::create(int detail, float radius, VertexData& vertex_data) {
 	while(it != tmp_verts.end()) {
 		vertex_data.addVertex((*it) * radius);		
 		++it;
+	}
+	
+	// add the triangles
+	size_t len = vertex_data.indices.size();
+	for(int i = 0; i < len; i += 3) {
+		vertex_data.addTriangle(
+			vertex_data.indices[i]
+			,vertex_data.indices[i+1]
+			,vertex_data.indices[i+2]
+		);
 	}
 }
 

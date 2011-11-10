@@ -31,7 +31,6 @@ void Quat::toMat4(Mat4& rDest) const {
 	rDest.m[8] = txz-twy;
 	rDest.m[9] = tyz+twx;
 	rDest.m[10] = 1.0f-(txx+tyy);
-	//rDest.flags |= rDest.ROTATE;
 }
 
 Mat4 Quat::getMat4() const {
@@ -41,27 +40,28 @@ Mat4 Quat::getMat4() const {
 }
 
 // angle in radians!
-void Quat::rotate(float nAngle, const float nX, const float nY, const float nZ) {
+void Quat::rotate(const float radians, const float x, const float y, const float z) {
 	Quat q;
-	float ha = 0.5 * nAngle;
+	float ha = 0.5 * radians;
 	float s = sin(ha);
 	q.w = cos(ha);
-	q.v.x = s * nX;
-	q.v.y = s * nY;
-	q.v.z = s * nZ;
+	q.v.x = s * x;
+	q.v.y = s * y;
+	q.v.z = s * z;
 	Quat cp = *this;
 	cp = cp * q;
 	*this = cp;
 }
 
-void Quat::fromAngleAxis(float nAngle, float nX, float nY, float nZ) {
-	float ha = 0.5 * nAngle;
+void Quat::setRotation(const float radians, const float x, const float y, const float z) {
+	float ha = 0.5 * radians;
 	float s = sin(ha);
 	w = cos(ha);
-	v.x = s * nX;
-	v.y = s * nY;
-	v.z = s * nZ;
+	v.x = s * x;
+	v.y = s * y;
+	v.z = s * z;
 }
+
 
 Vec3 Quat::rotate(const Vec3& rVec) const {
 	float vmult = (2.0f * v.x * rVec.x + v.y * rVec.y + v.z * rVec.z);

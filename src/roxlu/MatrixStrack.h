@@ -5,7 +5,6 @@ class MatrixStack {
 public:
 	MatrixStack();
 	~MatrixStack();
-	
 };
 
 #endif

@@ -11,6 +11,7 @@ Image::Image()
 }
 
 Image::~Image() {
+	printf("roxlu::Image virtual d'tro");
 	if(raw_pixels != NULL) {
 		delete raw_pixels;
 	}
@@ -19,7 +20,7 @@ unsigned char* Image::getPixels() {
 	return raw_pixels;
 }
 
-bool Image::loadImageFromDataDir(string fileName) {
+bool Image::loadImageFromDataPath(string fileName) {
 	return loadImage((string)File::toDataPath(fileName));
 }
 

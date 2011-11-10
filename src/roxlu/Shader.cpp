@@ -189,6 +189,7 @@ std::string Shader::readFile(std::string sPath) {
 
 // ----------------------- slower, but handier data transfers ------------------
 Shader& Shader::uniform1i(std::string sName, GLint x) {
+	//printf("uniform1i: '%s', value: %d\n", sName.c_str(), x);
 	glUniform1i(getUniform(sName), x); eglGetError();
 	return *this;
 }
@@ -233,13 +234,6 @@ Shader& Shader::uniform4f(std::string sName, GLfloat x, GLfloat y, GLfloat z, GL
 Shader& Shader::uniformMat4f(std::string sName, GLfloat* pMatrix, bool bTranspose) {
 	glUniformMatrix4fv(getUniform(sName), 1, bTranspose, pMatrix); eglGetError();
 	return *this;
-/*
-
-void glUniformMatrix4fv(	GLint  	location,
- 	GLsizei  	count,
- 	GLboolean  	transpose,
- 	const GLfloat * 	value);
-*/
 }
 
 Shader& Shader::setTextureUnit(

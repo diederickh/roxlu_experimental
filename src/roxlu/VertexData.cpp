@@ -3,6 +3,7 @@ namespace roxlu {
 
 VertexData::VertexData() 
 :vertex_p(NULL)
+,vertex_pt(NULL)
 ,vertex_pn(NULL)
 ,vertex_ptn(NULL)
 ,vertex_pnc(NULL)
@@ -60,15 +61,22 @@ void VertexData::addIndex(const int& rIndex) {
 	indices.push_back(rIndex);
 }
 
-int VertexData::addTriangle(const int nA, const int nB, const int nC) {
+// triangles are i.e. used when exporting. It's just a simple reference
+int VertexData::addTriangle(const int a, const int b, const int c) {
+	Triangle t(a,b,c);
+	triangles.push_back(t);
+	return triangles.size()-1;
+}
+
+int VertexData::addTriangleAndIndices(const int a, const int b, const int c) {
 	// keep track of triangle.
-	Triangle t(nA, nB, nC);
+	Triangle t(a, b, c);
 	triangles.push_back(t);
 	
 	// also create indexed triangle.
-	indices.push_back(nA);
-	indices.push_back(nB);
-	indices.push_back(nC);
+	indices.push_back(a);
+	indices.push_back(b);
+	indices.push_back(c);
 	
 	// return triangle index.
 	return triangles.size()-1;
@@ -97,23 +105,23 @@ Vec3* VertexData::getVertexPtr(int nIndex) {
 	return &vertices[nIndex];
 }
 
-const float* VertexData::getVertices() {
+const float* VertexData::getVerticesPtr() {
 	return &vertices[0].x;
 }
 
-const float* VertexData::getTexCoords() {
+const float* VertexData::getTexCoordsPtr() {
 	return &texcoords[0].x;
 }
 
-const float* VertexData::getNormals() {
+const float* VertexData::getNormalsPtr() {
 	return &normals[0].x;
 }
 
-const float* VertexData::getColors() {
+const float* VertexData::getColorsPtr() {
 	return &colors[0].r;
 }
 
-const int* VertexData::getIndices() {
+const int* VertexData::getIndicesPtr() {
 	return &indices[0];
 }
 
@@ -160,6 +168,22 @@ VertexP* VertexData::getVertexP() {
 		vertex_p[i].pos = vertices[i]; 
 	}
 	return vertex_p;
+}
+
+VertexPT* VertexData::getVertexPT() {
+	if(vertex_pt != NULL) {
+		return vertex_pt;
+	}
+	if( ! (attribs & (VERT_POS | VERT_TEX)) ) {
+		return NULL;
+	}
+	int num = getNumVertices();
+	vertex_pt = new VertexPT[num];
+	for(int i = 0; i < num; ++i) {	
+		vertex_pt[i].pos = vertices[i]; 
+		vertex_pt[i].tex = texcoords[i]; 
+	}
+	return vertex_pt;
 }
 
 VertexPN* VertexData::getVertexPN() {

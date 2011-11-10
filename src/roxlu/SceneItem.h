@@ -1,6 +1,7 @@
 #ifndef ROXLU_SCENEITEMH
 #define ROXLU_SCENEITEMH
 
+#include "Material.h"
 #include "VBO.h"
 #include "VAO.h"
 #include "Shader.h"
@@ -8,6 +9,7 @@
 #include "Vec3.h"
 #include "Quat.h"
 #include "VertexData.h"
+
 
 namespace roxlu {
 
@@ -24,12 +26,22 @@ public:
 	void draw();
 	bool createFromVertexData(VertexData* vd);
 	bool createFromVertexData(VertexData& vd);
+	inline VertexData* getVertexData();
 	inline void setPosition(float x, float y, float z);
 	inline void setPosition(const Vec3& p);
 	inline void translate(float x, float y, float z);
 	inline void translate(const Vec3& t);
+	inline void rotate(float radians, const float x, const float y, const float z);
+	inline void rotateX(float radians);
+	inline void rotateY(float radians);
+	inline void rotateZ(float radians);
 	inline void updateModelMatrix();
 	inline void setShader(Shader* sh);
+	
+	// material
+	inline void setMaterial(Material* mat);
+	inline Material* getMaterial();
+	inline bool hasMaterial();
 	
 	// draw modes
 	inline void	setDrawMode(SceneItemDrawMode mode);
@@ -47,8 +59,14 @@ public:
 	VBO* vbo;
 	VAO* vao;
 	Shader* shader;	
+	Material* material;
+	
 private:
+
+	bool initialized;
 	int draw_mode;
+	
+	void initialize();
 	void debugDraw();
 	void drawElements(); // indexed data
 	void drawArrays(); 
@@ -103,11 +121,48 @@ inline void SceneItem::setShader(Shader* sh) {
 }
 
 inline void SceneItem::updateModelMatrix() {
+	Mat4 rotation = orientation.getMat4();
 	model_matrix.identity();
 	model_matrix.translate(position);
-	Mat4 rotation = orientation.getMat4();
 	model_matrix *= rotation;
 }
+
+inline void SceneItem::rotate(float radians, const float x, const float y, const float z) {
+	orientation.rotate(radians, x, y, z);
+	updateModelMatrix();
+}
+
+inline void SceneItem::rotateX(float radians) {
+	orientation.rotate(radians,1,0,0);
+	updateModelMatrix();
+}
+
+inline void SceneItem::rotateY(float radians) {
+	orientation.rotate(radians,0,1,0);
+	updateModelMatrix();
+}
+
+inline void SceneItem::rotateZ(float radians) {
+	orientation.rotate(radians,0,0,1);
+	updateModelMatrix();
+}
+
+inline VertexData* SceneItem::getVertexData() {
+	return vertex_data;
+}
+
+inline void SceneItem::setMaterial(Material* mat) {
+	material = mat;
+}
+
+inline Material* SceneItem::getMaterial() {
+	return material;
+}
+
+inline bool SceneItem::hasMaterial() {
+	return material != NULL;
+}
+
 
 } // roxlu
 

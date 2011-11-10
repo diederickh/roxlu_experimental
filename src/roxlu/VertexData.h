@@ -31,16 +31,17 @@ public:
 	void			addNormal(const float nX, const float nY, const float nZ);
 	void 			addNormal(const Vec3& rVec);
 	void 			addIndex(const int& nIndex);
-	int 			addTriangle(int nA, int nB, int nC); 
+	int 			addTriangle(int a, int b, int c); 
+	int				addTriangleAndIndices(int a, int b, int c);
 	int 			addQuad(int nA, int nB, int nC, int nD);
 
 	void debugDraw(int drawMode = GL_TRIANGLES);
 	
-	const float* 	getVertices();
-	const float* 	getTexCoords();
-	const float* 	getColors();
-	const float* 	getNormals();
-	const int* 		getIndices();
+	const float* 	getVerticesPtr();
+	const float* 	getTexCoordsPtr();
+	const float* 	getColorsPtr();
+	const float* 	getNormalsPtr();
+	const int* 		getIndicesPtr();
 
     Triangle* 		getTriangle(int nTriangle);
 	Quad* 			getQuad(int nQuad);
@@ -54,13 +55,24 @@ public:
 	int 			getNumQuads();
 	Vec3 			getVertex(int nIndex);
 	Vec3*			getVertexPtr(int nIndex);
-
+	
 	VertexP* 		getVertexP();  	
+	VertexPT*		getVertexPT();
 	VertexPN* 		getVertexPN();
 	VertexPTN* 		getVertexPTN();
 	VertexPNC* 		getVertexPNC();
 	VertexPTNTB* 	getVertexPTNTB();
 	
+	inline void		clearAttribs();
+	inline void		enablePositionAttrib();
+	inline void		enableNormalAttrib();
+	inline void		enableColorAttrib();
+	inline void		enableTexCoordAttrib();
+	inline void		disablePositionAttrib();
+	inline void		disableNormalAttrib();
+	inline void		disableColorAttrib();
+	inline void		disableTexCoordAttrib();
+
 	void			clear();
 	
 	inline void 	setVertex(int nDX, Vec3 oPosition) { vertices[nDX] = oPosition; }
@@ -76,7 +88,7 @@ public:
 	vector<Vec2>		texcoords;
 	vector<Color4f> 	colors;
 	vector<int> 		indices;
-	vector<Triangle> 	triangles;
+	vector<Triangle> 	triangles; 
 	vector<Quad> 		quads;
 	vector<Vec3>		tangents;
 	vector<Vec3>		bitangents;
@@ -86,9 +98,53 @@ public:
 	VertexPTN* 			vertex_ptn;
 	VertexPNC* 			vertex_pnc;
 	VertexPN* 			vertex_pn;
+	VertexPT*			vertex_pt;
 	VertexPTNTB* 		vertex_ptntb;
 };
 
+
+// Set flags which should be used by a shader. When you add indices, texcoord,
+// vertices etc.. by using addVertex, addIndex, etc.. the correct attributes
+// are set automatically. But because the containers are public you can 
+// work w/o these setters. For this purpose you can use these functions.
+// -----------------------------------------------------------------------------
+inline void VertexData::clearAttribs() {
+	attribs = 0;
+}
+
+inline void	VertexData::enablePositionAttrib() {
+	attribs |= VERT_POS;
+}
+
+inline void	VertexData::enableNormalAttrib() {
+	attribs |= VERT_NORM;
+}
+
+inline void	VertexData::enableColorAttrib() {
+	attribs |= VERT_COL;
+}
+
+inline void	VertexData::enableTexCoordAttrib() {
+	attribs |= VERT_TEX;
+}
+
+inline void	VertexData::disablePositionAttrib() {
+	attribs &= ~VERT_POS;
+}
+
+inline void	VertexData::disableNormalAttrib() {
+	attribs &= ~VERT_NORM;
+}
+
+inline void	VertexData::disableColorAttrib() {
+	attribs &= ~VERT_COL;
+}
+
+inline void	VertexData::disableTexCoordAttrib() {
+	attribs &= ~VERT_TEX;
+}
+
+// -----------------------------------------------------------------------------
 inline ostream& operator <<(ostream& os, const VertexData& data) {
 	{
 		os << "Vertices: (" << data.vertices.size() << ")" << endl;

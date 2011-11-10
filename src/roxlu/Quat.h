@@ -16,9 +16,16 @@ public:
 	void normalize();
 	void toMat4(Mat4& aDest) const;
 	Mat4 getMat4() const;
-	void fromAngleAxis(float nAngle, float nX, float nY, float nZ);
-	void rotate(float nAngle, const float nX, const float nY, const float nZ);
-	void rotate(float nAngle, const Vec3& rAxis) { rotate(nAngle, rAxis.x, rAxis.y, rAxis.z); }
+	
+	// absolute rotations.
+	void setRotation(const float radians, const float x, const float y, const float z);
+	inline void setXRotation(const float radians);
+	inline void setYRotation(const float radians);
+	inline void setZRotation(const float radians);
+	
+	// relative rotation
+	void rotate(const float radians, const float x, const float y, const float z); 
+	void rotate(const float radians, const Vec3& rAxis) { rotate(radians, rAxis.x, rAxis.y, rAxis.z); }
 	Vec3 rotate(const Vec3& rVec) const;
 	
 	Quat operator*(const Quat& rOther) const;
@@ -30,6 +37,19 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, const Quat& rQuat);
 	
 };
+
+inline void Quat::setXRotation(const float radians) {
+	setRotation(radians, 1, 0, 0);
+}
+
+inline void Quat::setYRotation(const float radians) {
+	setRotation(radians, 0, 1, 0);
+}
+
+inline void Quat::setZRotation(const float radians) {
+	setRotation(radians, 0, 0, 1);
+}
+
 
 inline std::ostream& operator<<(std::ostream& os, const Quat& rQuat) {
 	os << rQuat.v.x << ", " << rQuat.v.y << ", " << rQuat.v.z <<", " << rQuat.w;

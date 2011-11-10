@@ -1,18 +1,38 @@
 #ifndef ROXLU_RENDERERH
 #define ROXLU_RENDERERH
 
-#include "OpenGL.h"
+#include "EasyCam.h"
+#include "VertexData.h"
+#include "SceneItem.h"
+//#include "Texture.h" 
+//#include "OpenGL.h"
+
+
+#include "Scene.h"
+
+#include <string>
+
+using std::string;
+
 namespace roxlu {
 
-
-
+/**
+ * Goal of this Renderer class is to make it as easy as possible to create
+ * a 3D/2D scene using modern openGL, not to provide the best implementation of 
+ * object oriented library.
+ *
+ *
+ */
+ 
 class Scene;
-class Camera;
+class EasyCam;
 class Shader;
+class Texture;
+class Material;
 
 class Renderer {
 public:
-	Renderer();
+	Renderer(float screenWidth, float screenHeight);
 	~Renderer();
 	void render();
 	
@@ -21,15 +41,32 @@ public:
 	inline Shader* getShader();
 	inline void setScene(Scene* someScene);	
 	inline void setScene(Scene& scene);
-	inline void setCamera(Camera* camera);
-	inline void setCamera(Camera& camera);
 	inline void	fill();
 	inline void noFill();
+	inline void translate(float x, float y, float z);
+	
+	inline SceneItem* getSceneItem(string name);
+	SceneItem* createIcoSphere(string name, int detail, float radius);
+	SceneItem* createUVSphere(string name, int phi, int theta, float radius);
+	Material* createMaterial(string name);
+	void loadDiffuseMaterial(string materialName, string textureName, string diffuseFileName, GLuint imageFormat = GL_RGB);
+	Material* createDiffuseMaterial(string materialName, string textureName, string diffuseFileName, GLuint imageFormat = GL_RGB);
+	inline Material* getMaterial(string materialName);
+	inline void setSceneItemMaterial(string sceneItemName, string materialName);
+	
+	void onMouseDown(float x, float y);
+	void onMouseDragged(float x, float y);
+	void exportToPly(string sceneItemName, string fileName);
+	Texture* createTexture(string name, string fileName);
+
+
 
 private:
 	bool use_fill;
+	float screen_width;
+	float screen_height;
 	Scene* scene;
-	Camera* cam;
+	EasyCam* cam;
 	Shader* shader;
 };
 
@@ -57,16 +94,24 @@ inline void Renderer::setScene(Scene* someScene) {
 	scene = someScene;
 }
 
-inline void Renderer::setCamera(Camera& camera) {
-	setCamera(&camera);
-}
-
-inline void Renderer::setCamera(Camera* camera) {
-	cam = camera;
+inline SceneItem* Renderer::getSceneItem(string name) {
+	return scene->getSceneItem(name);
 }
 
 inline Shader* Renderer::getShader() {
 	return shader;
+}
+
+inline void Renderer::translate(float x, float y, float z) {
+	cam->translate(x,y,z);
+}
+
+inline Material* Renderer::getMaterial(string materialName) {
+	return scene->getMaterial(materialName);
+}
+
+inline void Renderer::setSceneItemMaterial(string sceneItemName, string materialName) {
+	getSceneItem(sceneItemName)->setMaterial(getMaterial(materialName));
 }
 
 } // roxlu

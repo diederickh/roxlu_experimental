@@ -7,12 +7,17 @@ using std::cout;
 using std::endl;
 
 namespace roxlu {
-JPEGImage::JPEGImage():Image()
+JPEGImage::JPEGImage()
+	:Image()
 {
 }
 
 JPEGImage::JPEGImage(string filePath):Image() {
 	loadImage(filePath);
+}
+
+JPEGImage::~JPEGImage() {
+	printf("roxlu::JPEGIMAGE virtual d'tor");
 }
 
 bool JPEGImage::loadImage(string filePath) {
@@ -44,12 +49,12 @@ bool JPEGImage::loadImage(string filePath) {
 	int i = 0;
 	int dx = 0;
 
-	unsigned char* raw_image = new unsigned char[width*height*bytes_per_pixel];
+	raw_pixels = new unsigned char[width*height*bytes_per_pixel];
 	row_pointer[0] = new unsigned char[width * bytes_per_pixel];
 	while(decomp_info.output_scanline < height) {
 		jpeg_read_scanlines(&decomp_info, row_pointer,1);
 		for(i = 0; i < scan_width; ++i) { 
-			raw_image[dx++] = row_pointer[0][i];
+			raw_pixels[dx++] = row_pointer[0][i];
 		}
 	}
 	
@@ -58,7 +63,6 @@ bool JPEGImage::loadImage(string filePath) {
 	jpeg_destroy_decompress(&decomp_info);
 	
 	fclose(in_file);
-	raw_pixels = raw_image;
 	return true;
 }
 

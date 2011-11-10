@@ -7,9 +7,12 @@ SceneItem::SceneItem()
 :vertex_data(NULL)
 ,vao(NULL)
 ,vbo(NULL)
-,draw_mode(POINTS)
+,draw_mode(TRIANGLES)
+,material(NULL)
+,initialized(false)
 {
 	vao = new VAO();
+
 }
 
 SceneItem::~SceneItem() {
@@ -26,19 +29,27 @@ bool SceneItem::createFromVertexData(VertexData* vd) {
 		exit(1);
 	}	
 	vertex_data = vd;
-	
+}
+
+void SceneItem::initialize() {
+	if(initialized) {
+		return;
+	}
+	initialized = true;
 	vao->bind();
 	shader->enable();
-	
+
 	// create the VBO
 	vbo = new VBO();
-	Vertex*	vertex_data = NULL;
+	Vertex*	vertex = NULL;
 	size_t stride = 0;
 	int pos_offset = 0;
-
+	int tex_offset = 0;
+	VertexData* vd = vertex_data;
+	
 	// when we have shared vertices (aka indices) set them.
 	if(vd->getNumIndices() > 0) {
-		vbo->setIndices(vd->getIndices(), vd->getNumIndices());
+		vbo->setIndices(vd->getIndicesPtr(), vd->getNumIndices());
 	}
 
 
@@ -49,6 +60,15 @@ bool SceneItem::createFromVertexData(VertexData* vd) {
 			 vd->getVertexP()
 			,vd->getNumVertices()
 		);
+	}
+	else if(vd->attribs == VBO_TYPE_VERTEX_PT) {
+		printf("we have both pos+texcoords");
+		stride = sizeof(VertexPT);
+		vbo->setVertexData(
+			 vd->getVertexPT()
+			,vd->getNumVertices()
+		);
+		tex_offset = offsetof(VertexPT, tex);
 	}
 
 	// set attributes.
@@ -63,9 +83,24 @@ bool SceneItem::createFromVertexData(VertexData* vd) {
 				,GL_FALSE
 				,stride
 				,(GLvoid*)pos_offset
-			);
+			); eglGetError();
 		}
 	}	
+	// attribute: texture
+	if(vd->attribs & VERT_TEX) {
+		GLuint tex_id = shader->addAttribute("tex").getAttribute("tex");
+		if(tex_id != -1) {
+			shader->enableVertexAttribArray("tex");
+			glVertexAttribPointer(
+				tex_id
+				,2
+				,GL_FLOAT
+				,GL_FALSE
+				,stride
+				,(GLvoid*)tex_offset
+			); eglGetError();
+		}
+	}
 		
 	shader->disable();
 	return true;
@@ -77,12 +112,12 @@ void SceneItem::debugDraw() {
 	if(vbo->hasIndices()) {
 		glColor3f(0,1,0.4);
 		shader->disable();
-		glBegin(GL_POINTS);
+		glBegin(GL_POINTS); eglGetError();
 		for(int i = 0; i < vertex_data->indices.size(); ++i) {
 			Vec3 p = vertex_data->vertices[vertex_data->indices[i]];
-			glVertex3fv(p.getPtr());
+			glVertex3fv(p.getPtr()); eglGetError();
 		}
-		glEnd();
+		glEnd(); eglGetError();
 		
 	}
 	else { 
@@ -92,7 +127,17 @@ void SceneItem::debugDraw() {
 void SceneItem::drawArrays() {
 	vao->bind();
 	shader->enable();
-		glDrawArrays(draw_mode, 0, vertex_data->getNumVertices()); eglGetError();
+
+	if(material != NULL) {
+		material->bind();
+	}
+	glDrawArrays(draw_mode, 0, vertex_data->getNumVertices()); eglGetError();
+	
+	if(material != NULL) {
+		material->unbind();
+	}
+
+
 	shader->disable();
 	vao->unbind();
 }
@@ -107,6 +152,9 @@ void SceneItem::drawElements() {
 }
 
 void SceneItem::draw() {
+	if(!initialized) {
+		initialize();
+	}
 	if(vbo == NULL) {
 		printf("SceneItem no vbo set.\n"); 
 		exit(1);
