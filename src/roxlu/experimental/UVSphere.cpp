@@ -23,6 +23,8 @@ void UVSphere::create(float radius, int numSlices, int numStacks, VertexData& ve
 	slices = numSlices;
 	stacks = numStacks;
 	
+	// this code works; though as with all 4 other tested methods I get a wierd
+	// lines when using a texture. See git history for old code.
 	for (int j = 0; j < stacks; j++) {
          double latitude1 = (PI/stacks) * j - PI/2;
          double latitude2 = (PI/stacks) * (j+1) -PI/2;
@@ -54,8 +56,7 @@ void UVSphere::create(float radius, int numSlices, int numStacks, VertexData& ve
 	for(int i = 0; i < n-2; i+=2) {
 		vertex_data.addQuad(i+1, i+3, i+2, i);
 	}
-	printf("Num quads: %d\n", vertex_data.getNumQuads());
-	
+		
 	/*
 	int nv = stacks;
 	int nu = slices;

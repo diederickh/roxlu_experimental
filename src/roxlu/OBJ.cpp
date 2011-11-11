@@ -2,6 +2,8 @@
 #include "OBJ.h"
 #include "File.h"
 #include "HalfEdge.h"
+#include "Material.h"
+
 namespace roxlu {
 
 OBJ::OBJ() {
@@ -14,28 +16,94 @@ void OBJ::exportSceneItem(SceneItem* si) {
 	return exportSceneItem(*si);
 }
 
+void OBJ::createMaterialFile(Material& mat) {
+	string material_file = "mat_" +mat.getName() +".mtl";
+	printf("Material file: '%s'\n", material_file.c_str());
+	stringstream ss;
+	ss << "newmtl " << mat.getName() << endl;
+	ss << "Ka 1.0 1.0 1.0" << endl;
+	ss << "Kd 1.0 1.0 1.0" << endl;
+	ss << "Ks 1.0 1.0 1.0" << endl;
+	ss << "Ni 1.0" << endl;
+	ss << "d 1.0" << endl;
+	ss << "illum 2" << endl;
+	
+	if(mat.hasDiffuseMaterial()) {
+		printf("File: '%s'\n", mat.getDiffuseMaterialFilePath().c_str());	
+		ss << "map_Kd " << mat.getDiffuseMaterialFilePath() << endl;
+	}
+	else {
+		printf("??????");
+	}
+	File::writeToFile(File::toDataPath(material_file), ss.str());
+
+}
+
 void OBJ::exportSceneItem(SceneItem& si) {
 	stringstream ss;
 	ss << "# Roxlu OBJ export 0.01" << endl;	
 	ss << "o " << si.getName() << endl;
+
+	createMaterialFile(*si.getMaterial());
+	ss << "mtllib mat_" << (*si.getMaterial()).getName() << ".mtl" << endl;
+	
 	ss.precision(5);
 	ss.setf(ios::fixed,ios::floatfield);
 
 	VertexData& vd = *si.getVertexData();		
+	
+	// vertices
 	for(int i = 0; i < vd.getNumVertices(); ++i) {
 		Vec3& v = *vd.getVertexPtr(i);
 		ss << "v " << v.x << " " << v.y << " " << v.z << endl;
 	}
-	for(int i = 0; i < vd.getNumQuads(); ++i) {
-		Quad& q = *vd.getQuadPtr(i);
-		printf("%d, %d, %d, %d <---\n", q.a, q.b, q.c, q.d);
-		ss << "f " << q.d+1 << " " << q.c+1 << " " << q.b+1 << endl;
-		ss << "f " << q.b+1 << " " << q.a+1 << " " << q.d+1 << endl;
+	
+	// texcoords
+	for(int i = 0; i < vd.getNumTexCoords(); ++i) {
+		Vec2& tc = *vd.getTexCoordPtr(i);
+		ss << "vt " << tc.x << " " << tc.y << endl;
 	}
-	for(int i = 0; i < vd.getNumTriangles(); ++i) {
-		Triangle& t = *vd.getTrianglePtr(i);
-		ss << "f " << t.a+1 << " " << t.b+1 << " " << t.c+1 << endl;
-
+		
+	if(si.getMaterial()->hasDiffuseMaterial()) {
+		ss << "usemtl " << si.getMaterial()->getName() << endl;
+	}
+	if(vd.getNumTexCoords() == 0) {
+		// quads.
+		for(int i = 0; i < vd.getNumQuads(); ++i) {
+			Quad& q = *vd.getQuadPtr(i);
+			//printf("%d, %d, %d, %d <---\n", q.a, q.b, q.c, q.d);
+			ss << "f " << q.d+1 << " " << q.c+1 << " " << q.b+1 << endl;
+			ss << "f " << q.b+1 << " " << q.a+1 << " " << q.d+1 << endl;
+		}
+		
+		// triangles
+		for(int i = 0; i < vd.getNumTriangles(); ++i) {
+			Triangle& t = *vd.getTrianglePtr(i);
+			ss << "f " << t.a+1 << " " << t.b+1 << " " << t.c+1 << endl;
+		}
+	}
+	else {
+		// quads.
+		for(int i = 0; i < vd.getNumQuads(); ++i) {
+			Quad& q = *vd.getQuadPtr(i);
+			ss << "f " 	<< q.d+1 << "/" << q.d+1 << " "
+						<< q.c+1 << "/" << q.c+1 << " "
+						<< q.b+1 << "/" << q.b+1 << endl;
+						
+			ss << "f " 	<< q.b+1 << "/" << q.b+1 << " "
+						<< q.a+1 << "/" << q.a+1 << " "
+						<< q.d+1 << "/" << q.d+1 << endl;
+			
+		
+		}
+		
+		// triangles
+		for(int i = 0; i < vd.getNumTriangles(); ++i) {
+			Triangle& t = *vd.getTrianglePtr(i);
+			ss << "f " 	<< t.a+1 << "/" << t.a+1 << " "
+						<< t.b+1 << "/" << t.b+1 << " "
+						<< t.c+1 << "/" << t.c+1 << endl;
+		}
 	}
 	
 	// create unique list with vertices.

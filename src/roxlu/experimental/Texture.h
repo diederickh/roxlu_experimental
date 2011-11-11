@@ -19,7 +19,7 @@ public:
 	void bind();
 	void unbind();
 	GLuint getTextureID();
-
+	string getImageFilePath();
 private:
 	ofImage img;
 	GLuint texture_id;

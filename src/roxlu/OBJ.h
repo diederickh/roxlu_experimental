@@ -14,6 +14,7 @@ using namespace std;
 
 namespace roxlu {
 
+class Material;
 class SceneItem;
 
 // OBJ 3D file exporter for roxlu lib. 
@@ -28,7 +29,7 @@ public:
 	~OBJ();
 	void exportSceneItem(SceneItem& si);
 	void exportSceneItem(SceneItem* si);
-
+	void createMaterialFile(Material& mat);
 private:
 	
 };

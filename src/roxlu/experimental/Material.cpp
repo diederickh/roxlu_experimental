@@ -1,10 +1,11 @@
 #include "Material.h"
 namespace roxlu {
 
-Material::Material() 
+Material::Material(string name) 
 	:set_materials(MAT_NONE)
 	,shader(NULL)
 	,done(false)
+	,name(name)
 {
 }
 

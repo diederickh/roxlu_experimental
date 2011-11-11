@@ -26,7 +26,7 @@ public:
 		
 	};
 
-	SceneItem();
+	SceneItem(string name);
 	~SceneItem();
 	void draw();
 	bool createFromVertexData(VertexData* vd);
@@ -66,7 +66,6 @@ public:
 	Vec3 position;
 	Quat orientation;
 	VertexData* vertex_data;
-
 			
 	VBO* vbo;
 	VAO* vao;

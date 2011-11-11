@@ -3,13 +3,14 @@
 
 namespace roxlu {
 
-SceneItem::SceneItem() 
+SceneItem::SceneItem(string name) 
 :vertex_data(NULL)
 ,vao(NULL)
 ,vbo(NULL)
 ,draw_mode(TRIANGLES)
 ,material(NULL)
 ,initialized(false)
+,name(name)
 {
 	vao = new VAO();
 

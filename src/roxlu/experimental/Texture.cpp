@@ -24,6 +24,7 @@ void Texture::setParams() {
 void Texture::loadImage(string fileName, GLint imageFormat) {
 	// load image.
 	image_file = fileName;
+	printf("file path: '%s'\n", image_file.c_str());
 	if(!img.loadImage(fileName)) {
 		ofLog(OF_LOG_ERROR, "Cannot load file: %s", fileName.c_str());
 		return;
@@ -41,6 +42,9 @@ void Texture::loadImage(string fileName, GLint imageFormat) {
 }
 
 
+string Texture::getImageFilePath() {
+	return File::toDataPath(image_file);
+}
 
 void Texture::bind() {
 	glEnable(GL_TEXTURE_2D);	

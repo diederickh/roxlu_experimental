@@ -93,7 +93,7 @@ void Renderer::render() {
 
 SceneItem* Renderer::createIcoSphere(string name, int detail, float radius) {
 	VertexData* vd = new VertexData();
-	SceneItem* si = new SceneItem();
+	SceneItem* si = new SceneItem(name);
 
 	// Create vertex data for ico sphere.	
 	IcoSphere ico_sphere;
@@ -113,7 +113,7 @@ SceneItem* Renderer::createIcoSphere(string name, int detail, float radius) {
 
 SceneItem* Renderer::createUVSphere(string name, int phi, int theta, float radius) {
 	VertexData* vd = new VertexData();
-	SceneItem* si = new SceneItem();
+	SceneItem* si = new SceneItem(name);
 
 	// Create vertex data for ico sphere.	
 	UVSphere uv_sphere;
@@ -133,7 +133,7 @@ SceneItem* Renderer::createUVSphere(string name, int phi, int theta, float radiu
 
 SceneItem* Renderer::createBox(string name, float width, float height, float depth) {
 	VertexData* vd = new VertexData();
-	SceneItem* si = new SceneItem();
+	SceneItem* si = new SceneItem(name);
 
 	// Create vertex data for ico sphere.	
 	Box box;
@@ -152,7 +152,7 @@ SceneItem* Renderer::createBox(string name, float width, float height, float dep
 
 SceneItem* Renderer::createPlane(string name, float width, float height) {
 	VertexData* vd = new VertexData();
-	SceneItem* si = new SceneItem();
+	SceneItem* si = new SceneItem(name);
 
 	// Create vertex data for ico sphere.	
 	Plane plane;
@@ -201,7 +201,7 @@ Material* Renderer::createDiffuseMaterial(
 		,string diffuseFileName
 		,GLuint imageFormat) 
 {
-	Material* mat = new Material();
+	Material* mat = new Material(materialName);
 	mat->setShader(shader);
 	Texture* tex = mat->loadDiffuseMaterial(diffuseFileName, imageFormat);
 	

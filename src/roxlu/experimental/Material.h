@@ -6,7 +6,9 @@
 #include "Shader.h"
 //#include "OpenGL.h"
 #include <map>
+#include <string>
 
+using std::string;
 using std::map;
 namespace roxlu {
 
@@ -28,7 +30,7 @@ public:
 		,MAT_CUBEMAP		= (1 << 10)
 	};
 	
-	Material();
+	Material(string name);
 	~Material();
 	
 	void bind();
@@ -41,13 +43,20 @@ public:
 	inline Texture* getMaterial(int type);
 	inline bool hasMaterial(int type);
 	inline void setMaterial(int type, Texture* tex);
+	inline string getMaterialFilePath(int type);
 	
 	// diffuse material
 	inline Texture* loadDiffuseMaterial(string file, int imageFormat = GL_RGB);
 	Texture* getDiffuseMaterial();
-	bool hasDiffuseMaterial();
+	inline bool hasDiffuseMaterial();
+	inline string getDiffuseMaterialFilePath();
+	
+	// name
+	inline void setName(string name);
+	inline string getName();
 	
 private:
+	string name;
 	bool done;
 	int set_materials;
 	Shader* shader;	
@@ -64,12 +73,28 @@ inline Texture* Material::loadDiffuseMaterial(string file, int imageFormat) {
 	return loadMaterial(MAT_DIFFUSE, file, imageFormat);
 }
 
+inline bool Material::hasDiffuseMaterial() {
+	return hasMaterial(MAT_DIFFUSE);
+}
+
+inline string Material::getDiffuseMaterialFilePath() {
+	return getMaterialFilePath(MAT_DIFFUSE);
+}
+
 inline Texture* Material::getMaterial(int type) {
 	map<int, Texture*>::iterator it = materials.find(type);
 	if(it == materials.end()) {
 		return NULL;
 	}
 	return it->second;
+}
+
+inline void Material::setName(string matName) {
+	name = matName;
+}
+
+inline string Material::getName() {
+	return name;
 }
 
 inline bool Material::hasMaterial(int type) {
@@ -88,6 +113,10 @@ inline Texture* Material::loadMaterial(int type, string file, GLint imageFormat)
 	materials.insert(std::pair<int, Texture*>(type, tex));
 	set_materials |= type;
 	return tex;
+}
+
+inline string Material::getMaterialFilePath(int type) {
+	return getMaterial(type)->getImageFilePath();
 }
 
 }; // roxlu
