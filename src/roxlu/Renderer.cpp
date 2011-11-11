@@ -123,7 +123,7 @@ SceneItem* Renderer::createUVSphere(string name, int phi, int theta, float radiu
 	si->setShader(shader);
 	si->createFromVertexData(vd);
 //	si->setDrawMode(SceneItem::TRIANGLE_STRIP);
-	si->setDrawMode(SceneItem::QUADS);
+	si->setDrawMode(SceneItem::QUAD_STRIP);
 
 	// Keep track of the created data.
 	scene->addSceneItem(name, si);

@@ -28,7 +28,7 @@ void OBJ::exportSceneItem(SceneItem& si) {
 	}
 	for(int i = 0; i < vd.getNumQuads(); ++i) {
 		Quad& q = *vd.getQuadPtr(i);
-//		printf("%d, %d, %d, %d <---\n", q.a, q.b, q.c, q.d);
+		printf("%d, %d, %d, %d <---\n", q.a, q.b, q.c, q.d);
 		ss << "f " << q.d+1 << " " << q.c+1 << " " << q.b+1 << endl;
 		ss << "f " << q.b+1 << " " << q.a+1 << " " << q.d+1 << endl;
 	}

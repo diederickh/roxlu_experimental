@@ -21,7 +21,9 @@ public:
 		 TRIANGLES = GL_TRIANGLES
 		,TRIANGLE_STRIP = GL_TRIANGLE_STRIP
 		,QUADS = GL_QUADS
+		,QUAD_STRIP = GL_QUAD_STRIP
 		,POINTS = GL_POINTS
+		
 	};
 
 	SceneItem();
@@ -52,6 +54,7 @@ public:
 	inline void drawUsingQuads();
 	inline void drawUsingPoints();
 	inline void drawUsingTriangleStrip();
+	inline void drawUsingQuadStrip();
 	
 
 	inline void setName(string itemName);
@@ -97,6 +100,11 @@ inline void SceneItem::drawUsingPoints() {
 inline void SceneItem::drawUsingTriangleStrip() {
 	setDrawMode(TRIANGLE_STRIP);
 }
+
+inline void SceneItem::drawUsingQuadStrip() {
+	setDrawMode(QUAD_STRIP);
+}
+
 
 inline void SceneItem::setDrawMode(SceneItemDrawMode mode) {
 	draw_mode = mode;
