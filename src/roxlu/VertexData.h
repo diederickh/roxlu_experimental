@@ -53,6 +53,8 @@ public:
 	int 			getNumIndices();
 	int 			getNumTriangles();
 	int 			getNumQuads();
+	Vec2			getTexCoord(int index);
+	Vec2*			getTexCoordPtr(int index);
 	Vec3 			getVertex(int nIndex);
 	Vec3*			getVertexPtr(int nIndex);
 	

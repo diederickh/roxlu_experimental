@@ -19,6 +19,7 @@ class SceneItem {
 public:
 	enum SceneItemDrawMode {
 		 TRIANGLES = GL_TRIANGLES
+		,TRIANGLE_STRIP = GL_TRIANGLE_STRIP
 		,QUADS = GL_QUADS
 		,POINTS = GL_POINTS
 	};
@@ -50,6 +51,7 @@ public:
 	inline void	drawUsingTriangles();
 	inline void drawUsingQuads();
 	inline void drawUsingPoints();
+	inline void drawUsingTriangleStrip();
 	
 
 	inline void setName(string itemName);
@@ -90,6 +92,10 @@ inline void SceneItem::drawUsingQuads() {
 
 inline void SceneItem::drawUsingPoints() {
 	setDrawMode(POINTS);
+}
+
+inline void SceneItem::drawUsingTriangleStrip() {
+	setDrawMode(TRIANGLE_STRIP);
 }
 
 inline void SceneItem::setDrawMode(SceneItemDrawMode mode) {

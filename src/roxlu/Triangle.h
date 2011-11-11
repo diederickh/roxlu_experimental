@@ -11,7 +11,11 @@ struct Triangle {
 		a = nA;
 		b = nB;
 		c = nC;
-	}	
+	}
+		
+	int& operator[](int n){
+		return (&a)[n];
+	}
 };
 
 #endif

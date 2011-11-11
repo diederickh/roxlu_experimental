@@ -97,12 +97,20 @@ Quad* VertexData::getQuadPtr(int nQuad) {
 }
 
 
-Vec3 VertexData::getVertex(int nIndex) {
-	return vertices[nIndex];
+Vec3 VertexData::getVertex(int index) {
+	return vertices[index];
 }
 
-Vec3* VertexData::getVertexPtr(int nIndex) {
-	return &vertices[nIndex];
+Vec3* VertexData::getVertexPtr(int index) {
+	return &vertices[index];
+}
+
+Vec2 VertexData::getTexCoord(int index) {
+	return texcoords[index];
+}
+
+Vec2* VertexData::getTexCoordPtr(int index) {
+	return &texcoords[index];
 }
 
 const float* VertexData::getVerticesPtr() {

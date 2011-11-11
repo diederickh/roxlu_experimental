@@ -9,7 +9,7 @@
 #include "Triangle.h"
 */
 #include <sstream>
-
+#include "HalfEdge.h"
 using namespace std;
 
 namespace roxlu {

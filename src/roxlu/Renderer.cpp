@@ -9,6 +9,8 @@
 #include "Ply.h"
 #include "experimental/StringUtil.h"
 #include "experimental/UVSphere.h"
+#include "experimental/Plane.h"
+#include "experimental/Box.h"
 #include "experimental/Material.h"
 #include <iostream>
 
@@ -86,6 +88,7 @@ void Renderer::render() {
 		si.draw();
 		++it;
 	}
+	shader->disable();
 }
 
 SceneItem* Renderer::createIcoSphere(string name, int detail, float radius) {
@@ -119,12 +122,50 @@ SceneItem* Renderer::createUVSphere(string name, int phi, int theta, float radiu
 	// Create scene item from vertex data and make sure shader is set.
 	si->setShader(shader);
 	si->createFromVertexData(vd);
+//	si->setDrawMode(SceneItem::TRIANGLE_STRIP);
+	si->setDrawMode(SceneItem::QUADS);
+
+	// Keep track of the created data.
+	scene->addSceneItem(name, si);
+	scene->addVertexData(name, vd);
+	return si;
+}
+
+SceneItem* Renderer::createBox(string name, float width, float height, float depth) {
+	VertexData* vd = new VertexData();
+	SceneItem* si = new SceneItem();
+
+	// Create vertex data for ico sphere.	
+	Box box;
+	box.create(width, height, depth, *vd);
+	
+	// Create scene item from vertex data and make sure shader is set.
+	si->setShader(shader);
+	si->createFromVertexData(vd);
 	si->setDrawMode(SceneItem::QUADS);
 	
 	// Keep track of the created data.
 	scene->addSceneItem(name, si);
 	scene->addVertexData(name, vd);
+	return si;
+}
+
+SceneItem* Renderer::createPlane(string name, float width, float height) {
+	VertexData* vd = new VertexData();
+	SceneItem* si = new SceneItem();
+
+	// Create vertex data for ico sphere.	
+	Plane plane;
+	plane.create(width, height, *vd);
 	
+	// Create scene item from vertex data and make sure shader is set.
+	si->setShader(shader);
+	si->createFromVertexData(vd);
+	si->setDrawMode(SceneItem::QUADS);
+	
+	// Keep track of the created data.
+	scene->addSceneItem(name, si);
+	scene->addVertexData(name, vd);
 	return si;
 }
 

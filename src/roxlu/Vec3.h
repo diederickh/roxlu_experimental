@@ -93,6 +93,7 @@ struct Vec3 {
 	inline Vec3& 	cross(const Vec3& vec);
 	inline Vec3 	getCrossed(const Vec3& vec);
 	inline float* 	getPtr() { return &x; };
+	inline void		print();
 
 	// Accessors
 	float& operator[](unsigned int nIndex) {
@@ -282,6 +283,10 @@ inline Vec3 Vec3::getCrossed(const Vec3& vec) {
 		,z * vec.x - x * vec.z
 		,x * vec.y - y * vec.x
 	);
+}
+
+inline void Vec3::print() {
+	printf("%f, %f, %f\n", x, y, z);
 }
 
 // -----------------------------------------------------------------------------

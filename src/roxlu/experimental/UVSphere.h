@@ -10,8 +10,10 @@ public:
 	UVSphere();
 	~UVSphere();
 	void create(float radius, int phi, int theta, VertexData& vertex_data);
-
+	int getAt(int nSliceItem, int nStackItem);
 private:
+	int slices;
+	int stacks;
 };
 
 } // roxlu

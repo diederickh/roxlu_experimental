@@ -5,11 +5,12 @@
 #include <algorithm>
 #include "Vec3.h"
 #include "HEC_Creator.h"
-#include "ofMain.h" // tmp
+//#include "ofMain.h" // tmp
 using std::vector;
 
 namespace roxlu {
 
+class VertexData;
 class HE_Mesh;
 
 class HEC_FromFaceList  : public HEC_Creator {
@@ -17,6 +18,7 @@ public:
 	HEC_FromFaceList();
 
 	bool create(HE_Mesh& mesh);
+	void copyFromVertexData(VertexData& vd);
 	inline void addVertices(const vector<Vec3>& vertices);
 	inline void addFaces(const vector<vector<int> >& faces);
 		

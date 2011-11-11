@@ -36,6 +36,7 @@ public:
 	~Renderer();
 	void render();
 	
+	inline EasyCam* getCamera();
 	inline void setShader(Shader* someShader);
 	inline void setShader(Shader& someShader);
 	inline Shader* getShader();
@@ -48,6 +49,8 @@ public:
 	inline SceneItem* getSceneItem(string name);
 	SceneItem* createIcoSphere(string name, int detail, float radius);
 	SceneItem* createUVSphere(string name, int phi, int theta, float radius);
+	SceneItem* createBox(string name, float width, float height, float depth);
+	SceneItem* createPlane(string name, float width, float height);
 	Material* createMaterial(string name);
 	void loadDiffuseMaterial(string materialName, string textureName, string diffuseFileName, GLuint imageFormat = GL_RGB);
 	Material* createDiffuseMaterial(string materialName, string textureName, string diffuseFileName, GLuint imageFormat = GL_RGB);
@@ -113,6 +116,11 @@ inline Material* Renderer::getMaterial(string materialName) {
 inline void Renderer::setSceneItemMaterial(string sceneItemName, string materialName) {
 	getSceneItem(sceneItemName)->setMaterial(getMaterial(materialName));
 }
+
+inline EasyCam* Renderer::getCamera() {
+	return cam;
+}
+
 
 } // roxlu
 #endif
