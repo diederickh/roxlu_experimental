@@ -59,7 +59,6 @@ void UVSphere::create(float radius, int slices, int stacks, VertexData& vertex_d
 			texcoords[dx].y = theta / PI;
 		}
 	}
-	
 	// create indices / vertices; commented code creates shared vertices.
 	int dx = 0;
 	for(int slice = 0; slice < slices; ++slice) {
@@ -91,6 +90,9 @@ void UVSphere::create(float radius, int slices, int stacks, VertexData& vertex_d
 			vertex_data.vertices.push_back(vc);
 			vertex_data.vertices.push_back(vd);
 			
+			// created for export... not working correctly for the ply format
+			vertex_data.addQuad(dxa, dxb, dxc, dxd);
+			
 			vertex_data.texcoords.push_back(texcoords[dxa]);
 			vertex_data.texcoords.push_back(texcoords[dxb]);
 			vertex_data.texcoords.push_back(texcoords[dxc]);
@@ -105,10 +107,9 @@ void UVSphere::create(float radius, int slices, int stacks, VertexData& vertex_d
 			vertex_data.normals.push_back(normal);
 			vertex_data.normals.push_back(normal);
 			
-			// created for export... not working correctly for the ply format
-			vertex_data.addQuad(dxa, dxb, dxc, dxd);
-			vertex_data.addTriangle(dxa, dxb, dxc);
-			vertex_data.addTriangle(dxc, dxd, dxa);
+			
+//			vertex_data.addTriangle(dxa, dxb, dxc);
+//			vertex_data.addTriangle(dxc, dxd, dxa);
 		}
 	}
 	

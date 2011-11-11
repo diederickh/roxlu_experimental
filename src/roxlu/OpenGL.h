@@ -11,9 +11,8 @@
 	#include <OpenGLES/ES2/gl.h>
 	//#include <OpenGLES/ES1/gl.h>
 #elif ROXLU_OPENGL_VARIANT == ROXLU_OPENGL
-	#ifndef __GLEW_H__
-		#include <OpenGL/gl.h>
-	#endif
+	#include "ofMain.h"
+	//#include <OpenGL/gl.h>
 #endif
 
 

@@ -2,6 +2,8 @@
 #define ROXLU_FILEH
 
 #include <string>
+#include <fstream>
+
 //#include <unistd.h>
 
 #ifdef __APPLE__
@@ -9,12 +11,25 @@
 #endif
 
 using std::string;
-
+using std::ofstream;
 namespace roxlu {
+
+
 class File {
 public:
 	File();
 	~File();
+	
+	static void writeToFile(string file, string contents) {
+		ofstream of;
+		of.open(file.c_str(), std::ios::out);
+		if(!of.is_open()) {
+			printf("File: cannot open file: '%s'\n", file.c_str());
+			return;
+		}
+		of.write(contents.c_str(), contents.length());
+		of.close();
+	}
 	
 	static string toDataPath(string file) {
 		return toDataPath(file.c_str());

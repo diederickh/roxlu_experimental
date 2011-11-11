@@ -1,6 +1,7 @@
 #ifndef ROXLU_SCENEH
 #define ROXLU_SCENEH
 
+#include "SceneItem.h"
 #include <vector>
 #include <map>
 #include <string>
@@ -13,7 +14,6 @@ namespace roxlu {
 
 class VertexData;
 class VBO;
-class SceneItem;
 class Texture;
 class Material;
 
@@ -72,6 +72,7 @@ inline void Scene::addSceneItem(string name, SceneItem& item) {
 }
 
 inline void Scene::addSceneItem(string name, SceneItem* item) {
+	item->setName(name);
 	scene_items.insert(std::pair<string, SceneItem*>(name, item));
 }
 

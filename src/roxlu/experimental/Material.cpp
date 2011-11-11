@@ -13,17 +13,12 @@ Material::~Material() {
 
 void Material::bind() {
 	shader->enable();
-	Texture* tex = getMaterial(MAT_DIFFUSE);
-	if(tex != NULL) {
+	
+	// set diffuse texture
+	if(set_materials & MAT_DIFFUSE) {
+		Texture* tex = getMaterial(MAT_DIFFUSE);
 		shader->setTextureUnit("diffuse_texture", tex->getTextureID(), 0, GL_TEXTURE_2D);
 	}
-	/*
-	map<int, Texture*>::iterator it = materials.begin();
-	while(it != materials.end()) {
-		it->second->bind();
-		++it;
-	}
-	*/
 }
 
 void Material::unbind() {

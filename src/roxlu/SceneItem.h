@@ -9,7 +9,9 @@
 #include "Vec3.h"
 #include "Quat.h"
 #include "VertexData.h"
+#include <string>
 
+using std::string;
 
 namespace roxlu {
 
@@ -49,12 +51,17 @@ public:
 	inline void drawUsingQuads();
 	inline void drawUsingPoints();
 	
+
+	inline void setName(string itemName);
+	inline string getName();
+	
 	// matrix related
 	inline Mat4& mm(); // get model matrix.
 	Mat4 model_matrix; 
 	Vec3 position;
 	Quat orientation;
 	VertexData* vertex_data;
+
 			
 	VBO* vbo;
 	VAO* vao;
@@ -62,7 +69,7 @@ public:
 	Material* material;
 	
 private:
-
+	string name;
 	bool initialized;
 	int draw_mode;
 	
@@ -162,6 +169,15 @@ inline Material* SceneItem::getMaterial() {
 inline bool SceneItem::hasMaterial() {
 	return material != NULL;
 }
+
+inline void SceneItem::setName(string itemName) {
+	name = itemName;
+}
+
+inline string SceneItem::getName() {
+	return name;
+}
+
 
 
 } // roxlu

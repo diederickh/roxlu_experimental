@@ -43,8 +43,8 @@ public:
 	const float* 	getNormalsPtr();
 	const int* 		getIndicesPtr();
 
-    Triangle* 		getTriangle(int nTriangle);
-	Quad* 			getQuad(int nQuad);
+    Triangle* 		getTrianglePtr(int nTriangle);
+	Quad* 			getQuadPtr(int nQuad);
 
 	int 			getNumVertices();
 	int 			getNumTexCoords();

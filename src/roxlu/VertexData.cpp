@@ -88,11 +88,11 @@ int VertexData::addQuad(int nA, int nB, int nC, int nD) {
 	return quads.size()-1;
 }
 
-Triangle* VertexData::getTriangle(int nTriangle) {
+Triangle* VertexData::getTrianglePtr(int nTriangle) {
 	return &triangles[nTriangle];	
 }
 
-Quad* VertexData::getQuad(int nQuad) {
+Quad* VertexData::getQuadPtr(int nQuad) {
 	return &quads[nQuad];
 }
 
