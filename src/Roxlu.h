@@ -46,6 +46,8 @@
 #include "roxlu/experimental/SimpleClient.h"
 #include "roxlu/experimental/Box.h"
 #include "roxlu/experimental/Plane.h"
+#include "roxlu/experimental/ShaderGenerator.h"
+#include "roxlu/experimental/Light.h"
 
 #include "external/jpeg/JPEGImage.h"
 #include "external/webp/WebPImage.h"

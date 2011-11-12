@@ -38,7 +38,7 @@ public:
 	StringUtil& operator=(const string data);
 	string str();
 	
-	static string stringFromFile(string path);
+	//static string stringFromFile(string path);
 
 	// trim
 	// -------------------------------------

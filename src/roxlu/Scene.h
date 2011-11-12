@@ -16,6 +16,7 @@ class VertexData;
 class VBO;
 class Texture;
 class Material;
+class Light;
 
 class Scene {
 public:
@@ -35,15 +36,20 @@ public:
 	inline void addTexture(string name, Texture& tex);
 	inline void addMaterial(string name, Material* mat);
 	inline void addMaterial(string name, Material& mat);
+	inline void addLight(string name, Light& light);
+	inline void addLight(string name, Light* light);
+	inline int getNumberOfLights();
 	
 	inline SceneItem* getSceneItem(string name);
 	inline Material* getMaterial(string name);
+	inline Light* getLight(string name);
 	
 	map<string, VertexData*> vertex_datas;
 	map<string, VBO*> vbos;
 	map<string, SceneItem*> scene_items;
 	map<string, Texture*> textures;
 	map<string, Material*> materials;
+	map<string, Light*> lights;
 };
 
 
@@ -98,6 +104,26 @@ inline Material* Scene::getMaterial(string name) {
 		return it->second;
 	}
 	return NULL;
+}
+
+inline void Scene::addLight(string name, Light& light) {
+	addLight(name, light);
+}
+
+inline void Scene::addLight(string name, Light* light) {
+	lights.insert(std::pair<string, Light*>(name, light));
+}
+
+inline Light* Scene::getLight(string name) {
+	map<string, Light*>::iterator it = lights.find(name);
+	if(it == lights.end()) {
+		return NULL;
+	}
+	return it->second;
+}
+
+inline int Scene::getNumberOfLights() {
+	return lights.size();
 }
 
 } // roxlu

@@ -4,7 +4,6 @@
 
 #include "Texture.h" // texture uses ofImage now.. so we cannot use "OpenGL.h"
 #include "Shader.h"
-//#include "OpenGL.h"
 #include <map>
 #include <string>
 
@@ -36,8 +35,6 @@ public:
 	void bind();
 	void unbind();
 	
-	inline void setShader(Shader* shader);
-	
 	// generic material loading
 	inline Texture* loadMaterial(int type, string file, int imageFormat = GL_RGB);
 	inline Texture* getMaterial(int type);
@@ -47,7 +44,7 @@ public:
 	
 	// diffuse material
 	inline Texture* loadDiffuseMaterial(string file, int imageFormat = GL_RGB);
-	Texture* getDiffuseMaterial();
+	inline Texture* getDiffuseMaterial();
 	inline bool hasDiffuseMaterial();
 	inline string getDiffuseMaterialFilePath();
 	
@@ -59,17 +56,11 @@ private:
 	string name;
 	bool done;
 	int set_materials;
-	Shader* shader;	
 	map<int, Texture*> materials;
 };
 
 
-inline void Material::setShader(Shader* shad) {
-	shader = shad;
-}
-
 inline Texture* Material::loadDiffuseMaterial(string file, int imageFormat) {
-	shader->addUniform("diffuse_texture");
 	return loadMaterial(MAT_DIFFUSE, file, imageFormat);
 }
 
@@ -93,15 +84,17 @@ inline void Material::setName(string matName) {
 	name = matName;
 }
 
+inline Texture* Material::getDiffuseMaterial() {
+	return getMaterial(MAT_DIFFUSE);
+}
+
 inline string Material::getName() {
 	return name;
 }
 
 inline bool Material::hasMaterial(int type) {
-	map<int, Texture*>::iterator it = materials.find(type);
-	return (it != materials.end());
+	return set_materials & type;
 }
-
 
 inline void Material::setMaterial(int type, Texture* tex) {
 	materials.insert(std::pair<int, Texture*>(type, tex));

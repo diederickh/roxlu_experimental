@@ -48,7 +48,7 @@ StringParts StringUtil::split(const char delim) {
     }
     return str_parts;
 }
-
+/* See "File"
 string StringUtil::stringFromFile(string path) {
 	std::string result = "";
 	std::string line = "";
@@ -61,6 +61,7 @@ string StringUtil::stringFromFile(string path) {
 	}
 	return result;
 }
+*/
 
 StringUtil& StringUtil::operator=(const string data) {
 	value = data;

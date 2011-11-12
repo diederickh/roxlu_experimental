@@ -33,37 +33,15 @@ Shader& Shader::load() {
 }
 
 string Shader::getVertexSource() {
-	printf("ERROR SHADER: need to create/user a datapath function!");
-	//std::string base_path = ofToDataPath("",true);
-	std::string base_path = "./"; // @todo need to implement data path directory. (maybe a custom File object)
-	std::string vs_file = base_path +name +".vert";
-	/*
-	ofFile vf(vs_file);
-	if(!vf.exists()) {
-		printf("File not found: '%s'", vs_file.c_str());
-	}
-	
-	std::string vs_src = readFile(vs_file);
-	return vs_src;
-	*/
-	return "";
+	std::string vs_file = name +".vert";
+	std::string vs_file_path = File::toDataPath(vs_file);
+	return File::getFileContents(vs_file_path);
 }
 
 string Shader::getFragmentSource() {
-	printf("ERROR/SHADER: need to implement a custom file object!");
-	/*
-	std::string base_path = ofToDataPath("./",true);
-	std::string fs_file = base_path +name +".frag";
-
-	ofFile ff(fs_file);
-	if(!ff.exists()) {
-		printf("File not found: '%s'", fs_file.c_str());
-	}
-	
-	std::string fs_src = readFile(fs_file);
-	return fs_src;
-	*/
-	return "";
+	std::string vs_file = name +".frag";
+	std::string vs_file_path = File::toDataPath(vs_file);
+	return File::getFileContents(vs_file_path);
 }
 
 void Shader::create(std::string& rVertexSource, std::string& rFragmentSource) {
@@ -73,8 +51,8 @@ void Shader::create(std::string& rVertexSource, std::string& rFragmentSource) {
 	const char* vss_ptr = rVertexSource.c_str();
 	const char* fss_ptr = rFragmentSource.c_str();
 	
-	std::cout << rVertexSource << std::endl;
-	std::cout << rFragmentSource << std::endl;
+	//std::cout << rVertexSource << std::endl;
+	//std::cout << rFragmentSource << std::endl;
 	
 	// create shader.
 	vert_id = glCreateShader(GL_VERTEX_SHADER); eglGetError();
@@ -293,13 +271,14 @@ Shader& Shader::setTextureUnit(
 	,GLuint nNum
 	,GLuint nTextureType) 
 {
+	enable();
 	glActiveTexture(GL_TEXTURE0 +nNum); eglGetError();
 	glEnable(nTextureType); eglGetError();
 	glBindTexture(nTextureType, nTextureID); eglGetError();
-	uniform1i(nUniformID, nNum);
+	uniform1i(nUniformID, nNum); eglGetError();
 
-	glDisable(nTextureType);
-	glActiveTexture(GL_TEXTURE0);
+	glDisable(nTextureType); eglGetError();
+	glActiveTexture(GL_TEXTURE0); eglGetError();
 	return *this;
 }
 

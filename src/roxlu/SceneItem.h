@@ -28,7 +28,7 @@ public:
 
 	SceneItem(string name);
 	~SceneItem();
-	void draw();
+	void draw(Mat4& viewMatrix, Mat4& projectionMatrix);
 	bool createFromVertexData(VertexData* vd);
 	bool createFromVertexData(VertexData& vd);
 	inline VertexData* getVertexData();
@@ -41,7 +41,11 @@ public:
 	inline void rotateY(float radians);
 	inline void rotateZ(float radians);
 	inline void updateModelMatrix();
+	
+	// shader
 	inline void setShader(Shader* sh);
+	inline void setShader(Shader& sh);
+	
 	
 	// material
 	inline void setMaterial(Material* mat);
@@ -78,7 +82,6 @@ private:
 	int draw_mode;
 	
 	void initialize();
-	void debugDraw();
 	void drawElements(); // indexed data
 	void drawArrays(); 
 };
@@ -110,7 +113,6 @@ inline void SceneItem::setDrawMode(SceneItemDrawMode mode) {
 }
 
 inline Mat4& SceneItem::mm() {
-
 	return model_matrix;
 }
 
@@ -138,6 +140,10 @@ inline void SceneItem::translate(const Vec3& v) {
 
 inline void SceneItem::setShader(Shader* sh) {
 	shader = sh;
+}
+
+inline void SceneItem::setShader(Shader& sh) {
+	setShader(&sh);
 }
 
 inline void SceneItem::updateModelMatrix() {

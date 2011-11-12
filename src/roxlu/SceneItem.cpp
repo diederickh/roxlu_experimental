@@ -26,7 +26,7 @@ bool SceneItem::createFromVertexData(VertexData& vd) {
 
 bool SceneItem::createFromVertexData(VertexData* vd) {
 	if(shader == NULL) {
-		printf("error SceneItem: you need to set the shader before creating from vertex data\n");
+		printf("Error SceneItem: you need to set the shader before creating from vertex data\n");
 		exit(1);
 	}	
 	vertex_data = vd;
@@ -53,7 +53,6 @@ void SceneItem::initialize() {
 		vbo->setIndices(vd->getIndicesPtr(), vd->getNumIndices());
 	}
 
-
 	// set data and set offsets
 	if(vd->attribs == VBO_TYPE_VERTEX_P) {
 		stride = sizeof(VertexP);
@@ -63,7 +62,6 @@ void SceneItem::initialize() {
 		);
 	}
 	else if(vd->attribs == VBO_TYPE_VERTEX_PT) {
-		printf("we have both pos+texcoords");
 		stride = sizeof(VertexPT);
 		vbo->setVertexData(
 			 vd->getVertexPT()
@@ -103,56 +101,30 @@ void SceneItem::initialize() {
 		}
 	}
 		
+	// set diffuse texture
+	if(material->hasDiffuseMaterial()) {
+		shader->addUniform("diffuse_texture");
+		Texture* tex = material->getDiffuseMaterial();
+		shader->setTextureUnit("diffuse_texture", tex->getTextureID(), 0, GL_TEXTURE_2D);
+	}	
+		
 	shader->disable();
 	return true;
 }
 
-// @todo: we created a debugDrag in vertex_data, this one should be removed 
-// mabye?
-void SceneItem::debugDraw() {
-	if(vbo->hasIndices()) {
-		glColor3f(0,1,0.4);
-		shader->disable();
-		glBegin(GL_POINTS); eglGetError();
-		for(int i = 0; i < vertex_data->indices.size(); ++i) {
-			Vec3 p = vertex_data->vertices[vertex_data->indices[i]];
-			glVertex3fv(p.getPtr()); eglGetError();
-		}
-		glEnd(); eglGetError();
-		
-	}
-	else { 
-	}
-}
-
 void SceneItem::drawArrays() {
 	vao->bind();
-	shader->enable();
-
-	if(material != NULL) {
-		material->bind();
-	}
-	glDrawArrays(draw_mode, 0, vertex_data->getNumVertices()); eglGetError();
-	
-	if(material != NULL) {
-		material->unbind();
-	}
-
-
-	shader->disable();
+		glDrawArrays(draw_mode, 0, vertex_data->getNumVertices()); eglGetError();
 	vao->unbind();
 }
 
 void SceneItem::drawElements() {
 	vao->bind();
-	shader->enable();
-	vbo->bind();
 		glDrawElements(draw_mode, vertex_data->getNumIndices(), GL_UNSIGNED_INT, NULL); eglGetError();
-	shader->disable();
 	vao->unbind();
 }
 
-void SceneItem::draw() {
+void SceneItem::draw(Mat4& viewMatrix, Mat4& projectionMatrix) {
 	if(!initialized) {
 		initialize();
 	}
@@ -164,14 +136,27 @@ void SceneItem::draw() {
 		printf("SceneItem no vertex data set\n");
 		exit(1);
 	}
+		
+	if(material != NULL) {
+		material->bind();
+	}
 	
-	if(vbo->hasIndices()) {
-		drawElements();
-	}
-	else {
-		drawArrays();
-	}
-}
+	Mat4 modelview_matrix = viewMatrix * mm();
+	Mat4 modelview_projection_matrix = projectionMatrix * modelview_matrix ;
 
+	shader->enable();
+		shader->uniformMat4f("projection", projectionMatrix.getPtr());
+		shader->uniformMat4f("modelview", modelview_matrix.getPtr());
+		shader->uniformMat4f("modelview_projection", modelview_projection_matrix.getPtr());
+	
+		if(vbo->hasIndices()) {
+			drawElements();
+		}
+		else {
+			drawArrays();
+		}
+	
+	shader->disable();
+}
 
 } // roxlu

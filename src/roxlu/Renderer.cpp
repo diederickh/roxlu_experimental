@@ -7,11 +7,13 @@
 #include "IcoSphere.h"
 #include "File.h"
 #include "Ply.h"
+#include "Light.h"
 #include "experimental/StringUtil.h"
 #include "experimental/UVSphere.h"
 #include "experimental/Plane.h"
 #include "experimental/Box.h"
 #include "experimental/Material.h"
+#include "experimental/ShaderGenerator.h"
 #include <iostream>
 
 using namespace std;
@@ -31,20 +33,20 @@ Renderer::Renderer(float screenWidth, float screenHeight)
 	cam->setup(screen_width, screen_height);
 	cam->translate(0,0,-10);
 	
-	// create a scene instance (which is just a container for all created scene
-	// items.
+	// create a scene instance (which is just a container for all created scene  items.
 	scene = new Scene();
 	
 	// create default shader.
 	shader = new Shader();
 	StringUtil str_util(__FILE__);
 	string path = str_util.split('/').pop().join("/") +"/experimental/shaders/";
-	string vert_shader = StringUtil::stringFromFile(path +"uber.vert");
-	string frag_shader = StringUtil::stringFromFile(path +"uber.frag");
+	string vert_shader = File::getFileContents(path +"uber.vert");
+	string frag_shader = File::getFileContents(path +"uber.frag");
 	shader->create(vert_shader, frag_shader);
 	
 	shader->addUniform("modelview")
 		.addUniform("projection")
+		.addUniform("diffuse_texture")
 		.addUniform("modelview_projection");
 }
 
@@ -69,26 +71,24 @@ void Renderer::render() {
 	cam->updateViewMatrix();
 	Mat4& view_matrix = cam->vm();
 	Mat4& projection_matrix = cam->pm();
-	Mat4 projection_view_matrix = view_matrix * projection_matrix;
 
-	shader->enable();
-	shader->uniformMat4f("projection", projection_matrix.getPtr());
-	
 	// draw all scene items.
 	Scene::scene_item_iterator it = scene->scene_items.begin();
 	while(it != scene->scene_items.end()) {
-//		printf("Rendering: '%s'\n", it->first.c_str());
 		SceneItem& si = *(it->second);
-		Mat4 modelview_matrix = view_matrix * si.mm();
-		Mat4 modelview_projection_matrix = projection_matrix * modelview_matrix ;
-//		modelview_matrix.print();
-		shader->enable();
-		shader->uniformMat4f("modelview", modelview_matrix.getPtr());
-		shader->uniformMat4f("modelview_projection", modelview_projection_matrix.getPtr());
-		si.draw();
+		si.draw(view_matrix, projection_matrix);
 		++it;
 	}
-	shader->disable();
+
+}
+
+void Renderer::renderSceneItem(string name) {
+	cam->updateViewMatrix();
+	Mat4& view_matrix = cam->vm();
+	Mat4& projection_matrix = cam->pm();
+	
+	SceneItem& si = *getSceneItem(name);
+	si.draw(view_matrix, projection_matrix);
 }
 
 SceneItem* Renderer::createIcoSphere(string name, int detail, float radius) {
@@ -122,7 +122,6 @@ SceneItem* Renderer::createUVSphere(string name, int phi, int theta, float radiu
 	// Create scene item from vertex data and make sure shader is set.
 	si->setShader(shader);
 	si->createFromVertexData(vd);
-//	si->setDrawMode(SceneItem::TRIANGLE_STRIP);
 	si->setDrawMode(SceneItem::QUAD_STRIP);
 
 	// Keep track of the created data.
@@ -202,7 +201,6 @@ Material* Renderer::createDiffuseMaterial(
 		,GLuint imageFormat) 
 {
 	Material* mat = new Material(materialName);
-	mat->setShader(shader);
 	Texture* tex = mat->loadDiffuseMaterial(diffuseFileName, imageFormat);
 	
 	scene->addMaterial(materialName, mat);
@@ -227,6 +225,26 @@ void Renderer::loadDiffuseMaterial(
 		Texture* tex = mat->loadDiffuseMaterial(diffuseFileName, imageFormat);
 		scene->addTexture(textureName, tex);
 	}
+}
+
+// create a shader generator; used to dynamically build a shader based on the current scene settings.
+ShaderGenerator Renderer::createShaderGenerator(SceneItem& si) {
+	ShaderGenerator gen;
+	if(si.hasMaterial()) {
+		Material& mat = *si.getMaterial();
+		if(mat.hasDiffuseMaterial()) {
+			gen.enableDiffuseTexture();
+		}
+	}
+	gen.setNumberOfLights(scene->getNumberOfLights());
+	
+	return gen;
+}
+
+Light* Renderer::createLight(string name, float r, float g, float b) {
+	Light* l = new Light();
+	scene->addLight(name, l);
+	return l;
 }
 
 } // roxlu

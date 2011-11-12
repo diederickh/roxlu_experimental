@@ -29,17 +29,24 @@ class EasyCam;
 class Shader;
 class Texture;
 class Material;
+class ShaderGenerator;
+class Light;
 
 class Renderer {
 public:
 	Renderer(float screenWidth, float screenHeight);
 	~Renderer();
 	void render();
+	void renderSceneItem(string name);
 	
 	inline EasyCam* getCamera();
+	
+	// shader.
 	inline void setShader(Shader* someShader);
 	inline void setShader(Shader& someShader);
 	inline Shader* getShader();
+	ShaderGenerator createShaderGenerator(SceneItem& si);
+	
 	inline void setScene(Scene* someScene);	
 	inline void setScene(Scene& scene);
 	inline void	fill();
@@ -61,8 +68,8 @@ public:
 	void onMouseDragged(float x, float y);
 	void exportToPly(string sceneItemName, string fileName);
 	Texture* createTexture(string name, string fileName);
-
-
+	Light* createLight(string name, float r = 1.0, float g = 1.0, float b = 1.0);
+	
 
 private:
 	bool use_fill;

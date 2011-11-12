@@ -385,6 +385,7 @@ void VertexData::debugDraw(int drawMode) {
 	// w/o indices
 	else {
 		if(getNumTexCoords() > 0) {
+			glColor3f(1,1,1);
 			int len = vertices.size();
 			glBegin(drawMode);
 			for(int i = 0; i < len; ++i) {
@@ -409,7 +410,7 @@ void VertexData::debugDraw(int drawMode) {
 		if(len == vertices.size()) {	
 		 	// somehow the colors arent set in my current test app...
 			glColor3f(1,1,1);
-			glLineWidth(0.5);
+			glLineWidth(1.5);
 			glDisable(GL_BLEND);
 			glBegin(GL_LINES);
 

@@ -3,6 +3,7 @@
 #include "File.h"
 #include "HalfEdge.h"
 #include "Material.h"
+#include "Mat4.h"
 
 namespace roxlu {
 
@@ -35,11 +36,12 @@ void OBJ::createMaterialFile(Material& mat) {
 	else {
 		printf("??????");
 	}
-	File::writeToFile(File::toDataPath(material_file), ss.str());
+	File::putFileContents(File::toDataPath(material_file), ss.str());
 
 }
 
 void OBJ::exportSceneItem(SceneItem& si) {
+	Mat4 mm = si.mm();
 	stringstream ss;
 	ss << "# Roxlu OBJ export 0.01" << endl;	
 	ss << "o " << si.getName() << endl;
@@ -55,6 +57,7 @@ void OBJ::exportSceneItem(SceneItem& si) {
 	// vertices
 	for(int i = 0; i < vd.getNumVertices(); ++i) {
 		Vec3& v = *vd.getVertexPtr(i);
+		v = mm.transform(v);
 		ss << "v " << v.x << " " << v.y << " " << v.z << endl;
 	}
 	
@@ -177,7 +180,7 @@ void OBJ::exportSceneItem(SceneItem& si) {
 
 		
 	// And write everything to a file.
-	File::writeToFile(File::toDataPath("test2.obj"), ss.str());
+	File::putFileContents(File::toDataPath("test2.obj"), ss.str());
 
 }
 

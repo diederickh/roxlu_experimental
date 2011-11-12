@@ -20,7 +20,7 @@ public:
 	File();
 	~File();
 	
-	static void writeToFile(string file, string contents) {
+	static void putFileContents(string file, string contents) {
 		ofstream of;
 		of.open(file.c_str(), std::ios::out);
 		if(!of.is_open()) {
@@ -29,6 +29,19 @@ public:
 		}
 		of.write(contents.c_str(), contents.length());
 		of.close();
+	}
+	
+	static string getFileContents(string file) {
+		std::string result = "";
+		std::string line = "";
+		std::ifstream ifs(file.c_str());
+		if(!ifs.is_open()) {
+			return result;
+		}
+		while(getline(ifs,line)) {
+			result += line +"\n";
+		}
+		return result;
 	}
 	
 	static string toDataPath(string file) {

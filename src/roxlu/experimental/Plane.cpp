@@ -22,6 +22,10 @@ void Plane::create(float width, float height, VertexData& vd) {
 	vd.addTexCoord(1,0);
 	vd.addTexCoord(1,1);
 	vd.addTexCoord(0,1);
+	vd.addNormal(0,0,1);
+	vd.addNormal(0,0,1);
+	vd.addNormal(0,0,1);
+	vd.addNormal(0,0,1);
 	vd.addQuad(0,1,2,3);	
 }
 
