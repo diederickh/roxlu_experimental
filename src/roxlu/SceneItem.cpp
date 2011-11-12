@@ -1,5 +1,10 @@
 #include "SceneItem.h"
+#include "experimental/Effect.h"
+#include "experimental/Light.h"
+#include <sstream>
 #include <cstdlib>
+
+using std::stringstream;
 
 namespace roxlu {
 
@@ -10,32 +15,42 @@ SceneItem::SceneItem(string name)
 ,draw_mode(TRIANGLES)
 ,material(NULL)
 ,initialized(false)
+,effect(NULL)
 ,name(name)
 {
 	vao = new VAO();
-
+	vbo = new VBO();	
 }
 
 SceneItem::~SceneItem() {
 }
-
 
 bool SceneItem::createFromVertexData(VertexData& vd) {
 	createFromVertexData(&vd);
 }
 
 bool SceneItem::createFromVertexData(VertexData* vd) {
-	if(shader == NULL) {
-		printf("Error SceneItem: you need to set the shader before creating from vertex data\n");
-		exit(1);
-	}	
+//	if(shader == NULL) {
+//		printf("Error SceneItem: you need to set the shader before creating from vertex data\n");
+//		exit(1);
+//	}	
 	vertex_data = vd;
 }
 
+// @todo: 
+// we need to create some sort of intermediate object as now it's possible
+// that we use one shader for multiple scene items so we do not have
+// to setup each uniform for each scene item. :# maybe an effect class as 
+// previously used... :#
 void SceneItem::initialize() {
 	if(initialized) {
 		return;
 	}
+	
+	effect->setupBuffer(*vao, *vbo,  *vertex_data);
+	initialized = true;
+		
+	/*
 	initialized = true;
 	vao->bind();
 	shader->enable();
@@ -46,6 +61,7 @@ void SceneItem::initialize() {
 	size_t stride = 0;
 	int pos_offset = 0;
 	int tex_offset = 0;
+	int norm_offset = 0;
 	VertexData* vd = vertex_data;
 	
 	// when we have shared vertices (aka indices) set them.
@@ -54,12 +70,14 @@ void SceneItem::initialize() {
 	}
 
 	// set data and set offsets
+	// ------------------------------------------
 	if(vd->attribs == VBO_TYPE_VERTEX_P) {
 		stride = sizeof(VertexP);
 		vbo->setVertexData(
 			 vd->getVertexP()
 			,vd->getNumVertices()
 		);
+		pos_offset = offsetof(VertexP, pos);
 	}
 	else if(vd->attribs == VBO_TYPE_VERTEX_PT) {
 		stride = sizeof(VertexPT);
@@ -67,10 +85,22 @@ void SceneItem::initialize() {
 			 vd->getVertexPT()
 			,vd->getNumVertices()
 		);
+		pos_offset = offsetof(VertexPT, pos);
 		tex_offset = offsetof(VertexPT, tex);
 	}
-
-	// set attributes.
+	else if(vd->attribs == VBO_TYPE_VERTEX_PTN) {
+		stride = sizeof(VertexPTN);
+		vbo->setVertexData(
+			 vd->getVertexPTN()
+			,vd->getNumVertices()
+		);
+		pos_offset = offsetof(VertexPTN, pos);
+		tex_offset = offsetof(VertexPTN, tex);
+		norm_offset = offsetof(VertexPTN, norm);
+	}
+		
+	// set attributes in shader
+	// ------------------------------------------
 	if(vd->attribs & VERT_POS) {
 		GLuint pos_id = shader->addAttribute("pos").getAttribute("pos");
 		if(pos_id != -1) {
@@ -100,6 +130,22 @@ void SceneItem::initialize() {
 			); eglGetError();
 		}
 	}
+	
+	// attirbute: normals
+	if(vd->attribs & VERT_NORM) {
+		GLuint norm_id = shader->addAttribute("norm").getAttribute("norm");
+		if(norm_id != -1) {
+			shader->enableVertexAttribArray("norm");
+			glVertexAttribPointer(
+				norm_id
+				,3
+				,GL_FLOAT
+				,GL_FALSE
+				,stride
+				,(GLvoid*)norm_offset
+			); eglGetError();
+		}
+	}
 		
 	// set diffuse texture
 	if(material->hasDiffuseMaterial()) {
@@ -109,6 +155,7 @@ void SceneItem::initialize() {
 	}	
 		
 	shader->disable();
+	*/
 	return true;
 }
 
@@ -144,10 +191,10 @@ void SceneItem::draw(Mat4& viewMatrix, Mat4& projectionMatrix) {
 	Mat4 modelview_matrix = viewMatrix * mm();
 	Mat4 modelview_projection_matrix = projectionMatrix * modelview_matrix ;
 
-	shader->enable();
-		shader->uniformMat4f("projection", projectionMatrix.getPtr());
-		shader->uniformMat4f("modelview", modelview_matrix.getPtr());
-		shader->uniformMat4f("modelview_projection", modelview_projection_matrix.getPtr());
+	effect->getShader().enable();
+		effect->getShader().uniformMat4f("projection", projectionMatrix.getPtr());
+		effect->getShader().uniformMat4f("modelview", modelview_matrix.getPtr());
+		effect->getShader().uniformMat4f("modelview_projection", modelview_projection_matrix.getPtr());
 	
 		if(vbo->hasIndices()) {
 			drawElements();
@@ -155,8 +202,12 @@ void SceneItem::draw(Mat4& viewMatrix, Mat4& projectionMatrix) {
 		else {
 			drawArrays();
 		}
+	effect->getShader().disable();
 	
-	shader->disable();
+	if(material != NULL) {
+		material->unbind();
+	}
+
 }
 
 } // roxlu

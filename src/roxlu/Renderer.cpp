@@ -22,7 +22,6 @@ namespace roxlu {
 
 Renderer::Renderer(float screenWidth, float screenHeight) 
 :cam(NULL)
-,shader(NULL)
 ,scene(NULL)
 ,use_fill(true)
 ,screen_width(screenWidth)
@@ -35,29 +34,14 @@ Renderer::Renderer(float screenWidth, float screenHeight)
 	
 	// create a scene instance (which is just a container for all created scene  items.
 	scene = new Scene();
-	
-	// create default shader.
-	shader = new Shader();
-	StringUtil str_util(__FILE__);
-	string path = str_util.split('/').pop().join("/") +"/experimental/shaders/";
-	string vert_shader = File::getFileContents(path +"uber.vert");
-	string frag_shader = File::getFileContents(path +"uber.frag");
-	shader->create(vert_shader, frag_shader);
-	
-	shader->addUniform("modelview")
-		.addUniform("projection")
-		.addUniform("diffuse_texture")
-		.addUniform("modelview_projection");
+	effect = new Effect(); // our default effect
 }
 
 Renderer::~Renderer() {
-	if(shader != NULL) {
-		delete shader;
-	}
 }
 
 void Renderer::render() {
-	if(cam == NULL || shader == NULL || scene == NULL) {
+	if(cam == NULL || scene == NULL) {
 		printf("No cam, shader or scene set!\n");
 		exit(1);
 	}
@@ -100,7 +84,7 @@ SceneItem* Renderer::createIcoSphere(string name, int detail, float radius) {
 	ico_sphere.create(detail, radius, *vd);
 	
 	// Create scene item from vertex data and make sure shader is set.
-	si->setShader(shader);
+	si->setEffect(effect);
 	si->createFromVertexData(vd);
 	si->setDrawMode(SceneItem::TRIANGLES);
 	
@@ -120,7 +104,7 @@ SceneItem* Renderer::createUVSphere(string name, int phi, int theta, float radiu
 	uv_sphere.create(radius, phi, theta, *vd);
 	
 	// Create scene item from vertex data and make sure shader is set.
-	si->setShader(shader);
+	si->setEffect(effect);
 	si->createFromVertexData(vd);
 	si->setDrawMode(SceneItem::QUAD_STRIP);
 
@@ -139,7 +123,7 @@ SceneItem* Renderer::createBox(string name, float width, float height, float dep
 	box.create(width, height, depth, *vd);
 	
 	// Create scene item from vertex data and make sure shader is set.
-	si->setShader(shader);
+	si->setEffect(effect);
 	si->createFromVertexData(vd);
 	si->setDrawMode(SceneItem::QUADS);
 	
@@ -158,7 +142,7 @@ SceneItem* Renderer::createPlane(string name, float width, float height) {
 	plane.create(width, height, *vd);
 	
 	// Create scene item from vertex data and make sure shader is set.
-	si->setShader(shader);
+	si->setEffect(effect);
 	si->createFromVertexData(vd);
 	si->setDrawMode(SceneItem::QUADS);
 	
@@ -230,12 +214,21 @@ void Renderer::loadDiffuseMaterial(
 // create a shader generator; used to dynamically build a shader based on the current scene settings.
 ShaderGenerator Renderer::createShaderGenerator(SceneItem& si) {
 	ShaderGenerator gen;
+	
+	// diffuse texture.
 	if(si.hasMaterial()) {
 		Material& mat = *si.getMaterial();
 		if(mat.hasDiffuseMaterial()) {
 			gen.enableDiffuseTexture();
 		}
 	}
+	
+	// normals
+	if(si.getVertexData()->getNumNormals() > 0) {
+		gen.enableNormals();
+	}
+	
+	// lights
 	gen.setNumberOfLights(scene->getNumberOfLights());
 	
 	return gen;

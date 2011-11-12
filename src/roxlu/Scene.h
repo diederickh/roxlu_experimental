@@ -25,6 +25,7 @@ public:
 	typedef map<string, SceneItem*>::iterator	scene_item_iterator;
 	typedef map<string, VBO*>::iterator			vbo_iterator;
 	typedef map<string, VertexData*>::iterator	vertex_data_iterator;
+	typedef map<string, Light*>::iterator		light_iterator;
 	
 	inline void addVertexData(string name, VertexData* vd);
 	inline void addVertexData(string name, VertexData& vd);

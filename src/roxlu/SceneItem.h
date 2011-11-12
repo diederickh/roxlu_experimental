@@ -10,10 +10,16 @@
 #include "Quat.h"
 #include "VertexData.h"
 #include <string>
+#include <vector>
 
+
+using std::vector;
 using std::string;
 
 namespace roxlu {
+
+class Light;
+class Effect;
 
 class SceneItem {
 public:
@@ -23,7 +29,6 @@ public:
 		,QUADS = GL_QUADS
 		,QUAD_STRIP = GL_QUAD_STRIP
 		,POINTS = GL_POINTS
-		
 	};
 
 	SceneItem(string name);
@@ -43,9 +48,10 @@ public:
 	inline void updateModelMatrix();
 	
 	// shader
-	inline void setShader(Shader* sh);
-	inline void setShader(Shader& sh);
-	
+	//inline void setShader(Shader* sh);
+	//inline void setShader(Shader& sh);
+	inline void setEffect(Effect& eff);
+	inline void setEffect(Effect* eff);
 	
 	// material
 	inline void setMaterial(Material* mat);
@@ -60,9 +66,10 @@ public:
 	inline void drawUsingTriangleStrip();
 	inline void drawUsingQuadStrip();
 	
-
 	inline void setName(string itemName);
 	inline string getName();
+	
+	
 	
 	// matrix related
 	inline Mat4& mm(); // get model matrix.
@@ -73,10 +80,11 @@ public:
 			
 	VBO* vbo;
 	VAO* vao;
-	Shader* shader;	
+	//Shader* shader;	
 	Material* material;
 	
 private:
+	Effect* effect;
 	string name;
 	bool initialized;
 	int draw_mode;
@@ -137,14 +145,22 @@ inline void SceneItem::translate(const Vec3& v) {
 	position += v;
 	updateModelMatrix();
 }
+//
+//inline void SceneItem::setShader(Shader* sh) {
+//	shader = sh;
+//}
+//
+//inline void SceneItem::setShader(Shader& sh) {
+//	setShader(&sh);
+//}
 
-inline void SceneItem::setShader(Shader* sh) {
-	shader = sh;
+inline void SceneItem::setEffect(Effect& eff) {
+	setEffect(&eff);
+}
+inline void SceneItem::setEffect(Effect* eff) {
+	effect = eff;
 }
 
-inline void SceneItem::setShader(Shader& sh) {
-	setShader(&sh);
-}
 
 inline void SceneItem::updateModelMatrix() {
 	Mat4 rotation = orientation.getMat4();
@@ -196,8 +212,6 @@ inline void SceneItem::setName(string itemName) {
 inline string SceneItem::getName() {
 	return name;
 }
-
-
 
 } // roxlu
 

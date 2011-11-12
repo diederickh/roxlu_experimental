@@ -14,7 +14,7 @@ namespace roxlu {
 // T = tangent  (see member name)
 // B = binormal
 // C = color
-enum VertexAttribs {
+enum VertexAttrib {
 	 VERT_NONE 		= ( 0 )
 	,VERT_POS 		= ( 1 << 0 )
 	,VERT_TEX 		= ( 1 << 1 )

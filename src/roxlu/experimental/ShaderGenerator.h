@@ -3,6 +3,14 @@
 
 #include <string>
 
+/*
+
+	WHILE CODING THIS I REALIZED WE NEED A EFFECT TYPE WHICH DOES THIS
+	KINDS OF THINGS. AN EFFECT WILL DEFINE WHAT KIND OF DATA A SCENEITEM
+	OR RATHER A VERTEXDATA MUST HAVE!	
+
+*/
+
 using std::string;
 
 namespace roxlu {
@@ -11,8 +19,9 @@ class ShaderGenerator {
 public:
 	enum ShaderFeature {
 		 SHADER_FEATURE_NONE				= (0)
-		,SHADER_FEATURE_TEXCOORD			= (1 << 1)
-		,SHADER_FEATURE_DIFFUSE_TEXTURE		= (1 << 2)
+		,SHADER_FEATURE_TEXCOORDS			= (1 << 1)
+		,SHADER_FEATURE_NORMALS				= (1 << 2)
+		,SHADER_FEATURE_DIFFUSE_TEXTURE		= (1 << 3)
 	};
 	
 	ShaderGenerator();
@@ -30,6 +39,10 @@ public:
 	inline void setNumberOfLights(int num);
 	inline int getNumberOfLights();
 	inline bool hasLights();
+	
+	inline void enableNormals();
+	inline void disableNormals();
+	inline bool hasNormals();
 		
 private:
 	int number_of_lights;
@@ -55,7 +68,7 @@ inline bool ShaderGenerator::hasFeature(ShaderFeature feature) {
 }
 
 inline void ShaderGenerator::enableDiffuseTexture() {
-	enableFeature(SHADER_FEATURE_TEXCOORD);
+	enableFeature(SHADER_FEATURE_TEXCOORDS);
 	enableFeature(SHADER_FEATURE_DIFFUSE_TEXTURE);
 }
 
@@ -77,6 +90,18 @@ inline int ShaderGenerator::getNumberOfLights() {
 
 inline bool ShaderGenerator::hasLights() {
 	return number_of_lights > 0;
+}
+
+inline void ShaderGenerator::enableNormals() {
+	enableFeature(SHADER_FEATURE_NORMALS);
+}
+
+inline void ShaderGenerator::disableNormals() {
+	disableFeature(SHADER_FEATURE_NORMALS);
+}
+
+inline bool ShaderGenerator::hasNormals() {
+	return hasFeature(SHADER_FEATURE_NORMALS);
 }
 
 }; // roxlu

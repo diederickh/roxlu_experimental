@@ -4,6 +4,7 @@
 #include "EasyCam.h"
 #include "VertexData.h"
 #include "SceneItem.h"
+#include "Effect.h"
 //#include "Texture.h" 
 //#include "OpenGL.h"
 
@@ -41,10 +42,7 @@ public:
 	
 	inline EasyCam* getCamera();
 	
-	// shader.
-	inline void setShader(Shader* someShader);
-	inline void setShader(Shader& someShader);
-	inline Shader* getShader();
+	inline Effect* getEffect();
 	ShaderGenerator createShaderGenerator(SceneItem& si);
 	
 	inline void setScene(Scene* someScene);	
@@ -77,7 +75,7 @@ private:
 	float screen_height;
 	Scene* scene;
 	EasyCam* cam;
-	Shader* shader;
+	Effect* effect;
 };
 
 inline void Renderer::fill() {
@@ -86,14 +84,6 @@ inline void Renderer::fill() {
 
 inline void Renderer::noFill() {
 	use_fill = false;
-}
-
-inline void Renderer::setShader(Shader& someShader) {
-	setShader(&someShader);
-}
-
-inline void Renderer::setShader(Shader* someShader) {
-	shader = someShader;
 }
 
 inline void Renderer::setScene(Scene& someScene) {
@@ -108,8 +98,8 @@ inline SceneItem* Renderer::getSceneItem(string name) {
 	return scene->getSceneItem(name);
 }
 
-inline Shader* Renderer::getShader() {
-	return shader;
+inline Effect* Renderer::getEffect() {
+	return effect;
 }
 
 inline void Renderer::translate(float x, float y, float z) {
@@ -127,6 +117,65 @@ inline void Renderer::setSceneItemMaterial(string sceneItemName, string material
 inline EasyCam* Renderer::getCamera() {
 	return cam;
 }
+
+/* working example (also mouse rotation) 
+
+void testApp::setup(){
+	ofVec3f d;
+	ofEnableAlphaBlending();
+	ofBackground(33);
+	ofSetFrameRate(60);
+	ofSetVerticalSync(true);
+	renderer.getEffect()->enableDiffuseTexture();
+	renderer.translate(0,0,-5);	
+	renderer.createDiffuseMaterial("sphere_diffuse", "lava", "lavasym.jpg");
+	renderer.createLight("spot", 1.0, 0.0, 0.0);
+	renderer.createUVSphere("sphere", 40,20,15);
+	renderer.createBox("uv", 38,6,1);
+	renderer.setSceneItemMaterial("sphere","sphere_diffuse");
+	renderer.setSceneItemMaterial("uv","sphere_diffuse");
+}
+
+//--------------------------------------------------------------
+void testApp::update(){
+	ofSetWindowTitle(ofToString(ofGetFrameRate()));
+	float x = cos(ofGetElapsedTimef() * 0.4) * 10;
+	float y = sin(ofGetElapsedTimef() * 0.4) * 5;
+	renderer.getSceneItem("sphere")->setPosition(x+2,y,0);
+	renderer.getSceneItem("sphere")->rotateY(0.005);
+	renderer.getSceneItem("uv")->rotateX(0.005);
+}
+
+
+//--------------------------------------------------------------
+void testApp::draw(){
+	glEnable(GL_DEPTH_TEST);
+	bool test = true;
+	if(test) {
+		renderer.render();
+		int n = 5;
+		for(int i = 0; i < n; ++i) {
+			float p = ((float)i/n) * TWO_PI;
+			float cx = cos(p) * 5;
+			float cy = sin(p) * 5;
+			renderer.getSceneItem("uv")->setPosition(cx,cy,0);
+			renderer.renderSceneItem("uv");
+		}
+		
+	}
+	else {
+		renderer.getCamera()->place();
+		VertexData& vd = *renderer.getSceneItem("uv")->getVertexData();
+		vd.debugDraw(GL_QUADS);
+
+	}
+	
+	return;
+
+}
+
+*/
+
 
 
 } // roxlu

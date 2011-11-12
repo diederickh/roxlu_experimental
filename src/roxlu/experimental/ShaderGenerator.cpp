@@ -22,9 +22,9 @@ void ShaderGenerator::createShader(string& vertShader, string& fragShader) {
 
 	// declare variables.
 	// -------------------------------------------------------------------------
-
 	
 	// we always assume the view, projection matrices and pos are present.
+	vert << "attribute vec4 pos; " << endl;
 	vert << "uniform mat4 modelview;" << endl;
 	vert << "uniform mat4 projection;" << endl;
 	vert << "uniform mat4 modelview_projection;" << endl;
@@ -37,6 +37,12 @@ void ShaderGenerator::createShader(string& vertShader, string& fragShader) {
 	
 	if(hasDiffuseTexture()) {
 		frag << "uniform sampler2D diffuse_texture; " << endl;
+	}
+	
+	if(hasNormals()) {
+		vert << "attribute vec3 norm;" << endl;
+		vert << "varying vec3 normal;" << endl;
+		frag << "varying vec3 normal;" << endl;
 	}
 
 	if(hasLights()) {
