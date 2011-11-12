@@ -211,29 +211,6 @@ void Renderer::loadDiffuseMaterial(
 	}
 }
 
-// create a shader generator; used to dynamically build a shader based on the current scene settings.
-ShaderGenerator Renderer::createShaderGenerator(SceneItem& si) {
-	ShaderGenerator gen;
-	
-	// diffuse texture.
-	if(si.hasMaterial()) {
-		Material& mat = *si.getMaterial();
-		if(mat.hasDiffuseMaterial()) {
-			gen.enableDiffuseTexture();
-		}
-	}
-	
-	// normals
-	if(si.getVertexData()->getNumNormals() > 0) {
-		gen.enableNormals();
-	}
-	
-	// lights
-	gen.setNumberOfLights(scene->getNumberOfLights());
-	
-	return gen;
-}
-
 Light* Renderer::createLight(string name, float r, float g, float b) {
 	Light* l = new Light();
 	scene->addLight(name, l);

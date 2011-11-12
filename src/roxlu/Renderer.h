@@ -43,7 +43,6 @@ public:
 	inline EasyCam* getCamera();
 	
 	inline Effect* getEffect();
-	ShaderGenerator createShaderGenerator(SceneItem& si);
 	
 	inline void setScene(Scene* someScene);	
 	inline void setScene(Scene& scene);

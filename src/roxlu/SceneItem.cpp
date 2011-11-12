@@ -187,6 +187,7 @@ void SceneItem::draw(Mat4& viewMatrix, Mat4& projectionMatrix) {
 	if(material != NULL) {
 		material->bind();
 	}
+	// @todo set the texture unit (?)
 	
 	Mat4 modelview_matrix = viewMatrix * mm();
 	Mat4 modelview_projection_matrix = projectionMatrix * modelview_matrix ;
