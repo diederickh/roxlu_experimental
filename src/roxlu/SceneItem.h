@@ -48,8 +48,6 @@ public:
 	inline void updateModelMatrix();
 	
 	// shader
-	//inline void setShader(Shader* sh);
-	//inline void setShader(Shader& sh);
 	inline void setEffect(Effect& eff);
 	inline void setEffect(Effect* eff);
 	
@@ -68,9 +66,7 @@ public:
 	
 	inline void setName(string itemName);
 	inline string getName();
-	
-	
-	
+		
 	// matrix related
 	inline Mat4& mm(); // get model matrix.
 	Mat4 model_matrix; 

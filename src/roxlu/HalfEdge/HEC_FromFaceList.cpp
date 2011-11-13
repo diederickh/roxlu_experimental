@@ -76,7 +76,7 @@ bool HEC_FromFaceList::create(HE_Mesh& mesh)  {
 //		return;
 		vertices.clear();
 		vertices = unique_vertices;
-		printf("------ duplicates: %d  total:%d\n", c, unique_vertices.size());
+		printf("------ duplicates: %d  total:%d\n", c, (int)unique_vertices.size());
 		printf("num faces: %d\n", (int)faces.size());
 		for(int k = 0; k < faces.size(); ++k) {
 			vector<int> face = faces[k];

@@ -29,9 +29,9 @@ void OBJ::createMaterialFile(Material& mat) {
 	ss << "d 1.0" << endl;
 	ss << "illum 2" << endl;
 	
-	if(mat.hasDiffuseMaterial()) {
-		printf("File: '%s'\n", mat.getDiffuseMaterialFilePath().c_str());	
-		ss << "map_Kd " << mat.getDiffuseMaterialFilePath() << endl;
+	if(mat.hasDiffuseTexture()) {
+		printf("File: '%s'\n", mat.getDiffuseTextureFilePath().c_str());	
+		ss << "map_Kd " << mat.getDiffuseTextureFilePath() << endl;
 	}
 	else {
 		printf("??????");
@@ -67,7 +67,7 @@ void OBJ::exportSceneItem(SceneItem& si) {
 		ss << "vt " << tc.x << " " << tc.y << endl;
 	}
 		
-	if(si.getMaterial()->hasDiffuseMaterial()) {
+	if(si.getMaterial()->hasDiffuseTexture()) {
 		ss << "usemtl " << si.getMaterial()->getName() << endl;
 	}
 	if(vd.getNumTexCoords() == 0) {

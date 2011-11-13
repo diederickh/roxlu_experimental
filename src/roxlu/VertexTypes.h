@@ -1,6 +1,7 @@
 #ifndef ROXLU_VERTEXTYPESH
 #define ROXLU_VERTEXTYPESH
 
+#include "Vec4.h"
 #include "Vec3.h"
 #include "Vec2.h"
 #include "Color.h"
@@ -67,10 +68,17 @@ struct VertexPTNC : public Vertex  {
 	Vec2 tex;
 };
 
+struct VertexPTNT : public Vertex  { // with tangent.
+	Vec3 pos;
+	Vec3 norm;
+	Vec4 tan;
+	Vec2 tex;
+};
+
 struct VertexPTNTB : public Vertex  { // can be used for normal mapping
 	Vec3 pos;
 	Vec3 norm;
-	Vec3 tan;
+	Vec4 tan;
 	Vec3 binorm;
 	Vec2 tex;
 };

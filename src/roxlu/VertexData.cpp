@@ -229,6 +229,25 @@ VertexPTN* VertexData::getVertexPTN() {
 	return vertex_ptn;
 }
 
+VertexPTNT* VertexData::getVertexPTNT() {
+	if(vertex_ptnt != NULL) { 	
+		return vertex_ptnt; 
+	}
+	if( ! (attribs & (VERT_POS | VERT_NORM | VERT_TEX | VERT_TAN)) ) { 	
+		return NULL;  
+	}
+	
+	int num = getNumVertices();
+	vertex_ptnt = new VertexPTNT[num];
+	for(int i = 0; i < num; ++i) {	
+		vertex_ptnt[i].pos = vertices[i]; 
+		vertex_ptnt[i].norm = normals[i]; 
+		vertex_ptnt[i].tex = texcoords[i]; 
+		vertex_ptnt[i].tan = tangents[i]; 
+	}
+	return vertex_ptnt;
+}
+
 VertexPNC* VertexData::getVertexPNC() {
 	if(vertex_pnc != NULL) { 	
 		return vertex_pnc; 
@@ -298,7 +317,98 @@ VertexPTNTB* VertexData::getVertexPTNTB() {
  * doing things twice or more for shared vertices.
  */
  
-void VertexData::calculateTangentAndBiTangent() {
+void VertexData::computeTangentForTriangle(Vec3& v1, Vec3& v2, Vec3& v3, Vec2& w1, Vec2& w2, Vec2& w3, Vec3& sdir, Vec3& tdir) {
+	float x1 = v2.x - v1.x;
+	float x2 = v3.x - v1.x;
+	float y1 = v2.y - v1.y;
+	float y2 = v3.y - v1.y;
+	float z1 = v2.z - v1.z;
+	float z2 = v3.z - v1.z;
+	
+	float s1 = w2.x - w1.x;
+	float s2 = w3.x - w1.x;
+	float t1 = w2.y - w1.y;
+	float t2 = w3.y - w1.y;
+	
+	float r = 1.0f / (s1 * t2 - s2 * t1);
+	sdir.set(
+		 (t2 * x1 - t1 * x2) * r
+		,(t2 * y1 - t1 * y2) * r
+		,(t2 * z1 - t1 * z2) * r
+	);
+	
+	tdir.set(
+		 (s1 * x2 - s2 * x1) * r
+		,(s1 * y2 - s2 * y1) * r
+		,(s1 * z2 - s2 * z1) * r
+	);
+}
+ 
+void VertexData::computeTangents() {
+	vector<Vec3> tan1;
+	vector<Vec3> tan2;
+	int len = vertices.size();
+	if(quads.size() > 0) {
+		tan1.assign(len, Vec3());
+		tan2.assign(len, Vec3());
+		for(int i = 0; i < quads.size(); ++i) {
+			Quad& q = quads[i];
+			Vec3 sdir;
+			Vec3 tdir;
+			
+			// first triangle.
+			computeTangentForTriangle(
+				vertices[q.a]
+				,vertices[q.b]
+				,vertices[q.c]
+				,texcoords[q.a]
+				,texcoords[q.b]
+				,texcoords[q.c]
+				,sdir
+				,tdir
+			);
+			
+			tan1[q.a] += sdir;
+			tan1[q.b] += sdir;
+			tan1[q.c] += sdir;
+			
+			tan2[q.a] += tdir;
+			tan2[q.b] += tdir;
+			tan2[q.c] += tdir;
+			
+			// second triangle
+			computeTangentForTriangle(
+				vertices[q.c]
+				,vertices[q.d]
+				,vertices[q.a]
+				,texcoords[q.c]
+				,texcoords[q.d]
+				,texcoords[q.a]
+				,sdir
+				,tdir
+			);
+			
+			tan1[q.c] += sdir;
+			tan1[q.d] += sdir;
+			tan1[q.a] += sdir;
+			
+			tan2[q.c] += tdir;
+			tan2[q.d] += tdir;
+			tan2[q.a] += tdir;
+		
+		}
+	}
+	for(int i = 0; i < len; ++i) {
+		Vec3& n = normals[i];
+		Vec3& t = tan1[i];
+		Vec4 tangent = (t - n * (n.dot(t))).normalize();
+		tangent.w = (tan2[i].dot(n.getCrossed(t)) < 0.0f) ? -1.0f : 1.0f;
+		tangents.push_back(tangent);
+	}
+	
+	attribs |= VERT_TAN;
+	return;
+	/*
 	if(triangles.size() == 0 || texcoords.size() == 0) {
 		printf("Error: cannot calculate (bi)tangents as we do not have any triangles, or no texcoords defined.\n");
 		return;
@@ -350,8 +460,34 @@ void VertexData::calculateTangentAndBiTangent() {
 	}
 	attribs |= VERT_BINORM;
 	attribs |= VERT_TAN;
-	
+	*/
 };
+/**
+ *
+ *
+ * va	= vertex pos a
+ * vb 	= vertex pos b
+ * ta 	= texcoord a
+ * tb 	= texcoord b
+ * 
+ */ 
+void VertexData::createTangentAndBiTangent(
+	 Vec3 va
+	,Vec3 vb
+	,Vec2 ta
+	,Vec2 tb
+	,Vec3& normal
+	,Vec3& out_tangent
+	,Vec3& out_bitangent) 
+{
+	Vec3 norm = normal;
+	float coef = 1.0f / (ta.x * tb.y - tb.x * ta.y);
+	out_tangent.x = coef * ((va.x * tb.y) + (vb.x * -ta.y));
+	out_tangent.y = coef * ((va.y * tb.y) + (vb.y * -ta.y)); 
+	out_tangent.y = coef * ((va.z * tb.y) + (vb.y * -ta.y)); 
+	out_bitangent = norm.getCrossed(out_tangent);
+}
+
 
 void VertexData::debugDraw(int drawMode) {
 	// draw using indices
@@ -387,7 +523,7 @@ void VertexData::debugDraw(int drawMode) {
 		if(getNumTexCoords() > 0) {
 			//glColor3f(1,1,1);
 			glColor3f(0.98, 0.92, 0.75); // yellowish
-			glColor3f(0.4, 0.4, 0.4);
+//			glColor3f(0.4, 0.4, 0.4);
 			int len = vertices.size();
 			glBegin(drawMode);
 			for(int i = 0; i < len; ++i) {
@@ -414,20 +550,47 @@ void VertexData::debugDraw(int drawMode) {
 			glColor3f(1,1,1);
 			glLineWidth(1.5);
 			glDisable(GL_BLEND);
+		
 			glBegin(GL_LINES);
-
+		
 			for(int i = 0; i < len; ++i) {
 				Vec3 pos = vertices[i];
 				Vec3 norm = normals[i];
 				norm.normalize();
-				Vec3 end = pos + (norm.scale(0.5));
-				glColor4f(1.0f,1.0f,1.0f,1.0f);
+				Vec3 end = pos + (norm.scale(1.0));
+				glColor4f(1.0f,0.0f,0.4f,1.0f);
 				glVertex3fv(pos.getPtr());
-				glColor4f(0.0f, 1.0f,1.0f,1.0f);
+				glColor4f(1.0f, 0.0f,1.0f,1.0f);
 				glVertex3fv(end.getPtr());
 			}
 			glEnd();
 		}
+		
+		// do we have tangents?
+		if(tangents.size() > 0) {
+			int len = tangents.size();
+			glBegin(GL_LINES);
+			for(int i = 0; i < len; ++i) {
+				Vec3 pos = vertices[i];
+				Vec3 norm = tangents[i];
+				norm.normalize();
+				Vec3 end = pos + (norm.scale(1.5));
+				glColor4f(1.0f,0.0f,0.0f,1.0f);
+				glVertex3fv(pos.getPtr());
+				glVertex3fv(end.getPtr());
+			};
+			glEnd();
+		}
+		
+		// draw lines
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glColor3f(0,0,0);
+		glBegin(drawMode);
+		for(int i = 0; i < len; ++i) {
+			glVertex3fv(vertices[i].getPtr());
+		}
+		glEnd();
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 }
 
@@ -475,31 +638,6 @@ void VertexData::calculateTangentAndBiTangent() {
 	
 };
 */
-/**
- *
- *
- * va	= vertex pos a
- * vb 	= vertex pos b
- * ta 	= texcoord a
- * tb 	= texcoord b
- * 
- */ 
-void VertexData::createTangentAndBiTangent(
-	 Vec3 va
-	,Vec3 vb
-	,Vec2 ta
-	,Vec2 tb
-	,Vec3& normal
-	,Vec3& out_tangent
-	,Vec3& out_bitangent) 
-{
-	Vec3 norm = normal;
-	float coef = 1.0f / (ta.x * tb.y - tb.x * ta.y);
-	out_tangent.x = coef * ((va.x * tb.y) + (vb.x * -ta.y));
-	out_tangent.y = coef * ((va.y * tb.y) + (vb.y * -ta.y)); 
-	out_tangent.y = coef * ((va.z * tb.y) + (vb.y * -ta.y)); 
-	out_bitangent = norm.getCrossed(out_tangent);
-}
 
 
 // clear all buffers.

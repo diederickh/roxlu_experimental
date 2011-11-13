@@ -56,8 +56,8 @@ public:
 	SceneItem* createBox(string name, float width, float height, float depth);
 	SceneItem* createPlane(string name, float width, float height);
 	Material* createMaterial(string name);
-	void loadDiffuseMaterial(string materialName, string textureName, string diffuseFileName, GLuint imageFormat = GL_RGB);
-	Material* createDiffuseMaterial(string materialName, string textureName, string diffuseFileName, GLuint imageFormat = GL_RGB);
+	void loadDiffuseTexture(string materialName, string textureName, string diffuseFileName, GLuint imageFormat = GL_RGB);
+	Material* createDiffuseTexture(string materialName, string textureName, string diffuseFileName, GLuint imageFormat = GL_RGB);
 	inline Material* getMaterial(string materialName);
 	inline void setSceneItemMaterial(string sceneItemName, string materialName);
 	
@@ -65,7 +65,7 @@ public:
 	void onMouseDragged(float x, float y);
 	void exportToPly(string sceneItemName, string fileName);
 	Texture* createTexture(string name, string fileName);
-	Light* createLight(string name, float r = 1.0, float g = 1.0, float b = 1.0);
+	Light* createLight(string name, float r = 1.0, float g = 1.0, float b = 1.0, float a = 1.0);
 	void setLightPosition(string name, float x, float y, float z);
 	
 

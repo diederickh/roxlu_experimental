@@ -108,7 +108,6 @@ void Effect::createShader(string& vertShader, string& fragShader) {
 	
 	if(hasLights()) {
 		vert 	<< "\t" << "for(int i = 0; i < LIGHT_COUNT; ++i) { " << endl
-				//<< "\t\t" << "vec3 light_position = normalize(vec3(modelview * vec4(lights[i].position,1.0))); " << endl
 				<< "\t\t"	<< "light_directions[i] = normalize(lights[i].position-eye_position); " << endl 
 				<< "\t" << "}" << endl;
 		

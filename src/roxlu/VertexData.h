@@ -4,6 +4,7 @@
 #include "OpenGL.h"
 #include "VertexTypes.h"
 #include "Color.h"
+#include "Vec4.h"
 #include "Vec3.h"
 #include "Vec2.h"
 #include "Triangle.h"
@@ -62,6 +63,7 @@ public:
 	VertexPT*		getVertexPT();
 	VertexPN* 		getVertexPN();
 	VertexPTN* 		getVertexPTN();
+	VertexPTNT*		getVertexPTNT();
 	VertexPNC* 		getVertexPNC();
 	VertexPTNTB* 	getVertexPTNTB();
 	
@@ -82,7 +84,9 @@ public:
 	
 	friend ostream& operator <<(ostream& os, const VertexData& data);
 	
-	void 			calculateTangentAndBiTangent();
+	void 			computeTangents();
+	void			computeTangentForTriangle(Vec3& v1, Vec3& v2, Vec3& v3, Vec2& w1, Vec2& w2, Vec2& w3, Vec3& sdir, Vec3& tdir);
+	
 	void 			createTangentAndBiTangent(Vec3 va, Vec3 vb, Vec2 ta, Vec2 tb, Vec3& normal, Vec3& out_tangent, Vec3& out_bitangent);
 	
 	vector<Vec3>		normals;
@@ -92,12 +96,13 @@ public:
 	vector<int> 		indices;
 	vector<Triangle> 	triangles; 
 	vector<Quad> 		quads;
-	vector<Vec3>		tangents;
+	vector<Vec4>		tangents;
 	vector<Vec3>		bitangents;
 	
 	int 				attribs;
 	VertexP* 			vertex_p;
 	VertexPTN* 			vertex_ptn;
+	VertexPTNT*			vertex_ptnt;
 	VertexPNC* 			vertex_pnc;
 	VertexPN* 			vertex_pn;
 	VertexPT*			vertex_pt;

@@ -36,17 +36,21 @@ public:
 	void unbind();
 	
 	// generic material loading
-	inline Texture* loadMaterial(int type, string file, int imageFormat = GL_RGB);
-	inline Texture* getMaterial(int type);
-	inline bool hasMaterial(int type);
-	inline void setMaterial(int type, Texture* tex);
-	inline string getMaterialFilePath(int type);
+	inline Texture* loadTexture(int type, string file, int imageFormat = GL_RGB);
+	inline Texture* getTexture(int type);
+	inline bool hasTexture(int type);
+	inline void setTexture(int type, Texture* tex);
+	inline string getTextureFilePath(int type);
 	
 	// diffuse material
-	inline Texture* loadDiffuseMaterial(string file, int imageFormat = GL_RGB);
-	inline Texture* getDiffuseMaterial();
-	inline bool hasDiffuseMaterial();
-	inline string getDiffuseMaterialFilePath();
+	inline Texture* loadDiffuseTexture(string file, int imageFormat = GL_RGB);
+	inline Texture* getDiffuseTexture();
+	inline bool hasDiffuseTexture();
+	inline string getDiffuseTextureFilePath();
+	
+	// normal map
+	inline Texture* loadNormalTexture(string file, int imageFormat = GL_RGB);
+	
 	
 	// name
 	inline void setName(string name);
@@ -60,19 +64,19 @@ private:
 };
 
 
-inline Texture* Material::loadDiffuseMaterial(string file, int imageFormat) {
-	return loadMaterial(MAT_DIFFUSE, file, imageFormat);
+inline Texture* Material::loadDiffuseTexture(string file, int imageFormat) {
+	return loadTexture(MAT_DIFFUSE, file, imageFormat);
 }
 
-inline bool Material::hasDiffuseMaterial() {
-	return hasMaterial(MAT_DIFFUSE);
+inline bool Material::hasDiffuseTexture() {
+	return hasTexture(MAT_DIFFUSE);
 }
 
-inline string Material::getDiffuseMaterialFilePath() {
-	return getMaterialFilePath(MAT_DIFFUSE);
+inline string Material::getDiffuseTextureFilePath() {
+	return getTextureFilePath(MAT_DIFFUSE);
 }
 
-inline Texture* Material::getMaterial(int type) {
+inline Texture* Material::getTexture(int type) {
 	map<int, Texture*>::iterator it = materials.find(type);
 	if(it == materials.end()) {
 		return NULL;
@@ -84,23 +88,23 @@ inline void Material::setName(string matName) {
 	name = matName;
 }
 
-inline Texture* Material::getDiffuseMaterial() {
-	return getMaterial(MAT_DIFFUSE);
+inline Texture* Material::getDiffuseTexture() {
+	return getTexture(MAT_DIFFUSE);
 }
 
 inline string Material::getName() {
 	return name;
 }
 
-inline bool Material::hasMaterial(int type) {
+inline bool Material::hasTexture(int type) {
 	return set_materials & type;
 }
 
-inline void Material::setMaterial(int type, Texture* tex) {
+inline void Material::setTexture(int type, Texture* tex) {
 	materials.insert(std::pair<int, Texture*>(type, tex));
 }
 
-inline Texture* Material::loadMaterial(int type, string file, GLint imageFormat) {
+inline Texture* Material::loadTexture(int type, string file, GLint imageFormat) {
 	Texture* tex = new Texture();
 	tex->loadImage(file, imageFormat);
 	materials.insert(std::pair<int, Texture*>(type, tex));
@@ -108,8 +112,8 @@ inline Texture* Material::loadMaterial(int type, string file, GLint imageFormat)
 	return tex;
 }
 
-inline string Material::getMaterialFilePath(int type) {
-	return getMaterial(type)->getImageFilePath();
+inline string Material::getTextureFilePath(int type) {
+	return getTexture(type)->getImageFilePath();
 }
 
 }; // roxlu

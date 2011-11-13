@@ -178,14 +178,14 @@ Texture* Renderer::createTexture(string name, string fileName) {
 }
 
 // Create a diffuse material.
-Material* Renderer::createDiffuseMaterial(
+Material* Renderer::createDiffuseTexture(
 		 string materialName
 		,string textureName
 		,string diffuseFileName
 		,GLuint imageFormat) 
 {
 	Material* mat = new Material(materialName);
-	Texture* tex = mat->loadDiffuseMaterial(diffuseFileName, imageFormat);
+	Texture* tex = mat->loadDiffuseTexture(diffuseFileName, imageFormat);
 	
 	scene->addMaterial(materialName, mat);
 	scene->addTexture(textureName, tex);
@@ -193,7 +193,7 @@ Material* Renderer::createDiffuseMaterial(
 }
 
 // loads a diffuse material and sets it for the given material group
-void Renderer::loadDiffuseMaterial(
+void Renderer::loadDiffuseTexture(
 		 string materialName
 		,string textureName
 		,string diffuseFileName
@@ -202,18 +202,18 @@ void Renderer::loadDiffuseMaterial(
 {
 	Material* mat = getMaterial(materialName);
 	if(mat == NULL) {
-		mat = createDiffuseMaterial(materialName, textureName, diffuseFileName, imageFormat);
+		mat = createDiffuseTexture(materialName, textureName, diffuseFileName, imageFormat);
 		return;
 	}
 	else {
-		Texture* tex = mat->loadDiffuseMaterial(diffuseFileName, imageFormat);
+		Texture* tex = mat->loadDiffuseTexture(diffuseFileName, imageFormat);
 		scene->addTexture(textureName, tex);
 	}
 }
 
-Light* Renderer::createLight(string name, float r, float g, float b) {
+Light* Renderer::createLight(string name, float r, float g, float b, float a) {
 	Light* l = new Light();
-	l->setDiffuseColor(r,g,b);
+	l->setDiffuseColor(r,g,b, a);
 	scene->addLight(name, l);
 	effect->addLight(l);
 	return l;

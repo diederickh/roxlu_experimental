@@ -15,7 +15,7 @@ Material::~Material() {
 void Material::bind() {
 	// set diffuse texture
 	if(set_materials & MAT_DIFFUSE) {
-		Texture* tex = getMaterial(MAT_DIFFUSE);
+		Texture* tex = getTexture(MAT_DIFFUSE);
 		tex->bind();
 	}
 }

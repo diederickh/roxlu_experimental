@@ -53,6 +53,7 @@
 
 namespace roxlu {
 
+class Vec4;
 class Vec3;
 class Mat3;
 
@@ -76,7 +77,10 @@ struct Vec3 {
 		,z(other.z)
 	{
 	}
+	
+	Vec3(const Vec4& v4);
 
+	
 	// Basic methods.	
 	inline Vec3&	rotate(float angle, float x, float y, float z);
 	inline Vec3& 	rotate(float angle, Vec3 axis);
@@ -110,6 +114,7 @@ struct Vec3 {
 	bool operator!=(const Vec3& rOther) const;
 	
 	// Operators
+	Vec3& operator=(const Vec4& v4);
 	inline Vec3 	operator-(const Vec3& rOther) const;
 	inline Vec3 	operator+(const Vec3& rOther) const;
 	inline Vec3& 	operator-=(const Vec3& rOther);

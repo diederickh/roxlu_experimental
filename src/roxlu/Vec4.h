@@ -4,6 +4,8 @@
 #include <iostream>
 #include <iomanip>
 
+#include "Vec3.h"
+
 using std::setw;
 
 namespace roxlu {
@@ -26,22 +28,37 @@ public:
 	{
 	}
 	
+	inline Vec4(const Vec3& v3) {
+		x = v3.x;
+		y = v3.y;
+		z = v3.z;
+		w = 0.0;
+	}
+	
 	inline void set(float xx, float yy, float zz, float ww);
 	inline float* getPtr() { return &x; }
-	
+	inline void print();
 	friend std::ostream& operator<<(std::ostream& os, const Vec4& v);
-		
+	Vec4& operator =(const Vec3& v3);
+	
+			
 	float x;
 	float y;
 	float z;
 	float w;
 };
 
+
+
 inline void Vec4::set(float xx, float yy, float zz, float ww) {
 	x = xx;
 	y = yy;
 	z = zz;
 	w = ww;
+}
+
+inline void Vec4::print() {
+	printf("%f, %f, %f, %f\n", x, y, z, w);
 }
 
 inline std::ostream& operator<<(std::ostream& os, const Vec4& v) {
