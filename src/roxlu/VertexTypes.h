@@ -51,7 +51,7 @@ struct VertexPN : public Vertex  {
 struct VertexPNC : public Vertex  {
 	Vec3 pos;
 	Vec3 norm;
-	Color4f col;
+	Color4 col;
 };
 
 struct VertexPTN : public Vertex  {
@@ -63,7 +63,7 @@ struct VertexPTN : public Vertex  {
 struct VertexPTNC : public Vertex  {
 	Vec3 pos;
 	Vec3 norm;
-	Color4f col;
+	Color4 col;
 	Vec2 tex;
 };
 

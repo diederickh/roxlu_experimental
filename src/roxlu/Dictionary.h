@@ -49,6 +49,7 @@ namespace roxlu {
 		// constructors.
 		Dictionary();
 		~Dictionary();
+		Dictionary(IOBuffer& buffer);
 		Dictionary(const Dictionary& val);
 		Dictionary(const bool& val);
 		Dictionary(const double &val);

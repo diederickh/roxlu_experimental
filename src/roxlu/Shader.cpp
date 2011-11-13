@@ -84,7 +84,7 @@ Shader& Shader::addAttribute(std::string sName) {
 	}
 	
 	GLuint attribute_id = glGetAttribLocation(prog_id, sName.c_str()); eglGetError();
-	printf("Added attribute: %d for prog: %d\n", attribute_id, prog_id);
+	printf("Added attribute: %s(%d) for prog: %d\n", sName.c_str(), attribute_id, prog_id);
 	attributes[sName] = attribute_id;
 	disable();
 	return *this;
@@ -214,6 +214,26 @@ Shader& Shader::uniformMat4f(std::string sName, GLfloat* pMatrix, bool bTranspos
 	return *this;
 }
 
+Shader& Shader::uniform1fv(std::string name, GLfloat* value, int count) {
+	glUniform1fv(getUniform(name), count, value); eglGetError();
+	return *this;
+}
+
+Shader& Shader::uniform2fv(std::string name, GLfloat* value, int count) {
+	glUniform2fv(getUniform(name), count, value); eglGetError();
+	return *this;
+}
+
+Shader& Shader::uniform3fv(std::string name, GLfloat* value, int count) {
+	glUniform3fv(getUniform(name), count, value); eglGetError();
+	return *this;
+}
+
+Shader& Shader::uniform4fv(std::string name, GLfloat* value, int count) {
+	glUniform4fv(getUniform(name), count, value); eglGetError();
+	return *this;
+}
+
 Shader& Shader::setTextureUnit(
 	 std::string sUniform
 	,GLuint nTextureID
@@ -225,43 +245,63 @@ Shader& Shader::setTextureUnit(
 }	
 
 // ----------------------- fast data transfers ---------------------------------
-Shader& Shader::uniform1i(GLuint nPosition, GLint x) {
-	glUniform1i(nPosition, x); eglGetError();
+Shader& Shader::uniform1i(GLint position, GLint x) {
+	glUniform1i(position, x); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform2i(GLuint nPosition, GLint x, GLint y) {
-	glUniform2i(nPosition, x, y); eglGetError();
+Shader& Shader::uniform2i(GLint position, GLint x, GLint y) {
+	glUniform2i(position, x, y); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform3i(GLuint nPosition, GLint x, GLint y, GLint z) {
-	glUniform3i(nPosition, x, y, z); eglGetError();
+Shader& Shader::uniform3i(GLint position, GLint x, GLint y, GLint z) {
+	glUniform3i(position, x, y, z); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform4i(GLuint nPosition, GLint x, GLint y, GLint z, GLint w) {
-	glUniform4i(nPosition, x, y, z, w); eglGetError();
+Shader& Shader::uniform4i(GLint position, GLint x, GLint y, GLint z, GLint w) {
+	glUniform4i(position, x, y, z, w); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform1f(GLuint nPosition, GLfloat x) {
-	glUniform1f(nPosition, x); eglGetError();
+Shader& Shader::uniform1f(GLint position, GLfloat x) {
+	glUniform1f(position, x); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform2f(GLuint nPosition, GLfloat x, GLfloat y) {
-	glUniform2f(nPosition, x, y); eglGetError();
+Shader& Shader::uniform2f(GLint position, GLfloat x, GLfloat y) {
+	glUniform2f(position, x, y); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform3f(GLuint nPosition, GLfloat x, GLfloat y, GLfloat z) {
-	glUniform3f(nPosition, x, y, z); eglGetError();
+Shader& Shader::uniform3f(GLint position, GLfloat x, GLfloat y, GLfloat z) {
+	glUniform3f(position, x, y, z); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform4f(GLuint nPosition, GLfloat x, GLfloat y, GLfloat z, GLfloat w) {
-	glUniform4f(nPosition, x, y, z, w); eglGetError();
+Shader& Shader::uniform4f(GLint position, GLfloat x, GLfloat y, GLfloat z, GLfloat w) {
+	glUniform4f(position, x, y, z, w); eglGetError();
+	return *this;
+}
+
+Shader& Shader::uniform1fv(GLint position, GLfloat* value, int count) {
+	glUniform1fv(position, count, value); eglGetError();
+	return *this;
+}
+
+Shader& Shader::uniform2fv(GLint position, GLfloat* value, int count) {
+	glUniform2fv(position, count, value); eglGetError();
+	return *this;
+}
+
+Shader& Shader::uniform3fv(GLint position, GLfloat* value, int count) {
+	glUniform3fv(position, count, value); eglGetError();
+	return *this;
+}
+
+Shader& Shader::uniform4fv(GLint position, GLfloat* value, int count) {
+	glUniform4fv(position, count, value); eglGetError();
 	return *this;
 }
 

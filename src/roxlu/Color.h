@@ -1,13 +1,13 @@
-#ifndef ROXLU_COLOR4FH
-#define ROXLU_COLOR4FH
+#ifndef ROXLU_COLOR4H
+#define ROXLU_COLOR4H
 
 // color
-struct Color4f {
+struct Color4 {
 	float r,g,b,a;
 	
-	Color4f():r(1.0f),g(1.0f),b(1.0f),a(1.0f) {}
+	Color4():r(1.0f),g(1.0f),b(1.0f),a(1.0f) {}
 	
-	Color4f(float nR, float nG, float nB, float nA)
+	Color4(float nR, float nG, float nB, float nA)
 		:r(nR),g(nG),b(nB),a(nA)
 	{
 	}
@@ -20,6 +20,11 @@ struct Color4f {
 	}
 	void set(float nR, float nG, float nB) {
 		set(nR, nG, nB, 1.0f);
+	}
+	
+	float* getPtr() {
+		return &r;
+		
 	}
 };
 

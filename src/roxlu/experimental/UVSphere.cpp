@@ -46,9 +46,11 @@ void UVSphere::create(float radius, int numSlices, int numStacks, VertexData& ve
 			
 			vertex_data.addVertex(Vec3(x1 * radius, y1*radius, z1 * radius));
 			vertex_data.addTexCoord(1-1.0/slices * i, 1.0/stacks * j);
+			vertex_data.addNormal(Vec3(x1, y1, z1));
 			
 			vertex_data.addVertex(Vec3(x2 * radius, y2*radius, z2 * radius));
 			vertex_data.addTexCoord(1-1.0/slices * i, 1.0/stacks * (j+1));
+			vertex_data.addNormal(Vec3(x2, y2, z2));
 
 		}
 	}

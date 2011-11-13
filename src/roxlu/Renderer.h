@@ -66,6 +66,7 @@ public:
 	void exportToPly(string sceneItemName, string fileName);
 	Texture* createTexture(string name, string fileName);
 	Light* createLight(string name, float r = 1.0, float g = 1.0, float b = 1.0);
+	void setLightPosition(string name, float x, float y, float z);
 	
 
 private:

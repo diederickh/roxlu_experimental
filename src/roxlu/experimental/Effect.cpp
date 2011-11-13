@@ -22,8 +22,6 @@ Effect::~Effect() {
 }
 
 
-
-
 void Effect::createShader(string& vertShader, string& fragShader) {
 	printf("create shader\n");
 	// create vertex shader
@@ -51,23 +49,27 @@ void Effect::createShader(string& vertShader, string& fragShader) {
 	
 	if(hasNormals()) {
 		vert << "attribute vec3 norm;" << endl;
-		vert << "varying vec3 normal;" << endl;
-		frag << "varying vec3 normal;" << endl;
+		vert 	<< "varying vec3 normal;" << endl
+				<< "varying vec3 eye_normal; " << endl; 
+		frag 	<< "varying vec3 normal;" << endl
+				<< "varying vec3 eye_normal;" << endl;
 	}
 
 	if(hasLights()) {
 		stringstream lights;
+		
 		lights 	<< endl
 				<< "struct Light {" << endl
 				<< "\t" << "vec3 position;" << endl
 				<< "\t" << "vec4 diffuse_color;" << endl
 				<< "\t" << "vec4 specular_color;" << endl
 				<< "};" 
-				<< endl 
+				<< endl
+				<< "#define LIGHT_COUNT " << getNumberOfLights() << endl
 				<< endl;
 				
-		lights << "uniform Light lights[" << getNumberOfLights() << "];" << endl;
-		lights << "varying vec3 light_directions;" << endl << endl;
+		lights << "uniform Light lights[LIGHT_COUNT];" << endl;
+		lights << "varying vec3 light_directions[LIGHT_COUNT];" << endl << endl;
 		
 		vert << lights.str();
 		frag << lights.str();
@@ -79,15 +81,43 @@ void Effect::createShader(string& vertShader, string& fragShader) {
 	frag << "void main() {" << endl;
 
 	frag << "\t" << "vec4 texel_color = vec4(0.1, 0.1, 0.1, 1.0);" << endl;
-	vert << "\tgl_Position = modelview_projection * pos;" << endl;
+	vert << "\t" << "gl_Position = modelview_projection * pos;" << endl;
+	vert << "\t" << "vec4 modelview_position = modelview * pos;" << endl;
+	vert << "\t" << "vec3 eye_position = modelview_position.xyz;" << endl;
 
+	
 	if(hasTextures()) {
 		vert << "\t" << "texcoord = tex;" << endl;
 	}
 	
+	if(hasNormals()) {
+		vert << "\t" << "normal = normalize(norm);" << endl;
+		
+		// for light calculations we need to have a normal in the same view space
+		// and therefore we multiply it by the modelview matrix. Note that this
+		// will work in most cases but not when the modelview has non-uniform
+		// operations. Need to implement this: http://www.lighthouse3d.com/tutorials/glsl-tutorial/the-normal-matrix/
+		vert << "\t" << "eye_normal = vec3(modelview * vec4(normal, 0.0));" << endl;
+		//frag << "\t" << "texel_color.rgb += normal;" << endl;
+	}
+		
 	if(hasDiffuseTexture()) {
 		frag << "\t" << "vec4 diffuse_color = texture2D(diffuse_texture, texcoord);" << endl;
 		frag << "\t" << "texel_color += diffuse_color;" << endl;
+	}
+	
+	if(hasLights()) {
+		vert 	<< "\t" << "for(int i = 0; i < LIGHT_COUNT; ++i) { " << endl
+				//<< "\t\t" << "vec3 light_position = normalize(vec3(modelview * vec4(lights[i].position,1.0))); " << endl
+				<< "\t\t"	<< "light_directions[i] = normalize(lights[i].position-eye_position); " << endl 
+				<< "\t" << "}" << endl;
+		
+		frag 	<< "\t" << "for(int i = 0; i < LIGHT_COUNT; ++i) { " << endl
+				<< "\t\t"	<< "float n_dot_l = max(dot(eye_normal, light_directions[i]), 0.0); " << endl 
+				<< "\t\t"	<< "if(n_dot_l > 0.0) {" << endl
+				<< "\t\t\t"		<< "texel_color += (n_dot_l * lights[i].diffuse_color);" << endl
+				<< "\t\t"	<< "}" << endl
+				<< "\t" << "}" << endl;
 	}
 	
 
@@ -110,14 +140,14 @@ void Effect::setupShader() {
 
 	string vert, frag;
 	createShader(vert, frag);
-	shader.create(vert,frag);
-
-//	printf("---------------------------->>>>>>>>>\n");	
-//	cout << vert << endl;
-//	cout << "++++++++++++++++++\n" << endl;
-//	cout << frag << endl;
-//	cout << "++++++++++++++++++\n" << endl;	
 	
+	printf("---------------------------->>>>>>>>>\n");	
+	cout << vert << endl;
+	cout << "++++++++++++++++++\n" << endl;
+	cout << frag << endl;
+	cout << "++++++++++++++++++\n" << endl;	
+	
+	shader.create(vert,frag);
 	
 	shader.enable();	
 	
@@ -143,6 +173,16 @@ void Effect::setupShader() {
 	}
 	if(necessary_vertex_attribs & VERT_NORM) {
 		shader.addAttribute("norm");
+	}
+	
+	// add lights.
+	for(int i = 0; i < lights.size(); ++i) {
+		Light& light = *lights[i];
+		stringstream var;
+		var << "lights[" << i << "]";
+		shader.addUniform(var.str() +".position");
+		shader.addUniform(var.str() +".diffuse_color");
+		shader.addUniform(var.str() +".specular_color");
 	}
 	
 	shader.disable();
@@ -256,14 +296,19 @@ void Effect::setupBuffer(VAO& vao, VBO& vbo, VertexData& vd) {
 	vao.unbind();
 	shader.disable();
 	vbo.unbind();
-	
-	// create attribs flag
-	int attribs = 0;
-	if(hasTexCoords()) {
-		
-	}
 }
 
+
+void Effect::updateLights() {
+	shader.enable();
+	for(int i = 0; i < lights.size(); ++i) {
+		Light& l = *lights[i];
+		stringstream varname;
+		varname << "lights[" << i << "]";
+		shader.uniform3fv(varname.str() +".position", l.getPosition().getPtr());
+		shader.uniform4fv(varname.str() +".diffuse_color", l.getDiffuseColor().getPtr());
+	}
+}
 
 
 

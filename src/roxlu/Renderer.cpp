@@ -213,8 +213,15 @@ void Renderer::loadDiffuseMaterial(
 
 Light* Renderer::createLight(string name, float r, float g, float b) {
 	Light* l = new Light();
+	l->setDiffuseColor(r,g,b);
 	scene->addLight(name, l);
+	effect->addLight(l);
 	return l;
+}
+
+void Renderer::setLightPosition(string name, float x, float y, float z) {
+	Light* l = scene->getLight(name);
+	l->setPosition(x,y,z);
 }
 
 } // roxlu

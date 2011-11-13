@@ -18,6 +18,12 @@ Dictionary::~Dictionary() {
 	reset();
 }
 
+Dictionary::Dictionary(IOBuffer& buffer){
+	type = D_NULL;
+	memset(&value, 0, sizeof(value));
+	fromBinary(buffer);
+}
+
 Dictionary::Dictionary(const Dictionary& val) {
 	copyFrom(val);
 }

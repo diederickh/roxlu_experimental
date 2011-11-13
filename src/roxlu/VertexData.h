@@ -26,7 +26,7 @@ public:
 	void 			addTexCoord(const Vec2& rVec);
 	void 			addTexCoord(const float nX, const float nY);
 	void 			addColor(const Vec3& rColor);
-	void 			addColor(const Color4f& rColor);
+	void 			addColor(const Color4& rColor);
 	void 			addColor(const float nR, const float nG, const float nB);
 	void			addNormal(const float nX, const float nY, const float nZ);
 	void 			addNormal(const Vec3& rVec);
@@ -88,7 +88,7 @@ public:
 	vector<Vec3>		normals;
 	vector<Vec3>		vertices;
 	vector<Vec2>		texcoords;
-	vector<Color4f> 	colors;
+	vector<Color4> 	colors;
 	vector<int> 		indices;
 	vector<Triangle> 	triangles; 
 	vector<Quad> 		quads;

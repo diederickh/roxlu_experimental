@@ -156,7 +156,7 @@ void SceneItem::initialize() {
 		
 	shader->disable();
 	*/
-	return true;
+	//return true;
 }
 
 void SceneItem::drawArrays() {
@@ -193,6 +193,7 @@ void SceneItem::draw(Mat4& viewMatrix, Mat4& projectionMatrix) {
 	Mat4 modelview_projection_matrix = projectionMatrix * modelview_matrix ;
 
 	effect->getShader().enable();
+		effect->updateLights();
 		effect->getShader().uniformMat4f("projection", projectionMatrix.getPtr());
 		effect->getShader().uniformMat4f("modelview", modelview_matrix.getPtr());
 		effect->getShader().uniformMat4f("modelview_projection", modelview_projection_matrix.getPtr());

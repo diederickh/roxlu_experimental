@@ -76,6 +76,7 @@ public:
 	inline void addLight(Light* l);
 	inline int getNumberOfLights();
 	inline bool hasLights();
+	void updateLights();
 	
 private:
 	uint64_t necessary_vertex_attribs;

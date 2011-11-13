@@ -35,14 +35,14 @@ void VertexData::addTexCoord(const float nX, const float nY) {
 }
 
 void VertexData::addColor(const Vec3& rColor) {
-	addColor(Color4f(rColor.x, rColor.y, rColor.z, 1));
+	addColor(Color4(rColor.x, rColor.y, rColor.z, 1));
 }
 
 void VertexData::addColor(const float nR, const float nG, const float nB) {
-	addColor(Color4f(nR, nG, nB, 1.0f));
+	addColor(Color4(nR, nG, nB, 1.0f));
 }
 
-void VertexData::addColor(const Color4f& rCol) {
+void VertexData::addColor(const Color4& rCol) {
 	colors.push_back(rCol);
 	attribs |= VERT_COL;
 }
@@ -385,7 +385,9 @@ void VertexData::debugDraw(int drawMode) {
 	// w/o indices
 	else {
 		if(getNumTexCoords() > 0) {
-			glColor3f(1,1,1);
+			//glColor3f(1,1,1);
+			glColor3f(0.98, 0.92, 0.75); // yellowish
+			glColor3f(0.4, 0.4, 0.4);
 			int len = vertices.size();
 			glBegin(drawMode);
 			for(int i = 0; i < len; ++i) {

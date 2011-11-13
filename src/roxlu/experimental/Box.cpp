@@ -23,6 +23,10 @@ void Box::create(float width, float height, float depth, VertexData& vd) {
 	vd.addTexCoord(1,0);
 	vd.addTexCoord(1,1);
 	vd.addTexCoord(0,1);
+	vd.addNormal(0,0,1);
+	vd.addNormal(0,0,1);
+	vd.addNormal(0,0,1);
+	vd.addNormal(0,0,1);
 	vd.addQuad(0,1,2,3);
 	
 	// right
@@ -35,6 +39,10 @@ void Box::create(float width, float height, float depth, VertexData& vd) {
 	vd.addTexCoord(1,0);
 	vd.addTexCoord(1,1);
 	vd.addTexCoord(0,1);
+	vd.addNormal(1,0,0);
+	vd.addNormal(1,0,0);
+	vd.addNormal(1,0,0);
+	vd.addNormal(1,0,0);
 	vd.addQuad(4,5,6,7);
 
 	// back
@@ -47,6 +55,10 @@ void Box::create(float width, float height, float depth, VertexData& vd) {
 	vd.addTexCoord(1,0);
 	vd.addTexCoord(1,1);
 	vd.addTexCoord(0,1);
+	vd.addNormal(0,0,-1);
+	vd.addNormal(0,0,-1);
+	vd.addNormal(0,0,-1);
+	vd.addNormal(0,0,-1);
 	vd.addQuad(8,9,10,11);
 		
 	// left
@@ -59,6 +71,10 @@ void Box::create(float width, float height, float depth, VertexData& vd) {
 	vd.addTexCoord(1,0);
 	vd.addTexCoord(1,1);
 	vd.addTexCoord(0,1);
+	vd.addNormal(-1,0,0);
+	vd.addNormal(-1,0,0);
+	vd.addNormal(-1,0,0);
+	vd.addNormal(-1,0,0);
 	vd.addQuad(12,13,14,15);
 	
 	// top
@@ -71,6 +87,10 @@ void Box::create(float width, float height, float depth, VertexData& vd) {
 	vd.addTexCoord(1,0);
 	vd.addTexCoord(1,1);
 	vd.addTexCoord(0,1);
+	vd.addNormal(0,1,0);
+	vd.addNormal(0,1,0);
+	vd.addNormal(0,1,0);
+	vd.addNormal(0,1,0);
 	vd.addQuad(16,17,18,19);
 	
 	// bottom
@@ -83,6 +103,10 @@ void Box::create(float width, float height, float depth, VertexData& vd) {
 	vd.addTexCoord(1,0);
 	vd.addTexCoord(1,1);
 	vd.addTexCoord(0,1);
+	vd.addNormal(0,-1,0);
+	vd.addNormal(0,-1,0);
+	vd.addNormal(0,-1,0);
+	vd.addNormal(0,-1,0);
 	vd.addQuad(20,21,22,23);
 }
 
