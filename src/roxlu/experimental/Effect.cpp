@@ -108,6 +108,17 @@ void Effect::createShader(string& vertShader, string& fragShader) {
 		vert << "\t" << "texcoord = tex;" << endl;
 	}
 	
+	if(hasNormals()) {
+		vert << "\t" << "normal = normalize(vec3(modelview * vec4(norm,1.0)));" << endl;
+		
+		// for light calculations we need to have a normal in the same view space
+		// and therefore we multiply it by the modelview matrix. Note that this
+		// will work in most cases but not when the modelview has non-uniform
+		// operations. Need to implement this: http://www.lighthouse3d.com/tutorials/glsl-tutorial/the-normal-matrix/
+		vert << "\t" << "eye_normal = vec3(modelview * vec4(normal, 0.0));" << endl;
+		//frag << "\t" << "texel_color.rgb += normal;" << endl;
+	}
+	
 	if(hasNormalTexture()) {
 		vert << "\t" << "tangent = normalize(tan.xyz);" << endl;
 		vert << "\t" << "binormal = cross(normal, tangent) * tan.w;" << endl;
@@ -120,16 +131,7 @@ void Effect::createShader(string& vertShader, string& fragShader) {
 		frag << "\t" << "vec3 final_normal = tangent_matrix * normal_color;";
 	}
 	
-	if(hasNormals()) {
-		vert << "\t" << "normal = normalize(vec3(modelview * vec4(norm,1.0)));" << endl;
-		
-		// for light calculations we need to have a normal in the same view space
-		// and therefore we multiply it by the modelview matrix. Note that this
-		// will work in most cases but not when the modelview has non-uniform
-		// operations. Need to implement this: http://www.lighthouse3d.com/tutorials/glsl-tutorial/the-normal-matrix/
-		vert << "\t" << "eye_normal = vec3(modelview * vec4(normal, 0.0));" << endl;
-		//frag << "\t" << "texel_color.rgb += normal;" << endl;
-	}
+
 		
 	if(hasDiffuseTexture()) {
 		frag << "\t" << "vec4 diffuse_color = texture2D(diffuse_texture, texcoord);" << endl;
