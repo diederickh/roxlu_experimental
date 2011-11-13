@@ -62,6 +62,9 @@ VBO& VBO::setVertexData(VertexPN* pData, int nNum) {
 VBO& VBO::setVertexData(VertexPTN* pData, int nNum) {
 	return setVertexData<VertexPTN>(pData, nNum, VBO_TYPE_VERTEX_PTN);
 }
+VBO& VBO::setVertexData(VertexPTNT* pData, int nNum) {
+	return setVertexData<VertexPTNT>(pData, nNum, VBO_TYPE_VERTEX_PTNT);
+}
 VBO& VBO::setVertexData(VertexPNC* pData, int nNum) {
 	return setVertexData<VertexPNC>(pData, nNum, VBO_TYPE_VERTEX_PNC);
 }

@@ -48,16 +48,19 @@ public:
 		 EFFECT_FEATURE_NONE				= (0)
 		,EFFECT_FEATURE_TEXCOORDS			= (1 << 1)
 		,EFFECT_FEATURE_NORMALS				= (1 << 2)
-		,EFFECT_FEATURE_DIFFUSE_TEXTURE		= (1 << 3)
+		,EFFECT_FEATURE_TANGENTS			= (1 << 3)
+		,EFFECT_FEATURE_DIFFUSE_TEXTURE		= (1 << 4)
+		,EFFECT_FEATURE_NORMAL_TEXTURE		= (1 << 5)
 	};
 	
 	void createShader(string& vertShader, string& fragShader);
 	void setupShader();
 	void setupBuffer(VAO& vao, VBO& vbo, VertexData& vd);
 	inline Shader& getShader();
+	inline Shader* getShaderPtr();
 	
-	inline void enableFeature(EffectFeature feature, VertexAttrib neccesaryVertexAttrib);
-	inline void disableFeature(EffectFeature feature, VertexAttrib neccesaryVertexAttrib);
+	inline void enableFeature(EffectFeature feature, int neccesaryVertexAttrib);
+	inline void disableFeature(EffectFeature feature, int neccesaryVertexAttrib);
 	inline bool hasFeature(EffectFeature feature);
 	inline bool hasTextures();
 	
@@ -65,13 +68,29 @@ public:
 	inline void disableTexCoords();
 	inline bool hasTexCoords();
 	
+//	void bindTextures();
+	
+	// lighting etc..
 	inline void enableNormals();
 	inline void disableNormals();
 	inline bool hasNormals();
 	
+	// normapmap
+	inline void enableTangents();
+	inline void disableTangents();
+	inline bool hasTangents();
+	
+	
+	// diffuse texture
 	inline void enableDiffuseTexture();
 	inline void disableDiffuseTexture();
 	inline bool hasDiffuseTexture();
+	
+	// normal texture
+	inline void enableNormalTexture();
+	inline void disableNormalTexture();
+	inline bool hasNormalTexture();
+
 	
 	inline void addLight(Light* l);
 	inline int getNumberOfLights();
@@ -84,14 +103,16 @@ private:
 	vector<Light*> lights;
 	uint64_t features;
 	Shader shader;
+	int texunit;
 };
 
-inline void Effect::enableFeature(EffectFeature feature, VertexAttrib necessaryVertexAttrib) {
+// general
+inline void Effect::enableFeature(EffectFeature feature, int necessaryVertexAttrib) {
 	features |= feature;
 	necessary_vertex_attribs |= necessaryVertexAttrib;
 }
 
-inline void Effect::disableFeature(EffectFeature feature, VertexAttrib necessaryVertexAttrib) {
+inline void Effect::disableFeature(EffectFeature feature, int necessaryVertexAttrib) {
 	features &= ~feature;
 	necessary_vertex_attribs &= ~necessaryVertexAttrib;
 }
@@ -105,6 +126,7 @@ inline bool Effect::hasTextures() {
 	return (features & texture_types);
 }
 
+// texcoords
 inline void Effect::enableTexCoords() {
 	enableFeature(EFFECT_FEATURE_TEXCOORDS, VERT_TEX );
 }
@@ -117,6 +139,7 @@ inline bool Effect::hasTexCoords() {
 	return hasFeature(EFFECT_FEATURE_TEXCOORDS);
 }
 
+// normal
 inline void Effect::enableNormals() {
 	enableFeature(EFFECT_FEATURE_NORMALS, VERT_NORM);
 }
@@ -129,6 +152,20 @@ inline bool Effect::hasNormals() {
 	return hasFeature(EFFECT_FEATURE_NORMALS);
 }
 
+// tangents
+//inline void Effect::enableTangents() {
+//	enableFeature(EFFECT_FEATURE_TANGENTS, VERT_TAN);
+//}
+//
+//inline void Effect::disableTangents() {
+//	disableFeature(EFFECT_FEATURE_TANGENTS, VERT_TAN);
+//}
+//
+//inline bool Effect::hasTangents() {
+//	return hasFeature(EFFECT_FEATURE_TANGENTS);
+//}
+
+// texture: diffuse
 inline void Effect::enableDiffuseTexture() {
 	enableFeature(EFFECT_FEATURE_DIFFUSE_TEXTURE, VERT_TEX);
 }
@@ -141,6 +178,20 @@ inline bool Effect::hasDiffuseTexture() {
 	return hasFeature(EFFECT_FEATURE_DIFFUSE_TEXTURE);
 }
 
+// texture: normal (implicitly tells us we need tangents)
+inline void Effect::enableNormalTexture() {
+	enableFeature(EFFECT_FEATURE_NORMAL_TEXTURE, VERT_TEX | VERT_TAN);
+}
+
+inline void Effect::disableNormalTexture() {
+	disableFeature(EFFECT_FEATURE_NORMAL_TEXTURE, VERT_TEX | VERT_TAN);
+}
+
+inline bool Effect::hasNormalTexture() {
+	return hasFeature(EFFECT_FEATURE_NORMAL_TEXTURE);
+}
+
+// lights
 inline void Effect::addLight(Light* l) {
 	lights.push_back(l);
 	enableNormals(); 
@@ -157,7 +208,9 @@ inline bool Effect::hasLights() {
 inline Shader& Effect::getShader() {
 	return shader;
 }
-
+inline Shader* Effect::getShaderPtr() {
+	return &shader;
+}
 
 
 }; // roxlu

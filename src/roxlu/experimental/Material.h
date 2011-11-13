@@ -29,7 +29,7 @@ public:
 		,MAT_CUBEMAP		= (1 << 10)
 	};
 	
-	Material(string name);
+	Material(string name, Shader* shad);
 	~Material();
 	
 	void bind();
@@ -50,6 +50,9 @@ public:
 	
 	// normal map
 	inline Texture* loadNormalTexture(string file, int imageFormat = GL_RGB);
+	inline Texture* getNormalTexture();
+	inline bool hasNormalTexture();
+	inline string getNormalTextureFilePath();
 	
 	
 	// name
@@ -57,6 +60,7 @@ public:
 	inline string getName();
 	
 private:
+	Shader* shader;
 	string name;
 	bool done;
 	int set_materials;
@@ -64,6 +68,8 @@ private:
 };
 
 
+// Material: diffuse 
+// --------------------
 inline Texture* Material::loadDiffuseTexture(string file, int imageFormat) {
 	return loadTexture(MAT_DIFFUSE, file, imageFormat);
 }
@@ -76,6 +82,31 @@ inline string Material::getDiffuseTextureFilePath() {
 	return getTextureFilePath(MAT_DIFFUSE);
 }
 
+inline Texture* Material::getDiffuseTexture() {
+	return getTexture(MAT_DIFFUSE);
+}
+
+
+// Material: normal map 
+// --------------------
+inline Texture* Material::loadNormalTexture(string file, int imageFormat) {
+	return loadTexture(MAT_NORMAL, file, imageFormat);
+}
+
+inline bool Material::hasNormalTexture() {
+	return hasTexture(MAT_NORMAL);
+}
+
+inline string Material::getNormalTextureFilePath() {
+	return getTextureFilePath(MAT_NORMAL);
+}
+
+inline Texture* Material::getNormalTexture() {
+	return getTexture(MAT_NORMAL);
+}
+
+// General
+// ---------
 inline Texture* Material::getTexture(int type) {
 	map<int, Texture*>::iterator it = materials.find(type);
 	if(it == materials.end()) {
@@ -88,9 +119,6 @@ inline void Material::setName(string matName) {
 	name = matName;
 }
 
-inline Texture* Material::getDiffuseTexture() {
-	return getTexture(MAT_DIFFUSE);
-}
 
 inline string Material::getName() {
 	return name;

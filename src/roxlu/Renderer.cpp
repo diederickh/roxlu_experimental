@@ -184,15 +184,21 @@ Material* Renderer::createDiffuseTexture(
 		,string diffuseFileName
 		,GLuint imageFormat) 
 {
-	Material* mat = new Material(materialName);
-	Texture* tex = mat->loadDiffuseTexture(diffuseFileName, imageFormat);
+	// @todo create a function: getMaterialOrCreateIfNotExist
+	Material* mat = getMaterial(materialName);
+	if(mat == NULL) {
+		mat =  new Material(materialName, effect->getShaderPtr());
+	}
 	
+	Texture* tex = mat->loadDiffuseTexture(diffuseFileName, imageFormat);
 	scene->addMaterial(materialName, mat);
 	scene->addTexture(textureName, tex);
 	return mat;
 }
 
+
 // loads a diffuse material and sets it for the given material group
+/*
 void Renderer::loadDiffuseTexture(
 		 string materialName
 		,string textureName
@@ -210,6 +216,25 @@ void Renderer::loadDiffuseTexture(
 		scene->addTexture(textureName, tex);
 	}
 }
+*/
+Material* Renderer::createNormalTexture(
+	 string materialName
+	,string textureName
+	,string normalFileName
+	,GLuint imageFormat) 
+{
+	// @todo create a function: getMaterialOrCreateIfNotExist
+	Material* mat = getMaterial(materialName);
+	if(mat == NULL) {
+		mat =  new Material(materialName, effect->getShaderPtr());
+	}
+	
+	Texture* tex = mat->loadNormalTexture(normalFileName, imageFormat);
+	scene->addMaterial(materialName, mat);
+	scene->addTexture(textureName, tex);
+	return mat;
+}
+
 
 Light* Renderer::createLight(string name, float r, float g, float b, float a) {
 	Light* l = new Light();

@@ -55,12 +55,16 @@ public:
 	SceneItem* createUVSphere(string name, int phi, int theta, float radius);
 	SceneItem* createBox(string name, float width, float height, float depth);
 	SceneItem* createPlane(string name, float width, float height);
+	
+	// materials
 	Material* createMaterial(string name);
-	void loadDiffuseTexture(string materialName, string textureName, string diffuseFileName, GLuint imageFormat = GL_RGB);
-	Material* createDiffuseTexture(string materialName, string textureName, string diffuseFileName, GLuint imageFormat = GL_RGB);
 	inline Material* getMaterial(string materialName);
 	inline void setSceneItemMaterial(string sceneItemName, string materialName);
-	
+
+	Material* createDiffuseTexture(string materialName, string textureName, string diffuseFileName, GLuint imageFormat = GL_RGB);
+	Material* createNormalTexture(string materialName, string textureName, string normalFileName, GLuint imageFormat = GL_RGB);
+		
+	// general
 	void onMouseDown(float x, float y);
 	void onMouseDragged(float x, float y);
 	void exportToPly(string sceneItemName, string fileName);

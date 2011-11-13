@@ -29,6 +29,7 @@ enum VBOType {
 	,VBO_TYPE_VERTEX_PT			= VERT_POS | VERT_TEX
 	,VBO_TYPE_VERTEX_PNC		= VERT_POS | VERT_NORM | VERT_COL
 	,VBO_TYPE_VERTEX_PTN		= VERT_POS | VERT_TEX | VERT_NORM
+	,VBO_TYPE_VERTEX_PTNT		= VERT_POS | VERT_TEX | VERT_NORM | VERT_TAN
 	,VBO_TYPE_VERTEX_PTNC		= VERT_POS | VERT_TEX | VERT_NORM | VERT_COL
 	,VBO_TYPE_VERTEX_PTNTB		= VERT_POS | VERT_TEX | VERT_NORM | VERT_TAN | VERT_BINORM
 };
@@ -44,8 +45,10 @@ public:
 	VBO& setVertexData(VertexPT* pData, int nNum);
 	VBO& setVertexData(VertexPNC* pData, int nNum);
 	VBO& setVertexData(VertexPTN* pData, int nNum);
+	VBO& setVertexData(VertexPTNT* pData, int nNum);
 	VBO& setVertexData(VertexPTNC* pData, int nNum);
 	VBO& setVertexData(VertexPTNTB* pData, int nNum);
+	
 	
 	template<typename T>
 	VBO& setVertexData(T* pData, int nNum, VBOType nType) {

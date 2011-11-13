@@ -318,7 +318,7 @@ Shader& Shader::setTextureUnit(
 	uniform1i(nUniformID, nNum); eglGetError();
 
 	glDisable(nTextureType); eglGetError();
-	glActiveTexture(GL_TEXTURE0); eglGetError();
+	//glActiveTexture(GL_TEXTURE0); eglGetError();
 	return *this;
 }
 

@@ -51,6 +51,7 @@ public:
 	int 			getNumTexCoords();
 	int 			getNumColors();
 	int 			getNumNormals();
+	int				getNumTangents();
 	int 			getNumIndices();
 	int 			getNumTriangles();
 	int 			getNumQuads();

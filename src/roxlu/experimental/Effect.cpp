@@ -14,6 +14,7 @@ Effect::Effect()
 	:features(EFFECT_FEATURE_NONE)
 	,shader_created(false)
 	,necessary_vertex_attribs(VERT_POS)
+	,texunit(GL_TEXTURE0)
 {
 }
 
@@ -36,6 +37,8 @@ void Effect::createShader(string& vertShader, string& fragShader) {
 	vert << "uniform mat4 modelview;" << endl;
 	vert << "uniform mat4 projection;" << endl;
 	vert << "uniform mat4 modelview_projection;" << endl;
+	vert << "varying vec3 view_position;" << endl;
+	frag << "varying vec3 view_position;" << endl;
 	
 	if(hasTextures()) {
 		vert << "attribute vec2 tex;" << endl;
@@ -45,6 +48,21 @@ void Effect::createShader(string& vertShader, string& fragShader) {
 	
 	if(hasDiffuseTexture()) {
 		frag << "uniform sampler2D diffuse_texture; " << endl;
+	}
+	
+	if(hasNormalTexture()) {
+		vert 	<< endl
+				<< "attribute vec4 tan;" << endl
+				<< "varying vec3 tangent;" << endl
+				<< "varying vec3 binormal; " << endl 
+				<< endl;
+		
+		frag 	<< endl
+				<< "uniform sampler2D normal_texture; " << endl
+				<< "varying vec3 tangent;" << endl
+				<< "varying vec3 binormal;" << endl
+				<< endl;
+				
 	}
 	
 	if(hasNormals()) {
@@ -83,15 +101,27 @@ void Effect::createShader(string& vertShader, string& fragShader) {
 	frag << "\t" << "vec4 texel_color = vec4(0.1, 0.1, 0.1, 1.0);" << endl;
 	vert << "\t" << "gl_Position = modelview_projection * pos;" << endl;
 	vert << "\t" << "vec4 modelview_position = modelview * pos;" << endl;
-	vert << "\t" << "vec3 eye_position = modelview_position.xyz;" << endl;
-
+	vert << "\t" << "view_position = modelview_position.xyz;" << endl;
+	
 	
 	if(hasTextures()) {
 		vert << "\t" << "texcoord = tex;" << endl;
 	}
 	
+	if(hasNormalTexture()) {
+		vert << "\t" << "tangent = normalize(tan.xyz);" << endl;
+		vert << "\t" << "binormal = cross(normal, tangent) * tan.w;" << endl;
+		vert << "\t" << "binormal = normalize(binormal);" << endl; 
+		
+		
+		frag << "\t" << "vec3 normal_color = texture2D(normal_texture, texcoord).xyz * 2.0 - 1.0;" << endl; 
+		frag << "\t" << "normal_color = normalize(normal_color);" << endl;
+		frag << "\t" << "mat3 tangent_matrix = mat3(tangent, binormal, normal);" << endl;
+		frag << "\t" << "vec3 final_normal = tangent_matrix * normal_color;";
+	}
+	
 	if(hasNormals()) {
-		vert << "\t" << "normal = normalize(norm);" << endl;
+		vert << "\t" << "normal = normalize(vec3(modelview * vec4(norm,1.0)));" << endl;
 		
 		// for light calculations we need to have a normal in the same view space
 		// and therefore we multiply it by the modelview matrix. Note that this
@@ -108,11 +138,13 @@ void Effect::createShader(string& vertShader, string& fragShader) {
 	
 	if(hasLights()) {
 		vert 	<< "\t" << "for(int i = 0; i < LIGHT_COUNT; ++i) { " << endl
-				<< "\t\t"	<< "light_directions[i] = normalize(lights[i].position-eye_position); " << endl 
+				<< "\t\t" << "vec3 lp = vec3(modelview * vec4(lights[i].position,1.0));"<< endl
+				<< "\t\t"	<< "light_directions[i] = normalize(lp-view_position); " << endl
+				//<< "\t\t"	<< "light_directions[i] = normalize(lights[i].position-view_position); " << endl 
 				<< "\t" << "}" << endl;
 		
 		frag 	<< "\t" << "for(int i = 0; i < LIGHT_COUNT; ++i) { " << endl
-				<< "\t\t"	<< "float n_dot_l = max(dot(eye_normal, light_directions[i]), 0.0); " << endl 
+				<< "\t\t"	<< "float n_dot_l = max(dot(final_normal, light_directions[i]), 0.0); " << endl 
 				<< "\t\t"	<< "if(n_dot_l > 0.0) {" << endl
 				<< "\t\t\t"		<< "texel_color += (n_dot_l * lights[i].diffuse_color);" << endl
 				<< "\t\t"	<< "}" << endl
@@ -120,7 +152,8 @@ void Effect::createShader(string& vertShader, string& fragShader) {
 	}
 	
 
-	frag << "\tgl_FragColor = texel_color;" << endl;
+	frag << "\t" << "gl_FragColor = texel_color;" << endl;
+//	frag << "\t" << "gl_FragColor.rgb = normal_color;" << endl;
 	//frag << "\tgl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);" << endl;
 			
 	// close shader.
@@ -156,11 +189,11 @@ void Effect::setupShader() {
 	shader.addUniform("modelview_projection");
 	
 	// add other uniforms
-	if(hasTextures()) {
-		shader.addUniform("texcoord");
-	}
 	if(hasDiffuseTexture()) {
 		shader.addUniform("diffuse_texture");
+	}
+	if(hasNormalTexture()) {
+		shader.addUniform("normal_texture");
 	}
 	
 	// add attributes we need to use.
@@ -172,6 +205,9 @@ void Effect::setupShader() {
 	}
 	if(necessary_vertex_attribs & VERT_NORM) {
 		shader.addAttribute("norm");
+	}
+	if(necessary_vertex_attribs & VERT_TAN) {
+		shader.addAttribute("tan");
 	}
 	
 	// add lights.
@@ -212,6 +248,9 @@ void Effect::setupBuffer(VAO& vao, VBO& vbo, VertexData& vd) {
 	if(necessary_vertex_attribs & VERT_NORM) {
 		shader.enableVertexAttribArray("norm");
 	}
+	if(necessary_vertex_attribs & VERT_TAN) {
+		shader.enableVertexAttribArray("tan");
+	}
 	
 	// set data and set offsets
 	// ------------------------------------------
@@ -223,6 +262,7 @@ void Effect::setupBuffer(VAO& vao, VBO& vbo, VertexData& vd) {
 	int pos_offset = 0;
 	int tex_offset = 0;
 	int norm_offset = 0;
+	int tan_offset = 0;
 	
 	if(necessary_vertex_attribs == VBO_TYPE_VERTEX_P) {
 		printf("Effect: fill vbo with vertex positions.\n");
@@ -251,6 +291,20 @@ void Effect::setupBuffer(VAO& vao, VBO& vbo, VertexData& vd) {
 		tex_offset = offsetof(VertexPTN, tex);
 		norm_offset = offsetof(VertexPTN, norm);
 		stride = sizeof(VertexPTN);
+	}
+	else if(necessary_vertex_attribs == VBO_TYPE_VERTEX_PTNT) {
+		printf("------ %d, %d, %d, %d ----------\n", vd.getNumVertices(), vd.getNumTexCoords(), vd.getNumNormals(), vd.getNumTangents());
+		
+		vbo.setVertexData(
+			 vd.getVertexPTNT()
+			,vd.getNumVertices()
+		);
+		pos_offset = offsetof(VertexPTNT, pos);
+		tex_offset = offsetof(VertexPTNT, tex);
+		norm_offset = offsetof(VertexPTNT, norm);
+		tan_offset = offsetof(VertexPTNT, tan);
+		
+		stride = sizeof(VertexPTNT);
 	}
 
 
@@ -292,6 +346,18 @@ void Effect::setupBuffer(VAO& vao, VBO& vbo, VertexData& vd) {
 				,(GLvoid*)norm_offset
 		); eglGetError();
 	}
+	
+	if(necessary_vertex_attribs & VERT_TAN) {
+		glVertexAttribPointer(
+				shader.getAttribute("tan")
+				,4
+				,GL_FLOAT
+				,GL_FALSE
+				,stride
+				,(GLvoid*)tan_offset
+		); eglGetError();
+	}
+	
 	vao.unbind();
 	shader.disable();
 	vbo.unbind();

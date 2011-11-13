@@ -6,6 +6,7 @@ VertexData::VertexData()
 ,vertex_pt(NULL)
 ,vertex_pn(NULL)
 ,vertex_ptn(NULL)
+,vertex_ptnt(NULL)
 ,vertex_pnc(NULL)
 ,vertex_ptntb(NULL)
 ,attribs(VERT_NONE)
@@ -139,6 +140,10 @@ int VertexData::getNumVertices() {
 
 int VertexData::getNumTexCoords() {
 	return (int)texcoords.size();
+}
+
+int VertexData::getNumTangents() {
+	return (int)tangents.size();
 }
 
 int VertexData::getNumColors() {
@@ -311,7 +316,9 @@ VertexPTNTB* VertexData::getVertexPTNTB() {
  *
  * -	Source code I used for this:
  *		http://www.3dkingdoms.com/weekly/weekly.php?a=37
- * 
+ *
+ * - 	Based on:
+ * 		http://www.terathon.com/code/tangent.html
  *
  * TODO: this method should be optimized as it loops over all triangles so
  * doing things twice or more for shared vertices.
