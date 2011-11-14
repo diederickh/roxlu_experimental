@@ -69,9 +69,12 @@ public:
 	void onMouseDragged(float x, float y);
 	void exportToPly(string sceneItemName, string fileName);
 	Texture* createTexture(string name, string fileName);
+	
+	// light
 	Light* createLight(string name, float r = 1.0, float g = 1.0, float b = 1.0, float a = 1.0);
 	void setLightPosition(string name, float x, float y, float z);
-	
+	void setLightDiffuseColor(string name, float r, float g, float b, float a = 1.0);
+	void setLightSpecularColor(string name, float r, float g, float b, float a = 1.0);	
 
 private:
 	bool use_fill;

@@ -15,6 +15,8 @@ public:
 	void debugDraw();
 	inline Vec3& getPosition();
 	inline Color4& getDiffuseColor();
+	inline Color4& getSpecularColor();
+	inline Color4& getAmbientColor();
 	
 	void disable();
 	void enable(); 
@@ -34,6 +36,14 @@ inline Vec3& Light::getPosition() {
 
 inline Color4& Light::getDiffuseColor() {
 	return diffuse_col;
+}
+
+inline Color4& Light::getSpecularColor() {
+	return specular_col;
+}
+
+inline Color4& Light::getAmbientColor() {
+	return ambient_col;
 }
 
 

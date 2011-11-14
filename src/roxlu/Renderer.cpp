@@ -249,4 +249,16 @@ void Renderer::setLightPosition(string name, float x, float y, float z) {
 	l->setPosition(x,y,z);
 }
 
+void Renderer::setLightDiffuseColor(string name, float r, float g, float b, float a) {
+	Light* l = scene->getLight(name);
+	l->setDiffuseColor(r,g,b,a);
+}
+
+void Renderer::setLightSpecularColor(string name, float r, float g, float b, float a) {
+	Light* l = scene->getLight(name);
+	l->setSpecularColor(r,g,b,a);
+}
+
+
+
 } // roxlu

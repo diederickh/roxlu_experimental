@@ -54,6 +54,8 @@ public:
 	};
 	
 	void createShader(string& vertShader, string& fragShader);
+	void createVertexShader(string& vertShader);
+	void createFragmentShader(string& fragShader);
 	void setupShader();
 	void setupBuffer(VAO& vao, VBO& vbo, VertexData& vd);
 	inline Shader& getShader();
