@@ -136,6 +136,7 @@ void Effect::createShader(string& vertShader, string& fragShader) {
 	if(hasDiffuseTexture()) {
 		frag << "\t" << "vec4 diffuse_color = texture2D(diffuse_texture, texcoord);" << endl;
 		frag << "\t" << "texel_color += diffuse_color;" << endl;
+		frag << "\t" << "texel_color.rgb = vec3(0.3,0.3,0.3);" << endl;
 	}
 	
 	if(hasLights()) {
