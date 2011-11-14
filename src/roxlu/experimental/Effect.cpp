@@ -338,14 +338,15 @@ void Effect::createFragmentShader(string& fragShader) {
 	if(hasNormalTexture()) {
 		frag << "\t" << "vec3 normal_color = texture2D(normal_texture, texcoord).xyz * 2.0 - 1.0;" << endl; 
 		frag << "\t" << "normal_color = normalize(normal_color);" << endl;
-		frag << "\t" << "mat3 tangent_matrix = mat3(tangent, binormal, eye_normal);" << endl;
+		// @todo do I need to normalize the tangent, binormal here?
+		frag << "\t" << "mat3 tangent_matrix = mat3(tangent, binormal, final_normal);" << endl;
 		frag << "\t" << "final_normal = normalize(tangent_matrix * normal_color);";
 	}
 			
 	if(hasDiffuseTexture()) {
 		frag << "\t" << "vec4 diffuse_color = texture2D(diffuse_texture, texcoord);" << endl;
 		frag << "\t" << "texel_color += diffuse_color;" << endl;
-		frag << "\t" << "texel_color.rgb = vec3(0.3,0.3,0.3);" << endl;
+		frag << "\t" << "texel_color.rgb = vec3(0.01,0.01,0.01);" << endl;
 	}
 	
 	if(hasLights()) {
@@ -357,7 +358,7 @@ void Effect::createFragmentShader(string& fragShader) {
 
 				<< "\t\t\t"		<< "vec3 reflection = normalize(reflect(-normalize(light_directions[i]), final_normal));" << endl
 				<< "\t\t\t" 	<< "float spec = max(0.0, dot(final_normal, reflection)); " << endl
-				<< "\t\t\t"		<< "float fspec = pow(spec, 428.0);" << endl
+				<< "\t\t\t"		<< "float fspec = pow(spec, 128.0);" << endl
 				//<< "\t\t\t"		<< "texel_color.rgb += vec3(fspec, fspec, fspec);" << endl
 				<< "\t\t\t"		<< "texel_color += fspec * lights[i].specular_color;" << endl
 				<< "\t\t"	<< "}" << endl
@@ -366,6 +367,7 @@ void Effect::createFragmentShader(string& fragShader) {
 	
 
 	frag << "\t" << "gl_FragColor = texel_color;" << endl;
+//	frag << "\t" << "gl_FragColor = diffuse_color;" << endl;
 //	frag << "\t" << "gl_FragColor.rgb = normal_color;" << endl;
 	//frag << "\tgl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);" << endl;
 			
