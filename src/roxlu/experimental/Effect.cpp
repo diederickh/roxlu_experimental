@@ -37,8 +37,8 @@ void Effect::createShader(string& vertShader, string& fragShader) {
 	vert << "uniform mat4 modelview;" << endl;
 	vert << "uniform mat4 projection;" << endl;
 	vert << "uniform mat4 modelview_projection;" << endl;
-	vert << "varying vec3 view_position;" << endl;
-	frag << "varying vec3 view_position;" << endl;
+	vert << "varying vec3 eye_position;" << endl;
+	frag << "varying vec3 eye_position;" << endl;
 	
 	if(hasTextures()) {
 		vert << "attribute vec2 tex;" << endl;
@@ -101,7 +101,7 @@ void Effect::createShader(string& vertShader, string& fragShader) {
 	frag << "\t" << "vec4 texel_color = vec4(0.1, 0.1, 0.1, 1.0);" << endl;
 	vert << "\t" << "gl_Position = modelview_projection * pos;" << endl;
 	vert << "\t" << "vec4 modelview_position = modelview * pos;" << endl;
-	vert << "\t" << "view_position = modelview_position.xyz;" << endl;
+	vert << "\t" << "eye_position = modelview_position.xyz;" << endl;
 	
 	
 	if(hasTextures()) {
@@ -115,7 +115,7 @@ void Effect::createShader(string& vertShader, string& fragShader) {
 		// and therefore we multiply it by the modelview matrix. Note that this
 		// will work in most cases but not when the modelview has non-uniform
 		// operations. Need to implement this: http://www.lighthouse3d.com/tutorials/glsl-tutorial/the-normal-matrix/
-		vert << "\t" << "eye_normal = vec3(modelview * vec4(normal, 0.0));" << endl;
+		vert << "\t" << "eye_normal = normalize(vec3(modelview * vec4(normal, 0.0)));" << endl;
 		//frag << "\t" << "texel_color.rgb += normal;" << endl;
 	}
 	
@@ -128,7 +128,7 @@ void Effect::createShader(string& vertShader, string& fragShader) {
 		frag << "\t" << "vec3 normal_color = texture2D(normal_texture, texcoord).xyz * 2.0 - 1.0;" << endl; 
 		frag << "\t" << "normal_color = normalize(normal_color);" << endl;
 		frag << "\t" << "mat3 tangent_matrix = mat3(tangent, binormal, normal);" << endl;
-		frag << "\t" << "vec3 final_normal = tangent_matrix * normal_color;";
+		frag << "\t" << "vec3 final_normal = normalize(tangent_matrix * normal_color);";
 	}
 	
 
@@ -141,7 +141,7 @@ void Effect::createShader(string& vertShader, string& fragShader) {
 	if(hasLights()) {
 		vert 	<< "\t" << "for(int i = 0; i < LIGHT_COUNT; ++i) { " << endl
 				<< "\t\t" << "vec3 lp = vec3(modelview * vec4(lights[i].position,1.0));"<< endl
-				<< "\t\t"	<< "light_directions[i] = normalize(lp-view_position); " << endl
+				<< "\t\t"	<< "light_directions[i] = normalize(lp-eye_position); " << endl
 				//<< "\t\t"	<< "light_directions[i] = normalize(lights[i].position-view_position); " << endl 
 				<< "\t" << "}" << endl;
 		
@@ -149,7 +149,12 @@ void Effect::createShader(string& vertShader, string& fragShader) {
 				<< "\t\t"	<< "float n_dot_l = max(dot(final_normal, light_directions[i]), 0.0); " << endl 
 				<< "\t\t"	<< "if(n_dot_l > 0.0) {" << endl
 				<< "\t\t\t"		<< "texel_color += (n_dot_l * lights[i].diffuse_color);" << endl
-				<< "\t\t"	<< "}" << endl
+
+				<< "\t\t"	<< "vec3 reflection = normalize(reflect(-normalize(light_directions[i]), final_normal));" << endl
+				<< "\t\t" 	<< "float spec = max(0.0, dot(final_normal, reflection)); " << endl
+				<< "\t\t"	<< "float fspec = pow(spec, 128.0);" << endl
+				<< "\t\t"	<< "texel_color.rgb += vec3(fspec, fspec, fspec);" << endl
+								<< "\t\t"	<< "}" << endl
 				<< "\t" << "}" << endl;
 	}
 	
