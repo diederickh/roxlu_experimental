@@ -269,10 +269,18 @@ void Effect::createVertexShader(string& vertShader) {
 	if(hasLights()) {
 		vert << endl;
 		vert 	<< "\t" << "for(int i = 0; i < LIGHT_COUNT; ++i) { " << endl
-				//<< "\t\t" << "vec3 lp = vec3(modelview * vec4(lights[i].position,1.0));"<< endl
-				<< "\t\t" << "vec3 lp = lights[i].position;"<< endl
-				<< "\t\t"	<< "light_directions[i] = normalize(lp - eye_position); " << endl
-				<< "\t" << "}" << endl;
+				<< "\t\t" << "vec3 lp = lights[i].position;"<< endl;
+				
+		if(hasNormalTexture()) {
+			vert << "\t\t"	<< "mat3 tangent_space = mat3(tangent.x, binormal.x, eye_normal.x, tangent.y, binormal.y, eye_normal.y, tangent.z, binormal.z, eye_normal.z); " << endl;
+			vert << "\t\t"	<< "light_directions[i] = normalize(tangent_space * (lp - eye_position)); " << endl;
+		}
+		else {
+			vert << "\t\t"	<< "light_directions[i] = normalize(lp - eye_position); " << endl;
+		}
+				
+		vert << "\t" << "}" << endl;
+		
 	}
 	vert << "}" << endl; // close main
 	vertShader = vert.str();
@@ -354,13 +362,13 @@ void Effect::createFragmentShader(string& fragShader) {
 		frag 	<< "\t" << "for(int i = 0; i < LIGHT_COUNT; ++i) { " << endl
 				<< "\t\t"	<< "float n_dot_l = max(dot(final_normal, light_directions[i]), 0.0); " << endl 
 				<< "\t\t"	<< "if(n_dot_l > 0.0) {" << endl
-				<< "\t\t\t"		<< "texel_color += (n_dot_l * lights[i].diffuse_color);" << endl
+				<< "\t\t\t"		<< "texel_color += (0.4 * (n_dot_l * lights[i].diffuse_color));" << endl
 
 				<< "\t\t\t"		<< "vec3 reflection = normalize(reflect(-normalize(light_directions[i]), final_normal));" << endl
 				<< "\t\t\t" 	<< "float spec = max(0.0, dot(final_normal, reflection)); " << endl
-				<< "\t\t\t"		<< "float fspec = pow(spec, 128.0);" << endl
+				<< "\t\t\t"		<< "float fspec = pow(spec, 52.0);" << endl
 				//<< "\t\t\t"		<< "texel_color.rgb += vec3(fspec, fspec, fspec);" << endl
-				<< "\t\t\t"		<< "texel_color += fspec * lights[i].specular_color;" << endl
+				<< "\t\t\t"		<< "texel_color += (fspec * lights[i].specular_color) * 0.9;" << endl
 				<< "\t\t"	<< "}" << endl
 				<< "\t" << "}" << endl;
 	}
