@@ -264,6 +264,7 @@ void Effect::createVertexShader(string& vertShader) {
 		vert << "\t" << "tangent = normalize(tan.xyz);" << endl;
 		vert << "\t" << "binormal = cross(eye_normal, tangent) * tan.w;" << endl;
 		vert << "\t" << "binormal = normalize(binormal);" << endl; 
+		vert << "\t" << "mat3 tangent_space = mat3(tangent.x, binormal.x, eye_normal.x, tangent.y, binormal.y, eye_normal.y, tangent.z, binormal.z, eye_normal.z); " << endl;
 	}
 	
 	if(hasLights()) {
@@ -272,7 +273,6 @@ void Effect::createVertexShader(string& vertShader) {
 				<< "\t\t" << "vec3 lp = lights[i].position;"<< endl;
 				
 		if(hasNormalTexture()) {
-			vert << "\t\t"	<< "mat3 tangent_space = mat3(tangent.x, binormal.x, eye_normal.x, tangent.y, binormal.y, eye_normal.y, tangent.z, binormal.z, eye_normal.z); " << endl;
 			vert << "\t\t"	<< "light_directions[i] = normalize(tangent_space * (lp - eye_position)); " << endl;
 		}
 		else {
@@ -368,7 +368,7 @@ void Effect::createFragmentShader(string& fragShader) {
 				<< "\t\t\t" 	<< "float spec = max(0.0, dot(final_normal, reflection)); " << endl
 				<< "\t\t\t"		<< "float fspec = pow(spec, 52.0);" << endl
 				//<< "\t\t\t"		<< "texel_color.rgb += vec3(fspec, fspec, fspec);" << endl
-				<< "\t\t\t"		<< "texel_color += (fspec * lights[i].specular_color) * 0.9;" << endl
+				<< "\t\t\t"		<< "texel_color += (fspec * lights[i].specular_color) * 0.2;" << endl
 				<< "\t\t"	<< "}" << endl
 				<< "\t" << "}" << endl;
 	}

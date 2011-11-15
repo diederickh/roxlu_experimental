@@ -190,6 +190,8 @@ Material* Renderer::createDiffuseTexture(
 		mat =  new Material(materialName, effect->getShaderPtr());
 	}
 	
+	effect->enableDiffuseTexture();
+	
 	Texture* tex = mat->loadDiffuseTexture(diffuseFileName, imageFormat);
 	scene->addMaterial(materialName, mat);
 	scene->addTexture(textureName, tex);
@@ -229,9 +231,12 @@ Material* Renderer::createNormalTexture(
 		mat =  new Material(materialName, effect->getShaderPtr());
 	}
 	
+	effect->enableNormalTexture();
+	
 	Texture* tex = mat->loadNormalTexture(normalFileName, imageFormat);
 	scene->addMaterial(materialName, mat);
 	scene->addTexture(textureName, tex);
+
 	return mat;
 }
 

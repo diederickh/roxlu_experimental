@@ -241,6 +241,10 @@ VertexPTNT* VertexData::getVertexPTNT() {
 	if( ! (attribs & (VERT_POS | VERT_NORM | VERT_TEX | VERT_TAN)) ) { 	
 		return NULL;  
 	}
+
+	if(tangents.size() == 0) {
+		computeTangents();
+	}	
 	
 	int num = getNumVertices();
 	vertex_ptnt = new VertexPTNT[num];
@@ -405,6 +409,9 @@ void VertexData::computeTangents() {
 		
 		}
 	}
+	
+	// @todo implement for just triangles!
+	
 	for(int i = 0; i < len; ++i) {
 		Vec3& n = normals[i];
 		Vec3& t = tan1[i];
