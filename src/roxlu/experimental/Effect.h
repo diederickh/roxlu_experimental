@@ -70,8 +70,7 @@ public:
 	inline void disableTexCoords();
 	inline bool hasTexCoords();
 	
-//	void bindTextures();
-	
+
 	// lighting etc..
 	inline void enableNormals();
 	inline void disableNormals();
@@ -154,18 +153,6 @@ inline bool Effect::hasNormals() {
 	return hasFeature(EFFECT_FEATURE_NORMALS);
 }
 
-// tangents
-//inline void Effect::enableTangents() {
-//	enableFeature(EFFECT_FEATURE_TANGENTS, VERT_TAN);
-//}
-//
-//inline void Effect::disableTangents() {
-//	disableFeature(EFFECT_FEATURE_TANGENTS, VERT_TAN);
-//}
-//
-//inline bool Effect::hasTangents() {
-//	return hasFeature(EFFECT_FEATURE_TANGENTS);
-//}
 
 // texture: diffuse
 inline void Effect::enableDiffuseTexture() {
@@ -182,11 +169,11 @@ inline bool Effect::hasDiffuseTexture() {
 
 // texture: normal (implicitly tells us we need tangents)
 inline void Effect::enableNormalTexture() {
-	enableFeature(EFFECT_FEATURE_NORMAL_TEXTURE, VERT_TEX | VERT_TAN);
+	enableFeature(EFFECT_FEATURE_NORMAL_TEXTURE, VERT_TAN);
 }
 
 inline void Effect::disableNormalTexture() {
-	disableFeature(EFFECT_FEATURE_NORMAL_TEXTURE, VERT_TEX | VERT_TAN);
+	disableFeature(EFFECT_FEATURE_NORMAL_TEXTURE, VERT_TAN);
 }
 
 inline bool Effect::hasNormalTexture() {

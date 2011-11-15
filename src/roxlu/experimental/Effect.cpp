@@ -249,7 +249,7 @@ void Effect::createVertexShader(string& vertShader) {
 	vert << endl;
 	vert << "void main() {" << endl;
 	vert << "\t" << "gl_Position = modelview_projection * pos;" << endl;
-	vert << "\t" << "eye_position = vec3(modelview * pos);;" << endl;
+	vert << "\t" << "eye_position = vec3(modelview * pos);" << endl;
 		
 	if(hasTextures()) {
 		vert << "\t" << "texcoord = tex;" << endl;
@@ -257,26 +257,27 @@ void Effect::createVertexShader(string& vertShader) {
 	
 	if(hasNormals()) {
 		vert << "\t" << "normal = norm;" << endl;
-		vert << "\t" << "eye_normal = normalize(vec3(modelview * vec4(normal, 1.0)));" << endl;
+		vert << "\t" << "eye_normal = normalize(vec3(modelview * vec4(normal,0.0)));" << endl;
 	}
 	
 	if(hasNormalTexture()) {
 		vert << "\t" << "tangent = normalize(tan.xyz);" << endl;
 		vert << "\t" << "binormal = cross(eye_normal, tangent) * tan.w;" << endl;
 		vert << "\t" << "binormal = normalize(binormal);" << endl; 
-		vert << "\t" << "mat3 tangent_space = mat3(tangent.x, binormal.x, eye_normal.x, tangent.y, binormal.y, eye_normal.y, tangent.z, binormal.z, eye_normal.z); " << endl;
+		vert << "\t" << "mat3 tangent_space = mat3(tangent, binormal, eye_normal); " << endl;
 	}
 	
 	if(hasLights()) {
 		vert << endl;
 		vert 	<< "\t" << "for(int i = 0; i < LIGHT_COUNT; ++i) { " << endl
-				<< "\t\t" << "vec3 lp = lights[i].position;"<< endl;
+			//	<< "\t\t" << "vec3 lp = (lights[i].position);"<< endl;
+				<< "\t\t" << "vec3 lp = (vec3(modelview * vec4(lights[i].position, 0.0)));"<< endl;
 				
 		if(hasNormalTexture()) {
 			vert << "\t\t"	<< "light_directions[i] = normalize(tangent_space * (lp - eye_position)); " << endl;
 		}
 		else {
-			vert << "\t\t"	<< "light_directions[i] = normalize(lp - eye_position); " << endl;
+			vert << "\t\t"	<< "light_directions[i] = normalize(lp-eye_position); " << endl;
 		}
 				
 		vert << "\t" << "}" << endl;
@@ -340,7 +341,7 @@ void Effect::createFragmentShader(string& fragShader) {
 	frag << endl;
 	frag << "void main() {" << endl;
 
-	frag << "\t" << "vec4 texel_color = vec4(0.1, 0.1, 0.1, 1.0);" << endl;
+	frag << "\t" << "vec4 texel_color = vec4(0.0, 0.0, 0.0, 1.0);" << endl;
 	frag << "\t" << "vec3 final_normal = normalize(eye_normal);" << endl;
 	
 	if(hasNormalTexture()) {
@@ -354,21 +355,22 @@ void Effect::createFragmentShader(string& fragShader) {
 	if(hasDiffuseTexture()) {
 		frag << "\t" << "vec4 diffuse_color = texture2D(diffuse_texture, texcoord);" << endl;
 		frag << "\t" << "texel_color += diffuse_color;" << endl;
-		frag << "\t" << "texel_color.rgb = vec3(0.01,0.01,0.01);" << endl;
+//		frag << "\t" << "texel_color.rgb = vec3(0.0,0.0,0.0);" << endl;
 	}
 	
 	if(hasLights()) {
 		
 		frag 	<< "\t" << "for(int i = 0; i < LIGHT_COUNT; ++i) { " << endl
-				<< "\t\t"	<< "float n_dot_l = max(dot(final_normal, light_directions[i]), 0.0); " << endl 
+				<< "\t\t"	<< "float n_dot_l = max(dot(normalize(final_normal), light_directions[i]), 0.0); " << endl 
+				
 				<< "\t\t"	<< "if(n_dot_l > 0.0) {" << endl
-				<< "\t\t\t"		<< "texel_color += (0.4 * (n_dot_l * lights[i].diffuse_color));" << endl
-
+				<< "\t\t\t"		<< "texel_color += ( 0.4*(n_dot_l * lights[i].diffuse_color));" << endl
 				<< "\t\t\t"		<< "vec3 reflection = normalize(reflect(-normalize(light_directions[i]), final_normal));" << endl
 				<< "\t\t\t" 	<< "float spec = max(0.0, dot(final_normal, reflection)); " << endl
-				<< "\t\t\t"		<< "float fspec = pow(spec, 52.0);" << endl
+				<< "\t\t\t"		<< "float fspec = pow(spec, 352.0);" << endl
 				//<< "\t\t\t"		<< "texel_color.rgb += vec3(fspec, fspec, fspec);" << endl
-				<< "\t\t\t"		<< "texel_color += (fspec * lights[i].specular_color) * 0.2;" << endl
+				//<< "\t\t\t"		<< "texel_color += (fspec * lights[i].specular_color)  ;" << endl
+				<< "\t\t\t"		<< "texel_color += (fspec * lights[i].specular_color)  ;" << endl
 				<< "\t\t"	<< "}" << endl
 				<< "\t" << "}" << endl;
 	}
@@ -377,8 +379,8 @@ void Effect::createFragmentShader(string& fragShader) {
 	frag << "\t" << "gl_FragColor = texel_color;" << endl;
 //	frag << "\t" << "gl_FragColor = diffuse_color;" << endl;
 //	frag << "\t" << "gl_FragColor.rgb = normal_color;" << endl;
-	//frag << "\tgl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);" << endl;
-			
+//	frag << "\t" << "gl_FragColor.rgb = final_normal;" << endl;			
+//	frag << "\t" << "gl_FragColor.rgb = normal;" << endl;			
 	// close shader.
 	frag << "}" << endl; // main()
 	
@@ -488,8 +490,9 @@ void Effect::setupBuffer(VAO& vao, VBO& vbo, VertexData& vd) {
 	int norm_offset = 0;
 	int tan_offset = 0;
 	
+
+	
 	if(necessary_vertex_attribs == VBO_TYPE_VERTEX_P) {
-		printf("Effect: fill vbo with vertex positions.\n");
 		vbo.setVertexData(
 			 vd.getVertexP()
 			,vd.getNumVertices()
@@ -506,7 +509,16 @@ void Effect::setupBuffer(VAO& vao, VBO& vbo, VertexData& vd) {
 		tex_offset = offsetof(VertexPT, tex);
 		stride = sizeof(VertexPT);
 	}
-	else if(necessary_vertex_attribs == VBO_TYPE_VERTEX_PTN) {
+	else if(necessary_vertex_attribs == VBO_TYPE_VERTEX_PN) {	
+		vbo.setVertexData(
+			 vd.getVertexPN()
+			,vd.getNumVertices()
+		);
+		pos_offset = offsetof(VertexPN, pos);
+		norm_offset = offsetof(VertexPN, norm);
+		stride = sizeof(VertexPN);
+	}
+	else if(necessary_vertex_attribs == VBO_TYPE_VERTEX_PTN) {	
 		vbo.setVertexData(
 			 vd.getVertexPTN()
 			,vd.getNumVertices()
@@ -517,8 +529,6 @@ void Effect::setupBuffer(VAO& vao, VBO& vbo, VertexData& vd) {
 		stride = sizeof(VertexPTN);
 	}
 	else if(necessary_vertex_attribs == VBO_TYPE_VERTEX_PTNT) {
-		printf("------ %d, %d, %d, %d ----------\n", vd.getNumVertices(), vd.getNumTexCoords(), vd.getNumNormals(), vd.getNumTangents());
-		
 		vbo.setVertexData(
 			 vd.getVertexPTNT()
 			,vd.getNumVertices()
@@ -594,6 +604,7 @@ void Effect::updateLights() {
 		Light& l = *lights[i];
 		stringstream varname;
 		varname << "lights[" << i << "]";
+//		printf("Update lits: %f, %f, %f\n", l.getPosition().x, l.getPosition().y, l.getPosition().z);
 		shader.uniform3fv(varname.str() +".position", l.getPosition().getPtr());
 		shader.uniform4fv(varname.str() +".diffuse_color", l.getDiffuseColor().getPtr());
 		shader.uniform4fv(varname.str() +".specular_color", l.getSpecularColor().getPtr());
