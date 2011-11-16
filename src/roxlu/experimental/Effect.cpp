@@ -349,7 +349,7 @@ void Effect::createFragmentShader(string& fragShader) {
 		frag << "\t" << "normal_color = normalize(normal_color);" << endl;
 		// @todo do I need to normalize the tangent, binormal here?
 		frag << "\t" << "mat3 tangent_matrix = mat3(tangent, binormal, final_normal);" << endl;
-		frag << "\t" << "final_normal = normalize(tangent_matrix * normal_color);";
+		frag << "\t" << "final_normal = normalize(tangent_matrix * normal_color);" << endl;
 	}
 			
 	if(hasDiffuseTexture()) {
