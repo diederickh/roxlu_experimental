@@ -535,6 +535,7 @@ void VertexData::debugDraw(int drawMode) {
 	// w/o indices
 	else {
 		if(getNumTexCoords() > 0) {
+			glDisable(GL_TEXTURE_2D);
 			//glColor3f(1,1,1);
 			glColor3f(0.98, 0.92, 0.75); // yellowish
 //			glColor3f(0.4, 0.4, 0.4);
@@ -545,6 +546,7 @@ void VertexData::debugDraw(int drawMode) {
 				glVertex3fv(vertices[i].getPtr());
 			}
 			glEnd();
+			glEnable(GL_TEXTURE_2D);
 		
 		}
 		else {
@@ -563,6 +565,7 @@ void VertexData::debugDraw(int drawMode) {
 		 	// somehow the colors arent set in my current test app...
 			glColor3f(1,1,1);
 			glLineWidth(1.5);
+			
 			glDisable(GL_BLEND);
 		
 			glBegin(GL_LINES);
@@ -597,6 +600,7 @@ void VertexData::debugDraw(int drawMode) {
 		}
 		
 		// draw lines
+		glDisable(GL_TEXTURE_2D);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glColor3f(0,0,0);
 		glBegin(drawMode);
@@ -605,6 +609,7 @@ void VertexData::debugDraw(int drawMode) {
 		}
 		glEnd();
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glEnable(GL_TEXTURE_2D);
 	}
 }
 

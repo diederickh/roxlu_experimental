@@ -257,7 +257,7 @@ void Effect::createVertexShader(string& vertShader) {
 	
 	if(hasNormals()) {
 		vert << "\t" << "normal = norm;" << endl;
-		vert << "\t" << "eye_normal = normalize(vec3(modelview * vec4(normal,0.0)));" << endl;
+		vert << "\t" << "eye_normal = normalize(vec3(modelview * vec4(normal,1.0)));" << endl;
 	}
 	
 	if(hasNormalTexture()) {

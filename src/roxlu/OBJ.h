@@ -10,6 +10,8 @@
 */
 #include <sstream>
 #include "HalfEdge.h"
+#include <vector>
+
 using namespace std;
 
 namespace roxlu {
@@ -27,13 +29,46 @@ class OBJ {
 public:
 	OBJ();
 	~OBJ();
-	void exportSceneItem(SceneItem& si);
-	void exportSceneItem(SceneItem* si);
-	void createMaterialFile(Material& mat);
-private:
+	inline void addSceneItem(SceneItem& si);
+	inline void addSceneItem(SceneItem* si);
+	inline void addSceneItems(vector<SceneItem*>& items);
+	inline void addMaterial(Material* m);
+	inline void addMaterial(Material& m);
+	inline void addMaterials(vector<Material*>& mats);
 	
+	void exportSceneItem(SceneItem& si, stringstream& ss);
+	void exportSceneItem(SceneItem* si, stringstream& ss);
+	void createMaterialFile(Material& mat);
+	bool save(string fileName);
+private:
+//	int64_t num_exported_vertices;
+	vector<SceneItem*> scene_items;
+	vector<Material*> materials;	
 };
 
+inline void OBJ::addSceneItem(SceneItem& si) {
+	addSceneItem(&si);
+}
+
+inline void OBJ::addSceneItem(SceneItem* si) {
+	scene_items.push_back(si);
+}
+
+inline void OBJ::addMaterial(Material& m) {
+	addMaterial(&m);
+}
+
+inline void OBJ::addMaterial(Material* m) {
+	materials.push_back(m);
+}
+
+inline void OBJ::addSceneItems(vector<SceneItem*>& items) {
+	std::copy(items.begin(), items.end(), std::back_inserter(scene_items));
+}
+
+inline void OBJ::addMaterials(vector<Material*>& mats) {
+	std::copy(mats.begin(), mats.end(), std::back_inserter(materials));
+}
 
 };
 

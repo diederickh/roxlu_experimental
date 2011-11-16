@@ -42,6 +42,7 @@ public:
 	Mat4& rotationX(float a); // rotate around x-axis
 	Mat4& rotationY(float a); // rotate around y-axis
 	Mat4& rotationZ(float a); // rotate around z-axis
+	Mat4& scale(float s);
 	Mat4& scale(float x, float y, float z);
 	Mat4& scaling(float x, float y, float z);
 	

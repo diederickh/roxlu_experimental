@@ -42,7 +42,9 @@ public:
 	inline int getNumberOfLights();
 	
 	inline SceneItem* getSceneItem(string name);
+	inline const map<string, SceneItem*>& getSceneItems() const;
 	inline Material* getMaterial(string name);
+	inline const map<string, Material*>& getMaterials() const;
 	inline Light* getLight(string name);
 	
 	map<string, VertexData*> vertex_datas;
@@ -125,6 +127,14 @@ inline Light* Scene::getLight(string name) {
 
 inline int Scene::getNumberOfLights() {
 	return lights.size();
+}
+
+inline const map<string, Material*>& Scene::getMaterials() const {
+	return materials;
+}
+
+inline const map<string, SceneItem*>& Scene::getSceneItems() const {
+	return scene_items;
 }
 
 } // roxlu

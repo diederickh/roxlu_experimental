@@ -16,13 +16,31 @@ SceneItem::SceneItem(string name)
 ,material(NULL)
 ,initialized(false)
 ,effect(NULL)
+,scaling(1.0)
 ,name(name)
 {
 	vao = new VAO();
 	vbo = new VBO();	
 }
 
+//SceneItem::SceneItem(const SceneItem& other) {
+//	other.vao = vao;
+//	other.vbo = vbo;
+//	other.draw_mode = draw_mode;
+//	other.effect = effect;
+//	other.initialized = initialized;
+//	other.model_matrix = model_matrix;
+//	other.position = position;
+//	other.setName(getName());
+//}
+
 SceneItem::~SceneItem() {
+}
+
+SceneItem* SceneItem::duplicate() {
+	SceneItem* si = new SceneItem(name);
+	*si = *this;
+	return si;
 }
 
 bool SceneItem::createFromVertexData(VertexData& vd) {
@@ -71,6 +89,10 @@ void SceneItem::draw(Mat4& viewMatrix, Mat4& projectionMatrix) {
 	if(material != NULL) {
 		material->bind();
 	}
+//	printf("si: %s\n", name.c_str());
+//	printf("effect: %p\n", effect);
+//	printf("material:%p\n", material);
+//	printf("--------\n\n");
 
 	Mat4 modelview_matrix = viewMatrix * mm();
 	Mat4 modelview_projection_matrix = projectionMatrix * modelview_matrix ;

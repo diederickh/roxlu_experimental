@@ -33,12 +33,17 @@ public:
 
 	SceneItem(string name);
 	~SceneItem();
+	SceneItem* duplicate();
+	
+	
 	void draw(Mat4& viewMatrix, Mat4& projectionMatrix);
 	bool createFromVertexData(VertexData* vd);
 	bool createFromVertexData(VertexData& vd);
 	inline VertexData* getVertexData();
 	inline void setPosition(float x, float y, float z);
 	inline void setPosition(const Vec3& p);
+	inline Vec3 getPosition();
+	inline void scale(float s);
 	inline void translate(float x, float y, float z);
 	inline void translate(const Vec3& t);
 	inline void rotate(float radians, const float x, const float y, const float z);
@@ -76,10 +81,12 @@ public:
 			
 	VBO* vbo;
 	VAO* vao;
+	
 	//Shader* shader;	
 	Material* material;
 	
 private:
+	float scaling;
 	Effect* effect;
 	string name;
 	bool initialized;
@@ -130,6 +137,10 @@ inline void SceneItem::setPosition(const Vec3& p) {
 	updateModelMatrix();
 }
 
+inline Vec3 SceneItem::getPosition() {
+	return position;
+}
+
 inline void SceneItem::translate(float x, float y, float z) {
 	position.x += x;
 	position.y += y;
@@ -162,6 +173,7 @@ inline void SceneItem::updateModelMatrix() {
 	Mat4 rotation = orientation.getMat4();
 	model_matrix.identity();
 	model_matrix.translate(position);
+	model_matrix.scale(scaling);
 	model_matrix *= rotation;
 }
 
@@ -207,6 +219,11 @@ inline void SceneItem::setName(string itemName) {
 
 inline string SceneItem::getName() {
 	return name;
+}
+
+inline void SceneItem::scale(float s) {
+	scaling = s;
+	updateModelMatrix();
 }
 
 } // roxlu

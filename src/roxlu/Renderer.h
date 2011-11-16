@@ -51,6 +51,7 @@ public:
 	inline void translate(float x, float y, float z);
 	
 	inline SceneItem* getSceneItem(string name);
+	inline SceneItem* duplicateSceneItem(string oldName, string newName);
 	SceneItem* createIcoSphere(string name, int detail, float radius);
 	SceneItem* createUVSphere(string name, int phi, int theta, float radius);
 	SceneItem* createBox(string name, float width, float height, float depth);
@@ -60,6 +61,7 @@ public:
 	Material* createMaterial(string name);
 	inline Material* getMaterial(string materialName);
 	inline void setSceneItemMaterial(string sceneItemName, string materialName);
+	inline void setSceneItemPosition(string sceneItemname, float x, float y, float z);
 
 	Material* createDiffuseTexture(string materialName, string textureName, string diffuseFileName, GLuint imageFormat = GL_RGB);
 	Material* createNormalTexture(string materialName, string textureName, string normalFileName, GLuint imageFormat = GL_RGB);
@@ -68,6 +70,7 @@ public:
 	void onMouseDown(float x, float y);
 	void onMouseDragged(float x, float y);
 	void exportToPly(string sceneItemName, string fileName);
+	void exportToOBJ(string fileName);
 	Texture* createTexture(string name, string fileName);
 	
 	// light
@@ -124,6 +127,22 @@ inline void Renderer::setSceneItemMaterial(string sceneItemName, string material
 inline EasyCam* Renderer::getCamera() {
 	return cam;
 }
+
+inline SceneItem* Renderer::duplicateSceneItem(string oldName, string newName) {
+	SceneItem* si = getSceneItem(oldName);
+	if(si == NULL) {
+		printf("Error: cannot duplicate scene item: '%s' as we cannot find it\n", oldName.c_str());
+		return NULL;
+	}
+	SceneItem* duplicated = si->duplicate();
+	scene->addSceneItem(newName, duplicated);
+	return duplicated;
+}
+
+inline void Renderer::setSceneItemPosition(string name, float x, float y, float z) {
+	getSceneItem(name)->setPosition(x,y,z);
+}
+
 
 /* working example (also mouse rotation) 
 

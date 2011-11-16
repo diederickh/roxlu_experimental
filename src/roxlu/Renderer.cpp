@@ -8,6 +8,7 @@
 #include "File.h"
 #include "Ply.h"
 #include "Light.h"
+#include "OBJ.h"
 #include "experimental/StringUtil.h"
 #include "experimental/UVSphere.h"
 #include "experimental/Plane.h"
@@ -15,6 +16,7 @@
 #include "experimental/Material.h"
 #include "experimental/ShaderGenerator.h"
 #include <iostream>
+#include <map>
 
 using namespace std;
 
@@ -198,27 +200,6 @@ Material* Renderer::createDiffuseTexture(
 	return mat;
 }
 
-
-// loads a diffuse material and sets it for the given material group
-/*
-void Renderer::loadDiffuseTexture(
-		 string materialName
-		,string textureName
-		,string diffuseFileName
-		,GLuint imageFormat 
-)
-{
-	Material* mat = getMaterial(materialName);
-	if(mat == NULL) {
-		mat = createDiffuseTexture(materialName, textureName, diffuseFileName, imageFormat);
-		return;
-	}
-	else {
-		Texture* tex = mat->loadDiffuseTexture(diffuseFileName, imageFormat);
-		scene->addTexture(textureName, tex);
-	}
-}
-*/
 Material* Renderer::createNormalTexture(
 	 string materialName
 	,string textureName
@@ -262,6 +243,29 @@ void Renderer::setLightDiffuseColor(string name, float r, float g, float b, floa
 void Renderer::setLightSpecularColor(string name, float r, float g, float b, float a) {
 	Light* l = scene->getLight(name);
 	l->setSpecularColor(r,g,b,a);
+}
+
+void Renderer::exportToOBJ(string fileName) {
+	printf("export!");
+	OBJ obj;
+	
+	// add scene items.
+	const map<string, SceneItem*>& items = scene->getSceneItems();
+	map<string, SceneItem*>::const_iterator items_it = items.begin();
+	while(items_it != items.end()) {
+		obj.addSceneItem(items_it->second);
+		++items_it;
+	}
+	
+	// add materials.
+	const map<string, Material*>& maps = scene->getMaterials();
+	map<string, Material*>::const_iterator map_it = maps.begin();
+	while(map_it != maps.end()) {
+		obj.addMaterial(map_it->second);
+		++map_it;
+	}
+	
+	obj.save("test.obj");
 }
 
 

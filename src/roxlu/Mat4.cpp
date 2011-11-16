@@ -867,6 +867,9 @@ Mat4& Mat4::scaling(float x, float y, float z) {
 	
 	return *this;
 }
+Mat4& Mat4::scale(float s) {
+	return scale(s,s,s);
+}
 
 Mat4& Mat4::scale(float x, float y, float z) {
 	Mat4 m;
