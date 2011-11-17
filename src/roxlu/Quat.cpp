@@ -81,4 +81,31 @@ void Quat::normalize() {
 	w = w * factor;
 }
 
+// NOT VALIDATED (FROM OPENFRAMEWORKS)
+Vec3 Quat::getEuler() {
+	
+	float test = v.x * v.y + v.z * w;
+	float heading;
+	float attitude;
+	float bank;
+	if (test > 0.499) {
+		heading = 2 * atan2(v.x, w);
+		attitude = PI/2;
+		bank = 0;
+	} else if (test < -0.499) { 
+		heading = -2 * atan2(v.x, w);
+		attitude = - PI/2;
+		bank = 0;
+	} else {
+		float sqx = v.x * v.x;
+		float sqy = v.y * v.y;
+		float sqz = v.z * v.z;
+		heading = atan2(2.0f * v.y * w - 2.0f * v.x * v.z, 1.0f - 2.0f*sqy - 2.0f*sqz);
+		attitude = asin(2*test);
+		bank = atan2(2.0f * v.x * w - 2.0f * v.y * v.z, 1.0f - 2.0f*sqx - 2.0f*sqz);
+	}
+	return Vec3(attitude, heading, bank);
+	//return ofVec3f(ofRadToDeg(attitude), ofRadToDeg(heading), ofRadToDeg(bank));
+}
+
 } // roxlu

@@ -17,7 +17,7 @@ public:
 	void toMat4(Mat4& aDest) const;
 	Mat4 getMat4() const;
 	
-	// absolute rotations.
+	// absolute rotations. (euler)
 	void setRotation(const float radians, const float x, const float y, const float z);
 	inline void setXRotation(const float radians);
 	inline void setYRotation(const float radians);
@@ -33,6 +33,8 @@ public:
 	Quat& operator*=(const Quat& rOther);
 	Quat operator+(const Quat& rOther) const;
 	Quat operator-(const Quat& rOther) const;
+	
+	Vec3 getEuler();
 	
 	friend std::ostream& operator<<(std::ostream& os, const Quat& rQuat);
 	

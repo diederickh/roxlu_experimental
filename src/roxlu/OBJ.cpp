@@ -91,6 +91,7 @@ void OBJ::exportSceneItem(SceneItem& si, stringstream& ss) {
 	for(int i = 0; i < vd.getNumVertices(); ++i) {
 		Vec3& v = *vd.getVertexPtr(i);
 		v = mm.transform(v);
+//		v += si.getPosition();
 		ss << "v " << v.x << " " << v.y << " " << v.z << endl;
 //		v.print();
 //		num_exported_vertices++;

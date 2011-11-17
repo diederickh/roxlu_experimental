@@ -15,6 +15,7 @@
 #include "experimental/Box.h"
 #include "experimental/Material.h"
 #include "experimental/ShaderGenerator.h"
+#include "experimental/R3F.h"
 #include <iostream>
 #include <map>
 
@@ -268,6 +269,40 @@ void Renderer::exportToOBJ(string fileName) {
 	obj.save("test.obj");
 }
 
+void Renderer::exportToR3F(string fileName) {
+	R3F rf;
+	
+	// add vertex datas
+	const map<string, VertexData*>& datas = scene->getVertexDatas();
+	map<string, VertexData*>::const_iterator it_data = datas.begin();
+	while(it_data != datas.end()) {
+		rf.addVertexData(it_data->second);
+		++it_data;
+	}
+	
+	// add scene items.
+	const map<string, SceneItem*>& items = scene->getSceneItems();
+	map<string, SceneItem*>::const_iterator items_it = items.begin();
+	while(items_it != items.end()) {
+		rf.addSceneItem(items_it->second);
+		++items_it;
+	}
+	
+	rf.save("test.r3f");
+	
+	// add materials.
+	/*
+	const map<string, Material*>& maps = scene->getMaterials();
+	map<string, Material*>::const_iterator map_it = maps.begin();
+	while(map_it != maps.end()) {
+		rf.addMaterial(map_it->second);
+		++map_it;
+	}
+	*/
+
+	
+//	rf.addSceneItem(plane_si);
+}
 
 
 } // roxlu

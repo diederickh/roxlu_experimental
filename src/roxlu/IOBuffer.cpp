@@ -4,6 +4,8 @@
 using std::cout;
 using std::endl;
 
+namespace roxlu {
+
 IOBuffer::IOBuffer() 
 :buffer(NULL)
 ,size(0)
@@ -164,6 +166,12 @@ void IOBuffer::storeByte(uint8_t byte) {
 	published++;
 }
 
+void IOBuffer::storeFloat(float data) {
+	ensureSize(4);
+	memcpy(buffer+published, &data, 4);
+	published +=4;
+}
+
 bool IOBuffer::storeBytes(const uint8_t* someData, const uint32_t numBytes) {
 	//printf("storeBytes: %d\n", numBytes);
 	if(!ensureSize(numBytes)) {
@@ -236,6 +244,12 @@ void IOBuffer::storeBigEndianDouble(double data) {
 	published += 8;
 }
 
+void IOBuffer::storeBigEndianFloat(float data) {
+	ensureSize(4);
+	data = ToBE32(data);
+	memcpy(buffer+published, &data, 4);
+	published += 4;
+}
 
 void IOBuffer::storeString(string data) {
 	uint32_t len = (uint32_t)data.length();
@@ -434,6 +448,13 @@ int64_t IOBuffer::consumeI64() {
 	return val;
 }
 
+float IOBuffer::consumeFloat() {
+	float val = 0.0f;
+	memcpy(&val, buffer+consumed, 4);
+	consumed += 4;
+	return val;
+}
+
 double IOBuffer::consumeDouble() {
 	double val = 0;
 	memcpy(&val, buffer+consumed, 8);
@@ -608,3 +629,5 @@ void IOBuffer::printUI16AsHex(uint16_t toPrint) {
 bool IOBuffer::hasBytesToRead() {
 	return consumed < published;
 }
+
+} // roxlu

@@ -71,6 +71,7 @@ public:
 	void onMouseDragged(float x, float y);
 	void exportToPly(string sceneItemName, string fileName);
 	void exportToOBJ(string fileName);
+	void exportToR3F(string fileName);
 	Texture* createTexture(string name, string fileName);
 	
 	// light

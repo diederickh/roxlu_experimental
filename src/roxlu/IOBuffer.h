@@ -11,7 +11,7 @@ using std::ifstream;
 using std::ofstream;
 
 // Based on CRTMP server source code.
-
+namespace roxlu {
 
 #define GET_IB_POINTER(x) 				 ((uint8_t *)((x).buffer + (x).consumed))
 #define GET_AVAILABLE_BYTES_COUNT(x)     ((x).published - (x).consumed)
@@ -52,6 +52,7 @@ public:
 	void storeRepeat(uint8_t byte, uint32_t numBytes); // rename!
 	void storeBuffer(IOBuffer& other); // copies only stored data
 	int storeBuffer(IOBuffer& other, uint32_t numBytes);
+	void storeFloat(float data);
 
 	void storeString(string data);
 	void storeStringWithSize(string data); // adds a uint16_t with the size of the string 
@@ -59,6 +60,7 @@ public:
 	void storeBigEndianUI32(uint32_t data);
 	void storeBigEndianUI64(uint64_t data);
 	void storeBigEndianDouble(double data);
+	void storeBigEndianFloat(float data);
 	
 	// get the number of bytes published.
 	uint32_t getNumBytesStored();
@@ -81,6 +83,7 @@ public:
 	uint16_t consumeUI16();
 	uint32_t consumeUI32();
 	uint64_t consumeUI64();
+	float	consumeFloat();
 
 	int8_t  consumeI8();
 	int16_t consumeI16();
@@ -120,4 +123,6 @@ public:
 inline uint8_t IOBuffer::getAt(uint8_t position) {
 	return buffer[position];
 }
+
+} // roxlu
 #endif

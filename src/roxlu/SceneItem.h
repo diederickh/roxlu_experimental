@@ -44,12 +44,14 @@ public:
 	inline void setPosition(const Vec3& p);
 	inline Vec3 getPosition();
 	inline void scale(float s);
+	inline Vec3& getScale();
 	inline void translate(float x, float y, float z);
 	inline void translate(const Vec3& t);
 	inline void rotate(float radians, const float x, const float y, const float z);
 	inline void rotateX(float radians);
 	inline void rotateY(float radians);
 	inline void rotateZ(float radians);
+	inline Quat& getOrientation();
 	inline void updateModelMatrix();
 	
 	// shader
@@ -76,6 +78,7 @@ public:
 	inline Mat4& mm(); // get model matrix.
 	Mat4 model_matrix; 
 	Vec3 position;
+	Vec3 scaling;
 	Quat orientation;
 	VertexData* vertex_data;
 			
@@ -84,15 +87,16 @@ public:
 	
 	//Shader* shader;	
 	Material* material;
+	void initialize();
 	
 private:
-	float scaling;
+	
 	Effect* effect;
 	string name;
 	bool initialized;
 	int draw_mode;
 	
-	void initialize();
+
 	void drawElements(); // indexed data
 	void drawArrays(); 
 };
@@ -173,7 +177,7 @@ inline void SceneItem::updateModelMatrix() {
 	Mat4 rotation = orientation.getMat4();
 	model_matrix.identity();
 	model_matrix.translate(position);
-	model_matrix.scale(scaling);
+	model_matrix.scale(scaling.x, scaling.y, scaling.z);
 	model_matrix *= rotation;
 }
 
@@ -222,9 +226,19 @@ inline string SceneItem::getName() {
 }
 
 inline void SceneItem::scale(float s) {
-	scaling = s;
+	scaling.set(s,s,s);
 	updateModelMatrix();
 }
+
+inline Vec3& SceneItem::getScale() {
+	return scaling;
+}
+
+inline Quat& SceneItem::getOrientation() {
+	return orientation;
+}
+
+
 
 } // roxlu
 

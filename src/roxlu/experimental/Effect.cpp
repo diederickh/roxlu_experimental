@@ -341,8 +341,11 @@ void Effect::createFragmentShader(string& fragShader) {
 	frag << endl;
 	frag << "void main() {" << endl;
 
-	frag << "\t" << "vec4 texel_color = vec4(0.0, 0.0, 0.0, 1.0);" << endl;
-	frag << "\t" << "vec3 final_normal = normalize(eye_normal);" << endl;
+	frag << "\t" << "vec4 texel_color = vec4(0.1, 0.1, 0.1, 1.1);" << endl;
+	
+	if(hasNormals()) {
+		frag << "\t" << "vec3 final_normal = normalize(eye_normal);" << endl;
+	}
 	
 	if(hasNormalTexture()) {
 		frag << "\t" << "vec3 normal_color = texture2D(normal_texture, texcoord).xyz * 2.0 - 1.0;" << endl; 

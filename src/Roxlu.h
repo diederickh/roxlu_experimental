@@ -49,6 +49,8 @@
 #include "roxlu/experimental/ShaderGenerator.h"
 #include "roxlu/experimental/Light.h"
 #include "roxlu/experimental/Effect.h"
+#include "roxlu/experimental/R3F.h"
+
 
 #include "external/jpeg/JPEGImage.h"
 #include "external/webp/WebPImage.h"

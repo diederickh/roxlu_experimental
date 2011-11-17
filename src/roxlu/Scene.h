@@ -46,6 +46,7 @@ public:
 	inline Material* getMaterial(string name);
 	inline const map<string, Material*>& getMaterials() const;
 	inline Light* getLight(string name);
+	inline const map<string, VertexData*>& getVertexDatas() const;
 	
 	map<string, VertexData*> vertex_datas;
 	map<string, VBO*> vbos;
@@ -135,6 +136,10 @@ inline const map<string, Material*>& Scene::getMaterials() const {
 
 inline const map<string, SceneItem*>& Scene::getSceneItems() const {
 	return scene_items;
+}
+
+inline const map<string, VertexData*>& Scene::getVertexDatas() const {
+	return vertex_datas;
 }
 
 } // roxlu
