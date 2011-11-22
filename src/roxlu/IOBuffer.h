@@ -85,6 +85,7 @@ public:
 	uint32_t consumeUI32();
 	uint64_t consumeUI64();
 	float	consumeFloat();
+	bool	consumeBool();
 
 	int8_t  consumeI8();
 	int16_t consumeI16();

@@ -37,8 +37,10 @@ class Renderer {
 public:
 	Renderer(float screenWidth, float screenHeight);
 	~Renderer();
-	void render();
-	void renderSceneItem(string name);
+	void draw();
+	void debugDraw();
+	void drawSceneItem(string name);
+	void addSceneItem(SceneItem* si);
 	
 	inline EasyCam* getCamera();
 	

@@ -15,7 +15,7 @@ void EasyCam::setup(float screenWidth, float screenHeight) {
 		,(float)screenHeight * 0.5)
 	);
 	arcball.setCenter(screenWidth * 0.5,screenHeight * 0.5);
-	translate(0,0,-8);
+	translate(0,0,-5);
 }
 
 void EasyCam::onMouseDown(float x, float y) {

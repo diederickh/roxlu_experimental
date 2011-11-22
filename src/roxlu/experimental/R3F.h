@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 // Roxlu 3D Format: binary format to store vertex data // scenes which can 
 // be imported into blender. See the blender directory of this roxlu lib.
@@ -10,6 +11,7 @@
 
 using std::vector;
 using std::string;
+using std::map;
 
 #define R3F_VERTEX_DATAS	1
 #define R3F_SCENE_ITEMS		2
@@ -45,10 +47,14 @@ public:
 	void storeMaterial(IOBuffer& buffer, Material& m);
 	void load(string fileName);
 	
+	inline VertexData* getVertexData(string name);
+	SceneItem* getSceneItem(string name);
+	Material* getMaterial(string name);
 private:
 	vector<Material*> materials;
 	vector<VertexData*> vertex_datas;
 	vector<SceneItem*> scene_items;
+	
 };
 
 inline void R3F::addVertexData(VertexData& vd) {
@@ -76,5 +82,6 @@ inline void R3F::addMaterial(Material* m) {
 }
 
 
-}
+
+} // roxlu
 #endif

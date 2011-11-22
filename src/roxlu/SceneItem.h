@@ -45,6 +45,7 @@ public:
 	inline Vec3 getPosition();
 	inline void scale(float s);
 	inline Vec3& getScale();
+	inline void setScale(const Vec3& s);
 	inline void translate(float x, float y, float z);
 	inline void translate(const Vec3& t);
 	inline void rotate(float radians, const float x, const float y, const float z);
@@ -52,9 +53,11 @@ public:
 	inline void rotateY(float radians);
 	inline void rotateZ(float radians);
 	inline Quat& getOrientation();
+	inline void setOrientation(const Quat& q);
 	inline void updateModelMatrix();
 	
 	// shader
+	inline bool hasEffect();
 	inline void setEffect(Effect& eff);
 	inline void setEffect(Effect* eff);
 	
@@ -72,7 +75,7 @@ public:
 	inline void drawUsingQuadStrip();
 	
 	inline void setName(string itemName);
-	inline string getName();
+	inline string getName() const;
 		
 	// matrix related
 	inline Mat4& mm(); // get model matrix.
@@ -104,6 +107,15 @@ private:
 	void drawArrays(); 
 };
 
+// vector<SceneItem*>::iterator it = std::find_if(items.begin(), items.end(), CompareSceneItemByName(name));
+class CompareSceneItemByName {
+public:
+	CompareSceneItemByName(string name):name(name){}
+	bool const operator()(const SceneItem* other) const {
+		return name == other->getName();
+	}
+	string name;
+};
 
 inline void SceneItem::drawUsingTriangles() {
 	setDrawMode(TRIANGLES);
@@ -205,6 +217,12 @@ inline void SceneItem::rotateZ(float radians) {
 	updateModelMatrix();
 }
 
+inline void SceneItem::setOrientation(const Quat& q) {
+	orientation = q;
+	updateModelMatrix();
+}
+
+
 inline VertexData* SceneItem::getVertexData() {
 	return vertex_data;
 }
@@ -225,7 +243,7 @@ inline void SceneItem::setName(string itemName) {
 	name = itemName;
 }
 
-inline string SceneItem::getName() {
+inline string SceneItem::getName() const {
 	return name;
 }
 
@@ -237,6 +255,12 @@ inline void SceneItem::scale(float s) {
 inline Vec3& SceneItem::getScale() {
 	return scaling;
 }
+
+inline void SceneItem::setScale(const Vec3& s) {
+	scaling = s;
+	updateModelMatrix();
+}
+
 
 inline Quat& SceneItem::getOrientation() {
 	return orientation;
@@ -252,6 +276,10 @@ inline void SceneItem::show() {
 
 inline bool SceneItem::isVisible() {
 	return is_visible;
+}
+
+inline bool SceneItem::hasEffect() {
+	return effect != NULL;
 }
 
 

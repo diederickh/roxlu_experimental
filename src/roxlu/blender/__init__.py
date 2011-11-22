@@ -1,11 +1,14 @@
 import bpy
+#import bpy_extras
+import shutil
 import struct
 import mathutils
 import os
+
 # Good info: http://wiki.blender.org/index.php/Dev:2.5/Py/Scripts/Cookbook
 
 #imports for file selector
-from bpy_extras.io_utils import ImportHelper
+from bpy_extras.io_utils import ImportHelper, ExportHelper
 from bpy.props import StringProperty, BoolProperty, EnumProperty
 
 R3F_VERTEX_DATAS = 0x01
@@ -86,6 +89,38 @@ def readString(file):
 	n = str(tmp, "utf-8", "replace")
 	return n
 	
+def writeUI8(file, value):
+	data = struct.pack("B", value)
+	file.write(data)
+	
+def writeUI16(file, value):
+	data = struct.pack("h", value)
+	file.write(data)
+
+def writeUI32(file, value):
+	data = struct.pack("i", value)
+	file.write(data)
+	
+def writeString(file, value):
+	data = struct.pack(">h", len(value))
+	file.write(data)
+	file.write(bytes(value, 'utf-8'))
+
+def writeFloat2(file, value):	
+	data = struct.pack("ff",value[0], value[1])
+	file.write(data)
+	
+def writeFloat3(file, value):
+	data = struct.pack("fff",value[0], value[1], value[2])
+	file.write(data)
+
+def writeFloat4(file, value):
+	data = struct.pack("ffff",value[0], value[1], value[2], value[3])
+	file.write(data)
+	
+def writeBool(file, value):
+	writeUI8(file, value)
+	
 class Texture: 
 	def __init__(self):
 		self.type = R3F_MAT_NONE
@@ -95,9 +130,12 @@ class Texture:
 		self.type = type
 		self.file = file
 
-		
+	# get the filepath	
 	def getFile(self):
 		return self.file
+		
+	def getFileName(self):
+		return os.path.basename(self.getFile())
 		
 	def createBlenderImage(self):
 		img = bpy.data.images.load(self.file)
@@ -114,7 +152,16 @@ class Material:
 		
 	def getTextures(self):
 		return self.textures
-   
+		
+	def getNumTextures(self):
+		return len(self.textures)
+		
+	def hasTexture(self, type):
+		return self.textures[type] 
+		
+	def getTexture(self, type):
+		return self.textures[type]
+		
 class SceneItem:
 	def __init__(self):
 		self.vertex_data_id = 0
@@ -123,19 +170,30 @@ class SceneItem:
 		self.orientation = 0
 		self.scale = []
 		self.material_name = ""
+		self.vertex_data_name = ""
 	
+	# not used anymore, use vertex data name
 	def setVertexDataID(self, id):
+		print("SETVERTEXDATAID IS NOT USED ANYMORE, USE VERTEXDATANAME");
 		self.vertex_data_id = id
 	
 	def getVertexDataID(self):
+		print("GETVERTEXDATAID IS NOT USED ANYMORE, USE VERTEXDATANAME");
 		return self.vertex_data_id
+		
+	def setVertexDataName(self, n):
+		self.vertex_data_name = n
+	
+	def getVertexDataName(self):
+		return self.vertex_data_name;
 		
 	def setName(self, n):
 		self.name = n
 		
 	def getName(self):
 		return self.name
-		
+	
+	# @todo pass in a correct object (use G2B3: openGl to Blender Vec3)	
 	def setOrigin(self, o):
 		self.origin = (o[0], o[2], o[1])
 		
@@ -143,11 +201,15 @@ class SceneItem:
 		return self.origin
 		
 	def setOrientation(self, o):
-		self.orientation = mathutils.Quaternion((o[0], o[2], o[1]), -o[3]).to_euler() 
-
+		self.orientation = o;
+		
+	def getOrientationAsEuler(self):
+		return mathutils.Quaternion((self.orientation[0], self.orientation[2],self.orientation[1]), -self.orientation[3]).to_euler()
+	
 	def getOrientation(self):
 		return self.orientation
-		
+	
+	# @todo pass in a correct object (use B2G3 function)	
 	def setScale(self, s):
 		self.scale = (s[0], s[2], s[1])
 		
@@ -157,19 +219,36 @@ class SceneItem:
 	def hasMaterial(self):
 		return self.material_name != ""
 		
+	def setMaterialName(self, n):
+		self.material_name = n
+		
 	def getMaterialName(self):
 		return self.material_name
-		
+
+# blender 2 opengl conversion
+def B2G3(o):
+	return (o[0], -o[1], -o[2]);
+
+def B2G4(o):
+	return (o[0], -o[1], -o[2], o[3]);
+# opengl 2 blender conversion
+def G2B33(o):
+	return (o[0], o[2], o[1])
+	
 class VertexData:
 	def __init__(self):
 		self.vertices = []
 		self.quads = []
 		self.triangles = []
+		self.normals = []
 		self.faces = []
 		self.texcoords = []
+		self.name = "none"
 			
 	def addVertex(self, vert):
-		self.vertices.append((vert[0], vert[2], vert[1]))
+		# from blender to opengl: self.vertices.append((vert[0], -vert[1], -vert[2]))
+		#self.vertices.append((vert[0], -vert[1], -vert[2]))
+		self.vertices.append(vert)
 		
 	def addQuad(self, quad):
 		self.quads.append(quad)
@@ -180,6 +259,16 @@ class VertexData:
 	def addTexCoord(self, tc):
 		self.texcoords.append(tc)
 		
+	def addNormal(self, norm):
+		self.normals.append((norm[0], norm[1], norm[2]))
+		#self.normals.append((norm[0], -norm[1], -norm[2]))
+		
+	def getNormal(self, dx):
+		return self.normals[dx]
+	
+	def getNumNormals(self):
+		return len(self.normals)
+		
 	# creates faces from quads and triangles
 	def getFaces(self):
 		for quad in self.quads:
@@ -189,17 +278,61 @@ class VertexData:
 	def getVertices(self):
 		return self.vertices;
 	
+	def getNumVertices(self):
+		return len(self.vertices)
+	
+	def getVertex(self, i):
+		return self.vertices[i]
+	
 	def getTexCoords(self):
 		return self.texcoords
+		
+	def getNumTexCoords(self):
+		return len(self.texcoords)
+		
+	def getTexCoord(self, i):
+		return self.texcoords[i]
 		
 	def hasTexCoords(self):
 		return len(self.texcoords) > 0
 	
-	def setID(self, id):
-		self.id = id
 		
-	def getID(self):
-		return self.id 
+	def setName(self, n):
+		self.name = n
+		
+	def getName(self):
+		return self.name
+	
+	# Used by export 	
+	def addQuadVerticesAsTriangles(self, a, b, c, d):
+		self.addVertex(a)
+		self.addVertex(b)
+		self.addVertex(c)
+		self.addVertex(c)
+		self.addVertex(d)
+		self.addVertex(a)
+	
+	def addQuadNormalsAsTriangles(self, a, b, c, d):
+		self.addNormal(a)
+		self.addNormal(b)
+		self.addNormal(c)
+		self.addNormal(c)
+		self.addNormal(d)
+		self.addNormal(a)
+		
+	def addQuadTexCoordsAsTriangles(self, a, b, c, d):
+		self.addTexCoord(a)
+		self.addTexCoord(b)
+		self.addTexCoord(c)
+		self.addTexCoord(c)
+		self.addTexCoord(d)
+		self.addTexCoord(a)
+		
+	def getNumQuads(self):
+		return len(self.quads)
+
+	def getQuad(self, i):
+		return self.quads[i]
 
 class Triangle:
 	def __init__(self):
@@ -229,10 +362,22 @@ class Scene:
 		self.blender_materials = {}
 		
 	def addVertexData(self, vd):
-		self.vertex_datas[vd.getID()] = vd;
+		self.vertex_datas[vd.getName()] = vd;
+
+	def getNumVertexDatas(self):
+		return len(self.vertex_datas)
+	
+	def getNumSceneItems(self):
+		return len(self.scene_items)
 		
+	def getNumMaterials(self):
+		return len(self.materials)
+	
 	def addSceneItem(self, si):
 		self.scene_items.append(si)
+		
+	def getSceneItem(self, dx):
+		return self.scene_items[dx]
 		
 	def addMaterial(self, name, mat):
 		self.materials[name] = mat
@@ -289,11 +434,11 @@ class Scene:
 		
 		# Create meshes (vertex data representations)
 		# ----------------------------------		
-		for vertex_data_id in self.vertex_datas:
-			print("ID: ", vertex_data_id)
-			vd = self.vertex_datas[vertex_data_id]			
-			m = bpy.data.meshes.new("mesh_" +str(vertex_data_id))
-			self.addMesh(vertex_data_id, m)
+		for vertex_data_name in self.vertex_datas:
+			print("ID: ", vertex_data_name)
+			vd = self.vertex_datas[vertex_data_name]			
+			m = bpy.data.meshes.new("mesh_" +vertex_data_name)
+			self.addMesh(vertex_data_name, m)
 			faces = vd.getFaces()
 			m.from_pydata(vd.getVertices(), [], faces)
 			m.update()			
@@ -302,7 +447,7 @@ class Scene:
 			if vd.hasTexCoords():
 				texcoords = vd.getTexCoords()
 				uv_main = m.uv_textures.new()
-				uv_main.name = "uv_" +str(vertex_data_id)
+				uv_main.name = "uv_" +vertex_data_name
 				uv_faces = m.uv_textures.active.data[:]
 				
 				for i,f in enumerate(uv_main.data):
@@ -316,15 +461,16 @@ class Scene:
 		
 		# Create instances (scene items)
 		for si in self.scene_items:
+			print("Scene item: ", si)
 			m = self.getMeshForSceneItem(si)
 			ob = bpy.data.objects.new(si.getName(), m)
 			ob.location = si.getOrigin()
-			ob.rotation_euler = si.getOrientation()
+			ob.rotation_euler = si.getOrientationAsEuler()
 			ob.scale = si.getScale()
 			bpy.context.scene.objects.link(ob)
 		
 	def getMeshForSceneItem(self, si):
-		return self.meshes["mesh" +str(si.getVertexDataID())]
+		return self.meshes["mesh" +si.getVertexDataName()]
 		
 	def addMesh(self, vertexDataID, mesh):
 		self.meshes["mesh" +str(vertexDataID)] = mesh
@@ -332,7 +478,96 @@ class Scene:
 	def getVertexData(self, vertexDataID):
 		return self.vertex_datas[vertexDataID]
 		
-	
+	def exportToR3F(self, filePath):
+		dest_dir = os.path.dirname(filePath)
+		
+		print("Export to ", filePath, " path: ", dest_dir)
+		#b = bpy_extras.io_utils.path_reference("./textures", dest_dir, dest_dir, 'RELATIVE')
+		#print("---------------", b)
+		# rel = bpy_extras.io_utils.path_reference(face_img.filepath, source_dir, dest_dir, path_mode, "", copy_set, face_img.library)
+		file = open(filePath, "wb")
+		writeUI8(file, R3F_VERTEX_DATAS)
+		writeUI32(file, self.getNumVertexDatas())
+		print("Number of vertex datas: ", self.getNumVertexDatas())
+		
+		# Store vertex datas
+		for vertex_data_id in self.vertex_datas:
+			vertex_data = self.vertex_datas[vertex_data_id]
+			num_vertices = vertex_data.getNumVertices()
+			writeString(file, vertex_data.getName())
+
+			# vertices
+			writeUI32(file, num_vertices)
+			for i in range(0, num_vertices):
+				v = vertex_data.getVertex(i)
+				writeFloat3(file, v)
+				
+			# texcoords
+			num_texcoords = vertex_data.getNumTexCoords()
+			writeUI32(file, num_texcoords)
+			for i in range(0, num_texcoords):
+				writeFloat2(file, vertex_data.getTexCoord(i))
+				
+			# normals
+			num_normals = vertex_data.getNumNormals()
+			print("Num normals: ", num_normals)
+			writeUI32(file, num_normals)
+			for i in range(0, num_normals):
+				writeFloat3(file, vertex_data.getNormal(i))
+				
+			# num quads
+			num_quads = vertex_data.getNumQuads()
+			
+			writeUI32(file, num_quads)
+			for i in range(0, num_quads):
+				q = vertex_data.getQuad(i)
+				writeUI32(file, q.a)
+				writeUI32(file, q.b)
+				writeUI32(file, q.c)
+				writeUI32(file, q.d)
+			
+		
+		# Store materials.
+		num_materials = self.getNumMaterials()
+		writeUI8(file, R3F_MATERIALS)
+		writeUI32(file, num_materials)
+		
+		for mat_name in self.materials:
+			m = self.getMaterial(mat_name)
+			writeString(file, mat_name)
+			
+			num_textures = m.getNumTextures()
+			writeUI8(file, num_textures)
+			
+			# only diffuse texture implemented for now
+			for type in m.textures:
+				texture = m.getTexture(type)
+				# @todo we only need to create this path once
+				if not os.path.exists(dest_dir +"/textures/"):
+					os.makedirs(dest_dir +"/textures/")
+				dest_file = dest_dir +"/textures/" +texture.getFileName()
+				shutil.copyfile(texture.getFile(), dest_file)
+				writeUI8(file, type)
+				writeString(file, dest_file)
+				
+		
+		# Store scene items
+		num_scene_items = self.getNumSceneItems()
+		writeUI8(file, R3F_SCENE_ITEMS)
+		writeUI32(file, num_scene_items)
+		print("Number of scene items: ", num_scene_items)
+		for si in self.scene_items:
+			writeString(file, si.getVertexDataName())
+			writeString(file, si.getName())
+			writeFloat3(file, si.getOrigin())
+			writeFloat3(file, si.getScale())
+			writeFloat4(file, si.getOrientation())
+			writeBool(file, si.hasMaterial())
+			if si.hasMaterial():
+				writeString(file, si.getMaterialName())
+		
+		
+		file.close()
 	
 def parseCommand(cmd, dataFile, Container):
 	if cmd == R3F_VERTEX_DATAS: 
@@ -342,10 +577,10 @@ def parseCommand(cmd, dataFile, Container):
 		print("Parse vertex datas: ", num_vertex_datas)
 		for i in range(0, num_vertex_datas):
 			vertex_data = VertexData()
-			vertex_data_id = readUI32(dataFile)
-			vertex_data.setID(vertex_data_id)
+			vertex_data_name = readString(dataFile)
+			vertex_data.setName(vertex_data_name)
 			Container.addVertexData(vertex_data)
-			print("Vertex data id: ",vertex_data_id)
+			print("Vertex data id: ",vertex_data_name)
 			
 			#parse vertices
 			num_vertices = readUI32(dataFile)
@@ -374,15 +609,16 @@ def parseCommand(cmd, dataFile, Container):
 				quad = readQuad(dataFile)
 				vertex_data.addQuad(quad)
 				
-			# and continue...
-			cmd = readUI8(dataFile)
-			parseCommand(cmd, dataFile, Container)
+		# and continue...
+		cmd = readUI8(dataFile)
+		print("VERTEX_DATA: Next type is: ", cmd)
+		parseCommand(cmd, dataFile, Container)
 
 	elif cmd == R3F_SCENE_ITEMS:
 		num_scene_items = readUI32(dataFile)
 		print("Number of scene items: ", num_scene_items)		
 		for i in range(0, num_scene_items):
-			vertex_data_id = readUI32(dataFile)
+			vertex_data_name = readString(dataFile)
 			scene_item_name = readString(dataFile)
 			origin = readFloat3(dataFile)
 			scale = readFloat3(dataFile)
@@ -394,7 +630,7 @@ def parseCommand(cmd, dataFile, Container):
 				material_name = readString(dataFile)
 		
 			si = SceneItem()
-			si.setVertexDataID(vertex_data_id)
+			si.setVertexDataName(vertex_data_name)
 			si.setName(scene_item_name)
 			si.setOrigin(origin)
 			si.setOrientation(orientation)
@@ -402,16 +638,15 @@ def parseCommand(cmd, dataFile, Container):
 			Container.addSceneItem(si)
 
 			print("--------")			
-			print("Scene item:")
-			print("vertex data: ", vertex_data_id)
+			print("Scene item:", i)
+			print("vertex data: ", vertex_data_name)
 			print("origin: ", origin)
 			print("scale: ", scale)
 			print("orientation: ", orientation)
 			print("name:", scene_item_name)
 			print("material: ", material_name)
 			print("--------")
-		cmd = readUI8(dataFile)
-		parseCommand(cmd, dataFile, Container)
+		# scene items are the last entries in a r3f format, so we stop here
 		
 	elif cmd == R3F_MATERIALS:
 		num_materials = readUI32(dataFile)
@@ -430,10 +665,13 @@ def parseCommand(cmd, dataFile, Container):
 				tex = Texture()
 				tex.setup(texture_type, texture_file)
 				mat.addTexture(texture_type, tex)
+				
 				print("Texture file: ", texture_file)
 				print("Texture type: ", texture_type)
 			
-			
+		cmd = readUI8(dataFile)
+		print("R3F_Materials: next: " ,cmd)
+		parseCommand(cmd, dataFile, Container)	
 		
 
 	
@@ -445,26 +683,176 @@ def importR3F(filepath):
 	scene.createMeshes()
 	return
 
-# the ExportHelper gives us the file popup :)
-# class RoxluLib(bpy.types.Operator, ImportHelper):
-class RoxluLib(bpy.types.Operator):
-	'''Tooltip'''
-	bl_idname = "roxlulib.import"
-	bl_label = "Import Roxlu file"
+# Export functions 
+# ------------------------------------------------------------------------------
+
+def rvec3d(v):
+	return round(v[0], 6), round(v[1], 6), round(v[2], 6)
+
+def rvec2d(v):
+	return round(v[0], 6), round(v[1], 6)
+
+def meshVertexToList(v):
+	return (v.co.x, v.co.y, v.co.z)
+	
+# exports current scene (check io_mesh_ply addon for reference)
+# handy: print(repr(some_var)) or, print(dir(some_var))
+# tested on 2011.11.22 and the export + import both works.
+def exportR3F(context, filepath):
+	objects = context.selected_objects
+	scene = Scene()
+		
+	#vertex_data_id = 0
+	for obj in objects:
+		vertex_data = VertexData()
+		vertex_data.setName(obj.name +"_vertex_data")
+		scene_item = SceneItem()
+		scene_item.setName(obj.name)
+		
+		scene_item.setVertexDataName(vertex_data.getName())
+		scene_item.setOrigin(B2G3(obj.location))
+		#print("location: ", obj.location)
+		
+		#quat = mathutils.Euler(obj.rotation_euler[0], obj.rotation_euler[1], obj.rotation_euler[2])
+		obj.rotation_mode='QUATERNION'
+		#print(obj.rotation_quaternion)
+		scene_item.setOrientation(B2G4(obj.rotation_quaternion))
+		scene_item.setScale(B2G3(obj.scale))
+	
+		scene.addVertexData(vertex_data)
+		scene.addSceneItem(scene_item)
+		
+		# will be an option... 
+		use_uv_coords = True
+		
+		mesh = obj.to_mesh(context.scene, True, 'PREVIEW')
+		if not mesh:
+			raise Exception("Error, could not get mesh data from active object")
+		
+		# create material
+		mat = None
+		tex = None
+		if len(mesh.materials) > 0:
+			mat = mesh.materials[0]
+			tex = bpy.data.textures[mat.active_texture_index]
+			if mat and tex.image:
+				t = Texture()
+				t.setup(R3F_MAT_DIFFUSE, tex.image.filepath)
+				m = Material()
+				m.addTexture(R3F_MAT_DIFFUSE, t)
+				scene.addMaterial(mat.name, m)
+				scene_item.setMaterialName(mat.name)
+		
+		has_uv = (len(mesh.uv_textures) > 0)
+		has_uv_vertex = (len(mesh.sticky) > 0)
+		has_vcol = (len(mesh.vertex_colors) > 0)
+				
+		if (not has_uv) and (not has_uv_vertex):
+			use_uv_coords = False
+			
+		if not use_uv_coords:
+			has_uv = has_uv_vertex = False
+		
+		if has_uv:
+			active_uv_layer = mesh.uv_textures.active
+			if not active_uv_layer:
+				use_uv_coords = False
+				hash_uv = False
+			else:
+				active_uv_layer = active_uv_layer.data
+				
+		uv = None
+		mesh_verts = mesh.vertices;
+		texcoord = texcoord_key = normal = normal_key = None
+		
+		for i, f in enumerate(mesh.faces):
+			smooth = f.use_smooth
+			if not smooth:
+				normal = tuple(f.normal)
+				normal_key = rvec3d(normal)
+			
+			if has_uv:
+				uv = active_uv_layer[i]
+				#uv = uv.uv1, uv.uv2, uv.uv3, uv.uv4
+			
+			face_verts = f.vertices
+			
+			if len(face_verts) == 4:
+				vertex_data.addQuadVerticesAsTriangles( 						\
+						 B2G3(meshVertexToList(mesh_verts[face_verts[0]])) 	\
+						,B2G3(meshVertexToList(mesh_verts[face_verts[1]]))		\
+						,B2G3(meshVertexToList(mesh_verts[face_verts[2]])) 	\
+						,B2G3(meshVertexToList(mesh_verts[face_verts[3]])) 	\
+				)
+							
+				vertex_data.addQuadNormalsAsTriangles( 				\
+						 B2G3(mesh_verts[face_verts[0]].normal)		\
+						,B2G3(mesh_verts[face_verts[1]].normal)		\
+						,B2G3(mesh_verts[face_verts[2]].normal)		\
+						,B2G3(mesh_verts[face_verts[3]].normal)		\
+				)
+				
+				if has_uv:
+					vertex_data.addQuadTexCoordsAsTriangles(uv.uv1, uv.uv2, uv.uv3, uv.uv4)
+					
+			elif len(face_verts) == 3:
+				vertex_data.addVertex(B2G3(meshVertexToList(mesh_verts[face_verts[0]])))
+				vertex_data.addVertex(B2G3(meshVertexToList(mesh_verts[face_verts[1]])))
+				vertex_data.addVertex(B2G3(meshVertexToList(mesh_verts[face_verts[2]])))
+				
+				vertex_data.addNormal(B2G3(mesh_verts[face_verts[0]].normal))
+				vertex_data.addNormal(B2G3(mesh_verts[face_verts[1]].normal))
+				vertex_data.addNormal(B2G3(mesh_verts[face_verts[2]].normal))
+				
+				if has_uv:
+					vertex_data.addTexCoord(uv.uv1)
+					vertex_data.addTexCoord(uv.uv2)
+					vertex_data.addTexCoord(uv.uv3)
+		
+	scene.exportToR3F(filepath)
+		
+		
+		
+
+#class RoxluExport(bpy.types.Operator, ExportHelper):
+class RoxluExport(bpy.types.Operator):
+	bl_idname = "roxlulib.export"
+	bl_label = "Export Roxlu file (r3f)"
 	filename_ext = ".r3f"
 	filter_glob = StringProperty(default="*.r3f", options={'HIDDEN'})
 	
 	def execute(self, context):
-		importR3F("/Users/diederickhuijbers/Documents/programming/c++/of/of_preRelease_v007_osx/apps/diederick-007/015_roxlu_r3f_test/bin/data/test.r3f")
-		#importR3F(self.filepath)
+		exportR3F(context, "/Users/diederickhuijbers/Downloads/test.r3f")
+		#exportR3F(context, self.filepath)
+		return {'FINISHED'}
+
+# ------------------------- end export functions -------------------------------
+
+# the ExportHelper gives us the file popup :)
+# class RoxluLib(bpy.types.Operator, ImportHelper):
+class RoxluImport(bpy.types.Operator, ImportHelper):
+	'''Tooltip'''
+	bl_idname = "roxlulib.import"
+	bl_label = "Import Roxlu file (r3f)"
+	filename_ext = ".r3f"
+	filter_glob = StringProperty(default="*.r3f", options={'HIDDEN'})
+	
+	def execute(self, context):
+		#importR3F("/Users/diederickhuijbers/Documents/programming/c++/of/of_preRelease_v007_osx/apps/diederick-007/015_roxlu_r3f_test/bin/data/test.r3f")
+		importR3F(self.filepath)
 		return {'FINISHED'}
 		
 def menu_func_import(self, context):
-	self.layout.operator("roxlulib.import", text="Roxlu 3D Format (*.r3f)")
+	self.layout.operator(RoxluImport.bl_idname, text="Roxlu 3D Format (*.r3f)")
+	
+
+def menu_func_export(self, context):
+    self.layout.operator(RoxluExport.bl_idname, text="Roxlu 3D Format (*.r3f)")
 
 def register():
 	bpy.utils.register_module(__name__)
 	bpy.types.INFO_MT_file_import.append(menu_func_import)
+	bpy.types.INFO_MT_file_export.append(menu_func_export)
 	#bpy.utils.register_class(RoxluLib)
 	
 	

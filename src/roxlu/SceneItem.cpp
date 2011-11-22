@@ -87,9 +87,7 @@ void SceneItem::draw(Mat4& viewMatrix, Mat4& projectionMatrix) {
 		exit(1);
 	}
 		
-	if(material != NULL) {
-		material->bind();
-	}
+	
 //	printf("si: %s\n", name.c_str());
 //	printf("effect: %p\n", effect);
 //	printf("material:%p\n", material);
@@ -99,6 +97,12 @@ void SceneItem::draw(Mat4& viewMatrix, Mat4& projectionMatrix) {
 	Mat4 modelview_projection_matrix = projectionMatrix * modelview_matrix ;
 
 	effect->getShader().enable();
+		
+		if(material != NULL) {
+			//material->bind();
+			effect->bindMaterial(*material);
+		}
+		
 		effect->updateLights();
 		effect->getShader().uniformMat4f("projection", projectionMatrix.getPtr());
 		effect->getShader().uniformMat4f("modelview", modelview_matrix.getPtr());

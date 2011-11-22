@@ -402,6 +402,10 @@ uint8_t IOBuffer::consumeUI8() {
 	return val;
 }
 
+bool IOBuffer::consumeBool() {
+	return (bool)consumeUI8();
+}
+
 uint16_t IOBuffer::consumeUI16() {
 	uint16_t val = 0;
 	memcpy(&val, buffer+consumed, 2);

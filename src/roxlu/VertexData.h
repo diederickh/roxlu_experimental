@@ -12,16 +12,18 @@
 
 #include <iostream>
 #include <vector>
+#include <string>
 
 using std::endl;
 using std::ostream;
 using std::vector;
+using std::string;
 
 namespace roxlu {
 
 class VertexData {
 public:
-	VertexData();
+	VertexData(string meshName);
 	int 			addVertex(const Vec3& rVec);
 	int 			addVertex(const float nX, const float nY, const float nZ);
 	void 			addTexCoord(const Vec2& rVec);
@@ -35,6 +37,7 @@ public:
 	int 			addTriangle(int a, int b, int c); 
 	int				addTriangleAndIndices(int a, int b, int c);
 	int 			addQuad(int nA, int nB, int nC, int nD);
+	int				addQuad(Quad q);
 
 	void debugDraw(int drawMode = GL_TRIANGLES);
 	
@@ -84,9 +87,11 @@ public:
 	
 	inline void 	setVertex(int nDX, Vec3 oPosition) { vertices[nDX] = oPosition; }
 	inline void 	setVertex(int nDX, float nX, float nY, float nZ) { vertices[nDX].set(nX, nY,nZ); }
+	inline void 	setName(string n);
+	inline string	getName();
 	
 	friend ostream& operator <<(ostream& os, const VertexData& data);
-	
+		
 	void 			computeTangents();
 	void			computeTangentForTriangle(Vec3& v1, Vec3& v2, Vec3& v3, Vec2& w1, Vec2& w2, Vec2& w3, Vec3& sdir, Vec3& tdir);
 	
@@ -95,7 +100,7 @@ public:
 	vector<Vec3>		normals;
 	vector<Vec3>		vertices;
 	vector<Vec2>		texcoords;
-	vector<Color4> 	colors;
+	vector<Color4> 		colors;
 	vector<int> 		indices;
 	vector<Triangle> 	triangles; 
 	vector<Quad> 		quads;
@@ -110,7 +115,22 @@ public:
 	VertexPN* 			vertex_pn;
 	VertexPT*			vertex_pt;
 	VertexPTNTB* 		vertex_ptntb;
+	string 				name;
 };
+
+
+
+// Search for a vertex data by name:
+// vector<VertexData*>::iterator it = std::find_if(vertex_datas.begin(), vertex_datas.end(), CompareVertexDataByName(name));
+class CompareVertexDataByName {
+public:
+	CompareVertexDataByName(string name):name(name) {}
+	bool const operator()(const VertexData* other) const {
+		return name == other->name;
+	}
+	const string name;
+};
+
 
 
 // Set flags which should be used by a shader. When you add indices, texcoord,
@@ -155,6 +175,14 @@ inline void	VertexData::disableTexCoordAttrib() {
 }
 
 // -----------------------------------------------------------------------------
+inline void VertexData::setName(string n) {
+	name = n;
+}
+inline string VertexData::getName() {
+	return name;
+}
+
+// -----------------------------------------------------------------------------
 inline ostream& operator <<(ostream& os, const VertexData& data) {
 	{
 		os << "Vertices: (" << data.vertices.size() << ")" << endl;
@@ -185,6 +213,7 @@ inline ostream& operator <<(ostream& os, const VertexData& data) {
 	}
 	return os;	
 }
+
 
 
 } // roxlu

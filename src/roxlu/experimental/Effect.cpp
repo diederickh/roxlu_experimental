@@ -3,6 +3,7 @@
 #include "VBO.h"
 #include "VAO.h"
 #include "VertexData.h"
+#include "Material.h"
 #include <sstream>
 #include <cstdlib>
 
@@ -608,6 +609,28 @@ void Effect::setupBuffer(VAO& vao, VBO& vbo, VertexData& vd) {
 	vbo.unbind();
 }
 
+void Effect::bindMaterial(Material& m) {
+	shader.enable();
+	int n = 0;
+	if(m.hasDiffuseTexture()) {
+		Texture* tex = m.getDiffuseTexture();
+		shader.setTextureUnit("diffuse_texture", tex->getTextureID(), n, GL_TEXTURE_2D);
+		tex->bind();
+		//printf(">> diffuse: %d\n", tex->getTextureID());
+		n++;
+	}
+	
+	//if(set_materials & MAT_NORMAL) {
+	if(m.hasNormalTexture()) {
+		Texture* tex = m.getNormalTexture();
+		//printf(">> normal: %d\n", tex->getTextureID());
+		shader.setTextureUnit("normal_texture", tex->getTextureID(), n, GL_TEXTURE_2D);
+		tex->bind();
+		n++;
+	}
+	
+
+}
 
 void Effect::updateLights() {
 	shader.enable();

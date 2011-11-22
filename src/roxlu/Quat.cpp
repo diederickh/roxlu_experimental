@@ -7,6 +7,12 @@ Quat::Quat()
 {
 }
 
+Quat::Quat(float x, float y, float z, float w) 
+	:w(w)
+{
+	v.set(x,y,z);
+}
+
 void Quat::toMat4(Mat4& rDest) const {
 	float tx  = 2.0f*v.x;
 	float ty  = 2.0f*v.y;

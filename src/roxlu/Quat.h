@@ -13,6 +13,7 @@ public:
 	float w;
 	
 	Quat();
+	Quat(float x, float y, float z, float w);
 	void normalize();
 	void toMat4(Mat4& aDest) const;
 	Mat4 getMat4() const;
@@ -35,6 +36,8 @@ public:
 	Quat operator-(const Quat& rOther) const;
 	
 	Vec3 getEuler();
+	
+	inline void print();
 	
 	friend std::ostream& operator<<(std::ostream& os, const Quat& rQuat);
 	
@@ -96,6 +99,11 @@ inline Quat Quat::operator-(const Quat& rOther) const {
 	q_out.v = v - rOther.v;
 	q_out.w = w - rOther.w;
 	return q_out;
+}
+
+
+inline void Quat::print() {
+	printf("%f %f %f %f\n", v.x, v.y, v.z, w);
 }
 
 } // roxlu

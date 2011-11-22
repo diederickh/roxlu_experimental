@@ -1,7 +1,9 @@
 #include "Axis.h"
 namespace roxlu {
 
-Axis::Axis() {
+Axis::Axis() 
+	:vd("axis")
+{
 }
 
 void Axis::setup(int nSize) {

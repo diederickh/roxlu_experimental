@@ -31,7 +31,8 @@ public:
 		,MAT_CUBEMAP		= (1 << 10)
 	};
 	
-	Material(string name, Shader* shad);
+	// @todo move shader to effect
+	Material(string name, Shader* shad = NULL);
 	~Material();
 	
 	void bind();
@@ -61,14 +62,26 @@ public:
 	
 	// name
 	inline void setName(string name);
-	inline string getName();
+	inline string getName() const;
 	
+ 
 private:
 	Shader* shader;
 	string name;
 	bool done;
-	int set_materials;
+	int set_materials;	
 	map<int, Texture*> materials;
+};
+
+
+// vector<Material*>::iterator it = std::find_if(mats.begin(), mats.end(), CompareMaterialByName(name));
+class CompareMaterialByName {
+public:
+	CompareMaterialByName(string name):name(name) {}
+	bool const operator()(const Material* other) const {
+		return name == other->getName();
+	}
+	const string name;
 };
 
 
@@ -124,7 +137,7 @@ inline void Material::setName(string matName) {
 }
 
 
-inline string Material::getName() {
+inline string Material::getName() const {
 	return name;
 }
 

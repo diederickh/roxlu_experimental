@@ -37,7 +37,7 @@ class Light;
 class VAO;
 class VBO;
 class VertexData;
-
+class Material;
 
 class Effect {
 public:
@@ -98,6 +98,10 @@ public:
 	inline bool hasLights();
 	void updateLights();
 	
+	
+	void bindMaterial(Material& m);
+	inline void disable();
+	
 private:
 	uint64_t necessary_vertex_attribs;
 	bool shader_created;
@@ -125,6 +129,10 @@ inline bool Effect::hasFeature(EffectFeature feature) {
 inline bool Effect::hasTextures() {
 	uint64_t texture_types = EFFECT_FEATURE_DIFFUSE_TEXTURE;
 	return (features & texture_types);
+}
+
+inline void Effect::disable() {
+	shader.disable();
 }
 
 // texcoords

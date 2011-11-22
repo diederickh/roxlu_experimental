@@ -43,7 +43,7 @@ Renderer::Renderer(float screenWidth, float screenHeight)
 Renderer::~Renderer() {
 }
 
-void Renderer::render() {
+void Renderer::draw() {
 	if(cam == NULL || scene == NULL) {
 		printf("No cam, shader or scene set!\n");
 		exit(1);
@@ -64,6 +64,9 @@ void Renderer::render() {
 	while(it != scene->scene_items.end()) {
 		SceneItem& si = *(it->second);
 		if(si.isVisible()) {
+			//if(si.hasMaterial()) {
+			//	effect->bindMaterial(*si.getMaterial());
+			//}
 			si.draw(view_matrix, projection_matrix);
 		}
 		++it;
@@ -71,7 +74,50 @@ void Renderer::render() {
 
 }
 
-void Renderer::renderSceneItem(string name) {
+void Renderer::debugDraw() {
+//	glFrontFace(GL_CW);
+//	glMatrixMode(GL_PROJECTION);
+//	glLoadIdentity();
+//	gluPerspective(45.0, 4.0f/3.0f, 0.01, 100);
+//	
+//	glMatrixMode(GL_MODELVIEW);
+//	glLoadIdentity();
+//	glTranslatef(0,0,-35);
+//	glRotatef(sin(ofGetElapsedTimef()*0.5)*360,0,1,0);
+	effect->disable();
+	cam->place();
+	glEnable(GL_CULL_FACE);
+	Mat4 rot;
+	Scene::scene_item_iterator it = scene->scene_items.begin();
+	while(it != scene->scene_items.end()) {
+		SceneItem& si = *(it->second);
+		VertexData& vd = *si.getVertexData();
+		if(si.isVisible()) {
+			glPushMatrix();
+				Vec3& scale = si.getScale();
+//				scale.print();
+				Vec3 pos = si.getPosition();
+				si.getOrientation().toMat4(rot);
+				glTranslatef(pos.x, pos.y, pos.z);
+				glMatrixMode(GL_MODELVIEW);
+				glMultMatrixf(rot.getPtr());
+			
+				glScalef(scale.x, scale.y, scale.z);
+				vd.debugDraw();
+			//si.draw(view_matrix, projection_matrix);
+			glPopMatrix();
+		}
+		++it;
+	}
+//	
+//	Scene::vertex_data_iterator it = scene->vertex_datas.begin();
+//	while(it != scene->vertex_datas.end()) {
+//		(it->second)->debugDraw();
+//		++it;
+//	}
+}
+
+void Renderer::drawSceneItem(string name) {
 	cam->updateViewMatrix();
 	Mat4& view_matrix = cam->vm();
 	Mat4& projection_matrix = cam->pm();
@@ -81,7 +127,7 @@ void Renderer::renderSceneItem(string name) {
 }
 
 SceneItem* Renderer::createIcoSphere(string name, int detail, float radius) {
-	VertexData* vd = new VertexData();
+	VertexData* vd = new VertexData(name +"_vertex_data");
 	SceneItem* si = new SceneItem(name);
 
 	// Create vertex data for ico sphere.	
@@ -101,7 +147,7 @@ SceneItem* Renderer::createIcoSphere(string name, int detail, float radius) {
 }
 
 SceneItem* Renderer::createUVSphere(string name, int phi, int theta, float radius) {
-	VertexData* vd = new VertexData();
+	VertexData* vd = new VertexData(name +"_vertex_data");
 	SceneItem* si = new SceneItem(name);
 
 	// Create vertex data for ico sphere.	
@@ -120,7 +166,7 @@ SceneItem* Renderer::createUVSphere(string name, int phi, int theta, float radiu
 }
 
 SceneItem* Renderer::createBox(string name, float width, float height, float depth) {
-	VertexData* vd = new VertexData();
+	VertexData* vd = new VertexData(name +"_vertex_data");
 	SceneItem* si = new SceneItem(name);
 
 	// Create vertex data for ico sphere.	
@@ -139,7 +185,7 @@ SceneItem* Renderer::createBox(string name, float width, float height, float dep
 }
 
 SceneItem* Renderer::createPlane(string name, float width, float height) {
-	VertexData* vd = new VertexData();
+	VertexData* vd = new VertexData(name +"_vertex_data");
 	SceneItem* si = new SceneItem(name);
 
 	// Create vertex data for ico sphere.	
@@ -155,6 +201,14 @@ SceneItem* Renderer::createPlane(string name, float width, float height) {
 	scene->addSceneItem(name, si);
 	scene->addVertexData(name, vd);
 	return si;
+}
+
+void Renderer::addSceneItem(SceneItem* si) {
+	if(!si->hasEffect()) {
+		si->setEffect(effect);
+	}
+	scene->addSceneItem(si->getName(), si);
+	scene->addVertexData(si->getVertexData()->getName(), si->getVertexData());
 }
 
 

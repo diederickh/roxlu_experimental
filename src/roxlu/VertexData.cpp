@@ -1,7 +1,7 @@
 #include "VertexData.h"
 namespace roxlu {
 
-VertexData::VertexData() 
+VertexData::VertexData(string meshName) 
 :vertex_p(NULL)
 ,vertex_pt(NULL)
 ,vertex_pn(NULL)
@@ -10,6 +10,7 @@ VertexData::VertexData()
 ,vertex_pnc(NULL)
 ,vertex_ptntb(NULL)
 ,attribs(VERT_NONE)
+,name(meshName)
 {	
 }
 
@@ -87,6 +88,11 @@ int VertexData::addQuad(int nA, int nB, int nC, int nD) {
 	Quad q(nA, nB, nC, nD);
 	quads.push_back(q);
 	return quads.size()-1;
+}
+
+int VertexData::addQuad(Quad q) {
+	quads.push_back(q);
+	return quads.size()-1;	
 }
 
 Triangle* VertexData::getTrianglePtr(int nTriangle) {
@@ -558,6 +564,7 @@ void VertexData::debugDraw(int drawMode) {
 		
 		}
 		else {
+			glColor3f(0.98, 0.92, 0.75); // yellowish
 			glBegin(drawMode);
 			vector<Vec3>::iterator it = vertices.begin();
 			while(it != vertices.end()) {	
@@ -566,7 +573,7 @@ void VertexData::debugDraw(int drawMode) {
 			}
 			glEnd();
 		}
-		
+
 		// do we need to draw normals?	
 		int len = normals.size();
 		if(len == vertices.size()) {	
@@ -582,7 +589,7 @@ void VertexData::debugDraw(int drawMode) {
 				Vec3 pos = vertices[i];
 				Vec3 norm = normals[i];
 				norm.normalize();
-				Vec3 end = pos + (norm.scale(1.0));
+				Vec3 end = pos + (norm.scale(0.1));
 				glColor4f(1.0f,0.0f,0.4f,1.0f);
 				glVertex3fv(pos.getPtr());
 				glColor4f(1.0f, 0.0f,1.0f,1.0f);
