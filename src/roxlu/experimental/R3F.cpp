@@ -173,10 +173,7 @@ void R3F::save(string fileName) {
 		storeSceneItem(buffer, *(*scene_it));
 		++scene_it;
 	}
-	
-	// @todo switch materials and scene items.
-	
-	
+
 	buffer.saveToFile(File::toDataPath(fileName));	
 }
 
@@ -187,7 +184,7 @@ void R3F::storeMaterial(IOBuffer& buffer, Material& m) {
 	// store textures
 	int num_textures = m.getNumTextures();
 	buffer.storeUI8(num_textures);
-	//	printf("Store number of texture: %d\n", num_textures);
+
 	Material::texture_map map = m.getTextures();
 	Material::texture_iterator it = map.begin();
 	while(it != map.end()) {

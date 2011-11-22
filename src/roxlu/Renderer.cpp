@@ -246,7 +246,7 @@ Material* Renderer::createDiffuseTexture(
 	// @todo create a function: getMaterialOrCreateIfNotExist
 	Material* mat = getMaterial(materialName);
 	if(mat == NULL) {
-		mat =  new Material(materialName, effect->getShaderPtr());
+		mat =  new Material(materialName);
 	}
 	
 	//effect->enableDiffuseTexture();
@@ -259,7 +259,7 @@ Material* Renderer::createDiffuseTexture(
 
 
 Material* Renderer::createMaterial(string name) {
-	Material* m = new Material(name, effect->getShaderPtr());
+	Material* m = new Material(name);
 	scene->addMaterial(name, m);
 	return m;
 }
@@ -273,7 +273,7 @@ Material* Renderer::createNormalTexture(
 	// @todo create a function: getMaterialOrCreateIfNotExist
 	Material* mat = getMaterial(materialName);
 	if(mat == NULL) {
-		mat =  new Material(materialName, effect->getShaderPtr());
+		mat =  new Material(materialName);
 	}
 	
 	effect->enableNormalTexture();

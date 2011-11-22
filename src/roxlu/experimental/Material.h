@@ -3,7 +3,6 @@
 
 
 #include "Texture.h" // texture uses ofImage now.. so we cannot use "OpenGL.h"
-#include "Shader.h"
 #include <map>
 #include <string>
 
@@ -32,10 +31,9 @@ public:
 	};
 	
 	// @todo move shader to effect
-	Material(string name, Shader* shad = NULL);
+	Material(string name);
 	~Material();
 	
-	void bind();
 	void unbind();
 	
 	// generic material loading
@@ -66,7 +64,6 @@ public:
 	
  
 private:
-	Shader* shader;
 	string name;
 	bool done;
 	int set_materials;	
