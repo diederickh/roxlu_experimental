@@ -89,8 +89,11 @@ public:
 	Material* material;
 	void initialize();
 	
+	inline void hide();
+	inline void show();
+	inline bool isVisible();
 private:
-	
+	bool is_visible;
 	Effect* effect;
 	string name;
 	bool initialized;
@@ -133,6 +136,7 @@ inline Mat4& SceneItem::mm() {
 
 inline void SceneItem::setPosition(float x, float y, float z) {
 	position.set(x,y,z);
+	//printf("set position: %f, %f, %f\n", x,y , z);
 	updateModelMatrix();
 }
 
@@ -236,6 +240,18 @@ inline Vec3& SceneItem::getScale() {
 
 inline Quat& SceneItem::getOrientation() {
 	return orientation;
+}
+
+inline void SceneItem::hide() {
+	is_visible = false;
+}
+
+inline void SceneItem::show() {
+	is_visible = true;
+}
+
+inline bool SceneItem::isVisible() {
+	return is_visible;
 }
 
 

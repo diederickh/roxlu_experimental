@@ -14,6 +14,8 @@ namespace roxlu {
 
 class Material {
 public:
+	typedef map<int, Texture*>::const_iterator texture_iterator;
+	typedef map<int, Texture*> texture_map;
 	enum MaterialType {
 		 MAT_NONE			= 0
 		,MAT_DIFFUSE		= (1 << 0)
@@ -41,6 +43,8 @@ public:
 	inline bool hasTexture(int type);
 	inline void setTexture(int type, Texture* tex);
 	inline string getTextureFilePath(int type);
+	inline int getNumTextures();
+	inline const map<int, Texture*>& getTextures() const;
 	
 	// diffuse material
 	inline Texture* loadDiffuseTexture(string file, int imageFormat = GL_RGB);
@@ -142,6 +146,14 @@ inline Texture* Material::loadTexture(int type, string file, GLint imageFormat) 
 
 inline string Material::getTextureFilePath(int type) {
 	return getTexture(type)->getImageFilePath();
+}
+
+inline const map<int, Texture*>& Material::getTextures() const {
+	return materials;
+}
+
+inline int Material::getNumTextures() {
+	return materials.size();
 }
 
 }; // roxlu

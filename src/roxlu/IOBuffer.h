@@ -53,6 +53,7 @@ public:
 	void storeBuffer(IOBuffer& other); // copies only stored data
 	int storeBuffer(IOBuffer& other, uint32_t numBytes);
 	void storeFloat(float data);
+	void storeBool(bool data);
 
 	void storeString(string data);
 	void storeStringWithSize(string data); // adds a uint16_t with the size of the string 

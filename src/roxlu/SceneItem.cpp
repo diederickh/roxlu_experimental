@@ -15,8 +15,9 @@ SceneItem::SceneItem(string name)
 ,draw_mode(TRIANGLES)
 ,material(NULL)
 ,initialized(false)
+,is_visible(true)
 ,effect(NULL)
-,scaling(1.0)
+,scaling(1.0,1.0, 1.0)
 ,name(name)
 {
 	vao = new VAO();

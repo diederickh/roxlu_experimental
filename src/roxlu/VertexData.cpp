@@ -114,6 +114,14 @@ Vec2* VertexData::getTexCoordPtr(int index) {
 	return &texcoords[index];
 }
 
+Vec3 VertexData::getNormal(int index) {
+	return normals[index];
+}
+
+Vec3* VertexData::getNormalPtr(int index) {
+	return &normals[index];
+}
+
 const float* VertexData::getVerticesPtr() {
 	return &vertices[0].x;
 }

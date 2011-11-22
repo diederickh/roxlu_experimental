@@ -59,6 +59,8 @@ public:
 	Vec2*			getTexCoordPtr(int index);
 	Vec3 			getVertex(int nIndex);
 	Vec3*			getVertexPtr(int nIndex);
+	Vec3			getNormal(int index);
+	Vec3*			getNormalPtr(int index);
 	
 	VertexP* 		getVertexP();  	
 	VertexPT*		getVertexPT();

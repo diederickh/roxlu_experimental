@@ -2,6 +2,7 @@
 #include "Quat.h"
 #include "VertexData.h"
 #include "SceneItem.h"
+#include "Material.h"
 #include "../IOBuffer.h"
 #include "File.h"
 
@@ -33,7 +34,7 @@ void R3F::save(string fileName) {
 		storeVertexData(buffer, vd);
 		++it_data;
 	}
-	
+
 	// store Scene Item (instances of vertex datas)
 	buffer.storeUI8(R3F_SCENE_ITEMS);
 	buffer.storeUI32(scene_items.size());
@@ -42,7 +43,36 @@ void R3F::save(string fileName) {
 		storeSceneItem(buffer, *(*scene_it));
 		++scene_it;
 	}
+	
+	// store materials.
+	buffer.storeUI8(R3F_MATERIALS);
+	buffer.storeUI32(materials.size());
+	vector<Material*>::iterator mat_it = materials.begin();
+	while(mat_it != materials.end()) {
+		storeMaterial(buffer, *(*mat_it));
+		++mat_it;
+	}
+	
 	buffer.saveToFile(File::toDataPath(fileName));	
+}
+
+void R3F::storeMaterial(IOBuffer& buffer, Material& m) {
+	buffer.storeUI16(m.getName().size());
+	buffer.storeString(m.getName());
+	
+	// store textures
+	int num_textures = m.getNumTextures();
+	buffer.storeUI8(num_textures);
+	Material::texture_map map = m.getTextures();
+	Material::texture_iterator it = map.begin();
+	while(it != map.end()) {
+		buffer.storeUI8(it->first);
+		string file_path = m.getTextureFilePath(it->first);
+		buffer.storeUI16(file_path.size());
+		buffer.storeString(file_path);
+		++it;
+	}
+	
 }
 
 void R3F::storeVertexData(IOBuffer& buffer, VertexData& vd) {
@@ -50,7 +80,6 @@ void R3F::storeVertexData(IOBuffer& buffer, VertexData& vd) {
 	buffer.storeUI32((uint32_t)&vd);
 	
 	// store: vertices.
-	buffer.storeUI8(R3F_VERTICES);
 	int num = vd.getNumVertices();
 	buffer.storeUI32(num);
 	for(int i = 0; i < num; ++i) {
@@ -58,23 +87,40 @@ void R3F::storeVertexData(IOBuffer& buffer, VertexData& vd) {
 		buffer.storeFloat(v.x);
 		buffer.storeFloat(v.y);
 		buffer.storeFloat(v.z);
-		v.print();
 	}
 	
-	// store: quads
-	int num_q = vd.getNumQuads();
+	// store: texcoords
+	int num_t = vd.getNumTexCoords();
+	buffer.storeUI32(num_t);
+	for(int i = 0; i < num_t; ++i) {
+		Vec2 v = vd.getTexCoord(i);
+		buffer.storeFloat(v.x);
+		buffer.storeFloat(v.y);
+	}
+	
+	// store: normals
+	int num_n = vd.getNumNormals();
+	buffer.storeUI32(num_n);
+	for(int i = 0; i < num_n; ++i) {
+		Vec3 v = vd.getNormal(i);
+		buffer.storeFloat(v.x);
+		buffer.storeFloat(v.y);
+		buffer.storeFloat(v.z); 
+	}
+	
+	// store: quads // @todo add triangles
+	int num_q = vd.getNumQuads(); 
+	buffer.storeUI32(num_q);
 	if(num_q > 0) {
-		buffer.storeUI8(R3F_FACES);
-		buffer.storeUI32(num_q);
 		for(int i = 0; i < num_q; ++i) {
 			Quad& q = *vd.getQuadPtr(i);
-			buffer.storeUI8(R3F_FACE_QUAD);
 			buffer.storeUI32(q.a);
 			buffer.storeUI32(q.b);
 			buffer.storeUI32(q.c);
 			buffer.storeUI32(q.d);
 		}
 	}
+	
 }
 
 void R3F::storeSceneItem(IOBuffer& buffer, SceneItem& si) {
@@ -104,6 +150,13 @@ void R3F::storeSceneItem(IOBuffer& buffer, SceneItem& si) {
 	buffer.storeFloat(q.v.z);
 	buffer.storeFloat(q.w);
 
+	// store material flag
+	buffer.storeBool(si.hasMaterial());
+	if(si.hasMaterial()) {
+		buffer.storeUI16(si.getMaterial()->getName().size());
+		buffer.storeString(si.getMaterial()->getName());
+	}
+	
 }
 
 

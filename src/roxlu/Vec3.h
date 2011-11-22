@@ -98,6 +98,7 @@ struct Vec3 {
 	inline Vec3 	getCrossed(const Vec3& vec);
 	inline float* 	getPtr() { return &x; };
 	inline void		print();
+	inline Vec3&	limit(float size);
 
 	// Accessors
 	float& operator[](unsigned int nIndex) {
@@ -288,6 +289,16 @@ inline Vec3 Vec3::getCrossed(const Vec3& vec) {
 		,z * vec.x - x * vec.z
 		,x * vec.y - y * vec.x
 	);
+}
+
+inline Vec3& Vec3::limit(float s) {
+	float l = lengthSquared();
+	if(l > (s*s)) {
+		normalize();	
+		*this *= s;
+	}
+	return *this;
+	
 }
 
 inline void Vec3::print() {

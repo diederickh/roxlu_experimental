@@ -257,7 +257,8 @@ void Effect::createVertexShader(string& vertShader) {
 	
 	if(hasNormals()) {
 		vert << "\t" << "normal = norm;" << endl;
-		vert << "\t" << "eye_normal = normalize(vec3(modelview * vec4(normal,1.0)));" << endl;
+		// when you set the value to 0.0 it works when you have no normal texture
+		vert << "\t" << "eye_normal = normalize(vec3(modelview * vec4(normal,0.0)));" << endl;
 	}
 	
 	if(hasNormalTexture()) {
@@ -269,9 +270,10 @@ void Effect::createVertexShader(string& vertShader) {
 	
 	if(hasLights()) {
 		vert << endl;
+		// when using lights and no normal textures the eye_normal above should be multiplied by 0.0, the light by 1.0
 		vert 	<< "\t" << "for(int i = 0; i < LIGHT_COUNT; ++i) { " << endl
-			//	<< "\t\t" << "vec3 lp = (lights[i].position);"<< endl;
-				<< "\t\t" << "vec3 lp = (vec3(modelview * vec4(lights[i].position, 0.0)));"<< endl;
+//				<< "\t\t" << "vec3 lp = (lights[i].position);"<< endl;
+				<< "\t\t" << "vec3 lp = (vec3(modelview * vec4(lights[i].position,1.0)));"<< endl;
 				
 		if(hasNormalTexture()) {
 			vert << "\t\t"	<< "light_directions[i] = normalize(tangent_space * (lp - eye_position)); " << endl;
@@ -341,7 +343,12 @@ void Effect::createFragmentShader(string& fragShader) {
 	frag << endl;
 	frag << "void main() {" << endl;
 
-	frag << "\t" << "vec4 texel_color = vec4(0.1, 0.1, 0.1, 1.1);" << endl;
+	if(!hasNormalTexture() || !hasDiffuseTexture()) {
+		frag << "\t" << "vec4 texel_color = vec4(0.1, 0.1, 0.1, 1.1);" << endl;
+	}
+	else {
+		frag << "\t" << "vec4 texel_color = vec4(0.0, 0.0, 0.0, 1.0);" << endl;
+	}
 	
 	if(hasNormals()) {
 		frag << "\t" << "vec3 final_normal = normalize(eye_normal);" << endl;
@@ -357,7 +364,7 @@ void Effect::createFragmentShader(string& fragShader) {
 			
 	if(hasDiffuseTexture()) {
 		frag << "\t" << "vec4 diffuse_color = texture2D(diffuse_texture, texcoord);" << endl;
-		frag << "\t" << "texel_color += diffuse_color;" << endl;
+		frag << "\t" << "texel_color += (diffuse_color );" << endl;
 //		frag << "\t" << "texel_color.rgb = vec3(0.0,0.0,0.0);" << endl;
 	}
 	
@@ -384,6 +391,7 @@ void Effect::createFragmentShader(string& fragShader) {
 //	frag << "\t" << "gl_FragColor.rgb = normal_color;" << endl;
 //	frag << "\t" << "gl_FragColor.rgb = final_normal;" << endl;			
 //	frag << "\t" << "gl_FragColor.rgb = normal;" << endl;			
+//	frag << "\t" << "gl_FragColor.rgba = vec4(0.5, 0.5, 0.5,0.7);" << endl;			
 	// close shader.
 	frag << "}" << endl; // main()
 	

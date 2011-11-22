@@ -79,7 +79,8 @@ public:
 	void setLightPosition(string name, float x, float y, float z);
 	void setLightDiffuseColor(string name, float r, float g, float b, float a = 1.0);
 	void setLightSpecularColor(string name, float r, float g, float b, float a = 1.0);	
-
+	Light* getLight(string name);
+	
 private:
 	bool use_fill;
 	float screen_width;
@@ -135,7 +136,13 @@ inline SceneItem* Renderer::duplicateSceneItem(string oldName, string newName) {
 		printf("Error: cannot duplicate scene item: '%s' as we cannot find it\n", oldName.c_str());
 		return NULL;
 	}
+	
+	// @todo a scene item must be initialized before it can be duplicated... 
+	// this can lead to confusing when i.e. a material hasn't be applied yet.
+	// then the material will not show up.
+	si->initialize();
 	SceneItem* duplicated = si->duplicate();
+
 	scene->addSceneItem(newName, duplicated);
 	return duplicated;
 }

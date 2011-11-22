@@ -63,7 +63,9 @@ void Renderer::render() {
 	Scene::scene_item_iterator it = scene->scene_items.begin();
 	while(it != scene->scene_items.end()) {
 		SceneItem& si = *(it->second);
-		si.draw(view_matrix, projection_matrix);
+		if(si.isVisible()) {
+			si.draw(view_matrix, projection_matrix);
+		}
 		++it;
 	}
 
@@ -193,12 +195,19 @@ Material* Renderer::createDiffuseTexture(
 		mat =  new Material(materialName, effect->getShaderPtr());
 	}
 	
-	effect->enableDiffuseTexture();
+	//effect->enableDiffuseTexture();
 	
 	Texture* tex = mat->loadDiffuseTexture(diffuseFileName, imageFormat);
 	scene->addMaterial(materialName, mat);
 	scene->addTexture(textureName, tex);
 	return mat;
+}
+
+
+Material* Renderer::createMaterial(string name) {
+	Material* m = new Material(name, effect->getShaderPtr());
+	scene->addMaterial(name, m);
+	return m;
 }
 
 Material* Renderer::createNormalTexture(
@@ -239,6 +248,10 @@ void Renderer::setLightPosition(string name, float x, float y, float z) {
 void Renderer::setLightDiffuseColor(string name, float r, float g, float b, float a) {
 	Light* l = scene->getLight(name);
 	l->setDiffuseColor(r,g,b,a);
+}
+
+Light* Renderer::getLight(string name) {
+	return scene->getLight(name);
 }
 
 void Renderer::setLightSpecularColor(string name, float r, float g, float b, float a) {
@@ -288,19 +301,16 @@ void Renderer::exportToR3F(string fileName) {
 		++items_it;
 	}
 	
-	rf.save("test.r3f");
-	
+
 	// add materials.
-	/*
 	const map<string, Material*>& maps = scene->getMaterials();
 	map<string, Material*>::const_iterator map_it = maps.begin();
 	while(map_it != maps.end()) {
 		rf.addMaterial(map_it->second);
 		++map_it;
 	}
-	*/
 
-	
+	rf.save("test.r3f");	
 //	rf.addSceneItem(plane_si);
 }
 

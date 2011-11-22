@@ -12,16 +12,15 @@ using std::vector;
 using std::string;
 
 #define R3F_VERTEX_DATAS	1
-#define R3F_VERTICES		2
-#define R3F_FACES			3
-#define R3F_FACE_QUAD		4
-#define R3F_SCENE_ITEMS		5
+#define R3F_SCENE_ITEMS		2
+#define R3F_MATERIALS		3
 
 namespace roxlu {
 
 class IOBuffer;
 class VertexData;
 class SceneItem;
+class Material;
 
 class R3F {
 public:
@@ -36,13 +35,18 @@ public:
 	inline void addVertexData(VertexData* vd);
 	inline void addSceneItem(SceneItem& si);
 	inline void addSceneItem(SceneItem* si);
+	inline void addMaterial(Material& m);
+	inline void addMaterial(Material* m);
+	
 	
 	void save(string fileName);
 	void storeVertexData(IOBuffer& buffer, VertexData& vd); 
 	void storeSceneItem(IOBuffer& buffer, SceneItem& vd); 
+	void storeMaterial(IOBuffer& buffer, Material& m);
 	void load(string fileName);
 	
 private:
+	vector<Material*> materials;
 	vector<VertexData*> vertex_datas;
 	vector<SceneItem*> scene_items;
 };
@@ -62,6 +66,15 @@ inline void R3F::addSceneItem(SceneItem& si) {
 inline void R3F::addSceneItem(SceneItem* si){ 
 	scene_items.push_back(si);
 }
+
+inline void R3F::addMaterial(Material& m) {
+	addMaterial(&m);
+}
+
+inline void R3F::addMaterial(Material* m) {
+	materials.push_back(m);
+}
+
 
 }
 #endif

@@ -166,6 +166,10 @@ void IOBuffer::storeByte(uint8_t byte) {
 	published++;
 }
 
+void IOBuffer::storeBool(bool data) {
+	storeByte((uint8_t)data);
+}
+
 void IOBuffer::storeFloat(float data) {
 	ensureSize(4);
 	memcpy(buffer+published, &data, 4);
