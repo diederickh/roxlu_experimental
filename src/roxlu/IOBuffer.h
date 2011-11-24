@@ -49,20 +49,27 @@ public:
 	void storeUI8(uint8_t byte);
 	void storeUI16(uint16_t data);
 	void storeUI32(uint32_t data);
+	void storeString(string data);
 	void storeRepeat(uint8_t byte, uint32_t numBytes); // rename!
 	void storeBuffer(IOBuffer& other); // copies only stored data
 	int storeBuffer(IOBuffer& other, uint32_t numBytes);
 	void storeFloat(float data);
 	void storeBool(bool data);
-
-	void storeString(string data);
-	void storeStringWithSize(string data); // adds a uint16_t with the size of the string 
-	void storeBigEndianUI16(uint16_t data);
-	void storeBigEndianUI32(uint32_t data);
-	void storeBigEndianUI64(uint64_t data);
-	void storeBigEndianDouble(double data);
-	void storeBigEndianFloat(float data);
+	void storeUI16LE(uint16_t data);
+	void storeUI32LE(uint32_t data);
+	void storeFloatLE(float data);
+	void storeDoubleLE(double data);
+	void storeUI16BE(uint16_t data);
+	void storeUI32BE(uint32_t data);
+	void storeUI64BE(uint64_t data);
+	void storeDoubleBE(double data);
+	void storeFloatBE(float data);
 	
+	void storeStringWithSizeBE(string data); // adds a uint16_t with the size of the string 
+	void storeStringWithSizeLE(string data); // adds a uint16_t with the size of the string 
+	string consumeStringWithSizeBE();
+	string consumeStringWithSizeLE();
+		
 	// get the number of bytes published.
 	uint32_t getNumBytesStored();
 	void setNumBytesStored(uint32_t numBytes); // for direct manipulation of buffer.
@@ -77,7 +84,7 @@ public:
 	int consumeBytes(uint8_t* buff, uint32_t numBytes);
 
 	string consumeString(uint32_t upToNumBytes);
-	string consumeStringWithSize();
+
 
 	uint8_t consumeByte();
 	uint8_t  consumeUI8();
@@ -93,14 +100,24 @@ public:
 	int64_t consumeI64();
 	double consumeDouble();
 	
-	// when you want to convert from BE -> LE
-	uint16_t consumeBigEndianUI16();
-	uint32_t consumeBigEndianUI32();
-	uint64_t consumeBigEndianUI64();
-	int16_t consumeBigEndianI16();
-	int32_t consumeBigEndianI32();
-	int64_t consumeBigEndianI64();
-	double consumeBigEndianDouble();	
+
+
+	int16_t consumeI16LE();
+	int32_t consumeI32LE();
+	int64_t consumeI64LE();
+	double consumeDoubleLE();
+	uint16_t consumeUI16LE();
+	uint32_t consumeUI32LE();
+	uint64_t consumeUI64LE();
+	float consumeFloatLE();
+	
+	uint16_t consumeUI16BE();
+	uint32_t consumeUI32BE();
+	uint64_t consumeUI64BE();
+	int16_t consumeI16BE();
+	int32_t consumeI32BE();
+	int64_t consumeI64BE();
+	double consumeDoubleBE();	
 	
 	// operators
 	uint8_t& operator[](uint32_t index) const;

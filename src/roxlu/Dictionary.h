@@ -153,7 +153,11 @@ namespace roxlu {
 		bool serializeToJSON(string &result);
 		void escapeJSON(string &value);
 		string toString(string name="", uint32_t indent = 0);
-				
+		
+		// these features are also somehwere else in roxlu lib, but we want Dictionary to be portable
+		void strReplace(string& target, string search, string replacement);				
+		string strToLower(string str);
+												
 		union {
 			bool 		b;
 			int8_t 		i8;

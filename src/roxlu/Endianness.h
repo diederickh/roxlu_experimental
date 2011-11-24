@@ -55,6 +55,6 @@ static inline uint64_t EndianSwap64(uint64_t value) {
   #define FromLE32(n) EndianSwap32(n)
   #define FromLE64(n) EndianSwap64(n)
 #endif
-	//--------------
+
 	
 #endif
