@@ -28,6 +28,7 @@ public:
 	Color4 diffuse_col;
 	Color4 specular_col;
 	Vec3 position;
+	
 };
 
 inline Vec3& Light::getPosition() {

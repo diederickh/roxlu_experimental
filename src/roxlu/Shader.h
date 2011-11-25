@@ -31,11 +31,15 @@ class Shader {
 		GLuint getAttribute(std::string sName);
 		GLuint getUniform(std::string sName);
 
-		string getVertexSource();
-		string getFragmentSource();
+		string getVertexSource(bool inDataPath = true);
+		string getFragmentSource(bool inDataPath = true);
 				
 		Shader& enable();
 		Shader& disable();
+		
+		
+		// deletes,  reloads the vertex and fragment shaders from file
+		void recreate(std::string& vertShader, std::string& fragShader);
 		
 		std::string readFile(std::string sFile);
 	
@@ -49,7 +53,10 @@ class Shader {
 		Shader& uniform2f(std::string name, GLfloat x, GLfloat y);
 		Shader& uniform3f(std::string name, GLfloat x, GLfloat y, GLfloat z);
 		Shader& uniform4f(std::string name, GLfloat x, GLfloat y, GLfloat z, GLfloat w);
-		Shader& uniformMat4f(std::string name, GLfloat* pMatrix, bool bTranspose = false);
+
+		Shader& uniformMat2fv(std::string name, GLfloat* matrix, bool transpose = false);
+		Shader& uniformMat3fv(std::string name, GLfloat* matrix, bool transpose = false);
+		Shader& uniformMat4fv(std::string name, GLfloat* matrix, bool transpose = false);	
 		
 		Shader& uniform1fv(std::string name, GLfloat* value, int count = 1);
 		Shader& uniform2fv(std::string name, GLfloat* value, int count = 1);
@@ -79,6 +86,7 @@ class Shader {
 		ShaderMap uniforms;
 		ShaderMap attributes;
 		bool enabled;
+
 		std::string name;
 		std::string vert_shader_source;
 		std::string frag_shader_source;

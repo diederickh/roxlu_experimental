@@ -74,7 +74,7 @@ void SceneItem::drawElements() {
 	vao->unbind();
 }
 
-void SceneItem::draw(Mat4& viewMatrix, Mat4& projectionMatrix) {
+void SceneItem::draw(Mat4& viewMatrix, Mat4& projectionMatrix, Mat3& normalMatrix) {
 	if(!initialized) {
 		initialize();
 	}
@@ -87,33 +87,31 @@ void SceneItem::draw(Mat4& viewMatrix, Mat4& projectionMatrix) {
 		exit(1);
 	}
 		
-	
-//	printf("si: %s\n", name.c_str());
-//	printf("effect: %p\n", effect);
-//	printf("material:%p\n", material);
-//	printf("--------\n\n");
-
 	Mat4 modelview_matrix = viewMatrix * mm();
 	Mat4 modelview_projection_matrix = projectionMatrix * modelview_matrix ;
 
+	// @todo we need implement something like: effect()->begin() and effect->end() 	
+	// instead of effect->updateShaders + effect->bindMaterial etc...
+	effect->updateShaders();  
 	effect->getShader().enable();
 		
-		if(material != NULL) {
-			//material->bind();
-			effect->bindMaterial(*material);
-		}
-		
-		effect->updateLights();
-		effect->getShader().uniformMat4f("projection", projectionMatrix.getPtr());
-		effect->getShader().uniformMat4f("modelview", modelview_matrix.getPtr());
-		effect->getShader().uniformMat4f("modelview_projection", modelview_projection_matrix.getPtr());
+	if(material != NULL) {
+		effect->bindMaterial(*material);
+	}
 	
-		if(vbo->hasIndices()) {
-			drawElements();
-		}
-		else {
-			drawArrays();
-		}
+	effect->updateLights();
+	effect->getShader().uniformMat3fv("normalmatrix", normalMatrix.getPtr());
+	effect->getShader().uniformMat4fv("projection", projectionMatrix.getPtr());
+	effect->getShader().uniformMat4fv("modelview", modelview_matrix.getPtr());
+	effect->getShader().uniformMat4fv("modelview_projection", modelview_projection_matrix.getPtr());
+
+	if(vbo->hasIndices()) {
+		drawElements();
+	}
+	else {
+		drawArrays();
+	}
+	
 	effect->getShader().disable();
 	
 	if(material != NULL) {

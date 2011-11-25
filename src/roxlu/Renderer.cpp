@@ -41,6 +41,8 @@ Renderer::Renderer(float screenWidth, float screenHeight)
 }
 
 Renderer::~Renderer() {
+	printf("~Renderer");
+	delete effect;
 }
 
 void Renderer::draw() {
@@ -58,6 +60,7 @@ void Renderer::draw() {
 	cam->updateViewMatrix();
 	Mat4& view_matrix = cam->vm();
 	Mat4& projection_matrix = cam->pm();
+	Mat3 normal_matrix = cam->nm();
 
 	// draw all scene items.
 	Scene::scene_item_iterator it = scene->scene_items.begin();
@@ -67,11 +70,10 @@ void Renderer::draw() {
 			//if(si.hasMaterial()) {
 			//	effect->bindMaterial(*si.getMaterial());
 			//}
-			si.draw(view_matrix, projection_matrix);
+			si.draw(view_matrix, projection_matrix, normal_matrix);
 		}
 		++it;
 	}
-
 }
 
 void Renderer::debugDraw() {
@@ -86,7 +88,8 @@ void Renderer::debugDraw() {
 //	glRotatef(sin(ofGetElapsedTimef()*0.5)*360,0,1,0);
 	effect->disable();
 	cam->place();
-	glEnable(GL_CULL_FACE);
+//	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
 	Mat4 rot;
 	Scene::scene_item_iterator it = scene->scene_items.begin();
 	while(it != scene->scene_items.end()) {
@@ -103,27 +106,29 @@ void Renderer::debugDraw() {
 				glMultMatrixf(rot.getPtr());
 			
 				glScalef(scale.x, scale.y, scale.z);
-				vd.debugDraw();
+				vd.debugDraw(si.getDrawMode());
 			//si.draw(view_matrix, projection_matrix);
 			glPopMatrix();
 		}
 		++it;
 	}
-//	
-//	Scene::vertex_data_iterator it = scene->vertex_datas.begin();
-//	while(it != scene->vertex_datas.end()) {
-//		(it->second)->debugDraw();
-//		++it;
-//	}
+	
+	Scene::light_iterator lit = scene->lights.begin();
+	while(lit != scene->lights.end()) {
+		lit->second->debugDraw();
+		++lit;
+	}
+
 }
 
 void Renderer::drawSceneItem(string name) {
 	cam->updateViewMatrix();
 	Mat4& view_matrix = cam->vm();
 	Mat4& projection_matrix = cam->pm();
+	Mat3 normal_matrix = cam->nm();
 	
 	SceneItem& si = *getSceneItem(name);
-	si.draw(view_matrix, projection_matrix);
+	si.draw(view_matrix, projection_matrix, normal_matrix);
 }
 
 SceneItem* Renderer::createIcoSphere(string name, int detail, float radius) {

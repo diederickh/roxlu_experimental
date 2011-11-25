@@ -17,7 +17,7 @@ of data the VertexData member of the scene item must have! So:
 
 #include "Shader.h"
 #include "VertexTypes.h"
-
+#include "Timer.h"
 using std::vector;
 using std::string;
 
@@ -53,14 +53,21 @@ public:
 		,EFFECT_FEATURE_NORMAL_TEXTURE		= (1 << 5)
 	};
 	
-	void createShader(string& vertShader, string& fragShader);
+	
+	void createShaders(string& vertShader, string& fragShader);
 	void createVertexShader(string& vertShader);
 	void createFragmentShader(string& fragShader);
-	void setupShader();
-	void setupBuffer(VAO& vao, VBO& vbo, VertexData& vd);
+	void setupShader();  // should be private
+	void setupShaderAttributesAndUniforms(); // should be private
+ 	void setupBuffer(VAO& vao, VBO& vbo, VertexData& vd);
 	inline Shader& getShader();
 	inline Shader* getShaderPtr();
-	
+
+	// auto reload and compile shaders	
+	void saveShaders(string name, bool inDataPath = true);
+	void autoReloadShaders(string name, bool inDataPath = true);
+	void reloadShaders(string name, bool inDataPath = true);
+
 	inline void enableFeature(EffectFeature feature, int neccesaryVertexAttrib);
 	inline void disableFeature(EffectFeature feature, int neccesaryVertexAttrib);
 	inline bool hasFeature(EffectFeature feature);
@@ -93,22 +100,33 @@ public:
 	inline bool hasNormalTexture();
 
 	
+	inline void addLight(Light& l);
 	inline void addLight(Light* l);
 	inline int getNumberOfLights();
 	inline bool hasLights();
+	void updateShaders();
 	void updateLights();
-	
-	
 	void bindMaterial(Material& m);
 	inline void disable();
+	
+	// used by the auto reload shader feature.
+	void onTimer();
 	
 private:
 	uint64_t necessary_vertex_attribs;
 	bool shader_created;
+	bool reload_shader_datapath;
 	vector<Light*> lights;
 	uint64_t features;
 	Shader shader;
-	int texunit;
+//	int texunit;
+	
+	bool reload_shader_enabled;
+	string reload_shader_name;
+	time_t reload_shader_last_modified_frag;
+	time_t reload_shader_last_modified_vert;
+	roxlu::Timer<Effect> reload_timer;
+
 };
 
 // general
@@ -189,6 +207,10 @@ inline bool Effect::hasNormalTexture() {
 }
 
 // lights
+inline void Effect::addLight(Light& l) {
+	addLight(&l);
+}
+
 inline void Effect::addLight(Light* l) {
 	lights.push_back(l);
 	enableNormals(); 

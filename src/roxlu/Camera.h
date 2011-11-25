@@ -4,6 +4,7 @@
 #include "OpenGL.h"
 #include "Quat.h"
 #include "Mat4.h"
+#include "Mat3.h"
 #include "Vec3.h"
 
 namespace roxlu {
@@ -47,9 +48,10 @@ public:
 	Mat4 getInverseViewProjectionMatrix();
 	Mat4 getViewMatrix();
 	Mat4 getViewProjectionMatrix();
+
 	inline Mat4& vm(); // view matrix
 	inline Mat4& pm(); // projection matrix
-
+	inline Mat3 nm(); // normal matrix
 	
 	// internally used for caching
 	void updateViewMatrix();
@@ -94,6 +96,11 @@ inline Mat4& Camera::vm() {
 
 inline Mat4& Camera::pm() {
 	return projection_matrix;
+}
+
+inline Mat3 Camera::nm() {
+	rotation.getMat3().print();
+	return rotation.getMat3();
 }
 
 } // roxlu

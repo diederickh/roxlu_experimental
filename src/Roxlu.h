@@ -50,6 +50,7 @@
 #include "roxlu/experimental/Light.h"
 #include "roxlu/experimental/Effect.h"
 #include "roxlu/experimental/R3F.h"
+#include "roxlu/experimental/Timer.h"
 
 
 #include "external/jpeg/JPEGImage.h"

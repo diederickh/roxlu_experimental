@@ -1,6 +1,7 @@
 #ifndef ROXLU_QAUTH
 #define ROXLU_QAUTH
 
+#include "Mat3.h"
 #include "Mat4.h"
 #include "Vec3.h"
 #include "Constants.h"
@@ -11,12 +12,12 @@ class Quat {
 public:	
 	Vec3 v;
 	float w;
-	
-	Quat();
-	Quat(float x, float y, float z, float w);
+	Quat(float x = 0, float y = 0, float z = 0, float w = 1);
 	void normalize();
 	void toMat4(Mat4& aDest) const;
 	Mat4 getMat4() const;
+	void toMat3(Mat3& dest) const;
+	Mat3 getMat3() const;
 	
 	// absolute rotations. (euler)
 	void setRotation(const float radians, const float x, const float y, const float z);

@@ -41,7 +41,7 @@ void OBJ::createMaterialFile(Material& mat) {
 	else {
 		printf("??????");
 	}
-	File::putFileContents(File::toDataPath(material_file), ss.str());
+	File::putFileContents(File::toDataPath(material_file), ss.str(), true);
 }
 
 bool OBJ::save(string fileName) {
@@ -65,7 +65,7 @@ bool OBJ::save(string fileName) {
 	}
 	//printf("result:\n%s\n", ss.str().c_str());
 	
-	File::putFileContents(File::toDataPath(fileName), ss.str());
+	File::putFileContents(File::toDataPath(fileName), ss.str(), true);
 	return true;
 }
 

@@ -264,7 +264,6 @@ void R3F::storeSceneItem(IOBuffer& buffer, SceneItem& si) {
 		buffer.storeUI16LE(si.getMaterial()->getName().size());
 		buffer.storeString(si.getMaterial()->getName());
 	}
-	
 }
 
 inline VertexData* R3F::getVertexData(string name){

@@ -37,6 +37,7 @@ public:
 	Mat3(const Mat3& o); 
 	Mat3& operator=(const Mat3& o);
 	inline float& operator()(unsigned int row, unsigned int col);
+	inline float* getPtr();
 	
 	// comparison
 	bool operator==(const Mat3& o) const;
@@ -78,6 +79,7 @@ public:
 	Mat3& 			operator-=(const Mat3& o);
 	Mat3 			operator-();
 	
+	inline void print();
 	inline friend ostream& operator<<(ostream& os, const Mat3& m);
 	float m[9];
 	int flag;
@@ -85,6 +87,10 @@ public:
 
 inline float& Mat3::operator()(unsigned int row, unsigned int col) {
 	return m[col * 3 + row];
+}
+
+inline float* Mat3::getPtr() {
+	return &m[0];
 }
 
 extern Mat3 inverse(Mat3& o);
@@ -158,6 +164,14 @@ inline ostream& operator<<(ostream& os, const Mat3& m) {
 		<< m.m[5] << ", " << setw(w) 
 		<< m.m[8] << std::endl;
 	return os;
+}
+
+inline void Mat3::print() {
+	printf("%3.3f, %3.3f, %3.3f\n", m[0], m[3], m[6]);
+	printf("%3.3f, %3.3f, %3.3f\n", m[1], m[4], m[7]);
+	printf("%3.3f, %3.3f, %3.3f\n", m[2], m[5], m[8]);
+
+	printf("\n");
 }
 
 } // roxlu

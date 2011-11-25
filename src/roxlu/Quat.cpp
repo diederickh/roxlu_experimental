@@ -2,11 +2,6 @@
 
 namespace roxlu {
 
-Quat::Quat()
-:w(1)
-{
-}
-
 Quat::Quat(float x, float y, float z, float w) 
 	:w(w)
 {
@@ -42,6 +37,38 @@ void Quat::toMat4(Mat4& rDest) const {
 Mat4 Quat::getMat4() const {
 	Mat4 result;
 	toMat4(result);
+	return result;
+}
+
+void Quat::toMat3(Mat3& dest) const {
+	float tx  = 2.0f*v.x;
+	float ty  = 2.0f*v.y;
+	float tz  = 2.0f*v.z;
+	float twx = tx*w;
+	float twy = ty*w;
+	float twz = tz*w;
+	float txx = tx*v.x;
+	float txy = ty*v.x;
+	float txz = tz*v.x;
+	float tyy = ty*v.y;
+	float tyz = tz*v.y;
+	float tzz = tz*v.z;
+	dest.m[0] = 1.0f-(tyy+tzz);
+	dest.m[1] = txy-twz;
+	dest.m[2] = txz+twy;
+	
+	dest.m[4] = txy+twz;
+	dest.m[5] = 1.0f-(txx+tzz);
+	dest.m[6] = tyz-twx;
+	
+	dest.m[8] = txz-twy;
+	dest.m[9] = tyz+twx;
+	dest.m[10] = 1.0f-(txx+tyy);
+}
+
+Mat3 Quat::getMat3() const {
+	Mat3 result;
+	toMat3(result);
 	return result;
 }
 

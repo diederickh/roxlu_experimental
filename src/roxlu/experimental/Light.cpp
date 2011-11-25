@@ -40,8 +40,8 @@ void Light::debugDraw() {
 	normalize3(to_center, length, to_center);
 	cross3(to_center, help_axis, crossa);
 	cross3(to_center, crossa, crossb);
-	multiply3(crossa, 0.5, crossa);
-	multiply3(crossb, 0.5, crossb);
+	multiply3(crossa, 1.5, crossa);
+	multiply3(crossb, 1.5, crossb);
 		
 	Vec3 a = position + crossa;
 	Vec3 b = position - crossa;

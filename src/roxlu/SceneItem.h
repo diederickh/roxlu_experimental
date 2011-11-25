@@ -5,6 +5,7 @@
 #include "VBO.h"
 #include "VAO.h"
 #include "Shader.h"
+#include "Mat3.h"
 #include "Mat4.h"
 #include "Vec3.h"
 #include "Quat.h"
@@ -36,7 +37,7 @@ public:
 	SceneItem* duplicate();
 	
 	
-	void draw(Mat4& viewMatrix, Mat4& projectionMatrix);
+	void draw(Mat4& viewMatrix, Mat4& projectionMatrix, Mat3& normalMatrix);
 	bool createFromVertexData(VertexData* vd);
 	bool createFromVertexData(VertexData& vd);
 	inline VertexData* getVertexData();
@@ -68,6 +69,7 @@ public:
 	
 	// draw modes
 	inline void	setDrawMode(SceneItemDrawMode mode);
+	inline int getDrawMode();
 	inline void	drawUsingTriangles();
 	inline void drawUsingQuads();
 	inline void drawUsingPoints();
@@ -140,6 +142,10 @@ inline void SceneItem::drawUsingQuadStrip() {
 
 inline void SceneItem::setDrawMode(SceneItemDrawMode mode) {
 	draw_mode = mode;
+}
+
+inline int SceneItem::getDrawMode() {
+	return draw_mode;
 }
 
 inline Mat4& SceneItem::mm() {

@@ -5,6 +5,8 @@
 #include <fstream>
 
 //#include <unistd.h>
+#include "Poco/File.h"
+#include "Poco/Timestamp.h"
 
 #ifdef __APPLE__
 	#include <TargetConditionals.h>
@@ -20,8 +22,12 @@ public:
 	File();
 	~File();
 	
-	static void putFileContents(string file, string contents) {
+	static void putFileContents(string file, string contents, bool inDataPath = true) {
 		ofstream of;
+		if(inDataPath) {
+			file = File::toDataPath(file);	
+		}
+		
 		of.open(file.c_str(), std::ios::out);
 		if(!of.is_open()) {
 			printf("File: cannot open file: '%s'\n", file.c_str());
@@ -31,7 +37,10 @@ public:
 		of.close();
 	}
 	
-	static string getFileContents(string file) {
+	static string getFileContents(string file, bool inDataPath = true) {
+		if(inDataPath) {
+			file = File::toDataPath(file);
+		}
 		std::string result = "";
 		std::string line = "";
 		std::ifstream ifs(file.c_str());
@@ -59,6 +68,16 @@ public:
 		#else 
 			return getCWD() +"/" +file;
 		#endif
+	}
+	
+	static time_t getTimeModified(string file, bool inDataPath = true) {
+		if(inDataPath) {
+			file = File::toDataPath(file);
+		}
+		Poco::File f(file);
+		Poco::Timestamp stamp = f.getLastModified();
+
+		return stamp.epochTime();
 	}
 	
 	static string getCWD() {

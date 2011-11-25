@@ -32,16 +32,16 @@ Shader& Shader::load() {
 	return *this;
 }
 
-string Shader::getVertexSource() {
+string Shader::getVertexSource(bool inDataPath) {
 	std::string vs_file = name +".vert";
 	std::string vs_file_path = File::toDataPath(vs_file);
-	return File::getFileContents(vs_file_path);
+	return File::getFileContents(vs_file_path, inDataPath);
 }
 
-string Shader::getFragmentSource() {
+string Shader::getFragmentSource(bool inDataPath) {
 	std::string vs_file = name +".frag";
 	std::string vs_file_path = File::toDataPath(vs_file);
-	return File::getFileContents(vs_file_path);
+	return File::getFileContents(vs_file_path, inDataPath);
 }
 
 void Shader::create(std::string& rVertexSource, std::string& rFragmentSource) {
@@ -76,33 +76,33 @@ void Shader::create(std::string& rVertexSource, std::string& rFragmentSource) {
 
 }
 
-Shader& Shader::addAttribute(std::string sName) {
+Shader& Shader::addAttribute(std::string attribute) {
 	enable();
-	ShaderMap::iterator it = attributes.find(sName);
+	ShaderMap::iterator it = attributes.find(attribute);
 	if(it != attributes.end()) {
 		return *this;
 	}
 	
-	GLuint attribute_id = glGetAttribLocation(prog_id, sName.c_str()); eglGetError();
-	printf("Added attribute: %s(%d) for prog: %d\n", sName.c_str(), attribute_id, prog_id);
-	attributes[sName] = attribute_id;
+	GLuint attribute_id = glGetAttribLocation(prog_id, attribute.c_str()); eglGetError();
+	printf("Added attribute: %s(%d) for prog: %d\n", attribute.c_str(), attribute_id, prog_id);
+	attributes[attribute] = attribute_id;
 	disable();
 	return *this;
 };
 
-Shader& Shader::addUniform(std::string sName) {
+Shader& Shader::addUniform(std::string uniform) {
 	enable();
 	GLuint uni_loc = -1;
-	uni_loc = glGetUniformLocation(prog_id, sName.c_str()); eglGetError();
-	printf("Added uniform: %s at %d for prog: %d\n", sName.c_str(), uni_loc, prog_id);
-	uniforms[sName] = uni_loc;
+	uni_loc = glGetUniformLocation(prog_id, uniform.c_str()); eglGetError();
+	printf("Added uniform: %s at %d for prog: %d\n", uniform.c_str(), uni_loc, prog_id);
+	uniforms[uniform] = uni_loc;
 	disable();
 	return *this;
 }
 
-Shader& Shader::enableVertexAttribArray(std::string sName) {
+Shader& Shader::enableVertexAttribArray(std::string attribute) {
 	enable();
-	GLuint attrib = getAttribute(sName);
+	GLuint attrib = getAttribute(attribute);
 	if(attrib != -1) {
 		glEnableVertexAttribArray(attrib);eglGetError();
 	}
@@ -110,31 +110,31 @@ Shader& Shader::enableVertexAttribArray(std::string sName) {
 	return *this;
 }
 
-GLuint Shader::getAttribute(std::string sName) {
-	ShaderMap::iterator it = attributes.find(sName);
+GLuint Shader::getAttribute(std::string attribute) {
+	ShaderMap::iterator it = attributes.find(attribute);
 	if(it == attributes.end()) {
-		printf("Shader: error while retrieving the attribute: %s\n", sName.c_str());
+		printf("Shader: error while retrieving the attribute: %s\n", attribute.c_str());
 		return -1;
 	}
 	return (it->second);
 }
 
-GLuint Shader::getUniform(std::string sName) {
+GLuint Shader::getUniform(std::string uniform) {
 	// find and return directly.
-	ShaderMap::iterator it = uniforms.find(sName);
+	ShaderMap::iterator it = uniforms.find(uniform);
 	if(it != uniforms.end()) {
 		return it->second;
 	}
 	
 	// if not found, try to load it.
 	if(it == uniforms.end()) {
-		addUniform(sName);
+		addUniform(uniform);
 	}
 	
 	// and find again.... 
-	it = uniforms.find(sName);
+	it = uniforms.find(uniform);
 	if(it == uniforms.end()) {
-		printf("Shader: error while retrieve the uniform: %s\n", sName.c_str());
+		printf("Shader: error while retrieve the uniform: %s\n", uniform.c_str());
 		return -1;
 	}
 	return it->second;
@@ -150,10 +150,10 @@ Shader& Shader::disable() {
 	return *this;
 }
 
-std::string Shader::readFile(std::string sPath) {
+std::string Shader::readFile(std::string path) {
 	std::string result = "";
 	std::string line = "";
-	std::ifstream ifs(sPath.c_str());
+	std::ifstream ifs(path.c_str());
 	if(!ifs.is_open()) {
 		return result;
 	}
@@ -163,85 +163,108 @@ std::string Shader::readFile(std::string sPath) {
 	return result;
 }
 
+// --------- Kind of experimental; reloading and recompiling shaders -----------
+
+// reload vertex/fragment shader using the shader name 
+void Shader::recreate(std::string& vertShader, std::string& fragShader) {
+	glDeleteShader(vert_id); eglGetError();
+	glDeleteShader(frag_id); eglGetError();
+	glDeleteProgram(prog_id); eglGetError();
+	create(vertShader, fragShader);
+	printf("recreated shader: %d, %d\n", vert_id, frag_id);
+	
+}
+
 // +++++++++++++++++++++++++++ DATA TRANSFER +++++++++++++++++++++++++++++++++++
 
 // ----------------------- slower, but handier data transfers ------------------
-Shader& Shader::uniform1i(std::string sName, GLint x) {
-	//printf("uniform1i: '%s', value: %d\n", sName.c_str(), x);
-	glUniform1i(getUniform(sName), x); eglGetError();
+Shader& Shader::uniform1i(std::string uniform, GLint x) {
+	glUniform1i(getUniform(uniform), x); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform2i(std::string sName, GLint x, GLint y) {
-	glUniform2i(getUniform(sName), x, y); eglGetError();
+Shader& Shader::uniform2i(std::string uniform, GLint x, GLint y) {
+	glUniform2i(getUniform(uniform), x, y); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform3i(std::string sName, GLint x, GLint y, GLint z) {
-	glUniform3i(getUniform(sName), x, y, z); eglGetError();
+Shader& Shader::uniform3i(std::string uniform, GLint x, GLint y, GLint z) {
+	glUniform3i(getUniform(uniform), x, y, z); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform4i(std::string sName, GLint x, GLint y, GLint z, GLint w) {
-	glUniform4i(getUniform(sName), x, y, z, w); eglGetError();
+Shader& Shader::uniform4i(std::string uniform, GLint x, GLint y, GLint z, GLint w) {
+	glUniform4i(getUniform(uniform), x, y, z, w); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform1f(std::string sName, GLfloat x) {
-	glUniform1f(getUniform(sName), x); eglGetError();
+Shader& Shader::uniform1f(std::string uniform, GLfloat x) {
+	glUniform1f(getUniform(uniform), x); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform2f(std::string sName, GLfloat x, GLfloat y) {
-	glUniform2f(getUniform(sName), x, y); eglGetError();
-	return *this;
-}
-
-
-Shader& Shader::uniform3f(std::string sName, GLfloat x, GLfloat y, GLfloat z) {
-	glUniform3f(getUniform(sName), x, y, z); eglGetError();
+Shader& Shader::uniform2f(std::string uniform, GLfloat x, GLfloat y) {
+	glUniform2f(getUniform(uniform), x, y); eglGetError();
 	return *this;
 }
 
 
-Shader& Shader::uniform4f(std::string sName, GLfloat x, GLfloat y, GLfloat z, GLfloat w) {
-	glUniform4f(getUniform(sName), x, y, z, w); eglGetError();
+Shader& Shader::uniform3f(std::string uniform, GLfloat x, GLfloat y, GLfloat z) {
+	glUniform3f(getUniform(uniform), x, y, z); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniformMat4f(std::string sName, GLfloat* pMatrix, bool bTranspose) {
-	glUniformMatrix4fv(getUniform(sName), 1, bTranspose, pMatrix); eglGetError();
+Shader& Shader::uniform4f(std::string uniform, GLfloat x, GLfloat y, GLfloat z, GLfloat w) {
+	glUniform4f(getUniform(uniform), x, y, z, w); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform1fv(std::string name, GLfloat* value, int count) {
-	glUniform1fv(getUniform(name), count, value); eglGetError();
+
+Shader& Shader::uniformMat2fv(std::string uniform, GLfloat* matrix, bool transpose) {
+	glUniformMatrix2fv(getUniform(uniform), 1, transpose, matrix); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform2fv(std::string name, GLfloat* value, int count) {
-	glUniform2fv(getUniform(name), count, value); eglGetError();
+
+Shader& Shader::uniformMat3fv(std::string uniform, GLfloat* matrix, bool transpose) {
+	glUniformMatrix3fv(getUniform(uniform), 1, transpose, matrix); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform3fv(std::string name, GLfloat* value, int count) {
-	glUniform3fv(getUniform(name), count, value); eglGetError();
+
+Shader& Shader::uniformMat4fv(std::string uniform, GLfloat* matrix, bool transpose) {
+	glUniformMatrix4fv(getUniform(uniform), 1, transpose, matrix); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform4fv(std::string name, GLfloat* value, int count) {
-	glUniform4fv(getUniform(name), count, value); eglGetError();
+Shader& Shader::uniform1fv(std::string uniform, GLfloat* value, int count) {
+	glUniform1fv(getUniform(uniform), count, value); eglGetError();
+	return *this;
+}
+
+Shader& Shader::uniform2fv(std::string uniform, GLfloat* value, int count) {
+	glUniform2fv(getUniform(uniform), count, value); eglGetError();
+	return *this;
+}
+
+Shader& Shader::uniform3fv(std::string uniform, GLfloat* value, int count) {
+	glUniform3fv(getUniform(uniform), count, value); eglGetError();
+	return *this;
+}
+
+Shader& Shader::uniform4fv(std::string uniform, GLfloat* value, int count) {
+	glUniform4fv(getUniform(uniform), count, value); eglGetError();
 	return *this;
 }
 
 Shader& Shader::setTextureUnit(
-	 std::string sUniform
-	,GLuint nTextureID
-	,GLuint nNum
-	,GLuint nTextureType
+	 std::string uniform
+	,GLuint textureID
+	,GLuint num
+	,GLuint textureType
 ) 
 {
-	return setTextureUnit(getUniform(sUniform), nTextureID, nNum, nTextureType);
+	return setTextureUnit(getUniform(uniform), textureID, num, textureType);
 }	
 
 // ----------------------- fast data transfers ---------------------------------

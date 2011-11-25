@@ -518,6 +518,13 @@ void VertexData::createTangentAndBiTangent(
 
 
 void VertexData::debugDraw(int drawMode) {
+	float colors[4][3] = {
+			{0.88,0.25,0.11}
+			,{0.6,0.78,0.212}
+			,{0.2,0.65,0.698}
+			,{0.94,0.72,0.29}
+	};
+	 
 	// draw using indices
 	if(getNumIndices() > 0) {
 		if(getNumTexCoords() > 0) {
@@ -548,57 +555,82 @@ void VertexData::debugDraw(int drawMode) {
 	}
 	// w/o indices
 	else {
+	
+		glUseProgram(0);
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_BLEND);
+		// we adjust the size of the normals lines dynamically
+		float line_length = 0.2;
+		if(vertices.size() > 2) {
+			float length = (vertices[1] - vertices[2]).length();
+			if(length >= 3) {
+				line_length = 3.2;
+			}
+		}
+		
 		if(getNumTexCoords() > 0) {
-			glDisable(GL_TEXTURE_2D);
-			//glColor3f(1,1,1);
 			glColor3f(0.98, 0.92, 0.75); // yellowish
-//			glColor3f(0.4, 0.4, 0.4);
 			int len = vertices.size();
 			glBegin(drawMode);
 			for(int i = 0; i < len; ++i) {
-				glTexCoord2fv(texcoords[i].getPtr());
+				int parts = 3;
+				if(drawMode == GL_QUADS) {
+					parts = 4;
+				}
+				 glColor3fv(colors[i%parts]);
+				//glTexCoord2fv(texcoords[i].getPtr());
 				glVertex3fv(vertices[i].getPtr());
 			}
 			glEnd();
-			glEnable(GL_TEXTURE_2D);
+			//glEnable(GL_TEXTURE_2D);
 		
 		}
 		else {
+			// shape	
 			glColor3f(0.98, 0.92, 0.75); // yellowish
 			glBegin(drawMode);
 			vector<Vec3>::iterator it = vertices.begin();
+			float len = vertices.size();
+			int i = 0;
 			while(it != vertices.end()) {	
+				int parts = 3;
+				if(drawMode == GL_QUADS) {
+					parts = 4;
+				}
+				glColor3fv(colors[i%parts]);
 				glVertex3fv((*it).getPtr());
 				++it;
+				++i;
 			}
+
 			glEnd();
 		}
 
-		// do we need to draw normals?	
+		// normals.
 		int len = normals.size();
 		if(len == vertices.size()) {	
-		 	// somehow the colors arent set in my current test app...
 			glColor3f(1,1,1);
 			glLineWidth(1.5);
 			
 			glDisable(GL_BLEND);
-		
 			glBegin(GL_LINES);
-		
+
 			for(int i = 0; i < len; ++i) {
 				Vec3 pos = vertices[i];
 				Vec3 norm = normals[i];
 				norm.normalize();
-				Vec3 end = pos + (norm.scale(0.1));
+				Vec3 end = pos + (norm.scale(line_length));
 				glColor4f(1.0f,0.0f,0.4f,1.0f);
+				glColor3f(0.98, 0.92, 0.75);
 				glVertex3fv(pos.getPtr());
 				glColor4f(1.0f, 0.0f,1.0f,1.0f);
+				glColor3f(0.98, 0.92, 0.75);
 				glVertex3fv(end.getPtr());
 			}
 			glEnd();
 		}
 		
-		// do we have tangents?
+		// tangents
 		if(tangents.size() > 0) {
 			int len = tangents.size();
 			glBegin(GL_LINES);
@@ -606,7 +638,7 @@ void VertexData::debugDraw(int drawMode) {
 				Vec3 pos = vertices[i];
 				Vec3 norm = tangents[i];
 				norm.normalize();
-				Vec3 end = pos + (norm.scale(1.5));
+				Vec3 end = pos + (norm.scale(line_length));
 				glColor4f(1.0f,0.0f,0.0f,1.0f);
 				glVertex3fv(pos.getPtr());
 				glVertex3fv(end.getPtr());
@@ -615,16 +647,28 @@ void VertexData::debugDraw(int drawMode) {
 		}
 		
 		// draw lines
+		glPolygonOffset(-1.0f, -1.0f);
+		glEnable(GL_POLYGON_OFFSET_LINE);
+		glEnable(GL_LINE_SMOOTH);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glLineWidth(2.5f);
 		glDisable(GL_TEXTURE_2D);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glColor3f(0,0,0);
 		glBegin(drawMode);
-		for(int i = 0; i < len; ++i) {
+		for(int i = 0; i < vertices.size(); ++i) {
 			glVertex3fv(vertices[i].getPtr());
 		}
 		glEnd();
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glEnable(GL_TEXTURE_2D);
+		glDisable(GL_POLYGON_OFFSET_LINE);
+		glLineWidth(1.0f);
+		glDisable(GL_BLEND);
+		glDisable(GL_LINE_SMOOTH);
+
+		
 	}
 }
 
