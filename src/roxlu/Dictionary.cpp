@@ -309,6 +309,37 @@ Dictionary& Dictionary::operator[](const char* key) {
 	return operator[](string(key));
 }
 
+Dictionary& Dictionary::operator[](Dictionary& key) {
+	stringstream ss;
+	switch(key.type) {
+		case D_BOOL:
+		case D_INT8:
+		case D_INT16:
+		case D_INT32:
+		case D_INT64:
+		case D_UINT8:
+		case D_UINT16:
+		case D_UINT32:
+		case D_UINT64:
+		case D_DOUBLE: {
+			ss << VAR_INDEX_VALUE << (string)key;
+			break;
+		}
+		case D_STRING: {
+			ss << *key.value.s;
+			break;
+		}
+		case D_NULL:
+		case D_UNDEFINED:
+		case D_MAP: 
+		default: {
+			printf("Dictionary type cannot be used as index.\n");
+			break;
+		}
+	}
+	return operator[](ss.str());
+}
+
 // type casting
 //------------------------------------------------------------------------------
 #define DICT_OPERATOR(ctype) \
@@ -580,7 +611,7 @@ int64_t  Dictionary::getAsInt64() {
 //------------------------------------------------------------------------------
 string Dictionary::toJSON() {
 	string result = "";
-	if(serializeToJSON(result)) {
+	if(jsonSerialize(result)) {
 		return result;
 	}
 	return "";
@@ -590,7 +621,7 @@ string Dictionary::toXML() {
 	return toString();
 }
 
-bool Dictionary::serializeToJSON(string &result) {
+bool Dictionary::jsonSerialize(string &result) {
 	switch(type) {
 		case D_NULL: {
 			result += "null";
@@ -624,7 +655,8 @@ bool Dictionary::serializeToJSON(string &result) {
 		
 		case D_STRING: {
 			string str = (string)(*this);
-			escapeJSON(str);
+//			escapeJSON(str);
+			jsonEscape(str);
 			result += str;
 			break;
 		}
@@ -641,12 +673,13 @@ bool Dictionary::serializeToJSON(string &result) {
 				// get key.
 				string map_key = it->first;
 				if(!isArray()) {
-					escapeJSON(map_key);
+					//escapeJSON(map_key);
+					jsonEscape(map_key);
 					result += map_key +":";
 				}	
 				// get values.
 				Dictionary map_val = it->second;
-				if(!map_val.serializeToJSON(result)) {
+				if(!map_val.jsonSerialize(result)) {
 					printf("Error while converting to json for key: %s\n", map_key.c_str());
 					return false;
 				}
@@ -669,44 +702,6 @@ bool Dictionary::serializeToJSON(string &result) {
 		};
 	};
 	return true;
-}
-
-void Dictionary::escapeJSON(string& v) {
-	replaceString(v, 	"\\",	"\\\\");
-	replaceString(v, 	"/", 	"\\/"); 
-	replaceString(v, 	"\"", 	"\\\""); 
-	replaceString(v, 	"\b", 	"\\b"); 
-	replaceString(v, 	"\f", 	"\\f"); 
-	replaceString(v, 	"\n", 	"\\n"); 
-	replaceString(v, 	"\r", 	"\\r"); 
-	replaceString(v, 	"\t", 	"\\t"); 
-	v = "\"" +v +"\"";
-}
-
-
-// JSON deserialization helper functions
-//------------------------------------------------------------------------------
-void Dictionary::strReplace(string &target, string search, string replacement) {
-	if(search == replacement) {
-		return;
-	}
-	if(search == "") {
-		return;
-	}
-	string::size_type i = string::npos;
-	string::size_type lastPos = 0;
-	while ((i = target.find(search, lastPos)) != string::npos) {
-		target.replace(i, search.length(), replacement);
-		lastPos = i + replacement.length();
-	}
-}				
-
-string Dictionary::strToLower(string value) {
-	string result = "";
-	for (string::size_type i = 0; i < value.length(); i++) {
-			result += tolower(value[i]);
-	}
-	return result;
 }
 
 
@@ -809,9 +804,10 @@ bool Dictionary::toBinary(IOBuffer& buffer) {
 }
 
 bool Dictionary::fromBinary(IOBuffer& buffer) {
-	return fromBinaryInternal(buffer, *this);
+	return binaryDeserialize(buffer, *this);
 }
-bool Dictionary::fromBinaryInternal(IOBuffer& buffer, Dictionary& result) {
+
+bool Dictionary::binaryDeserialize(IOBuffer& buffer, Dictionary& result) {
 	uint8_t stored_type = buffer.consumeByte();
 	switch(stored_type) {
 		case D_NULL: {
@@ -868,7 +864,7 @@ bool Dictionary::fromBinaryInternal(IOBuffer& buffer, Dictionary& result) {
 			uint32_t length = buffer.consumeUI32BE();
 			for(uint32_t i = 0; i < length; i++) {
 				string key = buffer.consumeStringWithSizeBE();
-				if(!Dictionary::fromBinaryInternal(buffer, result[key])) {
+				if(!Dictionary::binaryDeserialize(buffer, result[key])) {
 					printf("Dictionary.fromBinary: cannot deserialize map for key: %s\n", key.c_str());
 					return false;
 				}
@@ -886,6 +882,30 @@ bool Dictionary::fromBinaryInternal(IOBuffer& buffer, Dictionary& result) {
 
 // String functions.
 //------------------------------------------------------------------------------
+void Dictionary::jsonEscape(string& v) {
+	replaceString(v, 	"\\",	"\\\\");
+	replaceString(v, 	"/", 	"\\/"); 
+	replaceString(v, 	"\"", 	"\\\""); 
+	replaceString(v, 	"\b", 	"\\b"); 
+	replaceString(v, 	"\f", 	"\\f"); 
+	replaceString(v, 	"\n", 	"\\n"); 
+	replaceString(v, 	"\r", 	"\\r"); 
+	replaceString(v, 	"\t", 	"\\t"); 
+	v = "\"" +v +"\"";
+}
+
+void Dictionary::jsonUnEscape(string& v) {
+	replaceString(v,	"\\/", 	"/");
+	replaceString(v,	"\\\"", "\"");
+	replaceString(v,	"\\b",	"\b");
+	replaceString(v,	"\\f", 	"\f");
+	replaceString(v,	"\\n", 	"\n");
+	replaceString(v,	"\\r", 	"\r");
+	replaceString(v,	"\\t", 	"\t");
+	replaceString(v,	"\\\\", "\\");
+}
+
+
 void Dictionary::replaceString(string& target, string search, string replacement) {
 	if (search == replacement) {
 		return;
@@ -900,6 +920,289 @@ void Dictionary::replaceString(string& target, string search, string replacement
 		last_pos = i + replacement.length();
 	}
 }
+
+string Dictionary::stringToLower(string value) {
+	string result = "";
+	for (string::size_type i = 0; i < value.length(); i++) {
+			result += tolower(value[i]);
+	}
+	return result;
+}
+
+bool Dictionary::jsonReadWhiteSpace(string& raw, uint32_t& start) {
+	for(; start < raw.length(); ++start){ 
+		if((raw[start] != ' '
+			&& raw[start] != '\t'
+			&& raw[start] != '\r'
+			&& raw[start] != '\n')
+		)
+		{
+			break;
+		}
+	}
+	return true;
+}
+
+bool Dictionary::jsonReadDelimiter(string& raw, uint32_t& start, char& c) {
+	if(!jsonReadWhiteSpace(raw, start)) {
+		printf("jsonReadDelimiter: invalid object\n");
+		return false;
+	}
+	if(raw.size() - start < 1) {
+		printf("jsonReadDelimiter: invalid json delimiter\n");
+		return false;
+	}
+	c = raw[start];
+	start++;
+	return jsonReadWhiteSpace(raw, start);
+	return true;
+}
+
+bool Dictionary::jsonReadString(string& raw, Dictionary& result, uint32_t& start) {
+	if((raw.size() - start) < 2) {
+		printf("jsonReadString: invalid string");
+		return false;
+	}
+	if(raw[start] != '\"') {
+		printf("jsonReadString: error invalid string: %u\n", start);
+		return false;
+	}
+	start++;
+	string::size_type pos = start;
+	while(true) {
+		pos = raw.find('\"', pos);
+		if(pos == string::npos) {
+			printf("jsonReadString: invalid json string.\n");
+			return false;
+		}
+		if(raw[pos-1] == '\\') {
+			pos++;
+		}
+		else {
+			string value = raw.substr(start, pos-start);
+			jsonUnEscape(value);
+			result = value;
+			start = pos + 1;
+			//printf("DEBUG: jsonReadString = %s\n", ((string)(result)).c_str());
+			return true;
+		}
+	}
+	//printf("DEBUG: jsonReadString .. here??\n");
+	return false;
+}
+
+bool Dictionary::jsonReadNumber(string& raw, Dictionary& result, uint32_t& start) {
+	string str = "";
+	for(; start < raw.length(); ++start) {
+		if((raw[start] < '0') || (raw[start] > '9')) {
+			break;
+		}
+		str += raw[start];
+	}
+	if(str == "") {
+		printf("jsonReadNumber: invalid json number\n");
+		return false;
+	}
+	result = (int64_t)atoll(str.c_str());
+	return true;
+}
+
+bool Dictionary::jsonReadObject(string& raw, Dictionary& result, uint32_t& start) {
+	result.reset();
+	result.isArray(false);
+	if((raw.size() - start) < 2) {
+		printf("jsonReadObject: invalid json object.\n");
+		return false;
+	}
+	if(raw[start] != '{') {
+		printf("jsonReadObject: invalid start of json object.\n");
+		return false;
+	}
+	start++;
+	char c;
+	while(start < raw.length()) {
+		if(raw[start] == '}') {
+			start++;
+			return true;
+		}
+		
+		Dictionary key;
+		if(!Dictionary::jsonDeserialize(raw,key,start)) {
+			printf("jsonReadObject: invalid json object (3).\n");
+			return false;
+		}
+		
+		if(!jsonReadDelimiter(raw, start, c)) {
+			printf("jsonReadObject: invald json object (4).\n");
+			return false;
+		}
+		
+		if(c != ':') {
+			printf("jsonReadObject: invalid json object (5).\n");
+			return false;
+		}
+		
+		Dictionary value;
+		if(!Dictionary::jsonDeserialize(raw, value, start)) {
+			printf("jsonReadObject: invalid json object (6).\n");
+			return false;
+		}
+		
+		result[key] = value;
+		
+		if(!jsonReadDelimiter(raw, start, c)) {
+			printf("jsonReadObject: invalid json object (7).\n");
+			return false;
+		}
+		if (c == '}') {
+			return true;
+		}
+		else if (c == ',') {
+			continue;		
+		}
+		else {
+			printf("jsonReadObject: invalid json object (8).\n");
+			return false;
+		}
+		
+	}
+	
+	return false;
+}
+
+bool Dictionary::jsonReadArray(string& raw, Dictionary& result, uint32_t& start) {
+	result.reset();
+	result.isArray(true);
+	if((raw.size() - start) < 2) {
+		printf("jsonReadArray: invalid json array.\n");
+		return false;
+	}
+	if(raw[start] != '[') {
+		printf("jsonReadArray: invalid json array (start).\n");
+		return false;
+	}
+	start++;
+	char c;
+	while(start < raw.length()) {
+		if(raw[start] == ']') {
+			start++;
+			return true;
+		}
+		Dictionary value;
+		if(!Dictionary::jsonDeserialize(raw, value, start)) {
+			printf("jsonReadArray: invalid json array (3)\n");
+			return false;
+		}
+		result.pushToArray(value);
+		
+		if(!jsonReadDelimiter(raw, start, c)) {
+			printf("jsonReadArray: invalid json array (4).\n");
+			return false;
+		}
+		
+		if(c == ']') {
+			return true;
+		}
+		else if(c == ',') {
+			continue;
+		}
+		else {
+			printf("jsonReadArray: invalid json array (5).\n");
+			return false;
+		}
+	}
+	
+	return false;
+}
+
+bool Dictionary::jsonReadBool(string& raw, Dictionary& result, uint32_t& start, string wanted) {
+	if((raw.size() - start) < wanted.size()) {
+		printf("jsonReadBool: invald json bool\n");
+		return false;
+	}
+	string temp = stringToLower(raw.substr(start, wanted.size()));
+	if(temp != wanted) {
+		printf("jsonReadBool: invalid bool\n");
+		return false;	
+	}
+	start += wanted.size();
+	result = (bool)(wanted == "true");
+	return true;
+}
+
+bool Dictionary::jsonReadNull(string& raw, Dictionary& result, uint32_t& start) {
+	if((raw.size() - start) < 4) {
+		printf("jsonReadNull: invalid json null.\n");
+		return false;
+	}
+	string temp = stringToLower(raw.substr(start, 4));
+	if(temp != "null") {
+		printf("jsonReadNull: invalid json null (2).\n");
+		return false;
+	}
+	start += 4;
+	result.reset();
+	return true;
+}
+
+bool Dictionary::fromJSON(string json) {
+	uint32_t start = 0;
+	return jsonDeserialize(json, *this, start);
+}
+
+bool Dictionary::jsonDeserialize(string& raw, Dictionary& result, uint32_t& start) {
+	result.reset();
+	if(start >= raw.size()) {
+		return false;
+	}
+	if(!jsonReadWhiteSpace(raw, start)) {
+		printf("Invalid JSON string\n");
+		return false;
+	}
+	switch(raw[start]) {
+		case '\"': {
+			return jsonReadString(raw, result, start);
+		}
+		case '-':
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9': {
+			return jsonReadNumber(raw, result, start);
+		}
+		case '{': {
+			return jsonReadObject(raw, result, start);
+		}
+		case '[': {
+			return jsonReadArray(raw, result, start);
+		}
+		case 't':
+		case 'T': {
+			return jsonReadBool(raw, result, start, "true");
+		}
+		case 'f':
+		case 'F': {
+			return jsonReadBool(raw, result, start, "false");
+		}
+		case 'n':
+		case 'N': {
+			return jsonReadNull(raw, result, start);
+		}
+		default: {
+			result.reset();
+			return false;
+		}
+		
+	}
+	return true;
+}
+
 
 string Dictionary::toString(string name, uint32_t indent) {
 	string result = "";

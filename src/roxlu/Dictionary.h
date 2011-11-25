@@ -44,8 +44,6 @@ namespace roxlu {
 
 	class Dictionary {
 	public:
-		//static int num_maps; // tmp debug
-		
 		// constructors.
 		Dictionary();
 		~Dictionary();
@@ -85,6 +83,7 @@ namespace roxlu {
 		Dictionary& operator[](const string& key);
 		Dictionary& operator[](const char* key);
 		Dictionary& operator[](const uint32_t& key);
+		Dictionary& operator[](Dictionary& key);
 		
 		bool operator==(Dictionary other); // @todo pass by ref?
 		bool operator!=(Dictionary other);
@@ -118,14 +117,19 @@ namespace roxlu {
 		operator string();
 		
 		string toJSON();
-		string toXML();
+		bool fromJSON(string json);
+		
 		bool toBinary(IOBuffer& buffer);
-		bool fromBinary(IOBuffer& buffer); // make sure the buffer is reset() before calling
+		bool fromBinary(IOBuffer& buffer); 
+	
+		string toXML();
+		
 		bool isNumeric();
 		bool isBoolean();
 		
 		// string functions
-		void replaceString(string& target, string search, string replacement);
+		static void replaceString(string& target, string search, string replacement);
+		static string stringToLower(string str);
 		
 		// destructor related
 		void reset(bool isUndefined = false);
@@ -149,15 +153,23 @@ namespace roxlu {
 		map<string, Dictionary>::iterator end();
 		
 	private:	
-		bool fromBinaryInternal(IOBuffer& buffer, Dictionary& result);
-		bool serializeToJSON(string &result);
-		void escapeJSON(string &value);
-		string toString(string name="", uint32_t indent = 0);
+		static bool binaryDeserialize(IOBuffer& buffer, Dictionary& result);
 		
-		// these features are also somehwere else in roxlu lib, but we want Dictionary to be portable
-		void strReplace(string& target, string search, string replacement);				
-		string strToLower(string str);
-												
+		bool jsonSerialize(string &result);
+		static bool jsonDeserialize(string& json, Dictionary& result, uint32_t& start);
+		static void jsonEscape(string &value);
+		static void jsonUnEscape(string& value);
+		static bool jsonReadWhiteSpace(string& raw, uint32_t& start);		
+		static bool jsonReadDelimiter(string& raw, uint32_t& start, char& c);
+		static bool jsonReadString(string& raw, Dictionary& result, uint32_t& start);
+		static bool jsonReadNumber(string& raw, Dictionary& result, uint32_t& start);
+		static bool jsonReadObject(string& raw, Dictionary& result, uint32_t& start);
+		static bool jsonReadArray(string& raw, Dictionary& result, uint32_t& start);
+		static bool jsonReadBool(string& raw, Dictionary& result, uint32_t& start, string wanted);
+		static bool jsonReadNull(string& raw, Dictionary& result, uint32_t& start);
+		
+		string toString(string name="", uint32_t indent = 0);										
+		
 		union {
 			bool 		b;
 			int8_t 		i8;
