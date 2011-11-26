@@ -34,6 +34,7 @@ public:
 	void			addNormal(const float nX, const float nY, const float nZ);
 	void 			addNormal(const Vec3& rVec);
 	void 			addIndex(const int& nIndex);
+	int				addTriangle(Triangle t);
 	int 			addTriangle(int a, int b, int c); 
 	int				addTriangleAndIndices(int a, int b, int c);
 	int 			addQuad(int nA, int nB, int nC, int nD);

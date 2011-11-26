@@ -70,6 +70,11 @@ int VertexData::addTriangle(const int a, const int b, const int c) {
 	return triangles.size()-1;
 }
 
+int	VertexData::addTriangle(Triangle t) {
+	triangles.push_back(t);
+	return triangles.size()-1;
+}
+
 int VertexData::addTriangleAndIndices(const int a, const int b, const int c) {
 	// keep track of triangle.
 	Triangle t(a, b, c);
@@ -425,6 +430,38 @@ void VertexData::computeTangents() {
 	}
 	
 	// @todo implement for just triangles!
+	if(triangles.size() > 0) {
+		
+		tan1.assign(len, Vec3());
+		tan2.assign(len, Vec3());
+		for(int i = 0; i < triangles.size(); ++i) {
+			Triangle& t = triangles[i];
+			Vec3 sdir;
+			Vec3 tdir;
+			
+			// first triangle.
+			computeTangentForTriangle(
+				vertices[t.a]
+				,vertices[t.b]
+				,vertices[t.c]
+				,texcoords[t.a]
+				,texcoords[t.b]
+				,texcoords[t.c]
+				,sdir
+				,tdir
+			);
+			
+			tan1[t.a] += sdir;
+			tan1[t.b] += sdir;
+			tan1[t.c] += sdir;
+			
+			tan2[t.a] += tdir;
+			tan2[t.b] += tdir;
+			tan2[t.c] += tdir;
+		}
+	}
+	
+
 	
 	for(int i = 0; i < len; ++i) {
 		Vec3& n = normals[i];
@@ -555,7 +592,7 @@ void VertexData::debugDraw(int drawMode) {
 	}
 	// w/o indices
 	else {
-	
+		glColor4f(1,1,1,1);
 		glUseProgram(0);
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_BLEND);
@@ -612,7 +649,7 @@ void VertexData::debugDraw(int drawMode) {
 			glColor3f(1,1,1);
 			glLineWidth(1.5);
 			
-			glDisable(GL_BLEND);
+			
 			glBegin(GL_LINES);
 
 			for(int i = 0; i < len; ++i) {
@@ -652,10 +689,10 @@ void VertexData::debugDraw(int drawMode) {
 		glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glLineWidth(2.5f);
+		glLineWidth(0.5f);
 		glDisable(GL_TEXTURE_2D);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glColor3f(0,0,0);
+		glColor3f(1,1,1);
 		glBegin(drawMode);
 		for(int i = 0; i < vertices.size(); ++i) {
 			glVertex3fv(vertices[i].getPtr());
@@ -667,6 +704,7 @@ void VertexData::debugDraw(int drawMode) {
 		glLineWidth(1.0f);
 		glDisable(GL_BLEND);
 		glDisable(GL_LINE_SMOOTH);
+		glColor3f(1,1,1);
 
 		
 	}

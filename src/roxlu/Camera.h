@@ -99,7 +99,6 @@ inline Mat4& Camera::pm() {
 }
 
 inline Mat3 Camera::nm() {
-	rotation.getMat3().print();
 	return rotation.getMat3();
 }
 

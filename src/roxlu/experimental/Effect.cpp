@@ -55,6 +55,7 @@ void Effect::createVertexShader(string& vertShader) {
 	}
 	
 	vert << endl; 
+	vert << "uniform mat4 viewmatrix;" << endl;
 	vert << "uniform mat4 modelview;" << endl;
 	vert << "uniform mat4 projection;" << endl;
 	vert << "uniform mat4 modelview_projection;" << endl;
@@ -115,7 +116,8 @@ void Effect::createVertexShader(string& vertShader) {
 	if(hasNormals()) {
 		vert << "\t" << "normal = norm;" << endl;
 		// when you set the value to 0.0 it works when you have no normal texture
-		vert << "\t" << "eye_normal = normalize(vec3(modelview * vec4(normal,0.0)));" << endl;
+		//vert << "\t" << "eye_normal = normalize(vec3(modelview * vec4(normal,0.0)));" << endl; // 1.0
+		vert << "\t" << "eye_normal = normalmatrix * normal;" << endl; // 2.0
 	}
 	
 	if(hasNormalTexture()) {
@@ -130,7 +132,8 @@ void Effect::createVertexShader(string& vertShader) {
 		// when using lights and no normal textures the eye_normal above should be multiplied by 0.0, the light by 1.0
 		vert 	<< "\t" << "for(int i = 0; i < LIGHT_COUNT; ++i) { " << endl
 //				<< "\t\t" << "vec3 lp = (lights[i].position);"<< endl;
-				<< "\t\t" << "vec3 lp = (vec3(modelview * vec4(lights[i].position,1.0)));"<< endl;
+//				<< "\t\t" << "vec3 lp = (vec3(modelview * vec4(lights[i].position,1.0)));"<< endl; // version 1.0
+			<< "\t\t" << "vec3 lp = (vec3(viewmatrix * vec4(lights[i].position,1.0)));"<< endl; // version 2.0
 				
 		if(hasNormalTexture()) {
 			vert << "\t\t"	<< "light_directions[i] = normalize(tangent_space * (lp - eye_position)); " << endl;
@@ -263,6 +266,7 @@ void Effect::setupShaderAttributesAndUniforms() {
 	shader.enable();	
 	
 	// default uniforms.
+	shader.addUniform("viewmatrix");
 	shader.addUniform("modelview");
 	shader.addUniform("projection");
 	shader.addUniform("modelview_projection");

@@ -99,13 +99,16 @@ void Renderer::debugDraw() {
 			glPushMatrix();
 				Vec3& scale = si.getScale();
 //				scale.print();
+				
 				Vec3 pos = si.getPosition();
+				rot.identity();
+				
 				si.getOrientation().toMat4(rot);
-				glTranslatef(pos.x, pos.y, pos.z);
+				//glTranslatef(pos.x, pos.y, pos.z);
 				glMatrixMode(GL_MODELVIEW);
-				glMultMatrixf(rot.getPtr());
-			
-				glScalef(scale.x, scale.y, scale.z);
+				//glMultMatrixf(rot.getPtr());
+				glMultMatrixf(si.mm().getPtr());
+				//glScalef(scale.x, scale.y, scale.z);
 				vd.debugDraw(si.getDrawMode());
 			//si.draw(view_matrix, projection_matrix);
 			glPopMatrix();
@@ -208,6 +211,11 @@ SceneItem* Renderer::createPlane(string name, float width, float height) {
 	return si;
 }
 
+
+void Renderer::addSceneItem(string name, SceneItem* si) {
+	si->setName(name);
+	addSceneItem(si);
+}
 void Renderer::addSceneItem(SceneItem* si) {
 	if(!si->hasEffect()) {
 		si->setEffect(effect);

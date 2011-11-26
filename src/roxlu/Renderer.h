@@ -40,6 +40,7 @@ public:
 	void draw();
 	void debugDraw();
 	void drawSceneItem(string name);
+	void addSceneItem(string name, SceneItem* si);
 	void addSceneItem(SceneItem* si);
 	
 	inline EasyCam* getCamera();

@@ -8,7 +8,8 @@ Quat::Quat(float x, float y, float z, float w)
 	v.set(x,y,z);
 }
 
-void Quat::toMat4(Mat4& rDest) const {
+void Quat::toMat4(Mat4& dest)  {
+	/*
 	float tx  = 2.0f*v.x;
 	float ty  = 2.0f*v.y;
 	float tz  = 2.0f*v.z;
@@ -32,41 +33,82 @@ void Quat::toMat4(Mat4& rDest) const {
 	rDest.m[8] = txz-twy;
 	rDest.m[9] = tyz+twx;
 	rDest.m[10] = 1.0f-(txx+tyy);
+	*/
+	
+	// from essiantial mathematics for game developers
+	normalize();
+	float xs, ys, zs, wx,wy,wz, xx,xy,xz, yy,yz,zz;
+	xs = v.x + v.x;
+	ys = v.y + v.y;
+	zs = v.z + v.z;
+	
+	wx = w * xs;
+	wy = w * ys;
+	wz = w * zs;
+	
+	xx = v.x * xs;
+	xy = v.x * ys;
+	xz = v.x * zs;
+	
+	yy = v.y * ys;
+	yz = v.y * zs;
+	
+	zz = v.z * zs;
+	
+	dest.m[0] = 1.0f - (yy + zz);
+	dest.m[1] = xy - wz;
+	dest.m[2] = xz + wy;
+	
+	dest.m[4] = xy + wz;
+	dest.m[5] = 1.0f - (xx + zz);
+	dest.m[6] = yz - wx;
+	
+	dest.m[8] = xz - wy;
+	dest.m[9] = yz + wx;
+	dest.m[10] = 1.0 - (xx + yy);
 }
 
-Mat4 Quat::getMat4() const {
+Mat4 Quat::getMat4()  {
 	Mat4 result;
 	toMat4(result);
 	return result;
 }
 
-void Quat::toMat3(Mat3& dest) const {
-	float tx  = 2.0f*v.x;
-	float ty  = 2.0f*v.y;
-	float tz  = 2.0f*v.z;
-	float twx = tx*w;
-	float twy = ty*w;
-	float twz = tz*w;
-	float txx = tx*v.x;
-	float txy = ty*v.x;
-	float txz = tz*v.x;
-	float tyy = ty*v.y;
-	float tyz = tz*v.y;
-	float tzz = tz*v.z;
-	dest.m[0] = 1.0f-(tyy+tzz);
-	dest.m[1] = txy-twz;
-	dest.m[2] = txz+twy;
+void Quat::toMat3(Mat3& dest) {
+	// from essiantial mathematics for game developers
+	normalize();
+	float xs, ys, zs, wx,wy,wz, xx,xy,xz, yy,yz,zz;
+	xs = v.x + v.x;
+	ys = v.y + v.y;
+	zs = v.z + v.z;
 	
-	dest.m[4] = txy+twz;
-	dest.m[5] = 1.0f-(txx+tzz);
-	dest.m[6] = tyz-twx;
+	wx = w * xs;
+	wy = w * ys;
+	wz = w * zs;
 	
-	dest.m[8] = txz-twy;
-	dest.m[9] = tyz+twx;
-	dest.m[10] = 1.0f-(txx+tyy);
+	xx = v.x * xs;
+	xy = v.x * ys;
+	xz = v.x * zs;
+	
+	yy = v.y * ys;
+	yz = v.y * zs;
+	
+	zz = v.z * zs;
+	
+	dest.m[0] = 1.0f - (yy + zz);
+	dest.m[1] = xy - wz;
+	dest.m[2] = xz + wy;
+	
+	dest.m[3] = xy + wz;
+	dest.m[4] = 1.0f - (xx + zz);
+	dest.m[5] = yz - wx;
+	
+	dest.m[6] = xz - wy;
+	dest.m[7] = yz + wx;
+	dest.m[8] = 1.0 - (xx + yy);
 }
 
-Mat3 Quat::getMat3() const {
+Mat3 Quat::getMat3() {
 	Mat3 result;
 	toMat3(result);
 	return result;

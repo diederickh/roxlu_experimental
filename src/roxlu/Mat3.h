@@ -10,6 +10,7 @@
 
 */
 
+#include "Mat4.h"
 #include "Vec3.h"
 #include "Constants.h"
 
@@ -35,13 +36,16 @@ public:
 	
 	// copy constructor.
 	Mat3(const Mat3& o); 
+	Mat3(const Mat4& o);
 	Mat3& operator=(const Mat3& o);
+	Mat3& operator=(const Mat4& o);
 	inline float& operator()(unsigned int row, unsigned int col);
 	inline float* getPtr();
 	
 	// comparison
 	bool operator==(const Mat3& o) const;
 	bool operator!=(const Mat3& o) const;
+	
 	bool isZero() const;
 	bool isIdentity() const;
 	

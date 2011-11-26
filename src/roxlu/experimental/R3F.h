@@ -41,11 +41,11 @@ public:
 	inline void addMaterial(Material* m);
 	
 	
-	void save(string fileName);
+	void save(string fileName, bool inDataPath = true);
 	void storeVertexData(IOBuffer& buffer, VertexData& vd); 
 	void storeSceneItem(IOBuffer& buffer, SceneItem& vd); 
 	void storeMaterial(IOBuffer& buffer, Material& m);
-	void load(string fileName);
+	void load(string fileName, bool inDataPath = true);
 	
 	inline VertexData* getVertexData(string name);
 	SceneItem* getSceneItem(string name);

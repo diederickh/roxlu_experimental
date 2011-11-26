@@ -20,7 +20,6 @@ public:
 	// copy
 	Mat4(const Mat4& o);
 	Mat4& operator=(const Mat4& o);
-		
 	bool operator==(const Mat4& o) const;
 	bool operator!=(const Mat4& o) const;
 	
@@ -28,6 +27,7 @@ public:
 	bool isIdentity();
 	void clean();
 	void identity();
+	
 	
 	Mat4& affineInverse();	 
 	Mat4& inverse();

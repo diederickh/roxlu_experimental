@@ -16,8 +16,12 @@ R3F::~R3F() {
 
 }
 
-void R3F::load(string fileName) {
+void R3F::load(string fileName, bool inDataPath) {
 	IOBuffer buffer;
+	
+	if(inDataPath) {
+		fileName = File::toDataPath(fileName);
+	}
 	
 	// Load R3F file.
 	buffer.loadFromFile(fileName);
@@ -60,6 +64,13 @@ void R3F::load(string fileName) {
 		for(uint32_t j = 0; j < num_quads; ++j) {
 			Quad q(buffer.consumeUI32LE(), buffer.consumeUI32LE(), buffer.consumeUI32LE(), buffer.consumeUI32LE());
 			vd->addQuad(q);
+		}
+		
+		// number of triangles
+		uint32_t num_tris = buffer.consumeUI32LE();
+		for(uint32_t j = 0; j < num_tris; ++j) {
+			Triangle t(buffer.consumeUI32LE(), buffer.consumeUI32LE(), buffer.consumeUI32LE());
+			vd->addTriangle(t);
 		}
 	}
 
@@ -127,7 +138,7 @@ void R3F::load(string fileName) {
 	}
 }
 
-void R3F::save(string fileName) {
+void R3F::save(string fileName, bool inDataPath) {
 	IOBuffer buffer;
 	
 	// store vertex datas.
@@ -157,8 +168,10 @@ void R3F::save(string fileName) {
 		storeSceneItem(buffer, *(*scene_it));
 		++scene_it;
 	}
-
-	buffer.saveToFile(File::toDataPath(fileName));	
+	if(inDataPath) {
+		fileName = File::toDataPath(fileName);
+	}
+	buffer.saveToFile(fileName);	
 }
 
 void R3F::storeMaterial(IOBuffer& buffer, Material& m) {
@@ -215,7 +228,7 @@ void R3F::storeVertexData(IOBuffer& buffer, VertexData& vd) {
 		buffer.storeFloatLE(v.z); 
 	}
 	
-	// store: quads // @todo add triangles
+	// store: quads
 	int num_q = vd.getNumQuads(); 
 	buffer.storeUI32LE(num_q);
 	if(num_q > 0) {
@@ -227,6 +240,17 @@ void R3F::storeVertexData(IOBuffer& buffer, VertexData& vd) {
 			buffer.storeUI32LE(q.d);
 		}
 	}
+	
+	// store: trianges
+	num_t = vd.getNumTriangles();
+	buffer.storeUI32LE(num_t);
+	for(int i = 0; i < num_t; ++i) {
+		Triangle& tri = *vd.getTrianglePtr(i);
+		buffer.storeUI32LE(tri.a);
+		buffer.storeUI32LE(tri.b);
+		buffer.storeUI32LE(tri.c);
+	}
+	
 	
 }
 

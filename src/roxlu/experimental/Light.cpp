@@ -71,6 +71,8 @@ void Light::debugDraw() {
 		glVertex3fv(&to_center_dir.x);
 	glEnd();
 	glLineWidth(1.0);
+	
+	
 	glColor3f(1.0, 1.0, 1.0);
 }
 

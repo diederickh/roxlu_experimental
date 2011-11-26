@@ -18,6 +18,22 @@ Mat3::Mat3(const Mat3& o)
 	m[8] = o.m[8];
 }
 
+Mat3::Mat3(const Mat4& o) 
+	:flag(MIX) // not sure what to use here
+{
+	m[0] = o.m[0];
+	m[1] = o.m[1];
+	m[2] = o.m[2];
+	
+	m[3] = o.m[4];
+	m[4] = o.m[5];
+	m[5] = o.m[6];
+	
+	m[6] = o.m[8];
+	m[7] = o.m[9];
+	m[8] = o.m[10];
+}
+
 bool Mat3::isIdentity() const {
 	return flag == IDENTITY;
 }
@@ -288,6 +304,21 @@ bool Mat3::operator!=(const Mat3& o) const {
 		}
 	}
 	return true;
+}
+
+Mat3& Mat3::operator=(const Mat4& o) {
+	m[0] = o.m[0];
+	m[1] = o.m[1];
+	m[2] = o.m[2];
+	
+	m[3] = o.m[4];
+	m[4] = o.m[5];
+	m[5] = o.m[6];
+	
+	m[6] = o.m[8];
+	m[7] = o.m[9];
+	m[8] = o.m[10];
+	return *this;
 }
 
 Mat3& Mat3::operator=(const Mat3& o) {

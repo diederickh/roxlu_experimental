@@ -14,10 +14,10 @@ public:
 	float w;
 	Quat(float x = 0, float y = 0, float z = 0, float w = 1);
 	void normalize();
-	void toMat4(Mat4& aDest) const;
-	Mat4 getMat4() const;
-	void toMat3(Mat3& dest) const;
-	Mat3 getMat3() const;
+	void toMat4(Mat4& aDest);
+	Mat4 getMat4() ;
+	void toMat3(Mat3& dest);
+	Mat3 getMat3();
 	
 	// absolute rotations. (euler)
 	void setRotation(const float radians, const float x, const float y, const float z);

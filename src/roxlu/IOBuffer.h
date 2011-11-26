@@ -32,7 +32,7 @@ public:
 	void setup();
 	void setup(uint32_t expectedSize);
 		
-	bool loadFromFile(string path);	
+	bool loadFromFile(string path); // no datapath (needs to be clean)	
 	bool saveToFile(string path);
 		
 	// moving the read head

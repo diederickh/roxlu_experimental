@@ -82,6 +82,13 @@ def readQuad(file):
 	q = Quad()
 	(q.a, q.b, q.c, q.d) = struct.unpack("<iiii", tmp)
 	return q
+	
+def readTriangle(file):
+	tmp = file.read(12)
+	t = Triangle()
+	(t.a, t.b, t.c) = struct.unpack("<iii", tmp)
+	return t
+
 
 def readString(file):
 	length = readUI16(file)
@@ -253,6 +260,12 @@ class VertexData:
 		
 	def addTriangle(self, triangle):
 		self.triangles.append(triangle)
+		
+	def getNumTriangles(self):
+		return len(self.triangles)
+		
+	def getTriangle(self, dx):
+		return self.triangles[dx]
 	
 	def addTexCoord(self, tc):
 		self.texcoords.append(tc)
@@ -271,6 +284,8 @@ class VertexData:
 	def getFaces(self):
 		for quad in self.quads:
 			self.faces.append((quad.a, quad.b, quad.c, quad.d))
+		for tri in self.triangles:
+			self.faces.append((tri.a, tri.b, tri.c))
 		return self.faces;
 	
 	def getVertices(self):
@@ -337,6 +352,11 @@ class Triangle:
 		self.a = 0;
 		self.b = 0;
 		self.c = 0;
+		
+	def set(self, d):
+		self.a = d[0]
+		self.b = d[1]
+		self.c = d[2]
 		
 class Quad:
 	def __init__(self):
@@ -434,6 +454,7 @@ class Scene:
 			m = bpy.data.meshes.new("mesh_" +vertex_data_name)
 			self.addMesh(vertex_data_name, m)
 			faces = vd.getFaces()
+			
 			m.from_pydata(vd.getVertices(), [], faces)
 			m.update()			
 			
@@ -452,6 +473,8 @@ class Scene:
 						f.uv2 = texcoords[face[1]]
 						f.uv3 = texcoords[face[2]]
 						f.uv4 = texcoords[face[3]]
+					
+						
 		
 		# Create instances (scene items)
 		for si in self.scene_items:
@@ -502,9 +525,8 @@ class Scene:
 			for i in range(0, num_normals):
 				writeFloat3(file, vertex_data.getNormal(i))
 				
-			# num quads
+			# quads
 			num_quads = vertex_data.getNumQuads()
-			
 			writeUI32(file, num_quads)
 			for i in range(0, num_quads):
 				q = vertex_data.getQuad(i)
@@ -513,6 +535,14 @@ class Scene:
 				writeUI32(file, q.c)
 				writeUI32(file, q.d)
 			
+			# triangles
+			num_triangles = vertex_data.getNumTriangles();
+			writeUI32(file, num_triangles)
+			for i in range(0, num_triangles):
+				t = vertex_data.getTriangle(i)
+				writeUI32(file, t.a);
+				writeUI32(file, t.b);
+				writeUI32(file, t.c);
 		
 		# Store materials.
 		num_materials = self.getNumMaterials()
@@ -533,7 +563,10 @@ class Scene:
 				if not os.path.exists(dest_dir +"/textures/"):
 					os.makedirs(dest_dir +"/textures/")
 				dest_file = dest_dir +"/textures/" +texture.getFileName()
-				shutil.copyfile(texture.getFile(), dest_file)
+				try:
+					shutil.copyfile(texture.getFile(), dest_file)
+				except:
+					print("error copying file")
 				writeUI8(file, type)
 				writeString(file, dest_file)
 				
@@ -590,6 +623,12 @@ def parseCommand(cmd, dataFile, Container):
 			for i in range(0, num_quads):
 				quad = readQuad(dataFile)
 				vertex_data.addQuad(quad)
+				
+			# parse triangles
+			num_tris = readUI32(dataFile);
+			for i in range(0, num_tris):
+				tri = readTriangle(dataFile)
+				vertex_data.addTriangle(tri)
 				
 		# and continue...
 		cmd = readUI8(dataFile)
@@ -757,6 +796,18 @@ def exportR3F(context, filepath):
 						,B2G3(mesh_verts[face_verts[3]].normal)		\
 				)
 				
+				# add triangles
+				q = Quad();
+				q.set((face_verts[0], face_verts[1], face_verts[2], face_verts[3]));
+				vertex_data.addQuad(q)
+				"""
+				tri = Triangle()
+				tri.set((face_verts[0], face_verts[1], face_verts[2]));
+				vertex_data.addTriangle(tri)
+				
+				tri.set((face_verts[2], face_verts[3], face_verts[0]));
+				vertex_data.addTriangle(tri)
+				"""
 				if has_uv:
 					vertex_data.addQuadTexCoordsAsTriangles(uv.uv1, uv.uv2, uv.uv3, uv.uv4)
 					
@@ -768,6 +819,10 @@ def exportR3F(context, filepath):
 				vertex_data.addNormal(B2G3(mesh_verts[face_verts[0]].normal))
 				vertex_data.addNormal(B2G3(mesh_verts[face_verts[1]].normal))
 				vertex_data.addNormal(B2G3(mesh_verts[face_verts[2]].normal))
+				
+				tri = Triangle()
+				tri.set(face_verts);
+				vertex_data.addTriangle(tri)
 				
 				if has_uv:
 					vertex_data.addTexCoord(uv.uv1)

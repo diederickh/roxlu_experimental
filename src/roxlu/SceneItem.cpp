@@ -98,9 +98,23 @@ void SceneItem::draw(Mat4& viewMatrix, Mat4& projectionMatrix, Mat3& normalMatri
 	if(material != NULL) {
 		effect->bindMaterial(*material);
 	}
-	
-	effect->updateLights();
-	effect->getShader().uniformMat3fv("normalmatrix", normalMatrix.getPtr());
+//	normalMatrix.m[0] = 1.0;
+//	normalMatrix.m[1] = 0.0;
+//	normalMatrix.m[2] = 0.0;
+	Mat4 modelview_copy = modelview_matrix;
+	Mat4 view_copy = viewMatrix;
+	Mat3 nm = modelview_copy.inverse().transpose();
+//	effect->updateLights();
+//	printf("----------------\n");
+//	normalMatrix.print();
+//	printf("---\n");
+//	orientation.getMat3().print();
+//	printf("---\n");
+//	Mat3 normal_mat = normalMatrix * orientation.getMat3();
+//	normal_mat.print();	
+//	printf("-------------------\n");
+	effect->getShader().uniformMat4fv("viewmatrix", viewMatrix.getPtr());
+	effect->getShader().uniformMat3fv("normalmatrix", nm.getPtr());
 	effect->getShader().uniformMat4fv("projection", projectionMatrix.getPtr());
 	effect->getShader().uniformMat4fv("modelview", modelview_matrix.getPtr());
 	effect->getShader().uniformMat4fv("modelview_projection", modelview_projection_matrix.getPtr());
