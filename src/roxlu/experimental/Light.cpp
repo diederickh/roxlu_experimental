@@ -5,6 +5,9 @@ namespace roxlu {
 
 Light::Light() 
 	:is_enabled(true)
+	,ambient_col(1.0, 1.0, 1.0, 1.0)
+	,diffuse_col(1.0, 0.0, 0.4, 1.0)
+	,specular_col(0.0, 0.0, 1.0, 1.0)
 {
 }
 

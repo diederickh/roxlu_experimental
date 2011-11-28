@@ -54,6 +54,9 @@ public:
 	Mat4& orthoTopLeft(float w, float h, float n, float f);
 	Mat4& orthoBottomLeft(float w, float h, float n, float f);	
 	
+	Mat4 getInverse();
+	Mat4 getTranspose();
+	
 	// rotate and translate
 	inline Vec3 transform(const Vec3& v) const;
 

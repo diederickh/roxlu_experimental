@@ -6,6 +6,9 @@ namespace roxlu {
 
 Shader::Shader() 
 :name("")
+,vert_id(0)
+,frag_id(0)
+,prog_id(0)
 {
 }
 
@@ -167,9 +170,11 @@ std::string Shader::readFile(std::string path) {
 
 // reload vertex/fragment shader using the shader name 
 void Shader::recreate(std::string& vertShader, std::string& fragShader) {
-	glDeleteShader(vert_id); eglGetError();
-	glDeleteShader(frag_id); eglGetError();
-	glDeleteProgram(prog_id); eglGetError();
+	if(vert_id != 0) {
+		glDeleteShader(vert_id); eglGetError();
+		glDeleteShader(frag_id); eglGetError();
+		glDeleteProgram(prog_id); eglGetError();
+	}
 	create(vertShader, fragShader);
 	printf("recreated shader: %d, %d\n", vert_id, frag_id);
 	
@@ -199,6 +204,7 @@ Shader& Shader::uniform4i(std::string uniform, GLint x, GLint y, GLint z, GLint 
 }
 
 Shader& Shader::uniform1f(std::string uniform, GLfloat x) {
+	//printf("> enabled: %d for: %s with id: %d\n", enabled, uniform.c_str(), getUniform(uniform));
 	glUniform1f(getUniform(uniform), x); eglGetError();
 	return *this;
 }
@@ -233,6 +239,7 @@ Shader& Shader::uniformMat3fv(std::string uniform, GLfloat* matrix, bool transpo
 
 
 Shader& Shader::uniformMat4fv(std::string uniform, GLfloat* matrix, bool transpose) {
+	//printf("> enabled: %d for: %s with id: %d\n", enabled, uniform.c_str(), getUniform(uniform));
 	glUniformMatrix4fv(getUniform(uniform), 1, transpose, matrix); eglGetError();
 	return *this;
 }

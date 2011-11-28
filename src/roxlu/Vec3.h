@@ -116,6 +116,7 @@ struct Vec3 {
 	
 	// Operators
 	Vec3& operator=(const Vec4& v4);
+	inline Vec3&	operator-() const;
 	inline Vec3 	operator-(const Vec3& rOther) const;
 	inline Vec3 	operator+(const Vec3& rOther) const;
 	inline Vec3& 	operator-=(const Vec3& rOther);
@@ -359,6 +360,14 @@ inline Vec3& Vec3::operator/=(const float nScalar) {
 	y *= inv;
 	z *= inv;
 	return *this;
+}
+
+inline Vec3& Vec3::operator-() const{
+	Vec3 v ;
+	v.x = -x;
+	v.y = -y;
+	v.z = -z;
+	return v;
 }
 
 inline std::ostream& operator<<(std::ostream& os, const Vec3& rVec) {

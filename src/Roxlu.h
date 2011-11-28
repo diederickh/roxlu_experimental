@@ -51,6 +51,7 @@
 #include "roxlu/experimental/Effect.h"
 #include "roxlu/experimental/R3F.h"
 #include "roxlu/experimental/Timer.h"
+#include "roxlu/experimental/Noise.h"
 
 
 #include "external/jpeg/JPEGImage.h"

@@ -108,9 +108,12 @@ public:
 	void updateLights();
 	void bindMaterial(Material& m);
 	inline void disable();
+	inline void enable();
 	
 	// used by the auto reload shader feature.
 	void onTimer();
+	
+	inline void addUniform(string uniform);
 	
 private:
 	uint64_t necessary_vertex_attribs;
@@ -126,8 +129,12 @@ private:
 	time_t reload_shader_last_modified_frag;
 	time_t reload_shader_last_modified_vert;
 	roxlu::Timer<Effect> reload_timer;
-
+	vector<string> uniforms;
 };
+
+inline void Effect::addUniform(string uniform) {
+	uniforms.push_back(uniform);
+}
 
 // general
 inline void Effect::enableFeature(EffectFeature feature, int necessaryVertexAttrib) {
@@ -151,6 +158,10 @@ inline bool Effect::hasTextures() {
 
 inline void Effect::disable() {
 	shader.disable();
+}
+
+inline void Effect::enable() {
+	shader.enable();
 }
 
 // texcoords

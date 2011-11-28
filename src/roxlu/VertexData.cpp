@@ -378,9 +378,9 @@ void VertexData::computeTangents() {
 	vector<Vec3> tan1;
 	vector<Vec3> tan2;
 	int len = vertices.size();
+	tan1.assign(len, Vec3());
+	tan2.assign(len, Vec3());
 	if(quads.size() > 0) {
-		tan1.assign(len, Vec3());
-		tan2.assign(len, Vec3());
 		for(int i = 0; i < quads.size(); ++i) {
 			Quad& q = quads[i];
 			Vec3 sdir;
@@ -430,10 +430,11 @@ void VertexData::computeTangents() {
 	}
 	
 	// @todo implement for just triangles!
+	// this implementation isn't working yet
 	if(triangles.size() > 0) {
 		
-		tan1.assign(len, Vec3());
-		tan2.assign(len, Vec3());
+//		tan1.assign(len, Vec3());
+//		tan2.assign(len, Vec3());
 		for(int i = 0; i < triangles.size(); ++i) {
 			Triangle& t = triangles[i];
 			Vec3 sdir;
@@ -462,7 +463,6 @@ void VertexData::computeTangents() {
 	}
 	
 
-	
 	for(int i = 0; i < len; ++i) {
 		Vec3& n = normals[i];
 		Vec3& t = tan1[i];

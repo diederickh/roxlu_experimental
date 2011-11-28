@@ -25,11 +25,12 @@ class Effect;
 class SceneItem {
 public:
 	enum SceneItemDrawMode {
-		 TRIANGLES = GL_TRIANGLES
+		 TRIANGLES 		= GL_TRIANGLES
 		,TRIANGLE_STRIP = GL_TRIANGLE_STRIP
-		,QUADS = GL_QUADS
-		,QUAD_STRIP = GL_QUAD_STRIP
-		,POINTS = GL_POINTS
+		,QUADS 			= GL_QUADS
+		,QUAD_STRIP 	= GL_QUAD_STRIP
+		,POINTS 		= GL_POINTS
+		,LINE_STRIP		= GL_LINE_STRIP
 	};
 
 	SceneItem(string name);
@@ -37,7 +38,7 @@ public:
 	SceneItem* duplicate();
 	
 	
-	void draw(Mat4& viewMatrix, Mat4& projectionMatrix, Mat3& normalMatrix);
+	void draw(Mat4& viewMatrix, Mat4& projectionMatrix);
 	bool createFromVertexData(VertexData* vd);
 	bool createFromVertexData(VertexData& vd);
 	inline VertexData* getVertexData();
@@ -56,6 +57,10 @@ public:
 	inline Quat& getOrientation();
 	inline void setOrientation(const Quat& q);
 	inline void updateModelMatrix();
+	inline VBO* getVBOPtr();
+	
+	inline void setName(string itemName);
+	inline string getName() const;
 	
 	// shader
 	inline bool hasEffect();
@@ -75,10 +80,17 @@ public:
 	inline void drawUsingPoints();
 	inline void drawUsingTriangleStrip();
 	inline void drawUsingQuadStrip();
+	inline void drawUsingLineStrip();
 	
-	inline void setName(string itemName);
-	inline string getName() const;
-		
+	// material
+	inline void setColor(Color4 col);
+	inline void setColor(float r, float g, float b, float a = 1.0);
+	inline Color4* getColorPtr();
+	inline void setSpecularity(float spec);
+	inline float getSpecularity();
+	inline void setAttenuation(float ambientAttenuation, float specularAttenuation, float diffuseAttenuation);
+	inline float* getAttenuationPtr();
+	
 	// matrix related
 	inline Mat4& mm(); // get model matrix.
 	Mat4 model_matrix; 
@@ -93,10 +105,12 @@ public:
 	//Shader* shader;	
 	Material* material;
 	void initialize();
+	bool isInitialized();
 	
 	inline void hide();
 	inline void show();
 	inline bool isVisible();
+	
 private:
 	bool is_visible;
 	Effect* effect;
@@ -104,7 +118,11 @@ private:
 	bool initialized;
 	int draw_mode;
 	
-
+	// material properties
+	float specularity;
+	Color4 color;
+	Vec3 attenuation; // x = ambient, y = diffuse, z = specular
+	
 	void drawElements(); // indexed data
 	void drawArrays(); 
 };
@@ -139,6 +157,9 @@ inline void SceneItem::drawUsingQuadStrip() {
 	setDrawMode(QUAD_STRIP);
 }
 
+inline void SceneItem::drawUsingLineStrip() {
+	setDrawMode(LINE_STRIP);
+}
 
 inline void SceneItem::setDrawMode(SceneItemDrawMode mode) {
 	draw_mode = mode;
@@ -154,7 +175,6 @@ inline Mat4& SceneItem::mm() {
 
 inline void SceneItem::setPosition(float x, float y, float z) {
 	position.set(x,y,z);
-	//printf("set position: %f, %f, %f\n", x,y , z);
 	updateModelMatrix();
 }
 
@@ -178,14 +198,6 @@ inline void SceneItem::translate(const Vec3& v) {
 	position += v;
 	updateModelMatrix();
 }
-//
-//inline void SceneItem::setShader(Shader* sh) {
-//	shader = sh;
-//}
-//
-//inline void SceneItem::setShader(Shader& sh) {
-//	setShader(&sh);
-//}
 
 inline void SceneItem::setEffect(Effect& eff) {
 	setEffect(&eff);
@@ -288,6 +300,41 @@ inline bool SceneItem::hasEffect() {
 	return effect != NULL;
 }
 
+inline void SceneItem::setColor(Color4 col) {
+	color = col;
+}
+
+inline void SceneItem::setColor(float r, float g, float b, float a) {
+	color.set(r,g,b,a);
+}
+
+inline Color4* SceneItem::getColorPtr() {
+	return &color;
+}
+
+inline void SceneItem::setSpecularity(float spec) {
+	specularity = spec;
+}
+
+inline float SceneItem::getSpecularity() {
+	return specularity;
+}
+	
+inline void SceneItem::setAttenuation(float ambientAttenuation, float specularAttenuation, float diffuseAttenuation) {
+	attenuation.set(ambientAttenuation, specularAttenuation, diffuseAttenuation);
+}
+
+inline float* SceneItem::getAttenuationPtr() {
+	return attenuation.getPtr();
+}
+
+inline VBO* SceneItem::getVBOPtr() {
+	return vbo;
+}
+
+inline bool SceneItem::isInitialized() {
+	return initialized;
+}
 
 
 } // roxlu

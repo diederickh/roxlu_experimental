@@ -76,7 +76,6 @@ public:
 		}
 		Poco::File f(file);
 		Poco::Timestamp stamp = f.getLastModified();
-
 		return stamp.epochTime();
 	}
 	

@@ -19,6 +19,9 @@ SceneItem::SceneItem(string name)
 ,effect(NULL)
 ,scaling(1.0,1.0, 1.0)
 ,name(name)
+,color(0.88,0.25,0.11,1.0)
+,specularity(8)
+,attenuation(0.3, 0.5, 1.0)
 {
 	vao = new VAO();
 	vbo = new VBO();	
@@ -57,7 +60,6 @@ void SceneItem::initialize() {
 	if(initialized) {
 		return;
 	}
-	
 	effect->setupBuffer(*vao, *vbo,  *vertex_data);
 	initialized = true;
 }
@@ -74,7 +76,7 @@ void SceneItem::drawElements() {
 	vao->unbind();
 }
 
-void SceneItem::draw(Mat4& viewMatrix, Mat4& projectionMatrix, Mat3& normalMatrix) {
+void SceneItem::draw(Mat4& viewMatrix, Mat4& projectionMatrix) {
 	if(!initialized) {
 		initialize();
 	}
@@ -93,7 +95,7 @@ void SceneItem::draw(Mat4& viewMatrix, Mat4& projectionMatrix, Mat3& normalMatri
 	// @todo we need implement something like: effect()->begin() and effect->end() 	
 	// instead of effect->updateShaders + effect->bindMaterial etc...
 	effect->updateShaders();  
-	effect->getShader().enable();
+	effect->enable();
 		
 	if(material != NULL) {
 		effect->bindMaterial(*material);
@@ -102,17 +104,15 @@ void SceneItem::draw(Mat4& viewMatrix, Mat4& projectionMatrix, Mat3& normalMatri
 //	normalMatrix.m[1] = 0.0;
 //	normalMatrix.m[2] = 0.0;
 	Mat4 modelview_copy = modelview_matrix;
-	Mat4 view_copy = viewMatrix;
-	Mat3 nm = modelview_copy.inverse().transpose();
-//	effect->updateLights();
-//	printf("----------------\n");
-//	normalMatrix.print();
-//	printf("---\n");
-//	orientation.getMat3().print();
-//	printf("---\n");
-//	Mat3 normal_mat = normalMatrix * orientation.getMat3();
-//	normal_mat.print();	
-//	printf("-------------------\n");
+//	Mat4 view_copy = viewMatrix;
+//	Mat3 nm = modelview_copy.inverse().transpose();
+	Mat3 nm = modelview_matrix.getInverse().transpose();
+	effect->updateLights(); // isnt this done in renderer
+
+
+	effect->getShader().uniform1f("specularity", specularity);
+	effect->getShader().uniform4fv("diffuse_color", color.getPtr());
+	effect->getShader().uniform3fv("attenuation", attenuation.getPtr());
 	effect->getShader().uniformMat4fv("viewmatrix", viewMatrix.getPtr());
 	effect->getShader().uniformMat3fv("normalmatrix", nm.getPtr());
 	effect->getShader().uniformMat4fv("projection", projectionMatrix.getPtr());

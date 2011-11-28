@@ -44,7 +44,7 @@ void OBJ::createMaterialFile(Material& mat) {
 	File::putFileContents(File::toDataPath(material_file), ss.str(), true);
 }
 
-bool OBJ::save(string fileName) {
+bool OBJ::save(string fileName, bool inDataPath) {
 //	printf("Num exported vertices: %d\n", num_exported_vertices);
 //	return;
 	stringstream ss;
@@ -65,7 +65,7 @@ bool OBJ::save(string fileName) {
 	}
 	//printf("result:\n%s\n", ss.str().c_str());
 	
-	File::putFileContents(File::toDataPath(fileName), ss.str(), true);
+	File::putFileContents(fileName, ss.str(), inDataPath);
 	return true;
 }
 

@@ -39,7 +39,7 @@ public:
 	void exportSceneItem(SceneItem& si, stringstream& ss);
 	void exportSceneItem(SceneItem* si, stringstream& ss);
 	void createMaterialFile(Material& mat);
-	bool save(string fileName);
+	bool save(string fileName, bool inDataPath = true);
 private:
 //	int64_t num_exported_vertices;
 	vector<SceneItem*> scene_items;

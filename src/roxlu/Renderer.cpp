@@ -50,7 +50,7 @@ void Renderer::draw() {
 		printf("No cam, shader or scene set!\n");
 		exit(1);
 	}
-	
+	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	if(!use_fill) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -60,36 +60,24 @@ void Renderer::draw() {
 	cam->updateViewMatrix();
 	Mat4& view_matrix = cam->vm();
 	Mat4& projection_matrix = cam->pm();
-	Mat3 normal_matrix = cam->nm();
-
+	
 	// draw all scene items.
 	Scene::scene_item_iterator it = scene->scene_items.begin();
 	while(it != scene->scene_items.end()) {
 		SceneItem& si = *(it->second);
 		if(si.isVisible()) {
-			//if(si.hasMaterial()) {
-			//	effect->bindMaterial(*si.getMaterial());
-			//}
-			si.draw(view_matrix, projection_matrix, normal_matrix);
+			si.draw(view_matrix, projection_matrix);
 		}
 		++it;
 	}
 }
 
 void Renderer::debugDraw() {
-//	glFrontFace(GL_CW);
-//	glMatrixMode(GL_PROJECTION);
-//	glLoadIdentity();
-//	gluPerspective(45.0, 4.0f/3.0f, 0.01, 100);
-//	
-//	glMatrixMode(GL_MODELVIEW);
-//	glLoadIdentity();
-//	glTranslatef(0,0,-35);
-//	glRotatef(sin(ofGetElapsedTimef()*0.5)*360,0,1,0);
 	effect->disable();
 	cam->place();
-//	glEnable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
+
 	Mat4 rot;
 	Scene::scene_item_iterator it = scene->scene_items.begin();
 	while(it != scene->scene_items.end()) {
@@ -97,20 +85,9 @@ void Renderer::debugDraw() {
 		VertexData& vd = *si.getVertexData();
 		if(si.isVisible()) {
 			glPushMatrix();
-				Vec3& scale = si.getScale();
-//				scale.print();
-				
-				Vec3 pos = si.getPosition();
-				rot.identity();
-				
-				si.getOrientation().toMat4(rot);
-				//glTranslatef(pos.x, pos.y, pos.z);
 				glMatrixMode(GL_MODELVIEW);
-				//glMultMatrixf(rot.getPtr());
 				glMultMatrixf(si.mm().getPtr());
-				//glScalef(scale.x, scale.y, scale.z);
 				vd.debugDraw(si.getDrawMode());
-			//si.draw(view_matrix, projection_matrix);
 			glPopMatrix();
 		}
 		++it;
@@ -128,10 +105,8 @@ void Renderer::drawSceneItem(string name) {
 	cam->updateViewMatrix();
 	Mat4& view_matrix = cam->vm();
 	Mat4& projection_matrix = cam->pm();
-	Mat3 normal_matrix = cam->nm();
-	
 	SceneItem& si = *getSceneItem(name);
-	si.draw(view_matrix, projection_matrix, normal_matrix);
+	si.draw(view_matrix, projection_matrix);
 }
 
 SceneItem* Renderer::createIcoSphere(string name, int detail, float radius) {
@@ -234,12 +209,13 @@ void Renderer::onMouseDragged(float x, float y) {
 }
 
 // exports given vertex data to .ply format.
-void Renderer::exportToPly(string sceneItemName, string fileName) {
+void Renderer::exportToPly(string sceneItemName, string fileName, bool inDataPath) {
 	SceneItem* si = getSceneItem(sceneItemName);
-	string path = File::toDataPath(fileName);
+	if(inDataPath) {
+		fileName = File::toDataPath(fileName);
+	}
 	Ply ply;
-	ply.save(path, *si->getVertexData());
-	printf("Saved: '%s'\n", path.c_str());
+	ply.save(fileName, *si->getVertexData());
 }
 
 Texture* Renderer::createTexture(string name, string fileName) {
@@ -294,7 +270,6 @@ Material* Renderer::createNormalTexture(
 	Texture* tex = mat->loadNormalTexture(normalFileName, imageFormat);
 	scene->addMaterial(materialName, mat);
 	scene->addTexture(textureName, tex);
-
 	return mat;
 }
 
@@ -326,8 +301,7 @@ void Renderer::setLightSpecularColor(string name, float r, float g, float b, flo
 	l->setSpecularColor(r,g,b,a);
 }
 
-void Renderer::exportToOBJ(string fileName) {
-	printf("export!");
+void Renderer::exportToOBJ(string fileName, bool inDataPath) {
 	OBJ obj;
 	
 	// add scene items.
@@ -346,10 +320,10 @@ void Renderer::exportToOBJ(string fileName) {
 		++map_it;
 	}
 	
-	obj.save("test.obj");
+	obj.save(fileName, inDataPath);
 }
 
-void Renderer::exportToR3F(string fileName) {
+void Renderer::exportToR3F(string fileName, bool inDataPath) {
 	R3F rf;
 	
 	// add vertex datas
@@ -377,8 +351,7 @@ void Renderer::exportToR3F(string fileName) {
 		++map_it;
 	}
 
-	rf.save("test.r3f");	
-//	rf.addSceneItem(plane_si);
+	rf.save(fileName, inDataPath);	
 }
 
 

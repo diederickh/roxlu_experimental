@@ -49,8 +49,7 @@ bool IOBuffer::saveToFile(string path) {
 	if(!ofs.is_open()) {
 		return false;
 	}
-	
-	//ofs.open(filename, ios::out | ios::binary);
+
 	ofs.write((char*)buffer, published);
 	if(!ofs.good()) {
 		ofs.close();
@@ -152,7 +151,6 @@ void IOBuffer::cleanup() {
 }
 
 void IOBuffer::setMinChunkSize(uint32_t minSize) {
-	//assert(minSize > 0 && minSize < 16 * 1024 * 1024);
 	min_chunk_size = minSize;
 }
 
@@ -177,7 +175,6 @@ void IOBuffer::storeFloat(float data) {
 }
 
 bool IOBuffer::storeBytes(const uint8_t* someData, const uint32_t numBytes) {
-	//printf("storeBytes: %d\n", numBytes);
 	if(!ensureSize(numBytes)) {
 		return false;
 	}
@@ -310,14 +307,6 @@ void IOBuffer::storeBuffer(IOBuffer& other) {
 }
 
 int IOBuffer::storeBuffer(IOBuffer& other, uint32_t numBytes) {
-	/*
-	cout << "Store from other buffer. Bytes:" << numBytes << endl;
-	cout << "this.published: " << published << endl;
-	cout << "this.consumed: " << consumed << endl;
-	cout << "other.published: " << other.published << endl;
-	cout << "other.consumed: " << other.consumed << endl;
-	*/
-	
 	// check if we can read this many bytes from other buffer.
 	numBytes = other.getMostNumberOfBytesWeCanConsume(numBytes);
 	if(numBytes == 0) {
@@ -326,26 +315,19 @@ int IOBuffer::storeBuffer(IOBuffer& other, uint32_t numBytes) {
 	ensureSize(numBytes);
 	memcpy(buffer+published, other.buffer+other.consumed, numBytes);
 	published += numBytes;
-//	printf("consumed after copying from other buffer: %d\n", consumed);
 	other.published += numBytes;
 	return numBytes;
 }
 
 uint32_t IOBuffer::getMostNumberOfBytesWeCanConsume(uint32_t tryToRead) {
-//	printf("@ published: %d consumed:%d trying to read: %d\n", published, consumed, tryToRead);
 	int space = published - consumed;
 	if(space <= 0) {
-//		printf("@ space is zero %d?\n", space);
-//		printf("@--------------\n");
 		return 0;
 	}
 
-//		printf("@--------------\n");	
 	if(tryToRead > space) {
 		tryToRead = space;
 	}
-//	printf("@ tell we can read all!: %d\n", tryToRead);
-//	printf("@--------------\n");
 	return tryToRead;
 }
 
@@ -407,23 +389,14 @@ int IOBuffer::consumeBytes(uint8_t* buf, uint32_t numBytes) {
 	int32_t available = left - numBytes;
 
 	if(available <= 0) {
-		printf("published: %d consumed: %d asking: %d, left:%d\n", published, consumed, numBytes, left);
 		return 0;
 	}
-	//printf("# still available: %d\n", available);
-	if(available < numBytes) {
-	///	printf("Resetting: %d\n", available);
-	//	printf("Current info is now: %d and published: %d want to read: %d available: %d\n", consumed, published, numBytes, available);
 
+	if(available < numBytes) {
 		numBytes = available;
 	}
-
-	printf("# going to read %d\n", numBytes);
 	memcpy(buf,buffer+consumed, numBytes);
 	consumed += numBytes;
-
-	printf(">>> consumed: %d, this: %p, %c %c %c\n", consumed, this, buffer[consumed], buffer[consumed+1], buffer[consumed+2]);
-	printf("Consumed is now: %d and published: %d want to read: %d\n", consumed, published, numBytes);
 	return numBytes;
 }
 
@@ -651,7 +624,6 @@ int IOBuffer::consumeUntil(string until, string& found) {
 	const char* search = until.c_str();
 	int k = 0;
 	for(int i = consumed; i < published; ++i) {
-		//cout << "store:" << (char)buffer[i] << endl;
 		found.push_back((char)buffer[i]);
 		if(buffer[i] == search[0]) {
 			// out of buffer.
