@@ -42,6 +42,7 @@ public:
 	void 				drawSceneItem(string name);
 	void 				addSceneItem(string name, SceneItem* si);
 	void 				addSceneItem(SceneItem* si);
+	inline SceneItem* 	duplicateSceneItem(string oldName); // auto generate new name
 	inline SceneItem* 	duplicateSceneItem(string oldName, string newName);
 	inline SceneItem* 	getSceneItem(string name);
 
@@ -54,7 +55,7 @@ public:
 	inline void 		noFill();
 	
 	// camera
-	inline EasyCam* 	getCamera();
+	inline EasyCam* 	getCameraPtr();
 	inline void 		translate(float x, float y, float z);
 	
 	// meshes
@@ -134,8 +135,14 @@ inline void Renderer::setSceneItemMaterial(string sceneItemName, string material
 	getSceneItem(sceneItemName)->setMaterial(getMaterial(materialName));
 }
 
-inline EasyCam* Renderer::getCamera() {
+inline EasyCam* Renderer::getCameraPtr() {
 	return cam;
+}
+
+inline SceneItem* Renderer::duplicateSceneItem(string oldName) {
+	stringstream ss;
+	ss << oldName << scene->getNumSceneItems();
+	return duplicateSceneItem(oldName, ss.str());
 }
 
 inline SceneItem* Renderer::duplicateSceneItem(string oldName, string newName) {

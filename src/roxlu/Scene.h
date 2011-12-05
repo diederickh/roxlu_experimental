@@ -39,7 +39,8 @@ public:
 	inline void addMaterial(string name, Material& mat);
 	inline void addLight(string name, Light& light);
 	inline void addLight(string name, Light* light);
-	inline int getNumberOfLights();
+	inline int getNumLights(); 
+	inline int getNumSceneItems();
 	
 	inline SceneItem* getSceneItem(string name);
 	inline const map<string, SceneItem*>& getSceneItems() const;
@@ -126,7 +127,11 @@ inline Light* Scene::getLight(string name) {
 	return it->second;
 }
 
-inline int Scene::getNumberOfLights() {
+inline int Scene::getNumSceneItems() {
+	return scene_items.size();
+}
+
+inline int Scene::getNumLights() {
 	return lights.size();
 }
 

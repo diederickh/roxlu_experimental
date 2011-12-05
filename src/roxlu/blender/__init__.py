@@ -417,17 +417,36 @@ class Scene:
 		bpy.context.scene.use_nodes = True
 		tree = bpy.context.scene.node_tree
 		links = tree.links
-			
+		print(tree)
+		
 		# clear default nodes
 		for n in tree.nodes:
 			tree.nodes.remove(n)
 		
-		rl = tree.nodes.new("R_LAYERS")
+		"""
+		mat = bpy.data.materials[0]
+		mat.use_nodes = True
+		ntree = mat.node_tree
+		rgb_node = ntree.nodes.new('RGB')
+		diffuse_node = ntree.nodes['Diffuse BSDF']
+		ntree.links.new(rgb_node.outputs['Color'], diffuse_node.inputs['Color'])
+		"""
 		
+		#rl = tree.nodes.new('R_LAYERS') 
 		for material_name in self.materials:
 			mat = self.materials[material_name]
+			
+			
 			textures = mat.getTextures()
+			
+			#Create a RGB diffuse node (default)
 			blender_mat = bpy.data.materials.new(material_name)
+			blender_mat.use_nodes = True
+			ntree = blender_mat.node_tree
+			rgb_node = ntree.nodes.new('RGB')
+			diffuse_node = ntree.nodes['Diffuse BSDF']
+			ntree.links.new(rgb_node.outputs['Color'], diffuse_node.inputs['Color']);
+			self.addBlenderMaterial(material_name, blender_mat)
 			
 			for texture_type in textures:
 				tex = textures[texture_type]
@@ -447,6 +466,7 @@ class Scene:
 					blender_tex_slot.texture = blender_tex;
 					blender_tex_slot.texture_coords = 'UV'
 					
+					
 		# create meshes (vertex data representations)
 		# ----------------------------------		
 		for vertex_data_name in self.vertex_datas:
@@ -454,7 +474,6 @@ class Scene:
 			m = bpy.data.meshes.new("mesh_" +vertex_data_name)
 			self.addMesh(vertex_data_name, m)
 			faces = vd.getFaces()
-			
 			m.from_pydata(vd.getVertices(), [], faces)
 			m.update()			
 			
@@ -479,11 +498,25 @@ class Scene:
 		# Create instances (scene items)
 		for si in self.scene_items:
 			m = self.getMeshForSceneItem(si)
+			
 			ob = bpy.data.objects.new(si.getName(), m)
 			ob.location = si.getOrigin()
 			ob.rotation_euler = si.getOrientationAsEuler()
 			ob.scale = si.getScale()
 			bpy.context.scene.objects.link(ob)
+			if si.hasMaterial():
+				added = False
+				for material in ob.data.materials:
+					if material.name == si.getMaterialName():
+						added = True
+				
+				if not added:
+					if len(ob.data.materials) == 0:
+						ob.data.materials.append(self.getBlenderMaterial(si.getMaterialName()))
+					
+					ob.material_slots[0].link = 'OBJECT'
+					ob.material_slots[0].material = self.getBlenderMaterial(si.getMaterialName())
+			
 		
 	def getMeshForSceneItem(self, si):
 		return self.meshes["mesh" +si.getVertexDataName()]
@@ -644,18 +677,21 @@ def parseCommand(cmd, dataFile, Container):
 			orientation = readFloat4(dataFile)
 			has_material = readUI8(dataFile)
 			material_name = ""
+
+			si = SceneItem()
 			
 			if has_material:
 				material_name = readString(dataFile)
-		
-			si = SceneItem()
+				si.setMaterialName(material_name)
+			
 			si.setVertexDataName(vertex_data_name)
 			si.setName(scene_item_name)
 			si.setOrigin(G2B3(origin))
 			si.setOrientation(G2B4(orientation))
 			si.setScale(G2B3(scale))
+			
 			Container.addSceneItem(si)
-
+			"""
 			print("--------")			
 			print("Scene item:", i)
 			print("vertex data: ", vertex_data_name)
@@ -665,6 +701,7 @@ def parseCommand(cmd, dataFile, Container):
 			print("name:", scene_item_name)
 			print("material: ", material_name)
 			print("--------")
+			"""
 		
 		
 	elif cmd == R3F_MATERIALS:

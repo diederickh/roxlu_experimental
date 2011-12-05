@@ -85,6 +85,7 @@ struct Vec3 {
 	inline Vec3&	rotate(float angle, float x, float y, float z);
 	inline Vec3& 	rotate(float angle, Vec3 axis);
 	inline Vec3& 	rotate(float angle, Vec3 axis, Vec3 pivot);
+	inline void 	set(float n);
 	inline void 	set(float nX, float nY, float nZ);
 	inline float 	length();
 	inline float 	lengthSquared();
@@ -116,7 +117,7 @@ struct Vec3 {
 	
 	// Operators
 	Vec3& operator=(const Vec4& v4);
-	inline Vec3&	operator-() const;
+	inline Vec3		operator-() const;
 	inline Vec3 	operator-(const Vec3& rOther) const;
 	inline Vec3 	operator+(const Vec3& rOther) const;
 	inline Vec3& 	operator-=(const Vec3& rOther);
@@ -141,6 +142,12 @@ inline void Vec3::set(float nX, float nY, float nZ) {
 	x = nX; 
 	y = nY;
 	z = nZ;
+}
+
+inline void Vec3::set(float n) {
+	x = n;
+	y = n;
+	z = n;
 }
 
 inline float Vec3::length() {
@@ -362,7 +369,7 @@ inline Vec3& Vec3::operator/=(const float nScalar) {
 	return *this;
 }
 
-inline Vec3& Vec3::operator-() const{
+inline Vec3 Vec3::operator-() const{
 	Vec3 v ;
 	v.x = -x;
 	v.y = -y;

@@ -50,8 +50,8 @@ void Renderer::draw() {
 		printf("No cam, shader or scene set!\n");
 		exit(1);
 	}
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
+//	glEnable(GL_CULL_FACE);
+//	glEnable(GL_DEPTH_TEST);
 	if(!use_fill) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
