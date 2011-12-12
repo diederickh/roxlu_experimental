@@ -54,6 +54,9 @@ public:
 	inline void rotateX(float radians);
 	inline void rotateY(float radians);
 	inline void rotateZ(float radians);
+	inline void rotateXYZ(float x, float y, float z);
+	inline void setRotation(float x, float y, float z);
+	inline void setRotation(float angle, Vec3 axis);
 	inline Quat& getOrientation();
 	inline void setOrientation(const Quat& q);
 	inline void updateModelMatrix();
@@ -179,7 +182,7 @@ inline void SceneItem::setPosition(float x, float y, float z) {
 }
 
 inline void SceneItem::setPosition(const Vec3& p) {
-	position = p;
+	position = p;	
 	updateModelMatrix();
 }
 
@@ -202,17 +205,25 @@ inline void SceneItem::translate(const Vec3& v) {
 inline void SceneItem::setEffect(Effect& eff) {
 	setEffect(&eff);
 }
+
 inline void SceneItem::setEffect(Effect* eff) {
 	effect = eff;
 }
 
-
 inline void SceneItem::updateModelMatrix() {
 	Mat4 rotation = orientation.getMat4();
-	model_matrix.identity();
-	model_matrix.translate(position);
+	model_matrix = model_matrix.translation(position); 
 	model_matrix.scale(scaling.x, scaling.y, scaling.z);
+	printf("--\n");
+	model_matrix.print();
+	printf("==\n");
 	model_matrix *= rotation;
+//	model_matrix = model_matrix * rotation;
+//	model_matrix *= rotation;
+	model_matrix.print();
+	printf("++\n");
+	//rotation.print();
+	printf("--\n");
 }
 
 inline void SceneItem::rotate(float radians, const float x, const float y, const float z) {
@@ -240,6 +251,16 @@ inline void SceneItem::setOrientation(const Quat& q) {
 	updateModelMatrix();
 }
 
+inline void SceneItem::rotateXYZ(float x, float y, float z) {
+	rotateX(x);
+	rotateY(y);
+	rotateZ(z);	
+}
+
+inline void SceneItem::setRotation(float angle, Vec3 axis) {
+	orientation.setRotation(angle, axis);
+	updateModelMatrix();
+}
 
 inline VertexData* SceneItem::getVertexData() {
 	return vertex_data;

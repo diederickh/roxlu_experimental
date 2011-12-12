@@ -50,8 +50,9 @@ void Renderer::draw() {
 		printf("No cam, shader or scene set!\n");
 		exit(1);
 	}
+	glFrontFace(GL_CCW);
 //	glEnable(GL_CULL_FACE);
-//	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 	if(!use_fill) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
@@ -75,7 +76,7 @@ void Renderer::draw() {
 void Renderer::debugDraw() {
 	effect->disable();
 	cam->place();
-	glEnable(GL_CULL_FACE);
+//	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 
 	Mat4 rot;
@@ -107,6 +108,20 @@ void Renderer::drawSceneItem(string name) {
 	Mat4& projection_matrix = cam->pm();
 	SceneItem& si = *getSceneItem(name);
 	si.draw(view_matrix, projection_matrix);
+}
+
+SceneItem*	Renderer::createSceneItemFromVertexData(VertexData& vd, SceneItem::SceneItemDrawMode drawMode) {
+	createSceneItemFromVertexData(&vd, drawMode);
+}
+
+SceneItem* Renderer::createSceneItemFromVertexData(VertexData* vd, SceneItem::SceneItemDrawMode drawMode) {
+	SceneItem* si = new SceneItem(vd->getName());
+	si->createFromVertexData(vd);
+	si->setEffect(effect);
+	si->setDrawMode(drawMode);
+	scene->addSceneItem(vd->getName(), si);
+	scene->addVertexData(vd->getName(), vd);
+	return si;
 }
 
 SceneItem* Renderer::createIcoSphere(string name, int detail, float radius) {

@@ -89,6 +89,18 @@ int VertexData::addTriangleAndIndices(const int a, const int b, const int c) {
 	return triangles.size()-1;
 }
 
+int VertexData::addQuadAndIndices(int a, int b, int c, int d) {
+	addQuadIndices(a,b,c,d);
+	return addQuad(a,b,c,d);
+}
+
+void VertexData::addQuadIndices(int a, int b, int c, int d) {
+	indices.push_back(a);
+	indices.push_back(b);
+	indices.push_back(c);
+	indices.push_back(d);
+}
+
 int VertexData::addQuad(int nA, int nB, int nC, int nD) {
 	Quad q(nA, nB, nC, nD);
 	quads.push_back(q);
@@ -117,6 +129,10 @@ Vec3* VertexData::getVertexPtr(int index) {
 	return &vertices[index];
 }
 
+Vec3& VertexData::getVertexRef(int index) {
+	return vertices[index];
+}
+
 Vec2 VertexData::getTexCoord(int index) {
 	return texcoords[index];
 }
@@ -131,6 +147,10 @@ Vec3 VertexData::getNormal(int index) {
 
 Vec3* VertexData::getNormalPtr(int index) {
 	return &normals[index];
+}
+
+Vec3& VertexData::getNormalRef(int index) {
+	return normals[index];
 }
 
 const float* VertexData::getVerticesPtr() {
@@ -555,6 +575,22 @@ void VertexData::createTangentAndBiTangent(
 
 
 void VertexData::debugDraw(int drawMode) {
+	bool blend_enabled = glIsEnabled(GL_BLEND);
+	if(!blend_enabled) {
+	//	glEnable(GL_BLEND);
+	//	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	}
+	
+	// we adjust the size of the normals lines dynamically
+	float line_length = 0.2;
+	if(vertices.size() > 2) {
+		float length = (vertices[1] - vertices[2]).length();
+		if(length >= 3) {
+			line_length = 3.2;
+		}
+	}
+
+
 	float colors[4][3] = {
 			{0.88,0.25,0.11}
 			,{0.6,0.78,0.212}
@@ -576,16 +612,34 @@ void VertexData::debugDraw(int drawMode) {
 		else {
 			int len = indices.size();
 			int mod = (drawMode == GL_QUADS) ? 4 : 3;
-			Vec3 colors[4];
-			colors[0].set(1,0,0);
-			colors[1].set(0,1,0);
-			colors[2].set(0,0,1);
-			colors[3].set(1,1,0);
+			Vec4 colors[4];
+			colors[0].set(1,0,0, 0.8);
+			colors[1].set(0,1,0, 0.8);
+			colors[2].set(0,0,1, 0.8);
+			colors[3].set(1,1,0, 0.8);
 			
 			glBegin(drawMode);
 			for(int i = 0; i < len; ++i) {
-				glColor3fv(colors[i%mod].getPtr());
+				glColor4fv(colors[i%mod].getPtr());
 				glVertex3fv(vertices[indices[i]].getPtr());
+			}
+			glEnd();
+			
+			glBegin(GL_LINES);
+			for(int i = 0; i < len; ++i) {
+				int dx = indices[i];
+				Vec3 pos = vertices[dx];
+				Vec3 norm = normals[dx];
+				
+				Vec3 end = pos + (norm.scale(line_length*2));
+				glColor4f(1.0f,0.0f,0.4f,1.0f);
+				glColor4f(0.98, 0.92, 0.75, 0.6);
+				glVertex3fv(pos.getPtr());
+				glColor4f(1.0f, 0.0f,1.0f,1.0f);
+				glColor3f(0.98, 0.92, 0.75);
+				glColor4f(0.98, 0.92, 0.75,0.6);
+				glVertex3fv(end.getPtr());
+				
 			}
 			glEnd();
 		}
@@ -596,14 +650,7 @@ void VertexData::debugDraw(int drawMode) {
 		glUseProgram(0);
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_BLEND);
-		// we adjust the size of the normals lines dynamically
-		float line_length = 0.2;
-		if(vertices.size() > 2) {
-			float length = (vertices[1] - vertices[2]).length();
-			if(length >= 3) {
-				line_length = 3.2;
-			}
-		}
+		
 		
 		if(getNumTexCoords() > 0) {
 			glColor3f(0.98, 0.92, 0.75); // yellowish
@@ -708,6 +755,26 @@ void VertexData::debugDraw(int drawMode) {
 
 		
 	}
+	
+	if(!blend_enabled) {
+		glDisable(GL_BLEND);
+	}
+	
+}
+
+
+void VertexData::debugDrawQuad(int quadNum) {
+	Quad* q = getQuadPtr(quadNum);
+	if(q == NULL) {
+		printf("Quad not found: %d\n", quadNum);
+		return;
+	}
+	glBegin(GL_QUADS);
+		glVertex3fv(vertices[q->a].getPtr());
+		glVertex3fv(vertices[q->b].getPtr());
+		glVertex3fv(vertices[q->c].getPtr());
+		glVertex3fv(vertices[q->d].getPtr());
+	glEnd();
 }
 
 /*
@@ -767,6 +834,14 @@ void VertexData::clear() {
 	quads.clear();
 	tangents.clear();
 	bitangents.clear();
+}
+
+Vec3 VertexData::computeQuadNormal(int quad) {
+	Quad& q = quads[quad];
+	Vec3 ab = vertices[q.b] - vertices[q.a];
+	Vec3 bc = vertices[q.c] - vertices[q.b];
+	Vec3 crossed = ab.getCrossed(bc);
+	return crossed;
 }
 
 } // roxlu

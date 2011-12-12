@@ -35,7 +35,8 @@ public:
 	Mat4& translate(const Vec3& v);
 	Mat4& translate(float x, float y, float z);
 
-	Mat4& translation(float x, float y, float z);
+	Mat4& translation(const Vec3& v);
+	Mat4& translation(const float x, const float y, const float z);
 	Mat4& rotation(const Mat3& o);
 	Mat4& rotation(float angleX, float angleY, float angeZ);
 	Mat4& rotation(float a, float x, float y, float z);
@@ -76,7 +77,7 @@ public:
 	float m[16];
 	
 	// stream operator, debug.
-	void print();
+	void print() const;
 	friend ostream& operator<<(ostream& os, const Mat4& o);
 };
 
@@ -108,7 +109,7 @@ inline Mat4::Mat4() {
 	m[15] = 1.0f;
 }
 
-inline void Mat4::print() {
+inline void Mat4::print() const {
 	printf("%3.3f, %3.3f, %3.3f, %3.3f\n", m[0], m[4], m[8], m[12]);
 	printf("%3.3f, %3.3f, %3.3f, %3.3f\n", m[1], m[5], m[9], m[13]);
 	printf("%3.3f, %3.3f, %3.3f, %3.3f\n", m[2], m[6], m[10], m[14]);

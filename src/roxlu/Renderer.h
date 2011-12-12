@@ -45,6 +45,8 @@ public:
 	inline SceneItem* 	duplicateSceneItem(string oldName); // auto generate new name
 	inline SceneItem* 	duplicateSceneItem(string oldName, string newName);
 	inline SceneItem* 	getSceneItem(string name);
+	SceneItem* 			createSceneItemFromVertexData(VertexData& vd, SceneItem::SceneItemDrawMode drawMode = SceneItem::TRIANGLES);
+	SceneItem*			createSceneItemFromVertexData(VertexData* vd, SceneItem::SceneItemDrawMode drawMode = SceneItem::TRIANGLES); // @todo is this a nice name (?)
 
 	inline Effect* 		getEffectPtr();
 	

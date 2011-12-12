@@ -136,6 +136,7 @@ inline void Effect::addUniform(string uniform) {
 	uniforms.push_back(uniform);
 }
 
+
 // general
 inline void Effect::enableFeature(EffectFeature feature, int necessaryVertexAttrib) {
 	features |= feature;

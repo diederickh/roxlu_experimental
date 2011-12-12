@@ -4,10 +4,10 @@
 namespace roxlu {
 
 Camera::Camera() 
-:fov(45.0f)
+:fov(60.0f)
 ,aspect(4.0f/3.0f)
-,near(0.1f)
-,far(1000.0f)
+,near(1.0f)
+,far(600.0f)
 ,screen_width(0)
 ,screen_height(0)
 ,projection_type(PERSPECTIVE)
@@ -71,18 +71,24 @@ void Camera::orthoTopLeft(float nWidth, float nHeight, float nNear, float nFar) 
 // Moving around.
 // -----------------------------------------------------------------------------
 void Camera::place() {
+//	printf("TRANSLATING AND THE Z IS NOW: %f\n", position.z);
+//	printf("----------------^^-----------------------\n");
+//	view_matrix.print();
+//	printf("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
 	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixf(projection_matrix.getPtr());
 
 	glMatrixMode(GL_MODELVIEW);
 	updateViewMatrix();
 	glLoadMatrixf(view_matrix.getPtr());
+	view_matrix.print();
 }
 
 void Camera::translate(float nX, float nY, float nZ) {
 	position.x += nX;
 	position.y += nY;
 	position.z += nZ;
+
 }
 
 void Camera::setPosition(float nX, float nY, float nZ) {
@@ -104,7 +110,7 @@ void Camera::clearRotation() {
 // -----------------------------------------------------------------------------
 void Camera::updateViewMatrix() {
 	view_matrix.identity();
-	view_matrix.translate(position);
+	view_matrix.translation(position);
 	view_matrix *= rotation.getMat4();
 }
 

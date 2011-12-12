@@ -487,7 +487,11 @@ Mat4 transpose(const Mat4& o) {
 	return r;
 }
 
-Mat4& Mat4::translation(float x, float y, float z) {
+Mat4& Mat4::translation(const Vec3& v) {
+	return translation(v.x, v.y, v.z);
+}
+
+Mat4& Mat4::translation(const float x, const float y, const float z) {
 	m[0]  = 1.0f;
 	m[1]  = 0.0f;
 	m[2]  = 0.0f;

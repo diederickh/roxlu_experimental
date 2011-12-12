@@ -48,3 +48,6 @@
 	#define ABS(x) (((x) < 0) ? -(x) : (x))
 #endif
 
+#ifndef DX
+	#define DX(i,j,w)	((j)*(w))+(i)
+#endif

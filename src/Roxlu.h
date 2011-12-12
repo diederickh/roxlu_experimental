@@ -1,6 +1,7 @@
 #ifndef ROXLUINCLUDESH
 #define ROXLUINCLUDESH
 
+#include "roxlu/Axis.h"
 #include "roxlu/ArcBall.h"
 #include "roxlu/Camera.h"
 #include "roxlu/Color.h"

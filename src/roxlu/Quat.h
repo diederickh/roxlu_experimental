@@ -21,6 +21,7 @@ public:
 	
 	// absolute rotations. (euler)
 	void setRotation(const float radians, const float x, const float y, const float z);
+	void setRotation(const float a, const Vec3 axis);
 	inline void setXRotation(const float radians);
 	inline void setYRotation(const float radians);
 	inline void setZRotation(const float radians);

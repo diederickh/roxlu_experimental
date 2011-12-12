@@ -128,6 +128,11 @@ void Quat::rotate(const float radians, const float x, const float y, const float
 	*this = cp;
 }
 
+
+void Quat::setRotation(const float a, const Vec3 axis) {
+	setRotation(a, axis.x, axis.y, axis.z);
+}
+	
 void Quat::setRotation(const float radians, const float x, const float y, const float z) {
 	float ha = 0.5 * radians;
 	float s = sin(ha);

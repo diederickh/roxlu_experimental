@@ -1,8 +1,11 @@
 import bpy
 #import bpy_extras
+
 import shutil
 import struct
 import mathutils
+import math
+import struct
 import os
 
 # Good info: http://wiki.blender.org/index.php/Dev:2.5/Py/Scripts/Cookbook
@@ -10,23 +13,25 @@ import os
 #imports for file selector
 from bpy_extras.io_utils import ImportHelper, ExportHelper
 from bpy.props import StringProperty, BoolProperty, EnumProperty
+from mathutils import Vector, Matrix
+#import mathutils, math, struct
 
 R3F_VERTEX_DATAS = 0x01
 R3F_SCENE_ITEMS = 0x02
 R3F_MATERIALS = 0x03
 
 R3F_MAT_NONE			= 0
-R3F_MAT_DIFFUSE		= (1 << 0)
+R3F_MAT_DIFFUSE			= (1 << 0)
 R3F_MAT_SPECULAR		= (1 << 1)
-R3F_MAT_AMBIENT		= (1 << 2)
-R3F_MAT_HEIGHT		= (1 << 3)
-R3F_MAT_NORMAL		= (1 << 4)
-R3F_MAT_SHININESS	= (1 << 5)
-R3F_MAT_OPACITY		= (1 << 6)
+R3F_MAT_AMBIENT			= (1 << 2)
+R3F_MAT_HEIGHT			= (1 << 3)
+R3F_MAT_NORMAL			= (1 << 4)
+R3F_MAT_SHININESS		= (1 << 5)
+R3F_MAT_OPACITY			= (1 << 6)
 R3F_MAT_DISPLACEMENT	= (1 << 7)
-R3F_MAT_LIGHT		= (1 << 8)
-R3F_MAT_REFLECTION	= (1 << 9)
-R3F_MAT_CUBEMAP		= (1 << 10)
+R3F_MAT_LIGHT			= (1 << 8)
+R3F_MAT_REFLECTION		= (1 << 9)
+R3F_MAT_CUBEMAP			= (1 << 10)
 
 bl_info = {
     "name": "RoxluLib",
@@ -235,10 +240,14 @@ def B2G4(o):
 
 # opengl 2 blender conversion
 def G2B3(o):
+	#o = o * mat_x90
 	return (o[0], o[2], o[1])
+	#return (o[0], o[1], o[2])
 	
 def G2B4(o):
-	return (o[0], o[2], o[1], o[3])
+	#return (o[0], o[2], o[1], o[3])
+	return (o[0], o[1], o[2], o[3])
+	
 	
 class VertexData:
 	def __init__(self):
@@ -475,7 +484,12 @@ class Scene:
 			self.addMesh(vertex_data_name, m)
 			faces = vd.getFaces()
 			m.from_pydata(vd.getVertices(), [], faces)
-			m.update()			
+			m.update()		
+			
+			# when importing we need to rotate our mesh because r3f uses
+			# openGL coordinates
+			mat_x90 = mathutils.Matrix.Rotation(math.pi/2, 4, 'X')
+			m.transform(mat_x90)
 			
 			# create UV layer
 			if vd.hasTexCoords():
@@ -501,6 +515,7 @@ class Scene:
 			
 			ob = bpy.data.objects.new(si.getName(), m)
 			ob.location = si.getOrigin()
+			#ob.location.transform(mat_x90)
 			ob.rotation_euler = si.getOrientationAsEuler()
 			ob.scale = si.getScale()
 			bpy.context.scene.objects.link(ob)

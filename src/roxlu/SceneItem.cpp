@@ -19,7 +19,7 @@ SceneItem::SceneItem(string name)
 ,effect(NULL)
 ,scaling(1.0,1.0, 1.0)
 ,name(name)
-,color(0.88,0.25,0.11,1.0)
+,color(1.0,1.0,1.0,1.0)
 ,specularity(8)
 ,attenuation(0.3, 0.5, 1.0)
 {
@@ -77,9 +77,11 @@ void SceneItem::drawElements() {
 }
 
 void SceneItem::draw(Mat4& viewMatrix, Mat4& projectionMatrix) {
+
 	if(!initialized) {
 		initialize();
 	}
+	
 	if(vbo == NULL) {
 		printf("SceneItem no vbo set.\n"); 
 		exit(1);
@@ -100,15 +102,15 @@ void SceneItem::draw(Mat4& viewMatrix, Mat4& projectionMatrix) {
 	if(material != NULL) {
 		effect->bindMaterial(*material);
 	}
+
 //	normalMatrix.m[0] = 1.0;
 //	normalMatrix.m[1] = 0.0;
 //	normalMatrix.m[2] = 0.0;
-	Mat4 modelview_copy = modelview_matrix;
+//	Mat4 modelview_copy = modelview_matrix;
 //	Mat4 view_copy = viewMatrix;
 //	Mat3 nm = modelview_copy.inverse().transpose();
 	Mat3 nm = modelview_matrix.getInverse().transpose();
 	effect->updateLights(); // isnt this done in renderer
-
 
 	effect->getShader().uniform1f("specularity", specularity);
 	effect->getShader().uniform4fv("diffuse_color", color.getPtr());

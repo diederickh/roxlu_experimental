@@ -305,7 +305,6 @@ void Effect::setupShaderAttributesAndUniforms() {
 		shader.addUniform(var.str() +".diffuse_color");
 		shader.addUniform(var.str() +".specular_color");
 	}
-	
 	shader.disable();
 
 }
@@ -338,7 +337,6 @@ void Effect::setupBuffer(VAO& vao, VBO& vbo, VertexData& vd) {
 	}
 	
 	vao.bind(); // keeps also state of the enable vertex attrib arrays.
-	vbo.bind();
 	shader.enable();
 	
 	// enable necessary vertex attributes (which get bound to the vao)
@@ -360,7 +358,11 @@ void Effect::setupBuffer(VAO& vao, VBO& vbo, VertexData& vd) {
 	// ------------------------------------------
 	if(vd.getNumIndices() > 0) {
 		vbo.setIndices(vd.getIndicesPtr(), vd.getNumIndices());
+	
 	}
+	
+	// now after possibly setting indices, we can bind the vbo
+	vbo.bind();
 
 	size_t stride = 0;
 	int pos_offset = 0;
@@ -419,7 +421,7 @@ void Effect::setupBuffer(VAO& vao, VBO& vbo, VertexData& vd) {
 
 	// attribute: position
 	if(necessary_vertex_attribs & VERT_POS) {
-		printf("Effect: set vertex position as attribute.\n");
+		//printf("Effect: set vertex position as attribute.\n");
 		glVertexAttribPointer(
 				shader.getAttribute("pos")
 				,3
@@ -488,8 +490,6 @@ void Effect::bindMaterial(Material& m) {
 		tex->bind();
 		n++;
 	}
-	
-
 }
 
 void Effect::updateShaders() {

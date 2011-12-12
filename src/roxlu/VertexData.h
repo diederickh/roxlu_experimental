@@ -39,8 +39,11 @@ public:
 	int				addTriangleAndIndices(int a, int b, int c);
 	int 			addQuad(int nA, int nB, int nC, int nD);
 	int				addQuad(Quad q);
+	int				addQuadAndIndices(int a, int b, int c, int d);
+	void			addQuadIndices(int a, int b, int c, int d);
 
 	void debugDraw(int drawMode = GL_TRIANGLES);
+	void debugDrawQuad(int quadNum);
 	
 	const float* 	getVerticesPtr();
 	const float* 	getTexCoordsPtr();
@@ -50,6 +53,7 @@ public:
 
     Triangle* 		getTrianglePtr(int nTriangle);
 	Quad* 			getQuadPtr(int nQuad);
+	
 
 	int 			getNumVertices();
 	int 			getNumTexCoords();
@@ -61,10 +65,12 @@ public:
 	int 			getNumQuads();
 	Vec2			getTexCoord(int index);
 	Vec2*			getTexCoordPtr(int index);
-	Vec3 			getVertex(int nIndex);
-	Vec3*			getVertexPtr(int nIndex);
+	Vec3 			getVertex(int index);
+	Vec3*			getVertexPtr(int index);
+	Vec3&			getVertexRef(int index);		
 	Vec3			getNormal(int index);
 	Vec3*			getNormalPtr(int index);
+	Vec3&			getNormalRef(int index);
 	
 	VertexP* 		getVertexP();  	
 	VertexPT*		getVertexPT();
@@ -86,13 +92,15 @@ public:
 
 	void			clear();
 	
-	inline void 	setVertex(int nDX, Vec3 oPosition) { vertices[nDX] = oPosition; }
-	inline void 	setVertex(int nDX, float nX, float nY, float nZ) { vertices[nDX].set(nX, nY,nZ); }
+	inline void		setNormal(int dx, Vec3 normal) { normals[dx] = normal; }
+	inline void 	setVertex(int dx, Vec3 position) { vertices[dx] = position; }
+	inline void 	setVertex(int dx, float x, float y, float z) { vertices[dx].set(x, y,z); }
 	inline void 	setName(string n);
 	inline string	getName();
 	
 	friend ostream& operator <<(ostream& os, const VertexData& data);
 		
+	Vec3			computeQuadNormal(int nQuad);
 	void 			computeTangents();
 	void			computeTangentForTriangle(Vec3& v1, Vec3& v2, Vec3& v3, Vec2& w1, Vec2& w2, Vec2& w3, Vec3& sdir, Vec3& tdir);
 	
@@ -179,6 +187,7 @@ inline void	VertexData::disableTexCoordAttrib() {
 inline void VertexData::setName(string n) {
 	name = n;
 }
+
 inline string VertexData::getName() {
 	return name;
 }
