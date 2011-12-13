@@ -199,7 +199,7 @@ class SceneItem:
 	# @todo test!	
 	def setOrigin(self, o):
 		self.origin = o;
-		#self.origin = (o[0], o[2], o[1])
+		
 		
 	def getOrigin(self):
 		return self.origin
@@ -209,7 +209,7 @@ class SceneItem:
 		
 	def getOrientationAsEuler(self):
 		return mathutils.Quaternion((self.orientation[0], self.orientation[1],self.orientation[2]), -self.orientation[3]).to_euler()
-		#return mathutils.Quaternion((self.orientation[0], self.orientation[2],self.orientation[1]), -self.orientation[3]).to_euler()
+	
 	
 	def getOrientation(self):
 		return self.orientation
@@ -241,11 +241,12 @@ def B2G4(o):
 # opengl 2 blender conversion
 def G2B3(o):
 	#o = o * mat_x90
-	return (o[0], o[2], o[1])
-	#return (o[0], o[1], o[2])
+	#return (o[0], o[2], o[1])
+	return (o[0], o[1], o[2])
 	
 def G2B4(o):
-	#return (o[0], o[2], o[1], o[3])
+	#return (o[1], o[0], o[2], o[3])
+	#return (-o[0], o[1], o[2], o[3])
 	return (o[0], o[1], o[2], o[3])
 	
 	
@@ -489,7 +490,7 @@ class Scene:
 			# when importing we need to rotate our mesh because r3f uses
 			# openGL coordinates
 			mat_x90 = mathutils.Matrix.Rotation(math.pi/2, 4, 'X')
-			m.transform(mat_x90)
+			#m.transform(mat_x90)
 			
 			# create UV layer
 			if vd.hasTexCoords():
@@ -664,7 +665,7 @@ def parseCommand(cmd, dataFile, Container):
 			num_normals = readUI32(dataFile)
 			for i in range(0, num_normals):
 				v = readFloat3(dataFile)
-				vertex_data.addTexCoord(v)
+				vertex_data.addNormal(v)
 				
 			# parse quads
 			num_quads = readUI32(dataFile)

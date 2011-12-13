@@ -612,6 +612,7 @@ void VertexData::debugDraw(int drawMode) {
 		else {
 			int len = indices.size();
 			int mod = (drawMode == GL_QUADS) ? 4 : 3;
+			
 			Vec4 colors[4];
 			colors[0].set(1,0,0, 0.8);
 			colors[1].set(0,1,0, 0.8);

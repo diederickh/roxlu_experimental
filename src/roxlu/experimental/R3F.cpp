@@ -164,7 +164,7 @@ void R3F::save(string fileName, bool inDataPath) {
 	buffer.storeUI8(R3F_SCENE_ITEMS);
 	buffer.storeUI32LE(scene_items.size());
 	vector<SceneItem*>::iterator scene_it = scene_items.begin();
-		while(scene_it != scene_items.end()) {
+	while(scene_it != scene_items.end()) {
 		storeSceneItem(buffer, *(*scene_it));
 		++scene_it;
 	}
@@ -250,8 +250,6 @@ void R3F::storeVertexData(IOBuffer& buffer, VertexData& vd) {
 		buffer.storeUI32LE(tri.b);
 		buffer.storeUI32LE(tri.c);
 	}
-	
-	
 }
 
 void R3F::storeSceneItem(IOBuffer& buffer, SceneItem& si) {

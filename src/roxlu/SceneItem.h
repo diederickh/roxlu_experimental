@@ -214,16 +214,16 @@ inline void SceneItem::updateModelMatrix() {
 	Mat4 rotation = orientation.getMat4();
 	model_matrix = model_matrix.translation(position); 
 	model_matrix.scale(scaling.x, scaling.y, scaling.z);
-	printf("--\n");
-	model_matrix.print();
-	printf("==\n");
+//	printf("--\n");
+//	model_matrix.print();
+//	printf("==\n");
 	model_matrix *= rotation;
 //	model_matrix = model_matrix * rotation;
 //	model_matrix *= rotation;
-	model_matrix.print();
-	printf("++\n");
+//	model_matrix.print();
+//	printf("++\n");
 	//rotation.print();
-	printf("--\n");
+//	printf("--\n");
 }
 
 inline void SceneItem::rotate(float radians, const float x, const float y, const float z) {

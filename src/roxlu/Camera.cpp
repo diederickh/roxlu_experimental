@@ -81,7 +81,7 @@ void Camera::place() {
 	glMatrixMode(GL_MODELVIEW);
 	updateViewMatrix();
 	glLoadMatrixf(view_matrix.getPtr());
-	view_matrix.print();
+	//view_matrix.print();
 }
 
 void Camera::translate(float nX, float nY, float nZ) {
