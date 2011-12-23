@@ -24,7 +24,7 @@ bool HES_CatmullClark::apply(HE_Mesh& mesh) {
 	while(vert_it != vertices.end()) {
 		HE_Vertex* vert = *vert_it;
 		HE_HalfEdge* he = vert->getHalfEdge();
-		Vec3 avarage_center(0);
+		Vec3 avarage_center;
 		int c = 0;
 		
 		// get avarage for face, related to current vertex.

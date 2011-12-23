@@ -50,6 +50,29 @@ Mat4& Mat4::operator=(const Mat4& o) {
 	return *this;
 }
 
+Mat4::Mat4(const Mat3& o) {
+	m[0] = o.m[0];
+	m[1] = o.m[1];
+	m[2] = o.m[2];
+	m[3] = 0.0f;
+	
+	m[4] = o.m[3];
+	m[5] = o.m[4];
+	m[6] = o.m[5];
+	m[7] = 0.0f;
+	
+	m[8] = o.m[6];
+	m[9] = o.m[7];
+	m[10] = o.m[8];
+	m[11] = 0.0f;
+	
+	m[12] = 0.0f;
+	m[13] = 0.0f;
+	m[14] = 0.0f;
+	m[15] =	1.0f;
+}
+
+
 // compare with other mat4
 bool Mat4::operator==(const Mat4& o) const {
 	for(int i = 0; i < 16; ++i) {
@@ -487,61 +510,64 @@ Mat4 transpose(const Mat4& o) {
 	return r;
 }
 
-Mat4& Mat4::translation(const Vec3& v) {
+Mat4 Mat4::translation(const Vec3& v) {
 	return translation(v.x, v.y, v.z);
 }
 
-Mat4& Mat4::translation(const float x, const float y, const float z) {
-	m[0]  = 1.0f;
-	m[1]  = 0.0f;
-	m[2]  = 0.0f;
-	m[3]  = 0.0f;
+Mat4 Mat4::translation(const float x, const float y, const float z) {
+	Mat4 mat;
+	mat.m[0]  = 1.0f;
+	mat.m[1]  = 0.0f;
+	mat.m[2]  = 0.0f;
+	mat.m[3]  = 0.0f;
 	
-	m[4]  = 0.0f;
-	m[5]  = 1.0f;
-	m[6]  = 0.0f;
-	m[7]  = 0.0f;
+	mat.m[4]  = 0.0f;
+	mat.m[5]  = 1.0f;
+	mat.m[6]  = 0.0f;
+	mat.m[7]  = 0.0f;
 	
-	m[8]  = 0.0f;
-	m[9]  = 0.0f;
-	m[10] = 1.0f;
-	m[11] = 0.0f;
+	mat.m[8]  = 0.0f;
+	mat.m[9]  = 0.0f;
+	mat.m[10] = 1.0f;
+	mat.m[11] = 0.0f;
 	
-	m[12] = x;
-	m[13] = y;
-	m[14] = z;
-	m[15] = 1.0f;
-	
-	return *this;
+	mat.m[12] = x;
+	mat.m[13] = y;
+	mat.m[14] = z;
+	mat.m[15] = 1.0f;
+
+	return mat;
 }
 
 // use rotation from 3x3 mat
-Mat4& Mat4::rotation(const Mat3& o) {
-	m[0]  = o.m[0];
-	m[1]  = o.m[1];
-	m[2]  = o.m[2];
-	m[3]  = 0.0f;
+Mat4 Mat4::rotation(const Mat3& o) {
+	Mat4 mat;
+	mat.m[0]  = o.m[0];
+	mat.m[1]  = o.m[1];
+	mat.m[2]  = o.m[2];
+	mat.m[3]  = 0.0f;
 	
-	m[4]  = o.m[3];
-	m[5]  = o.m[4];
-	m[6]  = o.m[5];
-	m[7]  = 0.0f;
+	mat.m[4]  = o.m[3];
+	mat.m[5]  = o.m[4];
+	mat.m[6]  = o.m[5];
+	mat.m[7]  = 0.0f;
 	
-	m[8]  = o.m[6];
-	m[9]  = o.m[7];
-	m[10] = o.m[8];
-	m[11] = 0.0f;
+	mat.m[8]  = o.m[6];
+	mat.m[9]  = o.m[7];
+	mat.m[10] = o.m[8];
+	mat.m[11] = 0.0f;
 	
-	m[12] = 0.0f;
-	m[13] = 0.0f;
-	m[14] = 0.0f;
-	m[15] = 1.0f;
+	mat.m[12] = 0.0f;
+	mat.m[13] = 0.0f;
+	mat.m[14] = 0.0f;
+	mat.m[15] = 1.0f;
 	
-	return *this;
+	return mat;
 }
 
 // from euler angles.
-Mat4& Mat4::rotation(float angleX, float angleY, float angleZ) {
+Mat4 Mat4::rotation(float angleX, float angleY, float angleZ) {
+	Mat4 mat;
 	angleX *= DEG_TO_RAD;
 	angleY *= DEG_TO_RAD;
 	angleZ *= DEG_TO_RAD;
@@ -553,30 +579,31 @@ Mat4& Mat4::rotation(float angleX, float angleY, float angleZ) {
 	float cz = cosf(angleZ);
 	float sz = sinf(angleZ);
 
-	m[0]  =  (cy * cz);
-	m[4]  = -(cy * sz);  
-	m[8]  =  sy;
-	m[12] = 0.0f;
+	mat.m[0]  =  (cy * cz);
+	mat.m[4]  = -(cy * sz);  
+	mat.m[8]  =  sy;
+	mat.m[12] = 0.0f;
 
-	m[1]  =  (sx * sy * cz) + (cx * sz);
-	m[5]  = -(sx * sy * sz) + (cx * cz);
-	m[9]  = -(sx * cy); 
-	m[13] = 0.0f;
+	mat.m[1]  =  (sx * sy * cz) + (cx * sz);
+	mat.m[5]  = -(sx * sy * sz) + (cx * cz);
+	mat.m[9]  = -(sx * cy); 
+	mat.m[13] = 0.0f;
 
-	m[2]  = -(cx * sy * cz) + (sx * sz);
-	m[6]  =  (cx * sy * sz) + (sx * cz);
-	m[10] =  (cx * cy);
-	m[14] = 0.0f;
+	mat.m[2]  = -(cx * sy * cz) + (sx * sz);
+	mat.m[6]  =  (cx * sy * sz) + (sx * cz);
+	mat.m[10] =  (cx * cy);
+	mat.m[14] = 0.0f;
 
-	m[3]  = 0.0f;
-	m[7]  = 0.0f;
-	m[11] = 0.0f;
-	m[15] = 1.0f;
+	mat.m[3]  = 0.0f;
+	mat.m[7]  = 0.0f;
+	mat.m[11] = 0.0f;
+	mat.m[15] = 1.0f;
 
-	return *this;
+	return mat;
 }
 
-Mat4& Mat4::rotation(float a, float x, float y, float z) {
+Mat4 Mat4::rotation(float a, float x, float y, float z) {
+	Mat4 mat;
 	a = DEG_TO_RAD;
 	float c = cosf(a);
 	float s = sinf(a);
@@ -598,157 +625,174 @@ Mat4& Mat4::rotation(float a, float x, float y, float z) {
 	float tyz = tx * ax.z; 
 	float txz = tx * ax.z;
 
-	m[0]  = tx * ax.x + c;
-	m[4]  = txy - sz; 
-	m[8]  = txz + sy;
-	m[12] = 0.0f;
+	mat.m[0]  = tx * ax.x + c;
+	mat.m[4]  = txy - sz; 
+	mat.m[8]  = txz + sy;
+	mat.m[12] = 0.0f;
 
-	m[1]  = txy + sz;
-	m[5]  = ty * ax.y + c;
-	m[9]  = tyz - sx;
-	m[13] = 0.0f;
+	mat.m[1]  = txy + sz;
+	mat.m[5]  = ty * ax.y + c;
+	mat.m[9]  = tyz - sx;
+	mat.m[13] = 0.0f;
 
-	m[2]  = txz - sy;
-	m[6]  = tyz + sx;
-	m[10] = tz * ax.z + c;
-	m[14] = 0.0f;
+	mat.m[2]  = txz - sy;
+	mat.m[6]  = tyz + sx;
+	mat.m[10] = tz * ax.z + c;
+	mat.m[14] = 0.0f;
 
-	m[3]  = 0.0f;
-	m[7]  = 0.0f;
-	m[11] = 0.0f;
-	m[15] = 1.0f;
+	mat.m[3]  = 0.0f;
+	mat.m[7]  = 0.0f;
+	mat.m[11] = 0.0f;
+	mat.m[15] = 1.0f;
 
-	return *this;
+	return mat;
 }
 
-Mat4& Mat4::rotationX(float a) {
+Mat4 Mat4::rotationX(float a) {
+	Mat4 mat;
 	a = DEG_TO_RAD;
 	float c = cosf(a);
 	float s = sinf(a);
 	
-	m[0]  = 1.0f;
-	m[1]  = 0.0f;
-	m[2]  = 0.0f;
-	m[3]  = 0.0f;
+	mat.m[0]  = 1.0f;
+	mat.m[1]  = 0.0f;
+	mat.m[2]  = 0.0f;
+	mat.m[3]  = 0.0f;
 	
-	m[4]  = 0.0f;
-	m[5]  = c;
-	m[6]  = s;
-	m[7]  = 0.0f;
+	mat.m[4]  = 0.0f;
+	mat.m[5]  = c;
+	mat.m[6]  = s;
+	mat.m[7]  = 0.0f;
 	
-	m[8]  = 0.0f;
-	m[9]  = -s;
-	m[10] = c;
-	m[11] = 0.0f;
+	mat.m[8]  = 0.0f;
+	mat.m[9]  = -s;
+	mat.m[10] = c;
+	mat.m[11] = 0.0f;
 	
-	m[12] = 0.0f;
-	m[13] = 0.0f;
-	m[14] = 0.0f;
-	m[15] = 1.0f;
+	mat.m[12] = 0.0f;
+	mat.m[13] = 0.0f;
+	mat.m[14] = 0.0f;
+	mat.m[15] = 1.0f;
 	
-	return *this;
+	return mat;
 }
 
-Mat4& Mat4::rotationY(float a) {
+Mat4 Mat4::rotationY(float a) {
+	Mat4 mat;
 	a = DEG_TO_RAD;
 	float c = cosf(a);
 	float s = sinf(a);
 	
-	m[0]  = c;
-	m[1]  = 0.0f;
-	m[2]  = -s;
-	m[3]  = 0.0f;
+	mat.m[0]  = c;
+	mat.m[1]  = 0.0f;
+	mat.m[2]  = -s;
+	mat.m[3]  = 0.0f;
 	
-	m[4]  = 0.0f;
-	m[5]  = 1.0f;
-	m[6]  = 0.0f;
-	m[7]  = 0.0f;
+	mat.m[4]  = 0.0f;
+	mat.m[5]  = 1.0f;
+	mat.m[6]  = 0.0f;
+	mat.m[7]  = 0.0f;
 	
-	m[8]  = s;
-	m[9]  = 0.0f;
-	m[10] = c;
-	m[11] = 0.0f;
+	mat.m[8]  = s;
+	mat.m[9]  = 0.0f;
+	mat.m[10] = c;
+	mat.m[11] = 0.0f;
 	
-	m[12] = 0.0f;
-	m[13] = 0.0f;
-	m[14] = 0.0f;
-	m[15] = 1.0f;
+	mat.m[12] = 0.0f;
+	mat.m[13] = 0.0f;
+	mat.m[14] = 0.0f;
+	mat.m[15] = 1.0f;
 	
-	return *this;
+	return mat;
 }
 
 
-Mat4& Mat4::rotationZ(float a) {
+Mat4 Mat4::rotationZ(float a) {
+	Mat4 mat;
 	a = DEG_TO_RAD;
 	float c = cosf(a);
 	float s = sinf(a);
 	
-	m[0]  = c;
-	m[1]  = s;
-	m[2]  = 0.0f;
-	m[3]  = 0.0f;
+	mat.m[0]  = c;
+	mat.m[1]  = s;
+	mat.m[2]  = 0.0f;
+	mat.m[3]  = 0.0f;
 	
-	m[4]  = -s;
-	m[5]  = c;
-	m[6]  = 0.0f;
-	m[7]  = 0.0f;
+	mat.m[4]  = -s;
+	mat.m[5]  = c;
+	mat.m[6]  = 0.0f;
+	mat.m[7]  = 0.0f;
 	
-	m[8]  = 0.0f;
-	m[9]  = 0.0f;
-	m[10] = 1.0;
-	m[11] = 0.0f;
+	mat.m[8]  = 0.0f;
+	mat.m[9]  = 0.0f;
+	mat.m[10] = 1.0;
+	mat.m[11] = 0.0f;
 	
-	m[12] = 0.0f;
-	m[13] = 0.0f;
-	m[14] = 0.0f;
-	m[15] = 1.0f;
+	mat.m[12] = 0.0f;
+	mat.m[13] = 0.0f;
+	mat.m[14] = 0.0f;
+	mat.m[15] = 1.0f;
 	
-	return *this;
+	return mat;
 }
 
-Mat4& Mat4::scaling(float x, float y, float z) {
-	m[0]  = x;
-	m[1]  = 0.0f;
-	m[2]  = 0.0f;
-	m[3]  = 0.0f;
+Mat4 Mat4::scaling(float x, float y, float z) {
+	Mat4 mat;
 	
-	m[4]  = 0.0f;
-	m[5]  = y;
-	m[6]  = 0.0f;
-	m[7]  = 0.0f;
+	mat.m[0]  = x;
+	mat.m[1]  = 0.0f;
+	mat.m[2]  = 0.0f;
+	mat.m[3]  = 0.0f;
 	
-	m[8]  = 0.0f;
-	m[9]  = 0.0f;
-	m[10] = z;
-	m[11] = 0.0f;
+	mat.m[4]  = 0.0f;
+	mat.m[5]  = y;
+	mat.m[6]  = 0.0f;
+	mat.m[7]  = 0.0f;
 	
-	m[12] = 0.0f;
-	m[13] = 0.0f;
-	m[14] = 0.0f;
-	m[15] = 1.0f;
+	mat.m[8]  = 0.0f;
+	mat.m[9]  = 0.0f;
+	mat.m[10] = z;
+	mat.m[11] = 0.0f;
 	
-	return *this;
+	mat.m[12] = 0.0f;
+	mat.m[13] = 0.0f;
+	mat.m[14] = 0.0f;
+	mat.m[15] = 1.0f;
+	
+	return mat;
 }
+
 Mat4& Mat4::scale(float s) {
 	return scale(s,s,s);
 }
 
 Mat4& Mat4::scale(float x, float y, float z) {
-	Mat4 m;
-	m.scaling(x,y,z);
-	*this *= m;
+	Mat4 mat;
+	mat.scaling(x,y,z);
+	*this *= mat;
 	return *this;
 }
 
 Mat4& Mat4::translate(const Vec3& v) {
-	Mat4 m = translation(v.x,v.y,v.z);
-	*this *= m;
+	Mat4 mat = translation(v.x,v.y,v.z);
+//	printf("=================\n");
+//	print();
+	*this *= mat;
+//	mat.print();
+//	printf("----------------\n\n");
+	
+/*
+	m[12] += v.x;
+	m[13] += v.y;
+	m[14] += v.z;
+*/
+	
 	return *this;	
 }
 
 Mat4& Mat4::translate(float x, float y, float z) {
-	Mat4 m = translation(x,y,z);
-	*this *= m;
+	Mat4 mat = translation(x,y,z);
+	*this *= mat;
 	return *this;	
 }
 
@@ -954,12 +998,13 @@ Mat4 Mat4::operator*(const Mat4& o) const {
 }
 
 Mat4& Mat4::operator*=(const Mat4& o) {
+
 	Mat4 r;
 	r.m[0]  =  m[0] * o.m[0]  +  m[4] * o.m[1]  +  m[8]  * o.m[2]  +  m[12] * o.m[3];
 	r.m[1]  =  m[1] * o.m[0]  +  m[5] * o.m[1]  +  m[9]  * o.m[2]  +  m[13] * o.m[3];
 	r.m[2]  =  m[2] * o.m[0]  +  m[6] * o.m[1]  +  m[10] * o.m[2]  +  m[14] * o.m[3];
 	r.m[3]  =  m[3] * o.m[0]  +  m[7] * o.m[1]  +  m[11] * o.m[2]  +  m[15] * o.m[3];
-	
+		
 	r.m[4]  =  m[0] * o.m[4]  +  m[4] * o.m[5]  +  m[8]  * o.m[6]  +  m[12] * o.m[7];
 	r.m[5]  =  m[1] * o.m[4]  +  m[5] * o.m[5]  +  m[9]  * o.m[6]  +  m[13] * o.m[7];
 	r.m[6]  =  m[2] * o.m[4]  +  m[6] * o.m[5]  +  m[10] * o.m[6]  +  m[14] * o.m[7];
@@ -969,7 +1014,7 @@ Mat4& Mat4::operator*=(const Mat4& o) {
 	r.m[9]  =  m[1] * o.m[8]  +  m[5] * o.m[9]  +  m[9]  * o.m[10] +  m[13] * o.m[11];
 	r.m[10] =  m[2] * o.m[8]  +  m[6] * o.m[9]  +  m[10] * o.m[10] +  m[14] * o.m[11];
 	r.m[11] =  m[3] * o.m[8]  +  m[7] * o.m[9]  +  m[11] * o.m[10] +  m[15] * o.m[11];
-	
+
 	r.m[12] =  m[0] * o.m[12] +  m[4] * o.m[13] +  m[8]  * o.m[14] +  m[12] * o.m[15];
 	r.m[13] =  m[1] * o.m[12] +  m[5] * o.m[13] +  m[9]  * o.m[14] +  m[13] * o.m[15];
 	r.m[14] =  m[2] * o.m[12] +  m[6] * o.m[13] +  m[10] * o.m[14] +  m[14] * o.m[15];
@@ -992,6 +1037,7 @@ Mat4& Mat4::operator*=(const Mat4& o) {
 	m[13] = r.m[13];
 	m[14] = r.m[14];
 	m[15] = r.m[15];
+	
 	return *this;
 }
 
@@ -1074,5 +1120,33 @@ Mat4 operator*(float s, const Mat4& o) {
 	r.m[15] = o.m[15] * s;
 	return r;
 }
+
+// get the top 3x3 matrix (rotation)
+Mat3 Mat4::operator=(const Mat4& o) const {
+	Mat3 m3(
+		 o.m[0], o.m[1], o.m[2]
+		,o.m[4], o.m[5], o.m[6]
+		,o.m[8], o.m[9], o.m[10]
+	);
+	return m3;
+}
+
+Mat4& Mat4::operator=(const Mat3& o) {	
+	m[0] = o.m[0];
+	m[1] = o.m[1];
+	m[2] = o.m[2];
+	
+	m[4] = o.m[3];
+	m[5] = o.m[4];
+	m[6] = o.m[5];
+	
+	m[8] = o.m[6];
+	m[9] = o.m[7];
+	m[10] = o.m[8];
+	
+	return *this;
+}
+
+
 
 } // roxlu

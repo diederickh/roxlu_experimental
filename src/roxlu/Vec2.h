@@ -11,19 +11,13 @@
 							const float rsopf = 1.5f; \
 							rsl=0x5f3759df-(rsl>>1); \
 							odist=*(float*)&rsl; \
-	 			            odist=odist*(rsopf-(rsf*odist*odist));  \
-						
-//#define length2(a,r)		isqrt2(a,r); \
-//							r = 1/r;
+	 			            odist=odist*(rsopf-(rsf*odist*odist));  
 #define copy2(a,b)			b.x = a.x; b.y = a.y;;					
 #define set2(a,x,y)			a.x = x; a.y = y;;
 #define normalize2(a,l,b)	l = 0.0; \
 							isqrt2(a,l); \
 							b.x = a.x * l; \
 							b.y = a.y * l;
-							
-
-	
 #define	subtract2(a,b,c)	c.x = a.x - b.x; c.y = a.y - b.y;
 #define	add2(a,b,c)			c.x = a.x + b.x; c.y = a.y + b.y;;
 #define multiply2(a,b,c)	c.x = a.x * b; c.y = a.y * b;
@@ -35,46 +29,54 @@
 
 namespace roxlu { 
 
+struct Vec3;
+
 struct Vec2 {
 public:
-	Vec2(float nX = 0.0f, float nY = 0.0f)
-		:x(nX)
-		,y(nY)
-	{
-	}
-			
+	Vec2(const float xx = 0.0f, const float yy = 0.0f);
+	Vec2(const float n);
+	Vec2(const Vec2& v);
+	Vec2(const Vec3& v);
+	Vec2(const Vec3& v, int dropAxis);
+	
+	
 	// Basic vector math.
-	inline void 	set(float nX, float nY);
-	inline float 	length();
-	inline float 	lengthSquared();
-	inline float*	getPtr() { return &x; }
+	void set(float x, float y);
+	float length();
+	float lengthSquared();
+	float* getPtr() { return &x; }
 	
 	// Accessors
-	float& operator[](unsigned int nIndex) {
-		return (&x)[nIndex];
+	float& operator[](unsigned int index) {
+		return (&x)[index];
 	}
 	
-	float operator[](unsigned int nIndex) const {
-		return (&x)[nIndex];
+	float operator[](unsigned int index) const {
+		return (&x)[index];
 	}
 	
 	// Comparison
-	bool operator==(const Vec2& rOther) const;
-	bool operator!=(const Vec2& rOther) const;
+	bool operator==(const Vec2& v) const; // v1 == v2 ?
+	bool operator!=(const Vec2& v) const; // v2 != v2 ? 
 	
-	// Operators
-	Vec2 	operator-(const Vec2& rOther) const;
-	Vec2 	operator+(const Vec2& rOther) const;
-	Vec2& 	operator-=(const Vec2& rOther);
-	Vec2& 	operator+=(const Vec2& rOther);
-	Vec2 	operator*(const float nScalar) const;
-	Vec2&	operator*=(const float nScalar);
-	Vec2 	operator/(const float nScalar) const;
-	Vec2& 	operator/=(const float nScalar);
+	// Assignment operators
+	Vec2& operator=(const Vec2& v);  // v1 = v2
+	Vec2& operator+=(const Vec2& v); // v1 += v2
+	Vec2& operator-=(const Vec2& v); // v1 -= v2
+	Vec2& operator*=(const float s); // v1 *= s
+	Vec2& operator/=(const float s); // v1 /= s
+
+	
+	// Other Operators
+	Vec2 operator-(); // -v1		
+	Vec2 operator-(const Vec2& v) const; // v1 - v2
+	Vec2 operator+(const Vec2& v) const; // v1 + v2
+	Vec2 operator*(const float s) const; // v * 3.0
+	Vec2 operator/(const float s) const; // v / 3.0
 			
 	// Streams
-	friend std::ostream& operator<<(std::ostream& os, const Vec2& rVec);		
-	friend std::istream& operator>>(std::istream& is, Vec2& rVec);		
+	friend std::ostream& operator<<(std::ostream& os, const Vec2& v);		
+	friend std::istream& operator>>(std::istream& is, Vec2& v);		
 			
 	float x;
 	float y;
@@ -82,9 +84,9 @@ public:
 };
 
 // -----------------------------------------------------------------------------
-inline void Vec2::set(float nX, float nY) {
-	x = nX; 
-	y = nY;
+inline void Vec2::set(float xx, float yy) {
+	x = xx; 
+	y = yy;
 }
 
 inline float Vec2::length() {
@@ -96,65 +98,76 @@ inline float Vec2::lengthSquared() {
 }
 
 // -----------------------------------------------------------------------------
-inline bool Vec2::operator==(const Vec2& rOther) const {
-	return x == rOther.x && y == rOther.y;
+inline Vec2& Vec2::operator=(const Vec2& v) {
+	x = v.x;
+	y = v.y;
 }
 
-inline bool Vec2::operator!=(const Vec2& rOther) const {
-	return x != rOther.x || y != rOther.y;
-}
-
-inline Vec2 Vec2::operator-(const Vec2& rOther) const {
-	return Vec2(x-rOther.x, y-rOther.y);
-}
-
-inline Vec2 Vec2::operator+(const Vec2& rOther) const {
-	return Vec2(x+rOther.x, y+rOther.y);
-}
-
-inline Vec2& Vec2::operator-=(const Vec2& rOther) {
-	x -= rOther.x;
-	y -= rOther.y;
+inline Vec2& Vec2::operator-=(const Vec2& v) {
+	x -= v.x;
+	y -= v.y;
 	return *this;
 }
 
-inline Vec2& Vec2::operator+=(const Vec2& rOther) {
-	x += rOther.x;
-	y += rOther.y;
+inline Vec2& Vec2::operator+=(const Vec2& v) {
+	x += v.x;
+	y += v.y;
 	return *this;
 }
 
-inline Vec2 Vec2::operator*(const float nScalar) const {
-	return Vec2(x*nScalar, y*nScalar);
-}
-
-inline Vec2& Vec2::operator*=(const float nScalar) {
-	x *= nScalar;
-	y *= nScalar;
+inline Vec2& Vec2::operator*=(const float s) {
+	x *= s;
+	y *= s;
 	return *this;
 }
 
-inline Vec2 Vec2::operator/(const float nScalar) const {
-	float inv = 1.0f/nScalar;
-	return Vec2(x*inv, y*inv);
-}
-
-inline Vec2& Vec2::operator/=(const float nScalar) {
-	float inv = 1.0f/nScalar;
+inline Vec2& Vec2::operator/=(const float s) {
+	float inv = 1.0f/s;
 	x *= inv;
 	y *= inv;
 	return *this;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const Vec2& rVec) {
-	os << rVec.x << ", " << rVec.y;
+inline bool Vec2::operator==(const Vec2& v) const {
+	return x == v.x && y == v.y;
+}
+
+inline bool Vec2::operator!=(const Vec2& v) const {
+	return x != v.x || y != v.y;
+}
+
+// -----------------------------------------------------------------------------
+inline Vec2 Vec2::operator-() {
+	return Vec2(-x, -y);
+}
+
+inline Vec2 Vec2::operator-(const Vec2& v) const {
+	return Vec2(x - v.x, y - v.y);
+}
+
+inline Vec2 Vec2::operator+(const Vec2& v) const {
+	return Vec2(x+v.x, y+v.y);
+}
+
+inline Vec2 Vec2::operator*(const float s) const {
+	return Vec2(x*s, y*s);
+}
+
+
+inline Vec2 Vec2::operator/(const float s) const {
+	float inv = 1.0f/s;
+	return Vec2(x*inv, y*inv);
+}
+
+inline std::ostream& operator<<(std::ostream& os, const Vec2& v) {
+	os << v.x << ", " << v.y;
 	return os;
 }
 
-inline std::istream& operator>>(std::istream& is, Vec2& rVec) {
-	is >> rVec.x;
+inline std::istream& operator>>(std::istream& is, Vec2& v) {
+	is >> v.x;
 	is.ignore(2);
-	is >> rVec.y;
+	is >> v.y;
 	return is;
 }
 

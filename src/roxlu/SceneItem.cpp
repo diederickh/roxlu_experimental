@@ -25,6 +25,9 @@ SceneItem::SceneItem(string name)
 {
 	vao = new VAO();
 	vbo = new VBO();	
+	
+	//test
+	test_rot_set = false;
 }
 
 //SceneItem::SceneItem(const SceneItem& other) {
@@ -134,6 +137,50 @@ void SceneItem::draw(Mat4& viewMatrix, Mat4& projectionMatrix) {
 		material->unbind();
 	}
 
+}
+
+Mat3 SceneItem::getLookAtMatrix(const Vec3& pos, const Vec3& upVec) {
+//	Mat3 m;
+//	return m.getLookAtMatrix(position, pos, upVec);
+}
+
+void SceneItem::lookAt(const SceneItem* si) {
+	return;
+}
+
+void SceneItem::lookAt(const Vec3& pos) {
+	bool debug = false;
+//	debug = !debug;
+	Mat3 m = Mat3::getLookAtMatrix(position, pos);
+	if(debug) {
+		printf("SceneItem lookat:\n");
+		m.print();
+		printf("------------\n");
+	}
+	
+	orientation.fromMat3(m);
+	
+	if(debug) {
+		printf("Quaterion from mat3:\n");
+		orientation.print();
+		printf("--\n");
+	}
+	
+	Mat4 quat_converted = orientation.getMat4() ;
+	
+	if(debug) {	
+		printf("Quaternion converted to mat4:\n");
+		quat_converted.print();
+	}
+	
+	test_rot_matrix = m;
+	test_rot_set = true;
+	updateModelMatrix();
+	
+	if(debug) {
+		printf("++++++++++++\n\n");
+	}
+	return;
 }
 
 } // roxlu

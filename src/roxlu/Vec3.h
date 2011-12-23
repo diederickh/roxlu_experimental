@@ -53,8 +53,10 @@
 
 namespace roxlu {
 
-class Vec4;
+class Vec2;
 class Vec3;
+class Vec4;
+
 class Mat3;
 
 Vec3 cross(const Vec3& a, const Vec3& b);
@@ -64,72 +66,64 @@ float dot(const Vec3& a, const Vec3& b);
 // -----------------------------------------------------------------------------
 struct Vec3 {
 	friend class Mat3;
-	Vec3(float nX = 0.0f, float nY = 0.0f, float nZ = 0.0f)
-		:x(nX)
-		,y(nY)
-		,z(nZ)
-	{
-	}
-	
-	Vec3(const Vec3& other) 
-		:x(other.x)
-		,y(other.y)
-		,z(other.z)
-	{
-	}
-	
-	Vec3(const Vec4& v4);
+	Vec3(const float xx = 0.0f, const float yy = 0.0f, const float zz = 0.0f);
+	Vec3(const Vec2& v);
+	Vec3(const Vec3& v);
+	Vec3(const Vec4& v);
+	Vec3(const float s);
 
-	
+	// Assignment operators
+	Vec3& operator=(const Vec4& v4);
+	Vec3& operator-=(const Vec3& other);
+	Vec3& operator+=(const Vec3& other);
+	Vec3& operator*=(const float scalar);
+	Vec3& operator/=(const float scalar);
+
 	// Basic methods.	
-	inline Vec3&	rotate(float angle, float x, float y, float z);
-	inline Vec3& 	rotate(float angle, Vec3 axis);
-	inline Vec3& 	rotate(float angle, Vec3 axis, Vec3 pivot);
-	inline void 	set(float n);
-	inline void 	set(float nX, float nY, float nZ);
-	inline float 	length();
-	inline float 	lengthSquared();
-	inline float 	lengthSquared(const Vec3& other);
-	inline Vec3 	getScaled(float length);
-	inline Vec3&	scale(float length);
-	inline Vec3&	normalize();
-	inline Vec3 	getNormalized();
-	inline float 	dot(const Vec3& vec);
-	inline Vec3& 	cross(const Vec3& vec);
-	inline Vec3 	getCrossed(const Vec3& vec);
-	inline float* 	getPtr() { return &x; };
-	inline void		print();
-	inline Vec3&	limit(float size);
+	Vec3& rotate(float angle, float x, float y, float z);
+	Vec3& rotate(float angle, Vec3 axis);
+	Vec3& rotate(float angle, Vec3 axis, Vec3 pivot);
+	Vec3& limit(float size);
+	Vec3& scale(float length);
+	Vec3& normalize();
+	Vec3& cross(const Vec3& vec);
+	Vec3 getScaled(float length);
+	Vec3 getNormalized() const;
+	Vec3 getCrossed(const Vec3& vec);
+
+	void set(float n);
+	void set(float xx, float yy, float zz);
+	float length() const;
+	float lengthSquared();
+	float lengthSquared(const Vec3& other);
+	float dot(const Vec3& vec);
+	float* getPtr() { return &x; };
+	void print() const;
 
 	// Accessors
-	float& operator[](unsigned int nIndex) {
-		return (&x)[nIndex];
+	float& operator[](unsigned int index) {
+		return (&x)[index];
 	}
 	
-	float operator[](unsigned int nIndex) const {
-		return (&x)[nIndex];
+	float operator[](unsigned int index) const {
+		return (&x)[index];
 	}
-	
 
 	// Comparison
-	bool operator==(const Vec3& rOther) const;
-	bool operator!=(const Vec3& rOther) const;
+	bool operator==(const Vec3& other) const;
+	bool operator!=(const Vec3& other) const;
 	
 	// Operators
-	Vec3& operator=(const Vec4& v4);
-	inline Vec3		operator-() const;
-	inline Vec3 	operator-(const Vec3& rOther) const;
-	inline Vec3 	operator+(const Vec3& rOther) const;
-	inline Vec3& 	operator-=(const Vec3& rOther);
-	inline Vec3& 	operator+=(const Vec3& rOther);
-	inline Vec3 	operator*(const float nScalar) const;
-	inline Vec3& 	operator*=(const float nScalar);
-	inline Vec3 	operator/(const float nScalar) const;
-	inline Vec3&	operator/=(const float nScalar);
+	Vec3 operator-() const; // -v
+	Vec3 operator-(const Vec3& other) const; // v1 - v2
+	Vec3 operator+(const Vec3& other) const; // v1 + v2
+	Vec3 operator*(const float scalar) const; // v1 *= 1.5;
+	Vec3 operator/(const float scalar) const; // v1 /= 3.0;
+	Vec3 operator^(const Vec3 v) const; // cross
 			
 	// Streams
-	friend std::ostream& operator<<(std::ostream& os, const Vec3& rVec);		
-	friend std::istream& operator>>(std::istream& is, Vec3& rVec);		
+	friend std::ostream& operator<<(std::ostream& os, const Vec3& vec);		
+	friend std::istream& operator>>(std::istream& is, Vec3& vec);		
 			
 	float x;
 	float y;
@@ -150,34 +144,19 @@ inline void Vec3::set(float n) {
 	z = n;
 }
 
-inline float Vec3::length() {
+inline float Vec3::length() const {
 	return sqrt(x*x + y*y + z*z);
 }
 
 inline Vec3& Vec3::normalize() {
 	float l = length();
-	x/= l;
-	y/= l;
+	x/=l;
+	y/=l;
 	z/=l;
 	return *this;
-	/*
-	float il = 0;
-	if(l > 0) {
-		il = 1/l;
-	}
-	
-	x *= il;
-	y *= il;
-	z *= il;
-	
-//	x /= il;
-//	y /= il;
-//	z /= il;
-	return *this;
-	*/
 }
 
-inline Vec3 Vec3::getNormalized() {
+inline Vec3 Vec3::getNormalized() const {
 	float l = length();
 	float il = 0;
 	if(l > 0) {
@@ -251,27 +230,11 @@ inline Vec3& Vec3::rotate(float a, Vec3 axis, Vec3 pivot) {
 	return *this;
 }
 
-// 0-1, 0.5 is center
 inline Vec3 Vec3::getScaled(float scale) {
 	return Vec3(x*scale, y*scale, z*scale);
-	/*
-	float l = (float)sqrt(x*x+y*y+z*z);
-	if(l > 0) {
-		float il = 1/l;
-		return Vec3(x *il*length, y*il*length, z*il*length);
-	}
-	else {
-		return Vec3();
-	}
-	*/
 }
-// 0-1, 0.5 is center
+
 inline Vec3& Vec3::scale(float scale) {
-	//float l = (float)sqrt(x*x+y*y+z*z);
-	//if(l > 0) {
-	//	float il = 1/l;
-		
-	//}
 	x *= scale;
 	y *= scale;
 	z *= scale;
@@ -306,10 +269,9 @@ inline Vec3& Vec3::limit(float s) {
 		*this *= s;
 	}
 	return *this;
-	
 }
 
-inline void Vec3::print() {
+inline void Vec3::print() const {
 	printf("%f, %f, %f\n", x, y, z);
 }
 
@@ -336,7 +298,6 @@ inline Vec3& Vec3::operator-=(const Vec3& rOther) {
 	z -= rOther.z;
 	return *this;
 }
-
 
 inline Vec3& Vec3::operator+=(const Vec3& rOther) {
 	x += rOther.x;
@@ -375,6 +336,16 @@ inline Vec3 Vec3::operator-() const{
 	v.y = -y;
 	v.z = -z;
 	return v;
+}
+
+// cross (check http://tutorial.math.lamar.edu/Classes/CalcII/CrossProduct.aspx) 
+// read up on the Sarrus rule, or Method of Cofactors, determinant
+inline Vec3 Vec3::operator^(const Vec3 v) const {
+	return Vec3(
+		 y * v.z - z * v.y
+		,z * v.x - x * v.z
+		,x * v.y - y * v.x
+	);
 }
 
 inline std::ostream& operator<<(std::ostream& os, const Vec3& rVec) {

@@ -36,8 +36,12 @@ public:
 	void place();
 	void translate(float nX, float nY, float nZ);
 	void rotate(float nDegrees, float nX, float nY, float nZ);
+	void setRotation(const Quat& rot);
 	void clearRotation();
 	void setPosition(float nX, float nY, float nZ);
+	Vec3& getPositionRef();
+	Vec3 getPosition();
+	Vec3 getWorldPosition();
 
 	Vec3 screenToWorld(float nX, float nY, float nZ);
 	void setUpVector(float nX, float nY, float nZ);
@@ -101,6 +105,26 @@ inline Mat4& Camera::pm() {
 inline Mat3 Camera::nm() {
 	return rotation.getMat3();
 }
+
+inline Vec3& Camera::getPositionRef() {
+	return position;
+}
+
+inline Vec3 Camera::getPosition() {
+	return position;
+}
+
+inline Vec3 Camera::getWorldPosition() {
+	Vec3 p = rotation.rotate(position * -1);	
+	return p;
+}
+
+inline void Camera::setRotation(const Quat& rot) {
+	rotation = rot;
+	updateViewMatrix();
+}
+
+
 
 } // roxlu
 #endif

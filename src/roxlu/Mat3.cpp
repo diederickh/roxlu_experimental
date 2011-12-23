@@ -5,7 +5,6 @@ namespace roxlu {
 
 // copy constructor.
 Mat3::Mat3(const Mat3& o)
-	:flag(o.flag)
 {
 	m[0] = o.m[0];
 	m[1] = o.m[1];
@@ -19,7 +18,6 @@ Mat3::Mat3(const Mat3& o)
 }
 
 Mat3::Mat3(const Mat4& o) 
-	:flag(MIX) // not sure what to use here
 {
 	m[0] = o.m[0];
 	m[1] = o.m[1];
@@ -34,9 +32,6 @@ Mat3::Mat3(const Mat4& o)
 	m[8] = o.m[10];
 }
 
-bool Mat3::isIdentity() const {
-	return flag == IDENTITY;
-}
 
 bool Mat3::isZero() const {
 	for(int i = 0; i < 9; ++i) {
@@ -167,7 +162,8 @@ Mat3& Mat3::inverse() {
 
 
 // Set Euler rotation
-Mat3& Mat3::rotation(float rotX, float rotY, float rotZ) {
+Mat3 Mat3::rotation(float rotX, float rotY, float rotZ) {
+	Mat3 mat;
 	rotX = rotX * DEG_TO_RAD;
 	rotY = rotY * DEG_TO_RAD;
 	rotZ = rotZ * DEG_TO_RAD;
@@ -179,22 +175,23 @@ Mat3& Mat3::rotation(float rotX, float rotY, float rotZ) {
 	float cz = cosf(rotZ);
 	float sz = sinf(rotZ);
 	
-	m[0] = (cy * cz);
-	m[3] = -(cy * sz);
-	m[6] = sy;
+	mat.m[0] = (cy * cz);
+	mat.m[3] = -(cy * sz);
+	mat.m[6] = sy;
 	
-	m[1] = (sx * sy * cz) + (cx * sz);
-	m[4] = -(sx * sy * sz) + (cx * cz);
-	m[7] = -(sx * cy);
+	mat.m[1] = (sx * sy * cz) + (cx * sz);
+	mat.m[4] = -(sx * sy * sz) + (cx * cz);
+	mat.m[7] = -(sx * cy);
 	
-	m[2] = -(cx * sy * cz) + (sx * sz);
-	m[5] = (cx * sy * sz) + (sx * cz);
-	m[8] = (cx * cy);
-	return *this;
+	mat.m[2] = -(cx * sy * cz) + (sx * sz);
+	mat.m[5] = (cx * sy * sz) + (sx * cz);
+	mat.m[8] = (cx * cy);
+	return mat;
 }
 
 // rotate around given axis
-Mat3& Mat3::rotation(float a, float x, float y, float z) {
+Mat3 Mat3::rotation(float a, float x, float y, float z) {
+	Mat3 mat;
 	a = a * DEG_TO_RAD;
 	float c = cosf(a);
 	float s = sinf(a);
@@ -215,75 +212,130 @@ Mat3& Mat3::rotation(float a, float x, float y, float z) {
 	float tyz = tx * ax.z; // @todo is this correct?
 	float txz = tx * ax.z;
 	
-	m[0] = tx * ax.x + c;
-	m[3] = txy - sz;
-	m[6] = txz + sy;
+	mat.m[0] = tx * ax.x + c;
+	mat.m[3] = txy - sz;
+	mat.m[6] = txz + sy;
 	
-	m[1] = txy + sz;
-	m[4] = ty * ax.y + c;
-	m[7] = tyz - sx;
+	mat.m[1] = txy + sz;
+	mat.m[4] = ty * ax.y + c;
+	mat.m[7] = tyz - sx;
 	
-	m[2] = txz - sy;
-	m[5] = tyz + sx;
-	m[8] = tz * ax.z +c;
-	return *this;
+	mat.m[2] = txz - sy;
+	mat.m[5] = tyz + sx;
+	mat.m[8] = tz * ax.z +c;
+	return mat;
 }
 
-Mat3& Mat3::rotationX(float a) {
+Mat3 Mat3::rotationX(float a) {
+	Mat3 mat;
 	a = a * DEG_TO_RAD;
 	float s = sinf(a);
 	float c = cosf(a);
-	m[0] = 1.0f;
-	m[1] = 0.0f;
-	m[2] = 0.0f;
+	mat.m[0] = 1.0f;
+	mat.m[1] = 0.0f;
+	mat.m[2] = 0.0f;
 	
-	m[3] = 0.0f;
-	m[4] = c;
-	m[5] = s;
+	mat.m[3] = 0.0f;
+	mat.m[4] = c;
+	mat.m[5] = s;
 	
-	m[6] = 0.0f;
-	m[7] = -s;
-	m[8] = c;
+	mat.m[6] = 0.0f;
+	mat.m[7] = -s;
+	mat.m[8] = c;
 	
-	return *this;
+	return mat;
 }
 
-Mat3& Mat3::rotationY(float a) {
+Mat3 Mat3::rotationY(float a) {
+	Mat3 mat;
 	a = a * DEG_TO_RAD;
 	float s = sinf(a);
 	float c = cosf(a);
-	m[0] = c;
-	m[1] = 0.0f;
-	m[2] = -s;
+	mat.m[0] = c;
+	mat.m[1] = 0.0f;
+	mat.m[2] = -s;
 	
-	m[3] = 0.0f;
-	m[4] = 1.0f;
-	m[5] = 0.0f;
+	mat.m[3] = 0.0f;
+	mat.m[4] = 1.0f;
+	mat.m[5] = 0.0f;
 	
-	m[6] = s;
-	m[7] = 0.0f;
-	m[8] = c;
+	mat.m[6] = s;
+	mat.m[7] = 0.0f;
+	mat.m[8] = c;
 	
-	return *this;
+	return mat;
 }
 
-Mat3& Mat3::rotationZ(float a) {
+Mat3 Mat3::rotationZ(float a) {
+	Mat3 mat;
 	a = a * DEG_TO_RAD;
 	float s = sinf(a);
 	float c = cosf(a);
-	m[0] = c;
-	m[1] = s;
-	m[2] = 0.0f;
+	mat.m[0] = c;
+	mat.m[1] = s;
+	mat.m[2] = 0.0f;
 	
-	m[3] = -s;
-	m[4] = c;
-	m[5] = 0.0f;
+	mat.m[3] = -s;
+	mat.m[4] = c;
+	mat.m[5] = 0.0f;
 
-	m[6] = 0.0f;
-	m[7] = 0.0f;
-	m[8] = 1.0f;
+	mat.m[6] = 0.0f;
+	mat.m[7] = 0.0f;
+	mat.m[8] = 1.0f;
 	
-	return *this;
+	return mat;
+}
+
+Mat3 Mat3::getLookAtMatrix(const Vec3& eye, const Vec3& center, const Vec3& up) {
+	Vec3 f = (center - eye).getNormalized();
+	Vec3 u = up.getNormalized();
+	Vec3 s = cross(f, u).getNormalized();
+	u = cross(s,f);
+//	printf("f.x = %f, f.y = %f, f.z = %f\n", f.x, f.y, f.z);  
+	/*
+	Mat3 m(
+		s.x
+		,s.y
+		,s.z
+		,u.x
+		,u.y
+		,u.z
+		,-f.x
+		,-f.y
+		,-f.z
+	);
+	*/
+	Mat3 m(
+		s.x
+		,u.x
+		,-f.x
+		
+		,s.y
+		,u.y
+		,-f.y
+	
+		,s.z
+		,u.z
+		,-f.z
+	);
+
+//	Vec3 d =  center - eye;
+//	d.normalize();
+//	d *= -1;
+//	
+//	Vec3 right = cross(d,up);
+//	right.normalize();
+//	right *= -1;
+//			
+//	Vec3 up = cross(d,right);
+//	up.normalize();
+//	
+//	Mat3 m(	
+//		right.x, up.x, d.x
+//		,right.y, up.y, d.y
+//		,right.z, up.z, d.z
+//	);
+	return m;
 }
 
 // Operators.

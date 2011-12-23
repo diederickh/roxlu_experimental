@@ -86,13 +86,17 @@ void ArcBall::onMouseDrag(float nX, float nY) {
 
 	Vec3 axis = mouse_start.getCrossed(mouse_curr);
 	axis.y *= -1;
+	
 	Quat q;
 	q.w = dot(mouse_start,mouse_curr);
-	q.v = axis;
+	q.x = axis.x;
+	q.y = axis.y;
+	q.z = axis.z;
+	q.inverse();
 	
 	rotation = initial_quat * q;
 	rotation.normalize();
-	camera->rotation = rotation;
+	camera->setRotation(rotation);
 }
 
 Vec3 ArcBall::getSphereIntersection(Vec3 oPos) {

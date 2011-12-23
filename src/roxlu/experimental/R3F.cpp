@@ -275,9 +275,9 @@ void R3F::storeSceneItem(IOBuffer& buffer, SceneItem& si) {
 	
 	// store orientation
 	Quat q = si.getOrientation();
-	buffer.storeFloatLE(q.v.x);
-	buffer.storeFloatLE(q.v.y);
-	buffer.storeFloatLE(q.v.z);
+	buffer.storeFloatLE(q.x);
+	buffer.storeFloatLE(q.y);
+	buffer.storeFloatLE(q.z);
 	buffer.storeFloatLE(q.w);
 
 	// store material flag

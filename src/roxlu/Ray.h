@@ -6,10 +6,7 @@
 namespace roxlu {
 
 struct Ray {
-	Ray() 
-		:origin(0)
-		,direction(0)
-	{
+	Ray() {
 	};
 	
 	Ray(Vec3 rayOrigin, Vec3 rayDir) 	

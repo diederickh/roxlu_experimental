@@ -71,34 +71,30 @@ void Camera::orthoTopLeft(float nWidth, float nHeight, float nNear, float nFar) 
 // Moving around.
 // -----------------------------------------------------------------------------
 void Camera::place() {
-//	printf("TRANSLATING AND THE Z IS NOW: %f\n", position.z);
-//	printf("----------------^^-----------------------\n");
-//	view_matrix.print();
-//	printf("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
 	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixf(projection_matrix.getPtr());
 
 	glMatrixMode(GL_MODELVIEW);
-	updateViewMatrix();
 	glLoadMatrixf(view_matrix.getPtr());
-	//view_matrix.print();
 }
 
 void Camera::translate(float nX, float nY, float nZ) {
 	position.x += nX;
 	position.y += nY;
 	position.z += nZ;
-
+	updateViewMatrix();
 }
 
 void Camera::setPosition(float nX, float nY, float nZ) {
 	position.x = nX;
 	position.y = nY;
 	position.z = nZ;
+	updateViewMatrix();
 }
 
 void Camera::rotate(float nDegrees, float nX, float nY, float nZ) {
 	rotation.rotate(nDegrees, nX, nY, nZ);
+	updateViewMatrix();
 }
 
 void Camera::clearRotation() {
@@ -109,9 +105,10 @@ void Camera::clearRotation() {
 // Updating the matrices.
 // -----------------------------------------------------------------------------
 void Camera::updateViewMatrix() {
-	view_matrix.identity();
-	view_matrix.translation(position);
-	view_matrix *= rotation.getMat4();
+	Mat4 rot_mat = rotation.getMat4();
+	Mat4 trans_mat = Mat4::translation(position);
+	view_matrix = rot_mat * trans_mat;
+	view_matrix.inverse(); // view matrix is the inverse of the camera matrix! http://robertokoci.com/world-view-projection-matrix-unveiled/
 }
 
 // TODO: check this great tutorial: http://www.vb6.us/tutorials/using-mouse-click-3d-space-directx-8
@@ -248,13 +245,10 @@ float* Camera::getInverseViewMatrixPtr() {
 }
 
 Mat4 Camera::getInverseViewMatrix() {
-	updateViewMatrix();
 	return affine_inverse(view_matrix);
 }
 
 Mat4 Camera::getInverseViewProjectionMatrix() {
-	updateViewMatrix();
-	updateProjectionMatrix();
 	Mat4 mvp = projection_matrix * view_matrix;
 	return affine_inverse(mvp);
 }

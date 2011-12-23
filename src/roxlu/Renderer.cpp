@@ -33,7 +33,7 @@ Renderer::Renderer(float screenWidth, float screenHeight)
 	// create camera
 	cam = new EasyCam();
 	cam->setup(screen_width, screen_height);
-	cam->translate(0,0,-10);
+	cam->translate(0,0,10);
 	
 	// create a scene instance (which is just a container for all created scene  items.
 	scene = new Scene();
@@ -87,7 +87,18 @@ void Renderer::debugDraw() {
 		if(si.isVisible()) {
 			glPushMatrix();
 				glMatrixMode(GL_MODELVIEW);
-				glMultMatrixf(si.mm().getPtr());
+//				if(si.test_rot_set) {
+//					
+//					Mat4 mm = si.test_rot_matrix;
+//					//mm.print();
+//					mm.translate(si.getPosition());
+//					
+//					glMultMatrixf(mm.getPtr());
+//				}
+//				else {
+					glMultMatrixf(si.mm().getPtr());
+//					glLoadMatrixf(si.mm().getPtr());
+//				}
 				vd.debugDraw(si.getDrawMode());
 			glPopMatrix();
 		}

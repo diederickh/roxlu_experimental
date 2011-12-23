@@ -44,7 +44,7 @@ public:
 	inline VertexData* getVertexData();
 	inline void setPosition(float x, float y, float z);
 	inline void setPosition(const Vec3& p);
-	inline Vec3 getPosition();
+	inline Vec3 getPosition() const;
 	inline void scale(float s);
 	inline Vec3& getScale();
 	inline void setScale(const Vec3& s);
@@ -61,6 +61,9 @@ public:
 	inline void setOrientation(const Quat& q);
 	inline void updateModelMatrix();
 	inline VBO* getVBOPtr();
+	void lookAt(const SceneItem* si);
+	void lookAt(const Vec3& pos); // pos is in world coordinates
+	Mat3 getLookAtMatrix(const Vec3& pos, const Vec3& upVec = Vec3(0,1,0));
 	
 	inline void setName(string itemName);
 	inline string getName() const;
@@ -113,6 +116,10 @@ public:
 	inline void hide();
 	inline void show();
 	inline bool isVisible();
+
+	Mat3 test_rot_matrix;
+	bool test_rot_set;
+
 	
 private:
 	bool is_visible;
@@ -125,9 +132,10 @@ private:
 	float specularity;
 	Color4 color;
 	Vec3 attenuation; // x = ambient, y = diffuse, z = specular
-	
 	void drawElements(); // indexed data
 	void drawArrays(); 
+	
+
 };
 
 // vector<SceneItem*>::iterator it = std::find_if(items.begin(), items.end(), CompareSceneItemByName(name));
@@ -186,7 +194,7 @@ inline void SceneItem::setPosition(const Vec3& p) {
 	updateModelMatrix();
 }
 
-inline Vec3 SceneItem::getPosition() {
+inline Vec3 SceneItem::getPosition() const {
 	return position;
 }
 
@@ -211,16 +219,48 @@ inline void SceneItem::setEffect(Effect* eff) {
 }
 
 inline void SceneItem::updateModelMatrix() {
+	Mat4 rotation_matrix; 
+	Mat4 translation_matrix;
+	
+	rotation_matrix = orientation.getMat4();
+	translation_matrix.translation(position);
+	
+	model_matrix = rotation_matrix * translation_matrix;
+
+	return;
+
 	Mat4 rotation = orientation.getMat4();
 	model_matrix = model_matrix.translation(position); 
 	model_matrix.scale(scaling.x, scaling.y, scaling.z);
+	bool debug = true;
+//	debug = !debug;
+	if(debug) {
+		printf("In SceneItem::updateModelMatrix:\n");
+		printf("Rotation matrix:\n");
+		rotation.print();
+		printf("\nTranslation matrix:\n");
+		model_matrix.print();
+	}
 //	printf("--\n");
 //	model_matrix.print();
 //	printf("==\n");
-	model_matrix *= rotation;
-//	model_matrix = model_matrix * rotation;
-//	model_matrix *= rotation;
+	//model_matrix = rotation * model_matrix;
+//	model_matrix *= model_matrix;
 //	model_matrix.print();
+//	model_matrix.translate(position);
+//	model_matrix = model_matrix * rotation;
+
+	model_matrix = rotation * model_matrix;
+//	model_matrix.m[12] *= -1;
+//	model_matrix.m[13] *= -1;
+//	model_matrix.m[14] *= -1;
+	if(debug) {
+		printf("\nFinal model matrix:\n");
+		model_matrix.print();	
+		printf("-------------\n\n\n");
+	}
+	
+//	
 //	printf("++\n");
 	//rotation.print();
 //	printf("--\n");
@@ -258,6 +298,7 @@ inline void SceneItem::rotateXYZ(float x, float y, float z) {
 }
 
 inline void SceneItem::setRotation(float angle, Vec3 axis) {
+	//printf("SET ROTATION: %f, %f, %f\n", axis.x, axis.y, axis.z);
 	orientation.setRotation(angle, axis);
 	updateModelMatrix();
 }
