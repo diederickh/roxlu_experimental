@@ -253,4 +253,12 @@ Mat4 Camera::getInverseViewProjectionMatrix() {
 	return affine_inverse(mvp);
 }
 
+void Camera::getBillboardVectors(Vec3& right, Vec3& up) const {
+	// transpose
+	right.set(view_matrix[0], view_matrix[4], view_matrix[8]);
+	up.set(view_matrix[1], view_matrix[5], view_matrix[9]);
+	//right.set(view_matrix[0], view_matrix[1], view_matrix[2]);
+	//up.set(view_matrix[4], view_matrix[5], view_matrix[6]);
+}
+
 } // roxlu

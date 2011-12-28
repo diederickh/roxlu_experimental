@@ -22,11 +22,11 @@
 							r = 1/r;
 #define copy3(a,b)			b.x = a.x; b.y = a.y; b.z = a.z;					
 #define set3(a,x,y,z)		a.x = x; a.y = y; a.z = z;
-#define normalize3(a,l,b)	l = 0.0; \
+#define normalize3(a,l,d)	l = 0.0; \
 							isqrt3(a,l); \
-							b.x = a.x * l; \
-							b.y = a.y * l; \
-							b.z = a.z * l; 
+							d.x = a.x * l; \
+							d.y = a.y * l; \
+							d.z = a.z * l; 
 							
 
 #define rotate3(a, angle, ax, result)	\
@@ -61,6 +61,7 @@ class Mat3;
 
 Vec3 cross(const Vec3& a, const Vec3& b);
 float dot(const Vec3& a, const Vec3& b);
+Vec3 rotate(const float angle, const Vec3& v, const Vec3& axis);
 
 // Vector 3 class.
 // -----------------------------------------------------------------------------
@@ -73,6 +74,7 @@ struct Vec3 {
 	Vec3(const float s);
 
 	// Assignment operators
+	Vec3& operator=(const float& scalar);
 	Vec3& operator=(const Vec4& v4);
 	Vec3& operator-=(const Vec3& other);
 	Vec3& operator+=(const Vec3& other);
@@ -90,6 +92,7 @@ struct Vec3 {
 	Vec3 getScaled(float length);
 	Vec3 getNormalized() const;
 	Vec3 getCrossed(const Vec3& vec);
+	Vec3 getRotated(const float a, const Vec3& ax) const;
 
 	void set(float n);
 	void set(float xx, float yy, float zz);
@@ -198,6 +201,12 @@ inline Vec3& Vec3::rotate(float a, Vec3 ax) {
 	y = v.y;
 	z = v.z;
 	return *this;
+}
+
+inline Vec3 Vec3::getRotated(const float a, const Vec3& ax) const {
+	Vec3 v = *this;
+	v.rotate(a,ax);
+	return v;
 }
 
 
@@ -391,6 +400,23 @@ inline float dot(const Vec3& a, const Vec3& b) {
 	float r = 0.0;
 	dot3(a,b,r);
 	return r;
+}
+
+inline Vec3 rotate(const float angle, const Vec3& v, const Vec3& axis) {
+	Vec3 result;
+	rotate3(v, angle, axis, result);
+	return result;
+/*
+rotate3(a, angle, ax, result)	\
+							{ \
+							float sina = sin(angle); \
+							float cosa = cos(angle); \
+							float cosb = 1.0f - cosa; \
+							result.x = a.x * (ax.x  * ax.x * cosb + cosa) + a.y * (ax.x * ax.y * cosb - ax.z * sina) + a.z * (ax.x * ax.z * cosb + ax.y * sina);   \
+							result.y = a.x * (ax.y  * ax.x * cosb + ax.z * sina) + a.y * (ax.y * ax.y * cosb + cosa) + a.z * (ax.y * ax.z * cosb - ax.x * sina);   \
+							result.z = a.x * (ax.z  * ax.x * cosb - ax.y * sina) + a.y * (ax.z * ax.y * cosb + ax.x * sina) + a.z * (ax.z * ax.z * cosb + cosa);   \
+							}
+*/
 }
 
 } // roxlu

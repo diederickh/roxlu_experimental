@@ -53,6 +53,9 @@
 #include "roxlu/experimental/R3F.h"
 #include "roxlu/experimental/Timer.h"
 #include "roxlu/experimental/Noise.h"
+#include "roxlu/experimental/physics/ParticleSystem.h"
+#include "roxlu/experimental/physics/Particle.h"
+#include "roxlu/experimental/physics/Spring.h"
 
 
 #include "external/jpeg/JPEGImage.h"

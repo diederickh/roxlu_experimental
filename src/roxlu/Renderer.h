@@ -42,6 +42,7 @@ public:
 	void 				drawSceneItem(string name);
 	void 				addSceneItem(string name, SceneItem* si);
 	void 				addSceneItem(SceneItem* si);
+	void				addSceneItem(SceneItem& si);
 	inline SceneItem* 	duplicateSceneItem(string oldName); // auto generate new name
 	inline SceneItem* 	duplicateSceneItem(string oldName, string newName);
 	inline SceneItem* 	getSceneItem(string name);

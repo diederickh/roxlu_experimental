@@ -629,6 +629,7 @@ void VertexData::debugDraw(int drawMode) {
 			glBegin(GL_LINES);
 			for(int i = 0; i < len; ++i) {
 				int dx = indices[i];
+				//printf("%d <--\n", dx);
 				Vec3 pos = vertices[dx];
 				Vec3 norm = normals[dx];
 				

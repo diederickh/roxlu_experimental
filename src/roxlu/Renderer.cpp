@@ -87,18 +87,7 @@ void Renderer::debugDraw() {
 		if(si.isVisible()) {
 			glPushMatrix();
 				glMatrixMode(GL_MODELVIEW);
-//				if(si.test_rot_set) {
-//					
-//					Mat4 mm = si.test_rot_matrix;
-//					//mm.print();
-//					mm.translate(si.getPosition());
-//					
-//					glMultMatrixf(mm.getPtr());
-//				}
-//				else {
-					glMultMatrixf(si.mm().getPtr());
-//					glLoadMatrixf(si.mm().getPtr());
-//				}
+				glMultMatrixf(si.mm().getPtr());
 				vd.debugDraw(si.getDrawMode());
 			glPopMatrix();
 		}
@@ -225,6 +214,9 @@ void Renderer::addSceneItem(SceneItem* si) {
 	scene->addVertexData(si->getVertexData()->getName(), si->getVertexData());
 }
 
+void Renderer::addSceneItem(SceneItem& si) {
+	addSceneItem(&si);
+}
 
 void Renderer::onMouseDown(float x, float y) {
 	cam->onMouseDown(x,y);

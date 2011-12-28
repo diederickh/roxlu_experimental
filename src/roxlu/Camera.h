@@ -45,6 +45,7 @@ public:
 
 	Vec3 screenToWorld(float nX, float nY, float nZ);
 	void setUpVector(float nX, float nY, float nZ);
+	void getBillboardVectors(Vec3& right, Vec3& up) const;
 
 	// matrices.	
 	float* getInverseViewMatrixPtr();
