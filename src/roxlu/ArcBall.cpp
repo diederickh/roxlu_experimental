@@ -78,6 +78,8 @@ void ArcBall::onMouseDown(float nX, float nY) {
 	initial_quat = rotation;
 }
 
+
+// @todo read up at  http://www.tecgraf.puc-rio.br/~mgattass/fcg/material/shoemake92.pdf ! <-- with example code
 // borrowed from libcinder
 void ArcBall::onMouseDrag(float nX, float nY) {
 	mouse_curr.set(nX, nY, 0); 

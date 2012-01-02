@@ -78,6 +78,7 @@ struct Vec3 {
 	Vec3& operator=(const Vec4& v4);
 	Vec3& operator-=(const Vec3& other);
 	Vec3& operator+=(const Vec3& other);
+	Vec3& operator+=(const float scalar);
 	Vec3& operator*=(const float scalar);
 	Vec3& operator/=(const float scalar);
 
@@ -285,54 +286,61 @@ inline void Vec3::print() const {
 }
 
 // -----------------------------------------------------------------------------
-inline bool Vec3::operator==(const Vec3& rOther) const {
-	return x == rOther.x && y == rOther.y && z == rOther.z;
+inline bool Vec3::operator==(const Vec3& v) const {
+	return x == v.x && y == v.y && z == v.z;
 }
 
-inline bool Vec3::operator!=(const Vec3& rOther) const {
-	return x != rOther.x || y != rOther.y || z != rOther.z;
+inline bool Vec3::operator!=(const Vec3& v) const {
+	return x != v.x || y != v.y || z != v.z;
 }
 
-inline Vec3 Vec3::operator-(const Vec3& rOther) const {
-	return Vec3(x-rOther.x, y-rOther.y, z-rOther.z);
+inline Vec3 Vec3::operator-(const Vec3& v) const {
+	return Vec3(x-v.x, y-v.y, z-v.z);
 }
 
-inline Vec3 Vec3::operator+(const Vec3& rOther) const {
-	return Vec3(x+rOther.x, y+rOther.y, z+rOther.z);
+inline Vec3 Vec3::operator+(const Vec3& v) const {
+	return Vec3(x+v.x, y+v.y, z+v.z);
 }
 
-inline Vec3& Vec3::operator-=(const Vec3& rOther) {
-	x -= rOther.x;
-	y -= rOther.y;
-	z -= rOther.z;
+inline Vec3& Vec3::operator-=(const Vec3& v) {
+	x -= v.x;
+	y -= v.y;
+	z -= v.z;
 	return *this;
 }
 
-inline Vec3& Vec3::operator+=(const Vec3& rOther) {
-	x += rOther.x;
-	y += rOther.y;
-	z += rOther.z;
+inline Vec3& Vec3::operator+=(const Vec3& v) {
+	x += v.x;
+	y += v.y;
+	z += v.z;
 	return *this;
 }
 
-inline Vec3 Vec3::operator*(const float nScalar) const {
-	return Vec3(x*nScalar, y*nScalar, z*nScalar);
+inline Vec3 Vec3::operator*(const float scalar) const {
+	return Vec3(x*scalar, y*scalar, z*scalar);
 }
 
-inline Vec3& Vec3::operator*=(const float nScalar) {
-	x *= nScalar;
-	y *= nScalar;
-	z *= nScalar;
+inline Vec3& Vec3::operator*=(const float scalar) {
+	x *= scalar;
+	y *= scalar;
+	z *= scalar;
 	return *this;
 }
 
-inline Vec3 Vec3::operator/(const float nScalar) const {
-	float inv = 1.0f/nScalar;
+inline Vec3& Vec3::operator+=(const float scalar) {
+	x += scalar;
+	y += scalar;
+	z += scalar;
+	return *this;
+}
+
+inline Vec3 Vec3::operator/(const float scalar) const {
+	float inv = 1.0f/scalar;
 	return Vec3(x*inv, y*inv, z*inv);
 }
 
-inline Vec3& Vec3::operator/=(const float nScalar) {
-	float inv = 1.0f/nScalar;
+inline Vec3& Vec3::operator/=(const float scalar) {
+	float inv = 1.0f/scalar;
 	x *= inv;
 	y *= inv;
 	z *= inv;
@@ -357,17 +365,17 @@ inline Vec3 Vec3::operator^(const Vec3 v) const {
 	);
 }
 
-inline std::ostream& operator<<(std::ostream& os, const Vec3& rVec) {
-	os << rVec.x << ", " << rVec.y << ", " << rVec.z;
+inline std::ostream& operator<<(std::ostream& os, const Vec3& v) {
+	os << v.x << ", " << v.y << ", " << v.z;
 	return os;
 }
 
-inline std::istream& operator>>(std::istream& is, Vec3& rVec) {
-	is >> rVec.x;
+inline std::istream& operator>>(std::istream& is, Vec3& v) {
+	is >> v.x;
 	is.ignore(2);
-	is >> rVec.y;
+	is >> v.y;
 	is.ignore(2);
-	is >> rVec.z;
+	is >> v.z;
 	return is;
 }
 
