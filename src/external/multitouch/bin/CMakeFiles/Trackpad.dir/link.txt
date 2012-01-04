@@ -1,0 +1,2 @@
+/usr/bin/ar cr Trackpad.a  CMakeFiles/Trackpad.dir/src/Trackpad.mm.o
+/usr/bin/ranlib Trackpad.a

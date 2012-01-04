@@ -76,6 +76,7 @@ void Camera::place() {
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(view_matrix.getPtr());
+	
 }
 
 void Camera::translate(float nX, float nY, float nZ) {

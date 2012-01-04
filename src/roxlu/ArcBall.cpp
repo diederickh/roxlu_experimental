@@ -3,73 +3,50 @@
 namespace roxlu {
 
 ArcBall::ArcBall()
-:center(0,0,0)
-,radius(1.0)
-,mouse_start(0,0,0)
+:mouse_start(0,0,0)
 ,mouse_curr(0,0,0)
+,sphere_vertices("arcball_sphere")
+,sphere_created(false)
 {
-	inv_radius = 1/radius;
 }
 
 // debug.
-void ArcBall::draw() {
-	/*
-	
-	// @todo: MAKE THIS NON-INTERMEDIATE
-	
-	glColor3f(1,1,0);
-	glBegin(GL_LINES);
-		glVertex3fv(&center.x);
-		glVertex3fv(&mouse_start.x);
-		glVertex3fv(&center.x);
-		glVertex3fv(&mouse_curr.x);
-	glEnd();
-	
-	// draw axis.
-	glColor3f(0,1,1);
-	glBegin(GL_LINES);
-		glVertex3fv(&center.x);
-		glVertex3fv(&axis.x);
+void ArcBall::debugDraw() {
+	if(!sphere_created) {
+		UVSphere tmp_sphere;
+		tmp_sphere.create(1.0f, 40,20, sphere_vertices);
+		sphere_created = true;
+	}
+	vector<Vec3>& verts = sphere_vertices.vertices;
+	vector<Quad>& quads = sphere_vertices.quads;
+	glColor3f(1,1,1);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glBegin(GL_QUADS);
+	for(int i = 0; i < quads.size(); ++i) {
+		glVertex3fv(verts[quads[i].a].getPtr());
+		glVertex3fv(verts[quads[i].b].getPtr());
+		glVertex3fv(verts[quads[i].c].getPtr());
+		glVertex3fv(verts[quads[i].d].getPtr());
+	}
 	glEnd();
 
-	glPointSize(10);
-
-	// start 
-	glColor3f(1,0,0);
-	glBegin(GL_POINTS);
+	glBegin(GL_LINES);
+		glColor3f(1,1,0);
+		glVertex3f(0,0,0);
 		glVertex3fv(&mouse_start.x);
-	glEnd();
-	
-	// current.
-	glColor3f(0,0,1);
-	glBegin(GL_POINTS);
+		glColor3f(0,1,1);
+		glVertex3f(0,0,0);
 		glVertex3fv(&mouse_curr.x);
 	glEnd();
-	glPointSize(1);
-	
-	glPointSize(15);
-	glColor3f(1,0,0.5);
-	glBegin(GL_POINTS);
-		glVertex3fv(&mc.x);
-	glEnd();
-	*/
+}
+
+void ArcBall::setScreenSize(float w, float h) {
+	screen_width = w;
+	screen_height = h;
 }
 
 void ArcBall::setCamera(Camera& rCam) {
 	camera = &rCam;
-}
-
-// good radius: std::min((float)ofGetWidth() * 0.5, (float) ofGetHeight() * 0.5);
-void ArcBall::setRadius(float nRadius) {
-	radius = nRadius;
-	inv_radius = 1/radius;
-}
-
-// setCenter(ofGetWidth()*0.5, ofGetHeight() * 0.5) for best results
-void ArcBall::setCenter(float nX, float nY) {
-	center.x = nX;
-	center.y = nY;
-	center.z = 0;
 }
 
 void ArcBall::onMouseDown(float nX, float nY) {
@@ -78,42 +55,41 @@ void ArcBall::onMouseDown(float nX, float nY) {
 	initial_quat = rotation;
 }
 
-
-// @todo read up at  http://www.tecgraf.puc-rio.br/~mgattass/fcg/material/shoemake92.pdf ! <-- with example code
-// borrowed from libcinder
 void ArcBall::onMouseDrag(float nX, float nY) {
 	mouse_curr.set(nX, nY, 0); 
-	mc = mouse_curr;
 	mouse_curr = getSphereIntersection(mouse_curr);
-
-	Vec3 axis = mouse_start.getCrossed(mouse_curr);
-	axis.y *= -1;
-	
+	axis = cross(mouse_start, mouse_curr);
+		
 	Quat q;
-	q.w = dot(mouse_start,mouse_curr);
+	q.w = dot(mouse_start,mouse_curr); // cos(a)
 	q.x = axis.x;
 	q.y = axis.y;
 	q.z = axis.z;
-	q.inverse();
-	
-	rotation = initial_quat * q;
-	rotation.normalize();
+
+	rotation = q * initial_quat;
 	camera->setRotation(rotation);
 }
 
 Vec3 ArcBall::getSphereIntersection(Vec3 oPos) {
-	Vec3 to_center;
-	to_center.x = (oPos.x - center.x) / (radius * 2);
-	to_center.y = (oPos.y - center.y) / (radius * 2);
-	to_center.z = 0.0f;
-	
-	float l = to_center.lengthSquared();
+	// We get the coordinate on the sphere (actually we only use one side of 
+	// the sphere which is in the possitive Z part of the scene. We map the 
+	// x and y screen coordinates onto a sphere at the center of the screen
+	// and with a radius of 1.
+	Vec3 to_center(0,0,0);
+	to_center.x = -1.0 + ((oPos.x/screen_width)) * 2.0f;
+	to_center.y = -(-1.0 + (oPos.y/screen_height) * 2.0f);
+
+	// normalize 
+	float l = to_center.x * to_center.x + to_center.y * to_center.y;
 	if(l > 1.0f) {
-		to_center.normalize();
+		float s = 1.0f / to_center.length();
+		to_center.x *= s;
+		to_center.y *= s;
+		to_center.z = 0.0f;
 	}
 	else {
+		// when not on outer edge get z
 		to_center.z = sqrt(1.0f - l);
-		to_center.normalize();
 	}
 	return to_center;
 }

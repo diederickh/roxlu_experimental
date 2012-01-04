@@ -14,3 +14,6 @@
 #include "HalfEdge/HEM_Noise.h"
 #include "HalfEdge/HES_CatmullClark.h"
 #include "HalfEdge/HES_Subdividor.h"
+
+// @todo http://openmesh.org/Documentation/OpenMesh-2.0-Documentation/index.html
+// @todo Check: http://vefur.simula.no/ogl/ttl/halfedge_doc/html/hesimplest.html

@@ -9,7 +9,7 @@ namespace roxlu {
 class EasyCam : public Camera {
 public:
 	EasyCam();
-	inline void draw();
+	inline void debugDraw();
 	void setup(float screenWidth, float screenHeight);
 	void onMouseDown(float x, float y);
 	void onMouseDragged(float x, float y);
@@ -20,8 +20,8 @@ private:
 	
 };
 
-inline void EasyCam::draw() {
-	arcball.draw();
+inline void EasyCam::debugDraw() {
+	arcball.debugDraw();
 }
 
 } // roxlu

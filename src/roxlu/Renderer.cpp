@@ -76,6 +76,7 @@ void Renderer::draw() {
 void Renderer::debugDraw() {
 	effect->disable();
 	cam->place();
+//	cam->debugDraw();
 //	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 

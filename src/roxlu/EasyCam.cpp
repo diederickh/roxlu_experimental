@@ -10,11 +10,12 @@ void EasyCam::setup(float screenWidth, float screenHeight) {
 	setScreenWidth(screenWidth);
 	setScreenHeight(screenHeight);
 	arcball.setCamera(*this);
-	arcball.setRadius(std::min(
-		(float)screenWidth * 0.5
-		,(float)screenHeight * 0.5)
-	);
-	arcball.setCenter(screenWidth * 0.5,screenHeight * 0.5);
+	arcball.setScreenSize(screenWidth, screenHeight);
+//	arcball.setRadius(std::min(
+//		(float)screenWidth * 0.2
+//		,(float)screenHeight * 0.2)
+//	);
+//	arcball.setCenter(screenWidth * 0.5,screenHeight * 0.5);
 	translate(0,0,-5);
 }
 
