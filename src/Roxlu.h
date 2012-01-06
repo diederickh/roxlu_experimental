@@ -40,7 +40,8 @@
 #include "roxlu/VertexData.h"
 #include "roxlu/VertexTypes.h"
 
-#include "roxlu/experimental/File.h"
+
+#include "roxlu/experimental/File.h" // @todo -> this only works in OF
 #include "roxlu/experimental/StringUtil.h"
 #include "roxlu/experimental/UVSphere.h"
 #include "roxlu/experimental/SimpleServer.h"
@@ -51,7 +52,7 @@
 #include "roxlu/experimental/Light.h"
 #include "roxlu/experimental/Effect.h"
 #include "roxlu/experimental/R3F.h"
-#include "roxlu/experimental/Timer.h"
+#include "roxlu/experimental/Timer.h" // @todo -> this only works in OF
 #include "roxlu/experimental/Noise.h"
 #include "roxlu/experimental/TrackpadCam.h"
 #include "roxlu/experimental/physics/ParticleSystem.h"
