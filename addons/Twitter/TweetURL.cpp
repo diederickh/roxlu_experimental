@@ -117,9 +117,9 @@ bool TweetURL::download(string fromURL, string name) {
 	return true;
 }
 
-void TweetURL::createFile() {
+bool TweetURL::createFile() {
 	if(fs != NULL) {
-		return;
+		return true;
 	}
 	
 	fs = new std::ofstream();
@@ -129,6 +129,7 @@ void TweetURL::createFile() {
 		printf("Error: cannot download file, because we cant create a file handle.\n");
 		return false;
 	}
+	return true;
 }
 
 size_t TweetURL::writeHeader( void *ptr, size_t size, size_t nmemb, void *userdata) {

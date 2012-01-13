@@ -18,7 +18,6 @@ namespace roxlu {
 typedef void (*image_downloaded_callback)(TweetURL*, void* userdata);
 typedef void (*tweet_callback)(Tweet*, void* userData);
 
-
 class TwitterStream {
 public:
 	TwitterStream();

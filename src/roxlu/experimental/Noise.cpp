@@ -350,6 +350,23 @@ float noise4(float x, float y, float z, float w) {
 
 
     return 27.0f * (n0 + n1 + n2 + n3 + n4); 
-  }
+}
+
+
+float fbm(const Vec2& v) {
+	float result = 0.0f;
+	float amp = 0.5f;
+	float x = v.x;
+	float y = v.y;
+	for(uint8_t i = 0; i < 4; ++i) {
+		result += noise2(x,y) * amp;
+		x *= 2.0f;
+		y *= 2.0f;
+		amp *= 0.5f;
+	}
+	return result;
+}
+
+
 
 }; // roxlu

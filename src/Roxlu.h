@@ -61,8 +61,8 @@
 
 
 
-#include "external/jpeg/JPEGImage.h"
-#include "external/webp/WebPImage.h"
+//#include "external/jpeg/JPEGImage.h"
+//#include "external/webp/WebPImage.h"
 
 using namespace roxlu;
 

@@ -36,7 +36,7 @@ struct TweetURL {
 	
 private:	
 	bool cleanup();
-	void createFile();
+	bool createFile();
 	string file_name;
 	string file_extension; // when downloading i.e. twitpic 	
 	bool is_downloaded;
