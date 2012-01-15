@@ -1,8 +1,7 @@
 #ifndef ROXLU_TWITTEROAUTHH
 #define ROXLU_TWITTEROAUTHH
 
-
-// Mostly based on twitcurl, which is awesome! 
+// Based on TwitCurl
 
 #include <string>
 #include <map>
@@ -38,14 +37,19 @@ namespace twitter {
     const string TOKEN_END_TAG_TWITTER_RESP				= "\" />";
     const string PIN_END_TAG_TWITTER_RESP				= "</code>";
     const string AUTHHEADER_STRING						= "Authorization: OAuth ";
+	
+    const string REQUEST_TOKEN_URL 	= "http://twitter.com/oauth/request_token";
+    const string AUTHORIZE_URL 		= "http://twitter.com/oauth/authorize?oauth_token=";
+    const string ACCESS_TOKEN_URL 	= "http://twitter.com/oauth/access_token";
 };
 
 
 class TwitteroAuth {
 public:
 	enum RequestType {
-		 GET
-		,POST
+		 TWITTER_OAUTH_GET
+		,TWITTER_OAUTH_POST
+		,TWITTER_OAUTH_DELETE
 	};
 	
 	string& getConsumerKey();
@@ -62,7 +66,7 @@ public:
 	void setScreenName(const string& name);
 	void setPin(const string& p);
 
-	bool fillHeader(
+	bool getHeader(
 				 const RequestType type
 				,const string url
 				,const string data
@@ -70,6 +74,7 @@ public:
 				,const bool includePin = false
 			);
 	
+	bool extractTokenKeyAndSecret(const string& buffer);
 	
 
 private:

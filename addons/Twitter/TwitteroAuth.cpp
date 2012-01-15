@@ -1,12 +1,15 @@
 #include "TwitteroAuth.h"
 #include <iostream>
 #include <map>
+#include "../../libs/crypto/urlencode.h"
+#include "../../libs/crypto/HMAC_SHA1.h"
+#include "../../libs/crypto/base64.h"
 
 using std::map;
 
 namespace roxlu {
 
-bool TwitteroAuth::fillHeader(
+bool TwitteroAuth::getHeader(
 				 const TwitteroAuth::RequestType type
 				,const string url
 				,const string data
@@ -39,7 +42,7 @@ bool TwitteroAuth::fillHeader(
 			if(npos != string::npos) {
 				data_key = data_keyval.substr(0,npos);
 				data_val = data_keyval.substr(npos + 1);
-				key_values[data_key] = data_val;
+				key_values[data_key] = urlencode(data_val);
 			}
 			data_part = data_part.substr(nsep + 1);
 		}
@@ -50,11 +53,20 @@ bool TwitteroAuth::fillHeader(
 		if(string::npos != npos) {
 			data_key = data_keyval.substr(0,npos);
 			data_val = data_keyval.substr(npos+1);
-			key_values[data_key] = data_val;
+			key_values[data_key] = urlencode(data_val);
 		}
 	}
-
-	return true;
+	
+	buildoAuthTokenKeyValuePairs(includePin, data, "", key_values, true);
+	getSignature(type, url, key_values, signature);			
+	buildoAuthTokenKeyValuePairs(includePin,"", signature, key_values, false); // with signature
+	
+	// get oauth header.
+	sep = ",";
+	getStringFromKeyValuePairs(key_values, params, sep);
+	header.assign(roxlu::twitter::AUTHHEADER_STRING);
+	header.append(params);
+	return (header.length()) ? true : false;
 }
 
 
@@ -115,7 +127,53 @@ bool TwitteroAuth::getSignature(
 	string sig_base;
 	string sep = "&";
 	signature = "";
-
+	getStringFromKeyValuePairs(keyValues, params, sep);
+	
+	switch(type) {
+		case TWITTER_OAUTH_GET: {
+			sig_base = "GET&";
+			break;
+		}
+		case TWITTER_OAUTH_POST: {
+			sig_base = "POST&";
+			break;
+		}
+		case TWITTER_OAUTH_DELETE: {
+			sig_base = "DELETE&";
+			break;
+		}
+		default: {
+			return false;
+			break;
+		}
+	};
+	sig_base.append(urlencode(url));
+	sig_base.append("&");
+	sig_base.append(urlencode(params));
+	
+	// create hash.
+	CHMAC_SHA1 mac;
+	string sign_key;
+	unsigned char digest[1024];
+	memset(digest, 0, 1024);
+	sign_key.assign(consumer_secret);
+	sign_key.append("&");
+	
+	if(token_secret.length()) {
+		sign_key.append(token_secret);	
+	}
+	
+	mac.HMAC_SHA1(
+				(unsigned char*)sig_base.c_str()
+				,sig_base.length()
+				,(unsigned char*)sign_key.c_str()
+				,sign_key.length()
+				,digest
+			);
+			
+	string base64_encoded = base64_encode(digest, 20);
+	signature = urlencode(base64_encoded);
+	return (signature.length()) ? true : false;
 }
 
 
@@ -181,6 +239,41 @@ void TwitteroAuth::updateNonce() {
 	timestamp.assign(buf_time);
 	
 	printf("Time: %s, nonce:%s\n", timestamp.c_str(), nonce.c_str()); 
+}
+
+
+bool TwitteroAuth::extractTokenKeyAndSecret(const string& buffer) {
+	// @todo implement
+	if(!buffer.length()) {
+		return false;
+	}
+	
+	// find oauth_token value
+	size_t npos = string::npos;
+	string dummy;
+	npos = buffer.find(roxlu::twitter::TOKEN_KEY);
+	if(npos != string::npos) {
+		npos = npos +roxlu::twitter::TOKEN_KEY.length()+1;
+		dummy = buffer.substr(npos);
+		npos = dummy.find("&");
+		if(npos != string::npos) {
+			token_key = dummy.substr(0,npos);
+		}
+	}
+	
+	// find oauth_token_secret
+	npos = buffer.find(roxlu::twitter::TOKENSECRET_KEY);
+	if(npos = string::npos) {
+		npos = npos +roxlu::twitter::TOKENSECRET_KEY.length() +1;
+		dummy = buffer.substr(npos);
+		npos = dummy.find("&");
+		if(npos != string::npos) {
+			token_secret = dummy.substr(0, npos);
+		}
+	}	
+	
+	printf("Token_Key: '%s', Token_Secret: '%s'\n", token_key.c_str(), token_secret.c_str()); 	
+	return true;
 }
 
 }; // roxlu
