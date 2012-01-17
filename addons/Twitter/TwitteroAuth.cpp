@@ -27,7 +27,11 @@ bool TwitteroAuth::getHeader(
 	
 	// extract key=value pairs.
 	size_t pos = url.find_first_of("?");
+	printf("URL: %s\n", url.c_str());
+	printf("Found: %lu -- %lu\n", pos, string::npos);
 	if(pos != string::npos) {
+		printf("getHeader - parsing url %lu\n", pos);
+		printf("url:%s\n", url.c_str());
 		base_url = url.substr(0, pos);
 		string data_part = url.substr(pos+1);
 		size_t nsep = string::npos;
@@ -63,12 +67,17 @@ bool TwitteroAuth::getHeader(
 	
 	// get oauth header.
 	sep = ",";
+	printf("\n\nHEADER:'%s'\n", header.c_str());
 	getStringFromKeyValuePairs(key_values, params, sep);
+	printf("\nPARAMS:\n'%s'\n\n", params.c_str());
 	header.assign(roxlu::twitter::AUTHHEADER_STRING);
 	header.append(params);
 	return (header.length()) ? true : false;
 }
-
+/*
+Authorization: OAuth oauth_consumer_key="kyw8bCAWKbkP6e1HMMdAvw",oauth_nonce="baea213007110aed26f20b79e9e0cfa1", oauth_signature="%2FGk4yKQf07U%2FBj8KXGdTdZffIkg%3D", oauth_signature_method="HMAC-SHA1", oauth_timestamp="1326839965", oauth_token="67066605-4xouV1ySq5yqiOUU6VOXcOE7SiB1CCoPcDh7Ptb59", oauth_version="1.0"
+Authorization: OAuth oauth_consumer_key="kyw8bCAWKbkP6e1HMMdAvw",oauth_nonce="13268411561bc",oauth_signature="kadcKvtj1hE1Qzq%2BYml9mMLTj0I%3D",oauth_signature_method="HMAC-SHA1",oauth_timestamp="1326841156",oauth_token="466622389-Osbd3Mm1SDVLOqugzCQ5y6MP1RkLMw81VIREB5NR",oauth_version="1.0"
+*/
 
 bool TwitteroAuth::buildoAuthTokenKeyValuePairs(
 				const bool includePin
@@ -119,10 +128,12 @@ bool TwitteroAuth::buildoAuthTokenKeyValuePairs(
 bool TwitteroAuth::getSignature(
 			 const RequestType type
 			,const string& url
-			,map<string, string>& keyValues
+			,const map<string, string>& keyValues
 			,string& signature /* out */
 )
 {
+	// @todo implement a smarter way of key-value parsing and encoding for the signature. 
+	// i.e. see: https://dev.twitter.com/apps/1527994/oauth?nid=46 for some examples
 	string params;
 	string sig_base;
 	string sep = "&";
@@ -160,7 +171,7 @@ bool TwitteroAuth::getSignature(
 	sign_key.append("&");
 	
 	if(token_secret.length()) {
-		sign_key.append(token_secret);	
+		sign_key.append(token_secret);
 	}
 	
 	mac.HMAC_SHA1(
@@ -173,8 +184,14 @@ bool TwitteroAuth::getSignature(
 			
 	string base64_encoded = base64_encode(digest, 20);
 	signature = urlencode(base64_encoded);
+	printf("Signature base string:'%s'\n", sig_base.c_str());
 	return (signature.length()) ? true : false;
 }
+/*
+GET&http%3A%2F%2Fapi.twitter.com%2F1%2Fstatuses%2Fhome_timeline.json%3Fcount%3D20&count%3D20%26oauth_consumer_key%3Dkyw8bCAWKbkP6e1HMMdAvw%26oauth_nonce%3D13268414151c9%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1326841415%26oauth_token%3D466622389-Osbd3Mm1SDVLOqugzCQ5y6MP1RkLMw81VIREB5NR%26oauth_version%3D1.0
+GET&http%3A%2F%2Fapi.twitter.com%2F1%2Fstatuses%2Fhome_timeline.json&count%3D2%26include_entities%3Dtrue%26oauth_consumer_key%3Dkyw8bCAWKbkP6e1HMMdAvw%26oauth_nonce%3Dbaea213007110aed26f20b79e9e0cfa1%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1326839965%26oauth_token%3D67066605-4xouV1ySq5yqiOUU6VOXcOE7SiB1CCoPcDh7Ptb59%26oauth_version%3D1.0
+
+*/
 
 
 bool TwitteroAuth::TwitteroAuth::getStringFromKeyValuePairs(
@@ -237,8 +254,6 @@ void TwitteroAuth::updateNonce() {
 	nonce.assign(buf_time);
 	nonce.append(buf_rand);
 	timestamp.assign(buf_time);
-	
-	printf("Time: %s, nonce:%s\n", timestamp.c_str(), nonce.c_str()); 
 }
 
 
@@ -263,7 +278,7 @@ bool TwitteroAuth::extractTokenKeyAndSecret(const string& buffer) {
 	
 	// find oauth_token_secret
 	npos = buffer.find(roxlu::twitter::TOKENSECRET_KEY);
-	if(npos = string::npos) {
+	if(npos != string::npos) {
 		npos = npos +roxlu::twitter::TOKENSECRET_KEY.length() +1;
 		dummy = buffer.substr(npos);
 		npos = dummy.find("&");
@@ -271,8 +286,7 @@ bool TwitteroAuth::extractTokenKeyAndSecret(const string& buffer) {
 			token_secret = dummy.substr(0, npos);
 		}
 	}	
-	
-	printf("Token_Key: '%s', Token_Secret: '%s'\n", token_key.c_str(), token_secret.c_str()); 	
+	//printf("Tokenkey: '%s', Token secret: '%s'\n", token_key.c_str(), token_secret.c_str()); 	
 	return true;
 }
 

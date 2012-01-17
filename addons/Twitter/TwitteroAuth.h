@@ -89,7 +89,7 @@ private:
 	bool getSignature(
 				 const RequestType type
 				,const string& url
-				,map<string, string>& keyValues
+				,const map<string, string>& keyValues
 				,string& signature /* out */
 			);
 			
