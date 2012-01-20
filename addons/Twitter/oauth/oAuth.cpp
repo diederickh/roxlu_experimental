@@ -55,13 +55,6 @@ rtc::Request oAuth::getRequestTokenRequest() {
 	return req;
 }
 
-//rtc::Request oAuth::getRequestWithTokenKey(const string& url) {
-//	rtp::Collection col;
-//	col["oauth_token"] = getTokenKey();
-//	
-//}
-
-
 
 rtc::Request oAuth::getAccessTokenRequest() {
 	string url = "https://api.twitter.com/oauth/access_token";
@@ -122,6 +115,7 @@ rtc::Request oAuth::getAuthorizedGet(const string& url, const rtp::Collection& p
 	rtc::Request req;
 	req.setURL(url);
 	req.setHeader(header);
+	req.addParams(params);
 	return req;
 
 }
@@ -135,18 +129,5 @@ rtp::Collection oAuth::getDefaultParameters() {
 	col["oauth_version"] = getVersion();
 	return col;
 }
-
-
-
-	
-	/*
-	printf("\n\n");
-	printf("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
-	printf("signature: %s\n", signature.c_str());
-	printf("header:%s\n", header.c_str());
-	printf("+++++++++++++++++++++++++++++++++++++++++++++++++\n");
-	printf("\n\n");
-	printf("\n\n");
-	*/
 
 }}} // roxlu::twitter::oauth

@@ -34,6 +34,7 @@ using std::vector;
 // All hard work goes to the author of TwitCurl!
 
 namespace roxlu {
+namespace twitter {
 
 class Twitter {
 public:

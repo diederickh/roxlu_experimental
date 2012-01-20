@@ -15,9 +15,8 @@ const string TOKEN_SECRET_KEY		= "oauth_token_secret";
 const string AUTHENTICITY_ATTRIBUTE	= "authenticity_token\" type=\"hidden\" value=\"";
 const string AUTHENTICITY_END_TAG	= "\" />";
 
-const string PIN_TAG					= "code-desc\"><code>";
-//const string TOKEN_END_TAG_TWITTER_RESP				= "\" />";
-const string PIN_END_TAG				= "</code>";
+const string PIN_TAG				= "code-desc\"><code>";
+const string PIN_END_TAG			= "</code>";
 
 
 class Utils {

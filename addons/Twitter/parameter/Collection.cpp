@@ -16,7 +16,6 @@ Collection::~Collection() {
 }
 
 void Collection::print() const {
-	printf("print\n");
 	list<Parameter*>::const_iterator it = params.begin();
 	while(it != params.end()) {
 		(*it)->print();

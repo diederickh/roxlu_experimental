@@ -3,6 +3,7 @@
 #include "TwitteroAuthHeader.h"
 
 namespace roxlu {
+namespace twitter {
 
 Twitter::Twitter() 
 	:curl_param_callback_set(false)
@@ -555,6 +556,7 @@ bool Twitter::statusUpdateWithMedia(const string& tweet, const string& imageFile
 	return false;
 }
 
+//http://api.twitter.com/1/statuses/home_timeline.format
 bool Twitter::getHomeTimeline(unsigned int count) {
 	// bound check.
 	if(count <= 0) {
@@ -563,23 +565,22 @@ bool Twitter::getHomeTimeline(unsigned int count) {
 	else if(count > 200) {
 		count = 200;
 	}
-	
-	
+		
 	// Create an authorized request object.
 	rtp::Collection col;
 	col["count"] = count;
 	string url = "http://api.twitter.com/1/statuses/home_timeline.json";
 	rtc::Request req = oauth.getAuthorizedGet(url, col);
-	//http://api.twitter.com/1/statuses/home_timeline.format
+	
 	// perform the post
 	string response;
-	if(!req.doGet(twitcurl, response, col)) {
+	if(!req.doGet(twitcurl, response)) {
 		printf("error: cannot do stauts update\n");
 		return false;
 	}
-	printf("-------------------\n");
-	printf("%s\n", response.c_str());
-	printf("-------------------\n");
+//	printf("-------------------\n");
+//	printf("%s\n", response.c_str());
+//	printf("-------------------\n");
 	return true;
 /*
 
@@ -616,4 +617,4 @@ Authorization: OAuth oauth_consumer_key="kyw8bCAWKbkP6e1HMMdAvw",oauth_nonce="13
 Authorization: OAuth count="20",oauth_consumer_key="kyw8bCAWKbkP6e1HMMdAvw",oauth_nonce="13268385811a3",oauth_signature="jHb0eLasJ506UaeeOE%2FLrGzK0tU%3D",oauth_signature_method="HMAC-SHA1",oauth_timestamp="1326838581",oauth_token="466622389-Osbd3Mm1SDVLOqugzCQ5y6MP1RkLMw81VIREB5NR",oauth_version="1.0"
 */
 
-} // roxlu
+}} // roxlu::twitter

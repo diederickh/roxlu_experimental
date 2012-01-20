@@ -29,6 +29,10 @@ bool Request::doGet(rtc::Curl& curl,  string& result, const rtp::Collection& ext
 	return doGet(curl, result);
 }
 
+void Request::addParams(const rtp::Collection& extraParams) {
+	params += extraParams;
+}
+
 bool Request::doGet(rtc::Curl& curl, string& result) {
 	// is the url set?
 	if(!url.length()) {

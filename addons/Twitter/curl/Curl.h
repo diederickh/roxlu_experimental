@@ -30,7 +30,6 @@ public:
 	string& getAuthUsername();
 	string& getAuthPassword();
 	void setHeader(const string& header);
-//	void clearHeader();
 	void setVerbose(bool verbose);
 	string& getBuffer();
 	string buffer;

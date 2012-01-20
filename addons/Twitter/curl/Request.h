@@ -26,6 +26,7 @@ public:
 	bool doGet(rtc::Curl& curl,  string& result, const rtp::Collection& extraParams);
 	bool doPost(rtc::Curl& curl,  string& result);
 	bool doPost(rtc::Curl& curl,  string& result, const rtp::Collection& extraParams);
+	void addParams(const rtp::Collection& extraParams);
 	rtp::Collection& getParams();
 	
 private:
