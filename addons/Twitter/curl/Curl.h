@@ -9,6 +9,7 @@
 #include "../../../libs/curl/curl.h"
 #include "../parameter/Collection.h"
 #include "../parameter/Parameter.h"
+#include "../../../libs/crypto/urlencode.h"
 
 using std::string;
 
@@ -31,6 +32,7 @@ public:
 	string& getAuthPassword();
 	void setHeader(const string& header);
 	void setVerbose(bool verbose);
+	string createQueryString(const list<rtp::Parameter*>& queryParams);
 	string& getBuffer();
 	string buffer;
 private:
@@ -38,6 +40,7 @@ private:
 	void setCallback();
 	void setUserPass();
 	static size_t callback(char* data, size_t size, size_t nmemb, Curl* twit);
+	
 
 	CURL* curl;
 	string header;	

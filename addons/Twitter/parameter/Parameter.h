@@ -31,6 +31,7 @@ public:
 	virtual void setName(const std::string& n);
 	virtual void setValue(const std::string& v);
 	virtual std::string getStringValue();
+	virtual bool mustUseInSignature();
 	
 	// pass in "any" value and convert it to string.
 	template<typename T>
@@ -49,6 +50,7 @@ public:
 	bool operator==(const Parameter& other) const;
 	void print();
 	int type;
+	
 protected:
 	std::string name;
 	std::string value;

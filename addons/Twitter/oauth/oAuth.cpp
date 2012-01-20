@@ -96,6 +96,32 @@ rtc::Request oAuth::getAuthorizedPost(const string& url, const rtp::Collection& 
 	return req;
 }
 
+void oAuth::authorize(rtc::Request& req) {
+	updateNonce();
+	
+	// create signature.
+	rtp::Collection signature_params = getDefaultParameters();
+	signature_params += req.getParams();
+	signature_params["oauth_token"] = getTokenKey();
+	string signature;
+	
+	if(req.isPost()) {
+		signature  = rto::Signature::getSignatureForPost(*this, req.getURL(), signature_params);
+	}
+	else if(req.isGet()) {
+		signature = rto::Signature::getSignatureForGet(*this, req.getURL(), signature_params);
+	}
+	
+	// create header.
+	rtp::Collection header_params = getDefaultParameters();
+	header_params["oauth_signature"] = signature;
+	header_params["oauth_token"] = getTokenKey();
+	string header = rto::Header::getHeader(header_params);
+	
+	req.setHeader(header);
+}
+//cout << twitter.getResponse() << endl;
+
 
 rtc::Request oAuth::getAuthorizedGet(const string& url, const rtp::Collection& params) {
 	updateNonce();

@@ -31,5 +31,10 @@ void Parameter::print() {
 	printf("%s = '%s'", getName().c_str(), getStringValue().c_str());
 }
 
+bool Parameter::mustUseInSignature() {
+	return true;
+}
+
+
 
 }}} // roxlu::twitter::parameter

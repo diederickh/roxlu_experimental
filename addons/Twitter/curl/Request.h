@@ -18,18 +18,34 @@ namespace rtc = roxlu::twitter::curl;
 class Request {
 public:
 	Request();
+	Request(const string& u);
 	~Request();
+	
+	enum {
+		 REQUEST_GET
+		,REQUEST_POST
+		,REQUEST_DELETE
+	};
 	
 	void setHeader(const string& header);
 	void setURL(const string& url);
+	string& getURL();
 	bool doGet(rtc::Curl& curl,  string& result);
 	bool doGet(rtc::Curl& curl,  string& result, const rtp::Collection& extraParams);
-	bool doPost(rtc::Curl& curl,  string& result);
+	bool doPost(rtc::Curl& curl,  string& result, bool multipart = false);
 	bool doPost(rtc::Curl& curl,  string& result, const rtp::Collection& extraParams);
 	void addParams(const rtp::Collection& extraParams);
 	rtp::Collection& getParams();
-	
+		
+	bool isPost();
+	void isPost(bool flag);
+	bool isGet();
+	void isGet(bool flag);
+	bool isDelete();
+	void isDelete(bool flag);
+
 private:
+	int method;
 	rtp::Collection params;
 	string header;
 	string url;
@@ -37,6 +53,10 @@ private:
 
 inline rtp::Collection& Request::getParams() {
 	return params;
+}
+
+inline string& Request::getURL() {
+	return url;
 }
 
 }}} // roxlu::twitter::Curl

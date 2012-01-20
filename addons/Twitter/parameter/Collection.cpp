@@ -4,6 +4,8 @@ namespace roxlu {
 namespace twitter {
 namespace parameter {
 
+namespace rtp = roxlu::twitter::parameter;
+
 Collection::Collection() {
 }
 
@@ -23,5 +25,33 @@ void Collection::print() const {
 		++it;
 	}	
 }
+
+File* Collection::addFile(const string& name, const string& file) {
+	rtp::File* f = new File(name, file);
+	params.push_back(f);
+	return f;
+}
+
+
+/** 
+ * Get only parameters that are either used or not-used to create the 
+ * signature for oauth. In short mult-part form data is not included
+ * in the signature base.  
+ *
+ * @param	bool			Pass true when you want only parameters 
+ *							that are used in the signature.
+ */
+list<rtp::Parameter*> Collection::getParameters(bool forSignature) const{
+	list<Parameter*> result;
+	list<Parameter*>::const_iterator it = params.begin();
+	while(it != params.end()) {
+		if((*it)->mustUseInSignature() == forSignature) {
+			result.push_back(*it);
+		}
+		++it;
+	}
+	return result;
+}
+
 
 }}} // roxlu::twitter::parameter

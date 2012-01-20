@@ -5,8 +5,10 @@
 #include <vector>
 #include <list>
 #include <map>
+
 #include "Parameter.h"
-#include "String.h"
+#include "File.h"
+//#include "String.h"
 
 using std::list;
 using std::vector;
@@ -16,6 +18,8 @@ using std::map;
 namespace roxlu {
 namespace twitter {
 namespace parameter {
+
+namespace rtp = roxlu::twitter::parameter;
 
 /**
  * A collection of Parameter* values. This can be used to i.e. create a 
@@ -38,12 +42,15 @@ public:
 		return v;
 	}
 	
+	File* addFile(const string& name, const string& file);
+	
 	Parameter* findByName(const string& name);
 	Parameter& operator[](const string& name);
 	Collection& operator+=(const Collection& other);
 	
 	void print() const;
 	const list<Parameter*>& getParameters() const;
+	list<rtp::Parameter*> getParameters(bool forSignature) const;
 	
 private:
 	list<Parameter*> params;
@@ -81,12 +88,17 @@ inline Collection& Collection::operator+=(const Collection& other) {
 	while(it != other.params.end()) {
 		switch((*it)->type) {
 			case Parameter::PARAM_STRING: {
-				Parameter* p = new Parameter((*it));
+				rtp::Parameter* p = new rtp::Parameter((*it));
 				params.push_back(p);
 				break;
 			};
+			case Parameter::PARAM_FILE: {
+				rtp::File* f = new rtp::File((rtp::File*)(*it));
+				params.push_back(f);
+				break;
+			}
 			default: {
-				printf("Unhandled type in Collection += operator! => %d\n", (*it)->type);
+				printf("!!! Unhandled type in Collection += operator! => %d\n !!!", (*it)->type);
 				break;
 			};
 		}

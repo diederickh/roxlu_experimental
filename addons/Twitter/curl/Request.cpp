@@ -8,8 +8,16 @@ namespace rtc = roxlu::twitter::curl;
 
 Request::Request() 
 	:header("")
+	,method(REQUEST_GET)
 {
 	
+}
+
+Request::Request(const string& u) 
+	:header("")
+	,method(REQUEST_GET)
+	,url(u)
+{
 }
 
 Request::~Request() {
@@ -44,8 +52,12 @@ bool Request::doGet(rtc::Curl& curl, string& result) {
 	}
 	
 	// add params to url  // @todo test
+	// @todo call curl.createQueryString!
 	// --------------------------------
-	curl.setVerbose(true);
+	//curl.setVerbose(true);
+	printf("------------> Request::doGet() -> use curl.getQueryString())\n");
+	printf("------------> Request::doGet() -> use curl.getQueryString())\n");
+	printf("------------> Request::doGet() -> use curl.getQueryString())\n");
 	string ps;
 	const list<rtp::Parameter*>& pars = params.getParameters();
 	list<rtp::Parameter*>::const_iterator it = pars.begin();
@@ -63,7 +75,6 @@ bool Request::doGet(rtc::Curl& curl, string& result) {
 	if(ps.length()) {
 		use_url.append("?");
 		use_url.append(ps);
-		printf("USE URL: %s\n", use_url.c_str());
 	}
 	// ------------------------
 	
@@ -72,34 +83,56 @@ bool Request::doGet(rtc::Curl& curl, string& result) {
 	}
 	
 	result = curl.getBuffer();
-	printf("------------------------------------------------------------\n");
 	return true;
 }
 
 bool Request::doPost(rtc::Curl& curl,  string& result, const rtp::Collection& extraParams) {
 	params += extraParams;
-	//params.print();
 	return doPost(curl, result);
 }
 
-
-
-bool Request::doPost(rtc::Curl& curl,  string& result) {
-	curl.setVerbose(true);
+bool Request::doPost(rtc::Curl& curl,  string& result, bool multipart) {
 	if(!url.length()) {
 		return false;
 	}
+	
 	if(header.length()) {
 		curl.setHeader(header);
 	}
 
-	if(!curl.doPost(url, params)) {
+	curl.setVerbose(true);
+
+	if(!curl.doPost(url, params, multipart)) {
 		return false;
 	}
 	
 	result = curl.getBuffer();
-	printf("------------------------------------------------------------\n");
 	return true;
+}
+
+
+bool Request::isPost() {
+	return method == REQUEST_POST;
+}
+
+void Request::isPost(bool flag) {
+	method = REQUEST_POST;
+}
+
+bool Request::isGet() {
+	return method == REQUEST_GET;
+}
+
+void Request::isGet(bool flag) {
+	method = REQUEST_GET;
+}
+
+bool Request::isDelete() {
+	return method == REQUEST_DELETE;
+}
+
+void Request::isDelete(bool flag) {
+	method = REQUEST_DELETE;
 }
 
 

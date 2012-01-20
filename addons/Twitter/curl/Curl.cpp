@@ -83,6 +83,7 @@ bool Curl::doPost(const string& url, const rtp::Collection& params, bool multiPa
 	struct curl_slist* curl_header = NULL;
 	struct curl_httppost* post_curr = NULL;
 	struct curl_httppost* post_last = NULL;
+	string use_url = url; // @todo make url not const!s
 			
 	// Make sure userpass/callback is set.
 	reset();
@@ -93,10 +94,15 @@ bool Curl::doPost(const string& url, const rtp::Collection& params, bool multiPa
 	
 	// Add fields to post.
 	// ------------------------------------------------------
-	const list<rtp::Parameter*>& pars = params.getParameters();
-	list<rtp::Parameter*>::const_iterator it = pars.begin();
-	
 	if(!multiPart) {
+		const list<rtp::Parameter*>& pars = params.getParameters();
+		list<rtp::Parameter*>::const_iterator it = pars.begin();
+		
+		// @todo use createQueryString!
+		printf("@todo useCreateQueryString!!!!!!!!!!!!!!!\n");
+		printf("@todo useCreateQueryString!!!!!!!!!!!!!!!\n");
+		printf("@todo useCreateQueryString!!!!!!!!!!!!!!!\n");
+		printf("@todo useCreateQueryString!!!!!!!!!!!!!!!\n");
 		string data_str;
 		while(it != pars.end()) {
 			data_str.append((*it)->getName());
@@ -117,9 +123,26 @@ bool Curl::doPost(const string& url, const rtp::Collection& params, bool multiPa
 
 	}	
 	else {
+	
+		// When we do a multi part, we add the parameters that are used 
+		// to create the signature string as query string; this is just 
+		// the ouath standard. Somehow adding them as mult-part doesnt work.
+		list<rtp::Parameter*> query_params = params.getParameters(true); 
+		string qs = createQueryString(query_params);
+		if(qs.length()) {
+			use_url = use_url + "?" + qs; 
+		}
+		 
 		// handling a multi part post.
-		while(it != pars.end()) {
+		list<rtp::Parameter*> post_params = params.getParameters(false); 
+		list<rtp::Parameter*>::const_iterator it = post_params.begin();	
+	
+		while(it != post_params.end()) {
 			switch((*it)->type) {
+				// This doesn't work somehow... I'm using the query string
+				// now and urlencoding the values. But somehow it looks like
+				// this string isn't added to the form.
+				/*
 				case rtp::Parameter::PARAM_STRING: {
 					curl_formadd(
 							 &post_curr
@@ -127,6 +150,19 @@ bool Curl::doPost(const string& url, const rtp::Collection& params, bool multiPa
 							,CURLFORM_COPYNAME
 							,(*it)->getName().c_str()
 							,CURLFORM_COPYCONTENTS
+							,urlencode((*it)->getStringValue()).c_str()
+							,CURLFORM_END
+					);
+					break;
+				}
+				*/
+				case rtp::Parameter::PARAM_FILE: {
+					curl_formadd(
+							 &post_curr
+							,&post_last
+							,CURLFORM_COPYNAME
+							,(*it)->getName().c_str()
+							,CURLFORM_FILE
 							,(*it)->getStringValue().c_str()
 							,CURLFORM_END
 					);
@@ -139,7 +175,7 @@ bool Curl::doPost(const string& url, const rtp::Collection& params, bool multiPa
 			}
 			++it;
 		}
-
+		
 		r = curl_easy_setopt(curl, CURLOPT_HTTPPOST, post_curr); // only for multi-part
 		CHECK_CURL_ERROR(r);
 	}
@@ -150,7 +186,7 @@ bool Curl::doPost(const string& url, const rtp::Collection& params, bool multiPa
 		
 	
 	// set URL
-	r = curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+	r = curl_easy_setopt(curl, CURLOPT_URL, use_url.c_str());
 	CHECK_CURL_ERROR(r);
 	
 	// set header
@@ -176,6 +212,23 @@ bool Curl::doPost(const string& url, const rtp::Collection& params, bool multiPa
 	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, NULL); // opts are sticky
 	
 	return result;
+}
+
+string Curl::createQueryString(const list<rtp::Parameter*>& queryParams) {
+	string qs;
+	list<rtp::Parameter*>::const_iterator it = queryParams.begin();
+	while(it != queryParams.end()) {
+		
+		qs.append(urlencode((*it)->getName()));
+		qs.append("=");
+		qs.append(urlencode((*it)->getStringValue())	);
+		
+		++it;
+		if(it != queryParams.end()) {
+			qs.append("&");
+		}	
+	}
+	return qs;
 }
 
 

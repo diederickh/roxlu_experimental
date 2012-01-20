@@ -45,11 +45,11 @@ string Signature::getSignature(oAuth& auth, const string& url, const string& met
 	sig_base.append("&");
 	
 	string param_string = getParameterStringForSignatureBase(params);
-	printf("Parameter string: %s\n", param_string.c_str());
+//	printf("Parameter string: %s\n", param_string.c_str());
 	if(param_string.length()) {
 		sig_base.append(urlencode(param_string));
 	}
-	printf("Signature base: %s\n", sig_base.c_str());
+//	printf("Signature base: %s\n", sig_base.c_str());
 	
 	// step 2: use signature base string to create signature
 	// -----------------------------------------------------
@@ -93,14 +93,12 @@ string Signature::getSignature(oAuth& auth, const string& url, const string& met
 string Signature::getParameterStringForSignatureBase(const rtp::Collection& col) {
 	// see https://dev.twitter.com/docs/auth/creating-signature 
 	list<string> value_list;
-	const list<rtp::Parameter*>& pars = col.getParameters();
+	list<rtp::Parameter*> pars = col.getParameters(true);
 	{
 		list<rtp::Parameter*>::const_iterator it = pars.begin();
 		string varval;
 		while(it != pars.end()) {
-
 			varval.assign(urlencode((*it)->getName()));
-			//varval.append("%3D"); // =
 			varval.append("="); // =
 			varval.append(urlencode((*it)->getStringValue()));
 			value_list.push_back(varval);
@@ -116,11 +114,11 @@ string Signature::getParameterStringForSignatureBase(const rtp::Collection& col)
 			base.append(*it);
 			++it;
 			if(it != value_list.end()) {
-				//base.append("%26"); // &
 				base.append("&"); // &
 			}
 		}
 	}
+	//printf(">>>>>>>>'%s'<<<<<<<<<<\n", base.c_str());
 	return base;
 }
 

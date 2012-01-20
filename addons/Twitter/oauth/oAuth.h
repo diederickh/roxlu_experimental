@@ -65,6 +65,7 @@ public:
 	rtc::Request getAccessTokenRequest();
 	rtc::Request getAuthorizedPost(const string& url, const rtp::Collection& params);
 	rtc::Request getAuthorizedGet(const string& url, const rtp::Collection& params);
+	void authorize(rtc::Request& req);
 	
 	// collections 
 	rtp::Collection getDefaultParameters(); // private?
