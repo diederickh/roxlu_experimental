@@ -12,6 +12,19 @@
 #include "types/TwitterCurlValueType.h"
 #include "types/TwitterCurlValueTypeString.h"
 #include "types/TwitterCurlValueTypeFile.h"
+#include "types/TwitterRequest.h"
+
+
+#include "parameter/Collection.h"
+#include "parameter/Parameter.h"
+#include "curl/Request.h"
+#include "curl/Curl.h"
+#include "oauth/Utils.h"
+#include "oauth/oAuth.h"
+
+namespace rtc = roxlu::twitter::curl;
+namespace rtp = roxlu::twitter::parameter;
+namespace rto = roxlu::twitter::oauth;
 
 using std::string;
 using std::vector;
@@ -85,14 +98,19 @@ private:
 	string twitter_username;
 	string twitter_password;
 	TwitteroAuth auth;
+	
+	rto::oAuth oauth;
+	rtc::Curl twitcurl;
 };
 
 
 inline void Twitter::setTwitterUsername(const string& username) {
+	twitcurl.setAuthUsername(username);
 	twitter_username = username;
 }
 
 inline void Twitter::setTwitterPassword(const string& password) {
+	twitcurl.setAuthPassword(password);
 	twitter_password = password;
 }
 
@@ -106,10 +124,12 @@ inline string& Twitter::getTwitterPassword() {
 
 inline void Twitter::setConsumerKey(const string& key) {
 	auth.setConsumerKey(key);
+	oauth.setConsumerKey(key);
 }
 
 inline void Twitter::setConsumerSecret(const string& secret) {
 	auth.setConsumerSecret(secret);
+	oauth.setConsumerSecret(secret);
 }
 	
 inline bool Twitter::isCurlInitialized() {

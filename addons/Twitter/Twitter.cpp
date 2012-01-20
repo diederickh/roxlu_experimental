@@ -1,4 +1,6 @@
 #include "Twitter.h"
+#include "TwitteroAuthSignature.h"
+#include "TwitteroAuthHeader.h"
 
 namespace roxlu {
 
@@ -17,33 +19,57 @@ Twitter::~Twitter() {
 }
 
 bool Twitter::requestToken(string& authURL /* out */) {
+	// get request-token.
+	string response;
+	rtc::Request req = oauth.getRequestTokenRequest();
+	if(!req.doGet(twitcurl, response)) {
+		printf("error: cannot do request for token.\n");
+		return false;
+	}
+	
+	// extract request-token and secret from result.
+	string token;
+	string secret;
+	if(!rto::Utils::extractTokenAndSecret(response, token, secret)) {
+		return false;
+	}
+	oauth.setTokenKey(token);
+	oauth.setTokenSecret(secret);
+	//printf("token: %s secret: %s\n", token.c_str(), secret.c_str());
+	// use these token and secret to create the authorization url.
+	authURL.assign("http://twitter.com/oauth/authorize?oauth_token=");
+	authURL.append(oauth.getTokenKey());
+	return true;
+
+	/*
 	if(!isCurlInitialized()) {
 		return false;
 	}
-	
+
+	// Get header with all the necessary oauth values
+	// @see https://dev.twitter.com/docs/auth/oauth	
 	string header;
+	string url = "http://twitter.com/oauth/request_token";
 	bool result = false;
-	result = auth.getHeader(
-						 TwitteroAuth::TWITTER_OAUTH_GET
-						,roxlu::twitter::REQUEST_TOKEN_URL
-						,""
-						,header
-	);
-	
+	result = auth.getHeader(TwitteroAuth::TWITTER_OAUTH_GET, url, NULL, header, false);
 	if(!result) {
 		return false;
 	}
-
+	printf("*******************************************************\n");
+	printf("%s\n", header.c_str());
+	printf("*******************************************************\n");
+	return true;
 	// get the token key and secret	
-	if(performGet(roxlu::twitter::REQUEST_TOKEN_URL, header)) {
+	if(performGet(url, header)) {
 		if(!auth.extractTokenKeyAndSecret(buffer)) {
 			printf("Error while extracting token key and secrect from response");
 			return false;
 		}
-		authURL.assign(roxlu::twitter::AUTHORIZE_URL);
+		authURL.assign("http://twitter.com/oauth/authorize?oauth_token=");
 		authURL.append(auth.getTokenKey());
 	}
 	return true;
+	*/
 }
 
 
@@ -97,6 +123,7 @@ bool Twitter::performGet(const string& url) {
 	curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 		
+	/*
 	auth.getHeader(TwitteroAuth::TWITTER_OAUTH_GET, url, dummy_data, oauth_header);
 	if(!oauth_header.length()) {
 		printf("Error: cannot create oauth header.\n");
@@ -115,7 +142,8 @@ bool Twitter::performGet(const string& url) {
 		curl_slist_free_all(header_list);
 	}
 	return (r == CURLE_OK);
-
+	*/
+	return true;
 }
 
 
@@ -137,7 +165,8 @@ bool Twitter::performPost(const string& url, const vector<TwitterCurlValueType*>
 	}
 	
 	// add oauth header.
-	bool result = auth.getHeader(TwitteroAuth::TWITTER_OAUTH_POST, url, "", oauth_header);
+	bool result = auth.getHeader(TwitteroAuth::TWITTER_OAUTH_POST, url, NULL, oauth_header, false);
+	//bool result = auth.getHeader(TwitteroAuth::TWITTER_OAUTH_POST, url, "", oauth_header);
 	if(!result) {
 		printf("Error: cannot create oauth header.\n");
 		return false;
@@ -187,6 +216,53 @@ bool Twitter::setPin(const string& pin) {
 // Get pin which authorizes the application.
 // -----------------------------------------
 bool Twitter::handlePin(const string& authURL) {
+
+	// STEP 1: get PIN-wise authorization
+	// -------------------------------------------------------------------------
+	string response;
+	rtc::Request req;
+	req.setURL(authURL);
+	if(!req.doGet(twitcurl, response)) {
+		printf("error: cannot do request for token.\n");
+		return false;
+	}
+	
+	// get authenticity token from authorization page. 
+	string authenticity_token;
+	rto::Utils::extractAuthenticityToken(response, authenticity_token);
+	
+	// STEP 2: do a post with the fields on this pin auth page.
+	// -------------------------------------------------------------------------
+	req.getParams().addString("oauth_token", auth.getTokenKey());
+	req.getParams().addString("authenticity_token", authenticity_token);
+	req.getParams().addString("session[username_or_email]", twitcurl.getAuthUsername());
+	req.getParams().addString("session[password]", twitcurl.getAuthPassword());
+	
+	if(!req.doPost(twitcurl, response)) {
+		printf("error: cannot get pin html\n");
+		return false;
+	}
+	
+	string pin;
+	if(!rto::Utils::extractPin(response, pin)) {	
+		printf("error: cannot extract pin.\n");
+		return false;
+	}
+	oauth.setPin(pin);
+	return true;
+	
+	printf("=====================================\n");
+//	printf("%s\n", response.c_str());
+	printf("=====================================\n");
+
+	/*
+	data_str = 	roxlu::twitter::TOKEN_KEY 				+"=" +oauth_token 			+"&" + \
+				roxlu::twitter::AUTHENTICITY_TOKEN_KEY 	+"=" +oauth_authenticity 	+"&" + \
+				roxlu::twitter::SESSIONUSERNAME_KEY		+"=" +getTwitterUsername()	+"&" + \
+				roxlu::twitter::SESSIONPASSWORD_KEY		+"=" +getTwitterPassword();
+	*/
+	return true;
+
 	string data_str;
 	string oauth_header;
 	string oauth_token;
@@ -200,7 +276,8 @@ bool Twitter::handlePin(const string& authURL) {
 		
 	// STEP 1: load HTML and get "authenticity_token" and "oauth_token"
 	// -------------------------------------------------------------------------
-	auth.getHeader(TwitteroAuth::TWITTER_OAUTH_GET, authURL, data_str, oauth_header);
+	auth.getHeader(TwitteroAuth::TWITTER_OAUTH_GET, authURL, NULL, oauth_header, false);
+	//auth.getHeader(TwitteroAuth::TWITTER_OAUTH_GET, authURL, data_str, oauth_header);
 	
 	if(oauth_header.length()) {
 		header_list = curl_slist_append(header_list, oauth_header.c_str());
@@ -228,7 +305,7 @@ bool Twitter::handlePin(const string& authURL) {
 			npos_start += roxlu::twitter::TOKEN_TWITTER_RESP_KEY.length();
 			npos_end = buffer.substr(npos_start).find(roxlu::twitter::TOKEN_END_TAG_TWITTER_RESP);
 			oauth_token = buffer.substr(npos_start, npos_end);
-			
+			printf("oauth_token: '%s' oauth_authenticity: '%s'\n", oauth_token.c_str(), oauth_authenticity.c_str());
 			curl_slist_free_all(header_list);
 		}
 	}
@@ -243,13 +320,20 @@ bool Twitter::handlePin(const string& authURL) {
 	header_list = NULL;
 	oauth_header.clear();
 	prepareCurlStandardParams();
+	
+	// make sure the oauth token is added to the header
+	map<string, string> extra_values;
+	extra_values[roxlu::twitter::TOKEN_KEY] = oauth_token;
+	
+	// we also need to post these
 	data_str = 	roxlu::twitter::TOKEN_KEY 				+"=" +oauth_token 			+"&" + \
 				roxlu::twitter::AUTHENTICITY_TOKEN_KEY 	+"=" +oauth_authenticity 	+"&" + \
 				roxlu::twitter::SESSIONUSERNAME_KEY		+"=" +getTwitterUsername()	+"&" + \
 				roxlu::twitter::SESSIONPASSWORD_KEY		+"=" +getTwitterPassword();
 	
-	auth.getHeader(TwitteroAuth::TWITTER_OAUTH_POST, authURL, data_str, oauth_header);
-	
+
+	auth.getHeader(TwitteroAuth::TWITTER_OAUTH_POST, authURL, &extra_values, oauth_header, false);
+	int i = 0;
 	if(oauth_header.length()) {
 		header_list = curl_slist_append(header_list, oauth_header.c_str());
 		if(header_list) {
@@ -262,12 +346,14 @@ bool Twitter::handlePin(const string& authURL) {
 	curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, data_str.c_str());
 	
 	if(curl_easy_perform(curl) == CURLE_OK) {
+		int i = 0;
 		if(header_list) {
 			curl_easy_getinfo(curl, CURLINFO_HTTP_CODE, &http_status);
 			npos_start = buffer.find(roxlu::twitter::PIN_TWITTER_RESP_KEY);
 			npos_start += roxlu::twitter::PIN_TWITTER_RESP_KEY.length();
 			npos_end = buffer.substr(npos_start).find(roxlu::twitter::PIN_END_TAG_TWITTER_RESP);
 			pincode = buffer.substr(npos_start, npos_end);
+			printf("Got pincode: %s\n", pincode.c_str());
 			auth.setPin(pincode);
 			curl_slist_free_all(header_list);
 			return true;
@@ -281,19 +367,38 @@ bool Twitter::handlePin(const string& authURL) {
 }
 
 bool Twitter::accessToken() {
+	// get request with correct headers (and signature)
+	string response; 
+	rtc::Request req = oauth.getAccessTokenRequest();
+	if(!req.doGet(twitcurl, response)) {
+		return false;
+	}
+	
+	// extract token and secrect from response.
+	string token;
+	string secret;
+	if(!rto::Utils::extractTokenAndSecret(response, token, secret)) {
+		return false;
+	}
+	oauth.setTokenKey(token);
+	oauth.setTokenSecret(secret);
+	printf("response: '%s'\n", response.c_str());
+	printf("token: '%s' secrect:'%s'\n", token.c_str(), secret.c_str());
+	return true;
+	/*
 	if(!isCurlInitialized()) {
 		printf("Error: cannot get accesstoken, curl not initialized.\n");	
 		return false;
 	}
-	
 	string auth_header;
 	bool result = auth.getHeader(	
 							 TwitteroAuth::TWITTER_OAUTH_GET
 							,roxlu::twitter::ACCESS_TOKEN_URL
-							,""
+							,NULL
 							,auth_header
-							,true
+							,true 
 						);
+	
 	if(!result) {
 		printf("Error: cannot get accesstoken, error retrieving auth header.\n");
 		return false;
@@ -303,8 +408,8 @@ bool Twitter::accessToken() {
 		auth.extractTokenKeyAndSecret(buffer);
 		return true;
 	}
-	
 	return false;
+	*/
 }
 
 // Save retrieved tokens which gives the application access to the twitter account
@@ -315,8 +420,8 @@ bool Twitter::saveTokens(const string& filePath) {
 		printf("Error: cannot open: '%s'.\n", filePath.c_str());
 		return false;
 	}
-	of << auth.getTokenKey() << std::endl;
-	of << auth.getTokenSecret() << std::endl;
+	of << oauth.getTokenKey() << std::endl;
+	of << oauth.getTokenSecret() << std::endl;
 	of.close();
 	return true;
 }
@@ -331,8 +436,8 @@ bool Twitter::loadTokens(const string& filePath) {
 	std::getline(ifs, token_key);
 	std::getline(ifs, token_secret);
 	printf("Loaded token_key='%s' token_secret='%s'\n", token_key.c_str(), token_secret.c_str());
-	auth.setTokenKey(token_key);
-	auth.setTokenSecret(token_secret);
+	oauth.setTokenKey(token_key);
+	oauth.setTokenSecret(token_secret);
 	return true;
 }
 
@@ -378,18 +483,58 @@ size_t Twitter::curlCallback(char* data, size_t size, size_t nmemb, Twitter* twi
 // API doc: https://dev.twitter.com/docs/api/ 
 // -----------------------------------------------------------------------------
 bool Twitter::statusUpdate(const string& tweet) {
+	
+	// Create an authorized request object.
+	rtp::Collection col;
+	col["status"] = "nice nice";
+	string url = "http://api.twitter.com/1/statuses/update.json";
+	rtc::Request req = oauth.getAuthorizedPost(url, col);
+	
+	// perform the post
+	string response;
+	if(!req.doPost(twitcurl, response, col)) {
+		printf("error: cannot do stauts update\n");
+		return false;
+	}
+	return true;
+	
+	
+	
+	
+	
+	/*
+		printf("-===============--\n");
+	printf("%s\n", response.c_str());
+	printf("-===============--\n");
+
+	Deze wordt gemaakt voor de tweet met tekst: and another one...
+	Authorization: OAuth oauth_consumer_key="kyw8bCAWKbkP6e1HMMdAvw", oauth_nonce="13269270842b5", oauth_signature="%2FpYiDEdeQc%2BJgOpJurMsfjg%2BMZA%3D", oauth_signature_method="HMAC-SHA1", oauth_timestamp="1326927084", oauth_token="466622389-Osbd3Mm1SDVLOqugzCQ5y6MP1RkLMw81VIREB5NR", oauth_version="1.0"
+	Authorization: OAuth oauth_consumer_key="kyw8bCAWKbkP6e1HMMdAvw", oauth_nonce="1326928753240", oauth_signature_method="HMAC-SHA1", oauth_timestamp="1326928753", oauth_version="1.0", status="and another one..."
+	Authorization: OAuth oauth_consumer_key="kyw8bCAWKbkP6e1HMMdAvw", oauth_nonce="", oauth_signature_method="HMAC-SHA1", oauth_timestamp="", oauth_version="1.0", status="and another one..."
+	*/
+	
+	
+
+/*
 	if(tweet.length() && isCurlInitialized()) {
 		TwitterCurlValueTypeString param_status("status", tweet);
 		vector<TwitterCurlValueType*> params;
 		params.push_back(&param_status);
-		
 		string url = "http://api.twitter.com/1/statuses/update.json";
 		if(!performPost(url, params)) {
 			return false;
 		}
+		
+		TwitteroAuthSignature sig(auth);
+	sig.addDefaultParameters();
+	sig.addParameter("status", tweet);
+	TwitteroAuthHeader head;
+	string h = head.getHeader(sig.getParameters());
+	printf("Generated header sig: %s\n", h.c_str());
 		return true;
 	}
 	return false;
+	*/
 }
 
 bool Twitter::statusUpdateWithMedia(const string& tweet, const string& imageFilePath) {
@@ -418,14 +563,52 @@ bool Twitter::getHomeTimeline(unsigned int count) {
 	else if(count > 200) {
 		count = 200;
 	}
+	
+	
+	// Create an authorized request object.
+	rtp::Collection col;
+	col["count"] = count;
+	string url = "http://api.twitter.com/1/statuses/home_timeline.json";
+	rtc::Request req = oauth.getAuthorizedGet(url, col);
+	//http://api.twitter.com/1/statuses/home_timeline.format
+	// perform the post
+	string response;
+	if(!req.doGet(twitcurl, response, col)) {
+		printf("error: cannot do stauts update\n");
+		return false;
+	}
+	printf("-------------------\n");
+	printf("%s\n", response.c_str());
+	printf("-------------------\n");
+	return true;
+/*
+
+
+
+	// bound check.
+	if(count <= 0) {
+		count = 5;
+	}
+	else if(count > 200) {
+		count = 200;
+	}
+	
+	TwitterRequest req(auth);
+	req.addString("count", count, true);
+	req.setURL("http://api.stwitter.com/1/statuses/home_timeline.json");
+	string header = req.getHeader(false);
+	printf("header:%s\n", header.c_str());
+	
 	TwitterCurlValues values;
 	values.addString("count", count);
-	string url = "http://api.twitter.com/1/statuses/home_timeline.json";
+	string url = "http://api.stwitter.com/1/statuses/home_timeline.json";
 	if(!performGet(url, values.getValues())) {
 		printf("Error: cannot get timeline\n");
 		return false;
 	}
 	return true;
+	*/
+
 }
 
 /*

@@ -1,6 +1,6 @@
 #include "TwitterCurlValues.h"
 #include "TwitterCurlValueType.h"
-#include "TwitterCurlValueTypeFile.h"
+//#include "TwitterCurlValueTypeFile.h"
 
 namespace roxlu {
 
@@ -17,9 +17,10 @@ TwitterCurlValues::~TwitterCurlValues() {
 
 
 
-void TwitterCurlValues::addFile(const string& name, const string& filePath) {
+TwitterCurlValueTypeFile*  TwitterCurlValues::addFile(const string& name, const string& filePath) {
 	TwitterCurlValueTypeFile* v = new TwitterCurlValueTypeFile(name, filePath);
 	values.push_back(v);
+	return v;
 }
 
 

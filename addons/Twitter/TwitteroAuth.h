@@ -5,13 +5,16 @@
 
 #include <string>
 #include <map>
+#include <vector>
 #include <list>
 #include <cstdlib>
 #include <map>
-
+#include "TwitteroAuthSignature.h"
+#include "TwitteroAuthHeader.h"
 using std::map;
 using std::string;
 using std::list;
+using std::vector;
 
 namespace roxlu {
 
@@ -58,6 +61,9 @@ public:
 	string& getTokenSecret();
 	string& getScreenName();
 	string& getPin();
+	string& getNonce();
+	string& getTimestamp();
+
 	
 	void setConsumerKey(const string& key);
 	void setConsumerSecret(const string& secret);
@@ -66,18 +72,29 @@ public:
 	void setScreenName(const string& name);
 	void setPin(const string& p);
 
+	/*
 	bool getHeader(
 				 const RequestType type
 				,const string url
 				,const string data
-				,string& header /* out */
+				,string& header 
+				,const bool includePin = false
+			);
+	*/
+	bool getHeader(
+				 const RequestType type
+				,const string url
+				,const map<string, string>* extraData
+				,string& header 
 				,const bool includePin = false
 			);
 	
 	bool extractTokenKeyAndSecret(const string& buffer);
 	
-
+	void updateNonce();
+	
 private:
+	/*
 	bool buildoAuthTokenKeyValuePairs(
 				 const bool includePin
 				,const string& data
@@ -85,6 +102,14 @@ private:
 				,map<string, string>& keyValues
 				,const bool generateTimestamp
 			);
+	*/
+	bool buildoAuthTokenKeyValuePairs(
+ 			map<string, string>& keyValues
+			,const map<string, string>* extraValues
+			,const string& signature
+			,const bool generateTimestamp
+			,const bool includePin
+	);	
 	
 	bool getSignature(
 				 const RequestType type
@@ -97,9 +122,10 @@ private:
 				 const map<string, string>& keyValues
 				,string& params /* out */
 				,const string& paramSep
+				,const string& paramJoin
 			);
 
-	void updateNonce();
+	
 
 	string consumer_key;
 	string consumer_secret;
@@ -136,6 +162,14 @@ inline string& TwitteroAuth::getScreenName() {
 
 inline string& TwitteroAuth::getPin() {
 	return pin;
+}
+
+inline string& TwitteroAuth::getNonce() {
+	return nonce;
+}
+
+inline string& TwitteroAuth::getTimestamp() {
+	return timestamp;
 }
 
 // set.

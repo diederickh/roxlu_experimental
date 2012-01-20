@@ -24,5 +24,8 @@ void TwitterCurlValueTypeString::addToGet(string& data) {
 	data += name +"=" +value;
 }
 
+string TwitterCurlValueTypeString::getValue() {
+	return value;
+}
 
 }; // roxlu

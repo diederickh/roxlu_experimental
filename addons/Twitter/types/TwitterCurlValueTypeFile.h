@@ -15,6 +15,7 @@ public:
 	~TwitterCurlValueTypeFile();
 	virtual void addToPost(CURL* curl, curl_httppost** curr, curl_httppost** last);
 	virtual void addToGet(string& data);
+	virtual string getValue();
 	string name;
 	string filepath;
 

@@ -15,8 +15,8 @@ public:
 
 	template<typename T>
 	TwitterCurlValueTypeString(const string& name, const T& val) 
-		:name(name)
 	{
+		setName(name);
 		std::stringstream ss;
 		ss << val;
 		value = ss.str();
@@ -26,9 +26,10 @@ public:
 	
 	virtual void addToPost(CURL* curl, curl_httppost** curr, curl_httppost** last);
 	virtual void addToGet(string& data);
+	virtual string getValue();
 	
 	string value;
-	string name;
+	//string name;
 };
 
 };

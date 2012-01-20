@@ -30,4 +30,8 @@ void TwitterCurlValueTypeFile::addToGet(string& data) {
 	// a file isnt added as data string.
 }
 
+string TwitterCurlValueTypeFile::getValue() {
+	return ""; // empty!
+}
+
 }; // roxlu

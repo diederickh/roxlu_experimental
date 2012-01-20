@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include "TwitterCurlValueTypeString.h"
+#include "TwitterCurlValueTypeFile.h"
 
 using std::vector;
 using std::string;
@@ -18,13 +19,15 @@ public:
 	~TwitterCurlValues();
 	
 	template<typename T>
-	void addString(const string& name, const T& value) {
+	TwitterCurlValueTypeString* addString(const string& name, const T& value) {
 		TwitterCurlValueTypeString* v = new TwitterCurlValueTypeString(name, value);
 		values.push_back(v);
+		return v;
 	}
 	
 	
-	void addFile(const string& name, const string& filePath);
+	TwitterCurlValueTypeFile* addFile(const string& name, const string& filePath);
+	
 	const vector<TwitterCurlValueType*>& getValues();
 	vector<TwitterCurlValueType*> values;
 };

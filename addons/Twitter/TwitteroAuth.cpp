@@ -10,6 +10,75 @@ using std::map;
 namespace roxlu {
 
 bool TwitteroAuth::getHeader(
+			 const RequestType type
+			,const string url
+			,const map<string, string>* extraData
+			,string& header 
+			,const bool includePin 
+)
+{	
+	/*
+	map<string, string>& keyValues
+			,const map<string, string>* extraValues
+			,const string& signature
+			,const bool generateTimestamp
+			,const bool includePin
+
+	*/
+	
+
+	// Get the oauth_* key-values pairs w/o signature (for request token)
+	map<string, string> oauth_key_values;
+	buildoAuthTokenKeyValuePairs(oauth_key_values, extraData, "", true, includePin);
+	
+	// Get signature
+	string signature;
+	getSignature(type, url, oauth_key_values, signature);
+	
+	// Now, build key-value pairs with signature
+	buildoAuthTokenKeyValuePairs(oauth_key_values, NULL, signature, false, includePin);
+		
+	string params;
+	getStringFromKeyValuePairs(oauth_key_values, params, ", ", "=");
+	
+	header.assign("Authorization: OAuth ");
+	header.append(params);
+	printf("Generated header:\n----------------------------------\n%s\n------------------------------\n", header.c_str());
+	/*
+	
+	getStringFromKeyValuePairs(
+			const map<string, string>& keyValues
+			,string& params 
+			,const string& paramSep
+			,const string& paramJoin
+	)
+	
+
+	
+	map<string, string>& keyValues
+			,const map<string, string>* extraValues
+			,const string& signature
+			,const bool generateTimestamp
+			,const bool includePin
+	*/
+	
+	printf("signature: %s\n", signature.c_str());
+	/*
+	
+bool TwitteroAuth::getSignature(
+			 const RequestType type
+			,const string& url
+			,const map<string, string>& keyValues
+			,string& signature 
+)
+{
+
+	*/
+	return true;
+}
+
+/*
+bool TwitteroAuth::getHeader(
 				 const TwitteroAuth::RequestType type
 				,const string url
 				,const string data
@@ -17,21 +86,22 @@ bool TwitteroAuth::getHeader(
 				,const bool includePin 
 )
 {
+
 	map<string, string> key_values;
 	string params;
 	string signature;
 	string sep;
 	string base_url(url);
 	
+	
 	header = "";
 	
 	// extract key=value pairs.
 	size_t pos = url.find_first_of("?");
-	printf("URL: %s\n", url.c_str());
-	printf("Found: %lu -- %lu\n", pos, string::npos);
+	printf("Get header:\n");
+	printf("\turl=%s\n", url.c_str());
+	printf("\tquestionmark_at=%lu\n", pos);
 	if(pos != string::npos) {
-		printf("getHeader - parsing url %lu\n", pos);
-		printf("url:%s\n", url.c_str());
 		base_url = url.substr(0, pos);
 		string data_part = url.substr(pos+1);
 		size_t nsep = string::npos;
@@ -67,18 +137,74 @@ bool TwitteroAuth::getHeader(
 	
 	// get oauth header.
 	sep = ",";
-	printf("\n\nHEADER:'%s'\n", header.c_str());
-	getStringFromKeyValuePairs(key_values, params, sep);
-	printf("\nPARAMS:\n'%s'\n\n", params.c_str());
+	printf("\n\theader=:'%s'\n", header.c_str());
+	getStringFromKeyValuePairs(key_values, params, sep, "=");
+	printf("\n\tparam_str='%s'\n", params.c_str());
 	header.assign(roxlu::twitter::AUTHHEADER_STRING);
 	header.append(params);
+	printf("\n\n");
 	return (header.length()) ? true : false;
+	
+	
 }
+*/
 /*
 Authorization: OAuth oauth_consumer_key="kyw8bCAWKbkP6e1HMMdAvw",oauth_nonce="baea213007110aed26f20b79e9e0cfa1", oauth_signature="%2FGk4yKQf07U%2FBj8KXGdTdZffIkg%3D", oauth_signature_method="HMAC-SHA1", oauth_timestamp="1326839965", oauth_token="67066605-4xouV1ySq5yqiOUU6VOXcOE7SiB1CCoPcDh7Ptb59", oauth_version="1.0"
 Authorization: OAuth oauth_consumer_key="kyw8bCAWKbkP6e1HMMdAvw",oauth_nonce="13268411561bc",oauth_signature="kadcKvtj1hE1Qzq%2BYml9mMLTj0I%3D",oauth_signature_method="HMAC-SHA1",oauth_timestamp="1326841156",oauth_token="466622389-Osbd3Mm1SDVLOqugzCQ5y6MP1RkLMw81VIREB5NR",oauth_version="1.0"
 */
 
+/**
+ * @param	keyValues			This map will be filled with the
+ *								oauth keys.
+ * @param	extraValues			These will be appended to the keyValues
+ * @param	signature			The signature string (oauth_signature)
+ * @param	generateTimestamp	Do you want to update the timestamp
+ * @param	includePin			Do you want to include the pin verifier.
+ *
+ */
+bool TwitteroAuth::buildoAuthTokenKeyValuePairs (
+			map<string, string>& keyValues
+			,const map<string, string>* extraValues
+			,const string& signature
+			,const bool generateTimestamp
+			,const bool includePin
+) 
+{
+	if(generateTimestamp) {
+		updateNonce();
+	}
+	
+	if(signature.length()) {
+		keyValues["oauth_signature"] = signature;
+	}
+	
+	if(token_key.length()) {
+		keyValues["oauth_token"] = token_key;
+	}
+	
+	if(includePin && pin.length()) {
+		keyValues["oauth_verifier"] = pin;
+	}
+	
+	keyValues["oauth_consumer_key"] 	= consumer_key;
+	keyValues["oauth_nonce"] 			= nonce;
+	keyValues["oauth_signature_method"] = "HMAC-SHA1";
+	keyValues["oauth_timestamp"] 		= timestamp;
+	keyValues["oauth_version"] 			= "1.0";
+	
+		
+	// now append teh extra values 
+	if(extraValues != NULL) {
+		map<string, string>::const_iterator it = extraValues->begin();
+		while(it != extraValues->end()) {
+			keyValues[it->first] = it->second;
+			++it;
+		}
+	}
+	return true;
+}
+
+/*
 bool TwitteroAuth::buildoAuthTokenKeyValuePairs(
 				const bool includePin
 				,const string& data
@@ -121,8 +247,10 @@ bool TwitteroAuth::buildoAuthTokenKeyValuePairs(
 			keyValues[dummy_key] = dummy_val;
 		}
 	}
+	
 	return keyValues.size() ? true : false;
 }
+*/
 
 	
 bool TwitteroAuth::getSignature(
@@ -132,14 +260,15 @@ bool TwitteroAuth::getSignature(
 			,string& signature /* out */
 )
 {
+	// Generate the signature base: https://dev.twitter.com/docs/auth/creating-signature
+	printf("\n-----------------------------\n");
+	printf("getSignature for URL: %s\n", url.c_str());
 	// @todo implement a smarter way of key-value parsing and encoding for the signature. 
 	// i.e. see: https://dev.twitter.com/apps/1527994/oauth?nid=46 for some examples
 	string params;
 	string sig_base;
-	string sep = "&";
 	signature = "";
-	getStringFromKeyValuePairs(keyValues, params, sep);
-	
+
 	switch(type) {
 		case TWITTER_OAUTH_GET: {
 			sig_base = "GET&";
@@ -158,10 +287,14 @@ bool TwitteroAuth::getSignature(
 			break;
 		}
 	};
+	
 	sig_base.append(urlencode(url));
 	sig_base.append("&");
-	sig_base.append(urlencode(params));
-	
+
+	getStringFromKeyValuePairs(keyValues, params, "%26","%3D"); // %26 -> &, %3D -> =
+	sig_base.append(params);
+
+
 	// create hash.
 	CHMAC_SHA1 mac;
 	string sign_key;
@@ -185,6 +318,7 @@ bool TwitteroAuth::getSignature(
 	string base64_encoded = base64_encode(digest, 20);
 	signature = urlencode(base64_encoded);
 	printf("Signature base string:'%s'\n", sig_base.c_str());
+	printf("-----------------------------\n");
 	return (signature.length()) ? true : false;
 }
 /*
@@ -198,49 +332,46 @@ bool TwitteroAuth::TwitteroAuth::getStringFromKeyValuePairs(
 			const map<string, string>& keyValues
 			,string& params /* out */
 			,const string& paramSep
+			,const string& paramJoin
 )
 {
-	params = "";
-	if(keyValues.size()) {
-		// quote key values
-		list<string> keyvalues_list;
-		string dummy;
-		map<string,string>::const_iterator it = keyValues.begin();
-		while(it != keyValues.end()) {
-			dummy.assign(it->first);
-			dummy.append("=");
-			
-			if(paramSep == ",") { 
-				dummy.append("\"");
-			}
-			
-			dummy.append(it->second);
-			
-			if(paramSep == ",") {
-				dummy.append("\"");
-			}
-			
-			keyvalues_list.push_back(dummy);
-			++it;
+	string varval;
+	list<string> value_list;
+	map<string, string>::const_iterator it = keyValues.begin();
+	while(it != keyValues.end()) {
+		varval.assign(it->first);
+		varval.append(paramJoin);
+		
+		// add quotes when separated between commas
+		if(paramSep == ", ") {
+		 	varval.append("\"");  
 		}
 		
-		// create url
-		keyvalues_list.sort();
-		dummy.assign("");
-		list<string>::iterator it_list = keyvalues_list.begin();
-		while(it_list != keyvalues_list.end()) {
-			if(dummy.length()) {
-				dummy.append(paramSep);
-			}
-			dummy.append(it_list->c_str());
-			++it_list;
+		varval += it->second;	
+		
+		if(paramSep == ", ") {
+		 	varval.append("\"");  
 		}
 		
-		// finalize...
-		params.assign(dummy);
+		value_list.push_back(varval);		
+		++it;		
 	}
-	return (params.length()) ? true : false;
 	
+	// following oauth standard; sort keyvalues
+	value_list.sort();
+	
+	// create (sorted) string.
+	params.assign("");
+	list<string>::iterator it_values = value_list.begin();
+	while(it_values != value_list.end()) {
+		params.append(*it_values);
+		++it_values;
+		if(it_values != value_list.end()) {
+			params.append(paramSep);
+		}
+	}
+	//printf("params: %s\n", params.c_str());
+	return params.length();
 }
 
 void TwitteroAuth::updateNonce() {
