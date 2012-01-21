@@ -61,8 +61,10 @@ public:
 	
 	// requests
 	rtc::Request getRequestTokenRequest();
-//	rtc::Request getRequestWithTokenKey(const string& url);
 	rtc::Request getAccessTokenRequest();
+
+	// @todo check if getAuthorizedPost or getAuthorizedGet are still used
+	// @todo I think only authorize is necessary
 	rtc::Request getAuthorizedPost(const string& url, const rtp::Collection& params);
 	rtc::Request getAuthorizedGet(const string& url, const rtp::Collection& params);
 	void authorize(rtc::Request& req);

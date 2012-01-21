@@ -1,9 +1,11 @@
-#include "TweetURL.h"
+#include "URL.h"
 #include "TweetConstants.h"
 
 namespace roxlu {
+namespace twitter {
+namespace data {
 
-TweetURL::TweetURL(string url)
+URL::URL(string url)
 	:type(NONE) 
 	,url(url)
 	,is_downloaded(false) 
@@ -16,7 +18,7 @@ TweetURL::TweetURL(string url)
 	detectURLType();
 }
 
-TweetURL::~TweetURL() {
+URL::~URL() {
 	if(fs != NULL) {
 		if(fs->is_open()) {
 			fs->close();
@@ -26,20 +28,20 @@ TweetURL::~TweetURL() {
 	cleanup();
 }
 
-TweetURL& TweetURL::operator=(const TweetURL& o) {
+URL& URL::operator=(const URL& o) {
 	url = o.url;
 	type = o.type;
 	return *this;
 }
 
-void TweetURL::detectURLType() {
+void URL::detectURLType() {
 	size_t pos = url.find("twitpic");
 	if(pos != std::string::npos) {
 		type = TWITPIC;
 	}
 }
 
-void TweetURL::update() {
+void URL::update() {
 	int still_running = 0;
 	CURLMcode r = curl_multi_perform(curlm, &still_running);
 
@@ -52,7 +54,7 @@ void TweetURL::update() {
 	}
 }
 
-bool TweetURL::download(string fromURL, string name) {
+bool URL::download(string fromURL, string name) {
 	if(is_downloaded) {
 		return false;
 	}
@@ -82,14 +84,14 @@ bool TweetURL::download(string fromURL, string name) {
 	curl_easy_setopt(
 					  curl
 					 ,CURLOPT_WRITEFUNCTION
-					 ,&TweetURL::writeData
+					 ,&URL::writeData
 					 );
 					 
 	// callback for headers (used when downloading files)
 	curl_easy_setopt(
 					curl
 					,CURLOPT_HEADERFUNCTION
-					,&TweetURL::writeHeader
+					,&URL::writeHeader
 					);
 	
 	// the userpointer (this object)
@@ -117,7 +119,7 @@ bool TweetURL::download(string fromURL, string name) {
 	return true;
 }
 
-bool TweetURL::createFile() {
+bool URL::createFile() {
 	if(fs != NULL) {
 		return true;
 	}
@@ -132,9 +134,9 @@ bool TweetURL::createFile() {
 	return true;
 }
 
-size_t TweetURL::writeHeader( void *ptr, size_t size, size_t nmemb, void *userdata) {
+size_t URL::writeHeader( void *ptr, size_t size, size_t nmemb, void *userdata) {
 	size_t bytes_to_write = size * nmemb;
-	TweetURL* url = static_cast<TweetURL*>(userdata);
+	URL* url = static_cast<URL*>(userdata);
 	char* data_ptr = static_cast<char*>(ptr);
 	string str(data_ptr);
 
@@ -153,15 +155,15 @@ size_t TweetURL::writeHeader( void *ptr, size_t size, size_t nmemb, void *userda
 			url->createFile();
 		}
 		else {
-			printf("Eror: Unhandled mime type: '%s' in TweetURL.\n", str.c_str());
+			printf("Eror: Unhandled mime type: '%s' in URL.\n", str.c_str());
 		}
 	}
 	return bytes_to_write;
 }
 
-size_t TweetURL::writeData(void *ptr, size_t size, size_t nmemb, void* obj) {
+size_t URL::writeData(void *ptr, size_t size, size_t nmemb, void* obj) {
 	size_t bytes_to_write = size * nmemb;
-	TweetURL* url = static_cast<TweetURL*>(obj);
+	URL* url = static_cast<URL*>(obj);
 	if(url->fs != NULL) {
 		char* data_ptr = static_cast<char*>(ptr);
 		url->fs->write(data_ptr, bytes_to_write);
@@ -173,7 +175,7 @@ size_t TweetURL::writeData(void *ptr, size_t size, size_t nmemb, void* obj) {
 }
 
 
-bool TweetURL::cleanup() {
+bool URL::cleanup() {
 	if(is_initialized) {
 		CURLMcode r = curl_multi_remove_handle(curlm, curl);
 		CHECK_CURLM_ERROR(r);	
@@ -183,7 +185,7 @@ bool TweetURL::cleanup() {
 	}
 }
 
-string TweetURL::getTwitPicCode() {
+string URL::getTwitPicCode() {
 	if(!isTwitPic()) {
 		return "";
 	}
@@ -198,7 +200,7 @@ string TweetURL::getTwitPicCode() {
 	return code;
 }
 
-string TweetURL::getTwitPicURL() {
+string URL::getTwitPicURL() {
 	string code;
 	try {
 		code = url.substr(19);
@@ -210,4 +212,4 @@ string TweetURL::getTwitPicURL() {
 	return "http://twitpic.com/show/full/" +code;
 }
 
-}; // roxlu
+}}} // roxlu::twitter::data

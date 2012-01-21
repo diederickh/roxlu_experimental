@@ -5,15 +5,8 @@
 #include <string>
 #include <fstream>
 
-#include "TwitteroAuth.h"
 #include "../../libs/curl/curl.h"
 #include "../../libs/crypto/urlencode.h"
-#include "types/TwitterCurlValues.h"
-#include "types/TwitterCurlValueType.h"
-#include "types/TwitterCurlValueTypeString.h"
-#include "types/TwitterCurlValueTypeFile.h"
-#include "types/TwitterRequest.h"
-
 
 #include "parameter/Collection.h"
 #include "parameter/Parameter.h"
@@ -36,8 +29,10 @@ using std::vector;
 namespace roxlu {
 namespace twitter {
 
-const string URL_STATUS_UPDATE = "http://api.twitter.com/1/statuses/update.json";
-const string URL_STATUS_WITH_MEDIA_UPDATE = "https://upload.twitter.com/1/statuses/update_with_media.json";
+const string URL_STATUSES_UPDATE = "http://api.twitter.com/1/statuses/update.json";
+const string URL_STATUSES_UPDATE_WITH_MEDIA = "https://upload.twitter.com/1/statuses/update_with_media.json";
+const string URL_STATUSES_MENTIONS = "https://api.twitter.com/1/statuses/mentions.json";
+const string URL_PUBLIC_TIMELINE = "https://api.twitter.com/1/statuses/public_timeline.json";
 const string URL_AUTHORIZE = "http://twitter.com/oauth/authorize?oauth_token=";
 const string URL_HOME_TIMELINE = "http://api.twitter.com/1/statuses/home_timeline.json";
 
@@ -62,7 +57,12 @@ public:
 	bool removeTokens(const string& filePath);
 	
 	// API implementation
-	bool getHomeTimeline(unsigned int count = 20);
+	bool statusesHomeTimeline();
+	bool statusesPublicTimeline();
+	bool statusesMentions();
+	bool statusesUpdate(const string& tweet);
+	bool statusesUpdateWithMedia(const string& tweet, const string& imageFilePath);
+	
 /*
 	bool getMentions();
 	bool getPublicTimeline();
@@ -71,15 +71,23 @@ public:
 	bool getRetweetsOfMe();
 	bool getUserTimeline();
 	*/
-	bool statusUpdate(const string& tweet);
-	bool statusUpdateWithMedia(const string& tweet, const string& imageFilePath);
 	string& getResponse();	
 	
 private:
+	bool doGet(const string& url);
+	void reset();
 	string response;
 	rto::oAuth oauth;
 	rtc::Curl twitcurl;
 };
+
+inline bool Twitter::doGet(const string& url) {
+	reset();
+	rtc::Request req(url);
+	req.isGet(true);
+	oauth.authorize(req);
+	return req.doGet(twitcurl, response);
+}
 
 
 inline void Twitter::setTwitterUsername(const string& username) {

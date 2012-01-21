@@ -53,6 +53,10 @@ bool Curl::doGet(const string& url) {
 	r = curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 	CHECK_CURL_ERROR(r);
 	
+	// no CA verification
+	r  = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false); 
+	CHECK_CURL_ERROR(r);
+	
 	// set header
 	if(header.length()) {
 		curl_header = curl_slist_append(curl_header, header.c_str());

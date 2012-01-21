@@ -6,17 +6,19 @@
 #include <vector>
 #include "../../libs/curl/curl.h"
 #include "../../libs/jansson/jansson.h"
-#include "Tweet.h"
-#include "TweetEvents.h"
+#include "data/Tweet.h"
+#include "data/URL.h"
 
 using std::string;
 using std::vector;
 using std::deque;
 
+namespace rtd = roxlu::twitter::data;
+
 namespace roxlu {
 
-typedef void (*image_downloaded_callback)(TweetURL*, void* userdata);
-typedef void (*tweet_callback)(Tweet*, void* userData);
+typedef void (*image_downloaded_callback)(rtd::URL*, void* userdata);
+typedef void (*tweet_callback)(rtd::Tweet*, void* userData);
 
 class TwitterStream {
 public:
@@ -29,9 +31,9 @@ public:
 	void parseBuffer();
 	void parseTweetJSON(string& json);
 	bool hasNewTweets();
-	Tweet* getNextTweet();
-	void removeTweet(Tweet* tweet);
-	void downloadTwitPic(string fileName, TweetURL* url);
+	rtd::Tweet* getNextTweet();
+	void removeTweet(rtd::Tweet* tweet);
+	void downloadTwitPic(string fileName, rtd::URL* url);
 	
 	void setImageDownloadCallback(image_downloaded_callback callback, void* userData);
 	void setTweetCallback(tweet_callback callback, void* userData);
@@ -57,8 +59,8 @@ private:
 	tweet_callback tweet_cb;
 	void* image_download_userdata;
 	image_downloaded_callback image_download_cb; 
-	deque<TweetURL*> download_twitpics;
-	deque<Tweet*> tweets;
+	deque<rtd::URL*> download_twitpics;
+	deque<rtd::Tweet*> tweets;
 	bool connected;
 	CURL* curl;
 	CURLM* curlm;
@@ -68,7 +70,7 @@ inline bool TwitterStream::hasNewTweets() {
 	return tweets.size() > 0;
 }
 
-inline Tweet* TwitterStream::getNextTweet() {
+inline rtd::Tweet* TwitterStream::getNextTweet() {
 	return tweets.front();
 }
 

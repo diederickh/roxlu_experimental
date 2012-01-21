@@ -4,21 +4,23 @@
 
 #include <fstream>
 #include <string>
-#include "../../libs/curl/curl.h"
+#include "../../../libs/curl/curl.h"
 
 using std::string;
 
 namespace roxlu {
+namespace twitter {
+namespace data {
 
-struct TweetURL {
+struct URL {
 	enum TweetURLType {
 		 NONE
 		,TWITPIC
 	};
-	TweetURL() {}
-	TweetURL(string url);
-	TweetURL& operator=(const TweetURL& other);
-	~TweetURL();
+	URL() {}
+	URL(string url);
+	URL& operator=(const URL& other);
+	~URL();
 	
 	void detectURLType();
 	bool isTwitPic();
@@ -48,18 +50,18 @@ private:
 	
 };
 
-inline bool TweetURL::isTwitPic() {
+inline bool URL::isTwitPic() {
 	return type == TWITPIC;
 }
 
-inline string TweetURL::getURL() {
+inline string URL::getURL() {
 	return url;
 }
 
-inline bool TweetURL::isDownloaded() {
+inline bool URL::isDownloaded() {
 	return is_downloaded;
 }
 
-}; // roxlu
+}}} // roxlu::twitter::data
 
 #endif

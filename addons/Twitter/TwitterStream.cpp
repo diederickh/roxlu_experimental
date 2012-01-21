@@ -1,11 +1,14 @@
 #include "TwitterStream.h"
 #include "TweetConstants.h"
-#include "TweetURL.h"
+#include "data/URL.h"
+#include "data/Tweet.h"
 #include <sstream>
 #include <iostream>
 
 
 using std::stringstream;
+
+namespace rtd = roxlu::twitter::data;
 
 namespace roxlu {
 
@@ -21,7 +24,7 @@ TwitterStream::TwitterStream()
 TwitterStream::~TwitterStream() {
 	// Remote tweet urs which are queued to download
 	{
-		deque<TweetURL*>::iterator it = download_twitpics.begin();
+		deque<rtd::URL*>::iterator it = download_twitpics.begin();
 		while(it != download_twitpics.end()) {
 			delete *it;
 			it = download_twitpics.erase(it);
@@ -30,7 +33,7 @@ TwitterStream::~TwitterStream() {
 	
 	// Remove tweets
 	{
-		deque<Tweet*>::iterator it = tweets.begin();
+		deque<rtd::Tweet*>::iterator it = tweets.begin();
 		while(it != tweets.end()) {
 			delete *it;
 			it = tweets.erase(it);
@@ -112,9 +115,9 @@ bool TwitterStream::disconnect() {
 
 bool TwitterStream::update() {
 	// download twitpics.
-	deque<TweetURL*>::iterator it = download_twitpics.begin();
+	deque<rtd::URL*>::iterator it = download_twitpics.begin();
 	while(it != download_twitpics.end()) {
-		TweetURL* u = (*it);
+		rtd::URL* u = (*it);
 		if(u->isDownloaded()) {
 			if(image_download_cb != NULL) {
 				image_download_cb(u, image_download_userdata);
@@ -167,7 +170,7 @@ void TwitterStream::parseBuffer() {
 void TwitterStream::parseTweetJSON(string& json) {
 	json_t* root;
 	json_error_t error;
-	Tweet* tweet;
+	rtd::Tweet* tweet;
 	
 	root = json_loads(json.c_str(), 0, &error);
 	if(!root) {
@@ -176,7 +179,7 @@ void TwitterStream::parseTweetJSON(string& json) {
 		return;
 	}
 
-	tweet = new Tweet();
+	tweet = new rtd::Tweet();
 
 	// text
 	json_t* node =	json_object_get(root, "text");
@@ -255,7 +258,7 @@ void TwitterStream::parseTweetJSON(string& json) {
 					json_t* exp_url = json_object_get(url, "expanded_url");
 					if(json_is_string(exp_url)) {
 						string exp_url_str = json_string_value(exp_url);
-						TweetURL* tu = new TweetURL(exp_url_str);
+						rtd::URL* tu = new rtd::URL(exp_url_str);
 						tweet->addURL(tu);
 					}
 				}
@@ -283,15 +286,15 @@ size_t TwitterStream::writeData(void *ptr, size_t s, size_t nmemb, void* obj) {
 	return bytes_to_write;
 }
 
-void TwitterStream::removeTweet(Tweet* tweet) {
-	deque<Tweet*>::iterator it = std::find(tweets.begin(), tweets.end(), tweet);
+void TwitterStream::removeTweet(rtd::Tweet* tweet) {
+	deque<rtd::Tweet*>::iterator it = std::find(tweets.begin(), tweets.end(), tweet);
 	if(it != tweets.end()) {
 		tweets.erase(it);
 		delete (*it);
 	}
 }
 
-void TwitterStream::downloadTwitPic(string fileName, TweetURL* url) {
+void TwitterStream::downloadTwitPic(string fileName, rtd::URL* url) {
 	if(url->isTwitPic()) {
 		download_twitpics.push_back(url);
 		url->download(url->getTwitPicURL(), fileName);
