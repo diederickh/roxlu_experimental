@@ -29,7 +29,12 @@ using std::vector;
 namespace roxlu {
 namespace twitter {
 
-const string URL_STATUSES_BASE = "http://api.twitter.com/1/statuses/";
+const string URL_STATUSES_BASE = "https://api.twitter.com/1/statuses/";
+const string URL_FRIENDSHIPS_BASE = "https://api.twitter.com/1/friendships/";
+const string URL_DIRECT_MESSAGES_BASE = "https://api.twitter.com/1/direct_messages/";
+const string URL_FOLLOWERS_BASE = "https://api.twitter.com/1/followers/";
+const string URL_USERS_BASE = "https://api.twitter.com/1/users/";
+
 const string URL_STATUSES_RETWEETED_BY = "/retweeted_by.json";
 const string URL_STATUSES_RETWEETED_BY_IDS = "/retweeted_by/ids.json";
 const string URL_STATUSES_RETWEETS = URL_STATUSES_BASE +"retweets/";
@@ -50,11 +55,32 @@ const string URL_STATUSES_USER_TIMELINE = URL_STATUSES_BASE +"user_timeline.json
 const string URL_STATUSES_RETWEETED_TO_USER = URL_STATUSES_BASE +"retweeted_to_user.json";
 const string URL_STATUSES_RETWEETED_BY_USER = URL_STATUSES_BASE +"retweeted_by_user.json";
 
-const string URL_SEARCH = "http://search.twitter.com/search.json";
+const string URL_SEARCH = "https://search.twitter.com/search.json";
 
-const string URL_DIRECT_MESSAGES = "http://api.twitter.com/1/direct_messages.json";
+const string URL_DIRECT_MESSAGES = "https://api.twitter.com/1/direct_messages.json";
+const string URL_DIRECT_MESSAGES_SENT = URL_DIRECT_MESSAGES_BASE +"sent.json";
+const string URL_DIRECT_MESSAGES_DESTROY = URL_DIRECT_MESSAGES_BASE +"destroy/";
+const string URL_DIRECT_MESSAGES_NEW = URL_DIRECT_MESSAGES_BASE +"new.json";
+const string URL_DIRECT_MESSAGES_SHOW = URL_DIRECT_MESSAGES_BASE +"show/"; 
 
-//const string URL_STATUSES_MENTIONS = URL_STATUSES_BASE +
+const string URL_FOLLOWERS_IDS = URL_FOLLOWERS_BASE +"ids.json";
+const string URL_FRIENDS_BASE = "https://api.twitter.com/1/friends/";
+const string URL_FRIENDS_IDS = URL_FRIENDS_BASE +"ids.json";
+const string URL_FRIENDSHIPS_EXISTS = URL_FRIENDSHIPS_BASE +"exists.json";
+const string URL_FRIENDSHIPS_INCOMING = URL_FRIENDSHIPS_BASE +"incoming.json";
+const string URL_FRIENDSHIPS_OUTGOING = URL_FRIENDSHIPS_BASE +"outgoing.json";
+const string URL_FRIENDSHIPS_SHOW = URL_FRIENDSHIPS_BASE +"show.json";
+const string URL_FRIENDSHIPS_CREATE = URL_FRIENDSHIPS_BASE +"create.json";
+const string URL_FRIENDSHIPS_DESTROY = URL_FRIENDSHIPS_BASE +"destroy/";
+const string URL_FRIENDSHIPS_LOOKUP = URL_FRIENDSHIPS_BASE +"lookup.json";
+const string URL_FRIENDSHIPS_UPDATE = URL_FRIENDSHIPS_BASE +"update.json";
+const string URL_FRIENDSHIPS_NO_RETWEET_IDS = URL_FRIENDSHIPS_BASE +"no_retweet_ids.json";
+
+const string URL_USERS_LOOKUP = URL_USERS_BASE +"lookup.json";
+const string URL_USERS_SEARCH = URL_USERS_BASE +"search.json";
+const string URL_USERS_SHOW = URL_USERS_BASE +"show.json";
+const string URL_USERS_CONTRIBUTEES = URL_USERS_BASE +"contributees.json";
+const string URL_USERS_CONTRIBUTORS = URL_USERS_BASE +"contributors.json";
 
 
 
@@ -106,7 +132,35 @@ public:
 	
 	// API: search
 	bool search(const string& query, rtp::Collection* extraParams = NULL);
+
+	// API: search (your Twitter application needs to have permissions!)
 	bool directMessages(rtp::Collection* extraParams = NULL);
+	bool directMessagesSent(rtp::Collection* extraParams = NULL);
+	bool directMessagesDestroy(const string& messageID, rtp::Collection* extraParams = NULL);
+	bool directMessagesNew(const string& screenName, const string& text, rtp::Collection*  extraParams = NULL);
+	bool directMessagesShow(const string& messageID);
+	
+	// API: Friends & followers
+	bool followersIDs(const string& screenName, rtp::Collection* extraParams = NULL);
+	bool friendsIDs(const string& screenName, rtp::Collection* extraParams = NULL);
+	bool friendshipsExists(const string& screenNameA, const string& screenNameB);
+	bool friendshipsIncoming(rtp::Collection* extraParams = NULL);
+	bool friendshipsOutgoing(rtp::Collection* extraParams = NULL);
+	bool friendshipsShow(const string& sourceScreenName, const string& targetScreenName);
+	bool friendshipsCreate(const string& screenName, rtp::Collection* extraParams = NULL);
+	bool friendshipsDestroy(const string& screenName, rtp::Collection* extraParams = NULL);
+	bool friendshipsLookup(const string& screenNames);
+	bool friendshipsUpdate(const string& screenName, bool enableDeviceNotifications, bool enableRetweets);
+	bool friendshipsNoRetweetIDs(bool stringifyIDs = true);
+	
+	// API: Users
+	bool usersLookup(const string& screenNames, rtp::Collection* extraParams = NULL);
+	bool usersSearch(const string& q, rtp::Collection* extraParams = NULL);
+	bool usersShow(const string& screenName, rtp::Collection* extraParams = NULL);
+	bool usersContributees(const string& screenName, rtp::Collection* extraParams = NULL);
+	bool usersContributors(const string& screenName, rtp::Collection* extraParams = NULL);
+	//bool usersProfileImages();  // how do we implement this.. maybe parse the 302
+	
 	// ++
 	
 	

@@ -246,6 +246,8 @@ bool Twitter::statusesRetweetedByUser(const string& screenName, rtp::Collection*
 }
 
 // :::::::::::::::: search
+
+// https://dev.twitter.com/docs/api/1/get/search
 bool Twitter::search(const string& query, rtp::Collection* extraParams) {
 	rtp::Collection col;
 	col.addString("q", query);
@@ -253,12 +255,149 @@ bool Twitter::search(const string& query, rtp::Collection* extraParams) {
 }
 
 // :::::::::::::::: direct mesages
+// https://dev.twitter.com/docs/api/1/get/direct_messages
 bool Twitter::directMessages(rtp::Collection* extraParams) {
 	return doGet(URL_DIRECT_MESSAGES, extraParams);
 }
 
+// https://dev.twitter.com/docs/api/1/get/direct_messages/sent
+bool Twitter::directMessagesSent(rtp::Collection* extraParams) {
+	return doGet(URL_DIRECT_MESSAGES_SENT, extraParams);
+}
 
+// https://dev.twitter.com/docs/api/1/post/direct_messages/destroy/%3Aid
+bool Twitter::directMessagesDestroy(const string& messageID, rtp::Collection* extraParams) {
+	string url = URL_DIRECT_MESSAGES_DESTROY +messageID +".json";
+	return doPost(url, extraParams);
+}
 
+// https://dev.twitter.com/docs/api/1/post/direct_messages/new
+bool Twitter::directMessagesNew(const string& screenName, const string& text, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("screen_name", screenName);
+	col.addString("text", text);
+	return doPost(URL_DIRECT_MESSAGES_NEW, col, false, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/get/direct_messages/show/%3Aid
+bool Twitter::directMessagesShow(const string& messageID) {
+	string url = URL_DIRECT_MESSAGES_SHOW +messageID +".json";
+	return doGet(url);
+}
+
+// :::::::::::::::: followers & friends.
+
+// https://dev.twitter.com/docs/api/1/get/followers/ids	
+bool Twitter::followersIDs(const string& screenName, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("screen_name", screenName);
+	return doGet(URL_FOLLOWERS_IDS, &col, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/get/friends/ids
+bool Twitter::friendsIDs(const string& screenName, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("screen_name", screenName);
+	return doGet(URL_FRIENDS_IDS, &col, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/get/friendships/exists
+bool Twitter::friendshipsExists(const string& screenNameA, const string& screenNameB) {
+	rtp::Collection col;
+	col.addString("screen_name_a", screenNameA);
+	col.addString("screen_name_b", screenNameB);
+	return doGet(URL_FRIENDSHIPS_EXISTS, &col);
+}
+
+// https://dev.twitter.com/docs/api/1/get/friendships/incoming
+bool Twitter::friendshipsIncoming(rtp::Collection* extraParams) {
+	return doGet(URL_FRIENDSHIPS_INCOMING, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/get/friendships/outgoing
+bool Twitter::friendshipsOutgoing(rtp::Collection* extraParams) {
+	return doGet(URL_FRIENDSHIPS_OUTGOING, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/get/friendships/show
+bool Twitter::friendshipsShow(const string& sourceScreenName, const string& targetScreenName) {
+	rtp::Collection col;
+	col.addString("source_screen_name", sourceScreenName);
+	col.addString("target_screen_name", targetScreenName);
+	return doGet(URL_FRIENDSHIPS_SHOW, &col);
+}
+
+// https://dev.twitter.com/docs/api/1/post/friendships/create
+bool Twitter::friendshipsCreate(const string& screenName, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("screen_name", screenName);
+	return doPost(URL_FRIENDSHIPS_CREATE, col, false, extraParams);
+}
+
+//https://dev.twitter.com/docs/api/1/post/friendships/destroy
+bool Twitter::friendshipsDestroy(const string& screenName, rtp::Collection* extraParams) {
+	string url = URL_FRIENDSHIPS_DESTROY +screenName +".json";
+	return doPost(url, *extraParams, false);
+}
+
+// https://dev.twitter.com/docs/api/1/get/friendships/lookup
+bool Twitter::friendshipsLookup(const string& screenNames) {
+	rtp::Collection col;
+	col.addString("screen_name", screenNames);
+	return doGet(URL_FRIENDSHIPS_LOOKUP, &col);
+}
+
+// https://dev.twitter.com/docs/api/1/post/friendships/update
+bool Twitter::friendshipsUpdate(const string& screenName, bool enableDeviceNotifications, bool enableRetweets) {
+	rtp::Collection col;
+	col.addString("screen_name", screenName);
+	col.addString("device", (enableDeviceNotifications) ? "1" : "0");
+	col.addString("retweets", (enableRetweets) ? "1" : "0");
+	return doPost(URL_FRIENDSHIPS_UPDATE, col, false);
+}
+
+// https://dev.twitter.com/docs/api/1/get/friendships/no_retweet_ids
+bool Twitter::friendshipsNoRetweetIDs(bool stringifyIDs) {
+	rtp::Collection col;
+	col.addString("stringify_ids", (stringifyIDs) ? "1" : "0");
+	return doGet(URL_FRIENDSHIPS_NO_RETWEET_IDS, &col);
+}
+
+// :::::::::::::::: followers & friends.
+// https://dev.twitter.com/docs/api/1/get/users/lookup
+bool Twitter::usersLookup(const string& screenNames, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("screen_name", screenNames);
+	return doGet(URL_USERS_LOOKUP, &col);
+}
+
+// https://dev.twitter.com/docs/api/1/get/users/search
+bool Twitter::usersSearch(const string& q, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("q", q);
+	return doGet(URL_USERS_SEARCH, &col, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/get/users/show
+bool Twitter::usersShow(const string& screenName, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("screen_name", screenName);
+	return doGet(URL_USERS_SHOW, &col, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/get/users/contributees
+bool Twitter::usersContributees(const string& screenName, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("screen_name", screenName);
+	return doGet(URL_USERS_CONTRIBUTEES, &col, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/get/users/contributors
+bool Twitter::usersContributors(const string& screenName, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("screen_name", screenName);
+	return doGet(URL_USERS_CONTRIBUTORS, &col, extraParams);
+}
 
 
 

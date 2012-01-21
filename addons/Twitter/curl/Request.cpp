@@ -97,7 +97,7 @@ bool Request::doPost(rtc::Curl& curl,  string& result, bool multipart) {
 		curl.setHeader(header);
 	}
 
-//	curl.setVerbose(true);
+	curl.setVerbose(true);
 
 	if(!curl.doPost(url, params, multipart)) {
 		return false;
