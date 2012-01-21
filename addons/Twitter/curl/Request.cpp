@@ -55,9 +55,6 @@ bool Request::doGet(rtc::Curl& curl, string& result) {
 	// @todo call curl.createQueryString!
 	// --------------------------------
 	//curl.setVerbose(true);
-	printf("------------> Request::doGet() -> use curl.getQueryString())\n");
-	printf("------------> Request::doGet() -> use curl.getQueryString())\n");
-	printf("------------> Request::doGet() -> use curl.getQueryString())\n");
 	string ps;
 	const list<rtp::Parameter*>& pars = params.getParameters();
 	list<rtp::Parameter*>::const_iterator it = pars.begin();
@@ -100,7 +97,7 @@ bool Request::doPost(rtc::Curl& curl,  string& result, bool multipart) {
 		curl.setHeader(header);
 	}
 
-	curl.setVerbose(true);
+//	curl.setVerbose(true);
 
 	if(!curl.doPost(url, params, multipart)) {
 		return false;

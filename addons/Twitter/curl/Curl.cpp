@@ -100,24 +100,7 @@ bool Curl::doPost(const string& url, const rtp::Collection& params, bool multiPa
 	// ------------------------------------------------------
 	if(!multiPart) {
 		const list<rtp::Parameter*>& pars = params.getParameters();
-		list<rtp::Parameter*>::const_iterator it = pars.begin();
-		
-		// @todo use createQueryString!
-		printf("@todo useCreateQueryString!!!!!!!!!!!!!!!\n");
-		printf("@todo useCreateQueryString!!!!!!!!!!!!!!!\n");
-		printf("@todo useCreateQueryString!!!!!!!!!!!!!!!\n");
-		printf("@todo useCreateQueryString!!!!!!!!!!!!!!!\n");
-		string data_str;
-		while(it != pars.end()) {
-			data_str.append((*it)->getName());
-			data_str.append("=");
-			data_str.append((*it)->getStringValue());
-		
-			++it;
-			if(it != pars.end()) {
-				data_str.append("&");
-			}
-		}
+		string data_str = createQueryString(pars);
 		
 		r = curl_easy_setopt(curl, CURLOPT_HTTPPOST, 1);
 		CHECK_CURL_ERROR(r);

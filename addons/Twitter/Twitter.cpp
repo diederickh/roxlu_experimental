@@ -131,40 +131,136 @@ void Twitter::reset() {
 	response.clear(); 
 }
 
-bool Twitter::statusesUpdate(const string& tweet) {
-	reset();
-	rtc::Request req(URL_STATUSES_UPDATE);
-	req.getParams().addString("status", tweet);
-	req.isPost(true);
-	oauth.authorize(req);
-	return req.doPost(twitcurl, response);
+// :::::::::::::::: tweets
+
+// https://dev.twitter.com/docs/api/1/get/statuses/%3Aid/retweeted_by
+bool Twitter::statusesRetweetedBy(const string& tweetID, rtp::Collection* extraParams) {
+	string url = URL_STATUSES_BASE +tweetID +URL_STATUSES_RETWEETED_BY;
+	return doGet(url, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/get/statuses/%3Aid/retweeted_by/ids
+bool Twitter::statusesRetweetedByIDs(const string& tweetID, rtp::Collection* extraParams) {
+	string url = URL_STATUSES_BASE +tweetID +URL_STATUSES_RETWEETED_BY_IDS;
+	return doGet(url, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/get/statuses/retweets/%3Aid
+bool Twitter::statusesRetweets(const string& tweetID, rtp::Collection* extraParams) {
+	string url = URL_STATUSES_RETWEETS +tweetID +".json";
+	return doGet(url, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/get/statuses/show/%3Aid
+bool Twitter::statusesShow(const string& tweetID, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("id", tweetID);
+	return doGet(URL_STATUSES_SHOW, &col, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/post/statuses/destroy/%3Aid
+bool Twitter::statusesDestroy(const string& tweetID, rtp::Collection* extraParams) {
+	string url = URL_STATUSES_DESTROY +tweetID +".json";
+	return doPost(url, false, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/post/statuses/retweet/%3Aid
+bool Twitter::statusesRetweet(const string& tweetID, rtp::Collection* extraParams) {
+	string url = URL_STATUSES_RETWEET +tweetID +".json";
+	return doPost(url, false, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/post/statuses/update
+bool Twitter::statusesUpdate(const string& tweet, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("status", tweet);
+	return doPost(URL_STATUSES_UPDATE, col, false, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/post/statuses/update_with_media
+bool Twitter::statusesUpdateWithMedia(const string& tweet, const string& imageFilePath, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("status", tweet);
+	col.addFile("media[]", imageFilePath);
+	return doPost(URL_STATUSES_UPDATE_WITH_MEDIA, col, true, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/get/statuses/oembed
+bool Twitter::statusesoEmbed(const string& tweetID, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("id", tweetID);
+	col.addString("url", "https://twitter.com/twitter/status/" +tweetID);
+	return doGet(URL_STATUSES_OEMBED, &col, extraParams);
 }
 
 
-bool Twitter::statusesUpdateWithMedia(const string& tweet, const string& imageFilePath) {
-	reset();
-	rtc::Request req(URL_STATUSES_UPDATE_WITH_MEDIA);
-	req.getParams().addString("status", tweet);
-	req.getParams().addFile("media[]", imageFilePath);
-	req.isPost(true);
-	oauth.authorize(req);
-	return req.doPost(twitcurl, response, true);
-}
+// :::::::::::::::: timeslines 
 
 // https://dev.twitter.com/docs/api/1/get/statuses/home_timeline
-bool Twitter::statusesHomeTimeline() {
-	return doGet(URL_HOME_TIMELINE);
-}
-
-// https://dev.twitter.com/docs/api/1/get/statuses/public_timeline
-bool Twitter::statusesPublicTimeline() {
-	return doGet(URL_PUBLIC_TIMELINE);
+bool Twitter::statusesHomeTimeline(rtp::Collection* extraParams) {
+	return doGet(URL_STATUSES_HOME_TIMELINE, extraParams);
 }
 
 // https://dev.twitter.com/docs/api/1/get/statuses/mentions
-bool Twitter::statusesMentions() {
-	return doGet(URL_STATUSES_MENTIONS);
+bool Twitter::statusesMentions(rtp::Collection* extraParams) {
+	return doGet(URL_STATUSES_MENTIONS, extraParams);
 }
+
+// https://dev.twitter.com/docs/api/1/get/statuses/public_timeline
+bool Twitter::statusesPublicTimeline(rtp::Collection* extraParams) {
+	return doGet(URL_STATUSES_PUBLIC_TIMELINE, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/get/statuses/retweeted_by_me
+bool Twitter::statusesRetweetedByMe(rtp::Collection* extraParams) {
+	return doGet(URL_STATUSES_RETWEETED_BY_ME, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/get/statuses/retweeted_to_me
+bool Twitter::statusesRetweetedToMe(rtp::Collection* extraParams) {
+	return doGet(URL_STATUSES_RETWEETED_TO_ME, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/get/statuses/retweets_of_me
+bool Twitter::statusesRetweetsOfMe(rtp::Collection* extraParams) {
+	return doGet(URL_STATUSES_RETWEETS_OF_ME, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/get/statuses/user_timeline
+bool Twitter::statusesUserTimeline(rtp::Collection* extraParams) {
+	return doGet(URL_STATUSES_USER_TIMELINE, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/get/statuses/retweeted_to_user
+bool Twitter::statusesRetweetedToUser(const string& screenName, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("screen_name", screenName);
+	return doGet(URL_STATUSES_RETWEETED_TO_USER, &col, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/get/statuses/retweeted_by_user
+bool Twitter::statusesRetweetedByUser(const string& screenName, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("screen_name", screenName);
+	return doGet(URL_STATUSES_RETWEETED_BY_USER, &col, extraParams);
+}
+
+// :::::::::::::::: search
+bool Twitter::search(const string& query, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("q", query);
+	return doGet(URL_SEARCH, &col, extraParams);
+}
+
+// :::::::::::::::: direct mesages
+bool Twitter::directMessages(rtp::Collection* extraParams) {
+	return doGet(URL_DIRECT_MESSAGES, extraParams);
+}
+
+
+
+
+
 
 
 }} // roxlu::twitter
