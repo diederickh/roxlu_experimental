@@ -174,7 +174,7 @@ bool Twitter::statusesRetweet(const string& tweetID, rtp::Collection* extraParam
 bool Twitter::statusesUpdate(const string& tweet, rtp::Collection* extraParams) {
 	rtp::Collection col;
 	col.addString("status", tweet);
-	return doPost(URL_STATUSES_UPDATE, col, false, extraParams);
+	return doPost(URL_STATUSES_UPDATE, &col, false, extraParams);
 }
 
 // https://dev.twitter.com/docs/api/1/post/statuses/update_with_media
@@ -182,7 +182,7 @@ bool Twitter::statusesUpdateWithMedia(const string& tweet, const string& imageFi
 	rtp::Collection col;
 	col.addString("status", tweet);
 	col.addFile("media[]", imageFilePath);
-	return doPost(URL_STATUSES_UPDATE_WITH_MEDIA, col, true, extraParams);
+	return doPost(URL_STATUSES_UPDATE_WITH_MEDIA, &col, true, extraParams);
 }
 
 // https://dev.twitter.com/docs/api/1/get/statuses/oembed
@@ -276,7 +276,7 @@ bool Twitter::directMessagesNew(const string& screenName, const string& text, rt
 	rtp::Collection col;
 	col.addString("screen_name", screenName);
 	col.addString("text", text);
-	return doPost(URL_DIRECT_MESSAGES_NEW, col, false, extraParams);
+	return doPost(URL_DIRECT_MESSAGES_NEW, &col, false, extraParams);
 }
 
 // https://dev.twitter.com/docs/api/1/get/direct_messages/show/%3Aid
@@ -331,13 +331,13 @@ bool Twitter::friendshipsShow(const string& sourceScreenName, const string& targ
 bool Twitter::friendshipsCreate(const string& screenName, rtp::Collection* extraParams) {
 	rtp::Collection col;
 	col.addString("screen_name", screenName);
-	return doPost(URL_FRIENDSHIPS_CREATE, col, false, extraParams);
+	return doPost(URL_FRIENDSHIPS_CREATE, &col, false, extraParams);
 }
 
 //https://dev.twitter.com/docs/api/1/post/friendships/destroy
 bool Twitter::friendshipsDestroy(const string& screenName, rtp::Collection* extraParams) {
 	string url = URL_FRIENDSHIPS_DESTROY +screenName +".json";
-	return doPost(url, *extraParams, false);
+	return doPost(url, extraParams, false);
 }
 
 // https://dev.twitter.com/docs/api/1/get/friendships/lookup
@@ -353,7 +353,7 @@ bool Twitter::friendshipsUpdate(const string& screenName, bool enableDeviceNotif
 	col.addString("screen_name", screenName);
 	col.addString("device", (enableDeviceNotifications) ? "1" : "0");
 	col.addString("retweets", (enableRetweets) ? "1" : "0");
-	return doPost(URL_FRIENDSHIPS_UPDATE, col, false);
+	return doPost(URL_FRIENDSHIPS_UPDATE, &col, false);
 }
 
 // https://dev.twitter.com/docs/api/1/get/friendships/no_retweet_ids
@@ -363,7 +363,7 @@ bool Twitter::friendshipsNoRetweetIDs(bool stringifyIDs) {
 	return doGet(URL_FRIENDSHIPS_NO_RETWEET_IDS, &col);
 }
 
-// :::::::::::::::: followers & friends.
+// :::::::::::::::: users
 // https://dev.twitter.com/docs/api/1/get/users/lookup
 bool Twitter::usersLookup(const string& screenNames, rtp::Collection* extraParams) {
 	rtp::Collection col;
@@ -399,7 +399,48 @@ bool Twitter::usersContributors(const string& screenName, rtp::Collection* extra
 	return doGet(URL_USERS_CONTRIBUTORS, &col, extraParams);
 }
 
+// :::::::::::::::: users suggestions
 
+// https://dev.twitter.com/docs/api/1/get/users/suggestions
+bool Twitter::usersSuggestions() {
+	return doGet(URL_USERS_SUGGESTIONS);
+}
+
+// https://dev.twitter.com/docs/api/1/get/users/suggestions/%3Aslug
+bool Twitter::usersSuggestionsSlug(const string& slug, string lang) {
+	rtp::Collection col;
+	string url = URL_USERS_SUGGESTIONS_SLUG +slug +".json";
+	
+	if(lang.length()) {
+		col.addString("lang", lang);
+	}
+	return doGet(url, &col);
+}
+
+// https://dev.twitter.com/docs/api/1/get/users/suggestions/%3Aslug/members
+bool Twitter::usersSuggestionsSlugMembers(const string& slug) {
+	string url = URL_USERS_SUGGESTIONS_SLUG +slug +"/members.json";
+	return doGet(url);
+}
+
+// :::::::::::::::: favorites
+
+// https://dev.twitter.com/docs/api/1/get/favorites
+bool Twitter::favorites(rtp::Collection* extraParams) {
+	return doGet(URL_FAVORITES, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/post/favorites/create/%3Aid
+bool Twitter::favoritesCreate(const string& tweetID, rtp::Collection* extraParams) {
+	string url = URL_FAVORITES_CREATE +tweetID +".json";
+	return doPost(url, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/post/favorites/destroy/%3Aid
+bool Twitter::favoritesDestroy(const string& tweetID) {
+	string url = URL_FAVORITES_DESTROY +tweetID +".json";
+	return doPost(url, NULL, false, NULL);
+}
 
 
 }} // roxlu::twitter

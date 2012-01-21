@@ -29,11 +29,13 @@ using std::vector;
 namespace roxlu {
 namespace twitter {
 
-const string URL_STATUSES_BASE = "https://api.twitter.com/1/statuses/";
-const string URL_FRIENDSHIPS_BASE = "https://api.twitter.com/1/friendships/";
-const string URL_DIRECT_MESSAGES_BASE = "https://api.twitter.com/1/direct_messages/";
-const string URL_FOLLOWERS_BASE = "https://api.twitter.com/1/followers/";
-const string URL_USERS_BASE = "https://api.twitter.com/1/users/";
+const string URL_TWITTER_BASE = "https://api.twitter.com/";
+const string URL_STATUSES_BASE = URL_TWITTER_BASE +"1/statuses/";
+const string URL_FRIENDSHIPS_BASE = URL_TWITTER_BASE +"1/friendships/";
+const string URL_DIRECT_MESSAGES_BASE = URL_TWITTER_BASE +"1/direct_messages/";
+const string URL_FOLLOWERS_BASE = URL_TWITTER_BASE +"1/followers/";
+const string URL_USERS_BASE = URL_TWITTER_BASE +"1/users/";
+const string URL_FAVORITES_BASE = URL_TWITTER_BASE + "1/favorites/";
 
 const string URL_STATUSES_RETWEETED_BY = "/retweeted_by.json";
 const string URL_STATUSES_RETWEETED_BY_IDS = "/retweeted_by/ids.json";
@@ -57,14 +59,14 @@ const string URL_STATUSES_RETWEETED_BY_USER = URL_STATUSES_BASE +"retweeted_by_u
 
 const string URL_SEARCH = "https://search.twitter.com/search.json";
 
-const string URL_DIRECT_MESSAGES = "https://api.twitter.com/1/direct_messages.json";
+const string URL_DIRECT_MESSAGES = URL_TWITTER_BASE +"1/direct_messages.json";
 const string URL_DIRECT_MESSAGES_SENT = URL_DIRECT_MESSAGES_BASE +"sent.json";
 const string URL_DIRECT_MESSAGES_DESTROY = URL_DIRECT_MESSAGES_BASE +"destroy/";
 const string URL_DIRECT_MESSAGES_NEW = URL_DIRECT_MESSAGES_BASE +"new.json";
 const string URL_DIRECT_MESSAGES_SHOW = URL_DIRECT_MESSAGES_BASE +"show/"; 
 
 const string URL_FOLLOWERS_IDS = URL_FOLLOWERS_BASE +"ids.json";
-const string URL_FRIENDS_BASE = "https://api.twitter.com/1/friends/";
+const string URL_FRIENDS_BASE = URL_TWITTER_BASE +"1/friends/";
 const string URL_FRIENDS_IDS = URL_FRIENDS_BASE +"ids.json";
 const string URL_FRIENDSHIPS_EXISTS = URL_FRIENDSHIPS_BASE +"exists.json";
 const string URL_FRIENDSHIPS_INCOMING = URL_FRIENDSHIPS_BASE +"incoming.json";
@@ -81,7 +83,12 @@ const string URL_USERS_SEARCH = URL_USERS_BASE +"search.json";
 const string URL_USERS_SHOW = URL_USERS_BASE +"show.json";
 const string URL_USERS_CONTRIBUTEES = URL_USERS_BASE +"contributees.json";
 const string URL_USERS_CONTRIBUTORS = URL_USERS_BASE +"contributors.json";
+const string URL_USERS_SUGGESTIONS = URL_USERS_BASE +"suggestions.json";
+const string URL_USERS_SUGGESTIONS_SLUG = URL_USERS_BASE +"suggestions/";
 
+const string URL_FAVORITES = URL_TWITTER_BASE +"1/favorites.json";
+const string URL_FAVORITES_CREATE = URL_FAVORITES_BASE +"create/";
+const string URL_FAVORITES_DESTROY = URL_FAVORITES_BASE +"destroy/";
 
 
 const string URL_AUTHORIZE = "http://twitter.com/oauth/authorize?oauth_token=";
@@ -160,27 +167,26 @@ public:
 	bool usersContributees(const string& screenName, rtp::Collection* extraParams = NULL);
 	bool usersContributors(const string& screenName, rtp::Collection* extraParams = NULL);
 	//bool usersProfileImages();  // how do we implement this.. maybe parse the 302
+
+	// API: Users suggestions
+	bool usersSuggestions();
+	bool usersSuggestionsSlug(const string& slug, string lang = "");
+	bool usersSuggestionsSlugMembers(const string& slug);
+	
+	// API: Favorites
+	bool favorites(rtp::Collection* extraParams = NULL);
+	bool favoritesCreate(const string& tweetID, rtp::Collection* extraParams = NULL);
+	bool favoritesDestroy(const string& tweetID);
+	
+	
 	
 	// ++
 	
-	
-	
-
-	
-	
-/*
-	bool getMentions();
-	bool getPublicTimeline();
-	bool getRetweetedByMe();
-	bool getRetweetedToMe();
-	bool getRetweetsOfMe();
-	bool getUserTimeline();
-	*/
 	string& getResponse();	
 	
 private:
 	bool doGet(const string& url, rtp::Collection* defaultParams = NULL, rtp::Collection* extraParams = NULL);
-	bool doPost(const string& url, const rtp::Collection& col, bool multiPart = false, rtp::Collection* extraParams = NULL);
+	bool doPost(const string& url, const rtp::Collection* col = NULL, bool multiPart = false, rtp::Collection* extraParams = NULL);
 	bool doPost(const string& url, bool multiPart = false, rtp::Collection* extraParams = NULL);
 	void reset();
 	string response;
@@ -210,19 +216,25 @@ inline bool Twitter::doGet(const string& url, rtp::Collection* defaultParams, rt
 inline bool Twitter::doPost(const string& url, bool multiPart, rtp::Collection* extraParams) {
 	reset();
 	rtc::Request req(url);
+	
 	if(extraParams != NULL) {
 		req.getParams() += *extraParams;
 	}
+	
 	req.isPost(true);
 	oauth.authorize(req);
 	return req.doPost(twitcurl, response, multiPart);
 
 }
 
-inline bool Twitter::doPost(const string& url, const rtp::Collection& col, bool multiPart, rtp::Collection* extraParams) {	
+inline bool Twitter::doPost(const string& url, const rtp::Collection* col, bool multiPart, rtp::Collection* extraParams) {	
 	reset();
 	rtc::Request req(url);
-	req.addParams(col);
+	
+	if(col != NULL) {
+		req.addParams(*col);
+	}
+	
 	if(extraParams != NULL) {
 		req.getParams() += *extraParams;
 	}
@@ -230,8 +242,6 @@ inline bool Twitter::doPost(const string& url, const rtp::Collection& col, bool 
 	oauth.authorize(req);
 	return req.doPost(twitcurl, response, multiPart);
 }
-
-
 
 
 inline void Twitter::setTwitterUsername(const string& username) {
