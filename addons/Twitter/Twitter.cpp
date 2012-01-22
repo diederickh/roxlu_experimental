@@ -442,5 +442,170 @@ bool Twitter::favoritesDestroy(const string& tweetID) {
 	return doPost(url, NULL, false, NULL);
 }
 
+// :::::::::::::::: lists
+// https://dev.twitter.com/docs/api/1/get/lists/all
+bool Twitter::listsAll(const string& screenName) {
+	rtp::Collection col;
+	col.addString("screen_name", screenName);
+	return doGet(URL_FAVORITES, &col);
+}
+
+// https://dev.twitter.com/docs/api/1/get/lists/statuses
+bool Twitter::listsStatuses(const string& slug, const string& ownerScreenName, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("slug", slug);
+	col.addString("owner_screen_name", ownerScreenName);
+	return doGet(URL_LISTS_STATUSES, &col, extraParams);	
+}
+
+// https://dev.twitter.com/docs/api/1/post/lists/members/destroy
+bool Twitter::listsMembersDestroy(const string& slug, const string& ownerScreenName) {
+	rtp::Collection col;
+	col.addString("slug", slug);
+	col.addString("owner_screen_name", ownerScreenName);
+	return doPost(URL_LISTS_MEMBERS_DESTROY, &col, false, NULL);
+}
+
+// https://dev.twitter.com/docs/api/1/get/lists/memberships
+bool Twitter::listsMemberships(const string& screenName, rtp::Collection* extraParams) {
+	rtp::Collection col; 
+	col.addString("screen_name", screenName);
+	return doGet(URL_LISTS_MEMBERSHIPS, &col);
+}
+
+// https://dev.twitter.com/docs/api/1/get/lists/subscribers
+bool Twitter::listsSubscribers(const string& slug, const string& ownerScreenName, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("slug", slug);
+	col.addString("owner_screen_name", ownerScreenName);
+	return doGet(URL_LISTS_SUBSCRIBERS, &col);
+}
+
+// https://dev.twitter.com/docs/api/1/post/lists/subscribers/create
+bool Twitter::listsSubscribersCreate(const string& slug, const string& ownerScreenName) {	
+	rtp::Collection col;
+	col.addString("slug", slug);
+	col.addString("owner_screen_name", ownerScreenName);
+	return doPost(URL_LISTS_SUBSCRIBERS_CREATE, &col, false, NULL);
+}
+
+// https://dev.twitter.com/docs/api/1/get/lists/subscribers/show
+bool Twitter::listsSubscribersShow(
+	 const string& slug
+	,const string& ownerScreenName
+	,const string& screenName
+	,rtp::Collection* extraParams
+)
+{
+	rtp::Collection col;
+	col.addString("slug", slug);
+	col.addString("owner_screen_name", ownerScreenName);
+	col.addString("screen_name", screenName);
+	return doGet(URL_LISTS_SUBSCRIBERS_SHOW, &col, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/post/lists/subscribers/destroy
+bool Twitter::listsSubscribersDestroy(const string& slug, const string& ownerScreenName) {
+	rtp::Collection col;
+	col.addString("slug", slug);
+	col.addString("owner_screen_name", ownerScreenName);
+	//printf("%s\n", URL_LISTS_SUBSCRIBERS_DESTROY.c_str());
+	return doPost(URL_LISTS_SUBSCRIBERS_DESTROY, &col, false, NULL);
+}
+
+// https://dev.twitter.com/docs/api/1/post/lists/members/create_all
+bool Twitter::listsMembersCreateAll(const string& slug, const string& ownerScreenName, const string& screenNames) {
+	rtp::Collection col;
+	col.addString("slug", slug);
+	col.addString("owner_screen_name", ownerScreenName);
+	col.addString("screen_name", screenNames);
+	return doPost(URL_LISTS_MEMBERS_CREATE_ALL, &col, false, NULL);
+}
+
+// https://dev.twitter.com/docs/api/1/get/lists/members/show
+bool Twitter::listsMembersShow(const string& slug, const string& ownerScreenName, const string& screenName, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("slug", slug);
+	col.addString("owner_screen_name", ownerScreenName);
+	col.addString("screen_name", screenName);
+	return doGet(URL_LISTS_MEMBERS_SHOW, &col, extraParams);
+}
+
+
+// https://dev.twitter.com/docs/api/1/post/lists/create	
+bool Twitter::listsCreate(const string& name, bool isPublic, const string& description) {
+	rtp::Collection col;
+	col.addString("name", name);
+	col.addString("mode", (isPublic) ? "public" : "private");
+	if(description.length()) {
+		col.addString("description", description);
+	}
+	return doPost(URL_LISTS_CREATE, &col, false, NULL);
+}
+
+// https://dev.twitter.com/docs/api/1/post/lists/update
+bool Twitter::listsUpdate(
+	 const string& slug
+	,const string& ownerScreenName
+	,bool isPublic, const string& description
+)
+{
+	rtp::Collection col;
+	col.addString("slug", slug);
+	col.addString("owner_screen_name", ownerScreenName);
+	col.addString("mode", (isPublic) ? "public" : "private");
+	if(description.length()) {
+		col.addString("description", description);
+	}	
+	return doPost(URL_LISTS_UPDATE, &col, false,  NULL);
+}
+
+// https://dev.twitter.com/docs/api/1/get/lists
+bool Twitter::lists(const string& screenName, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("screen_name",screenName);
+	return doGet(URL_LISTS, &col);
+}
+
+// https://dev.twitter.com/docs/api/1/get/lists/show
+bool Twitter::listsShow(const string& slug, const string& ownerScreenName) {
+	rtp::Collection col;
+	col.addString("owner_screen_name" , ownerScreenName);
+	col.addString("slug", slug);
+	return doGet(URL_LISTS_SHOW, &col);
+}
+
+// https://dev.twitter.com/docs/api/1/get/lists/subscriptions
+bool Twitter::listsSubscriptions(const string& screenName, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("screen_name", screenName);
+	return doGet(URL_LISTS_SUBSCRIPTIONS, &col, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/get/lists/members 
+bool Twitter::listsMembers(const string& slug, const string& ownerScreenName, rtp::Collection* extraParams) {
+	rtp::Collection col;
+	col.addString("slug", slug);
+	col.addString("owner_screen_name", ownerScreenName);
+	return doGet(URL_LISTS_MEMBERS, &col, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/post/lists/members/create
+bool Twitter::listsMembersCreate(const string& slug, const string& ownerScreenName, const string& screenName) {
+	rtp::Collection col;
+	col.addString("slug", slug);
+	col.addString("owner_screen_name", ownerScreenName);
+	col.addString("screen_name", screenName);
+	return doPost(URL_LISTS_MEMBERS_CREATE, &col, false, NULL);
+}
+
+
+// https://dev.twitter.com/docs/api/1/post/lists/destroy
+bool Twitter::listsDestroy(const string& slug, const string& ownerScreenName) {
+	rtp::Collection col;
+	col.addString("slug", slug);
+	col.addString("owner_screen_name", ownerScreenName);
+	return doPost(URL_LISTS_DESTROY, &col, false, NULL);
+}
 
 }} // roxlu::twitter

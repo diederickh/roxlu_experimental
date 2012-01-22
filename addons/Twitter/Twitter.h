@@ -36,6 +36,7 @@ const string URL_DIRECT_MESSAGES_BASE = URL_TWITTER_BASE +"1/direct_messages/";
 const string URL_FOLLOWERS_BASE = URL_TWITTER_BASE +"1/followers/";
 const string URL_USERS_BASE = URL_TWITTER_BASE +"1/users/";
 const string URL_FAVORITES_BASE = URL_TWITTER_BASE + "1/favorites/";
+const string URL_LISTS_BASE = URL_TWITTER_BASE +"1/lists/";
 
 const string URL_STATUSES_RETWEETED_BY = "/retweeted_by.json";
 const string URL_STATUSES_RETWEETED_BY_IDS = "/retweeted_by/ids.json";
@@ -90,9 +91,51 @@ const string URL_FAVORITES = URL_TWITTER_BASE +"1/favorites.json";
 const string URL_FAVORITES_CREATE = URL_FAVORITES_BASE +"create/";
 const string URL_FAVORITES_DESTROY = URL_FAVORITES_BASE +"destroy/";
 
+const string URL_LISTS_ALL = URL_LISTS_BASE +"all.json";
+const string URL_LISTS_STATUSES = URL_LISTS_BASE +"statuses.json";
+const string URL_LISTS_MEMBERS_DESTROY = URL_LISTS_BASE +"destroy.json"; // @todo
+const string URL_LISTS_MEMBERSHIPS = URL_LISTS_BASE +"memberships.json";
+const string URL_LISTS_SUBSCRIBERS = URL_LISTS_BASE +"subscribers.json";
+const string URL_LISTS_SUBSCRIBERS_CREATE = URL_LISTS_BASE +"subscribers/create.json";
+const string URL_LISTS_SUBSCRIBERS_SHOW = URL_LISTS_BASE +"subscribers/show.json";
+const string URL_LISTS_SUBSCRIBERS_DESTROY = URL_LISTS_BASE +"subscribers/destroy.json";
+const string URL_LISTS_MEMBERS_CREATE_ALL = URL_LISTS_BASE +"members/create_all.json";
+const string URL_LISTS_MEMBERS_SHOW = URL_LISTS_BASE +"members/show.json";
+const string URL_LISTS_MEMBERS_CREATE = URL_LISTS_BASE +"members/create.json";
+const string URL_LISTS_CREATE = URL_LISTS_BASE +"create.json";
+const string URL_LISTS_UPDATE = URL_LISTS_BASE +"update.json";
+const string URL_LISTS_DESTORY = URL_LISTS_BASE +"destroy.json";
+const string URL_LISTS = URL_TWITTER_BASE +"1/lists.json";
+const string URL_LISTS_SHOW = URL_LISTS_BASE +"show.json";
+const string URL_LISTS_SUBSCRIPTIONS = URL_LISTS_BASE +"subscriptions.json";
+const string URL_LISTS_MEMBERS = URL_LISTS_BASE +"members.json";
+const string URL_LISTS_DESTROY = URL_LISTS_BASE +"destroy.json";
 
 const string URL_AUTHORIZE = "http://twitter.com/oauth/authorize?oauth_token=";
 
+/*
+// set keys
+	twitter.setTwitterUsername("roxlutest");
+	twitter.setTwitterPassword("*************");
+	twitter.setConsumerKey("kyw8bCAWKbkP6e1HMMdAvw");
+	twitter.setConsumerSecret("***************");
+	
+	string token_file = ofToDataPath("twitter.txt", true);
+	//twitter.removeTokens(token_file);
+	
+	// get authorized tokens.
+	if(!twitter.loadTokens(token_file)) {
+		string auth_url;
+		twitter.requestToken(auth_url);
+		twitter.handlePin(auth_url);
+		twitter.accessToken();
+		twitter.saveTokens(token_file);
+	}
+	
+	twitter.statusesHomeTimeline();
+	printf("%s\n", twitter.getResponse().c_str());
+
+*/
 
 class Twitter {
 public:
@@ -178,6 +221,25 @@ public:
 	bool favoritesCreate(const string& tweetID, rtp::Collection* extraParams = NULL);
 	bool favoritesDestroy(const string& tweetID);
 	
+	// API: Lists
+	bool listsAll(const string& screenName);
+	bool listsStatuses(const string& slug, const string& ownerScreenName, rtp::Collection* extraParams = NULL);		
+	bool listsMembersDestroy(const string& slug, const string& ownerScreenName);
+	bool listsMemberships(const string& screenName, rtp::Collection* extraParams = NULL);
+	bool listsSubscribers(const string& slug, const string& ownerScreenName, rtp::Collection* extraParams = NULL);
+	bool listsSubscribersCreate(const string& slug, const string& ownerScreenName); // @todo not working; doc is outdated
+	bool listsSubscribersShow(const string& slug, const string& ownerScreenName, const string& screenName, rtp::Collection* extraParams = NULL);
+	bool listsSubscribersDestroy(const string& slug, const string& ownerScreenName); // @todo url does not exist??
+	bool listsMembersCreateAll(const string& slug, const string& ownerScreenName, const string& screenNames);
+	bool listsMembersShow(const string& slug, const string& ownerScreenName, const string& screenName, rtp::Collection* extraParams = NULL);	
+	bool listsMembers(const string& slug, const string& ownerScreenName, rtp::Collection* extraParams = NULL);
+	bool listsMembersCreate(const string& slug, const string& ownerScreenName, const string& screenName);
+	bool listsDestroy(const string& slug, const string& ownerScreenName);
+	bool listsUpdate(const string& slug, const string& ownerScreenName, bool isPublic = true, const string& description = "");
+	bool listsCreate(const string& name, bool isPublic = true, const string& description = "");
+	bool lists(const string& screenName, rtp::Collection* extraParams = NULL);
+	bool listsShow(const string& slug, const string& ownerScreenName);
+	bool listsSubscriptions(const string& screenName, rtp::Collection* extraParams = NULL);
 	
 	
 	// ++
