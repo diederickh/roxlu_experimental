@@ -186,6 +186,7 @@ inline Mat4& SceneItem::mm() {
 
 inline void SceneItem::setPosition(float x, float y, float z) {
 	position.set(x,y,z);
+	//printf("position.y = %f\n", position.y);	
 	updateModelMatrix();
 }
 
@@ -223,10 +224,11 @@ inline void SceneItem::updateModelMatrix() {
 	Mat4 translation_matrix;
 	
 	rotation_matrix = orientation.getMat4();
-	translation_matrix.translation(position);
+	translation_matrix = Mat4::translation(position);
 	
 	model_matrix = rotation_matrix * translation_matrix;
-
+//	model_matrix.print();
+//	printf("y: %f\n", model_matrix[13]);
 	return;
 
 	Mat4 rotation = orientation.getMat4();

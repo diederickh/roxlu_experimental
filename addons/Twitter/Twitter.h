@@ -113,7 +113,17 @@ const string URL_LISTS_MEMBERS = URL_LISTS_BASE +"members.json";
 const string URL_LISTS_DESTROY = URL_LISTS_BASE +"destroy.json";
 
 const string URL_ACCOUNT_RATE_LIMIT_STATUS = URL_ACCOUNT_BASE +"rate_limit_status.json";
+const string URL_ACCOUNT_VERIFY_CREDENTIALS = URL_ACCOUNT_BASE +"verify_credentials.json";
+const string URL_ACCOUNT_END_SESSION = URL_ACCOUNT_BASE +"end_session.json";
+const string URL_ACCOUNT_UPDATE_PROFILE = URL_ACCOUNT_BASE +"update_profile.json";
+const string URL_ACCOUNT_UPDATE_PROFILE_BACKGROUND_IMAGE = URL_ACCOUNT_BASE +"update_profile_background_image.json";
+const string URL_ACCOUNT_UPDATE_PROFILE_COLORS = URL_ACCOUNT_BASE +"update_profile_colors.json";
+const string URL_ACCOUNT_UPDATE_PROFILE_IMAGE =  URL_ACCOUNT_BASE +"update_profile_image.json";
+const string URL_ACCOUNT_TOTALS = URL_ACCOUNT_BASE +"totals.json";
+const string URL_ACCOUNT_SETTINGS = URL_ACCOUNT_BASE +"settings.json";
+
 const string URL_AUTHORIZE = "http://twitter.com/oauth/authorize?oauth_token=";
+
 
 /*
 // set keys
@@ -245,6 +255,14 @@ public:
 	
 	// API: Accounts
 	bool accountRateLimitStatus();
+	bool accountVerifyCredentials(rtp::Collection* extraParams = NULL);
+	bool accountEndSession();
+	bool accountUpdateProfile(const string& name, const string& url, const string& location, const string& description, rtp::Collection* extraParams = NULL);
+	bool accountUpdateProfileBackgroundImage(const string& imageFilePath, bool tile, bool use, rtp::Collection* extraParams = NULL);
+	bool accountUpdateProfileImage(const string& imageFilePath);
+	bool accountUpdateProfileColors(const string& bgColor, const string& profileLinkColor, const string& sidebarBorderColor, const string& sidebarFillColor, const string& textColor, rtp::Collection* extraParams = NULL);
+	bool accountTotals();
+	bool accountSettings();
 	
 	// ++
 	

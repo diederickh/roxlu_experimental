@@ -608,10 +608,118 @@ bool Twitter::listsDestroy(const string& slug, const string& ownerScreenName) {
 	return doPost(URL_LISTS_DESTROY, &col, false, NULL);
 }
 
+
+// :::::::::::::::: account
+
 // https://dev.twitter.com/docs/api/1/get/account/rate_limit_status
 bool Twitter::accountRateLimitStatus() {	
 	return doGet(URL_ACCOUNT_RATE_LIMIT_STATUS);
 }
 
+
+// https://dev.twitter.com/docs/api/1/get/account/verify_credentials
+bool Twitter::accountVerifyCredentials(rtp::Collection* extraParams) {
+	return doGet(URL_ACCOUNT_VERIFY_CREDENTIALS);
+}
+
+// https://dev.twitter.com/docs/api/1/post/account/end_session
+bool Twitter::accountEndSession() {
+	return doPost(URL_ACCOUNT_END_SESSION, NULL, false, NULL);
+}
+
+// https://dev.twitter.com/docs/api/1/post/account/update_profile
+bool Twitter::accountUpdateProfile(
+	 const string& name
+	,const string& url
+	,const string& location
+	,const string& description
+	,rtp::Collection* extraParams
+)
+{
+	rtp::Collection col;
+	if(name.length()) {
+		col.addString("name", name);
+	}
+	if(url.length()) {
+		col.addString("url", url);
+	}
+	if(location.length()) {
+		col.addString("location", location);
+	}
+	if(description.length()) {
+		col.addString("description", description);
+	}
+	return doPost(URL_ACCOUNT_UPDATE_PROFILE, &col, false, extraParams);
+}
+
+
+// https://dev.twitter.com/docs/api/1/post/account/update_profile_colors
+bool Twitter::accountUpdateProfileColors(
+	 const string& bgColor
+	,const string& profileLinkColor
+	,const string& sidebarBorderColor
+	,const string& sidebarFillColor
+	,const string& profileTextColor
+	,rtp::Collection* extraParams
+)
+{
+	rtp::Collection col;
+	if(bgColor.length()) {
+		col.addString("profile_background_color", bgColor);
+	}
+	if(profileLinkColor.length()) {
+		col.addString("profile_link_color", profileLinkColor);
+	}
+	if(sidebarBorderColor.length()) {
+		col.addString("profile_sidebar_border_color", sidebarBorderColor);
+	}
+	if(sidebarFillColor.length()) {
+		col.addString("profile_sidebar_fill_color", sidebarFillColor);
+	}
+	if(profileTextColor.length()) {
+		col.addString("profile_text_color", profileTextColor);
+	}
+	return doPost(URL_ACCOUNT_UPDATE_PROFILE_COLORS, &col, false, extraParams);
+}
+
+// https://dev.twitter.com/docs/api/1/post/account/update_profile_background_image
+bool Twitter::accountUpdateProfileBackgroundImage(
+	 const string& imageFilePath
+	,bool tile
+	,bool use
+	,rtp::Collection* extraParams
+)
+{
+	rtp::Collection col;
+	if(imageFilePath.length()) {
+		col.addFile("image", imageFilePath);
+	}
+	col.addString("tile", (tile) ? "1" : "0");
+	col.addString("use", (use) ? "1" : "0");
+
+	if(imageFilePath.length()) {
+		return doPost(URL_ACCOUNT_UPDATE_PROFILE_BACKGROUND_IMAGE, &col, true, extraParams);
+	}
+	else {
+		return doPost(URL_ACCOUNT_UPDATE_PROFILE_BACKGROUND_IMAGE, &col, false, extraParams);	
+	}
+}
+
+// https://dev.twitter.com/docs/api/1/post/account/update_profile_image
+bool Twitter::accountUpdateProfileImage(const string& imageFilePath) {
+	rtp::Collection col;
+	col.addFile("image", imageFilePath);
+	return doPost(URL_ACCOUNT_UPDATE_PROFILE_IMAGE, &col, true, NULL);
+}
+
+// https://dev.twitter.com/docs/api/1/get/account/totals
+bool Twitter::accountTotals() {
+	return doGet(URL_ACCOUNT_TOTALS);
+}
+
+// https://dev.twitter.com/docs/api/1/get/account/settings
+bool Twitter::accountSettings() {
+	return doGet(URL_ACCOUNT_SETTINGS);
+}
 
 }} // roxlu::twitter
