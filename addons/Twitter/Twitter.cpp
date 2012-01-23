@@ -608,4 +608,10 @@ bool Twitter::listsDestroy(const string& slug, const string& ownerScreenName) {
 	return doPost(URL_LISTS_DESTROY, &col, false, NULL);
 }
 
+// https://dev.twitter.com/docs/api/1/get/account/rate_limit_status
+bool Twitter::accountRateLimitStatus() {	
+	return doGet(URL_ACCOUNT_RATE_LIMIT_STATUS);
+}
+
+
 }} // roxlu::twitter

@@ -37,6 +37,7 @@ const string URL_FOLLOWERS_BASE = URL_TWITTER_BASE +"1/followers/";
 const string URL_USERS_BASE = URL_TWITTER_BASE +"1/users/";
 const string URL_FAVORITES_BASE = URL_TWITTER_BASE + "1/favorites/";
 const string URL_LISTS_BASE = URL_TWITTER_BASE +"1/lists/";
+const string URL_ACCOUNT_BASE = URL_TWITTER_BASE +"1/account/";
 
 const string URL_STATUSES_RETWEETED_BY = "/retweeted_by.json";
 const string URL_STATUSES_RETWEETED_BY_IDS = "/retweeted_by/ids.json";
@@ -111,6 +112,7 @@ const string URL_LISTS_SUBSCRIPTIONS = URL_LISTS_BASE +"subscriptions.json";
 const string URL_LISTS_MEMBERS = URL_LISTS_BASE +"members.json";
 const string URL_LISTS_DESTROY = URL_LISTS_BASE +"destroy.json";
 
+const string URL_ACCOUNT_RATE_LIMIT_STATUS = URL_ACCOUNT_BASE +"rate_limit_status.json";
 const string URL_AUTHORIZE = "http://twitter.com/oauth/authorize?oauth_token=";
 
 /*
@@ -241,6 +243,8 @@ public:
 	bool listsShow(const string& slug, const string& ownerScreenName);
 	bool listsSubscriptions(const string& screenName, rtp::Collection* extraParams = NULL);
 	
+	// API: Accounts
+	bool accountRateLimitStatus();
 	
 	// ++
 	
