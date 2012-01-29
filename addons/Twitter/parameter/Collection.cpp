@@ -32,10 +32,29 @@ File* Collection::addFile(const string& name, const string& file) {
 	return f;
 }
 
+string Collection::getQueryString() {
+	string ps;
+	if(params.size() > 0) {
+		ps.append("?");
+	}
+	
+	list<rtp::Parameter*>::const_iterator it = params.begin();
+	while(it != params.end()) {
+		ps.append((*it)->getName());
+		ps.append("=");
+		ps.append((*it)->getStringValue());
+		++it;
+		if(it != params.end()) {
+			ps.append("&");
+		}	
+	}
+	return ps;
+}
+
 
 /** 
  * Get only parameters that are either used or not-used to create the 
- * signature for oauth. In short mult-part form data is not included
+ * signature for oauth. In short multi-part form data is not included
  * in the signature base.  
  *
  * @param	bool			Pass true when you want only parameters 

@@ -4,7 +4,9 @@
 namespace roxlu {
 namespace twitter {
 
-Twitter::Twitter() {
+Twitter::Twitter() 
+	:json(*this)
+{
 }
 
 Twitter::~Twitter() {
@@ -123,6 +125,24 @@ bool Twitter::loadTokens(const string& filePath) {
 bool Twitter::removeTokens(const string& filePath) {
 	std::remove(filePath.c_str());
 }
+
+
+// Event listeners
+// -----------------------------------------------------------------------------
+void Twitter::addEventListener(IEventListener& listener) {
+	addEventListener(&listener);
+}
+
+void Twitter::addEventListener(IEventListener* listener) {
+	listeners.push_back(listener);
+}
+
+void Twitter::onStatusUpdate(const rtt::Tweet& tweet) {
+	for(int i = 0; i < listeners.size(); ++i) {
+		listeners[i]->onStatusUpdate(tweet);
+	}
+}
+
 
 // API implementation
 // -----------------------------------------------------------------------------

@@ -24,7 +24,7 @@ Parameter::Parameter(const std::string& n, const std::string& v)
 }
 
 Parameter::~Parameter() {
-	printf("~ Parameter()\n");
+	//printf("~ Parameter()\n");
 }
 
 void Parameter::print() {

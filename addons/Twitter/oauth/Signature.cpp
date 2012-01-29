@@ -49,7 +49,7 @@ string Signature::getSignature(oAuth& auth, const string& url, const string& met
 	if(param_string.length()) {
 		sig_base.append(urlencode(param_string));
 	}
-//	printf("Signature base: %s\n", sig_base.c_str());
+	printf("Signature base: %s\n", sig_base.c_str());
 	
 	// step 2: use signature base string to create signature
 	// -----------------------------------------------------
@@ -78,6 +78,7 @@ string Signature::getSignature(oAuth& auth, const string& url, const string& met
 			
 	string base64_encoded = base64_encode(digest, 20);
 	string signature = urlencode(base64_encoded);
+	printf("Signature: %s\n", signature.c_str());
 	return signature;
 }
 

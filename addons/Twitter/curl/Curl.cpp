@@ -201,6 +201,7 @@ bool Curl::doPost(const string& url, const rtp::Collection& params, bool multiPa
 	return result;
 }
 
+// @todo use Collection::getQueryString
 string Curl::createQueryString(const list<rtp::Parameter*>& queryParams) {
 	string qs;
 	list<rtp::Parameter*>::const_iterator it = queryParams.begin();
@@ -208,7 +209,7 @@ string Curl::createQueryString(const list<rtp::Parameter*>& queryParams) {
 		
 		qs.append(urlencode((*it)->getName()));
 		qs.append("=");
-		qs.append(urlencode((*it)->getStringValue())	);
+		qs.append(urlencode((*it)->getStringValue()));
 		
 		++it;
 		if(it != queryParams.end()) {

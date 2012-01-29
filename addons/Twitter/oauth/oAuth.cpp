@@ -24,6 +24,7 @@ void oAuth::updateNonce() {
 	nonce.assign(buf_time);
 	nonce.append(buf_rand);
 	timestamp.assign(buf_time);
+	printf("> %s\n", timestamp.c_str());
 }
 
 
@@ -77,7 +78,7 @@ rtc::Request oAuth::getAccessTokenRequest() {
 
 rtc::Request oAuth::getAuthorizedPost(const string& url, const rtp::Collection& params) {
 	updateNonce();
-	
+
 	// create collection for signature
 	rtp::Collection signature_col = getDefaultParameters();
 	signature_col += params; // @todo multi part form data (file) should not be part of these params! http://tools.ietf.org/html/rfc5849#section-3.4.1.3.1
@@ -103,6 +104,7 @@ void oAuth::authorize(rtc::Request& req) {
 	rtp::Collection signature_params = getDefaultParameters();
 	signature_params += req.getParams();
 	signature_params["oauth_token"] = getTokenKey();
+//	signature_params.print();
 	string signature;
 	
 	if(req.isPost()) {
@@ -120,7 +122,6 @@ void oAuth::authorize(rtc::Request& req) {
 	
 	req.setHeader(header);
 }
-//cout << twitter.getResponse() << endl;
 
 
 rtc::Request oAuth::getAuthorizedGet(const string& url, const rtp::Collection& params) {

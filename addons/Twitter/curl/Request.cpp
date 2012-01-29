@@ -53,6 +53,8 @@ bool Request::doGet(rtc::Curl& curl, string& result) {
 	
 	// add params to url  // @todo test
 	// @todo call curl.createQueryString!
+	// @todo ^^--> no, use params.getQueryString(), also need to update curl to do the same 
+	// @todo ^^--> no,no use this.getQueryString() ;-)
 	// --------------------------------
 	//curl.setVerbose(true);
 	string ps;
@@ -81,6 +83,10 @@ bool Request::doGet(rtc::Curl& curl, string& result) {
 	
 	result = curl.getBuffer();
 	return true;
+}
+
+string Request::getQueryString() {
+	return params.getQueryString();
 }
 
 bool Request::doPost(rtc::Curl& curl,  string& result, const rtp::Collection& extraParams) {

@@ -14,10 +14,14 @@
 #include "curl/Curl.h"
 #include "oauth/Utils.h"
 #include "oauth/oAuth.h"
+#include "IEventListener.h"
+#include "types/Tweet.h"
+#include "parser/JSON.h"
 
 namespace rtc = roxlu::twitter::curl;
 namespace rtp = roxlu::twitter::parameter;
 namespace rto = roxlu::twitter::oauth;
+namespace rtt = roxlu::twitter::type;
 
 using std::string;
 using std::vector;
@@ -161,6 +165,8 @@ public:
 	
 	void setTwitterUsername(const string& username);
 	void setTwitterPassword(const string& password);
+	string getTwitterUsername();
+	string getTwitterPassword(); 
 	
 	void setConsumerKey(const string& consumerKey);
 	void setConsumerSecret(const string& consumerSecret);
@@ -179,8 +185,7 @@ public:
 	bool statusesUpdate(const string& tweet, rtp::Collection* extraParams =  NULL);
 	bool statusesUpdateWithMedia(const string& tweet, const string& imageFilePath, rtp::Collection* extraParams =  NULL);
 	bool statusesoEmbed(const string& tweetID, rtp::Collection* extraParams =  NULL); 
-	
-	
+		
 	// API: Timelines
 	bool statusesHomeTimeline(rtp::Collection* extraParams =  NULL);
 	bool statusesMentions(rtp::Collection* extraParams =  NULL);
@@ -264,9 +269,16 @@ public:
 	bool accountTotals();
 	bool accountSettings();
 	
-	// ++
+	// Event system.
+	void addEventListener(IEventListener& listener);
+	void addEventListener(IEventListener* listener);
+	void onStatusUpdate(const rtt::Tweet& tweet);
 	
+	
+	// ++
+	roxlu::twitter::parser::JSON& getJSON();
 	string& getResponse();	
+	rto::oAuth& getoAuth();
 	
 private:
 	bool doGet(const string& url, rtp::Collection* defaultParams = NULL, rtp::Collection* extraParams = NULL);
@@ -276,6 +288,8 @@ private:
 	string response;
 	rto::oAuth oauth;
 	rtc::Curl twitcurl;
+	vector<IEventListener*> listeners;
+	roxlu::twitter::parser::JSON json;
 };
 
 inline bool Twitter::doGet(const string& url, rtp::Collection* defaultParams, rtp::Collection* extraParams) {
@@ -346,6 +360,22 @@ inline void Twitter::setConsumerSecret(const string& secret) {
 
 inline string& Twitter::getResponse() {
 	return response;
+}
+
+inline rto::oAuth& Twitter::getoAuth() {
+	return oauth;
+}
+
+inline string Twitter::getTwitterUsername() {
+	return twitcurl.getAuthUsername();
+}
+
+inline string Twitter::getTwitterPassword() {
+	return twitcurl.getAuthPassword();
+} 
+	
+inline roxlu::twitter::parser::JSON& Twitter::getJSON() {
+	return json;
 }
 	
 }} // roxlu twitter

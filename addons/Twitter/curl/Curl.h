@@ -32,7 +32,7 @@ public:
 	string& getAuthPassword();
 	void setHeader(const string& header);
 	void setVerbose(bool verbose);
-	string createQueryString(const list<rtp::Parameter*>& queryParams);
+	string createQueryString(const list<rtp::Parameter*>& queryParams); // @todo use Collection::getQueryString
 	string& getBuffer();
 	string buffer;
 private:

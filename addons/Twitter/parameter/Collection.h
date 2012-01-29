@@ -48,6 +48,8 @@ public:
 	Parameter& operator[](const string& name);
 	Collection& operator+=(const Collection& other);
 	
+	string getQueryString();
+	
 	void print() const;
 	const list<Parameter*>& getParameters() const;
 	list<rtp::Parameter*> getParameters(bool forSignature) const;

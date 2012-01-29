@@ -1,0 +1,17 @@
+#ifndef ROXLU_OPENGLINCLUDESH
+#define ROXLU_OPENGLINCLUDESH
+
+#define ROXLU_OPENGLES				1
+#define ROXLU_OPENFRAMEWORKS		2
+#define ROXLU_COCOA					3
+
+#define ROXLU_VARIANT 	ROXLU_OPENFRAMEWORKS
+
+
+#if ROXLU_VARIANT == ROXLU_OPENGLES
+	#include <OpenGLES/ES2/gl.h>
+#elif ROXLU_VARIANT == ROXLU_OPENFRAMEWORKS
+	#include "ofMain.h"
+#endif
+
+#endif

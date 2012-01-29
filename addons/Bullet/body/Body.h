@@ -2,7 +2,7 @@
 #define ROXLU_BULLET_SHAPEH
 
 #include "bullet/btBulletDynamicsCommon.h"
-
+#include "Mat4.h"
 namespace roxlu {
 namespace bullet {
 namespace body {
@@ -12,9 +12,12 @@ public:
 	Body();
 	~Body();
 	void applyCentralForce(float x, float y, float z);
+	virtual void copyMatrix(Mat4& m) const;
+	
 	btRigidBody* rigid_body;
 	btCollisionShape* collision_shape;
-	btMotionState* motion_state;
+	btDefaultMotionState* motion_state;
+;
 };
 
 inline void Body::applyCentralForce(float x, float y, float z) {

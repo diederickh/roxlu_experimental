@@ -28,6 +28,7 @@ public:
 	};
 	
 	void setHeader(const string& header);
+	string& getHeader();
 	void setURL(const string& url);
 	string& getURL();
 	bool doGet(rtc::Curl& curl,  string& result);
@@ -35,6 +36,7 @@ public:
 	bool doPost(rtc::Curl& curl,  string& result, bool multipart = false);
 	bool doPost(rtc::Curl& curl,  string& result, const rtp::Collection& extraParams);
 	void addParams(const rtp::Collection& extraParams);
+	string getQueryString();
 	rtp::Collection& getParams();
 		
 	bool isPost();
@@ -57,6 +59,10 @@ inline rtp::Collection& Request::getParams() {
 
 inline string& Request::getURL() {
 	return url;
+}
+
+inline string& Request::getHeader() {
+	return header;
 }
 
 }}} // roxlu::twitter::Curl
