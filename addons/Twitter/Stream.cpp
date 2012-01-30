@@ -24,11 +24,12 @@ Stream::~Stream() {
 @todo 	pass param to which stream one once to connect (general, user, site)
 @todo	implement reconnecting to server when hashtags to track changes
 */
-bool Stream::connect() {
+bool Stream::connect(const string& streamURL) {
 	CURLcode r;
 	
 	// create request.
-	string url = "https://userstream.twitter.com/2/user.json";
+//	string url = "https://userstream.twitter.com/2/user.json";
+	string url = streamURL;
 	//string url = "https://stream.twitter.com/1/statuses/filter.json";
 	rtp::Collection params;
 	rtc::Request req;
@@ -203,9 +204,9 @@ void Stream::parseBuffer() {
 size_t Stream::curlWriteCallback(char *ptr, size_t size, size_t nmemb, Stream* obj) {
 	size_t bytes_to_write = size * nmemb;
 	obj->buffer.append(ptr, bytes_to_write);
-//	for(int i = 0; i < bytes_to_write; ++i) {
-//		printf("%c", ptr[i]);
-//	}
+	for(int i = 0; i < bytes_to_write; ++i) {
+		printf("%c", ptr[i]);
+	}
 	obj->parseBuffer();
 	return bytes_to_write;
 }

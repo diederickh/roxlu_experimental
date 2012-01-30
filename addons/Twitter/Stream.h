@@ -13,15 +13,21 @@ using std::vector;
 
 // @todo read this: https://dev.twitter.com/docs/streaming-api/user-streams/suggestions
 
+
+const string URL_STREAM_USER = "https://userstream.twitter.com/2/user.json";
+const string URL_STREAM_FILTER = "https://stream.twitter.com/1/statuses/filter.json";
+
 namespace roxlu {
 namespace twitter {
 
 class Stream {
 public:
+
 	Stream(Twitter& twitter);
 	~Stream();
-	bool connect();	
+	bool connect(const string& streamURL);	
 	bool disconnect();
+	bool isConnected();
 	bool update();
 	
 	// Parameters
@@ -60,6 +66,9 @@ inline std::string& Stream::rtrim(std::string &s) {
 	return s;
 }
 
+inline bool Stream::isConnected(){
+	return connected;
+}
 
 }} // roxlu::twitter
 

@@ -2,7 +2,7 @@
 #include "../Twitter.h"
 #include "../../../libs/curl/curl.h"
 #include "../../../libs/jansson/jansson.h"
-#include "../types/Tweet.h"
+
 
 namespace rtt = roxlu::twitter::type;
 
@@ -21,7 +21,6 @@ JSON::~JSON() {
 }
 
 bool JSON::parseStatus(json_t* root, rtt::Tweet& tweet) {
-	
 	// text
 	json_t* node =	json_object_get(root, "text");
 	if(!json_is_string(node)) {
@@ -78,10 +77,59 @@ bool JSON::parseStatus(json_t* root, rtt::Tweet& tweet) {
 	return true;	
 }
 
+bool JSON::parseDestroy(json_t* root, rtt::StatusDestroy& destroy) {
+	json_t* del = json_object_get(root, "delete");
+	if(!json_is_object(del)) {
+		printf("Error: No delete found.\n");
+		return false;
+	}
+	
+	json_t* status = json_object_get(del, "status");
+	if(!json_is_object(status)) {
+		printf("Error: No status found in delete.\n");
+		return false;
+	}
+	
+	// user_id_str
+	json_t* node = json_object_get(status, "user_id_str");
+	if(!json_is_string(node)) {
+		printf("Error: No user_id_str found.\n");
+		return false;
+	}
+	destroy.user_id_str = json_string_value(node);
+	
+	// id_str
+	node = json_object_get(status, "id_str");
+	if(!json_is_string(node)) {
+		printf("Error: No id_str found.\n");	
+		return false;
+	}
+	
+	// id
+	node = json_object_get(status, "id");
+	if(!json_is_integer(node)) {
+		printf("Error: no id value found.\n");
+		return false;
+	}
+	destroy.id = json_integer_value(node);
+	
+	// user_id
+	node = json_object_get(status, "user_id");
+	if(!json_is_integer(node)) {
+		printf("Error: no user id found.\n");
+		return false;
+	}
+	destroy.user_id = json_integer_value(node);
+	return true;
+}
+
+
 void JSON::parse(const string& line) {
 	json_t* root;
 	json_error_t error;
-
+	
+	printf("%s\n\n---------------------------------------------------------\n", line.c_str());
+	
 	// load json into jansson
 	root = json_loads(line.c_str(), 0, &error);
 	if(!root) {
@@ -91,7 +139,7 @@ void JSON::parse(const string& line) {
 	}
 	
 	// STATUS UPDATE
-	json_t* node =	json_object_get(root, "text");
+	json_t* node = json_object_get(root, "text");
 	if(json_is_string(node)) {
 		rtt::Tweet tweet;
 		if(parseStatus(root, tweet)) {
@@ -100,6 +148,29 @@ void JSON::parse(const string& line) {
 		json_decref(root);
 		return;
 	}
+	
+	// STATUS DESTROY
+	node = json_object_get(root, "delete");
+	if(json_is_object(node)) {
+		rtt::StatusDestroy destroy;
+		if(parseDestroy(root, destroy)) {
+			twitter.onStatusDestroy(destroy);
+		}
+		//printf("found a delete\n");
+		json_decref(root);
+		return;
+	
+	}
+	
+	// START FOLLOWING
+	node = json_object_get(root, "event");
+	if(json_is_string(node)) {
+		string event = json_string_value(node);
+		if(event == "follow") {
+		}
+		printf("event: %s\n", event.c_str());
+	}
+	
 }
 
 }}} // roxlu::twitter::parser

@@ -143,6 +143,11 @@ void Twitter::onStatusUpdate(const rtt::Tweet& tweet) {
 	}
 }
 
+void Twitter::onStatusDestroy(const rtt::StatusDestroy& destroy) {
+	for(int i = 0; i < listeners.size(); ++i) {
+		listeners[i]->onStatusDestroy(destroy);
+	}
+}
 
 // API implementation
 // -----------------------------------------------------------------------------

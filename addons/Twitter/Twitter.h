@@ -14,9 +14,11 @@
 #include "curl/Curl.h"
 #include "oauth/Utils.h"
 #include "oauth/oAuth.h"
-#include "IEventListener.h"
 #include "types/Tweet.h"
+#include "types/General.h"
 #include "parser/JSON.h"
+#include "IEventListener.h"
+#include "Stream.h"
 
 namespace rtc = roxlu::twitter::curl;
 namespace rtp = roxlu::twitter::parameter;
@@ -273,7 +275,7 @@ public:
 	void addEventListener(IEventListener& listener);
 	void addEventListener(IEventListener* listener);
 	void onStatusUpdate(const rtt::Tweet& tweet);
-	
+	void onStatusDestroy(const rtt::StatusDestroy& destroy);
 	
 	// ++
 	roxlu::twitter::parser::JSON& getJSON();
@@ -379,5 +381,8 @@ inline roxlu::twitter::parser::JSON& Twitter::getJSON() {
 }
 	
 }} // roxlu twitter
+
+
+namespace rt = roxlu::twitter;
 
 #endif

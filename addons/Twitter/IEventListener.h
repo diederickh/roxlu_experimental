@@ -2,6 +2,7 @@
 #define ROXLU_TWITTER_IEVENTLISTENERH
 
 #include "types/Tweet.h"
+#include "types/General.h"
 
 namespace rtt = roxlu::twitter::type;
 
@@ -12,6 +13,7 @@ namespace twitter {
 class IEventListener {
 public:
 	virtual void onStatusUpdate(const rtt::Tweet& tweet) = 0;
+	virtual void onStatusDestroy(const rtt::StatusDestroy& destroy) = 0;
 //	virtual void onTweetDelete(const rtt::DeletedTweet& deletedTweet) = 0;
 };
 

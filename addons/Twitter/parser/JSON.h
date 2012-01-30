@@ -4,6 +4,7 @@
 #include <string>
 #include "../../../libs/curl/curl.h"
 #include "../../../libs/jansson/jansson.h"
+#include "../types/General.h"
 #include "../types/Tweet.h"
 
 using std::string;
@@ -26,6 +27,7 @@ public:
 	
 	void parse(const string& line);
 	bool parseStatus(json_t* root, rtt::Tweet& tweet);	
+	bool parseDestroy(json_t* root, rtt::StatusDestroy& destroy);
 	
 private:
 	roxlu::twitter::Twitter& twitter;
