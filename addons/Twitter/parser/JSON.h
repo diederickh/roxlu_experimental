@@ -28,6 +28,8 @@ public:
 	void parse(const string& line);
 	bool parseStatus(json_t* root, rtt::Tweet& tweet);	
 	bool parseDestroy(json_t* root, rtt::StatusDestroy& destroy);
+	bool parseStreamEvent(json_t* root, rtt::StreamEvent& event);
+	bool parseUser(json_t* root, rtt::User& user);
 	
 private:
 	roxlu::twitter::Twitter& twitter;

@@ -1,6 +1,5 @@
 #include "Dictionary.h"
 #include "DictionaryMap.h"
-//#include "ofMain.h" // only for debugging
 
 namespace roxlu {
 

@@ -1,8 +1,6 @@
 #ifndef ROXLU_DICTIONARYH
 #define ROXLU_DICTIONARYH
 
-// thanks: http://wiki.rtmpd.com/myfirstapp/variant?s[]=amf
-
 #include <inttypes.h>
 #include <string>
 #include <sstream>

@@ -18,6 +18,32 @@ struct StatusDestroy {
 	uint64_t user_id;
 };
 
+// source for general event.
+struct User {
+	string name;
+	string id_str;
+	string screen_name;
+	string location;
+	uint64_t statuses_count;
+	uint64_t id;
+};
+
+// target of general event.
+struct TargetObject {
+	string name;
+	string mode;
+	string description;
+	User user;	
+};
+
+// general event: https://dev.twitter.com/docs/streaming-api/user-streams
+struct StreamEvent {
+	User target;					// who is affected or owns the affected object
+	TargetObject target_object;		// the "changed" object; i.e. a list
+	User source; 					// who initiated the event
+	string event;					// what kind of event.
+};
+
 }}} // roxlu::twitter::type
 
 #endif

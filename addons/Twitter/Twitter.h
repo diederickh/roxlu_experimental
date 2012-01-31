@@ -276,6 +276,7 @@ public:
 	void addEventListener(IEventListener* listener);
 	void onStatusUpdate(const rtt::Tweet& tweet);
 	void onStatusDestroy(const rtt::StatusDestroy& destroy);
+	void onStreamEvent(const rtt::StreamEvent& event);
 	
 	// ++
 	roxlu::twitter::parser::JSON& getJSON();

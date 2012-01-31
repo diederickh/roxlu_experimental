@@ -14,7 +14,7 @@ class IEventListener {
 public:
 	virtual void onStatusUpdate(const rtt::Tweet& tweet) = 0;
 	virtual void onStatusDestroy(const rtt::StatusDestroy& destroy) = 0;
-//	virtual void onTweetDelete(const rtt::DeletedTweet& deletedTweet) = 0;
+	virtual void onStreamEvent(const rtt::StreamEvent& event) = 0;
 };
 
 }} // roxlu::twitter

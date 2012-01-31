@@ -149,6 +149,12 @@ void Twitter::onStatusDestroy(const rtt::StatusDestroy& destroy) {
 	}
 }
 
+void Twitter::onStreamEvent(const rtt::StreamEvent& event) {
+	for(int i = 0; i < listeners.size(); ++i) {
+		listeners[i]->onStreamEvent(event);
+	}
+}
+
 // API implementation
 // -----------------------------------------------------------------------------
 // called just before a new API request is made.
