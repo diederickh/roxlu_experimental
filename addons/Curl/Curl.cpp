@@ -125,16 +125,26 @@ bool Curl::doPost(const string& url, const rcp::Collection& params, bool multiPa
 	}	
 	else {
 	
+		// @todo: 2012.02.03, we've to test this, I got some wierd things
+		// with posting to twitter. I had to add all parameters to the 
+		// query string and only was allowed to use files in the multipart 
+		// body...
+		//
+		// for twitpic I had to use only the multipart body ...
+		//
+		//------------------------------
 		// When we do a multi part, we add the parameters that are used 
 		// to create the signature string as query string; this is just 
 		// the ouath standard. Somehow adding them as mult-part doesnt work.
+
+		/*  commented this because of testing with twitpic
 		list<rcp::Parameter*> query_params = params.getParameters(true); 
 		string qs = createQueryString(query_params);
 		if(qs.length()) {
 			//use_url = use_url + "?" + qs; 
 		}
-		 
-		 params.print();
+		*/
+
 		// handling a multi part post.
 		//const list<rcp::Parameter*>& post_params = params.getParameters(false); 
 		const list<rcp::Parameter*>& post_params = params.getParameters(); 
@@ -143,19 +153,18 @@ bool Curl::doPost(const string& url, const rcp::Collection& params, bool multiPa
 		while(it != post_params.end()) {
 			printf("-------- Type: %d - %d\n", (*it)->type, rcp::Parameter::PARAM_STRING);
 			switch((*it)->type) {
-				// This doesn't work somehow... I'm using the query string
+				// This doesn't work somehow for twitter... I'm using the query string
 				// now and urlencoding the values. But somehow it looks like
 				// this string isn't added to the form.
-				
+				// update: 2012.02.03 this does work for twitpic
 				case rcp::Parameter::PARAM_STRING: {
-					printf("--------------- add string: %s\n", (*it)->getName().c_str());
 					curl_formadd(
 							 &post_curr
 							,&post_last
 							,CURLFORM_COPYNAME
 							,(*it)->getName().c_str()
 							,CURLFORM_COPYCONTENTS
-							,urlencode((*it)->getStringValue()).c_str()
+							,(*it)->getStringValue().c_str()
 							,CURLFORM_END
 					);
 					break;
