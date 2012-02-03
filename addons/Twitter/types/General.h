@@ -18,8 +18,10 @@ struct StatusDestroy {
 	uint64_t user_id;
 };
 
+
 // source for general event.
 struct User {
+	bool contributors_enabled;
 	string name;
 	string id_str;
 	string screen_name;
@@ -38,7 +40,7 @@ struct TargetObject {
 
 // general event: https://dev.twitter.com/docs/streaming-api/user-streams
 struct StreamEvent {
-	User target;					// who is affected or owns the affected object
+	User target;					// who is affected (i.e. removed, added) or owns the affected object
 	TargetObject target_object;		// the "changed" object; i.e. a list
 	User source; 					// who initiated the event
 	string event;					// what kind of event.

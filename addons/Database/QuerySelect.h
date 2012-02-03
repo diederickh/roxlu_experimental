@@ -2,6 +2,7 @@
 #define ROXLU_DATABASE_QUERY_SELECTH
 
 #include "Query.h"
+#include <sstream>
 #include <string>
 #include "QueryResult.h"
 
@@ -15,6 +16,8 @@ class QuerySelect : public Query {
 public:
 	QuerySelect(Database& db);
 	QuerySelect(Database& db, const string& selectFields);
+	QuerySelect(const QuerySelect& other);
+	QuerySelect& operator=(const QuerySelect& other);
 	~QuerySelect();
 	
 	QuerySelect& from(const string& fromTable);
@@ -26,61 +29,60 @@ public:
 		field_values.use(fieldName, fieldValue);
 		return *this;
 	}
-
-	QuerySelect& where(const string& whereClause);
 	
-	/*
+	QuerySelect& where(const string& whereClause);
+	QuerySelect& join(const string& joinClause);
+	QuerySelect& order(const string& orderClause);
+
+
+	// Use: db.select("tag_id").from("tags").where("tag_name in (%s) ",tweet.tags).execute(tag_result);
 	template<typename T>
-	QuerySelect& where(const string& fieldName, const T& fieldValue) {
-		where_values.use(fieldName, fieldValue);
+	QuerySelect& where(const string& whereClause, const T& values) {
+		// create the value string
+		typename T::const_iterator it = values.begin();
+		string in_value;
+		int count = 0;
+		while(it != values.end()) {
+			stringstream ss;
+			ss << (*it);
+			in_value.append("\"");
+			in_value.append(ss.str());
+			in_value.append("\"");
+			++it;
+			if(it != values.end()) {
+				in_value.append(",");
+			}
+		}
+		// copy the creating string into the where clause
+		int result_size = in_value.length() + whereClause.length() +2;
+		char* buffer = new char[result_size];
+		sprintf(buffer, whereClause.c_str(), in_value.c_str() );
+		where_clause.assign(buffer, result_size);
+		delete[] buffer;
+		
 		return *this;
 	}
-	*/
 	
+	template<typename T>
+	QuerySelect& limit(const T& t) {
+		std::stringstream ss;
+		ss << t;
+		limit(ss.str());
+		return *this;
+	}
+	
+	QuerySelect& limit(const string& limitClause);
 	
 private:
 	string select_fields;
 	string from_table;
+	string join_clause;
 	string where_clause;
-//	QueryParams where_values;
-	QueryParams field_values;
+	string order_clause;
+	string limit_clause;
 	
-};
-
-} // roxlu
-#endif
-
-/*
-#ifndef ROXLU_DATABASE_QUERY_INSERTH
-#define ROXLU_DATABASE_QUERY_INSERTH
-
-#include "Query.h"
-#include "QueryParams.h"
-
-namespace roxlu {
-
-class Database;
-class QueryInsert : public Query {
-public: 
-	QueryInsert(Database& db);
-	QueryInsert(Database& db, const string& table);
-	~QueryInsert();	
-	
-	QueryInsert& setTable(const string& tableName);
-	
-	template<typename T>
-	QueryInsert& use(const string& fieldName, const T& fieldValue) {
-		field_values.use(fieldName, fieldValue);
-		return *this;
-	}
-	string toString();
-	
-	virtual bool execute();
-protected:
-	string table;
 	QueryParams field_values;
 };
 
 } // roxlu
 #endif
-*/

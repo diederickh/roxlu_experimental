@@ -5,24 +5,25 @@
 #include <string>
 #include <fstream>
 
-#include "../../libs/curl/curl.h"
-#include "../../libs/crypto/urlencode.h"
+//#include "../../libs/curl/curl.h"
+//#include "../../libs/crypto/urlencode.h"
 
-#include "parameter/Collection.h"
-#include "parameter/Parameter.h"
-#include "curl/Request.h"
-#include "curl/Curl.h"
-#include "oauth/Utils.h"
-#include "oauth/oAuth.h"
+#include "../Curl/parameter/Collection.h"
+#include "../Curl/parameter/Parameter.h"
+#include "../Curl/Request.h"
+#include "../Curl/Curl.h"
+#include "../Curl/oauth/Utils.h"
+#include "../Curl/oauth/oAuth.h"
+
 #include "types/Tweet.h"
 #include "types/General.h"
 #include "parser/JSON.h"
 #include "IEventListener.h"
 #include "Stream.h"
 
-namespace rtc = roxlu::twitter::curl;
-namespace rtp = roxlu::twitter::parameter;
-namespace rto = roxlu::twitter::oauth;
+namespace rc = roxlu::curl;
+namespace rcp = roxlu::curl::parameter;
+namespace rco = roxlu::curl::oauth;
 namespace rtt = roxlu::twitter::type;
 
 using std::string;
@@ -155,6 +156,9 @@ const string URL_AUTHORIZE = "http://twitter.com/oauth/authorize?oauth_token=";
 
 */
 
+
+// when another class needs the twitter object, make sure to 
+// use references only!
 class Twitter {
 public:
 	Twitter();
@@ -178,56 +182,56 @@ public:
 	bool removeTokens(const string& filePath);
 	
 	// API: Tweets
-	bool statusesRetweetedBy(const string& tweetID, rtp::Collection* extraParams =  NULL);
-	bool statusesRetweetedByIDs(const string& tweetID, rtp::Collection* extraParams = NULL);
-	bool statusesRetweets(const string& tweetID, rtp::Collection* extraParams = NULL);
-	bool statusesShow(const string& tweetID, rtp::Collection* extraParams = NULL);
-	bool statusesDestroy(const string& tweetID, rtp::Collection* extraParams = NULL); 
-	bool statusesRetweet(const string& tweetID, rtp::Collection* extraParams = NULL);
-	bool statusesUpdate(const string& tweet, rtp::Collection* extraParams =  NULL);
-	bool statusesUpdateWithMedia(const string& tweet, const string& imageFilePath, rtp::Collection* extraParams =  NULL);
-	bool statusesoEmbed(const string& tweetID, rtp::Collection* extraParams =  NULL); 
+	bool statusesRetweetedBy(const string& tweetID, rcp::Collection* extraParams =  NULL);
+	bool statusesRetweetedByIDs(const string& tweetID, rcp::Collection* extraParams = NULL);
+	bool statusesRetweets(const string& tweetID, rcp::Collection* extraParams = NULL);
+	bool statusesShow(const string& tweetID, rcp::Collection* extraParams = NULL);
+	bool statusesDestroy(const string& tweetID, rcp::Collection* extraParams = NULL); 
+	bool statusesRetweet(const string& tweetID, rcp::Collection* extraParams = NULL);
+	bool statusesUpdate(const string& tweet, rcp::Collection* extraParams =  NULL);
+	bool statusesUpdateWithMedia(const string& tweet, const string& imageFilePath, rcp::Collection* extraParams =  NULL);
+	bool statusesoEmbed(const string& tweetID, rcp::Collection* extraParams =  NULL); 
 		
 	// API: Timelines
-	bool statusesHomeTimeline(rtp::Collection* extraParams =  NULL);
-	bool statusesMentions(rtp::Collection* extraParams =  NULL);
-	bool statusesPublicTimeline(rtp::Collection* extraParams =  NULL);
-	bool statusesRetweetedByMe(rtp::Collection* extraParams = NULL);
-	bool statusesRetweetedToMe(rtp::Collection* extraParams = NULL);
-	bool statusesRetweetsOfMe(rtp::Collection* extraParams = NULL);
-	bool statusesUserTimeline(rtp::Collection* extraParams = NULL);
-	bool statusesRetweetedToUser(const string& screenName, rtp::Collection* extraParams = NULL);
-	bool statusesRetweetedByUser(const string& screenName, rtp::Collection* extraParams = NULL);
+	bool statusesHomeTimeline(rcp::Collection* extraParams =  NULL);
+	bool statusesMentions(rcp::Collection* extraParams =  NULL);
+	bool statusesPublicTimeline(rcp::Collection* extraParams =  NULL);
+	bool statusesRetweetedByMe(rcp::Collection* extraParams = NULL);
+	bool statusesRetweetedToMe(rcp::Collection* extraParams = NULL);
+	bool statusesRetweetsOfMe(rcp::Collection* extraParams = NULL);
+	bool statusesUserTimeline(rcp::Collection* extraParams = NULL);
+	bool statusesRetweetedToUser(const string& screenName, rcp::Collection* extraParams = NULL);
+	bool statusesRetweetedByUser(const string& screenName, rcp::Collection* extraParams = NULL);
 	
 	// API: search
-	bool search(const string& query, rtp::Collection* extraParams = NULL);
+	bool search(const string& query, rcp::Collection* extraParams = NULL);
 
 	// API: search (your Twitter application needs to have permissions!)
-	bool directMessages(rtp::Collection* extraParams = NULL);
-	bool directMessagesSent(rtp::Collection* extraParams = NULL);
-	bool directMessagesDestroy(const string& messageID, rtp::Collection* extraParams = NULL);
-	bool directMessagesNew(const string& screenName, const string& text, rtp::Collection*  extraParams = NULL);
+	bool directMessages(rcp::Collection* extraParams = NULL);
+	bool directMessagesSent(rcp::Collection* extraParams = NULL);
+	bool directMessagesDestroy(const string& messageID, rcp::Collection* extraParams = NULL);
+	bool directMessagesNew(const string& screenName, const string& text, rcp::Collection*  extraParams = NULL);
 	bool directMessagesShow(const string& messageID);
 	
 	// API: Friends & followers
-	bool followersIDs(const string& screenName, rtp::Collection* extraParams = NULL);
-	bool friendsIDs(const string& screenName, rtp::Collection* extraParams = NULL);
+	bool followersIDs(const string& screenName, rcp::Collection* extraParams = NULL);
+	bool friendsIDs(const string& screenName, rcp::Collection* extraParams = NULL);
 	bool friendshipsExists(const string& screenNameA, const string& screenNameB);
-	bool friendshipsIncoming(rtp::Collection* extraParams = NULL);
-	bool friendshipsOutgoing(rtp::Collection* extraParams = NULL);
+	bool friendshipsIncoming(rcp::Collection* extraParams = NULL);
+	bool friendshipsOutgoing(rcp::Collection* extraParams = NULL);
 	bool friendshipsShow(const string& sourceScreenName, const string& targetScreenName);
-	bool friendshipsCreate(const string& screenName, rtp::Collection* extraParams = NULL);
-	bool friendshipsDestroy(const string& screenName, rtp::Collection* extraParams = NULL);
+	bool friendshipsCreate(const string& screenName, rcp::Collection* extraParams = NULL);
+	bool friendshipsDestroy(const string& screenName, rcp::Collection* extraParams = NULL);
 	bool friendshipsLookup(const string& screenNames);
 	bool friendshipsUpdate(const string& screenName, bool enableDeviceNotifications, bool enableRetweets);
 	bool friendshipsNoRetweetIDs(bool stringifyIDs = true);
 	
 	// API: Users
-	bool usersLookup(const string& screenNames, rtp::Collection* extraParams = NULL);
-	bool usersSearch(const string& q, rtp::Collection* extraParams = NULL);
-	bool usersShow(const string& screenName, rtp::Collection* extraParams = NULL);
-	bool usersContributees(const string& screenName, rtp::Collection* extraParams = NULL);
-	bool usersContributors(const string& screenName, rtp::Collection* extraParams = NULL);
+	bool usersLookup(const string& screenNames, rcp::Collection* extraParams = NULL);
+	bool usersSearch(const string& q, rcp::Collection* extraParams = NULL);
+	bool usersShow(const string& screenName, rcp::Collection* extraParams = NULL);
+	bool usersContributees(const string& screenName, rcp::Collection* extraParams = NULL);
+	bool usersContributors(const string& screenName, rcp::Collection* extraParams = NULL);
 	//bool usersProfileImages();  // how do we implement this.. maybe parse the 302
 
 	// API: Users suggestions
@@ -236,38 +240,38 @@ public:
 	bool usersSuggestionsSlugMembers(const string& slug);
 	
 	// API: Favorites
-	bool favorites(rtp::Collection* extraParams = NULL);
-	bool favoritesCreate(const string& tweetID, rtp::Collection* extraParams = NULL);
+	bool favorites(rcp::Collection* extraParams = NULL);
+	bool favoritesCreate(const string& tweetID, rcp::Collection* extraParams = NULL);
 	bool favoritesDestroy(const string& tweetID);
 	
 	// API: Lists
 	bool listsAll(const string& screenName);
-	bool listsStatuses(const string& slug, const string& ownerScreenName, rtp::Collection* extraParams = NULL);		
+	bool listsStatuses(const string& slug, const string& ownerScreenName, rcp::Collection* extraParams = NULL);		
 	bool listsMembersDestroy(const string& slug, const string& ownerScreenName);
-	bool listsMemberships(const string& screenName, rtp::Collection* extraParams = NULL);
-	bool listsSubscribers(const string& slug, const string& ownerScreenName, rtp::Collection* extraParams = NULL);
+	bool listsMemberships(const string& screenName, rcp::Collection* extraParams = NULL);
+	bool listsSubscribers(const string& slug, const string& ownerScreenName, rcp::Collection* extraParams = NULL);
 	bool listsSubscribersCreate(const string& slug, const string& ownerScreenName); // @todo not working; doc is outdated
-	bool listsSubscribersShow(const string& slug, const string& ownerScreenName, const string& screenName, rtp::Collection* extraParams = NULL);
+	bool listsSubscribersShow(const string& slug, const string& ownerScreenName, const string& screenName, rcp::Collection* extraParams = NULL);
 	bool listsSubscribersDestroy(const string& slug, const string& ownerScreenName); // @todo url does not exist??
 	bool listsMembersCreateAll(const string& slug, const string& ownerScreenName, const string& screenNames);
-	bool listsMembersShow(const string& slug, const string& ownerScreenName, const string& screenName, rtp::Collection* extraParams = NULL);	
-	bool listsMembers(const string& slug, const string& ownerScreenName, rtp::Collection* extraParams = NULL);
+	bool listsMembersShow(const string& slug, const string& ownerScreenName, const string& screenName, rcp::Collection* extraParams = NULL);	
+	bool listsMembers(const string& slug, const string& ownerScreenName, rcp::Collection* extraParams = NULL);
 	bool listsMembersCreate(const string& slug, const string& ownerScreenName, const string& screenName);
 	bool listsDestroy(const string& slug, const string& ownerScreenName);
 	bool listsUpdate(const string& slug, const string& ownerScreenName, bool isPublic = true, const string& description = "");
 	bool listsCreate(const string& name, bool isPublic = true, const string& description = "");
-	bool lists(const string& screenName, rtp::Collection* extraParams = NULL);
+	bool lists(const string& screenName, rcp::Collection* extraParams = NULL);
 	bool listsShow(const string& slug, const string& ownerScreenName);
-	bool listsSubscriptions(const string& screenName, rtp::Collection* extraParams = NULL);
+	bool listsSubscriptions(const string& screenName, rcp::Collection* extraParams = NULL);
 	
 	// API: Accounts
 	bool accountRateLimitStatus();
-	bool accountVerifyCredentials(rtp::Collection* extraParams = NULL);
+	bool accountVerifyCredentials(rcp::Collection* extraParams = NULL);
 	bool accountEndSession();
-	bool accountUpdateProfile(const string& name, const string& url, const string& location, const string& description, rtp::Collection* extraParams = NULL);
-	bool accountUpdateProfileBackgroundImage(const string& imageFilePath, bool tile, bool use, rtp::Collection* extraParams = NULL);
+	bool accountUpdateProfile(const string& name, const string& url, const string& location, const string& description, rcp::Collection* extraParams = NULL);
+	bool accountUpdateProfileBackgroundImage(const string& imageFilePath, bool tile, bool use, rcp::Collection* extraParams = NULL);
 	bool accountUpdateProfileImage(const string& imageFilePath);
-	bool accountUpdateProfileColors(const string& bgColor, const string& profileLinkColor, const string& sidebarBorderColor, const string& sidebarFillColor, const string& textColor, rtp::Collection* extraParams = NULL);
+	bool accountUpdateProfileColors(const string& bgColor, const string& profileLinkColor, const string& sidebarBorderColor, const string& sidebarFillColor, const string& textColor, rcp::Collection* extraParams = NULL);
 	bool accountTotals();
 	bool accountSettings();
 	
@@ -281,23 +285,23 @@ public:
 	// ++
 	roxlu::twitter::parser::JSON& getJSON();
 	string& getResponse();	
-	rto::oAuth& getoAuth();
+	rco::oAuth& getoAuth();
 	
 private:
-	bool doGet(const string& url, rtp::Collection* defaultParams = NULL, rtp::Collection* extraParams = NULL);
-	bool doPost(const string& url, const rtp::Collection* col = NULL, bool multiPart = false, rtp::Collection* extraParams = NULL);
-	bool doPost(const string& url, bool multiPart = false, rtp::Collection* extraParams = NULL);
+	bool doGet(const string& url, rcp::Collection* defaultParams = NULL, rcp::Collection* extraParams = NULL);
+	bool doPost(const string& url, const rcp::Collection* col = NULL, bool multiPart = false, rcp::Collection* extraParams = NULL);
+	bool doPost(const string& url, bool multiPart = false, rcp::Collection* extraParams = NULL);
 	void reset();
 	string response;
-	rto::oAuth oauth;
-	rtc::Curl twitcurl;
+	rco::oAuth oauth;
+	rc::Curl twitcurl;
 	vector<IEventListener*> listeners;
 	roxlu::twitter::parser::JSON json;
 };
 
-inline bool Twitter::doGet(const string& url, rtp::Collection* defaultParams, rtp::Collection* extraParams) {
+inline bool Twitter::doGet(const string& url, rcp::Collection* defaultParams, rcp::Collection* extraParams) {
 	reset();
-	rtc::Request req(url);
+	rc::Request req(url);
 	req.isGet(true);
 	
 	if(defaultParams != NULL) {
@@ -314,9 +318,9 @@ inline bool Twitter::doGet(const string& url, rtp::Collection* defaultParams, rt
 }
 
 
-inline bool Twitter::doPost(const string& url, bool multiPart, rtp::Collection* extraParams) {
+inline bool Twitter::doPost(const string& url, bool multiPart, rcp::Collection* extraParams) {
 	reset();
-	rtc::Request req(url);
+	rc::Request req(url);
 	
 	if(extraParams != NULL) {
 		req.getParams() += *extraParams;
@@ -328,9 +332,9 @@ inline bool Twitter::doPost(const string& url, bool multiPart, rtp::Collection* 
 
 }
 
-inline bool Twitter::doPost(const string& url, const rtp::Collection* col, bool multiPart, rtp::Collection* extraParams) {	
+inline bool Twitter::doPost(const string& url, const rcp::Collection* col, bool multiPart, rcp::Collection* extraParams) {	
 	reset();
-	rtc::Request req(url);
+	rc::Request req(url);
 	
 	if(col != NULL) {
 		req.addParams(*col);
@@ -365,7 +369,7 @@ inline string& Twitter::getResponse() {
 	return response;
 }
 
-inline rto::oAuth& Twitter::getoAuth() {
+inline rco::oAuth& Twitter::getoAuth() {
 	return oauth;
 }
 
@@ -381,7 +385,7 @@ inline roxlu::twitter::parser::JSON& Twitter::getJSON() {
 	return json;
 }
 	
-}} // roxlu twitter
+}} // roxlu::twitter
 
 
 namespace rt = roxlu::twitter;

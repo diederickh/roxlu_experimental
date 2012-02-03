@@ -1,8 +1,8 @@
 #include "Stream.h"
 #include <sstream>
 
-namespace rtp = roxlu::twitter::parameter;
-namespace rtc = roxlu::twitter::curl;
+namespace rcp = roxlu::curl::parameter;
+namespace rc = roxlu::curl;
 
 namespace roxlu {
 namespace twitter {
@@ -28,19 +28,26 @@ bool Stream::connect(const string& streamURL) {
 	CURLcode r;
 	
 	// create request.
-//	string url = "https://userstream.twitter.com/2/user.json";
 	string url = streamURL;
-	//string url = "https://stream.twitter.com/1/statuses/filter.json";
-	rtp::Collection params;
-	rtc::Request req;
+	rcp::Collection params;
+	rc::Request req;
 	req.setURL(url);
 	req.isGet(true);
 	
-	// add stream parameters: https://dev.twitter.com/docs/streaming-api/methods#statuses-filter
+
+	// TRACK : https://dev.twitter.com/docs/streaming-api/methods#statuses-filter
+	// ------
 	string track_list;
 	if(getTrackList(track_list)) {
 		req.getParams().addString("track",track_list);
 		printf("Tracklist: %s\n", track_list.c_str());
+	}
+	
+	// FOLLOW
+	// ------
+	string follow_list;
+	if(getFollowList(follow_list)) {
+		req.getParams().addString("follow", follow_list);
 	}
 	
 	string qs = req.getQueryString();
@@ -50,6 +57,8 @@ bool Stream::connect(const string& streamURL) {
 	}
 	twitter.getoAuth().authorize(req);
 
+	printf("Using url: %s\n", use_url.c_str());
+	
 	// create curl handle.
 	curl = curl_easy_init();
 	if(!curl) {	
@@ -58,10 +67,11 @@ bool Stream::connect(const string& streamURL) {
 		return false;
 	}
 	
+	/*
 	string userpass = twitter.getTwitterUsername() +":" +twitter.getTwitterPassword();
 	curl_easy_setopt(curl, CURLOPT_USERPWD, NULL); 
 	curl_easy_setopt(curl, CURLOPT_USERPWD, userpass.c_str());
-
+	*/
 	
 	// set url
 	r = curl_easy_setopt(curl, CURLOPT_URL, use_url.c_str());
@@ -82,17 +92,28 @@ bool Stream::connect(const string& streamURL) {
 	curl_easy_setopt(curl, CURLOPT_VERBOSE, true);
 
 	// set the oauth headers.
-	string header = req.getHeader();
-	if(header.length()) {
-		printf("\n\n%s\n\n", header.c_str());
-		curl_header = curl_slist_append(curl_header, header.c_str());
-		if(curl_header) {
-			curl_easy_setopt(curl, CURLOPT_HTTPHEADER ,curl_header);
+	const vector<string>& headers = req.getHeaders();
+	if(headers.size()) {
+		vector<string>::const_iterator it = headers.begin();
+		while(it != headers.end()) {
+			curl_header = curl_slist_append(curl_header, (*it).c_str());
+			if(curl_header == NULL) {
+				printf("Error: stream cannot set header!\n");
+				return false;
+			}
+			++it;
+
 		}
-		else {
-			printf("Cannot set header!");
-			return false;
-		}
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER ,curl_header);
+//			printf("\nSTREAM HEADERS\n\n%s\n\n", header.c_str());
+//		curl_header = curl_slist_append(curl_header, header.c_str());
+//		if(curl_header) {
+//			curl_easy_setopt(curl, CURLOPT_HTTPHEADER ,curl_header);
+//		}
+//		else {
+//			printf("Cannot set header!");
+//			return false;
+//		}
 	}	
 	
 	// create multi handle for async io
@@ -148,7 +169,27 @@ bool Stream::update() {
 	
 	if(still_running == 0) {
 		printf("Twitter stream not running...\n");
+		return false;
 	}
+	return true;
+}
+
+// vector with user screen names to follow
+void Stream::follow(const vector<string>& followers) {
+	std::copy(followers.begin(), followers.end(), std::back_inserter(to_follow));
+}
+
+bool Stream::getFollowList(string& result) {
+	result.clear();
+	vector<string>::iterator it = to_follow.begin();
+	while(it != to_follow.end()) {
+		result.append(*it);
+		++it;
+		if(it != to_follow.end()) {
+			result.append(",");		
+		}
+	}
+	return result.length();
 }
 
 /**
@@ -177,7 +218,7 @@ bool Stream::getTrackList(string& result) {
 			result.append(",");
 		}	
 	}
-	return to_track.size();	
+	return result.length();	
 }
 
 void Stream::parseBuffer() {
@@ -204,9 +245,9 @@ void Stream::parseBuffer() {
 size_t Stream::curlWriteCallback(char *ptr, size_t size, size_t nmemb, Stream* obj) {
 	size_t bytes_to_write = size * nmemb;
 	obj->buffer.append(ptr, bytes_to_write);
-	for(int i = 0; i < bytes_to_write; ++i) {
-		printf("%c", ptr[i]);
-	}
+//	for(int i = 0; i < bytes_to_write; ++i) {
+//		printf("%c", ptr[i]);
+//	}
 	obj->parseBuffer();
 	return bytes_to_write;
 }

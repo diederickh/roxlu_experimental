@@ -183,6 +183,7 @@ bool URL::cleanup() {
 		r = curl_multi_cleanup(curlm);
 		CHECK_CURLM_ERROR(r);	
 	}
+	return true;
 }
 
 string URL::getTwitPicCode() {

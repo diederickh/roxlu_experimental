@@ -12,9 +12,24 @@ namespace parser {
 
 
 JSON::JSON(roxlu::twitter::Twitter& tw) 
-	:twitter(tw)
+	:twit(tw)
 {
 }
+
+JSON::JSON(const roxlu::twitter::parser::JSON& other)
+	:twit(other.twit)
+{
+	*this = other;
+}
+
+JSON& JSON::operator=(const roxlu::twitter::parser::JSON& other) {
+	if(this != &other) {
+		return *this;
+	}
+	//twit = other.twit;
+	return *this;
+}
+
 
 JSON::~JSON() {
 	printf("~JSON()");
@@ -23,51 +38,104 @@ JSON::~JSON() {
 bool JSON::parseStatus(json_t* root, rtt::Tweet& tweet) {
 	// text
 	json_t* node =	json_object_get(root, "text");
-	if(!json_is_string(node)) {
+	if(node == NULL) {
 		RETURN_JSON("Error: cannot get text from tweet.\n");
 	}
-	
-	string text = json_string_value(node);
-	tweet.setText(text);
-	
+	if(json_is_string(node)) {
+		string text = json_string_value(node);
+		tweet.setText(text);
+	}
+	printf(">  %s\n", tweet.text.c_str());
 	// id_str
 	node = json_object_get(root, "id_str");
-	if(!json_is_string(node)) {
+	if(node == NULL) {
 		RETURN_JSON("Error: cannot get id_str from tweet.\n");
 	}
+	if(json_is_string(node)) {
+		string id = json_string_value(node);
+		tweet.setTweetID(id);
+	}
 		
-	string id = json_string_value(node);
-	tweet.setTweetID(id);
 
 	// user - object
 	json_t* user = json_object_get(root, "user");
-	if(!json_is_object(user)) {
+	if(user == NULL || !json_is_object(user)) {
 		RETURN_JSON("Error: cannot get user node from tweet.\n");
 	}
 
 	// user: screen name
 	node = json_object_get(user, "screen_name");
-	if(!json_is_string(node)) {
+	if(node == NULL) {
 		RETURN_JSON("Error: cannot get user screen_name.\n");
 	}
-	string screen_name = json_string_value(node);
-	tweet.setScreenName(screen_name);
+	if(json_is_string(node)) {
+		string screen_name = json_string_value(node);
+		tweet.setScreenName(screen_name);
+	}
 	
 	// user: avatar
 	node = json_object_get(user, "profile_image_url");
-	if(!json_is_string(node)) {
+	if(node == NULL) {
 		RETURN_JSON("Error: cannot get profile_image_url.\n");
 	}
-	string profile_image = json_string_value(node);
-	tweet.setAvatar(profile_image);
+	if(json_is_string(node)) {
+		string profile_image = json_string_value(node);
+		tweet.setAvatar(profile_image);
+	}
 
 	// user: id
 	node = json_object_get(user, "id_str");
-	if(!json_is_string(node)) {
+	if(node == NULL) {
 		RETURN_JSON("Error: cannot get user id.\n");
 	}
-	string user_id = json_string_value(node);
-	tweet.setUserID(user_id);
+	if(json_is_string(node)) {
+		string user_id = json_string_value(node);
+		tweet.setUserID(user_id);
+	}
+	
+	// entities
+	node = json_object_get(root, "entities");
+	if(node != NULL && json_is_object(node)) {
+		// get user mentions
+		json_t* subnode = json_object_get(node, "user_mentions");
+		if(subnode != NULL && json_is_array(subnode)) {
+			size_t num = json_array_size(subnode);
+			json_t* val = NULL;
+			for(int i = 0; i < num; ++i) {
+				val = json_array_get(subnode, i);
+				if(val == NULL || !json_is_object(val)) {
+					continue;
+				}
+				json_t* name_node = json_object_get(val, "screen_name");
+				if(name_node == NULL) {
+					continue;
+				}
+				string name_text = json_string_value(name_node);
+				tweet.user_mentions.push_back(name_text);
+			}
+		}
+		
+		// get hash tags.
+		subnode = json_object_get(node, "hashtags");
+		if(subnode != NULL && json_is_array(subnode)) {
+			size_t num = json_array_size(subnode);
+			json_t* val = NULL;
+			for(int i = 0; i < num; ++i) {
+				val = json_array_get(subnode, i);
+				if(val == NULL || !json_is_object(val)) {
+					continue;
+				}
+				json_t* tag = json_object_get(val, "text");
+				if(tag == NULL) {
+					continue;
+				}
+				string tag_text = json_string_value(tag);
+				tweet.tags.push_back(tag_text);
+			}
+		}
+		
+
+	}
 	return true;	
 }
 
@@ -84,30 +152,40 @@ bool JSON::parseDestroy(json_t* root, rtt::StatusDestroy& destroy) {
 	
 	// user_id_str
 	json_t* node = json_object_get(status, "user_id_str");
-	if(!json_is_string(node)) {
+	if(node == NULL) {
 		RETURN_JSON("Error: No user_id_str found.\n");
 	}
-	destroy.user_id_str = json_string_value(node);
+	if(json_is_string(node)) {
+		destroy.user_id_str = json_string_value(node);	
+	}
+
 	
 	// id_str
 	node = json_object_get(status, "id_str");
-	if(!json_is_string(node)) {
+	if(node == NULL) {
 		RETURN_JSON("Error: No id_str found.\n");	
+	}
+	if(json_is_string(node)) {
+		destroy.id_str = json_string_value(node);	
 	}
 	
 	// id
 	node = json_object_get(status, "id");
-	if(!json_is_integer(node)) {
+	if(node == NULL) {
 		RETURN_JSON("Error: no id value found.\n");
 	}
-	destroy.id = json_integer_value(node);
+	if(json_is_integer(node)) {
+		destroy.id = json_integer_value(node);
+	}
 	
 	// user_id
 	node = json_object_get(status, "user_id");
-	if(!json_is_integer(node)) {
+	if(node == NULL) {
 		RETURN_JSON("Error: no user id found.\n");
 	}
-	destroy.user_id = json_integer_value(node);
+	if(json_is_integer(node)) {
+		destroy.user_id = json_integer_value(node);
+	}
 	return true;
 }
 
@@ -192,44 +270,60 @@ struct User {
 */
 bool JSON::parseUser(json_t* root, rtt::User& user) {
 	json_t* node = json_object_get(root, "contributors_enabled");
-	if(!json_is_boolean(node)) {
+	if(node == NULL) {
 		RETURN_JSON("given node is not a user object.\n");
+	}
+	if(json_is_boolean(node)) {
+		user.contributors_enabled = json_is_true(node);
 	}
 	
 	// name
 	node = json_object_get(root, "name");
-	if(!json_is_string(node)) {
+	if(node == NULL) {
 		RETURN_JSON("no user name found.\n");
+	}
+	if(json_is_string(node)) {
+		user.name = json_string_value(node);
 	}	
-	user.name = json_string_value(node);
+	
 	
 	// id_str
 	node = json_object_get(root, "id_str");
-	if(!json_is_string(node)) {
+	if(node == NULL) {
 		RETURN_JSON("no id_str found in user.\n");
 	}
-	user.id_str = json_string_value(node);
+	if(json_is_string(node)) {
+		user.id_str = json_string_value(node);
+	}
 	
 	// screen_name
 	node = json_object_get(root, "screen_name");
-	if(!json_is_string(node)) {
+	if(node == NULL) {
 		RETURN_JSON("no screen name found in user\n");
 	}
-	user.screen_name = json_string_value(node);
+	if(json_is_string(node)) {
+		user.screen_name = json_string_value(node);
+	}
 	
 	// location
 	node = json_object_get(root, "location");
-	if(!json_is_string(node)) {
+	if(node == NULL) {
 		RETURN_JSON("no location in user.\n");
 	}
-	user.location = json_string_value(node);
+	if(json_is_string(node)) {
+		user.location = json_string_value(node);
+	}
+	
 	
 	// status count
 	node = json_object_get(root, "statuses_count");
-	if(!json_is_integer(node)) {
+	if(node == NULL) {
 		RETURN_JSON("no status count in user.\n");
 	}
-	user.id = json_integer_value(node);
+	if(json_is_integer(node)) {
+		user.id = json_integer_value(node);
+	}
+	
 
 	return true;
 }
@@ -238,7 +332,7 @@ bool JSON::parseUser(json_t* root, rtt::User& user) {
 void JSON::parse(const string& line) {
 	json_t* root;
 	json_error_t error;
-	printf("--\n");
+//	printf("--\n");
 //	printf("%s\n\n---------------------------------------------------------\n", line.c_str());
 	
 	// load json into jansson
@@ -254,7 +348,7 @@ void JSON::parse(const string& line) {
 	if(json_is_string(node)) {
 		rtt::Tweet tweet;
 		if(parseStatus(root, tweet)) {
-			twitter.onStatusUpdate(tweet);
+			twit.onStatusUpdate(tweet);
 		}
 		json_decref(root);
 		return;
@@ -265,7 +359,7 @@ void JSON::parse(const string& line) {
 	if(json_is_object(node)) {
 		rtt::StatusDestroy destroy;
 		if(parseDestroy(root, destroy)) {
-			twitter.onStatusDestroy(destroy);
+			twit.onStatusDestroy(destroy);
 		}
 		//printf("found a delete\n");
 		json_decref(root);
@@ -277,19 +371,21 @@ void JSON::parse(const string& line) {
 	node = json_object_get(root, "event");
 	if(json_is_string(node)) {
 		string event = json_string_value(node);
+		printf("event: %s\n", event.c_str());
+
 		if(event == "follow") {
 		}
-		else if(event == "list_member_added") {
+		else if(event == "list_member_added"
+				|| event == "list_member_removed") 
+		{
 			rtt::StreamEvent stream_event;
-		printf("event: %s\n", event.c_str());
+			stream_event.event = event;
 			if(parseStreamEvent(root, stream_event)) {
-				twitter.onStreamEvent(stream_event);
+				twit.onStreamEvent(stream_event);
 			}
-			
 		}
-
 	}
-	
+
 }
 
 }}} // roxlu::twitter::parser

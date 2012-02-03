@@ -14,6 +14,24 @@ QueryInsert::QueryInsert(Database& db, const string& table)
 {
 }
 
+QueryInsert::QueryInsert(const QueryInsert& other)
+	:Query(other.db)
+{
+	*this = other;
+}
+
+
+QueryInsert& QueryInsert::operator=(const QueryInsert& other) {
+	if(this == &other) {
+		return *this;
+	}	
+	
+	or_clause = other.or_clause;
+	table = other.table;
+	field_values = other.field_values;
+	return *this;
+}
+
 QueryInsert::~QueryInsert() {
 }
 
@@ -31,7 +49,13 @@ string QueryInsert::toString() {
 		return sql;
 	}
 	
-	sql.append("insert into ");
+	sql.append("insert ");
+	
+	if(or_clause.length()) {
+		sql.append(or_clause);
+	}
+	
+	sql.append(" into ");
 	sql.append(table);
 	sql.append("(");
 	sql.append(fields);
@@ -39,6 +63,7 @@ string QueryInsert::toString() {
 	sql.append(values);
 	sql.append(")");
 	
+	//printf("> %s\n", sql.c_str());
 	return sql;
 }
 
@@ -48,7 +73,7 @@ bool QueryInsert::execute() {
 	if(!sql.length()) {
 		return false;
 	}
-	
+
 	sqlite3_stmt* stmt;
 	if(!getDB().prepare(sql, &stmt)) {
 		sqlite3_finalize(stmt);

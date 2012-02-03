@@ -12,7 +12,10 @@ class Database;
 class QueryResult {
 public:
 	QueryResult(Database& db);
+	QueryResult(const QueryResult& other);
+	QueryResult& operator=(const QueryResult& other);
 	~QueryResult();
+	
 	bool execute(const string& sql, QueryParams& params, int queryType);
 	bool isOK();
 	bool next();
@@ -20,6 +23,7 @@ public:
 	string getString(int index);
 	int64_t getInt(int index);
 	float getFloat(int index);
+	bool isLast();
 	
 private:
 	Database& getDB();

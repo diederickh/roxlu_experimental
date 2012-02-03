@@ -13,6 +13,7 @@ Contents:
 
    twitter
    tutorial   
+   database
    
 
 Indices and tables

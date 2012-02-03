@@ -6,6 +6,7 @@
 #include "sqlite3.h"
 #include "QueryInsert.h"
 #include "QuerySelect.h"
+#include "QueryDelete.h"
 #include "QueryParam.h"
 #include "QueryParams.h"
 
@@ -19,19 +20,26 @@ public:
 	enum QueryTypes {
  		 QUERY_INSERT
 		,QUERY_SELECT
+		,QUERY_DELETE
 	};
 	
 	Database();
 	~Database();
 	bool open(const string& fileName);
 	bool query(const string& sql);
+	int lastInsertID();
+	bool beginTransaction();
+	bool endTransaction();
 	QueryInsert insert(const string& table);
 	QuerySelect	select(const string& selectFields);
 	QuerySelect select();
+	QueryDelete remove();
+	QueryDelete remove(const string& table);
 	
 	bool prepare(const string& sql, sqlite3_stmt** stmt);
 	bool bind(const vector<QueryParam*>& params, sqlite3_stmt** stmt, int queryType);
 	sqlite3* getDB();
+	void printCompileInfo();
 private:
 	string file;
 	sqlite3* db;

@@ -19,10 +19,11 @@ class Twitter;
 namespace parser {
 
 
-
 class JSON {
 public:
-	JSON(roxlu::twitter::Twitter& twitter);
+	JSON(roxlu::twitter::Twitter& tw);
+	JSON(const roxlu::twitter::parser::JSON& other);
+	JSON& operator=(const roxlu::twitter::parser::JSON& other);
 	~JSON();
 	
 	void parse(const string& line);
@@ -32,7 +33,7 @@ public:
 	bool parseUser(json_t* root, rtt::User& user);
 	
 private:
-	roxlu::twitter::Twitter& twitter;
+	roxlu::twitter::Twitter& twit;
 	
 }; // json
 

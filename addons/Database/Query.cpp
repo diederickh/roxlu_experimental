@@ -8,6 +8,11 @@ Query::Query(Database& db)
 {
 }
 
+Query& Query::operator=(const Query& other) {
+	db = other.db;
+	return *this;
+}
+
 Query::~Query() {
 }
 

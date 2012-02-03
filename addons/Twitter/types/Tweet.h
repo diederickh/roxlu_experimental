@@ -26,6 +26,8 @@ public:
 	void setUserID(string uid)		{ user_id = uid; 		}
 	void setTweetID(string tid) 	{ tweet_id = tid; 		}
 	void addURL(rtt::URL* url);
+	void addTag(const string& tag);
+	void addUserMention(const string& screenName);
 	
 	string getText() const			{ return text; 			}		
 	string getScreenName() const	{ return screen_name;	}
@@ -40,6 +42,8 @@ public:
 	string screen_name;
 	string avatar;
 	vector<rtt::URL*> urls;
+	vector<string> tags; 
+	vector<string> user_mentions;
 };
 
 }}} // roxlu::twitter::type
