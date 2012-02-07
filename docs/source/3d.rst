@@ -1,0 +1,41 @@
+3D
+================================================================================
+
+EasyCam
+--------------------------------------------------------------------------------
+
+The ``EasyCam`` camera creates a Arcball so you can move around easily in your
+scene. There are a couple of things you needs to call before you can use it.
+You have to call ``EasyCam::setup(int screenWidth, int screenHeigth)`` once
+and then translate the camera to a position from where you want to view the
+scene. We use a camera, so you need to move along the positive Z is you want to
+see something.
+
+In your setup code:
+
+.. code-block:: c++
+		
+	cam.setup(ofGetWidth(), ofGetHeight();
+	cam.translate(0,0,10); // 10 units away from the thing we draw
+	
+	
+Pass mouse events to the Camera
+
+.. code-block:: c++
+		
+	void testApp::mouseDragged(int x, int y, int button){
+		cam.onMouseDragged(x,y);
+	}
+	
+	void testApp::mousePressed(int x, int y, int button){
+		cam.onMouseDown(x,y);
+	}
+
+	
+Place the camera in your draw function:
+
+.. code-block:: c++
+
+	void testApp::draw(){
+		cam.place();
+	}
