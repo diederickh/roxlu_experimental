@@ -40,12 +40,17 @@ public:
 	void identity();
 	void copy(float* f);
 		
-	Mat4& affineInverse();	 
-	Mat4& inverse();
-	Mat4& transpose();
-	Mat4& translate(const Vec3& v);
-	Mat4& translate(float x, float y, float z);
-	Mat4& setPosition(float x, float y, float z);
+	// @todo maybe we should not return anything here (?)	
+	void affineInverse();	 
+	void inverse();
+	void transpose();
+	void translate(const Vec3& v);
+	void translate(float x, float y, float z);
+	void rotate(float angle, float x, float y, float z);
+	void scale(float s);
+	void scale(float x, float y, float z);
+	
+	void setPosition(float x, float y, float z);
 
 	static Mat4 translation(const Vec3& v);
 	static Mat4 translation(const float x, const float y, const float z);
@@ -57,8 +62,6 @@ public:
 	static Mat4 rotationZ(float a); // rotate around z-axis
 	static Mat4 scaling(float x, float y, float z);
 	
-	Mat4& scale(float s);
-	Mat4& scale(float x, float y, float z);
 	
 	
 	Mat4& frustum(float l, float r, float b, float t, float n, float f);
@@ -226,11 +229,10 @@ inline Vec3 Mat4::transform(const Vec3& o) const {
 }
 
 
-inline Mat4& Mat4::setPosition(float x, float y, float z) {
+inline void Mat4::setPosition(float x, float y, float z) {
 	m[12] = x;
 	m[13] = y; 
 	m[14] = z;
-	return *this;
 }
 
 inline float Mat4::operator[](const unsigned int dx) const {

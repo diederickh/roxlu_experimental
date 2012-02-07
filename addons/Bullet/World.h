@@ -37,7 +37,7 @@ public:
 
 	static btTransform createTransform(const Vec3& position);
 	static void setupBody(rbb::Body* body, btCollisionShape* collisionShape, const btTransform& transform, const float mass);
-	
+	btDiscreteDynamicsWorld* getBulletWorld();
 private:
 	
 	btBroadphaseInterface* broadphase;		
@@ -47,6 +47,10 @@ private:
 	btDiscreteDynamicsWorld* world;
 	rb::DebugDraw* debug_drawer; 
 };
+
+inline btDiscreteDynamicsWorld* World::getBulletWorld() {
+	return world;
+}
 
 }} // roxlu::bullet
 

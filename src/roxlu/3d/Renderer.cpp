@@ -246,7 +246,8 @@ void Renderer::exportToPly(string sceneItemName, string fileName, bool inDataPat
 
 Texture* Renderer::createTexture(string name, string fileName) {
 	Texture* tex = new Texture();
-	tex->loadImage(fileName);
+	//tex->loadImage(fileName);
+	printf("Renderer:createTexture need to be fixed. removing all OF dependencies\n");
 	scene->addTexture(name, tex);
 	return tex;
 }

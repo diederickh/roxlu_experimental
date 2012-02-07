@@ -21,7 +21,7 @@ VertexData::VertexData()
 	printf("Autoname: %s", name.c_str());
 }
 
-VertexData::VertexData(string meshName) 
+VertexData::VertexData(const string& meshName) 
 :vertex_p(NULL)
 ,vertex_pt(NULL)
 ,vertex_pn(NULL)
@@ -34,53 +34,53 @@ VertexData::VertexData(string meshName)
 {	
 }
 
-int VertexData::addVertex(const Vec3& rVec) {
-	vertices.push_back(rVec);
+int VertexData::addVertex(const Vec3& vec) {
+	vertices.push_back(vec);
 	attribs |= VERT_POS;
 	return vertices.size()-1;
 }
 
-int VertexData::addVertex(const float nX, const float nY, const float nZ) {
-	vertices.push_back(Vec3(nX,nY,nZ));
+int VertexData::addVertex(const float x, const float y, const float z) {
+	vertices.push_back(Vec3(x,y,z));
 	attribs |= VERT_POS;
 	return vertices.size()-1;
 }
 
-void VertexData::addTexCoord(const Vec2& rVec) {
-	texcoords.push_back(rVec);
+void VertexData::addTexCoord(const Vec2& vec) {
+	texcoords.push_back(vec);
 	attribs |= VERT_TEX;
 }
 
-void VertexData::addTexCoord(const float nX, const float nY) {
-	texcoords.push_back(Vec2(nX, nY));
+void VertexData::addTexCoord(const float x, const float y) {
+	texcoords.push_back(Vec2(x, y));
 	attribs |= VERT_TEX;
 }
 
-void VertexData::addColor(const Vec3& rColor) {
-	addColor(Color4(rColor.x, rColor.y, rColor.z, 1));
+void VertexData::addColor(const Vec3& color) {
+	addColor(Color4(color.x, color.y, color.z, 1));
 }
 
-void VertexData::addColor(const float nR, const float nG, const float nB) {
-	addColor(Color4(nR, nG, nB, 1.0f));
+void VertexData::addColor(const float r, const float g, const float b) {
+	addColor(Color4(r, g, b, 1.0f));
 }
 
-void VertexData::addColor(const Color4& rCol) {
-	colors.push_back(rCol);
+void VertexData::addColor(const Color4& color) {
+	colors.push_back(color);
 	attribs |= VERT_COL;
 }
 
-void VertexData::addNormal(const float nX, const float nY, const float nZ) {
-	normals.push_back(Vec3(nX, nY, nZ));
+void VertexData::addNormal(const float x, const float y, const float z) {
+	normals.push_back(Vec3(x, y, z));
 	attribs |= VERT_NORM;
 }
 
-void VertexData::addNormal(const Vec3& rVec) {
-	normals.push_back(rVec);
+void VertexData::addNormal(const Vec3& vec) {
+	normals.push_back(vec);
 	attribs |= VERT_NORM;
 }
 
-void VertexData::addIndex(const int& rIndex) {
-	indices.push_back(rIndex);
+void VertexData::addIndex(const int& index) {
+	indices.push_back(index);
 }
 
 // triangles are i.e. used when exporting. It's just a simple reference
@@ -121,8 +121,8 @@ void VertexData::addQuadIndices(int a, int b, int c, int d) {
 	indices.push_back(d);
 }
 
-int VertexData::addQuad(int nA, int nB, int nC, int nD) {
-	Quad q(nA, nB, nC, nD);
+int VertexData::addQuad(int a, int b, int c, int d) {
+	Quad q(a, b, c, d);
 	quads.push_back(q);
 	return quads.size()-1;
 }
@@ -132,12 +132,12 @@ int VertexData::addQuad(Quad q) {
 	return quads.size()-1;	
 }
 
-Triangle* VertexData::getTrianglePtr(int nTriangle) {
-	return &triangles[nTriangle];	
+Triangle* VertexData::getTrianglePtr(int triangle) {
+	return &triangles[triangle];	
 }
 
-Quad* VertexData::getQuadPtr(int nQuad) {
-	return &quads[nQuad];
+Quad* VertexData::getQuadPtr(int quad) {
+	return &quads[quad];
 }
 
 
@@ -512,60 +512,7 @@ void VertexData::computeTangents() {
 	}
 	
 	attribs |= VERT_TAN;
-	return;
-	/*
-	if(triangles.size() == 0 || texcoords.size() == 0) {
-		printf("Error: cannot calculate (bi)tangents as we do not have any triangles, or no texcoords defined.\n");
-		return;
-	}
-	
-	if(tangents.size() == 0 && bitangents.size() == 0) {
-		Vec3 d(0,0,0);
-		tangents.assign(getNumVertices(), d);
-		bitangents.assign(getNumVertices(), d);
-	}
-	for(int i = 0; i < triangles.size(); ++i) {
-		Vec3& v1 = vertices[triangles[i].a];
-		Vec3& v2 = vertices[triangles[i].b];
-		Vec3& v3 = vertices[triangles[i].c];				
-		Vec3 edge1 = v2 - v1;
-		Vec3 edge2 = v3 - v1;
-		Vec2& uv1 = texcoords[triangles[i].a];
-		Vec2& uv2 = texcoords[triangles[i].b];
-		Vec2& uv3 = texcoords[triangles[i].c];
-		Vec2 edge1_uv = uv2 - uv1;
-		Vec2 edge2_uv = uv3 - uv1;
-		
-		float cp = edge1_uv.y * edge2_uv.x - edge1_uv.x * edge2_uv.y;
-		if(cp != 0.0f) {
-			float mul = 1.0f/cp; // flips
-			Vec3 tangent = (edge1 * -edge2_uv.y + edge2 * edge1_uv.y) * mul;
-			Vec3 bitangent = (edge1 * -edge2_uv.x  + edge2 * edge1_uv.x) * mul;
 
-			
-			// these tangents are not per se orthogonal but most likely are 
-			// near orthogonal. we use Gram-Schhmidt orthogonalization, by 
-			// subtracting the part of a vector in the direction of another
-			// vector and then renormalizing. (see linke above 3dkingdoms,
-			// or page: 186 in the above mentioned book.
-			Vec3 normal = normals[triangles[i].a];
-			tangent -= normal * normal.dot(tangent);
-			bitangent -= bitangent.dot(normal)*normal - (tangent.dot(bitangent)*tangent);
-
-			tangent.normalize();
-			bitangent.normalize();
-			
-			tangents[triangles[i].a] = tangent;
-			bitangents[triangles[i].a] = bitangent;
-			tangents[triangles[i].b] = tangent;
-			bitangents[triangles[i].b] = bitangent;
-			tangents[triangles[i].c] = tangent;
-			bitangents[triangles[i].c] = bitangent;
-		}
-	}
-	attribs |= VERT_BINORM;
-	attribs |= VERT_TAN;
-	*/
 };
 /**
  *
@@ -677,18 +624,20 @@ void VertexData::debugDraw(int drawMode) {
 		if(getNumTexCoords() > 0) {
 			glColor3f(0.98, 0.92, 0.75); // yellowish
 			int len = vertices.size();
+			glEnable(GL_TEXTURE_2D);
 			glBegin(drawMode);
 			for(int i = 0; i < len; ++i) {
 				int parts = 3;
 				if(drawMode == GL_QUADS) {
 					parts = 4;
 				}
-				 glColor3fv(colors[i%parts]);
-				//glTexCoord2fv(texcoords[i].getPtr());
+				glColor3fv(colors[i%parts]);
+				glTexCoord2fv(texcoords[i].getPtr());
 				glVertex3fv(vertices[i].getPtr());
 			}
 			glEnd();
-			//glEnable(GL_TEXTURE_2D);
+			glDisable(GL_TEXTURE_2D);
+			
 		
 		}
 		else {
@@ -798,51 +747,6 @@ void VertexData::debugDrawQuad(int quadNum) {
 		glVertex3fv(vertices[q->d].getPtr());
 	glEnd();
 }
-
-/*
-void VertexData::calculateTangentAndBiTangent() {
-	if(triangles.size() == 0 || texcoords.size() == 0) {
-		ofLog(OF_LOG_ERROR, "Error: cannot calculate (bi)tangents as we do not have any triangles, or no texcoords defined.");
-		return;
-	}
-	
-	if(tangents.size() == 0 && bitangents.size() == 0) {
-		Vec3 d(0,0,0);
-		tangents.assign(getNumVertices(), d);
-		bitangents.assign(getNumVertices(), d);
-	}
-	for(int i = 0; i < triangles.size(); ++i) {
-		Vec3& v1 = vertices[triangles[i].a];
-		Vec3& v2 = vertices[triangles[i].b];
-		Vec3& v3 = vertices[triangles[i].c];		
-		Vec2& t1 = texcoords[triangles[i].a];
-		Vec2& t2 = texcoords[triangles[i].b];		
-		Vec2& t3 = texcoords[triangles[i].c];
-		Vec3& normal = normals[triangles[i].a];
-		Vec3 tangent(0);
-		Vec3 bitangent(0);
-		
-		createTangentAndBiTangent(v1, v2, t1, t2, normal, tangent, bitangent);
-		tangents[triangles[i].a] = tangent;
-		bitangents[triangles[i].a] = bitangent;
-
-		createTangentAndBiTangent(v1, v3, t1, t3, normal, tangent, bitangent);
-		tangents[triangles[i].b] = tangent;
-		bitangents[triangles[i].b] = bitangent;
-		cout << tangent << endl;
-		cout << bitangent << endl;
-		cout << "-------\n";
-//		tangents[triangles[i].c] = tangent;
-//		bitangents[triangles[i].c] = bitangent;
-
-
-	
-	}
-	attribs |= VERT_BINORM;
-	attribs |= VERT_TAN;
-	
-};
-*/
 
 
 // clear all buffers.

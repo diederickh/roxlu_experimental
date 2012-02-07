@@ -24,21 +24,21 @@ namespace roxlu {
 class VertexData {
 public:
 	VertexData(); 
-	VertexData(string meshName);
-	int 			addVertex(const Vec3& rVec);
-	int 			addVertex(const float nX, const float nY, const float nZ);
-	void 			addTexCoord(const Vec2& rVec);
-	void 			addTexCoord(const float nX, const float nY);
-	void 			addColor(const Vec3& rColor);
-	void 			addColor(const Color4& rColor);
-	void 			addColor(const float nR, const float nG, const float nB);
-	void			addNormal(const float nX, const float nY, const float nZ);
-	void 			addNormal(const Vec3& rVec);
-	void 			addIndex(const int& nIndex);
+	VertexData(const string& meshName);
+	int 			addVertex(const Vec3& vec);
+	int 			addVertex(const float x, const float y, const float z);
+	void 			addTexCoord(const Vec2& vec);
+	void 			addTexCoord(const float x, const float y);
+	void 			addColor(const Vec3& color);
+	void 			addColor(const Color4& color);
+	void 			addColor(const float r, const float g, const float b);
+	void			addNormal(const float x, const float y, const float z);
+	void 			addNormal(const Vec3& vec);
+	void 			addIndex(const int& index);
 	int				addTriangle(Triangle t);
 	int 			addTriangle(int a, int b, int c); 
 	int				addTriangleAndIndices(int a, int b, int c);
-	int 			addQuad(int nA, int nB, int nC, int nD);
+	int 			addQuad(int a, int b, int c, int d);
 	int				addQuad(Quad q);
 	int				addQuadAndIndices(int a, int b, int c, int d);
 	void			addQuadIndices(int a, int b, int c, int d);
@@ -52,8 +52,8 @@ public:
 	const float* 	getNormalsPtr();
 	const int* 		getIndicesPtr();
 
-    Triangle* 		getTrianglePtr(int nTriangle);
-	Quad* 			getQuadPtr(int nQuad);
+    Triangle* 		getTrianglePtr(int triangle);
+	Quad* 			getQuadPtr(int quad);
 	
 
 	int 			getNumVertices();
@@ -81,23 +81,23 @@ public:
 	VertexPNC* 		getVertexPNC();
 	VertexPTNTB* 	getVertexPTNTB();
 	
-	inline void		clearAttribs();
-	inline void		enablePositionAttrib();
-	inline void		enableNormalAttrib();
-	inline void		enableColorAttrib();
-	inline void		enableTexCoordAttrib();
-	inline void		disablePositionAttrib();
-	inline void		disableNormalAttrib();
-	inline void		disableColorAttrib();
-	inline void		disableTexCoordAttrib();
+	void			clearAttribs();
+	void			enablePositionAttrib();
+	void			enableNormalAttrib();
+	void			enableColorAttrib();
+	void			enableTexCoordAttrib();
+	void			disablePositionAttrib();
+	void			disableNormalAttrib();
+	void			disableColorAttrib();
+	void			disableTexCoordAttrib();
 
 	void			clear();
 	
-	inline void		setNormal(int dx, Vec3 normal) { normals[dx] = normal; }
-	inline void 	setVertex(int dx, Vec3 position) { vertices[dx] = position; }
-	inline void 	setVertex(int dx, float x, float y, float z) { vertices[dx].set(x, y,z); }
-	inline void 	setName(string n);
-	inline string	getName();
+	void		setNormal(int dx, Vec3 normal) { normals[dx] = normal; }
+	void 		setVertex(int dx, Vec3 position) { vertices[dx] = position; }
+	void 		setVertex(int dx, float x, float y, float z) { vertices[dx].set(x, y,z); }
+	void 		setName(string n);
+	string		getName();
 	
 	friend ostream& operator <<(ostream& os, const VertexData& data);
 	Vec3& operator[](const unsigned int dx);

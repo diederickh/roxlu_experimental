@@ -5,9 +5,7 @@ namespace roxlu {
 class VertexData;
 class Plane {
 public:	
-	Plane();
-	~Plane();
-	void create(float width, float height, VertexData& vd);
+	static void create(float width, float height, VertexData& vd);
 };
 
 } // roxlu

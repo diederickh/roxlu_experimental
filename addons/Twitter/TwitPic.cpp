@@ -33,6 +33,7 @@ bool TwitPic::upload(const string& filePath, TwitPicResult& result, const string
 	// Create a request which is used to generate the credentials oauth header.
 	rc::Request req(URL_ACCOUNT_VERIFY_CREDENTIALS);
 	req.isGet(true);
+	twitter.getoAuth().updateNonce();
 	string oauth_header = twitter.getoAuth().getHeader(req, req.getParams());
 	
 	// Now use the oauth header for the credentials so twitpic can validate us.

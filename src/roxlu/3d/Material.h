@@ -2,6 +2,7 @@
 #define ROXLU_MATERIALH
 
 
+#include "../opengl/OpenGL.h"
 #include "Texture.h" // texture uses ofImage now.. so we cannot use "OpenGL.h"
 #include <map>
 #include <string>
@@ -147,9 +148,13 @@ inline void Material::setTexture(int type, Texture* tex) {
 }
 
 inline Texture* Material::loadTexture(int type, string file, GLint imageFormat) {
+	
 	Texture* tex = new Texture();
+	/*
 	tex->loadImage(file, imageFormat);
 	materials.insert(std::pair<int, Texture*>(type, tex));
+	*/
+	printf("Error: loadTexture in Materia not implemented!!! We're removing all openFrameworks related code\n");
 	set_materials |= type;
 	return tex;
 }

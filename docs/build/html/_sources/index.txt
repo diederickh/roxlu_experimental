@@ -14,6 +14,8 @@ Contents:
    twitter
    tutorial   
    database
+   gl
+   3d
    
 
 Indices and tables

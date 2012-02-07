@@ -11,7 +11,7 @@ using std::string;
 using std::cout;
 using std::endl;
 
-typedef std::map<std::string, GLuint> ShaderMap;
+typedef std::map<std::string, GLint> ShaderMap;
 
 
 namespace roxlu {
@@ -19,22 +19,22 @@ namespace roxlu {
 class Shader {
 	public:
 		Shader();
-		Shader(std::string sName);
-		Shader& setName(std::string sName);
-		Shader& load(std::string sName);
+		Shader(const std::string& name);
+		Shader& setName(const std::string& name);
+		Shader& load(const std::string& name);
 		Shader& load();
-		void create(std::string& rVertexSource, std::string& rFragmentSource); 
-		Shader& addAttribute(std::string sName);
-		Shader& addUniform(std::string sName);
-		Shader& enableVertexAttribArray(std::string sName);
-		GLuint getAttribute(std::string sName);
-		GLuint getUniform(std::string sName);
+		void create(const std::string& vertexSource, const std::string& fragmentSource); 
+		Shader& addAttribute(const std::string& sName);
+		Shader& addUniform(const std::string& sName);
+		Shader& enableVertexAttribArray(const std::string& sName);
+		GLint getAttribute(const std::string& sName);
+		GLint getUniform(const std::string& sName);
 
 		string getVertexSource(bool inDataPath = true);
 		string getFragmentSource(bool inDataPath = true);
 				
-		Shader& enable();
-		Shader& disable();
+		void enable();
+		void disable();
 		
 		
 		// deletes,  reloads the vertex and fragment shaders from file

@@ -1,10 +1,8 @@
 #ifndef ROXLU_TEXTUREH
 #define ROXLU_TEXTUREH
 
-#include "ofImage.h"
-//#include "OpenGL.h" // can't use this because we use ofImage.h
 #include <string>
-
+#include "OpenGL.h"
 
 using std::string;
 
@@ -15,13 +13,14 @@ public:
 	Texture();
 	~Texture();
 	void setParams();
-	void loadImage(string fileName, GLint imageFormat = GL_RGB);
+	void setPixels(unsigned char* pixels, int width, int height, GLenum format = GL_RGB);
+	//void loadImage(string fileName, GLint imageFormat = GL_RGB);
 	void bind();
 	void unbind();
 	GLuint getTextureID();
 	string getImageFilePath();
 private:
-	ofImage img;
+	//ofImage img;
 	GLuint texture_id;
 	string image_file;
 };

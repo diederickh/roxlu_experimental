@@ -80,8 +80,8 @@ public:
 	void setTexVertexAttribPointer(GLuint index);
 	
 	
-	bool hasType(VBOType nType) {
-		return (nType & created_types);
+	bool hasType(VBOType type) {
+		return type;
 	}
 	
 	bool hasIndices() {

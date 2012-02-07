@@ -115,7 +115,8 @@ void SceneItem::draw(Mat4& viewMatrix, Mat4& projectionMatrix) {
 //	Mat4 modelview_copy = modelview_matrix;
 //	Mat4 view_copy = viewMatrix;
 //	Mat3 nm = modelview_copy.inverse().transpose();
-	Mat3 nm = modelview_matrix.getInverse().transpose();
+	Mat3 nm = modelview_matrix.getInverse();
+	nm.transpose();
 	effect->updateLights(); // isnt this done in renderer
 
 	effect->getShader().uniform1f("specularity", specularity);

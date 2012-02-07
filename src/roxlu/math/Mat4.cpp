@@ -46,7 +46,7 @@ Mat4& Mat4::operator=(const Mat4& o) {
 	m[13] = o.m[13];
 	m[14] = o.m[14];
 	m[15] = o.m[15];
-	
+
 	return *this;
 }
 
@@ -166,14 +166,14 @@ void Mat4::clean() {
 }
 
 
-Mat4& Mat4::inverse() {
+void Mat4::inverse() {
  	mat4_inverse(*this, *this);
-	return *this;
 }
 
 Mat4 Mat4::getInverse() {
 	Mat4 m = *this;
-	return m.inverse();
+	m.inverse();
+	return m;
 }
 
 #define SWAP_ROWS_DOUBLE(a, b) { double *_tmp = a; (a)=(b); (b)=_tmp; }
@@ -427,9 +427,8 @@ int mat4_inverse(const Mat4& o, Mat4& result) {
 }
 
 // assumes we are a affine matrix.
-Mat4& Mat4::affineInverse() {
+void Mat4::affineInverse() {
 	*this = affine_inverse(*this);
-	return *this;
 }
 
 // assumes a standard affine matrix.
@@ -468,7 +467,7 @@ Mat4 affine_inverse(const Mat4& o) {
 }
 
 #define SWAP_MAT4(a,b,tmp) t = m[a]; m[a] = m[b]; m[b] = t;
-Mat4& Mat4::transpose() {
+void Mat4::transpose() {
 	float t;
 	SWAP_MAT4(1,  4,  t);
 	SWAP_MAT4(2,  8,  t);
@@ -477,12 +476,12 @@ Mat4& Mat4::transpose() {
 	SWAP_MAT4(6,  9,  t);
 	SWAP_MAT4(7,  13, t);
 	SWAP_MAT4(11, 14, t);
-	return *this;	
 }
 
 Mat4 Mat4::getTranspose() {
 	Mat4 m = *this;
-	return m.transpose();	
+	m.transpose();	
+	return m;
 }
 
 Mat4 transpose(const Mat4& o) {
@@ -648,6 +647,11 @@ Mat4 Mat4::rotation(float a, float x, float y, float z) {
 	return mat;
 }
 
+void Mat4::rotate(float angle, float x, float y, float z) {
+	Mat4 rot = Mat4::rotation(angle, x, y, z);
+	*this *= rot;
+}
+
 Mat4 Mat4::rotationX(float a) {
 	Mat4 mat;
 	a = DEG_TO_RAD;
@@ -762,18 +766,16 @@ Mat4 Mat4::scaling(float x, float y, float z) {
 	return mat;
 }
 
-Mat4& Mat4::scale(float s) {
-	return scale(s,s,s);
+void Mat4::scale(float s) {
+	scale(s,s,s);
 }
 
-Mat4& Mat4::scale(float x, float y, float z) {
-	Mat4 mat;
-	mat.scaling(x,y,z);
+void Mat4::scale(float x, float y, float z) {
+	Mat4 mat = Mat4::scaling(x,y,z);
 	*this *= mat;
-	return *this;
 }
 
-Mat4& Mat4::translate(const Vec3& v) {
+void Mat4::translate(const Vec3& v) {
 	Mat4 mat = translation(v.x,v.y,v.z);
 //	printf("=================\n");
 //	print();
@@ -787,13 +789,12 @@ Mat4& Mat4::translate(const Vec3& v) {
 	m[14] += v.z;
 */
 	
-	return *this;	
+
 }
 
-Mat4& Mat4::translate(float x, float y, float z) {
+void Mat4::translate(float x, float y, float z) {
 	Mat4 mat = translation(x,y,z);
 	*this *= mat;
-	return *this;	
 }
 
 Mat4& Mat4::frustum(float l, float r, float b, float t, float n, float f) {

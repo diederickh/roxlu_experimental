@@ -15,6 +15,7 @@ public:
  FBO& addTexture(int nAttachmentPoint); 
  GLuint getTextureID(int nAttachmentPoint);
  void bindTexture(int nAttachmentPoint);
+ 
  void begin();
  void end();
  void bind();

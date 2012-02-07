@@ -10,17 +10,17 @@ Shader::Shader()
 {
 }
 
-Shader::Shader(std::string sName) 
+Shader::Shader(const std::string& sName) 
 :name(sName)
 {
 }
 
-Shader& Shader::setName(std::string sName) {
+Shader& Shader::setName(const std::string& sName) {
 	name = sName;
 	return *this;
 }
 
-Shader& Shader::load(std::string sName) {
+Shader& Shader::load(const std::string& sName) {
 	name = sName;
 	return load();
 }
@@ -43,20 +43,20 @@ string Shader::getFragmentSource(bool inDataPath) {
 	return File::getFileContents(vs_file, inDataPath);
 }
 
-void Shader::create(std::string& rVertexSource, std::string& rFragmentSource) {
-	if(!rVertexSource.length() || !rFragmentSource.length()) {
+void Shader::create(const std::string& vertexSource, const std::string& fragmentSource) {
+	if(!vertexSource.length() || !fragmentSource.length()) {
 		printf("No shader source given.\n");
 		return;
 	}
 	
-	vert_shader_source = rVertexSource;
-	frag_shader_source = rFragmentSource;
+	vert_shader_source = vertexSource;
+	frag_shader_source = fragmentSource;
 	
-	const char* vss_ptr = rVertexSource.c_str();
-	const char* fss_ptr = rFragmentSource.c_str();
+	const char* vss_ptr = vertexSource.c_str();
+	const char* fss_ptr = fragmentSource.c_str();
 	
-	std::cout << rVertexSource << std::endl;
-	std::cout << rFragmentSource << std::endl;
+	std::cout << vertexSource << std::endl;
+	std::cout << fragmentSource << std::endl;
 	
 	// create shader.
 	vert_id = glCreateShader(GL_VERTEX_SHADER); eglGetError();
@@ -80,41 +80,35 @@ void Shader::create(std::string& rVertexSource, std::string& rFragmentSource) {
 
 }
 
-Shader& Shader::addAttribute(std::string attribute) {
-	enable();
+Shader& Shader::addAttribute(const std::string& attribute) {
 	ShaderMap::iterator it = attributes.find(attribute);
 	if(it != attributes.end()) {
 		return *this;
 	}
 	
-	GLuint attribute_id = glGetAttribLocation(prog_id, attribute.c_str()); eglGetError();
+	GLint attribute_id = glGetAttribLocation(prog_id, attribute.c_str()); eglGetError();
 	printf("Added attribute: %s(%d) for prog: %d\n", attribute.c_str(), attribute_id, prog_id);
 	attributes[attribute] = attribute_id;
-	disable();
 	return *this;
 };
 
-Shader& Shader::addUniform(std::string uniform) {
-	enable();
-	GLuint uni_loc = -1;
+Shader& Shader::addUniform(const std::string& uniform) {
+	GLint uni_loc = -1;
 	uni_loc = glGetUniformLocation(prog_id, uniform.c_str()); eglGetError();
 	printf("Added uniform: %s at %d for prog: %d\n", uniform.c_str(), uni_loc, prog_id);
 	uniforms[uniform] = uni_loc;
-	disable();
 	return *this;
 }
 
-Shader& Shader::enableVertexAttribArray(std::string attribute) {
-	enable();
-	GLuint attrib = getAttribute(attribute);
+Shader& Shader::enableVertexAttribArray(const std::string& attribute) {
+	GLint attrib = getAttribute(attribute);
 	if(attrib != -1) {
 		glEnableVertexAttribArray(attrib);eglGetError();
 	}
-	disable();
 	return *this;
 }
 
-GLuint Shader::getAttribute(std::string attribute) {
+GLint Shader::getAttribute(const std::string& attribute) {
 	ShaderMap::iterator it = attributes.find(attribute);
 	if(it == attributes.end()) {
 		printf("Shader: error while retrieving the attribute: %s\n", attribute.c_str());
@@ -123,7 +117,7 @@ GLuint Shader::getAttribute(std::string attribute) {
 	return (it->second);
 }
 
-GLuint Shader::getUniform(std::string uniform) {
+GLint Shader::getUniform(const std::string& uniform) {
 	// find and return directly.
 	ShaderMap::iterator it = uniforms.find(uniform);
 	if(it != uniforms.end()) {
@@ -144,14 +138,12 @@ GLuint Shader::getUniform(std::string uniform) {
 	return it->second;
 }
 
-Shader& Shader::enable() {
+void Shader::enable() {
 	glUseProgram(prog_id); eglGetError();
-	return *this;
 }
 
-Shader& Shader::disable() {
+void Shader::disable() {
 	glUseProgram(0); eglGetError();
-	return *this;
 }
 
 std::string Shader::readFile(std::string path) {
@@ -214,7 +206,6 @@ Shader& Shader::uniform2f(std::string uniform, GLfloat x, GLfloat y) {
 	glUniform2f(getUniform(uniform), x, y); eglGetError();
 	return *this;
 }
-
 
 Shader& Shader::uniform3f(std::string uniform, GLfloat x, GLfloat y, GLfloat z) {
 	glUniform3f(getUniform(uniform), x, y, z); eglGetError();

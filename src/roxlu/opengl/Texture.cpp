@@ -21,6 +21,7 @@ void Texture::setParams() {
 	unbind();
 }
 
+/*
 void Texture::loadImage(string fileName, GLint imageFormat) {
 	// load image.
 	image_file = fileName;
@@ -40,7 +41,25 @@ void Texture::loadImage(string fileName, GLint imageFormat) {
 		eglGetError();
 	unbind();
 }
+*/
 
+void Texture::setPixels(unsigned char* pixels, int width, int height, GLenum format) {
+	bind();
+	glTexImage2D(
+		 GL_TEXTURE_2D
+		,0
+		,GL_RGBA 
+		,width
+		,height
+		,0
+		,format
+		,GL_UNSIGNED_BYTE
+		,pixels
+	);
+	setParams();
+	eglGetError();
+	unbind();
+}
 
 string Texture::getImageFilePath() {
 	return File::toDataPath(image_file);

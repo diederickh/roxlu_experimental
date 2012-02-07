@@ -53,7 +53,8 @@ void FBO::begin() {
 	glPushAttrib(GL_VIEWPORT_BIT); eglGetError();
 	glViewport(0,0, width, height); eglGetError();
 	 // clear buffer and fill it with the currently set glClearColor
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+//	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 void FBO::end() {
@@ -70,6 +71,8 @@ void FBO::bindTexture(int nAttachmentPoint) {
 		printf("Cannot bind texture with attachment point: '%d'", nAttachmentPoint);
 	}
 }
+
+
 
 void FBO::bind() {	
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo_id); eglGetError();

@@ -86,6 +86,7 @@ struct Vec3 {
 	Vec3& rotate(float angle, float x, float y, float z);
 	Vec3& rotate(float angle, Vec3 axis);
 	Vec3& rotate(float angle, Vec3 axis, Vec3 pivot);
+	Vec3& rotateY(float angle);
 	Vec3& limit(float size);
 	Vec3& scale(float length);
 	Vec3& normalize();
@@ -180,8 +181,18 @@ inline float Vec3::lengthSquared(const Vec3& other) {
 	return dx*dx + dy*dy + dz*dz;
 }
 
-inline Vec3& Vec3::rotate(float angle, float x, float y, float z) {
-	return rotate(angle, Vec3(x,y,z));
+inline Vec3& Vec3::rotate(float a, float xx, float yy, float zz) {
+	float sina = sin(a);
+	float cosa = cos(a);
+	float cosb = 1.0f - cosa;
+	
+	x =  x * (xx * xx * cosb + cosa) + y * (xx * yy * cosb - zz * sina)+ z * (xx * zz * cosb + yy * sina);
+	y =  x * (yy * xx * cosb + zz * sina) + y * (yy * yy * cosb + cosa) + z * (yy * zz * cosb - xx * sina);
+	z =  x * (zz * xx * cosb - yy * sina) + y * (zz * yy * cosb + xx * sina) + z * (zz * zz * cosb + cosa);
+}
+
+inline Vec3& Vec3::rotateY(float angle) {
+	return rotate(angle, 0.0f, 1.0f, 0.0f);
 }
 
 inline Vec3& Vec3::rotate(float a, Vec3 ax) {

@@ -55,3 +55,5 @@
 #include "opengl/Texture.h"
 #include "opengl/VAO.h"
 #include "opengl/VBO.h"
+
+using namespace roxlu;
