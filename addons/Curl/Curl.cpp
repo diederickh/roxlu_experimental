@@ -71,10 +71,8 @@ bool Curl::doGet(const string& url) {
 	
 	// set header
 	if(headers.size()) {
-		//curl_header = curl_slist_append(curl_header, header.c_str());
 		setHeaders(&curl_header);
 		if(curl_header) {
-			printf("++++++++++++++++++++++++\n");
 			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, curl_header);
 		}
 	}
@@ -151,12 +149,12 @@ bool Curl::doPost(const string& url, const rcp::Collection& params, bool multiPa
 		list<rcp::Parameter*>::const_iterator it = post_params.begin();	
 	
 		while(it != post_params.end()) {
-			printf("-------- Type: %d - %d\n", (*it)->type, rcp::Parameter::PARAM_STRING);
 			switch((*it)->type) {
 				// This doesn't work somehow for twitter... I'm using the query string
 				// now and urlencoding the values. But somehow it looks like
 				// this string isn't added to the form.
 				// update: 2012.02.03 this does work for twitpic
+				// update: 2012.02.06 this also works for flickr
 				case rcp::Parameter::PARAM_STRING: {
 					curl_formadd(
 							 &post_curr
@@ -204,9 +202,7 @@ bool Curl::doPost(const string& url, const rcp::Collection& params, bool multiPa
 	CHECK_CURL_ERROR(r);
 	
 	// set header
-//	if(header.length()) {
 	if(headers.size()) {
-		//curl_header = curl_slist_append(curl_header, header.c_str());
 		setHeaders(&curl_header);
 	}
 	if(curl_header) {
@@ -224,10 +220,8 @@ bool Curl::doPost(const string& url, const rcp::Collection& params, bool multiPa
 	
 	// clear header.
 	curl_slist_free_all(curl_header);
-	//header.clear();
 	headers.clear();
 	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, NULL); // opts are sticky
-	
 	return result;
 }
 
@@ -249,10 +243,8 @@ string Curl::createQueryString(const list<rcp::Parameter*>& queryParams) {
 	return qs;
 }
 
-
 void Curl::reset() {
 	buffer = "";
-	//curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, NULL); // reset request, from twitcurl.
 	setCallback();
 	setUserPass();
 }
@@ -279,10 +271,6 @@ size_t Curl::callback(char* data, size_t size, size_t nmemb, Curl* curlPtr) {
 	curlPtr->buffer.append(data, handled);
 	return handled;
 }
-
-//void Curl::addHeader(const string& h) {
-//	header = h;
-//}
 
 void Curl::setVerbose(bool verbose) {
 	curl_easy_setopt(curl, CURLOPT_VERBOSE, (verbose) ? 1 : 0);	

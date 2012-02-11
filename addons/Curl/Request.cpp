@@ -28,7 +28,6 @@ void Request::setURL(const string& u) {
 }
 
 void Request::addHeader(const string& h) {
-//	header = h;
 	headers.push_back(h);
 }
 
@@ -49,41 +48,14 @@ bool Request::doGet(rc::Curl& curl, string& result) {
 	
 	vector<string>::iterator head_it = headers.begin();
 	while(head_it != headers.end()) {
-		printf("Adding header > %s\n", (*head_it).c_str());
 		curl.addHeader(*head_it);
 		++head_it;
 	}
 	
-//	if(header.length()) {
-//		curl.addsetHeader(header);
-//	}
-	
-	// add params to url  // @todo test
-	// @todo call curl.createQueryString!
-	// @todo ^^--> no, use params.getQueryString(), also need to update curl to do the same 
-	// @todo ^^--> no,no use this.getQueryString() ;-)
-	// --------------------------------
-	//curl.setVerbose(true);
-	string ps;
-	const list<rcp::Parameter*>& pars = params.getParameters();
-	list<rcp::Parameter*>::const_iterator it = pars.begin();
-	while(it != pars.end()) {
-		ps.append((*it)->getName());
-		ps.append("=");
-		ps.append((*it)->getStringValue());
-		
-		++it;
-		if(it != pars.end()) {
-			ps.append("&");
-		}	
-	}
+	// create url + query string.	
 	string use_url = url;
-	if(ps.length()) {
-		use_url.append("?");
-		use_url.append(ps);
-	}
-	// ------------------------
-	
+	use_url += getQueryString();	
+
 	if(!curl.doGet(use_url)) {
 		return false;
 	}
@@ -106,16 +78,14 @@ bool Request::doPost(rc::Curl& curl,  string& result, bool multipart) {
 		return false;
 	}
 	
-//	if(header.length()) {
-//		curl.setHeader(header);
-//	}
+	// adding headers.
 	vector<string>::iterator head_it = headers.begin();
 	while(head_it != headers.end()) {
 		curl.addHeader(*head_it);
 		++head_it;
 	}
 	
-	curl.setVerbose(true);
+	//curl.setVerbose(true);
 
 	if(!curl.doPost(url, params, multipart)) {
 		return false;

@@ -45,7 +45,9 @@ bool JSON::parseStatus(json_t* root, rtt::Tweet& tweet) {
 		string text = json_string_value(node);
 		tweet.setText(text);
 	}
-	printf(">  %s\n", tweet.text.c_str());
+	
+	//printf(">  %s\n", tweet.text.c_str());
+	
 	// id_str
 	node = json_object_get(root, "id_str");
 	if(node == NULL) {

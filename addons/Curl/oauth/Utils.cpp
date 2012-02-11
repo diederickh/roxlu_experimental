@@ -48,10 +48,10 @@ bool Utils::extractTokenAndSecret(
 	if(npos != string::npos) {
 		npos = npos +TOKEN_SECRET_KEY.length() +1;
 		dummy = buffer.substr(npos);
+		
+		// check the next variable
 		npos = dummy.find("&");
-		if(npos != string::npos) {
-			secret = dummy.substr(0, npos);
-		}
+		secret = dummy.substr(0, npos); // got to next & or to end of string
 	}	
 	//printf("Tokenkey: '%s', Token secret: '%s'\n", token_key.c_str(), token_secret.c_str()); 	
 	return true;
@@ -66,6 +66,7 @@ bool Utils::extractTokenAndSecret(
  * @param	string [in]		The buffer (the HTML with the pincode)
  * @param	string [out]	We set the pin value to this.
  */
+ /*
 bool Utils::extractAuthenticityToken(const string& buffer, string& authenticity) {
 	// get: <input name="authenticity_token" type="hidden" value="11187c853df9ca61369472e70f5652ddc2922333" />
 	size_t npos_start;
@@ -77,6 +78,7 @@ bool Utils::extractAuthenticityToken(const string& buffer, string& authenticity)
 	authenticity = buffer.substr(npos_start, npos_end);
 	return authenticity.length();
 }
+*/
 
 /**
  * Part of the automatically authorizing PIN flow. We parse the HTML of twitter
@@ -86,6 +88,7 @@ bool Utils::extractAuthenticityToken(const string& buffer, string& authenticity)
  * @param	string [in]		The HTML from twitter containing the PIN 
  * @param	string [out]	Is set to the extract pin.
  */
+ /*
 bool Utils::extractPin(const string& buffer, string& pin) {
 	size_t npos_start;
 	size_t npos_end;
@@ -96,5 +99,5 @@ bool Utils::extractPin(const string& buffer, string& pin) {
 	pin = buffer.substr(npos_start, npos_end);
 	return pin.length();
 }
-
+*/
 }}} // roxlu::curl::oauth

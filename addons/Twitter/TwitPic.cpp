@@ -26,6 +26,7 @@ TwitPic& TwitPic::operator=(const TwitPic& other) {
 	}
 	twitter = other.twitter;
 	key = other.key;
+	return *this;
 }
 
 

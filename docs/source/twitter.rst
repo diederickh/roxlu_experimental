@@ -1,49 +1,166 @@
 Twitter
 ==================================
 
-Authorizing a connection
-------------------------
+Creating a twitter application
+--------------------------------------------------------------------------------
+
+Before you can use Twitter in your (openFrameworks) application, make sure to
+register it at `Twitter developers <http://dev.twitter.com/>`_. Once you created 
+an application you'll need the application consumer key and consumer secret.
+
+Authorizing your application
+--------------------------------------------------------------------------------
 
 In your application include the "Twitter.h" file and create the neccesary
 objects. I you want to do status updates, get the timeline, etc.. you need
-a Twitter object. When you want to connect to the streaming server, you 
-use the Stream object.
+a :cpp:class:`Twitter` object. When you want to connect to the streaming server, 
+you also need the :cpp:class:`Stream` object.  Then in your application setup 
+code you set the correct authorization information as shown in the code example
+below. Next thing you need to do, is adding some code to authorize your 
+application once your application is authorized we will receive a oauth key and
+oauth secret. These values are used to sign your requests so Twitter knows you're
+they one who allowed the application to i.e. posts tweets on your behalf. 
+
+
+*In your .h file:*
 
 .. code-block:: c++
 
 	rt::Twitter twitter;
+
+*In your .cpp file.*	
 	
-Before you continue you need to register your application at Twitter then 
-use the correct twitter username, password, consumer key and secret to make a 
-connection to the Twitter servers. See the 
-`Twitter developers <http://dev.twitter.com/>`_ page and login to create a new
-application..
-
-Then in your applications setup code you set the correct authorization information
-as shown below:
-
 .. code-block:: c++
 
-	twitter.setTwitterUsername("********");
-	twitter.setTwitterPassword("**********");
-	twitter.setConsumerKey("***********");
-	twitter.setConsumerSecret("***********");
-	
-Once all authorization information is set, you're ready to go to retrieve the 
-authorization tokens (see oauth for more information. We store the authorization
-tokens. We store the authorization tokens in a simple text file because you only
-need to get these once. 
-
-.. code-block:: c++
-
-	// get authorized tokens.
-	string token_file = "twitter.txt";
-	if(!twitter.loadTokens(token_file)) {
-		string auth_url;
-		twitter.requestToken(auth_url);
-		twitter.handlePin(auth_url);
-		twitter.accessToken();
-		twitter.saveTokens(token_file);
+	void testApp::testApp() {
+		twitter.setConsumerKey("kyw8bCAWKbk6e1HMMdAvw");
+		twitter.setConsumerSecret("PwVuyjLedVZbi4ER6yRAo0byF55AIureauV6UhLRw");
+		
+		string tokens_file = ofToDataPath("twitter.txt",true);
+		if(!twitter.loadTokens(tokens_file)) {
+			string auth_url;
+			twitter.requestToken(auth_url);
+			twitter.handlePin(auth_url);
+			twitter.accessToken();
+			twitter.saveTokens(tokens_file);
+		}	
 	}
 	
+
+Connecting to the twitter stream
+--------------------------------------------------------------------------------
+
+Twitter has a streaming server which allows you to receive status update from 
+people you're interested in. There are two kinds of streams: 
+
+#. General streaming server
+#. User streaming server
+
+The user streaming server is probably the most interesting to use. It allows
+you to receive tweets in realtime from people you're following. **This is an
+important thing:** you need to be aware of: when you authorize the application,
+you need to login to twitter, the user stream you'll be receiving is from this
+user.
+
+To receive and do something with new twitter messages, you need te implement
+the rt:IEventListener interface.
+
+.. code-block:: c++
+
+	class IEventListener {
+	public:
+		virtual void onStatusUpdate(const rtt::Tweet& tweet) = 0;
+		virtual void onStatusDestroy(const rtt::StatusDestroy& destroy) = 0;
+		virtual void onStreamEvent(const rtt::StreamEvent& event) = 0;
+	};
 	
+Twitter streaming server example
+--------------------------------------------------------------------------------
+
+*testApp.h*
+
+.. code-block:: c++
+
+	#pragma once
+	
+	#include "ofMain.h"
+	#include "Twitter.h"
+	
+	// example listener:
+	class TwitterListener : public rt::IEventListener {
+	public:
+	
+		virtual void onStatusUpdate(const rtt::Tweet& tweet) {
+			printf("> %s\n", tweet.getText().c_str());
+		}
+		
+		virtual void onStatusDestroy(const rtt::StatusDestroy& destroy) {
+		}
+		
+		virtual void onStreamEvent(const rtt::StreamEvent& event) {
+	
+		}
+	};
+	
+	
+	class testApp : public ofBaseApp{
+	
+		public:
+			testApp();
+			void setup();
+			void update();
+			void draw();
+	
+			void keyPressed  (int key);
+			void keyReleased(int key);
+			void mouseMoved(int x, int y );
+			void mouseDragged(int x, int y, int button);
+			void mousePressed(int x, int y, int button);
+			void mouseReleased(int x, int y, int button);
+			void windowResized(int w, int h);
+			void dragEvent(ofDragInfo dragInfo);
+			void gotMessage(ofMessage msg);
+			
+			rt::Twitter twitter;
+			rt::Stream stream;		
+			TwitterListener listener;
+	};
+
+*testApp.cpp*
+
+.. code-block:: c++
+
+	#include "testApp.h"
+	
+	testApp::testApp()
+		:stream(twitter)
+	{
+	}
+	
+	void testApp::setup(){
+		ofSetFrameRate(60);
+		ofSetVerticalSync(true);
+		ofBackground(33);
+		
+		twitter.setConsumerKey("kyw8bCAWKbP6e1MMdAvw");
+		twitter.setConsumerSecret("PwVuyjLeUVZi4ER6yRAo0byF55AIureauV6UhLRw");
+		
+		string tokens_file = ofToDataPath("twitter.txt",true);
+		if(!twitter.loadTokens(tokens_file)) {
+			string auth_url;
+			twitter.requestToken(auth_url);
+			twitter.handlePin(auth_url);
+			twitter.accessToken();
+			twitter.saveTokens(tokens_file);
+		}
+		
+		stream.track("love");
+		stream.connect(URL_STREAM_USER);
+		
+		twitter.addEventListener(listener);
+	}
+	
+	void testApp::update(){
+		stream.update();
+	}
+

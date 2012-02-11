@@ -22,6 +22,13 @@ using std::vector;
 namespace rcp = roxlu::curl::parameter;
 namespace rc = roxlu::curl;
 
+
+enum oAuthAuthorizationMethods {
+	 OAUTH_METHOD_HEADER 		// add authorization to header
+	,OAUTH_METHOD_GET			// add authorization to request vars
+};
+
+
 namespace roxlu {
 namespace curl {
 namespace oauth {
@@ -35,7 +42,7 @@ public:
 	void setTokenKey(const string& key);
 	void setTokenSecret(const string& secret);
 	void setScreenName(const string& name);
-	void setPin(const string& p);
+	void setVerifier(const string& verifier); // i.e. the pin from twitter
 
 	void updateNonce();
 
@@ -44,7 +51,7 @@ public:
 	string& getTokenKey();
 	string& getTokenSecret();
 	string& getScreenName();
-	string& getPin();
+	string& getVerifier();
 	string& getNonce();
 	string& getTimestamp();
 	string getSignatureMethod();
@@ -55,15 +62,16 @@ public:
 	string token_key;
 	string token_secret;
 	string screen_name;
-	string pin;
+	string verifier;
 	string nonce;
 	string timestamp;
 	
 	// requests
-	rc::Request getRequestTokenRequest(const string& url, const string& callbackURL);
-	rc::Request getAccessTokenRequest(const string& url);
+	rc::Request getRequestTokenRequest(const string& url, const string& callbackURL, int authMethod = OAUTH_METHOD_HEADER);
+	rc::Request getAccessTokenRequest(const string& url, int authMethod = OAUTH_METHOD_HEADER);
 
-	void authorize(rc::Request& req);
+	void authorize(rc::Request& req, int authMethod = OAUTH_METHOD_HEADER);
+	bool getAuthorizeParams(rc::Request& req, const rcp::Collection& paramsIn, rcp::Collection& paramsOut);
 	string getHeader(rc::Request& req, const rcp::Collection& params);
 	string getAuthorizationHeader(rc::Request& req, const rcp::Collection& params);
 	
@@ -98,8 +106,8 @@ inline string& oAuth::getScreenName() {
 	return screen_name;
 }
 
-inline string& oAuth::getPin() {
-	return pin;
+inline string& oAuth::getVerifier() {
+	return verifier;
 }
 
 inline string& oAuth::getNonce() {
@@ -140,8 +148,8 @@ inline void oAuth::setScreenName(const string& n) {
 	screen_name = n;
 }
 
-inline void oAuth::setPin(const string& p) {
-	pin  = p;
+inline void oAuth::setVerifier(const string& p) {
+	verifier  = p;
 }
 
 

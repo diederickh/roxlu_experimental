@@ -45,7 +45,7 @@ string Signature::getSignature(oAuth& auth, const string& url, const string& met
 	sig_base.append("&");
 	
 	string param_string = getParameterStringForSignatureBase(params);
-//	printf("Parameter string: %s\n", param_string.c_str());
+	//printf("Parameter string: %s\n", param_string.c_str());
 	if(param_string.length()) {
 		sig_base.append(urlencode(param_string));
 	}
@@ -66,7 +66,7 @@ string Signature::getSignature(oAuth& auth, const string& url, const string& met
 	if(toksec.length()) {
 		sign_key.append(urlencode(toksec));
 	}
-	
+
 	// use signature base + sign key to create signature
 	mac.HMAC_SHA1(
 				(unsigned char*)sig_base.c_str()

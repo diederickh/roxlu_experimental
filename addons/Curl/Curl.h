@@ -31,7 +31,6 @@ public:
 	void setAuthPassword(const string& password);
 	string& getAuthUsername();
 	string& getAuthPassword();
-//	void setHeader(const string& header);
 	void addHeader(const string& header);
 	void setVerbose(bool verbose);
 	string createQueryString(const list<rcp::Parameter*>& queryParams); // @todo use Collection::getQueryString
@@ -53,7 +52,6 @@ private:
 	string auth_username;
 	string auth_password;
 	vector<string> headers;
-	//CURLM* curlm; // for now we do not yet use the multi handle... maybe later
 };
 
 inline string& Curl::getBuffer() {

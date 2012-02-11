@@ -48,7 +48,7 @@ void Texture::setPixels(unsigned char* pixels, int width, int height, GLenum for
 	glTexImage2D(
 		 GL_TEXTURE_2D
 		,0
-		,GL_RGBA 
+		,GL_RGBA8 
 		,width
 		,height
 		,0

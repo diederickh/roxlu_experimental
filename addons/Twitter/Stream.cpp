@@ -102,18 +102,8 @@ bool Stream::connect(const string& streamURL) {
 				return false;
 			}
 			++it;
-
 		}
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER ,curl_header);
-//			printf("\nSTREAM HEADERS\n\n%s\n\n", header.c_str());
-//		curl_header = curl_slist_append(curl_header, header.c_str());
-//		if(curl_header) {
-//			curl_easy_setopt(curl, CURLOPT_HTTPHEADER ,curl_header);
-//		}
-//		else {
-//			printf("Cannot set header!");
-//			return false;
-//		}
 	}	
 	
 	// create multi handle for async io
@@ -245,9 +235,9 @@ void Stream::parseBuffer() {
 size_t Stream::curlWriteCallback(char *ptr, size_t size, size_t nmemb, Stream* obj) {
 	size_t bytes_to_write = size * nmemb;
 	obj->buffer.append(ptr, bytes_to_write);
-//	for(int i = 0; i < bytes_to_write; ++i) {
-//		printf("%c", ptr[i]);
-//	}
+	for(int i = 0; i < bytes_to_write; ++i) {
+		printf("%c", ptr[i]);
+	}
 	obj->parseBuffer();
 	return bytes_to_write;
 }

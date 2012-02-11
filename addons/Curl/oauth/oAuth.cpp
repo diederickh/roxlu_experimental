@@ -24,7 +24,6 @@ void oAuth::updateNonce() {
 	nonce.assign(buf_time);
 	nonce.append(buf_rand);
 	timestamp.assign(buf_time);
-	printf("> %s\n", timestamp.c_str());
 }
 
 
@@ -36,7 +35,7 @@ void oAuth::updateNonce() {
  * @param	string			The callback to which the request token is sent.
  * @return	Request			Request object for token-request
  */
-rc::Request oAuth::getRequestTokenRequest(const string& url, const string& callbackURL) {
+rc::Request oAuth::getRequestTokenRequest(const string& url, const string& callbackURL, int authMethod) {
 	updateNonce();
 
 	rcp::Collection col = getDefaultParameters();
@@ -46,51 +45,82 @@ rc::Request oAuth::getRequestTokenRequest(const string& url, const string& callb
 	string signature = rco::Signature::getSignatureForGet(*this, url,col);
 	col["oauth_signature"] = signature;
 	
-	// use the collection to generate a oAuth header with the signature
-	string header = "Authorization: " +rco::Header::getHeader(col);
-
-	// create the request object which 
+	
 	rc::Request req;
 	req.setURL(url);
-	req.addHeader(header);
+	
+	if(authMethod == OAUTH_METHOD_GET) {
+		req.addParams(col);
+		req.isGet(true);
+	}
+	else if(authMethod == OAUTH_METHOD_HEADER) {
+		string header = "Authorization: " +rco::Header::getHeader(col);
+		req.addHeader(header);
+	}
+	
 	return req;
 }
 
 
-rc::Request oAuth::getAccessTokenRequest(const string& url) {
+rc::Request oAuth::getAccessTokenRequest(const string& url, int authMethod) {
+	updateNonce();
+	
 	// get the parameters necessary for a token-request.
 	rcp::Collection col = getDefaultParameters();
 	col["oauth_token"] = getTokenKey();
-	col["oauth_verifier"] = getPin();
+	col["oauth_verifier"] = getVerifier();
 	
 	string signature = rco::Signature::getSignatureForGet(*this, url,col);
 	col["oauth_signature"] = signature;
+
+	rc::Request req;	
 	
-	string header = "Authorization: " +rco::Header::getHeader(col);
-	rc::Request req;
+	if(authMethod == OAUTH_METHOD_GET) {
+		req.addParams(col);
+		req.isGet(true);
+	}
+	else if(authMethod == OAUTH_METHOD_HEADER) {
+		string header = "Authorization: " +rco::Header::getHeader(col);
+		req.addHeader(header);
+	}
+	
 	req.setURL(url);
-	req.addHeader(header);
+	
 	return req;
 
 }
 
-void oAuth::authorize(rc::Request& req) {
+void oAuth::authorize(rc::Request& req, int authMethod) {
 	updateNonce();
-	string s =getAuthorizationHeader(req, req.getParams());
-	printf("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");
-	printf("%s\n", s.c_str());
-	printf("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n");
-	req.addHeader(getAuthorizationHeader(req, req.getParams()));
+	
+	if(authMethod == OAUTH_METHOD_GET) {
+		rcp::Collection auth_params;
+		getAuthorizeParams(req, req.getParams(), auth_params);
+		req.addParams(auth_params);
+	}
+	else if(authMethod == OAUTH_METHOD_HEADER) {
+		string s = getAuthorizationHeader(req, req.getParams());
+		req.addHeader(getAuthorizationHeader(req, req.getParams()));
+	}
 }
+
 
 string oAuth::getAuthorizationHeader(rc::Request& req, const rcp::Collection& params) {
 	return "Authorization: " +getHeader(req, params);
 }
 
 string oAuth::getHeader(rc::Request& req, const rcp::Collection& params) {
+	rcp::Collection header_params;
+	if(getAuthorizeParams(req, params, header_params)) {
+		return rco::Header::getHeader(header_params);
+	}
+	return "";
+}
+
+bool oAuth::getAuthorizeParams(rc::Request& req, const rcp::Collection& paramsIn, rcp::Collection& paramsOut) {
 	// create collection for signature
 	rcp::Collection signature_params = getDefaultParameters();
-	signature_params += params;
+	signature_params += paramsIn;
 	
 	signature_params["oauth_token"] = getTokenKey();
 	string signature;
@@ -102,11 +132,12 @@ string oAuth::getHeader(rc::Request& req, const rcp::Collection& params) {
 	}
 
 	// Create header with signature	
-	rcp::Collection header_params = getDefaultParameters();
-	header_params["oauth_signature"] = signature;
-	header_params["oauth_token"] = getTokenKey();
-	return rco::Header::getHeader(header_params);
+	paramsOut = getDefaultParameters();
+	paramsOut["oauth_signature"] = signature;
+	paramsOut["oauth_token"] = getTokenKey();
+	return true;
 }
+
 
 rcp::Collection oAuth::getDefaultParameters() {
 	rcp::Collection col;

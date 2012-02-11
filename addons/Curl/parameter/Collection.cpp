@@ -10,11 +10,39 @@ Collection::Collection() {
 }
 
 Collection::~Collection() {
+	clear();	
+}
+
+
+Collection::Collection(const Collection& other) {
+	*this = other;
+}
+
+Collection& Collection::operator=(const Collection& other) {
+	clear();
+	*this += other;
+	return *this;
+}
+
+void Collection::clear() {
 	list<Parameter*>::iterator it = params.begin();
 	while(it != params.end()) {
 		delete *it;
 		it = params.erase(it);
-	}	
+	}
+}
+
+bool Collection::removeParameter(const string& name) {
+	list<Parameter*>::iterator it = params.begin();
+	while(it != params.end()) {
+		if((*it)->getName() == name) {
+			delete (*it);
+			params.erase(it);
+			return true;
+		}
+		++it;
+	}
+	return false;
 }
 
 void Collection::print() const {

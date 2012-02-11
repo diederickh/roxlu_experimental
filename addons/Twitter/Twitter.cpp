@@ -53,7 +53,7 @@ bool Twitter::handlePin(const string& authURL) {
 	getline(std::cin, pin);
 	printf("pin: '%s'\n", pin.c_str());
 	printf("--------------------------------------------------------------------\n");
-
+	
 	/*
 	// STEP 1: get PIN-wise authorization
 	// -------------------------------------------------------------------------

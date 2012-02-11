@@ -32,11 +32,12 @@ class Collection {
 public:
 	Collection();
 	~Collection();
+	Collection(const Collection& other);
+	Collection& operator=(const Collection& other);
 	
 	// Add a string var-value
 	template<typename T>
 	Parameter* addString(const string& name, const T& value) {
-		printf("Adding: %s\n", name.c_str());
 		Parameter* v = new Parameter(name, "");
 		v->setStringValue(value);
 		params.push_back(v);
@@ -45,6 +46,7 @@ public:
 	
 	File* addFile(const string& name, const string& file);
 	
+	bool removeParameter(const string& name);
 	Parameter* findByName(const string& name);
 	Parameter& operator[](const string& name);
 	Collection& operator+=(const Collection& other);
@@ -54,7 +56,7 @@ public:
 	void print() const;
 	const list<Parameter*>& getParameters() const;
 	list<rcp::Parameter*> getParameters(bool forSignature) const;
-	
+	void clear(); // remove all params 	
 private:
 	list<Parameter*> params;
 };

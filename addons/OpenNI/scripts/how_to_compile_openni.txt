@@ -1,0 +1,227 @@
+- Downlaod the source code from: https://github.com/OpenNI/OpenNI
+
+1. COMPILING LIBUSB
+---------------------
+
+- Go into: Platform/Linux/Build/Prerequisites/libusb
+- Create a file: compile.sh with:
+
+	#!/bin/sh
+	d=${PWD}/build
+	if [ ! -d ${d} ] ; then 
+		mkdir ${d}
+	fi
+	./autogen.sh
+	./configure LDFLAGS='-framework IOKit -framework CoreFoundation -arch i386 -arch x86_64 ' CFLAGS='-arch i386 -arch x86_64' --disable-dependency-tracking --prefix=${d}
+	
+- chmod 777 compile.sh
+- ./compile.sh
+- make
+- make install
+
+
+2. COMPILING OPENNI
+--------------------
+
+- Go into Platform/Linux/Build/OpenNI, and open the Makefile
+- Add the directories to the libusb build for these settings:
+
+	# INC_DIRS
+	# LIB_DIRS
+	
+  See this example source code:
+  
+		OSTYPE := $(shell uname -s)
+		
+		BIN_DIR = ../../Bin
+		
+		INC_DIRS = \
+			../../../../Include \
+			../../../../Source \
+			../../../../Source/External/TinyXml \
+			../../../../Platform/Linux/Build/Prerequisites/libusb/build/include/
+			
+		
+		SRC_FILES = \
+			../../../../Source/OpenNI/*.cpp \
+			../../../../Source/OpenNI/Linux/*.cpp \
+			../../../../Source/External/TinyXml/*.cpp
+		
+		ifeq ("$(OSTYPE)","Darwin")
+			INC_DIRS += /opt/local/include
+			LIB_DIRS += /opt/local/lib
+			LIB_DIRS += ../../../../Platform/Linux/Build/Prerequisites/libusb/build/lib/
+			LDFLAGS += -framework CoreFoundation -framework IOKit
+			
+		endif
+		
+		LIB_NAME = OpenNI
+		USED_LIBS = usb-1.0 dl pthread
+		ifneq ("$(OSTYPE)","Darwin")
+			USED_LIBS += rt 
+		endif
+		DEFINES = XN_EXPORTS
+		
+		include ../Common/CommonCppMakefile:wq
+
+- We also have to make sure openni loads the modules.xml file from a different
+location so that we can use it in i.e. a framework. You can define the modules.xml
+location in: Source/OpenNI/XnOpenNI.cpp around line 6985, search for "XN_OPEN_NI_FILES_LOCATION"
+and change it to something usable :)
+
+	#define XN_OPEN_NI_FILES_LOCATION "./../Frameworks/OpenNI.framework/Resources/"
+
+- Go into Platform/Linux/CreateRedist
+- Open Redist_OpenNi.py
+- Comment the doxygen lines (I don't have doxygen so I had to disable it):
+
+	#--------------Doxygen---------------------------------------------------------#
+	'''
+	print "* Creating Doxygen..."
+	logger.info("Creating DoxyGen...")
+	os.chdir("../../../Source/DoxyGen");
+	if os.path.exists("html"):
+		os.system("rm -rf html")
+	# Running doxygen
+	os.makedirs("html")
+	execute_check("doxygen Doxyfile > "+ SCRIPT_DIR + "/Output/EngineDoxy.txt", "Creating Documentation")
+	
+	# remove unneeded files
+	os.system("rm -rf html/*.map html/*.md5 html/*.hhc html/*.hhk html/*.hhp")
+	'''
+
+- Also check line 332, comment this
+
+	#docs
+	#shutil.copytree("../../Source/DoxyGen/html", REDIST_DIR + "/Documentation/html")
+	
+- Execute ./RedistMaker
+- After compiling we need to change the install name paths.
+- install_name_tool -id @executable_path/libOpenNI.dylib libOpenNI.dylib
+
+
+USING INSTALL_NAME_TOOL
+---------------------------
+
+A great page with information how the dynamic linker works on OSX is this one:
+
+# http://www.mikeash.com/pyblog/friday-qa-2009-11-06-linking-and-install-names.html
+# http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_09_01.html
+
+What we need to do, it change the "root" path of the dylib file so the 
+application can find the dylib file on runtime. We use install_name_tool for
+this. 
+
+Using "otool -L file.dylib" you can see which paths are used when dynamically
+linking the .dylib file.  In this example the first line 
+"../../Bin/x86-Release/libOpenNI.dylib" should be read like this:
+
+When you application links with libOpenNI.dylib, load the file 
+../../Bin/x86-Release/libOpenNI.dylib on runtime.  This is the path we need to 
+change. 
+
+The first entry in this list is called the "id" and can be changed using:
+install_name_tool -id [new] file.dylib
+
+	$ otool -L libOpenNI.dylib 
+		libOpenNI.dylib:
+			../../Bin/x86-Release/libOpenNI.dylib (compatibility version 0.0.0, current version 0.0.0)
+			/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 550.44.0)
+			/System/Library/Frameworks/IOKit.framework/Versions/A/IOKit (compatibility version 1.0.0, current version 275.0.0)
+			/Users/diederickhuijbers/Downloads/_openni/OpenNI-OpenNI-1516074/Platform/Linux/Build/Prerequisites/libusb/build/lib/libusb-1.0.0.dylib (compatibility version 2.0.0, current version 2.0.0)
+			/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 125.2.11)
+			/usr/lib/libstdc++.6.dylib (compatibility version 7.0.0, current version 7.9.0)
+			
+
+HANDY COMPILE SCRIPTS
+----------------------
+
+Used to rebuild, reset ids and copy files to my test app:
+
+	#!/bin/sh
+	d=${PWD}
+	cp change_ids.sh ../Redist/OpenNI-Bin-Dev-MacOSX-v1.5.2.23/Lib/
+	cd ../Redist/OpenNI-Bin-Dev-MacOSX-v1.5.2.23/Lib/
+	./change_ids.sh
+	cp *.dylib /Users/diederickhuijbers/of/of_preRelease_v007_osx/apps/diederick-007/0053_openni_using_git_sources/bin/data/
+	
+	
+	
+COMPILING SENSORKINECT
+-----------------------
+- I ended up with just using the file from the bin directory!
+
+- OLD INFO: Open the file: PrimeSense-sensor/Platform/Linux/Build/EngineLibMakefile and
+change the paths to the compiled version of OpenNI for both the INC_DIRS as
+the LIB_DIRS. See example code below:
+
+	INC_DIRS += \
+		=/Users/diederickhuijbers/Downloads/_openni/OpenNI-OpenNI-1516074/Platform/Linux/Redist/OpenNI-Bin-Dev-MacOSX-v1.5.2.23/Include \
+		../../../../Include \
+		../../../../Source \
+		../../../../Source/XnCommon 
+		
+	
+	BIN_DIR = ../../Bin
+	
+	include ../Common/CommonCppMakefile
+	
+	
+	LIB_DIRS = \
+		/Users/diederickhuijbers/Downloads/_openni/OpenNI-OpenNI-1516074/Platform/Linux/Redist/OpenNI-Bin-Dev-MacOSX-v1.5.2.23/Lib
+
+		
+CREATING A FRAMEWORK BUNDLE FOR OPENNI
+---------------------------------------
+
+- Create a Framework bundle structure (you must use version, headers, repositories
+etc...
+
+- Then create a symlink to the Libraries/libOpenNI.dylib file with the same name
+as the framework; so OpenNI.
+
+	#!/bin/sh
+	
+	dylibs=$(ls *.dylib);
+	for lib in $dylibs ;  do 
+		echo ${lib}
+		install_name_tool -id @executable_path/../Frameworks/OpenNI.framework/Versions/Current/Libraries/${lib} ${lib}
+		for change_lib in ${dylibs} ; do 
+			install_name_tool -change ../../Bin/x86-Release/${change_lib} @executable_path/../Frameworks/${change_lib} ${lib}
+		done
+	done
+	
+- Once you added the framework to your xcode project you can include the files
+using <OpenNI/[includefile>.
+
+
+RESOURCES FILES
+-----------------
+- OpenNI, SensorKinect and NITE need to have a couple of config files. 
+There is one file which you can store per application and that the
+SamplesConfig.xml, which I will name something like "openni.xml". This files
+can be loaded to generate modules automatically using ...fromXML(..).
+Some other files are stored in the framework resources directory, these are
+
+# avin2-SensorKinect-faf4994/Bin/Sensor-Bin-MacOSX-v5.1.0.25/GlobalDefaultsKinect.ini 
+(I just extracted the file SensorKinect091-Bin-MacOSX-v5.1.0.25.tar.bz2 I downloaded 
+from avins repository).
+
+
+ADDING NITE TO THE FRAMEWORK
+------------------------------
+This is just a log while testing:
+
+- Go to http://www.openni.org/Downloads/OpenNIModules.aspx
+- Select OpenNI Compliant Middleware Binaries
+- Select Unstable (there is no stable for Mac)
+- Select PrimeSense NITE Unstable for Mac
+- Click downlaod
+
+- Now copy the files from the Include dir to the framework > Headers dir.
+- Copy Features_1_5_2/Data/* to the Resources dir
+- Copy Features_1_5_2/Bin/libXnVFeatures_1_5_2 to the Libraries dir
+- Copy Hands_1_5_2/Data/* to the Resources dir (Nite.ini)
+- Copy Hands_1_5_2/Bin/libXnVHandGenerator_1_5_2.dylib to the Libraries dir
+- Copy Bin/libXnVCNITE_1_5_2.dylib to the Libraries dir
+- Copy Bin/libXnVNite_1_5_2.dylib to the Libraries dir
