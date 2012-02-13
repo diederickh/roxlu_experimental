@@ -133,7 +133,7 @@ UserGenerator::~UserGenerator() {
 bool UserGenerator::setup(roxlu::openni::OpenNI& ni) {
 	if(!ni.getDepthGenerator().IsValid()) {
 		printf("UserGenerator.setup - Depth generator is not valid.\n");
-		return false;
+		exit(0);
 	}
 
 	
@@ -143,7 +143,7 @@ bool UserGenerator::setup(roxlu::openni::OpenNI& ni) {
 	status = ni.getDepthGenerator().GetMapOutputMode(map_mode);
 	if(status != XN_STATUS_OK) {
 		SHOW_RC(status, "UserGenerator.setup() - GetMapOutputMode");
-		return false;
+		exit(0);
 	}
 	
 	width = map_mode.nXRes;
@@ -159,7 +159,7 @@ bool UserGenerator::setup(roxlu::openni::OpenNI& ni) {
 	status = generator.Create(ni.getContext());
 	if(status != XN_STATUS_OK) {
 		SHOW_RC(status, "UserGenerator.setup() - generator.Create");
-		return false;
+		exit(0);
 	}	
 	
 	// Register callbacks
