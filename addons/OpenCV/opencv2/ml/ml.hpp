@@ -41,7 +41,7 @@
 #ifndef __OPENCV_ML_HPP__
 #define __OPENCV_ML_HPP__
 
-#include "opencv2/core/core.hpp"
+#include "./../core/core.hpp"
 #include <limits.h>
 
 #ifdef __cplusplus

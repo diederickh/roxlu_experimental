@@ -47,8 +47,8 @@
 #ifndef __OPENCV_IMGPROC_HPP__
 #define __OPENCV_IMGPROC_HPP__
 
-#include "opencv2/core/core.hpp"
-#include "opencv2/imgproc/types_c.h"
+#include "./../core/core.hpp"
+#include "types_c.h"
 
 #ifdef __cplusplus
 
@@ -1077,6 +1077,7 @@ protected:
     int isRightOf(Point2f pt, int edge) const;
     void calcVoronoi();
     void clearVoronoi();
+	
     void check() const;
     
     struct CV_EXPORTS Vertex

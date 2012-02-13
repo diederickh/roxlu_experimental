@@ -42,7 +42,7 @@
 #ifndef _npp_staging_hpp_
 #define _npp_staging_hpp_
 
-#include "NCV.hpp"
+#include "./../../ncv.hpp"
 
 
 /**

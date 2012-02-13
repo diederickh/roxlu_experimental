@@ -42,7 +42,7 @@
 #ifndef __OPENCV_HIGHGUI_H__
 #define __OPENCV_HIGHGUI_H__
 
-#include "opencv2/core/core_c.h"
+#include "./../core/core_c.h"
 
 #ifdef __cplusplus
 extern "C" {

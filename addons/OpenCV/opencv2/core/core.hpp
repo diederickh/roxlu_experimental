@@ -46,8 +46,8 @@
 #ifndef __OPENCV_CORE_HPP__
 #define __OPENCV_CORE_HPP__
 
-#include "opencv2/core/types_c.h"
-#include "opencv2/core/version.hpp"
+#include "types_c.h"
+#include "version.hpp"
 
 #ifdef __cplusplus
 
@@ -4338,7 +4338,7 @@ double CommandLineParser::analizeValue<double>(const std::string& str, bool spac
 
 #endif // __cplusplus
 
-#include "opencv2/core/operations.hpp"
-#include "opencv2/core/mat.hpp"
+#include "operations.hpp"
+#include "mat.hpp"
 
 #endif /*__OPENCV_CORE_HPP__*/

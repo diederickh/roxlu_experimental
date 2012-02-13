@@ -45,10 +45,10 @@
 
 #ifdef __cplusplus
 
-#include "opencv2/core/types_c.h"
-#include "opencv2/core/core.hpp"
-#include "opencv2/flann/flann_base.hpp"
-#include "opencv2/flann/miniflann.hpp"
+#include "./../core/types_c.h"
+#include "./../core/core.hpp"
+#include "flann_base.hpp"
+#include "miniflann.hpp"
 
 namespace cvflann
 {

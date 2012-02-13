@@ -43,18 +43,18 @@
 #ifndef __OPENCV_ALL_HPP__
 #define __OPENCV_ALL_HPP__
 
-#include "opencv2/core/core_c.h"
-#include "opencv2/core/core.hpp"
-#include "opencv2/flann/miniflann.hpp"
-#include "opencv2/imgproc/imgproc_c.h"
-#include "opencv2/imgproc/imgproc.hpp"
-#include "opencv2/video/video.hpp"
-#include "opencv2/features2d/features2d.hpp"
-#include "opencv2/objdetect/objdetect.hpp"
-#include "opencv2/calib3d/calib3d.hpp"
-#include "opencv2/ml/ml.hpp"
-#include "opencv2/highgui/highgui_c.h"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/contrib/contrib.hpp"
+#include "./core/core_c.h"
+#include "./core/core.hpp"
+#include "./flann/miniflann.hpp"
+#include "./imgproc/imgproc_c.h"
+#include "./imgproc/imgproc.hpp"
+#include "./video/video.hpp"
+#include "./features2d/features2d.hpp"
+#include "./objdetect/objdetect.hpp"
+#include "./calib3d/calib3d.hpp"
+#include "./ml/ml.hpp"
+#include "./highgui/highgui_c.h"
+#include "./highgui/highgui.hpp"
+#include "./contrib/contrib.hpp"
 
 #endif

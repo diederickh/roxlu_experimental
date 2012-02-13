@@ -43,7 +43,7 @@
 #ifndef __OPENCV_BACKGROUND_SEGM_HPP__
 #define __OPENCV_BACKGROUND_SEGM_HPP__
 
-#include "opencv2/core/core.hpp"
+#include "./../core/core.hpp"
 
 #ifdef __cplusplus
 extern "C" {

@@ -45,8 +45,8 @@
 
 #ifdef __cplusplus
 
-#include "opencv2/core/core.hpp"
-#include "opencv2/flann/defines.h"
+#include "./../core/core.hpp"
+#include "defines.h"
 
 namespace cv
 {

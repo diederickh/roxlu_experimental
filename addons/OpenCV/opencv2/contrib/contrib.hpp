@@ -43,9 +43,9 @@
 #ifndef __OPENCV_CONTRIB_HPP__
 #define __OPENCV_CONTRIB_HPP__
 
-#include "opencv2/core/core.hpp"
-#include "opencv2/features2d/features2d.hpp"
-#include "opencv2/objdetect/objdetect.hpp"
+#include "./../core/core.hpp"
+#include "./../features2d/features2d.hpp"
+#include "./../objdetect/objdetect.hpp"
 
 #ifdef __cplusplus
 
@@ -607,7 +607,7 @@ namespace cv
     CV_EXPORTS void polyfit(const Mat& srcx, const Mat& srcy, Mat& dst, int order);
 }
 
-#include "opencv2/contrib/retina.hpp"
+#include "retina.hpp"
 
 #endif
 

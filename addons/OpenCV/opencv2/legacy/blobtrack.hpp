@@ -46,7 +46,7 @@
 /* Turn off the functionality until cvaux/src/Makefile.am gets updated: */
 //#if _MSC_VER >= 1200
 
-#include "opencv2/core/core_c.h"
+#include "./../core/core_c.h"
 #include <stdio.h>
 
 #if _MSC_VER >= 1200 || defined __BORLANDC__

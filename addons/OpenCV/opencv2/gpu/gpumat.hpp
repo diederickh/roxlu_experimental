@@ -43,8 +43,8 @@
 #ifndef __OPENCV_GPUMAT_HPP__
 #define __OPENCV_GPUMAT_HPP__
 
-#include "opencv2/core/core.hpp"
-#include "opencv2/gpu/devmem2d.hpp"
+#include "./../core/core.hpp"
+#include "devmem2d.hpp"
 
 namespace cv { namespace gpu
 {

@@ -45,7 +45,7 @@
 
 #ifdef __cplusplus
 
-#include "cxcore.h"
+#include "./../../cxcore.h"
 
 namespace cv
 {

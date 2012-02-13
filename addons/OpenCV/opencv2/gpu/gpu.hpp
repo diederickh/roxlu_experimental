@@ -44,11 +44,11 @@
 #define __OPENCV_GPU_HPP__
 
 #include <vector>
-#include "opencv2/core/core.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-#include "opencv2/objdetect/objdetect.hpp"
-#include "opencv2/features2d/features2d.hpp"
-#include "opencv2/gpu/gpumat.hpp"
+#include "./../core/core.hpp"
+#include "./../imgproc/imgproc.hpp"
+#include "./../objdetect/objdetect.hpp"
+#include "./../features2d/features2d.hpp"
+#include "gpumat.hpp"
 
 namespace cv
 {
@@ -1495,6 +1495,6 @@ namespace cv
     CV_EXPORTS void filterSpeckles( Mat& img, uchar newVal, int maxSpeckleSize, uchar diffThreshold, Mat& buf);
 
 }
-#include "opencv2/gpu/matrix_operations.hpp"
+#include "matrix_operations.hpp"
 
 #endif /* __OPENCV_GPU_HPP__ */
