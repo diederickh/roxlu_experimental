@@ -16,6 +16,8 @@
 using std::string;
 using std::vector;
 
+namespace ro = roxlu::openni;
+
 namespace roxlu {
 namespace openni {
 
@@ -28,13 +30,17 @@ public:
 	void update();
 	bool initFromXML(const string& xmlFile);
 	const uint8_t* getImagePixels();
+	ro::ImageGenerator& getImageGenerator();
 	xn::ImageMetaData& getImageMetaData();
 	xn::DepthMetaData& getDepthMetaData();
 	xn::DepthGenerator& getDepthGenerator();
 	int getDepthWidth();
 	int getDepthHeight();
 	xn::Context& getContext();
-
+	void setGlobalMirror(bool mirror);
+	
+	bool resetViewPoint();
+	bool setViewPoint(xn::ProductionNode& otherNode);
 private:
 	void logErrors(const xn::EnumerationErrors& errors);
 	bool openExistingNodes();
@@ -46,6 +52,9 @@ private:
 	roxlu::openni::DepthGenerator depth;
 };
 
+inline ro::ImageGenerator& OpenNI::getImageGenerator() {
+	return image;
+}
 
 inline xn::ImageMetaData& OpenNI::getImageMetaData() {
 	return image.getMetaData();
@@ -69,6 +78,10 @@ inline int OpenNI::getDepthWidth() {
 
 inline int OpenNI::getDepthHeight() {
 	return depth.getHeight();
+}
+
+inline void OpenNI::setGlobalMirror(bool mirror) {
+	context.SetGlobalMirror(mirror);
 }
 
 }} // roxlu

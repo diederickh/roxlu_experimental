@@ -1,6 +1,8 @@
 #ifndef ROXLU_COLOR4H
 #define ROXLU_COLOR4H
 
+// TODO: implement HSL See Graphics Gems 1, HSLtoRGB.c
+
 // color
 struct Color4 {
 	float r,g,b,a;

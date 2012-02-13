@@ -102,4 +102,41 @@ void OpenNI::logErrors(const xn::EnumerationErrors& errors) {
 	}
 }
 
+/**
+ *
+ * View point: how to map the depth images; 
+ * Use this to align the depth image to the rgb-image
+ *
+ */
+bool OpenNI::setViewPoint(xn::ProductionNode& otherNode) {
+	if(!depth.getGenerator().IsValid() || !image.getGenerator().IsValid()) {
+		return false;
+	}
+	if(!depth.getGenerator().IsCapabilitySupported(XN_CAPABILITY_ALTERNATIVE_VIEW_POINT)) {
+		return false;
+	}
+	
+	XnStatus status = depth.getGenerator().GetAlternativeViewPointCap().SetViewPoint(otherNode);
+	if(status != XN_STATUS_OK) {
+		SHOW_RC(status, "OpenNI.setViewPoint()");
+		return false;
+	}
+	return true;
+}
+
+bool OpenNI::resetViewPoint() {
+	if(!depth.getGenerator().IsValid() || !image.getGenerator().IsValid()) {
+		return false;
+	}
+	if(!depth.getGenerator().IsCapabilitySupported(XN_CAPABILITY_ALTERNATIVE_VIEW_POINT)) {
+		return false;
+	}
+	XnStatus status = depth.getGenerator().GetAlternativeViewPointCap().ResetViewPoint();
+	if(status != XN_STATUS_OK) {
+		SHOW_RC(status, "OpenNI.resetViewPoint()");
+		return false;
+	}
+	return true;
+}
+
 }} // roxlu::openni
