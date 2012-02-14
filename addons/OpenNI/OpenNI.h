@@ -12,6 +12,8 @@
 #include "ImageGenerator.h"
 #include "DepthGenerator.h"
 #include "UserGenerator.h"
+#include "Recorder.h"
+#include "Player.h" 
 
 using std::string;
 using std::vector;
@@ -29,11 +31,14 @@ public:
 	~OpenNI();
 	void update();
 	bool initFromXML(const string& xmlFile);
+	bool initFromRecording(const string& recording);
+	void addLicense(const string& vendor, const string& key);
+	
 	const uint8_t* getImagePixels();
-	ro::ImageGenerator& getImageGenerator();
+	ro::ImageGenerator& getImage();
 	xn::ImageMetaData& getImageMetaData();
 	xn::DepthMetaData& getDepthMetaData();
-	xn::DepthGenerator& getDepthGenerator();
+	ro::DepthGenerator& getDepth();
 	int getDepthWidth();
 	int getDepthHeight();
 	xn::Context& getContext();
@@ -48,11 +53,12 @@ private:
 	
 	xn::Context context;
 	xn::ScriptNode script_node;
-	roxlu::openni::ImageGenerator image;
-	roxlu::openni::DepthGenerator depth;
+	ro::ImageGenerator image;
+	ro::DepthGenerator depth;
+	ro::Player player;
 };
 
-inline ro::ImageGenerator& OpenNI::getImageGenerator() {
+inline ro::ImageGenerator& OpenNI::getImage() {
 	return image;
 }
 
@@ -64,8 +70,8 @@ inline xn::Context& OpenNI::getContext() {
 	return context;
 }
 
-inline xn::DepthGenerator& OpenNI::getDepthGenerator() {
-	return depth.getGenerator();
+inline ro::DepthGenerator& OpenNI::getDepth() {
+	return depth;
 }
 
 inline xn::DepthMetaData& OpenNI::getDepthMetaData() {

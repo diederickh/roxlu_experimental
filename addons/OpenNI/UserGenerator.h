@@ -42,11 +42,12 @@ public:
 	bool getAllUserPixels(xn::SceneMetaData& meta);
 	bool getUserPixels(XnUserID id, xn::SceneMetaData& meta);
 	map<XnUserID, ro::User*>& getUsers();
+	
 private:
 	void updateUserPixels(ro::User* user);
-	
-	xn::SceneMetaData meta;
 	map<XnUserID, ro::User*> users;
+	xn::SceneMetaData meta;
+	
 	XnChar calibration_pose[20];
 	bool needs_pose;
 	XnCallbackHandle cb_pose_detected;

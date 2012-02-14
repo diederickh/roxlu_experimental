@@ -16,7 +16,7 @@ void XN_CALLBACK_TYPE User_NewUser(
 	ro::UserGenerator* generator = static_cast<ro::UserGenerator*>(cookie);
 	if(generator->needsPoseForCalibration()) {
 		printf("Needs pose for calibration\n");
-	}
+		}
 	else {
 		printf("No pose for calibration\n");
 	}
@@ -31,6 +31,8 @@ void XN_CALLBACK_TYPE User_LostUser(
 	printf("--------------------------------------------------------------\n");
 	printf("Lost User: %d\n", id);
 	printf("--------------------------------------------------------------\n");
+	ro::UserGenerator* generator = static_cast<ro::UserGenerator*>(cookie);
+	generator->getUsers()[id]->is_tracked = false;
 	xnGenerator.GetSkeletonCap().Reset(id);
 }
 
@@ -131,7 +133,7 @@ UserGenerator::~UserGenerator() {
 }
 
 bool UserGenerator::setup(roxlu::openni::OpenNI& ni) {
-	if(!ni.getDepthGenerator().IsValid()) {
+	if(!ni.getDepth().getGenerator().IsValid()) {
 		printf("UserGenerator.setup - Depth generator is not valid.\n");
 		exit(0);
 	}
@@ -140,7 +142,7 @@ bool UserGenerator::setup(roxlu::openni::OpenNI& ni) {
 	// Get the width/height from depth maps
 	XnStatus status = XN_STATUS_OK;
 	XnMapOutputMode map_mode;
-	status = ni.getDepthGenerator().GetMapOutputMode(map_mode);
+	status = ni.getDepth().getGenerator().GetMapOutputMode(map_mode);
 	if(status != XN_STATUS_OK) {
 		SHOW_RC(status, "UserGenerator.setup() - GetMapOutputMode");
 		exit(0);
@@ -169,6 +171,9 @@ bool UserGenerator::setup(roxlu::openni::OpenNI& ni) {
 	
 	// Get all skeleton info.
 	generator.GetSkeletonCap().SetSkeletonProfile(XN_SKEL_PROFILE_ALL);
+	
+	// Must call this when using a recording
+	ni.getContext().StartGeneratingAll();
 	return true;
 }
 
@@ -236,6 +241,8 @@ bool UserGenerator::registerCallbacks() {
 	else {
 		needs_pose = false;
 	}
+	
+
 	return true;	
 }
 
@@ -258,13 +265,16 @@ void UserGenerator::startTracking(XnUserID id) {
 	
 void UserGenerator::updateUserPixels(ro::User* user) {
 	if(generator.GetUserPixels(user->getID(), meta) != XN_STATUS_OK) {
+	//if(generator.GetUserPixels(0, meta) != XN_STATUS_OK) {
 		printf("UserGenerator.updateUserPixels(), cannot get pixels\n");
 		return;
 	}
 	unsigned short* user_labels = (unsigned short*)meta.Data();
+	if(user_labels == NULL) {
+		return;
+	}
 	for(int i = 0; i < num_pixels; ++i) {
 		if(user_labels[i] == user->id) {
-			//printf("User label: %d\n", user_labels[i]);
 			user->mask_pixels[i] = 255;
 		}
 		else {

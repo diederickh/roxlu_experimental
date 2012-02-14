@@ -1,4 +1,5 @@
 #include "OpenNI.h"
+#include <OpenNI/XnLog.h>
 
 namespace roxlu {
 namespace openni {
@@ -64,6 +65,7 @@ bool OpenNI::openExistingNodes() {
 					break;
 			}
 			case XN_NODE_TYPE_PLAYER: {
+					(*it).GetInstance(player.getPlayer());
 					break;
 			}
 			default: {
@@ -91,6 +93,49 @@ bool OpenNI::initFromXML(const string& xmlFile) {
 	
 	BOOL_RC(status, "OpenNI.initFromXML()");
 }
+
+bool OpenNI::initFromRecording(const string& recording) {
+	XnStatus status = context.Init();
+	if(status != XN_STATUS_OK) {
+		printf("OpenNI.initFromRecording() - error");
+		return false;
+	}
+
+	xnLogInitFromXmlFile("../Frameworks/OpenNI.framework/Resources/log.xml");
+	SHOW_RC(status,  "Init log from xml");
+	
+	addLicense("PrimeSense", "0KOIk2JeIBYClPWVnMoRKn5cdY4=");
+
+	status = context.OpenFileRecording(recording.c_str(), player.getPlayer());
+	SHOW_RC(status, "OpenNI.initFromRecording() - setup from recording");
+
+	if(status!=XN_STATUS_OK) return false;
+
+	openExistingNodes();
+
+	BOOL_RC(status, "OpenNI.initFromRecording()");
+}
+
+void OpenNI::addLicense(const string& vendor, const string& key) {
+	XnLicense license = {0};
+	XnStatus status = XN_STATUS_OK;
+	status = xnOSStrNCopy(license.strVendor, vendor.c_str(), vendor.size(), sizeof(license.strVendor));
+	if(status != XN_STATUS_OK) {
+		printf("OpenNI.addLicense() - vendor copy error\n");
+		return;
+	}
+
+	status = xnOSStrNCopy(license.strKey, key.c_str(), key.size(), sizeof(license.strKey));
+	if(status != XN_STATUS_OK) {
+		printf("OpenNI.addLicense() - key copy error\n");
+		return;
+	}
+
+	status = context.AddLicense(license);
+	SHOW_RC(status, "AddLicense");
+	xnPrintRegisteredLicenses();
+}
+
 
 void OpenNI::logErrors(const xn::EnumerationErrors& errors) {
 	xn::EnumerationErrors::Iterator it = errors.Begin();
