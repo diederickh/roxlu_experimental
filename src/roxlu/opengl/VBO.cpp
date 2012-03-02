@@ -83,13 +83,13 @@ VBO& VBO::bind() {
 		return *this;
 	}
 	// VertexPN
-	if(created_types == VBO_TYPE_VERTEX_PN) {
+	else if(created_types == VBO_TYPE_VERTEX_PN) {
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices); eglGetError();
 		return *this; 
 	}
 
 	// VertexPT
-	if(created_types == VBO_TYPE_VERTEX_PT) {
+	else if(created_types == VBO_TYPE_VERTEX_PT) {
 		glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices); eglGetError();
 		return *this;
 	}
@@ -116,7 +116,7 @@ VBO& VBO::bind() {
 	}
 	
 	// indices
-	if(created_types & VBO_TYPE_INDEX_ARRAY) {
+	if(created_types & VBO_TYPE_INDEX_ARRAY) {	
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_indices); eglGetError();
 	}
 	
@@ -251,7 +251,8 @@ void VBO::setNormVertexAttribPointer(GLuint index) {
 	}
 	size_t stride = 0;
 	int offset = -1;
-	switch(created_types) {
+	int type = created_types & ~(VBO_TYPE_INDEX_ARRAY);
+	switch(type) {
 		case VBO_TYPE_VERTEX_PN: {
 			stride = sizeof(VertexPN);
 			offset = offsetof(VertexPN, norm);
@@ -287,12 +288,14 @@ void VBO::setNormVertexAttribPointer(GLuint index) {
 void VBO::setPosVertexAttribPointer(GLuint index) {
 	// check if we have a normal
 	if(!created_types & VERT_POS) {
-		printf("Cannot set pos attribute as we didnt foudn any.\n");
+		printf("Cannot set pos attribute as we didnt found any.\n");
 		return;
 	}
 	size_t stride = 0;
 	int offset = -1;
-	switch(created_types) {
+	
+	int type = created_types & ~(VBO_TYPE_INDEX_ARRAY);
+	switch(type) {
 		case VBO_TYPE_VERTEX_P: {
 			stride = sizeof(VertexP);
 			offset = 0;
@@ -352,8 +355,10 @@ void VBO::setTexVertexAttribPointer(GLuint index) {
 	}
 	size_t stride = 0;
 	int offset = -1;
-	switch(created_types) {
+	int type = created_types & ~(VBO_TYPE_INDEX_ARRAY);
+	switch(type) {
 		case VBO_TYPE_VERTEX_PT: {
+		
 			stride = sizeof(VertexPT);
 			offset = offsetof(VertexPT, tex);
 			break;

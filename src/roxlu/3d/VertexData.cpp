@@ -593,24 +593,28 @@ void VertexData::debugDraw(int drawMode) {
 			}
 			glEnd();
 			
-			glBegin(GL_LINES);
-			for(int i = 0; i < len; ++i) {
-				int dx = indices[i];
-				//printf("%d <--\n", dx);
-				Vec3 pos = vertices[dx];
-				Vec3 norm = normals[dx];
-				
-				Vec3 end = pos + (norm.scale(line_length*2));
-				glColor4f(1.0f,0.0f,0.4f,1.0f);
-				glColor4f(0.98, 0.92, 0.75, 0.6);
-				glVertex3fv(pos.getPtr());
-				glColor4f(1.0f, 0.0f,1.0f,1.0f);
-				glColor3f(0.98, 0.92, 0.75);
-				glColor4f(0.98, 0.92, 0.75,0.6);
-				glVertex3fv(end.getPtr());
-				
+			if(normals.size() > 0) {
+				glBegin(GL_LINES);
+				for(int i = 0; i < len; ++i) {
+					int dx = indices[i];
+					//printf("%d <--\n", dx);
+					Vec3 pos = vertices[dx];
+					Vec3 norm = normals[dx];
+					
+					Vec3 end = pos + (norm.scale(line_length*2));
+					glColor4f(1.0f,0.0f,0.4f,1.0f);
+					glColor4f(0.98, 0.92, 0.75, 0.6);
+					glVertex3fv(pos.getPtr());
+					glColor4f(1.0f, 0.0f,1.0f,1.0f);
+					glColor3f(0.98, 0.92, 0.75);
+					glColor4f(0.98, 0.92, 0.75,0.6);
+					glVertex3fv(end.getPtr());
+					
+				}
+				glEnd();
 			}
-			glEnd();
+
+
 		}
 	}
 	// w/o indices

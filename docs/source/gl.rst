@@ -89,6 +89,70 @@ Example fragment shader
 	}
 	
 	
+Using a VBO and Shader
+--------------------------------------------------------------------------------
+
+
+.. code-block:: c++
+
+	void testApp::setup(){
+		ofBackground(33);
+		ofSetFrameRate(60);
+		ofSetVerticalSync(true);
+		
+		
+		// Create indices.
+		int rows = 10;
+		int cols = 10;
+		float width = 0.1;
+		float height = 0.1;
+		for(int i = 0; i < cols; ++i) {
+			for(int j = 0; j < rows; ++j) {
+				float x = i * width;
+				float y = j * height;
+				vd.addVertex(x,y,0);
+			}
+		}
+		
+		for(int i = 0; i < cols-1; ++i) {
+			for(int j = 0; j < rows-1; ++j) {
+				int a = DX(i,j, cols);
+				int b = DX(i+1, j, cols);
+				int c = DX(i+1, j+1, cols);
+				int d = DX(i, j+1, cols);
+				vd.addQuadIndices(a,b,c,d);
+			}
+		}
+		
+		// Make sure VAO keeps state of the VBO
+		vao.bind();
+		
+		// Initialize shader.
+		shader.load("shader");
+		shader.addUniform("projection_matrix").addUniform("view_matrix");
+		shader.addAttribute("pos");
+		shader.enableVertexAttribArray("pos");
+	
+		
+		// Fill VBO
+		vbo.setIndices(vd.getIndicesPtr(), vd.getNumIndices());
+		vbo.setVertexData(vd.getVertexP(), vd.size());
+		vbo.setPosVertexAttribPointer(shader.getAttribute("pos"));	
+		
+		projection_matrix.perspective(45.0f, ofGetWidth()/ofGetHeight(), 0.1, 100);
+		view_matrix.translate(-1,0,-3);
+	}
+	
+	
+	
+	void testApp::draw(){
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		shader.enable();
+		shader.uniformMat4fv("projection_matrix", projection_matrix.getPtr());
+		shader.uniformMat4fv("view_matrix", view_matrix.getPtr());
+		vbo.drawElements(GL_QUADS, vd.size()*4);
+	}
+	
 	
 API reference
 --------------------------------------------------------------------------------
