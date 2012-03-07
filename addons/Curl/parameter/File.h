@@ -3,6 +3,7 @@
 
 #include <string>
 #include <sstream>
+#include <fstream>
 #include "Parameter.h"
 
 namespace roxlu {

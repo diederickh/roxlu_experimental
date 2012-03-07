@@ -48,10 +48,17 @@ bool Twitter::handlePin(const string& authURL) {
 	printf("this application. Then enter the PIN you see in the browser below.\n");
 	printf("--------------------------------------------------------------------\n");
 	printf("url: %s\n", authURL.c_str());
+	
+	
+	// for mac
+	string open_cmd = "open " +authURL;
+	system(open_cmd.c_str());
+	
 	printf("type the pin and press enter:");
 	string pin;
 	getline(std::cin, pin);
 	printf("pin: '%s'\n", pin.c_str());
+	
 	printf("--------------------------------------------------------------------\n");
 	
 	/*
@@ -230,6 +237,7 @@ bool Twitter::statusesUpdateWithMedia(const string& tweet, const string& imageFi
 	rcp::Collection col;
 	col.addString("status", tweet);
 	col.addFile("media[]", imageFilePath);
+	printf(">> status update with media: %s\n", imageFilePath.c_str());
 	return doPost(URL_STATUSES_UPDATE_WITH_MEDIA, &col, true, extraParams);
 }
 

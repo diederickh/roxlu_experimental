@@ -6,16 +6,16 @@ namespace curl {
 namespace rc = roxlu::curl;
 
 Request::Request() 
-//	:header("")
 	:method(REQUEST_GET)
+	,is_multipart(false)
 {
 	
 }
 
 Request::Request(const string& u) 
-//	:header("")
 	:method(REQUEST_GET)
 	,url(u)
+	,is_multipart(false)
 {
 }
 
@@ -51,6 +51,8 @@ bool Request::doGet(rc::Curl& curl, string& result) {
 		curl.addHeader(*head_it);
 		++head_it;
 	}
+	
+	//curl.setVerbose(true);
 	
 	// create url + query string.	
 	string use_url = url;
@@ -110,6 +112,9 @@ bool Request::isGet() {
 
 void Request::isGet(bool flag) {
 	method = REQUEST_GET;
+	if(flag) {
+		isMultiPart(false);
+	}
 }
 
 bool Request::isDelete() {
@@ -120,5 +125,12 @@ void Request::isDelete(bool flag) {
 	method = REQUEST_DELETE;
 }
 
+void Request::isMultiPart(bool flag) {
+	is_multipart = flag;
+}
+
+bool Request::isMultiPart() {
+	return is_multipart;
+}
 
 }} // roxlu::twitter::curl

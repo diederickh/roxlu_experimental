@@ -12,6 +12,15 @@
 #include "../../libs/curl/curl.h"
 #include "../../libs/crypto/urlencode.h"
 
+/**
+ * @todo	We need to add some more info to the Parameter types i.e. 
+ * 			does the caller wants it to be a post, get or url variable?
+ *			Maybe we need to add a "usage" member to Parameter and 
+ *			usage values like: USAGE_QUERY_STRING, USAGE_POST
+ *
+ *
+ */
+
 using std::string;
 using std::vector;
 
@@ -36,6 +45,8 @@ public:
 	string createQueryString(const list<rcp::Parameter*>& queryParams); // @todo use Collection::getQueryString
 	string& getBuffer();
 	string buffer;
+	
+	
 private:
 	void reset(); // clears buffer; sets callback, sets userspass
 	void setCallback();

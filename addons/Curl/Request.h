@@ -47,8 +47,11 @@ public:
 	void isGet(bool flag);
 	bool isDelete();
 	void isDelete(bool flag);
+	void isMultiPart(bool flag);
+	bool isMultiPart();
 
 private:
+	int is_multipart;
 	vector<string> headers;
 	int method;
 	rcp::Collection params;

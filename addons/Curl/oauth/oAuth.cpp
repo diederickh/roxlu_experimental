@@ -120,7 +120,12 @@ string oAuth::getHeader(rc::Request& req, const rcp::Collection& params) {
 bool oAuth::getAuthorizeParams(rc::Request& req, const rcp::Collection& paramsIn, rcp::Collection& paramsOut) {
 	// create collection for signature
 	rcp::Collection signature_params = getDefaultParameters();
-	signature_params += paramsIn;
+	
+	// only add post or get parameters to the signature params when it's not 
+	// a multi part form. See: https://dev.twitter.com/discussions/1059
+	if(!req.isMultiPart()) {
+		signature_params += paramsIn;
+	}
 	
 	signature_params["oauth_token"] = getTokenKey();
 	string signature;

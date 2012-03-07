@@ -55,7 +55,7 @@ public:
 	
 	void print() const;
 	const list<Parameter*>& getParameters() const;
-	list<rcp::Parameter*> getParameters(bool forSignature) const;
+	list<rcp::Parameter*> getParameters(bool forSignature) const; 
 	void clear(); // remove all params 	
 private:
 	list<Parameter*> params;

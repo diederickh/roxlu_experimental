@@ -21,6 +21,7 @@ public:
 		,PARAM_FILE = 2	
 	};
 	
+		
 	Parameter();
 	Parameter(const std::string& n, const std::string& v);
 	Parameter(Parameter* other);
@@ -31,7 +32,7 @@ public:
 	virtual void setName(const std::string& n);
 	virtual void setValue(const std::string& v);
 	virtual std::string getStringValue();
-	virtual bool mustUseInSignature();
+	virtual bool mustUseInSignature(); // @todo this is oauth related; remove here and use Usages
 	
 	// pass in "any" value and convert it to string.
 	template<typename T>
@@ -49,6 +50,7 @@ public:
 	
 	bool operator==(const Parameter& other) const;
 	void print();
+	
 	int type;
 	
 protected:
@@ -64,7 +66,6 @@ inline std::string& Parameter::getName() {
 inline std::string& Parameter::getValue() {
 	return value;
 }
-
 
 
 inline void Parameter::setName(const std::string& n) {

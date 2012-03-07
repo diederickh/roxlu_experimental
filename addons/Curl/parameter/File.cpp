@@ -10,6 +10,11 @@ File::File(const std::string& n, const std::string& f)
 {
 	name = n;
 	type = rcp::Parameter::PARAM_FILE;
+	
+	std::ifstream ifs(f.c_str());
+	if(!ifs.is_open()) {
+		printf("Error: cannot find file: '%s'; make sure to use complete path.\n", f.c_str());
+	}
 }
 
 File::File(File* other) {

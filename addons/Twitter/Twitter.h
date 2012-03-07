@@ -1,3 +1,5 @@
+// TODO: Check the return headers from twitter (404,301 etc..)
+// TODO: Check the timestamp from twitter; our and theirs must be somewhat in sync.
 #ifndef ROXLU_TWITTERH
 #define ROXLU_TWITTERH
 
@@ -37,6 +39,7 @@ namespace roxlu {
 namespace twitter {
 
 const string URL_TWITTER_BASE = "https://api.twitter.com/";
+const string URL_TWITTER_UPLOAD_BASE = "https://upload.twitter.com/";
 const string URL_STATUSES_BASE = URL_TWITTER_BASE +"1/statuses/";
 const string URL_FRIENDSHIPS_BASE = URL_TWITTER_BASE +"1/friendships/";
 const string URL_DIRECT_MESSAGES_BASE = URL_TWITTER_BASE +"1/direct_messages/";
@@ -53,7 +56,7 @@ const string URL_STATUSES_SHOW = URL_STATUSES_BASE +"show.json";
 const string URL_STATUSES_DESTROY = URL_STATUSES_BASE +"destroy/";
 const string URL_STATUSES_RETWEET = URL_STATUSES_BASE +"retweet/";
 const string URL_STATUSES_UPDATE = URL_STATUSES_BASE +"update.json";
-const string URL_STATUSES_UPDATE_WITH_MEDIA = URL_STATUSES_BASE +"update_with_media.json";
+const string URL_STATUSES_UPDATE_WITH_MEDIA = URL_TWITTER_UPLOAD_BASE +"1/statuses/update_with_media.json";
 const string URL_STATUSES_OEMBED = URL_STATUSES_BASE +"oembed.json";
 
 const string URL_STATUSES_HOME_TIMELINE = URL_STATUSES_BASE +"home_timeline.json";
@@ -134,8 +137,6 @@ const string URL_AUTHORIZE = "http://twitter.com/oauth/authorize?oauth_token=";
 
 /*
 // set keys
-	twitter.setTwitterUsername("roxlutest");
-	twitter.setTwitterPassword("*************");
 	twitter.setConsumerKey("kyw8bCAWKbkP6e1HMMdAvw");
 	twitter.setConsumerSecret("***************");
 	
@@ -297,44 +298,49 @@ private:
 	rc::Curl twitcurl;
 	vector<IEventListener*> listeners;
 	roxlu::twitter::parser::JSON json;
+	
 };
 
 inline bool Twitter::doGet(const string& url, rcp::Collection* defaultParams, rcp::Collection* extraParams) {
 	reset();
 	rc::Request req(url);
 	req.isGet(true);
-	
+
 	if(defaultParams != NULL) {
 		req.getParams() += *defaultParams;
 	}
 		
 	if(extraParams != NULL) {
 		req.getParams() += *extraParams;
-	}
-	
+	}	
 	
 	oauth.authorize(req);
 	return req.doGet(twitcurl, response);
 }
 
 
-inline bool Twitter::doPost(const string& url, bool multiPart, rcp::Collection* extraParams) {
+inline bool Twitter::doPost(const string& url, bool multipart, rcp::Collection* extraParams) {
 	reset();
+	
 	rc::Request req(url);
+	req.isMultiPart(multipart);
+	req.isPost(true);
 	
 	if(extraParams != NULL) {
 		req.getParams() += *extraParams;
 	}
 	
-	req.isPost(true);
 	oauth.authorize(req);
-	return req.doPost(twitcurl, response, multiPart);
+	return req.doPost(twitcurl, response, multipart);
 
 }
 
-inline bool Twitter::doPost(const string& url, const rcp::Collection* col, bool multiPart, rcp::Collection* extraParams) {	
+inline bool Twitter::doPost(const string& url, const rcp::Collection* col, bool multipart, rcp::Collection* extraParams) {	
 	reset();
+
 	rc::Request req(url);
+	req.isMultiPart(multipart);
+	req.isPost(true);
 	
 	if(col != NULL) {
 		req.addParams(*col);
@@ -343,9 +349,10 @@ inline bool Twitter::doPost(const string& url, const rcp::Collection* col, bool 
 	if(extraParams != NULL) {
 		req.getParams() += *extraParams;
 	}
-	req.isPost(true);
+	
+	//twitcurl.setVerbose(true);
 	oauth.authorize(req);
-	return req.doPost(twitcurl, response, multiPart);
+	return req.doPost(twitcurl, response, multipart);
 }
 
 

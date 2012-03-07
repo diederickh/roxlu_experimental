@@ -141,7 +141,7 @@ bool TwitterStream::update() {
 	CHECK_CURLM_ERROR(r);
 	
 	if(still_running == 0) {
-		printf("Twitter stream not running...\n");
+//		printf("Twitter stream not running...\n");
 	}
 	return true;
 }
