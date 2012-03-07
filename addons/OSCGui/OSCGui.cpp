@@ -33,6 +33,11 @@ void OSCGui::addColor(const string& name, float& r, float& g, float& b, float& a
 	elements[name] = el;
 }
 
+void OSCGui::addInt(const string& name, int& v) {
+	OSCGInt* el = new OSCGInt(name, v);
+	elements[name] = el;
+}
+
 void OSCGui::update() {
 	OSCMessage m;
 	if(osc_receiver.hasMessages()) {
@@ -58,18 +63,25 @@ void OSCGui::update() {
 					break;
 				}
 				case OSCU_COLOR: {
-					printf("COLOR\n");
 					map<string, OSCGType*>::iterator it = elements.find(oscu_name);
 					if(it == elements.end()) {
 						return;
 					}
-					printf("%f\n", m.getFloat(2));
 					((OSCGColor*)it->second)->setValue(
 						 m.getFloat(2)
 						,m.getFloat(3)
 						,m.getFloat(4)
 						,m.getFloat(5)
 					);
+					break;
+				}
+				// Radio list
+				case OSCU_MATRIX: {
+					map<string, OSCGType*>::iterator it = elements.find(oscu_name);
+					if(it == elements.end()) {
+						return;
+					}
+					((OSCGInt*)it->second)->setValue(m.getInt32(2));
 					break;
 				}
 				default: {
