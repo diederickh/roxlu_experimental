@@ -190,7 +190,7 @@ bool Curl::doPost(const string& url, const rcp::Collection& params, bool multiPa
 	}
 	
 	curl_formfree(post_curr);
-	
+
 	// clear header.
 	curl_slist_free_all(curl_header);
 	headers.clear();
@@ -218,14 +218,25 @@ string Curl::createQueryString(const list<rcp::Parameter*>& queryParams) {
 
 void Curl::reset() {
 	buffer = "";
+	http_response_code = 0;
+	response_headers.clear();
+	http_response_message.clear();
 	setCallback();
 	setUserPass();
+	setDefaultOptions();
+}
+
+void Curl::setDefaultOptions() {
+	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1); 
 }
 
 void Curl::setCallback() {
 	if(!is_callback_set) {
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, callback);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+		
+		curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, headerCallback);
+		curl_easy_setopt(curl, CURLOPT_WRITEHEADER, this);
 		is_callback_set = true;
 	}
 }
@@ -239,11 +250,40 @@ void Curl::setUserPass() {
 	}
 }
 
-size_t Curl::callback(char* data, size_t size, size_t nmemb, Curl* curlPtr) {
+size_t Curl::writeCallback(char* data, size_t size, size_t nmemb, Curl* c) {
 	size_t handled = size * nmemb;
-	curlPtr->buffer.append(data, handled);
+	c->buffer.append(data, handled);
 	return handled;
 }
+
+size_t Curl::headerCallback(char* ptr, size_t size, size_t nmemb, Curl* c) {
+	size_t bytes_to_write = size * nmemb;
+	string header_line(ptr, nmemb);
+	size_t pos = header_line.find_first_of(":");
+	if(pos != string::npos) {
+		string header_name = header_line.substr(0,pos);
+		string header_value = header_line.substr(pos+2, (header_line.length()-(pos+4)));
+		std::transform(header_name.begin(), header_name.end(), header_name.begin(),::tolower);
+		c->addResponseHeader(header_name, header_value);
+	}
+	else {
+		// parse the HTTP result.
+		pos = header_line.find("HTTP/");		
+		if(pos != std::string::npos) {
+			std::istringstream oss(header_line);
+			long code;
+			string msg;
+			oss >> msg >> code >> msg;
+			c->http_response_message = msg;
+			c->http_response_code = code;
+			if(code == 401) {
+				printf("Error: while connecting to remote: %s, code: %lu\n", msg.c_str(), code);
+			}
+		}
+	}
+	return bytes_to_write;
+}
+
 
 void Curl::setVerbose(bool verbose) {
 	curl_easy_setopt(curl, CURLOPT_VERBOSE, (verbose) ? 1 : 0);	

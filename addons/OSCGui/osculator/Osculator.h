@@ -5,6 +5,8 @@
 #define OSCU_BUTTON		2
 #define OSCU_COLOR		3
 #define OSCU_MATRIX		4
+#define OSCU_STRING		5
+#define OSCU_CALLBACK	6
 
 @interface Osculator : NSObject {
 	NSWindow* window;
@@ -12,7 +14,7 @@
 	OSCSender* osc_sender;
 }
 
-- (void) generateFromWindow:(NSWindow*) window;
+- (void) generateFromWindow:(NSWindow*) window port:(int)port;
 - (void) fillSubviews:(NSView*) parent fill:(NSMutableArray*)array;
 
 - (void) sliderChanged:(NSSlider*)sender;
@@ -21,4 +23,8 @@
 - (void) matrixChanged:(NSMatrix*)sender;
 - (void) listButtonChanged:(NSPopUpButton*)sender;
 - (void) segmentedControlChanged:(NSSegmentedControl*)sender;
+
+- (void) sendTextfieldChanged:(const char*) var sender:(NSTextField*)sender;
+- (void) sendButtonChanged:(const char*)varname  sender:(NSButton*) button;
+//(const char*)var value:(const char*)value;
 @end

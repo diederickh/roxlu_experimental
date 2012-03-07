@@ -35,6 +35,8 @@ JSON::~JSON() {
 	printf("~JSON()");
 }
 
+
+
 bool JSON::parseStatus(json_t* root, rtt::Tweet& tweet) {
 	// text
 	json_t* node =	json_object_get(root, "text");
@@ -58,7 +60,16 @@ bool JSON::parseStatus(json_t* root, rtt::Tweet& tweet) {
 		tweet.setTweetID(id);
 	}
 		
-
+	// created at:
+	node = json_object_get(root, "created_at");
+	if(node == NULL) {
+		RETURN_JSON("Error: cannot get created_at field from tweet.\n");
+	}
+	if(json_is_string(node)) {
+		string created_at = json_string_value(node);
+		tweet.setCreatedAt(created_at);
+	}
+	
 	// user - object
 	json_t* user = json_object_get(root, "user");
 	if(user == NULL || !json_is_object(user)) {
@@ -94,6 +105,7 @@ bool JSON::parseStatus(json_t* root, rtt::Tweet& tweet) {
 		string user_id = json_string_value(node);
 		tweet.setUserID(user_id);
 	}
+
 	
 	// entities
 	node = json_object_get(root, "entities");
@@ -330,13 +342,44 @@ bool JSON::parseUser(json_t* root, rtt::User& user) {
 	return true;
 }
 
+// Parse a array of status messages (i.e. when you need the statusesHomeTimeline)
+bool JSON::parseStatusArray(const string& json, vector<rtt::Tweet>& result) {
+	json_error_t error;
+	json_t* root = json_loads(json.c_str(), 0, &error);
+
+	if(!root) {
+		printf("Error: on line: %d, %s\n", error.line, error.text);
+		json_decref(root);
+		return false;
+	}
+	
+	if(!json_is_array(root)) {
+		json_decref(root);
+		return false;
+	}
+	size_t num = json_array_size(root);
+	json_t* val = NULL;
+	for(int i = 0; i < num; ++i) {
+		val = json_array_get(root, i);
+		if(val == NULL || !json_is_object(val)) {
+			continue;
+		}
+		rtt::Tweet tweet;
+	 	if(parseStatus(val, tweet)) {
+			result.push_back(tweet);
+		}
+	}
+	json_decref(root);
+	return true;
+}
+
 
 void JSON::parse(const string& line) {
 	json_t* root;
 	json_error_t error;
 //	printf("--\n");
 //	printf("%s\n\n---------------------------------------------------------\n", line.c_str());
-	
+
 	// load json into jansson
 	root = json_loads(line.c_str(), 0, &error);
 	if(!root) {
@@ -344,6 +387,8 @@ void JSON::parse(const string& line) {
 		json_decref(root);
 		return;
 	}
+	
+	
 	
 	// STATUS UPDATE
 	json_t* node = json_object_get(root, "text");

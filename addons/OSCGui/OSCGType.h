@@ -12,6 +12,8 @@ enum OSCGTypes {
 	,OSCG_BOOL 		= 2
 	,OSCG_COLOR		= 3
 	,OSCG_INT		= 4
+	,OSCG_STRING	= 5
+	,OSCG_CALLBACK	= 6
 };
 
 

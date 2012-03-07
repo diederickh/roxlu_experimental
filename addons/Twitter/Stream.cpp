@@ -28,7 +28,24 @@ Stream::~Stream() {
 */
 bool Stream::connect(const string& streamURL) {
 	twitter.accountVerifyCredentials();
-	printf("Credentials: %s\n", twitter.getResponse().c_str());
+	string h;
+	if(twitter.getResponseHeader("date",h)) {
+		struct tm tm;
+		strptime(h.c_str(), "%a, %e %b %Y %H:%M:%S %Z", &tm);
+		time_t current_time = time(NULL);
+		time_t http_time = mktime(&tm);
+		time_t difference = std::abs(current_time - http_time);
+		if(difference > 180) {
+			printf("\n\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+			printf("MAKE SURE THAT YOUR COMPUTER TIME IS SYNCRHONIZED WITH A REMOTE TIME SERVER\n");
+			printf("WHEN YOUR COMPUTER IS OUT OF SYNC YOU CANNOT CONNECT TO THE TWITTER STREAMING\n");
+			printf("SERVER.\n");
+			printf("\n\n");
+			printf("You are off by: %zu seconds.\n", difference);
+			printf("\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+			exit(0);
+		}
+	}
 	
 	CURLcode r;
 	
@@ -72,6 +89,9 @@ bool Stream::connect(const string& streamURL) {
 		printf("Error: cannot create easy handle.\n");
 		return false;
 	}
+	
+	// no signals on i.e. resolv timouts
+	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1); 
 
 	// set url
 	r = curl_easy_setopt(curl, CURLOPT_URL, use_url.c_str());

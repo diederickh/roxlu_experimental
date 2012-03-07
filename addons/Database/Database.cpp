@@ -4,6 +4,7 @@ namespace roxlu  {
 
 Database::Database()
 	:file("")
+	,opened(false)
 {
 }
 
@@ -14,17 +15,22 @@ Database::~Database() {
 bool Database::open(const string& fileName) {
 	file = fileName;
 	if(SQLITE_OK !=  sqlite3_open(file.c_str(), &db)) {
-		printf("db error: %s\n", sqlite3_errmsg(db));
+		printf("Error: %s\n", sqlite3_errmsg(db));
 		sqlite3_close(db);
 		return false;
 	}
+	opened = true;
 	return true;
 }
 
 bool Database::query(const string& sql) {
+	if(!opened) {
+		printf("Warning query(): db not opened\n");
+		return false;
+	}
 	sqlite3_stmt* statement;
 	if (SQLITE_OK != sqlite3_prepare_v2(db, sql.c_str(),-1, &statement, 0)) {
-		printf("db error: %s\n", sqlite3_errmsg(db));
+		printf("Error: %s with: %s\n", sqlite3_errmsg(db), sql.c_str());
 		return false;
 	}
 	
@@ -75,8 +81,12 @@ QueryDelete Database::remove(const string& table) {
 
 // THE CALLER MUST FINALIZE() the statement when ready!
 bool Database::prepare(const string& sql, sqlite3_stmt** stmt) {
+	if(!opened) {
+		printf("Warning prepare(): db not opened\n");
+		return false;
+	}
 	if(SQLITE_OK != sqlite3_prepare_v2(db, sql.c_str(), -1, stmt, 0)) {
-		printf("db error: %s\n", sqlite3_errmsg(db));
+		printf("DB error: %s with prepare: %s\n", sqlite3_errmsg(db), sql.c_str());
 		return false;
 	}
 	return true;
@@ -118,7 +128,7 @@ bool Database::bind(const vector<QueryParam*>& params, sqlite3_stmt** stmt, int 
 								);
 							
 				if(result != SQLITE_OK) {
-					printf("bind error with: %s(%d) =  %s\n", qp->getField().c_str(),parameter_index, sqlite3_errmsg(db));
+					printf("Error: cannot bind: %s(%d) =  %s\n", qp->getField().c_str(),parameter_index, sqlite3_errmsg(db));
 					return false;
 				}
 				break;

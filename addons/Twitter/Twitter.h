@@ -177,6 +177,8 @@ public:
 	
 	void setConsumerKey(const string& consumerKey);
 	void setConsumerSecret(const string& consumerSecret);
+	string getConsumerKey();
+	string getConsumerSecret();
 	
 	bool saveTokens(const string& filePath);
 	bool loadTokens(const string& filePath);
@@ -200,7 +202,7 @@ public:
 	bool statusesRetweetedByMe(rcp::Collection* extraParams = NULL);
 	bool statusesRetweetedToMe(rcp::Collection* extraParams = NULL);
 	bool statusesRetweetsOfMe(rcp::Collection* extraParams = NULL);
-	bool statusesUserTimeline(rcp::Collection* extraParams = NULL);
+	bool statusesUserTimeline(uint32_t howMany = 0, rcp::Collection* extraParams = NULL);
 	bool statusesRetweetedToUser(const string& screenName, rcp::Collection* extraParams = NULL);
 	bool statusesRetweetedByUser(const string& screenName, rcp::Collection* extraParams = NULL);
 	
@@ -279,6 +281,7 @@ public:
 	// Event system.
 	void addEventListener(IEventListener& listener);
 	void addEventListener(IEventListener* listener);
+	vector<IEventListener*>& getEventListeners();
 	void onStatusUpdate(const rtt::Tweet& tweet);
 	void onStatusDestroy(const rtt::StatusDestroy& destroy);
 	void onStreamEvent(const rtt::StreamEvent& event);
@@ -287,6 +290,9 @@ public:
 	roxlu::twitter::parser::JSON& getJSON();
 	string& getResponse();	
 	rco::oAuth& getoAuth();
+	long getHTTPResponseCode();
+	string getHTTPResponseMessage();
+	bool getResponseHeader(const string& name, string& result);
 	
 private:
 	bool doGet(const string& url, rcp::Collection* defaultParams = NULL, rcp::Collection* extraParams = NULL);
@@ -390,6 +396,30 @@ inline string Twitter::getTwitterPassword() {
 	
 inline roxlu::twitter::parser::JSON& Twitter::getJSON() {
 	return json;
+}
+
+inline long Twitter::getHTTPResponseCode() {
+	return twitcurl.getHTTPResponseCode();
+}
+
+inline string Twitter::getHTTPResponseMessage() {
+	return twitcurl.getHTTPResponseMessage();
+}
+
+inline bool Twitter::getResponseHeader(const string& name, string& result) {
+	return twitcurl.getResponseHeader(name, result);
+}
+
+inline vector<IEventListener*>& Twitter::getEventListeners() {
+	return listeners;
+}
+
+inline string Twitter::getConsumerKey() {
+	return oauth.getConsumerKey();
+}
+	
+inline string Twitter::getConsumerSecret() {
+	return oauth.getConsumerSecret();
 }
 	
 }} // roxlu::twitter

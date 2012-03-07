@@ -21,6 +21,10 @@ application once your application is authorized we will receive a oauth key and
 oauth secret. These values are used to sign your requests so Twitter knows you're
 they one who allowed the application to i.e. posts tweets on your behalf. 
 
+When you run your application for the first time we will open a browser
+window which opens an authorization page. There you see a code which  you need
+enter into the console of XCode.
+
 
 *In your .h file:*
 

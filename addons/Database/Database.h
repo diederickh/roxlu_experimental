@@ -43,6 +43,7 @@ public:
 private:
 	string file;
 	sqlite3* db;
+	bool opened;
 };
 
 

@@ -283,7 +283,16 @@ bool Twitter::statusesRetweetsOfMe(rcp::Collection* extraParams) {
 }
 
 // https://dev.twitter.com/docs/api/1/get/statuses/user_timeline
-bool Twitter::statusesUserTimeline(rcp::Collection* extraParams) {
+bool Twitter::statusesUserTimeline(uint32_t howMany, rcp::Collection* extraParams) {
+	rcp::Collection col;
+	howMany = (howMany > 200) ? 200 : howMany;
+	if(extraParams == NULL) {
+		col["count"] = howMany;
+		extraParams = &col;
+	}
+	else {
+		(*extraParams)["count"] = howMany;
+	}
 	return doGet(URL_STATUSES_USER_TIMELINE, extraParams);
 }
 

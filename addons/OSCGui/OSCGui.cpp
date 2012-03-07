@@ -38,6 +38,17 @@ void OSCGui::addInt(const string& name, int& v) {
 	elements[name] = el;
 }
 
+void OSCGui::addString(const string& name, string& value) {
+	OSCGString* el = new OSCGString(name, value);
+	elements[name] = el;
+}
+
+void OSCGui::addCallback(const string& name, int value, GuiCallback* type) {
+	OSCGCallback* el = new OSCGCallback(name, value, type);
+	elements[name] = el;
+}
+
+
 void OSCGui::update() {
 	OSCMessage m;
 	if(osc_receiver.hasMessages()) {
@@ -82,6 +93,22 @@ void OSCGui::update() {
 						return;
 					}
 					((OSCGInt*)it->second)->setValue(m.getInt32(2));
+					break;
+				}
+				case OSCU_STRING: {	
+					map<string, OSCGType*>::iterator it = elements.find(oscu_name);
+					if(it == elements.end()) {
+						return;
+					}
+					((OSCGString*)it->second)->setValue(m.getString(2));
+					break;
+				}
+				case OSCU_CALLBACK: {	
+					map<string, OSCGType*>::iterator it = elements.find(oscu_name);
+					if(it == elements.end()) {
+						return;
+					}
+					((OSCGCallback*)it->second)->call();
 					break;
 				}
 				default: {

@@ -20,7 +20,7 @@ Request::Request(const string& u)
 }
 
 Request::~Request() {
-	printf("~Request()\n");
+	//printf("~Request()\n");
 }
 
 void Request::setURL(const string& u) {

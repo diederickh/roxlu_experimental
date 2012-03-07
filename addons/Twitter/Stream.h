@@ -59,6 +59,7 @@ public:
 	// Event listeners
 	void addEventListener(IStreamEventListener* listener);
 	void addEventListener(IStreamEventListener& listener);
+	vector<IStreamEventListener*>& getEventListeners();
 	
 	string buffer;
 
@@ -104,6 +105,10 @@ inline void Stream::addEventListener(IStreamEventListener& listener) {
 
 inline void Stream::addEventListener(IStreamEventListener* listener) {
 	event_listeners.push_back(listener);
+}
+
+inline vector<IStreamEventListener*>& Stream::getEventListeners() {
+	return event_listeners;
 }
 
 /*

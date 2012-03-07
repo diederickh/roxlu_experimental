@@ -66,6 +66,10 @@ bool URL::download(string fromURL, string name) {
 	
 	is_initialized = true;
 	
+	// no timeout signals.
+	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
+	
+	
 	// set the url to download
 	curl_easy_setopt(
 					  curl

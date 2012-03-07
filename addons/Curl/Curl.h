@@ -4,7 +4,7 @@
 #define CHECK_CURL_ERROR(result)	if((result) != CURLE_OK) { printf("Curl error: %s.\n", curl_easy_strerror((result))); return false; }
 #define CHECK_CURLM_ERROR(result)	if((result) != CURLM_OK) { printf("Curl multi error: %s.\n", curl_multi_strerror((result))); return false; }
 
-
+#include <map>
 #include <vector>
 #include <string>
 #include "parameter/Collection.h"
@@ -23,6 +23,7 @@
 
 using std::string;
 using std::vector;
+using std::map;
 
 namespace roxlu {
 namespace curl {
@@ -42,6 +43,10 @@ public:
 	string& getAuthPassword();
 	void addHeader(const string& header);
 	void setVerbose(bool verbose);
+	void addResponseHeader(const string& name, const string& value);
+	bool getResponseHeader(const string& name, string& result);
+	string getHTTPResponseMessage();
+	long getHTTPResponseCode();
 	string createQueryString(const list<rcp::Parameter*>& queryParams); // @todo use Collection::getQueryString
 	string& getBuffer();
 	string buffer;
@@ -49,11 +54,12 @@ public:
 	
 private:
 	void reset(); // clears buffer; sets callback, sets userspass
+	void setDefaultOptions();
 	void setCallback();
 	void setUserPass();
 	void setHeaders(struct curl_slist** slist);
-	static size_t callback(char* data, size_t size, size_t nmemb, Curl* twit);
-	
+	static size_t writeCallback(char* data, size_t size, size_t nmemb, Curl* c);
+	static size_t headerCallback(char* data, size_t size, size_t nmemb, Curl* c);
 
 	CURL* curl;
 	string header;	
@@ -63,6 +69,9 @@ private:
 	string auth_username;
 	string auth_password;
 	vector<string> headers;
+	map<string, string> response_headers;
+	long http_response_code;
+	string http_response_message;
 };
 
 inline string& Curl::getBuffer() {
@@ -87,6 +96,27 @@ inline string& Curl::getAuthUsername() {
 
 inline string& Curl::getAuthPassword() {
 	return auth_password;
+}
+
+inline void Curl::addResponseHeader(const string& name, const string& value) {
+	response_headers.insert(std::pair<string, string>(name, value));
+}
+
+inline bool Curl::getResponseHeader(const string& name, string& result) {	
+	map<string, string>::iterator it = response_headers.find(name);
+	if(it == response_headers.end()) {
+		return false;
+	}
+	result = it->second;
+	return true;
+}
+
+inline string Curl::getHTTPResponseMessage() {
+	return http_response_message;
+}
+
+inline long Curl::getHTTPResponseCode() {
+	return http_response_code;
 }
 
 }} // roxlu::curl

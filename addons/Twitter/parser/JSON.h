@@ -27,6 +27,7 @@ public:
 	~JSON();
 	
 	void parse(const string& line);
+	bool parseStatusArray(const string& json, vector<rtt::Tweet>& result);
 	bool parseStatus(json_t* root, rtt::Tweet& tweet);	
 	bool parseDestroy(json_t* root, rtt::StatusDestroy& destroy);
 	bool parseStreamEvent(json_t* root, rtt::StreamEvent& event);

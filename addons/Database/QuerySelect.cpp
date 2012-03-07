@@ -101,7 +101,6 @@ string QuerySelect::toString() {
 		sql.append(limit_clause);
 	}
 	
-	
 	//printf("SQL: %s\n" , sql.c_str());
 	return sql;
 	
