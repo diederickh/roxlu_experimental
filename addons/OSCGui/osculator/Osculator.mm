@@ -9,7 +9,6 @@
 	views = [NSMutableArray array];
 	[self fillSubviews:[window contentView] fill:views];
 	
-	NSLog(@"c: %zu\n", [views count]);
 }
 
 - (void) fillSubviews:(NSView*) parent fill:(NSMutableArray*)array {
@@ -18,17 +17,26 @@
 		if([view isKindOfClass:[NSSlider class]]) {
 			[(NSSlider*)view setTarget:self];
 			[((NSSlider*)view) setAction:@selector(sliderChanged:)];
-			NSLog(@"SLIDER: %@", [view toolTip]);
+		}
+		else if([view isKindOfClass:[NSPopUpButton class]]) {
+			[(NSPopUpButton*)view setTarget:self];
+			[(NSPopUpButton*)view setAction:@selector(listButtonChanged:)];
+		}
+		else if([view isKindOfClass:[NSSegmentedControl class]]) {
+			[(NSSegmentedControl*)view setTarget:self];
+			[(NSSegmentedControl*)view setAction:@selector(segmentedControlChanged:)];
 		}
 		else if([view isKindOfClass:[NSButton class]]) {
 			[(NSButton*)view setTarget:self];
 			[(NSButton*)view setAction:@selector(buttonChanged:)];
-			NSLog(@"BUTTON.");
 		}
 		else if([view isKindOfClass:[NSColorWell class]]) {
 			[(NSColorWell*)view setTarget:self];
 			[(NSColorWell*)view setAction:@selector(colorChanged:)];
-			NSLog(@"COLORWELL");
+		}
+		else if([view isKindOfClass:[NSMatrix class]]) {
+			[(NSMatrix*)view setTarget:self];
+			[(NSMatrix*)view setAction:@selector(matrixChanged:)];
 		}
 		else {
 			[self fillSubviews:view fill:array];
@@ -36,9 +44,59 @@
 	}
 }
 
+- (void) segmentedControlChanged:(NSSegmentedControl*)sender {
+	if([sender toolTip] == NULL) {
+		NSLog(@"No tooltip set.");
+		return;
+	}
+	NSInteger dx = [sender selectedSegment];
+	const char* varname = [[sender toolTip]UTF8String];
+
+	OSCMessage msg;
+	msg.addInt32(OSCU_MATRIX);
+	msg.addString(varname);
+	msg.addInt32((int32_t)dx);
+	osc_sender->sendMessage(msg);
+}
+
+- (void) listButtonChanged:(NSPopUpButton*)sender {
+	if([sender toolTip] == NULL) {
+		NSLog(@"No tooltip set.");
+		return;
+	}
+	NSInteger dx = [sender indexOfSelectedItem];
+	const char* varname = [[sender toolTip]UTF8String];
+	
+	OSCMessage msg;
+	msg.addInt32(OSCU_MATRIX);
+	msg.addString(varname);
+	msg.addInt32((int32_t)dx);
+	osc_sender->sendMessage(msg);
+}
+
+- (void) matrixChanged:(NSMatrix*)sender {
+	if([sender toolTip] == NULL) {
+		NSLog(@"No tooltip set.");
+		return;
+	}
+
+	//id selected = [sender selectedCell];
+	//NSLog(@" %d", [(NSButtonCell*)selected state]);
+	NSInteger sel_row = [sender selectedRow];
+	NSInteger sel_col = [sender selectedColumn];
+	NSInteger cols = [sender numberOfColumns];
+	NSInteger dx = (sel_row * cols) + sel_col;
+	const char* varname = [[sender toolTip]UTF8String];
+	
+	// send which index is selected 
+	OSCMessage msg;
+	msg.addInt32(OSCU_MATRIX);
+	msg.addString(varname);
+	msg.addInt32((int32_t)dx);
+	osc_sender->sendMessage(msg);
+}
 
 - (void) sliderChanged:(NSSlider*)sender {
-	NSLog(@"Slider dragged: %f", [sender floatValue]);
 	if ([sender toolTip] == NULL) {
 		NSLog(@"No tooltip set.");
 		return;

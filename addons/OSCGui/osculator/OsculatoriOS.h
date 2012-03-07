@@ -1,6 +1,21 @@
 #import <Foundation/Foundation.h>
 #include "OSC.h"
 
+@interface OsculatoriOS : NSObject {
+	NSMutableArray* views;	
+	OSCSender* osc_sender;
+}
+
+- (void) generateFromWindow:(UIWindow*) window;
+- (void) fillSubviews:(NSArray*) views fill:(NSMutableArray*) array;
+- (void) sliderChanged:(UISlider*) sender;
+
+@end
+
+/*
+#import <Foundation/Foundation.h>
+#include "OSC.h"
+
 #define OSCU_SLIDER 	1
 #define OSCU_BUTTON		2
 #define OSCU_COLOR		3
@@ -22,3 +37,4 @@
 - (void) listButtonChanged:(NSPopUpButton*)sender;
 - (void) segmentedControlChanged:(NSSegmentedControl*)sender;
 @end
+*/
