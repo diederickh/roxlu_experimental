@@ -19,6 +19,17 @@ public:
 		value = v;
 	}
 	
+	bool getStringValue(std::string& result) {
+		result = value;
+		return true;
+	}
+	
+	bool setStringValue(std::string& v)  {
+		value = v;
+		return true;
+	}
+	
+	
 private:
 	string& value;
 };

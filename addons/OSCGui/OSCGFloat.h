@@ -17,6 +17,18 @@ public:
 		value = v;
 	}
 	
+	bool getStringValue(std::string& result) {
+		std::stringstream ss;
+		ss << value;
+		result = ss.str();
+		return true;
+	}
+	
+	bool setStringValue(std::string& v)  {
+		return true;
+	}
+	
+	
 private:
 	float& value;
 };

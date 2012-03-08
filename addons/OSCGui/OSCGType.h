@@ -3,6 +3,7 @@
 
 #include "OSCGType.h"
 #include <string>
+#include <sstream>
 
 namespace roxlu {
 
@@ -26,6 +27,9 @@ public:
 	{
 	}
 	
+	virtual bool getStringValue(std::string& result) = 0;
+	virtual bool setStringValue(std::string& value) = 0;
+
 protected:
 	int type;
 	std::string name;

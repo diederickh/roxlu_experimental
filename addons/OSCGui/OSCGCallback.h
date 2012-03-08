@@ -24,6 +24,14 @@ public:
 		ptr->guiCallback(value);
 	}	
 	
+	bool getStringValue(std::string& result) {
+		return false;
+	}
+	
+	bool setStringValue(std::string& value)  {
+		return false;
+	}
+	
 	int value;
 	GuiCallback* ptr;
 };

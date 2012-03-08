@@ -121,4 +121,60 @@ void OSCGui::update() {
 	}
 }
 
+
+bool OSCGui::save(const string& filepath) {
+	std::ofstream ofs(filepath.c_str());
+	if(!ofs.is_open()) {
+		printf("Cannot open: '%s'\n", filepath.c_str());
+		return false;
+	}
+	
+	std::stringstream ss;
+	string val;
+	map<string, OSCGType*>::iterator it = elements.begin();
+	while(it != elements.end()) {
+		OSCGType* type = it->second;
+		string name = it->first;
+		if(type->getStringValue(val)) {
+			ss << name.c_str() << "=" << val << std::endl;
+			printf("%s=%s\n", name.c_str(), val.c_str());
+		}
+		++it;
+	}
+	ofs.write(ss.str().c_str(), ss.str().size()+1);
+	ofs.close();
+	return true;
+}
+
+bool OSCGui::load(const string& filepath) {
+	std::ifstream ifs(filepath.c_str());
+	if(!ifs.is_open()) {
+		printf("Cannot open: '%s'\n", filepath.c_str());
+		return false;
+	}
+	string name;
+	string value;
+	string line;
+	while(std::getline(ifs, line)) {
+		line = trim(line);
+		if(!line.size()) {
+			continue;
+		}
+		std::stringstream ss(line);
+		getline(ss, name, '=');
+		getline(ss, value,'=');
+		if(!name.size() || !value.size()) {
+			continue;
+		}
+		map<string, OSCGType*>::iterator it = elements.find(name);
+		if(it == elements.end()) {
+			continue;
+		}
+		
+		it->second->setStringValue(value);
+		name.clear();
+		value.clear();
+	}
+}
+
 } // roxlu
