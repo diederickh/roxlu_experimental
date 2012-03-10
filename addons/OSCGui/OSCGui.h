@@ -43,13 +43,15 @@ public:
 	void addString(const string& name, string& value);
 	void addCallback(const string& name, int value, GuiCallback* type);
 	
+	bool didValueChange();
 	bool save(const string& filepath);
 	bool load(const string& filepath);
 	std::string& trim(std::string &s);
  	std::string& ltrim(std::string &s);
 	std::string& rtrim(std::string &s);
-
+	
 private:
+	bool value_changed;
 	OSCReceiver osc_receiver;
 	map<string, OSCGType*> elements;
 };
@@ -66,6 +68,10 @@ inline std::string& OSCGui::ltrim(std::string &s) {
 inline std::string& OSCGui::rtrim(std::string &s) {
 	s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
 	return s;
+}
+
+inline bool OSCGui::didValueChange() {
+	return value_changed;
 }
 
 

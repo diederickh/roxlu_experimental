@@ -3,6 +3,7 @@ namespace roxlu {
 
 OSCGui::OSCGui(int port)
 	:osc_receiver(port)
+	,value_changed(false)
 {
 }
 
@@ -50,9 +51,11 @@ void OSCGui::addCallback(const string& name, int value, GuiCallback* type) {
 
 
 void OSCGui::update() {
+	value_changed = false;
 	OSCMessage m;
 	if(osc_receiver.hasMessages()) {
 		while(osc_receiver.getNextMessage(&m)) {
+			value_changed = true;
 			int32_t oscu_type = m.getInt32(0);
 			string oscu_name = m.getString(1);
 	
