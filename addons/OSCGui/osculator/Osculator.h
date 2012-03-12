@@ -26,5 +26,6 @@
 
 - (void) sendTextfieldChanged:(const char*) var sender:(NSTextField*)sender;
 - (void) sendButtonChanged:(const char*)varname  sender:(NSButton*) button;
-//(const char*)var value:(const char*)value;
+- (void) sendSliderChanged:(const char*)varname sender:(NSSlider*) sender;
+
 @end

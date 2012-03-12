@@ -14,6 +14,7 @@
 - (void) fillSubviews:(NSView*) parent fill:(NSMutableArray*)array {
 	for(NSView* view in [parent subviews]) {
 		[array addObject:view];	
+		
 		if([view isKindOfClass:[NSSlider class]]) {
 			if([view toolTip] == NULL) {
 				continue;
@@ -55,6 +56,12 @@
 			}
 			[(NSMatrix*)view setTarget:self];
 			[(NSMatrix*)view setAction:@selector(matrixChanged:)];
+		}
+		else if([view isKindOfClass:[NSTabView class]]) {
+			NSArray* tabs = [(NSTabView*)view tabViewItems];
+			for(NSTabViewItem* tab_view in tabs) {
+				[self fillSubviews:[tab_view view] fill:array];
+			}
 		}
 		else {
 			[self fillSubviews:view fill:array];
@@ -103,36 +110,12 @@
 
 - (void) sliderChanged:(NSSlider*)sender {
 	const char* varname = [[sender toolTip]UTF8String];
-		
-	OSCMessage msg;
-	msg.addInt32(OSCU_SLIDER);
-	msg.addString(varname);
-	msg.addFloat([sender floatValue]);
-	osc_sender->sendMessage(msg);
+	[self sendSliderChanged:varname sender:sender];	
 }
 
 - (void) buttonChanged:(NSButton*)button {
 	const char* varname = [[button toolTip]UTF8String];
  	[self sendButtonChanged:varname sender:button];
-/*
-	if([[button cell] showsStateBy] != NSNoCellMask) {
-		// toggle button
-		int on = [button state] == NSOnState;
-		OSCMessage msg;
-		msg.addInt32(OSCU_BUTTON);
-		msg.addString(varname);
-		msg.addInt32(on);
-		osc_sender->sendMessage(msg);
-	}
-	else {
-		// push button.
-		OSCMessage msg;
-		msg.addInt32(OSCU_CALLBACK);
-		msg.addString(varname);
-		osc_sender->sendMessage(msg);
-		NSLog(@" callback toggle");
-	}
-*/
 }
 
 
@@ -151,6 +134,15 @@
 	msg.addFloat(rgba[3]);
 	osc_sender->sendMessage(msg);
 }
+
+- (void) sendSliderChanged:(const char*)varname sender:(NSSlider*) sender {
+	OSCMessage msg;
+	msg.addInt32(OSCU_SLIDER);
+	msg.addString(varname);
+	msg.addFloat([sender floatValue]);
+	osc_sender->sendMessage(msg);
+}
+
 - (void) sendTextfieldChanged:(const char*) varname sender:(NSTextField*)sender {
 	OSCMessage msg;
 	msg.addInt32(OSCU_STRING);
@@ -160,7 +152,6 @@
 }
 
 - (void) sendButtonChanged:(const char*)varname sender:(NSButton*) button {
-	NSLog(@"SEND!!!");
 	if([[button cell] showsStateBy] != NSNoCellMask) {
 		// toggle button
 		int on = [button state] == NSOnState;
@@ -176,7 +167,6 @@
 		msg.addInt32(OSCU_CALLBACK);
 		msg.addString(varname);
 		osc_sender->sendMessage(msg);
-		NSLog(@" callback toggle");
 	}
 
 }
