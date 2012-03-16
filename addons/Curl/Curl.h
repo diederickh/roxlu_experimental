@@ -43,6 +43,7 @@ public:
 	string& getAuthPassword();
 	void addHeader(const string& header);
 	void setVerbose(bool verbose);
+	void printResponseHeaders();
 	void addResponseHeader(const string& name, const string& value);
 	bool getResponseHeader(const string& name, string& result);
 	string getHTTPResponseMessage();

@@ -293,6 +293,7 @@ public:
 	long getHTTPResponseCode();
 	string getHTTPResponseMessage();
 	bool getResponseHeader(const string& name, string& result);
+	void printResponseHeaders();
 	
 private:
 	bool doGet(const string& url, rcp::Collection* defaultParams = NULL, rcp::Collection* extraParams = NULL);
@@ -408,6 +409,10 @@ inline string Twitter::getHTTPResponseMessage() {
 
 inline bool Twitter::getResponseHeader(const string& name, string& result) {
 	return twitcurl.getResponseHeader(name, result);
+}
+
+inline void Twitter::printResponseHeaders() {
+	twitcurl.printResponseHeaders();
 }
 
 inline vector<IEventListener*>& Twitter::getEventListeners() {

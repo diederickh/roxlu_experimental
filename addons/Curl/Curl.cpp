@@ -284,6 +284,14 @@ size_t Curl::headerCallback(char* ptr, size_t size, size_t nmemb, Curl* c) {
 	return bytes_to_write;
 }
 
+void Curl::printResponseHeaders() {
+	map<string, string>::iterator it = response_headers.begin();
+	while(it != response_headers.end()) {
+		printf("%s: %s\n", it->first.c_str(), it->second.c_str());
+		++it;
+	}
+}
+
 
 void Curl::setVerbose(bool verbose) {
 	curl_easy_setopt(curl, CURLOPT_VERBOSE, (verbose) ? 1 : 0);	
