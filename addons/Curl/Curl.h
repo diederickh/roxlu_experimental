@@ -11,6 +11,7 @@
 #include "parameter/Parameter.h"
 #include "../../libs/curl/curl.h"
 #include "../../libs/crypto/urlencode.h"
+#include "FTP.h"
 
 /**
  * @todo	We need to add some more info to the Parameter types i.e. 
