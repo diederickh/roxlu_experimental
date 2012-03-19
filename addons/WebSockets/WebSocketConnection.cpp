@@ -14,7 +14,6 @@ WebSocketConnection::WebSocketConnection(WebSockets* websockets, WebSocketProtoc
 }
 
 WebSocketConnection::~WebSocketConnection() {
-	printf("~WebSocketConnection\n");
 }
 
 void WebSocketConnection::close() {

@@ -17,7 +17,6 @@ WebSockets::~WebSockets() {
 }
 
 void WebSockets::start(const unsigned int port) {
-	printf("Start...\n");
 	
 	// create websocket array
 	vector<pair<string, WebSocketProtocol*> >::iterator it = protocols.begin();
