@@ -1,8 +1,9 @@
 #include "OSCGui.h"
 namespace roxlu {
 
-OSCGui::OSCGui(int port)
-	:osc_receiver(port)
+OSCGui::OSCGui(int receiverPort, int senderPort)
+	:osc_receiver(receiverPort)
+	,osc_sender("localhost", senderPort)
 	,value_changed(false)
 {
 }
@@ -114,6 +115,15 @@ void OSCGui::update() {
 					((OSCGCallback*)it->second)->call();
 					break;
 				}
+				
+				// Control messages
+				case OSCU_COMMAND: {
+					uint32_t command = m.getInt32(1);
+					if(command == OSCU_COMMAND_LOAD_SETTINGS) {
+						sendValues();
+					}
+					break;
+				}
 				default: {
 					printf("warning: unhandled osculator type.\n");
 					break;
@@ -140,7 +150,6 @@ bool OSCGui::save(const string& filepath) {
 		string name = it->first;
 		if(type->getStringValue(val)) {
 			ss << name.c_str() << "=" << val << std::endl;
-			printf("%s=%s\n", name.c_str(), val.c_str());
 		}
 		++it;
 	}
@@ -178,6 +187,24 @@ bool OSCGui::load(const string& filepath) {
 		name.clear();
 		value.clear();
 	}
+	sendValues();
 }
+
+void OSCGui::sendValues() {
+	OSCMessage msg;
+	msg.addInt32(OSCU_COMMAND);
+	msg.addInt32(OSCU_COMMAND_LOAD_SETTINGS);
+	string val;
+	map<string, OSCGType*>::iterator it = elements.begin();
+	while(it != elements.end()) {
+		if(it->second->getStringValue(val)) {
+			msg.addString(it->first);
+			msg.addString(val);
+		}
+		++it;
+	}
+	osc_sender.sendMessage(msg);
+}
+
 
 } // roxlu

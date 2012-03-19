@@ -33,6 +33,7 @@ public:
 	string getString(int dx) const;
 	int32_t getInt32(int dx) const;
 	float getFloat(int dx) const;
+	size_t getNumArgs();
 	
 	typedef vector<OSCArg*>::iterator iterator;
 	vector<OSCArg*>::iterator begin();
@@ -59,6 +60,10 @@ inline vector<OSCArg*>::iterator OSCMessage::begin() {
 
 inline vector<OSCArg*>::iterator OSCMessage::end() {
 	return args.end();
+}
+
+inline size_t OSCMessage::getNumArgs() {
+	return args.size();
 }
 
 inline void OSCMessage::setRemoteEndpoint(const string& host, int port) {

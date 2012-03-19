@@ -7,15 +7,23 @@
 #define OSCU_MATRIX		4
 #define OSCU_STRING		5
 #define OSCU_CALLBACK	6
+#define OSCU_COMMAND	7 	// protocol commands.
+#define OSCU_COMMAND_LOAD_SETTINGS	1 // load remote settings.
 
 @interface Osculator : NSObject {
 	NSWindow* window;
-	NSMutableArray* views;
+	NSMutableDictionary* views;
+//	NSMutableArray* views;
 	OSCSender* osc_sender;
+	OSCReceiver* osc_receiver;
 }
 
-- (void) generateFromWindow:(NSWindow*) window port:(int)port;
-- (void) fillSubviews:(NSView*) parent fill:(NSMutableArray*)array;
+- (void) update:(NSTimer*)timer;
+- (void) loadSettings;
+- (void) sendCommand:(int)command;
+
+- (void) generateFromWindow:(NSWindow*)window senderPort:(int)senderPort receiverPort:(int)receiverPort;
+- (void) fillSubviews:(NSView*) parent fill:(NSMutableDictionary*)container;
 
 - (void) sliderChanged:(NSSlider*)sender;
 - (void) buttonChanged:(NSButton*)button;

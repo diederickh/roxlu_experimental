@@ -28,11 +28,16 @@ enum OSCUTypes {
 	 ,OSCU_MATRIX	= 4
 	 ,OSCU_STRING	= 5
 	 ,OSCU_CALLBACK	= 6
+	 ,OSCU_COMMAND 	= 7
+};
+
+enum OSCUCommands {
+	OSCU_COMMAND_LOAD_SETTINGS = 1 // client asks for settings.
 };
 
 class OSCGui {
 public:
-	OSCGui(int port);
+	OSCGui(int receiverPort = 4000, int senderPort = 4001);
 	~OSCGui();
 	void update();
 	void addInt(const string& name, int& v);
@@ -46,6 +51,8 @@ public:
 	bool didValueChange();
 	bool save(const string& filepath);
 	bool load(const string& filepath);
+	void sendValues();
+	
 	std::string& trim(std::string &s);
  	std::string& ltrim(std::string &s);
 	std::string& rtrim(std::string &s);
@@ -53,6 +60,7 @@ public:
 private:
 	bool value_changed;
 	OSCReceiver osc_receiver;
+	OSCSender osc_sender;
 	map<string, OSCGType*> elements;
 };
 

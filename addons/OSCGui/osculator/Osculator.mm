@@ -2,23 +2,63 @@
 
 @implementation Osculator
 
-- (void) generateFromWindow:(NSWindow*)inWindow port:(int)port{
-	osc_sender = new OSCSender("localhost",port);
-	
+												
+- (void) generateFromWindow:(NSWindow*)inWindow senderPort:(int) sp receiverPort:(int) rp { 
+	osc_sender = new OSCSender("localhost",sp);
+	osc_receiver = new OSCReceiver(rp);
 	window = inWindow;
-	views = [NSMutableArray array];
+	views = [NSMutableDictionary dictionary];
+	
 	[self fillSubviews:[window contentView] fill:views];
+	[self loadSettings];
+	[NSTimer scheduledTimerWithTimeInterval:0.25 target:self selector:@selector(update:) userInfo:views repeats:YES];
+}
+
+- (void) loadSettings {
+	[self sendCommand:OSCU_COMMAND_LOAD_SETTINGS];
+}
+
+- (void) sendCommand:(int)command {
+	OSCMessage msg;
+	msg.addInt32(OSCU_COMMAND);
+	msg.addInt32((int32_t)command);
+	osc_sender->sendMessage(msg);
+}
+
+- (void) update:(NSTimer*)timer {
+	if(osc_receiver->hasMessages()) {
+		OSCMessage m;
+		while(osc_receiver->getNextMessage(&m)) {
+			uint32_t type = m.getInt32(0);
+			if(type == OSCU_COMMAND) {
+				uint32_t cmd = m.getInt32(1);
+				
+				// load settings.
+				if(cmd == OSCU_COMMAND_LOAD_SETTINGS) {
+					size_t num = m.getNumArgs();
+					for(int i = 2; i < num; i += 2) {
+						string el_name = m.getString(i);
+						string el_val = m.getString(i+1);
+						NSString* k = [NSString stringWithUTF8String:el_name.c_str()];
+						NSString* v = [NSString stringWithUTF8String:el_val.c_str()];
+						NSControl* view = [[timer userInfo] objectForKey:k];
+						[view setStringValue:v];
+					}
+				}
+			}
+		}
+	}
 	
 }
 
-- (void) fillSubviews:(NSView*) parent fill:(NSMutableArray*)array {
+- (void) fillSubviews:(NSView*) parent fill:(NSMutableDictionary*)container {
 	for(NSView* view in [parent subviews]) {
-		[array addObject:view];	
-		
+	
 		if([view isKindOfClass:[NSSlider class]]) {
 			if([view toolTip] == NULL) {
 				continue;
 			}
+			[container setObject:view forKey:[view toolTip]];
 			[(NSSlider*)view setTarget:self];
 			[((NSSlider*)view) setAction:@selector(sliderChanged:)];
 		}
@@ -26,6 +66,7 @@
 			if([view toolTip] == NULL) {
 				continue;
 			}
+			[container setObject:view forKey:[view toolTip]];
 			[(NSPopUpButton*)view setTarget:self];
 			[(NSPopUpButton*)view setAction:@selector(listButtonChanged:)];
 		}
@@ -33,6 +74,7 @@
 			if([view toolTip] == NULL) {
 				continue;
 			}
+			[container setObject:view forKey:[view toolTip]];
 			[(NSSegmentedControl*)view setTarget:self];
 			[(NSSegmentedControl*)view setAction:@selector(segmentedControlChanged:)];
 		}
@@ -40,6 +82,7 @@
 			if([view toolTip] == NULL) {
 				continue;
 			}
+			[container setObject:view forKey:[view toolTip]];
 			[(NSButton*)view setTarget:self];
 			[(NSButton*)view setAction:@selector(buttonChanged:)];
 		}
@@ -47,6 +90,7 @@
 			if([view toolTip] == NULL) {
 				continue;
 			}
+			[container setObject:view forKey:[view toolTip]];
 			[(NSColorWell*)view setTarget:self];
 			[(NSColorWell*)view setAction:@selector(colorChanged:)];
 		}
@@ -54,17 +98,18 @@
 			if([view toolTip] == NULL) {
 				continue;
 			}
+			[container setObject:view forKey:[view toolTip]];
 			[(NSMatrix*)view setTarget:self];
 			[(NSMatrix*)view setAction:@selector(matrixChanged:)];
 		}
 		else if([view isKindOfClass:[NSTabView class]]) {
 			NSArray* tabs = [(NSTabView*)view tabViewItems];
 			for(NSTabViewItem* tab_view in tabs) {
-				[self fillSubviews:[tab_view view] fill:array];
+				[self fillSubviews:[tab_view view] fill:container];
 			}
 		}
 		else {
-			[self fillSubviews:view fill:array];
+			[self fillSubviews:view fill:container];
 		}
 	}
 }
@@ -92,8 +137,6 @@
 }
 
 - (void) matrixChanged:(NSMatrix*)sender {
-	//id selected = [sender selectedCell];
-	//NSLog(@" %d", [(NSButtonCell*)selected state]);
 	NSInteger sel_row = [sender selectedRow];
 	NSInteger sel_col = [sender selectedColumn];
 	NSInteger cols = [sender numberOfColumns];
