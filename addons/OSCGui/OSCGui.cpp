@@ -1,6 +1,8 @@
 #include "OSCGui.h"
 namespace roxlu {
 
+// special line to test submodules
+
 OSCGui::OSCGui(int receiverPort, int senderPort)
 	:osc_receiver(receiverPort)
 	,osc_sender("localhost", senderPort)
