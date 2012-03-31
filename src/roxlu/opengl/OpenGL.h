@@ -5,13 +5,15 @@
 #define ROXLU_OPENFRAMEWORKS		2
 #define ROXLU_COCOA					3
 
-#define ROXLU_VARIANT 	ROXLU_OPENFRAMEWORKS
+#define ROXLU_VARIANT 	ROXLU_COCOA
 
 
 #if ROXLU_VARIANT == ROXLU_OPENGLES
 	#include <OpenGLES/ES2/gl.h>
 #elif ROXLU_VARIANT == ROXLU_OPENFRAMEWORKS
 	#include "ofMain.h"
+#elif ROXLU_VARIANT == ROXLU_COCOA
+	#include <OpenGL/gl.h>
 #endif
 
 #endif

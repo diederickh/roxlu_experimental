@@ -7,8 +7,9 @@
 
 //#include <unistd.h>
 
-#include "Poco/File.h"
-#include "Poco/Timestamp.h"
+// NO POCO!
+//#include "Poco/File.h"
+//#include "Poco/Timestamp.h"
 
 #ifdef __APPLE__
 	#include <TargetConditionals.h>
@@ -77,9 +78,10 @@ public:
 		if(inDataPath) {
 			file = File::toDataPath(file);
 		}
-		Poco::File f(file);
-		Poco::Timestamp stamp = f.getLastModified();
-		return stamp.epochTime();
+		printf("NOOOOOO\n");
+//		Poco::File f(file);
+//		Poco::Timestamp stamp = f.getLastModified();
+//		return stamp.epochTime();
 	}
 	
 	static string getCWD() {

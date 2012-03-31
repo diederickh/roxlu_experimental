@@ -34,7 +34,7 @@ void Effect::createShaders(string& vertShader, string& fragShader) {
 }
 
 void Effect::createVertexShader(string& vertShader) {
-	stringstream vert;
+	std::stringstream vert;
 
 	vert << "#define LIGHT_COUNT " << getNumberOfLights() << endl << endl;
 	vert << "attribute vec4 pos; " << endl;
@@ -59,7 +59,7 @@ void Effect::createVertexShader(string& vertShader) {
 	vert << "uniform mat3 normalmatrix;" << endl;
 	
 	if(hasLights()) {
-		stringstream lights;
+		std::stringstream lights;
 		
 		lights 	<< endl
 				<< "struct Light {" << endl
@@ -146,7 +146,7 @@ void Effect::createVertexShader(string& vertShader) {
 
 
 void Effect::createFragmentShader(string& fragShader) {
-	stringstream frag;
+	std::stringstream frag;
 	
 	frag << "#define LIGHT_COUNT " << getNumberOfLights() << endl << endl;
 	frag << "uniform vec4 diffuse_color; " << endl; // color of the scene item
@@ -298,7 +298,7 @@ void Effect::setupShaderAttributesAndUniforms() {
 	// add lights.
 	for(int i = 0; i < lights.size(); ++i) {
 		Light& light = *lights[i];
-		stringstream var;
+		std::stringstream var;
 		var << "lights[" << i << "]";
 		shader.addUniform(var.str() +".position");
 		shader.addUniform(var.str() +".ambient_color");
@@ -507,7 +507,7 @@ void Effect::updateLights() {
 	shader.enable();
 	for(int i = 0; i < lights.size(); ++i) {
 		Light& l = *lights[i];
-		stringstream varname;
+		std::stringstream varname;
 		varname << "lights[" << i << "]";
 		shader.uniform3fv(varname.str() +".position", l.getPosition().getPtr());
 		shader.uniform4fv(varname.str() +".ambient_color", l.getAmbientColor().getPtr());

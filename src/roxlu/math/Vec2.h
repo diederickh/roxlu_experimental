@@ -101,6 +101,7 @@ inline float Vec2::lengthSquared() {
 inline Vec2& Vec2::operator=(const Vec2& v) {
 	x = v.x;
 	y = v.y;
+	return *this;
 }
 
 inline Vec2& Vec2::operator-=(const Vec2& v) {

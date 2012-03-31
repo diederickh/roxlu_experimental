@@ -189,6 +189,7 @@ inline Vec3& Vec3::rotate(float a, float xx, float yy, float zz) {
 	x =  x * (xx * xx * cosb + cosa) + y * (xx * yy * cosb - zz * sina)+ z * (xx * zz * cosb + yy * sina);
 	y =  x * (yy * xx * cosb + zz * sina) + y * (yy * yy * cosb + cosa) + z * (yy * zz * cosb - xx * sina);
 	z =  x * (zz * xx * cosb - yy * sina) + y * (zz * yy * cosb + xx * sina) + z * (zz * zz * cosb + cosa);
+	return *this;
 }
 
 inline Vec3& Vec3::rotateY(float angle) {

@@ -3,7 +3,34 @@
 
 #include <vector>
 
+
+#ifdef PI
+	#undef PI
+#endif
+
+#ifdef TWO_PI
+	#undef TWO_PI
+#endif
+
+#ifdef HALF_PI
+	#undef HALF_PI
+#endif
+
+#ifdef DEG_TO_RAD
+	#undef DEG_TO_RAD
+#endif
+
+#ifdef RAD_TO_DEG
+	#undef RAD_TO_DEG
+#endif
+
+#ifdef B0
+	#undef B0 // somewhere from termios
+#endif
+
 #include "Wm5Core.h"
+
+
 #include "Wm5Mathematics.h"
 #include "Wm5Images.h"
 #include "Wm5Imagics.h"
@@ -30,7 +57,8 @@ public:
 	size_t getNumVertices();
 	size_t getNumIndices();
 	
-
+	void useRealQueryType();
+	
 	// -----------------------
 	void clear();
 	
@@ -74,6 +102,10 @@ inline size_t ConvexHull3D::getNumVertices() {
 
 inline size_t ConvexHull3D::getNumIndices() {
 	return num_indices;
+}
+
+inline void ConvexHull3D::useRealQueryType() {
+	query_type = Wm5::Query::QT_RATIONAL;
 }
 
 } // roxlu

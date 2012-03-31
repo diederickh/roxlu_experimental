@@ -40,6 +40,7 @@
 #include "io/Ply.h"
 #include "io/R3F.h"
 #include "math/Interpolator.h"
+#include "math/Random.h"
 #include "math/Mat3.h"
 #include "math/Mat4.h"
 #include "math/Quat.h"

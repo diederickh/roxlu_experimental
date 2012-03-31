@@ -15,3 +15,5 @@ How to use
 Compile info
 ===========
 Just download the zip and run "MacBuildWm5.sh" file.
+I did add:  -arch "x86_64 i386"  to each of the xcodebuild lines to create
+a i386 + 64bit version.

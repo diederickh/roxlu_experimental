@@ -54,11 +54,12 @@ SceneItem* SceneItem::duplicate() {
 }
 
 bool SceneItem::createFromVertexData(VertexData& vd) {
-	createFromVertexData(&vd);
+	return createFromVertexData(&vd);
 }
 
 bool SceneItem::createFromVertexData(VertexData* vd) {
 	vertex_data = vd;
+	return true;
 }
 
 

@@ -116,7 +116,7 @@ void Renderer::drawSceneItem(string name) {
 }
 
 SceneItem*	Renderer::createSceneItemFromVertexData(VertexData& vd, SceneItem::SceneItemDrawMode drawMode) {
-	createSceneItemFromVertexData(&vd, drawMode);
+	return createSceneItemFromVertexData(&vd, drawMode);
 }
 
 SceneItem* Renderer::createSceneItemFromVertexData(VertexData* vd, SceneItem::SceneItemDrawMode drawMode) {

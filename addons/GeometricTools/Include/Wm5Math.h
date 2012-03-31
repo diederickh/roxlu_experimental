@@ -107,6 +107,7 @@ public:
     static Real FastNegExp3 (Real value);
 
     // Common constants.
+	#undef EPSILON // roxlu
     WM5_MATHEMATICS_ITEM static const Real EPSILON;
     WM5_MATHEMATICS_ITEM static const Real ZERO_TOLERANCE;
     WM5_MATHEMATICS_ITEM static const Real MAX_REAL;

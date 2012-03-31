@@ -12,6 +12,7 @@
 #include "Scene.h"
 
 #include <string>
+#include <sstream>
 
 using std::string;
 
@@ -147,7 +148,7 @@ inline EasyCam* Renderer::getCameraPtr() {
 }
 
 inline SceneItem* Renderer::duplicateSceneItem(string oldName) {
-	stringstream ss;
+	std::stringstream ss;
 	ss << oldName << scene->getNumSceneItems();
 	return duplicateSceneItem(oldName, ss.str());
 }

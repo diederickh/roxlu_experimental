@@ -13,6 +13,7 @@ public:
 	void setup(float screenWidth, float screenHeight);
 	void onMouseDown(float x, float y);
 	void onMouseDragged(float x, float y);
+	void onScrollWheel(float d);
 	ArcBall arcball;
 private:
 	bool shift_down;
