@@ -6,7 +6,7 @@
 #import <AppKit/AppKit.h>
 #include <OpenGL/gl.h>
 #import <QuartzCore/QuartzCore.h>
-#import "MacApplication.h"
+#import "MacWindow.h"
 #include "ApplicationBase.h"
 	
 @interface MacOpenGLView : NSOpenGLView {
@@ -14,13 +14,13 @@
 	double delta_time;
     float view_width;
     float view_height;
-	MacApplication* mac_app;
+	MacWindow* mac_win;
 	ApplicationBase* base_app;
 }
 
 - (float) getViewWidth;
 - (float) getViewHeight;
-- (void) initMacApplication:(MacApplication*)macApp application:(ApplicationBase*) baseApp;
+- (void) initMacWindow:(MacWindow*)macWin andApplication:(ApplicationBase*) baseApp;
 - (CVReturn) getFrameForTime:(const CVTimeStamp *)outputTime;
 - (void) draw;
 - (void) lockOpenGL;

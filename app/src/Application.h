@@ -2,8 +2,6 @@
 #define ROXLU_APPLICATION_INTERFACE
 
 #include "ApplicationBase.h"
-#include "Roxlu.h"
-#include "Veins3D.h"
 
 class Application : public ApplicationBase {
 public:
@@ -28,12 +26,6 @@ public:
 	void keyUp(unsigned char key);
 	
 	void resized(float w, float h);
-		
-
-	EasyCam cam;
-	Veins3D v;
 };
-
-
 
 #endif

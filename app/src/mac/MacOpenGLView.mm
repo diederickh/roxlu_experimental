@@ -1,5 +1,5 @@
 #import "MacOpenGLView.h"
-#import "MacApplication.h"
+#import "MacWindow.h"
 
 @implementation MacOpenGLView
 
@@ -17,10 +17,10 @@ static CVReturn MyDisplayLinkCallback(
     return result;
 }
 
-- (void) initMacApplication:(MacApplication*)macApp application:(ApplicationBase*) baseApp {
-	mac_app = macApp;
+- (void) initMacWindow:(MacWindow*)macApp andApplication:(ApplicationBase*) baseApp {
+	mac_win = macApp;
 	base_app = baseApp;
-	[mac_app setupApp:view_width height:view_height];
+	[mac_win setupApp:view_width height:view_height];
 	base_app->setDefaults();
 	
 	GLint swapInt = 1;
@@ -72,7 +72,7 @@ static CVReturn MyDisplayLinkCallback(
 
     // let the context know we've changed size
     [[self openGLContext] update];
-	[mac_app resizedApp:view_width height:view_height];
+	[mac_win resizedApp:view_width height:view_height];
     CGLUnlockContext((CGLContextObj)[current_context CGLContextObj]);
 }
 
@@ -99,8 +99,8 @@ static CVReturn MyDisplayLinkCallback(
     glClear(GL_COLOR_BUFFER_BIT);
 
     // draw here
-	[mac_app updateApp];
-	[mac_app drawApp];
+	[mac_win updateApp];
+	[mac_win drawApp];
 
     [current_context flushBuffer];
     CGLUnlockContext((CGLContextObj)[current_context CGLContextObj]);
