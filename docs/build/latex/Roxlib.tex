@@ -13,7 +13,7 @@
 
 
 \title{Roxlib Documentation}
-\date{January 30, 2012}
+\date{April 05, 2012}
 \release{0.0.1}
 \author{Diederick Huijbers}
 \newcommand{\sphinxlogo}{}
@@ -120,8 +120,1646 @@ Contents:
 \chapter{Twitter}
 \label{twitter:twitter}\label{twitter:welcome-to-roxlib-s-documentation}\label{twitter::doc}
 
+\section{Creating a twitter application}
+\label{twitter:creating-a-twitter-application}
+Before you can use Twitter in your (openFrameworks) application, make sure to
+register it at \href{http://dev.twitter.com/}{Twitter developers}. Once you created
+an application you'll need the application consumer key and consumer secret.
+
+
+\section{Authorizing your application}
+\label{twitter:authorizing-your-application}
+In your application include the ``Twitter.h'' file and create the neccesary
+objects. I you want to do status updates, get the timeline, etc.. you need
+a \code{Twitter} object. When you want to connect to the streaming server,
+you also need the \code{Stream} object.  Then in your application setup
+code you set the correct authorization information as shown in the code example
+below. Next thing you need to do, is adding some code to authorize your
+application once your application is authorized we will receive a oauth key and
+oauth secret. These values are used to sign your requests so Twitter knows you're
+they one who allowed the application to i.e. posts tweets on your behalf.
+
+When you run your application for the first time we will open a browser
+window which opens an authorization page. There you see a code which  you need
+enter into the console of XCode.
+
+\emph{In your .h file:}
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{rt}\PYG{o}{:}\PYG{o}{:}\PYG{n}{Twitter} \PYG{n}{twitter}\PYG{p}{;}
+\end{Verbatim}
+
+\emph{In your .cpp file.}
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kt}{void} \PYG{n}{testApp}\PYG{o}{:}\PYG{o}{:}\PYG{n}{testApp}\PYG{p}{(}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+        \PYG{n}{twitter}\PYG{p}{.}\PYG{n}{setConsumerKey}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{kyw8bCAWKbk6e1HMMdAvw}\PYG{l+s}{"}\PYG{p}{)}\PYG{p}{;}
+        \PYG{n}{twitter}\PYG{p}{.}\PYG{n}{setConsumerSecret}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{PwVuyjLedVZbi4ER6yRAo0byF55AIureauV6UhLRw}\PYG{l+s}{"}\PYG{p}{)}\PYG{p}{;}
+
+        \PYG{n}{string} \PYG{n}{tokens\PYGZus{}file} \PYG{o}{=} \PYG{n}{ofToDataPath}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{twitter.txt}\PYG{l+s}{"}\PYG{p}{,}\PYG{k+kc}{true}\PYG{p}{)}\PYG{p}{;}
+        \PYG{k}{if}\PYG{p}{(}\PYG{o}{!}\PYG{n}{twitter}\PYG{p}{.}\PYG{n}{loadTokens}\PYG{p}{(}\PYG{n}{tokens\PYGZus{}file}\PYG{p}{)}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+                \PYG{n}{string} \PYG{n}{auth\PYGZus{}url}\PYG{p}{;}
+                \PYG{n}{twitter}\PYG{p}{.}\PYG{n}{requestToken}\PYG{p}{(}\PYG{n}{auth\PYGZus{}url}\PYG{p}{)}\PYG{p}{;}
+                \PYG{n}{twitter}\PYG{p}{.}\PYG{n}{handlePin}\PYG{p}{(}\PYG{n}{auth\PYGZus{}url}\PYG{p}{)}\PYG{p}{;}
+                \PYG{n}{twitter}\PYG{p}{.}\PYG{n}{accessToken}\PYG{p}{(}\PYG{p}{)}\PYG{p}{;}
+                \PYG{n}{twitter}\PYG{p}{.}\PYG{n}{saveTokens}\PYG{p}{(}\PYG{n}{tokens\PYGZus{}file}\PYG{p}{)}\PYG{p}{;}
+        \PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}
+
+
+\section{Connecting to the twitter stream}
+\label{twitter:connecting-to-the-twitter-stream}
+Twitter has a streaming server which allows you to receive status update from
+people you're interested in. There are two kinds of streams:
+\begin{enumerate}
+\item {} 
+General streaming server
+
+\item {} 
+User streaming server
+
+\end{enumerate}
+
+The user streaming server is probably the most interesting to use. It allows
+you to receive tweets in realtime from people you're following. \textbf{This is an
+important thing:} you need to be aware of: when you authorize the application,
+you need to login to twitter, the user stream you'll be receiving is from this
+user.
+
+To receive and do something with new twitter messages, you need te implement
+the rt:IEventListener interface.
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{class} \PYG{n+nc}{IEventListener} \PYG{p}{\PYGZob{}}
+\PYG{k}{public}\PYG{o}{:}
+        \PYG{k}{virtual} \PYG{k+kt}{void} \PYG{n}{onStatusUpdate}\PYG{p}{(}\PYG{k}{const} \PYG{n}{rtt}\PYG{o}{:}\PYG{o}{:}\PYG{n}{Tweet}\PYG{o}{\&} \PYG{n}{tweet}\PYG{p}{)} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;}
+        \PYG{k}{virtual} \PYG{k+kt}{void} \PYG{n}{onStatusDestroy}\PYG{p}{(}\PYG{k}{const} \PYG{n}{rtt}\PYG{o}{:}\PYG{o}{:}\PYG{n}{StatusDestroy}\PYG{o}{\&} \PYG{n}{destroy}\PYG{p}{)} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;}
+        \PYG{k}{virtual} \PYG{k+kt}{void} \PYG{n}{onStreamEvent}\PYG{p}{(}\PYG{k}{const} \PYG{n}{rtt}\PYG{o}{:}\PYG{o}{:}\PYG{n}{StreamEvent}\PYG{o}{\&} \PYG{n}{event}\PYG{p}{)} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}\PYG{p}{;}
+\end{Verbatim}
+
+
+\section{Twitter streaming server example}
+\label{twitter:twitter-streaming-server-example}
+\emph{testApp.h}
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+cp}{\PYGZsh{}}\PYG{c+cp}{pragma once}
+
+\PYG{c+cp}{\PYGZsh{}}\PYG{c+cp}{include "ofMain.h"}
+\PYG{c+cp}{\PYGZsh{}}\PYG{c+cp}{include "Twitter.h"}
+
+\PYG{c+c1}{// example listener:}
+\PYG{k}{class} \PYG{n+nc}{TwitterListener} \PYG{o}{:} \PYG{k}{public} \PYG{n}{rt}\PYG{o}{:}\PYG{o}{:}\PYG{n}{IEventListener} \PYG{p}{\PYGZob{}}
+\PYG{k}{public}\PYG{o}{:}
+
+        \PYG{k}{virtual} \PYG{k+kt}{void} \PYG{n}{onStatusUpdate}\PYG{p}{(}\PYG{k}{const} \PYG{n}{rtt}\PYG{o}{:}\PYG{o}{:}\PYG{n}{Tweet}\PYG{o}{\&} \PYG{n}{tweet}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+                \PYG{n}{printf}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{\textgreater{} \PYGZpc{}s}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{"}\PYG{p}{,} \PYG{n}{tweet}\PYG{p}{.}\PYG{n}{getText}\PYG{p}{(}\PYG{p}{)}\PYG{p}{.}\PYG{n}{c\PYGZus{}str}\PYG{p}{(}\PYG{p}{)}\PYG{p}{)}\PYG{p}{;}
+        \PYG{p}{\PYGZcb{}}
+
+        \PYG{k}{virtual} \PYG{k+kt}{void} \PYG{n}{onStatusDestroy}\PYG{p}{(}\PYG{k}{const} \PYG{n}{rtt}\PYG{o}{:}\PYG{o}{:}\PYG{n}{StatusDestroy}\PYG{o}{\&} \PYG{n}{destroy}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+        \PYG{p}{\PYGZcb{}}
+
+        \PYG{k}{virtual} \PYG{k+kt}{void} \PYG{n}{onStreamEvent}\PYG{p}{(}\PYG{k}{const} \PYG{n}{rtt}\PYG{o}{:}\PYG{o}{:}\PYG{n}{StreamEvent}\PYG{o}{\&} \PYG{n}{event}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+
+        \PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}\PYG{p}{;}
+
+
+\PYG{k}{class} \PYG{n+nc}{testApp} \PYG{o}{:} \PYG{k}{public} \PYG{n}{ofBaseApp}\PYG{p}{\PYGZob{}}
+
+        \PYG{k}{public}\PYG{o}{:}
+                \PYG{n}{testApp}\PYG{p}{(}\PYG{p}{)}\PYG{p}{;}
+                \PYG{k+kt}{void} \PYG{n}{setup}\PYG{p}{(}\PYG{p}{)}\PYG{p}{;}
+                \PYG{k+kt}{void} \PYG{n}{update}\PYG{p}{(}\PYG{p}{)}\PYG{p}{;}
+                \PYG{k+kt}{void} \PYG{n}{draw}\PYG{p}{(}\PYG{p}{)}\PYG{p}{;}
+
+                \PYG{k+kt}{void} \PYG{n}{keyPressed}  \PYG{p}{(}\PYG{k+kt}{int} \PYG{n}{key}\PYG{p}{)}\PYG{p}{;}
+                \PYG{k+kt}{void} \PYG{n}{keyReleased}\PYG{p}{(}\PYG{k+kt}{int} \PYG{n}{key}\PYG{p}{)}\PYG{p}{;}
+                \PYG{k+kt}{void} \PYG{n}{mouseMoved}\PYG{p}{(}\PYG{k+kt}{int} \PYG{n}{x}\PYG{p}{,} \PYG{k+kt}{int} \PYG{n}{y} \PYG{p}{)}\PYG{p}{;}
+                \PYG{k+kt}{void} \PYG{n}{mouseDragged}\PYG{p}{(}\PYG{k+kt}{int} \PYG{n}{x}\PYG{p}{,} \PYG{k+kt}{int} \PYG{n}{y}\PYG{p}{,} \PYG{k+kt}{int} \PYG{n}{button}\PYG{p}{)}\PYG{p}{;}
+                \PYG{k+kt}{void} \PYG{n}{mousePressed}\PYG{p}{(}\PYG{k+kt}{int} \PYG{n}{x}\PYG{p}{,} \PYG{k+kt}{int} \PYG{n}{y}\PYG{p}{,} \PYG{k+kt}{int} \PYG{n}{button}\PYG{p}{)}\PYG{p}{;}
+                \PYG{k+kt}{void} \PYG{n}{mouseReleased}\PYG{p}{(}\PYG{k+kt}{int} \PYG{n}{x}\PYG{p}{,} \PYG{k+kt}{int} \PYG{n}{y}\PYG{p}{,} \PYG{k+kt}{int} \PYG{n}{button}\PYG{p}{)}\PYG{p}{;}
+                \PYG{k+kt}{void} \PYG{n}{windowResized}\PYG{p}{(}\PYG{k+kt}{int} \PYG{n}{w}\PYG{p}{,} \PYG{k+kt}{int} \PYG{n}{h}\PYG{p}{)}\PYG{p}{;}
+                \PYG{k+kt}{void} \PYG{n}{dragEvent}\PYG{p}{(}\PYG{n}{ofDragInfo} \PYG{n}{dragInfo}\PYG{p}{)}\PYG{p}{;}
+                \PYG{k+kt}{void} \PYG{n}{gotMessage}\PYG{p}{(}\PYG{n}{ofMessage} \PYG{n}{msg}\PYG{p}{)}\PYG{p}{;}
+
+                \PYG{n}{rt}\PYG{o}{:}\PYG{o}{:}\PYG{n}{Twitter} \PYG{n}{twitter}\PYG{p}{;}
+                \PYG{n}{rt}\PYG{o}{:}\PYG{o}{:}\PYG{n}{Stream} \PYG{n}{stream}\PYG{p}{;}
+                \PYG{n}{TwitterListener} \PYG{n}{listener}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}\PYG{p}{;}
+\end{Verbatim}
+
+\emph{testApp.cpp}
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+cp}{\PYGZsh{}}\PYG{c+cp}{include "testApp.h"}
+
+\PYG{n}{testApp}\PYG{o}{:}\PYG{o}{:}\PYG{n}{testApp}\PYG{p}{(}\PYG{p}{)}
+        \PYG{o}{:}\PYG{n}{stream}\PYG{p}{(}\PYG{n}{twitter}\PYG{p}{)}
+\PYG{p}{\PYGZob{}}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k+kt}{void} \PYG{n}{testApp}\PYG{o}{:}\PYG{o}{:}\PYG{n}{setup}\PYG{p}{(}\PYG{p}{)}\PYG{p}{\PYGZob{}}
+        \PYG{n}{ofSetFrameRate}\PYG{p}{(}\PYG{l+m+mi}{60}\PYG{p}{)}\PYG{p}{;}
+        \PYG{n}{ofSetVerticalSync}\PYG{p}{(}\PYG{k+kc}{true}\PYG{p}{)}\PYG{p}{;}
+        \PYG{n}{ofBackground}\PYG{p}{(}\PYG{l+m+mi}{33}\PYG{p}{)}\PYG{p}{;}
+
+        \PYG{n}{twitter}\PYG{p}{.}\PYG{n}{setConsumerKey}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{kyw8bCAWKbP6e1MMdAvw}\PYG{l+s}{"}\PYG{p}{)}\PYG{p}{;}
+        \PYG{n}{twitter}\PYG{p}{.}\PYG{n}{setConsumerSecret}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{PwVuyjLeUVZi4ER6yRAo0byF55AIureauV6UhLRw}\PYG{l+s}{"}\PYG{p}{)}\PYG{p}{;}
+
+        \PYG{n}{string} \PYG{n}{tokens\PYGZus{}file} \PYG{o}{=} \PYG{n}{ofToDataPath}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{twitter.txt}\PYG{l+s}{"}\PYG{p}{,}\PYG{k+kc}{true}\PYG{p}{)}\PYG{p}{;}
+        \PYG{k}{if}\PYG{p}{(}\PYG{o}{!}\PYG{n}{twitter}\PYG{p}{.}\PYG{n}{loadTokens}\PYG{p}{(}\PYG{n}{tokens\PYGZus{}file}\PYG{p}{)}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+                \PYG{n}{string} \PYG{n}{auth\PYGZus{}url}\PYG{p}{;}
+                \PYG{n}{twitter}\PYG{p}{.}\PYG{n}{requestToken}\PYG{p}{(}\PYG{n}{auth\PYGZus{}url}\PYG{p}{)}\PYG{p}{;}
+                \PYG{n}{twitter}\PYG{p}{.}\PYG{n}{handlePin}\PYG{p}{(}\PYG{n}{auth\PYGZus{}url}\PYG{p}{)}\PYG{p}{;}
+                \PYG{n}{twitter}\PYG{p}{.}\PYG{n}{accessToken}\PYG{p}{(}\PYG{p}{)}\PYG{p}{;}
+                \PYG{n}{twitter}\PYG{p}{.}\PYG{n}{saveTokens}\PYG{p}{(}\PYG{n}{tokens\PYGZus{}file}\PYG{p}{)}\PYG{p}{;}
+        \PYG{p}{\PYGZcb{}}
+
+        \PYG{n}{stream}\PYG{p}{.}\PYG{n}{track}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{love}\PYG{l+s}{"}\PYG{p}{)}\PYG{p}{;}
+        \PYG{n}{stream}\PYG{p}{.}\PYG{n}{connect}\PYG{p}{(}\PYG{n}{URL\PYGZus{}STREAM\PYGZus{}USER}\PYG{p}{)}\PYG{p}{;}
+
+        \PYG{n}{twitter}\PYG{p}{.}\PYG{n}{addEventListener}\PYG{p}{(}\PYG{n}{listener}\PYG{p}{)}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k+kt}{void} \PYG{n}{testApp}\PYG{o}{:}\PYG{o}{:}\PYG{n}{update}\PYG{p}{(}\PYG{p}{)}\PYG{p}{\PYGZob{}}
+        \PYG{n}{stream}\PYG{p}{.}\PYG{n}{update}\PYG{p}{(}\PYG{p}{)}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}
+
+
 \chapter{Tutorial}
 \label{tutorial::doc}\label{tutorial:tutorial}
+
+\chapter{Database}
+\label{database::doc}\label{database:database}
+
+\section{Tutorial}
+\label{database:tutorial}
+The Database addon is a simple wrapper around SQLite.  This tutorial will
+guide you through settings up a simple database and doing some queries
+on it. Make sure to include the Database.h header file.
+Then you need to create a database object.
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{roxlu}\PYG{o}{:}\PYG{o}{:}\PYG{n}{Database} \PYG{n}{db}
+\end{Verbatim}
+
+In your setup code you open the database by calling db.open(``filename''):
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{db}\PYG{p}{.}\PYG{n}{open}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{my\PYGZus{}database.db}\PYG{l+s}{"}\PYG{p}{)}\PYG{p}{;}
+\PYG{n}{db}\PYG{p}{.}\PYG{n}{query}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{CREATE TABLE IF NOT EXISTS scores (}\PYG{l+s}{"} \PYGZbs{}
+                \PYG{l+s}{"}\PYG{l+s}{ id INTEGER PRIMARY KEY AUTOINCREMENT}\PYG{l+s}{"} \PYGZbs{}
+                \PYG{l+s}{"}\PYG{l+s}{, score INTEGER}\PYG{l+s}{"} \PYGZbs{}
+                \PYG{l+s}{"}\PYG{l+s}{, name TEXT }\PYG{l+s}{"}\PYGZbs{}
+        \PYG{l+s}{"}\PYG{l+s}{);}\PYG{l+s}{"}\PYG{p}{)}\PYG{p}{;}
+\end{Verbatim}
+
+
+\section{Examples}
+\label{database:examples}
+\begin{Verbatim}[commandchars=\\\{\}]
+     \PYG{k+kt}{bool} \PYG{n}{result} \PYG{o}{=} \PYG{n}{db}\PYG{p}{.}\PYG{n}{query}\PYG{p}{(}
+                        \PYG{l+s}{"}\PYG{l+s}{CREATE TABLE IF NOT EXISTS tweets( }\PYG{l+s}{"}                                        \PYGZbs{}
+                        \PYG{l+s}{"}\PYG{l+s}{ t\PYGZus{}id                       INTEGER PRIMARY KEY AUTOINCREMENT}\PYG{l+s}{"}      \PYGZbs{}
+                        \PYG{l+s}{"}\PYG{l+s}{,t\PYGZus{}user\PYGZus{}id          VARCHAR(50)}\PYG{l+s}{"}                                                    \PYGZbs{}
+                        \PYG{l+s}{"}\PYG{l+s}{,t\PYGZus{}text                     INTEGER}\PYG{l+s}{"}                                                                \PYGZbs{}
+                        \PYG{l+s}{"}\PYG{l+s}{,t\PYGZus{}screen\PYGZus{}name      VARCHAR(20)}\PYG{l+s}{"}                                                    \PYGZbs{}
+                        \PYG{l+s}{"}\PYG{l+s}{,t\PYGZus{}timestamp        TIMESTAMP}\PYG{l+s}{"}                                                              \PYGZbs{}
+                        \PYG{l+s}{"}\PYG{l+s}{,t\PYGZus{}longitude        REAL}\PYG{l+s}{"}                                                                   \PYGZbs{}
+                        \PYG{l+s}{"}\PYG{l+s}{,t\PYGZus{}latitude REAL}\PYG{l+s}{"}                                                                   \PYGZbs{}
+                        \PYG{l+s}{"}\PYG{l+s}{);}\PYG{l+s}{"}
+\PYG{p}{)}\PYG{p}{;}
+
+     \PYG{n}{QueryResult} \PYG{n}{result}\PYG{p}{(}\PYG{n}{db}\PYG{p}{)}\PYG{p}{;}
+     \PYG{n}{db}\PYG{p}{.}\PYG{n}{select}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{time,score,id}\PYG{l+s}{"}\PYG{p}{)}
+             \PYG{p}{.}\PYG{n}{from}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{scores}\PYG{l+s}{"}\PYG{p}{)}
+             \PYG{p}{.}\PYG{n}{where}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{name = :name}\PYG{l+s}{"}\PYG{p}{)}
+             \PYG{p}{.}\PYG{n}{use}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{time}\PYG{l+s}{"}\PYG{p}{,} \PYG{l+s}{"}\PYG{l+s}{100}\PYG{l+s}{"}\PYG{p}{)}
+             \PYG{p}{.}\PYG{n}{execute}\PYG{p}{(}\PYG{n}{result}\PYG{p}{)}\PYG{p}{;}
+
+     \PYG{c+c1}{// Some date and time examples;}
+     \PYG{c+c1}{// select datetime('now','localtime','+3.5 seconds','+10 minutes');}
+     \PYG{n}{QueryResult} \PYG{n}{result}\PYG{p}{(}\PYG{n}{db}\PYG{p}{)}\PYG{p}{;}
+     \PYG{n}{db}\PYG{p}{.}\PYG{n}{select}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{t\PYGZus{}text, t\PYGZus{}user\PYGZus{}id, t\PYGZus{}timestamp,  datetime('now', '-1.5 hours') as test, tt\PYGZus{}tag}\PYG{l+s}{"}\PYG{p}{)}
+             \PYG{p}{.}\PYG{n}{from}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{tweets}\PYG{l+s}{"}\PYG{p}{)}
+             \PYG{p}{.}\PYG{n}{join}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{tweet\PYGZus{}tags on tt\PYGZus{}id = t\PYGZus{}id}\PYG{l+s}{"}\PYG{p}{)}
+             \PYG{p}{.}\PYG{n}{where}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{tt\PYGZus{}tag = :tt\PYGZus{}tag }\PYG{l+s}{"}\PYG{p}{)}
+             \PYG{p}{.}\PYG{n}{use}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{tt\PYGZus{}tag}\PYG{l+s}{"}\PYG{p}{,} \PYG{n}{word}\PYG{p}{)}
+             \PYG{p}{.}\PYG{n}{execute}\PYG{p}{(}\PYG{n}{result}\PYG{p}{)}\PYG{p}{;}
+
+     \PYG{c+c1}{// create index}
+     \PYG{n}{result} \PYG{o}{=} \PYG{n}{db}\PYG{p}{.}\PYG{n}{query}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{CREATE INDEX tweet\PYGZus{}timestamp ON tweets(t\PYGZus{}timestamp)}\PYG{l+s}{"}\PYG{p}{)}\PYG{p}{;}
+
+     \PYG{c+c1}{// combined primary key}
+             \PYG{n}{result} \PYG{o}{=} \PYG{n}{db}\PYG{p}{.}\PYG{n}{query}\PYG{p}{(}
+                       \PYG{l+s}{"}\PYG{l+s}{CREATE TABLE IF NOT EXISTS tweet\PYGZus{}tags( }\PYG{l+s}{"}                             \PYGZbs{}
+                       \PYG{l+s}{"}\PYG{l+s}{ tt\PYGZus{}tagid                    INTEGER }\PYG{l+s}{"}                                                       \PYGZbs{}
+                       \PYG{l+s}{"}\PYG{l+s}{,tt\PYGZus{}tweetid                  INTEGER }\PYG{l+s}{"}                                               \PYGZbs{}
+                       \PYG{l+s}{"}\PYG{l+s}{,PRIMARY KEY(tt\PYGZus{}tagid, tt\PYGZus{}tweetid) }\PYG{l+s}{"}
+                       \PYG{l+s}{"}\PYG{l+s}{);}\PYG{l+s}{"}
+       \PYG{p}{)}\PYG{p}{;}
+\end{Verbatim}
+
+
+\chapter{openGL}
+\label{gl::doc}\label{gl:opengl}
+
+\section{Vertex Data}
+\label{gl:vertex-data}
+Use the {\hyperref[gl:VertexData]{\code{VertexData}}} class as a container for your vertices, texture
+coordinates, colors, normals, tangents and binormals. The VertexData class can
+convert the stored information to any of the generic vertex types as defined in
+\code{VertexTypes}
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{VertexData} \PYG{n}{vd}\PYG{p}{;}
+
+\PYG{c+c1}{// create a quad}
+\PYG{k+kt}{float} \PYG{n}{s} \PYG{o}{=} \PYG{l+m+mf}{0.5}\PYG{p}{;}
+\PYG{n}{vd}\PYG{p}{.}\PYG{n}{addVertex}\PYG{p}{(}\PYG{o}{-}\PYG{n}{s}\PYG{p}{,} \PYG{n}{s}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{)}\PYG{p}{;}
+\PYG{n}{vd}\PYG{p}{.}\PYG{n}{addVertex}\PYG{p}{(}\PYG{n}{s}\PYG{p}{,} \PYG{n}{s}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{)}\PYG{p}{;}
+\PYG{n}{vd}\PYG{p}{.}\PYG{n}{addVertex}\PYG{p}{(}\PYG{n}{s}\PYG{p}{,}\PYG{o}{-}\PYG{n}{s}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{)}\PYG{p}{;}
+\PYG{n}{vd}\PYG{p}{.}\PYG{n}{addVertex}\PYG{p}{(}\PYG{o}{-}\PYG{n}{s}\PYG{p}{,}\PYG{o}{-}\PYG{n}{s}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{)}\PYG{p}{;}
+
+\PYG{c+c1}{// with texture coordinates}
+\PYG{n}{vd}\PYG{p}{.}\PYG{n}{addTexCoord}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{)}\PYG{p}{;}
+\PYG{n}{vd}\PYG{p}{.}\PYG{n}{addTexCoord}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{)}\PYG{p}{;}
+\PYG{n}{vd}\PYG{p}{.}\PYG{n}{addTexCoord}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{p}{;}
+\PYG{n}{vd}\PYG{p}{.}\PYG{n}{addTexCoord}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{p}{;}
+
+\PYG{c+c1}{// We must delete the vertices after using.}
+\PYG{n}{VertexP}\PYG{o}{*} \PYG{n}{vertices} \PYG{o}{=} \PYG{n}{vd}\PYG{p}{.}\PYG{n}{getVertexP}\PYG{p}{(}\PYG{p}{)}\PYG{p}{;}
+
+\PYG{c+c1}{// Getting VertexPT}
+\PYG{n}{VertexPT}\PYG{o}{*} \PYG{n}{vertices\PYGZus{}pt} \PYG{o}{=} \PYG{n}{vd}\PYG{p}{.}\PYG{n}{getVertexPT}\PYG{p}{(}\PYG{p}{)}\PYG{p}{;}
+\end{Verbatim}
+
+
+\section{Using shaders}
+\label{gl:using-shaders}
+Example loading and setting up a {\hyperref[gl:Shader]{\code{Shader}}}.
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{Shader} \PYG{n}{shader}\PYG{p}{;}
+
+\PYG{c+c1}{// Create two files: rays.vert and rays.frag in your data dir.}
+\PYG{n}{shader}\PYG{p}{.}\PYG{n}{load}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{rays}\PYG{l+s}{"}\PYG{p}{)}\PYG{p}{;}
+\PYG{n}{shader}\PYG{p}{.}\PYG{n}{enable}\PYG{p}{(}\PYG{p}{)}\PYG{p}{;}
+
+\PYG{c+c1}{// Tell the shader what attributes we have}
+\PYG{n}{shader}\PYG{p}{.}\PYG{n}{addAttribute}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{tex}\PYG{l+s}{"}\PYG{p}{)}
+                \PYG{p}{.}\PYG{n}{addAttribute}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{pos}\PYG{l+s}{"}\PYG{p}{)}\PYG{p}{;}
+
+\PYG{c+c1}{// Tell the shader what uniforms we have}
+\PYG{n}{shader}\PYG{p}{.}\PYG{n}{addUniform}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{diffuse\PYGZus{}texture}\PYG{l+s}{"}\PYG{p}{)}
+                \PYG{p}{.}\PYG{n}{addUniform}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{projection\PYGZus{}matrix}\PYG{l+s}{"}\PYG{p}{)}
+                \PYG{p}{.}\PYG{n}{addUniform}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{modelview\PYGZus{}matrix}\PYG{l+s}{"}\PYG{p}{)}
+                \PYG{p}{.}\PYG{n}{addUniform}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{exposure}\PYG{l+s}{"}\PYG{p}{)}
+                \PYG{p}{.}\PYG{n}{addUniform}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{decay}\PYG{l+s}{"}\PYG{p}{)}
+                \PYG{p}{.}\PYG{n}{addUniform}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{weight}\PYG{l+s}{"}\PYG{p}{)}\PYG{p}{;}
+
+\PYG{c+c1}{// Set some uniform values}
+\PYG{n}{shader}\PYG{p}{.}\PYG{n}{uniform1f}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{exposure}\PYG{l+s}{"}\PYG{p}{,} \PYG{l+m+mf}{1.5f}\PYG{p}{)}
+                \PYG{p}{.}\PYG{n}{uniform1f}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{density}\PYG{l+s}{"}\PYG{p}{,} \PYG{l+m+mf}{0.999f}\PYG{p}{)}
+                \PYG{p}{.}\PYG{n}{uniform1f}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{weight}\PYG{l+s}{"}\PYG{p}{,} \PYG{l+m+mf}{1.0f}\PYG{p}{)}\PYG{p}{;}
+\end{Verbatim}
+
+Example vertex shader
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{attribute} \PYG{n}{vec4} \PYG{n}{pos}\PYG{p}{;}
+\PYG{n}{attribute} \PYG{n}{vec2} \PYG{n}{tex}\PYG{p}{;}
+
+\PYG{n}{uniform} \PYG{n}{mat4} \PYG{n}{projection\PYGZus{}matrix}\PYG{p}{;}
+\PYG{n}{uniform} \PYG{n}{mat4} \PYG{n}{modelview\PYGZus{}matrix}\PYG{p}{;}
+\PYG{n}{varying} \PYG{n}{vec2} \PYG{n}{v\PYGZus{}tex}\PYG{p}{;}
+
+\PYG{k+kt}{void} \PYG{n+nf}{main}\PYG{p}{(}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+        \PYG{n}{gl\PYGZus{}Position} \PYG{o}{=} \PYG{n}{projection\PYGZus{}matrix} \PYG{o}{*} \PYG{n}{modelview\PYGZus{}matrix} \PYG{o}{*} \PYG{n}{pos}\PYG{p}{;}
+        \PYG{n}{v\PYGZus{}tex} \PYG{o}{=} \PYG{n}{tex}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}
+
+Example fragment shader
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kt}{void} \PYG{n+nf}{main}\PYG{p}{(}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+        \PYG{n}{gl\PYGZus{}FragColor} \PYG{o}{=} \PYG{n}{vec4}\PYG{p}{(}\PYG{l+m+mf}{1.0}\PYG{p}{,} \PYG{l+m+mf}{0.0}\PYG{p}{,} \PYG{l+m+mf}{0.5}\PYG{p}{,} \PYG{l+m+mf}{1.0}\PYG{p}{)}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}
+
+
+\section{Using a VBO and Shader}
+\label{gl:using-a-vbo-and-shader}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kt}{void} \PYG{n}{testApp}\PYG{o}{:}\PYG{o}{:}\PYG{n}{setup}\PYG{p}{(}\PYG{p}{)}\PYG{p}{\PYGZob{}}
+        \PYG{n}{ofBackground}\PYG{p}{(}\PYG{l+m+mi}{33}\PYG{p}{)}\PYG{p}{;}
+        \PYG{n}{ofSetFrameRate}\PYG{p}{(}\PYG{l+m+mi}{60}\PYG{p}{)}\PYG{p}{;}
+        \PYG{n}{ofSetVerticalSync}\PYG{p}{(}\PYG{k+kc}{true}\PYG{p}{)}\PYG{p}{;}
+
+
+        \PYG{c+c1}{// Create indices.}
+        \PYG{k+kt}{int} \PYG{n}{rows} \PYG{o}{=} \PYG{l+m+mi}{10}\PYG{p}{;}
+        \PYG{k+kt}{int} \PYG{n}{cols} \PYG{o}{=} \PYG{l+m+mi}{10}\PYG{p}{;}
+        \PYG{k+kt}{float} \PYG{n}{width} \PYG{o}{=} \PYG{l+m+mf}{0.1}\PYG{p}{;}
+        \PYG{k+kt}{float} \PYG{n}{height} \PYG{o}{=} \PYG{l+m+mf}{0.1}\PYG{p}{;}
+        \PYG{k}{for}\PYG{p}{(}\PYG{k+kt}{int} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{n}{i} \PYG{o}{\textless{}} \PYG{n}{cols}\PYG{p}{;} \PYG{o}{+}\PYG{o}{+}\PYG{n}{i}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+                \PYG{k}{for}\PYG{p}{(}\PYG{k+kt}{int} \PYG{n}{j} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{n}{j} \PYG{o}{\textless{}} \PYG{n}{rows}\PYG{p}{;} \PYG{o}{+}\PYG{o}{+}\PYG{n}{j}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+                        \PYG{k+kt}{float} \PYG{n}{x} \PYG{o}{=} \PYG{n}{i} \PYG{o}{*} \PYG{n}{width}\PYG{p}{;}
+                        \PYG{k+kt}{float} \PYG{n}{y} \PYG{o}{=} \PYG{n}{j} \PYG{o}{*} \PYG{n}{height}\PYG{p}{;}
+                        \PYG{n}{vd}\PYG{p}{.}\PYG{n}{addVertex}\PYG{p}{(}\PYG{n}{x}\PYG{p}{,}\PYG{n}{y}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{)}\PYG{p}{;}
+                \PYG{p}{\PYGZcb{}}
+        \PYG{p}{\PYGZcb{}}
+
+        \PYG{k}{for}\PYG{p}{(}\PYG{k+kt}{int} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{n}{i} \PYG{o}{\textless{}} \PYG{n}{cols}\PYG{o}{-}\PYG{l+m+mi}{1}\PYG{p}{;} \PYG{o}{+}\PYG{o}{+}\PYG{n}{i}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+                \PYG{k}{for}\PYG{p}{(}\PYG{k+kt}{int} \PYG{n}{j} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{n}{j} \PYG{o}{\textless{}} \PYG{n}{rows}\PYG{o}{-}\PYG{l+m+mi}{1}\PYG{p}{;} \PYG{o}{+}\PYG{o}{+}\PYG{n}{j}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+                        \PYG{k+kt}{int} \PYG{n}{a} \PYG{o}{=} \PYG{n}{DX}\PYG{p}{(}\PYG{n}{i}\PYG{p}{,}\PYG{n}{j}\PYG{p}{,} \PYG{n}{cols}\PYG{p}{)}\PYG{p}{;}
+                        \PYG{k+kt}{int} \PYG{n}{b} \PYG{o}{=} \PYG{n}{DX}\PYG{p}{(}\PYG{n}{i}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{j}\PYG{p}{,} \PYG{n}{cols}\PYG{p}{)}\PYG{p}{;}
+                        \PYG{k+kt}{int} \PYG{n}{c} \PYG{o}{=} \PYG{n}{DX}\PYG{p}{(}\PYG{n}{i}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{j}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{cols}\PYG{p}{)}\PYG{p}{;}
+                        \PYG{k+kt}{int} \PYG{n}{d} \PYG{o}{=} \PYG{n}{DX}\PYG{p}{(}\PYG{n}{i}\PYG{p}{,} \PYG{n}{j}\PYG{o}{+}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{cols}\PYG{p}{)}\PYG{p}{;}
+                        \PYG{n}{vd}\PYG{p}{.}\PYG{n}{addQuadIndices}\PYG{p}{(}\PYG{n}{a}\PYG{p}{,}\PYG{n}{b}\PYG{p}{,}\PYG{n}{c}\PYG{p}{,}\PYG{n}{d}\PYG{p}{)}\PYG{p}{;}
+                \PYG{p}{\PYGZcb{}}
+        \PYG{p}{\PYGZcb{}}
+
+        \PYG{c+c1}{// Make sure VAO keeps state of the VBO}
+        \PYG{n}{vao}\PYG{p}{.}\PYG{n}{bind}\PYG{p}{(}\PYG{p}{)}\PYG{p}{;}
+
+        \PYG{c+c1}{// Initialize shader.}
+        \PYG{n}{shader}\PYG{p}{.}\PYG{n}{load}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{shader}\PYG{l+s}{"}\PYG{p}{)}\PYG{p}{;}
+        \PYG{n}{shader}\PYG{p}{.}\PYG{n}{addUniform}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{projection\PYGZus{}matrix}\PYG{l+s}{"}\PYG{p}{)}\PYG{p}{.}\PYG{n}{addUniform}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{view\PYGZus{}matrix}\PYG{l+s}{"}\PYG{p}{)}\PYG{p}{;}
+        \PYG{n}{shader}\PYG{p}{.}\PYG{n}{addAttribute}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{pos}\PYG{l+s}{"}\PYG{p}{)}\PYG{p}{;}
+        \PYG{n}{shader}\PYG{p}{.}\PYG{n}{enableVertexAttribArray}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{pos}\PYG{l+s}{"}\PYG{p}{)}\PYG{p}{;}
+
+
+        \PYG{c+c1}{// Fill VBO}
+        \PYG{n}{vbo}\PYG{p}{.}\PYG{n}{setIndices}\PYG{p}{(}\PYG{n}{vd}\PYG{p}{.}\PYG{n}{getIndicesPtr}\PYG{p}{(}\PYG{p}{)}\PYG{p}{,} \PYG{n}{vd}\PYG{p}{.}\PYG{n}{getNumIndices}\PYG{p}{(}\PYG{p}{)}\PYG{p}{)}\PYG{p}{;}
+        \PYG{n}{vbo}\PYG{p}{.}\PYG{n}{setVertexData}\PYG{p}{(}\PYG{n}{vd}\PYG{p}{.}\PYG{n}{getVertexP}\PYG{p}{(}\PYG{p}{)}\PYG{p}{,} \PYG{n}{vd}\PYG{p}{.}\PYG{n}{size}\PYG{p}{(}\PYG{p}{)}\PYG{p}{)}\PYG{p}{;}
+        \PYG{n}{vbo}\PYG{p}{.}\PYG{n}{setPosVertexAttribPointer}\PYG{p}{(}\PYG{n}{shader}\PYG{p}{.}\PYG{n}{getAttribute}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{pos}\PYG{l+s}{"}\PYG{p}{)}\PYG{p}{)}\PYG{p}{;}
+
+        \PYG{n}{projection\PYGZus{}matrix}\PYG{p}{.}\PYG{n}{perspective}\PYG{p}{(}\PYG{l+m+mf}{45.0f}\PYG{p}{,} \PYG{n}{ofGetWidth}\PYG{p}{(}\PYG{p}{)}\PYG{o}{/}\PYG{n}{ofGetHeight}\PYG{p}{(}\PYG{p}{)}\PYG{p}{,} \PYG{l+m+mf}{0.1}\PYG{p}{,} \PYG{l+m+mi}{100}\PYG{p}{)}\PYG{p}{;}
+        \PYG{n}{view\PYGZus{}matrix}\PYG{p}{.}\PYG{n}{translate}\PYG{p}{(}\PYG{o}{-}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{o}{-}\PYG{l+m+mi}{3}\PYG{p}{)}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+
+
+
+\PYG{k+kt}{void} \PYG{n}{testApp}\PYG{o}{:}\PYG{o}{:}\PYG{n}{draw}\PYG{p}{(}\PYG{p}{)}\PYG{p}{\PYGZob{}}
+        \PYG{n}{glPolygonMode}\PYG{p}{(}\PYG{n}{GL\PYGZus{}FRONT\PYGZus{}AND\PYGZus{}BACK}\PYG{p}{,} \PYG{n}{GL\PYGZus{}LINE}\PYG{p}{)}\PYG{p}{;}
+        \PYG{n}{shader}\PYG{p}{.}\PYG{n}{enable}\PYG{p}{(}\PYG{p}{)}\PYG{p}{;}
+        \PYG{n}{shader}\PYG{p}{.}\PYG{n}{uniformMat4fv}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{projection\PYGZus{}matrix}\PYG{l+s}{"}\PYG{p}{,} \PYG{n}{projection\PYGZus{}matrix}\PYG{p}{.}\PYG{n}{getPtr}\PYG{p}{(}\PYG{p}{)}\PYG{p}{)}\PYG{p}{;}
+        \PYG{n}{shader}\PYG{p}{.}\PYG{n}{uniformMat4fv}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{view\PYGZus{}matrix}\PYG{l+s}{"}\PYG{p}{,} \PYG{n}{view\PYGZus{}matrix}\PYG{p}{.}\PYG{n}{getPtr}\PYG{p}{(}\PYG{p}{)}\PYG{p}{)}\PYG{p}{;}
+        \PYG{n}{vbo}\PYG{p}{.}\PYG{n}{drawElements}\PYG{p}{(}\PYG{n}{GL\PYGZus{}QUADS}\PYG{p}{,} \PYG{n}{vd}\PYG{p}{.}\PYG{n}{size}\PYG{p}{(}\PYG{p}{)}\PYG{o}{*}\PYG{l+m+mi}{4}\PYG{p}{)}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}
+
+
+\section{API reference}
+\label{gl:api-reference}
+
+\subsection{VBO}
+\label{gl:vbo}\index{VBO::VBO (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::VBO}\pysiglinewithargsret{ \code{VBO::}\bfcode{VBO}}{}{}
+\end{fulllineitems}
+
+\index{VBO::setVertexData (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::setVertexData__VertexDataR}\pysiglinewithargsret{VBO\& \code{VBO::}\bfcode{setVertexData}}{VertexData\& \emph{data}}{}~\begin{quote}\begin{description}
+\item[{Parameters VertexData\& data}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VBO::setVertexData (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::setVertexData__VertexDataP}\pysiglinewithargsret{VBO\& \code{VBO::}\bfcode{setVertexData}}{VertexData* \emph{data}}{}~\begin{quote}\begin{description}
+\item[{Parameters VertexData* data}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VBO::setVertexData (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::setVertexData__VertexPP.i}\pysiglinewithargsret{VBO\& \code{VBO::}\bfcode{setVertexData}}{VertexP* \emph{data}, int \emph{num}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{VertexP* data} -- 
+
+\item {} 
+\textbf{int num} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VBO::setVertexData (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::setVertexData__VertexPNP.i}\pysiglinewithargsret{VBO\& \code{VBO::}\bfcode{setVertexData}}{VertexPN* \emph{data}, int \emph{num}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{VertexPN* data} -- 
+
+\item {} 
+\textbf{int num} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VBO::setVertexData (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::setVertexData__VertexPTP.i}\pysiglinewithargsret{VBO\& \code{VBO::}\bfcode{setVertexData}}{VertexPT* \emph{data}, int \emph{num}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{VertexPT* data} -- 
+
+\item {} 
+\textbf{int num} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VBO::setVertexData (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::setVertexData__VertexPNCP.i}\pysiglinewithargsret{VBO\& \code{VBO::}\bfcode{setVertexData}}{VertexPNC* \emph{data}, int \emph{num}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{VertexPNC* data} -- 
+
+\item {} 
+\textbf{int num} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VBO::setVertexData (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::setVertexData__VertexPTNP.i}\pysiglinewithargsret{VBO\& \code{VBO::}\bfcode{setVertexData}}{VertexPTN* \emph{data}, int \emph{num}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{VertexPTN* data} -- 
+
+\item {} 
+\textbf{int num} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VBO::setVertexData (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::setVertexData__VertexPTNTP.i}\pysiglinewithargsret{VBO\& \code{VBO::}\bfcode{setVertexData}}{VertexPTNT* \emph{data}, int \emph{num}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{VertexPTNT* data} -- 
+
+\item {} 
+\textbf{int num} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VBO::setVertexData (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::setVertexData__VertexPTNCP.i}\pysiglinewithargsret{VBO\& \code{VBO::}\bfcode{setVertexData}}{VertexPTNC* \emph{data}, int \emph{num}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{VertexPTNC* data} -- 
+
+\item {} 
+\textbf{int num} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VBO::setVertexData (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::setVertexData__VertexPTNTBP.i}\pysiglinewithargsret{VBO\& \code{VBO::}\bfcode{setVertexData}}{VertexPTNTB* \emph{data}, int \emph{num}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{VertexPTNTB* data} -- 
+
+\item {} 
+\textbf{int num} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VBO::updateVertexData (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::updateVertexData__VertexDataP}\pysiglinewithargsret{VBO\& \code{VBO::}\bfcode{updateVertexData}}{VertexData* \emph{data}}{}~\begin{quote}\begin{description}
+\item[{Parameters VertexData* data}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VBO::setVertices (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::setVertices__floatCP.i.i.i}\pysiglinewithargsret{VBO\& \code{VBO::}\bfcode{setVertices}}{const float* \emph{vertices}, int \emph{numCoords}, int \emph{num}, int \emph{usage}\emph{=GL\_STATIC\_DRAW}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{const float* vertices} -- 
+
+\item {} 
+\textbf{int numCoords} -- 
+
+\item {} 
+\textbf{int num} -- 
+
+\item {} 
+\textbf{int usage = GL\_STATIC\_DRAW} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VBO::setTexCoords (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::setTexCoords__floatCP.i.i}\pysiglinewithargsret{VBO\& \code{VBO::}\bfcode{setTexCoords}}{const float* \emph{texCoords}, int \emph{num}, int \emph{usage}\emph{=GL\_STATIC\_DRAW}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{const float* texCoords} -- 
+
+\item {} 
+\textbf{int num} -- 
+
+\item {} 
+\textbf{int usage = GL\_STATIC\_DRAW} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VBO::setIndices (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::setIndices__iCP.i.i}\pysiglinewithargsret{VBO\& \code{VBO::}\bfcode{setIndices}}{const int* \emph{indices}, int \emph{num}, int \emph{usage}\emph{=GL\_STATIC\_DRAW}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{const int* indices} -- 
+
+\item {} 
+\textbf{int num} -- 
+
+\item {} 
+\textbf{int usage = GL\_STATIC\_DRAW} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VBO::setColors (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::setColors__floatCP.i.i}\pysiglinewithargsret{VBO\& \code{VBO::}\bfcode{setColors}}{const float* \emph{colors}, int \emph{numColors}, int \emph{usage}\emph{=GL\_STATIC\_DRAW}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{const float* colors} -- 
+
+\item {} 
+\textbf{int numColors} -- 
+
+\item {} 
+\textbf{int usage = GL\_STATIC\_DRAW} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VBO::bind (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::bind}\pysiglinewithargsret{VBO\& \code{VBO::}\bfcode{bind}}{}{}
+\end{fulllineitems}
+
+\index{VBO::unbind (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::unbind}\pysiglinewithargsret{VBO\& \code{VBO::}\bfcode{unbind}}{}{}
+\end{fulllineitems}
+
+\index{VBO::drawElements (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::drawElements__i.i}\pysiglinewithargsret{VBO\& \code{VBO::}\bfcode{drawElements}}{int \emph{drawMode}, int \emph{total}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{int drawMode} -- 
+
+\item {} 
+\textbf{int total} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VBO::setNormVertexAttribPointer (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::setNormVertexAttribPointer__GLuint}\pysiglinewithargsret{void \code{VBO::}\bfcode{setNormVertexAttribPointer}}{GLuint \emph{index}}{}~\begin{quote}\begin{description}
+\item[{Parameters GLuint index}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VBO::setPosVertexAttribPointer (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::setPosVertexAttribPointer__GLuint}\pysiglinewithargsret{void \code{VBO::}\bfcode{setPosVertexAttribPointer}}{GLuint \emph{index}}{}~\begin{quote}\begin{description}
+\item[{Parameters GLuint index}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VBO::setTexVertexAttribPointer (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::setTexVertexAttribPointer__GLuint}\pysiglinewithargsret{void \code{VBO::}\bfcode{setTexVertexAttribPointer}}{GLuint \emph{index}}{}~\begin{quote}\begin{description}
+\item[{Parameters GLuint index}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+
+
+\begin{fulllineitems}
+\pysigline{\bfcode{bool~VBO::hasIndices();}}
+\end{fulllineitems}
+
+\index{VBO::hasType (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VBO::hasType__VBOType}\pysiglinewithargsret{return \code{VBO::}\bfcode{hasType}}{VBOType \emph{type}}{}~\begin{quote}\begin{description}
+\item[{Parameters VBOType}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+
+
+\subsection{VertexData}
+\label{gl:vertexdata}\index{VertexData (C++ class)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData}\pysigline{\strong{class }\bfcode{VertexData}}
+VertexData class
+
+\end{fulllineitems}
+
+\index{VertexData::VertexData (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::VertexData}\pysiglinewithargsret{ \code{VertexData::}\bfcode{VertexData}}{}{}
+Default constructor.
+
+\end{fulllineitems}
+
+\index{VertexData::VertexData (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::VertexData__string}\pysiglinewithargsret{ \code{VertexData::}\bfcode{VertexData}}{string \emph{meshName}}{}~\begin{quote}\begin{description}
+\item[{Parameters string meshName}] \leavevmode
+You can give the vertex data a name, which can be
+used by exporters.
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::addVertex (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::addVertex__Vec3CR}\pysiglinewithargsret{int \code{VertexData::}\bfcode{addVertex}}{const Vec3\& \emph{vec}}{}~\begin{quote}\begin{description}
+\item[{Parameters const Vec3\& vec}] \leavevmode
+Add a vertex
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::addVertex (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::addVertex__floatC.floatC.floatC}\pysiglinewithargsret{int \code{VertexData::}\bfcode{addVertex}}{const float \emph{x}, const float \emph{y}, const float \emph{z}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{const float x} -- X of vertex
+
+\item {} 
+\textbf{const float y} -- Y of vertex
+
+\item {} 
+\textbf{const float z} -- Z of vertex
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::addTexCoord (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::addTexCoord__Vec2CR}\pysiglinewithargsret{void \code{VertexData::}\bfcode{addTexCoord}}{const Vec2\& \emph{vec}}{}~\begin{quote}\begin{description}
+\item[{Parameters const Vec2\& vec}] \leavevmode
+Add this texture coordinate
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::addTexCoord (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::addTexCoord__floatC.floatC}\pysiglinewithargsret{void \code{VertexData::}\bfcode{addTexCoord}}{const float \emph{x}, const float \emph{y}}{}
+Add a texture coordinate:
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{const float x} -- x-value
+
+\item {} 
+\textbf{const float y} -- y-value
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::addColor (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::addColor__Vec3CR}\pysiglinewithargsret{void \code{VertexData::}\bfcode{addColor}}{const Vec3\& \emph{color}}{}~\begin{quote}\begin{description}
+\item[{Parameters const Vec3\& color}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::addColor (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::addColor__Color4CR}\pysiglinewithargsret{void \code{VertexData::}\bfcode{addColor}}{const Color4\& \emph{color}}{}~\begin{quote}\begin{description}
+\item[{Parameters const Color4\& color}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::addColor (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::addColor__floatC.floatC.floatC}\pysiglinewithargsret{void \code{VertexData::}\bfcode{addColor}}{const float \emph{r}, const float \emph{g}, const float \emph{b}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{const float r} -- 
+
+\item {} 
+\textbf{const float g} -- 
+
+\item {} 
+\textbf{const float b} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::addNormal (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::addNormal__floatC.floatC.floatC}\pysiglinewithargsret{void \code{VertexData::}\bfcode{addNormal}}{const float \emph{x}, const float \emph{y}, const float \emph{z}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{const float x} -- 
+
+\item {} 
+\textbf{const float y} -- 
+
+\item {} 
+\textbf{const float z} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::addNormal (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::addNormal__Vec3CR}\pysiglinewithargsret{void \code{VertexData::}\bfcode{addNormal}}{const Vec3\& \emph{vec}}{}~\begin{quote}\begin{description}
+\item[{Parameters const Vec3\& vec}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::addIndex (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::addIndex__iCR}\pysiglinewithargsret{void \code{VertexData::}\bfcode{addIndex}}{const int\& \emph{index}}{}~\begin{quote}\begin{description}
+\item[{Parameters const int\& index}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::addTriangle (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::addTriangle__Triangle}\pysiglinewithargsret{int \code{VertexData::}\bfcode{addTriangle}}{Triangle \emph{t}}{}~\begin{quote}\begin{description}
+\item[{Parameters Triangle t}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::addTriangle (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::addTriangle__i.i.i}\pysiglinewithargsret{int \code{VertexData::}\bfcode{addTriangle}}{int \emph{a}, int \emph{b}, int \emph{c}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{int a} -- 
+
+\item {} 
+\textbf{int b} -- 
+
+\item {} 
+\textbf{int c} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::addTriangleAndIndices (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::addTriangleAndIndices__i.i.i}\pysiglinewithargsret{int \code{VertexData::}\bfcode{addTriangleAndIndices}}{int \emph{a}, int \emph{b}, int \emph{c}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{int a} -- 
+
+\item {} 
+\textbf{int b} -- 
+
+\item {} 
+\textbf{int c} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::addQuad (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::addQuad__i.i.i.i}\pysiglinewithargsret{int \code{VertexData::}\bfcode{addQuad}}{int \emph{a}, int \emph{b}, int \emph{c}, int \emph{d}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{int a} -- 
+
+\item {} 
+\textbf{int b} -- 
+
+\item {} 
+\textbf{int c} -- 
+
+\item {} 
+\textbf{int d} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::addQuad (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::addQuad__Quad}\pysiglinewithargsret{int \code{VertexData::}\bfcode{addQuad}}{Quad \emph{q}}{}~\begin{quote}\begin{description}
+\item[{Parameters Quad q}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::addQuadAndIndices (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::addQuadAndIndices__i.i.i.i}\pysiglinewithargsret{int \code{VertexData::}\bfcode{addQuadAndIndices}}{int \emph{a}, int \emph{b}, int \emph{c}, int \emph{d}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{int a} -- 
+
+\item {} 
+\textbf{int b} -- 
+
+\item {} 
+\textbf{int c} -- 
+
+\item {} 
+\textbf{int d} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::addQuadIndices (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::addQuadIndices__i.i.i.i}\pysiglinewithargsret{void \code{VertexData::}\bfcode{addQuadIndices}}{int \emph{a}, int \emph{b}, int \emph{c}, int \emph{d}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{int a} -- 
+
+\item {} 
+\textbf{int b} -- 
+
+\item {} 
+\textbf{int c} -- 
+
+\item {} 
+\textbf{int d} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::debugDraw (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::debugDraw__i}\pysiglinewithargsret{void \code{VertexData::}\bfcode{debugDraw}}{int \emph{drawMode}\emph{=GL\_TRIANGLES}}{}~\begin{quote}\begin{description}
+\item[{Parameters int drawMode = GL\_TRIANGLES}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::debugDrawQuad (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::debugDrawQuad__i}\pysiglinewithargsret{void \code{VertexData::}\bfcode{debugDrawQuad}}{int \emph{quadNum}}{}~\begin{quote}\begin{description}
+\item[{Parameters int quadNum}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::getVerticesPtr (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getVerticesPtr}\pysiglinewithargsret{const float* \code{VertexData::}\bfcode{getVerticesPtr}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::getTexCoordsPtr (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getTexCoordsPtr}\pysiglinewithargsret{const float* \code{VertexData::}\bfcode{getTexCoordsPtr}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::getColorsPtr (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getColorsPtr}\pysiglinewithargsret{const float* \code{VertexData::}\bfcode{getColorsPtr}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::getNormalsPtr (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getNormalsPtr}\pysiglinewithargsret{const float* \code{VertexData::}\bfcode{getNormalsPtr}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::getIndicesPtr (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getIndicesPtr}\pysiglinewithargsret{const int* \code{VertexData::}\bfcode{getIndicesPtr}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::getTrianglePtr (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getTrianglePtr__i}\pysiglinewithargsret{Triangle* \code{VertexData::}\bfcode{getTrianglePtr}}{int \emph{triangle}}{}~\begin{quote}\begin{description}
+\item[{Parameters int triangle}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::getQuadPtr (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getQuadPtr__i}\pysiglinewithargsret{Quad* \code{VertexData::}\bfcode{getQuadPtr}}{int \emph{quad}}{}~\begin{quote}\begin{description}
+\item[{Parameters int quad}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::getNumVertices (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getNumVertices}\pysiglinewithargsret{int \code{VertexData::}\bfcode{getNumVertices}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::getNumTexCoords (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getNumTexCoords}\pysiglinewithargsret{int \code{VertexData::}\bfcode{getNumTexCoords}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::getNumColors (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getNumColors}\pysiglinewithargsret{int \code{VertexData::}\bfcode{getNumColors}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::getNumNormals (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getNumNormals}\pysiglinewithargsret{int \code{VertexData::}\bfcode{getNumNormals}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::getNumTangents (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getNumTangents}\pysiglinewithargsret{int \code{VertexData::}\bfcode{getNumTangents}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::getNumIndices (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getNumIndices}\pysiglinewithargsret{int \code{VertexData::}\bfcode{getNumIndices}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::getNumTriangles (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getNumTriangles}\pysiglinewithargsret{int \code{VertexData::}\bfcode{getNumTriangles}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::getNumQuads (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getNumQuads}\pysiglinewithargsret{int \code{VertexData::}\bfcode{getNumQuads}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::getTexCoord (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getTexCoord__i}\pysiglinewithargsret{Vec2 \code{VertexData::}\bfcode{getTexCoord}}{int \emph{index}}{}~\begin{quote}\begin{description}
+\item[{Parameters int index}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::getTexCoordPtr (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getTexCoordPtr__i}\pysiglinewithargsret{Vec2* \code{VertexData::}\bfcode{getTexCoordPtr}}{int \emph{index}}{}~\begin{quote}\begin{description}
+\item[{Parameters int index}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::getVertex (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getVertex__i}\pysiglinewithargsret{Vec3 \code{VertexData::}\bfcode{getVertex}}{int \emph{index}}{}~\begin{quote}\begin{description}
+\item[{Parameters int index}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::getVertexPtr (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getVertexPtr__i}\pysiglinewithargsret{Vec3* \code{VertexData::}\bfcode{getVertexPtr}}{int \emph{index}}{}~\begin{quote}\begin{description}
+\item[{Parameters int index}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::getVertexRef (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getVertexRef__i}\pysiglinewithargsret{Vec3\& \code{VertexData::}\bfcode{getVertexRef}}{int \emph{index}}{}~\begin{quote}\begin{description}
+\item[{Parameters int index}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::getNormal (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getNormal__i}\pysiglinewithargsret{Vec3 \code{VertexData::}\bfcode{getNormal}}{int \emph{index}}{}~\begin{quote}\begin{description}
+\item[{Parameters int index}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::getNormalPtr (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getNormalPtr__i}\pysiglinewithargsret{Vec3* \code{VertexData::}\bfcode{getNormalPtr}}{int \emph{index}}{}~\begin{quote}\begin{description}
+\item[{Parameters int index}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::getNormalRef (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getNormalRef__i}\pysiglinewithargsret{Vec3\& \code{VertexData::}\bfcode{getNormalRef}}{int \emph{index}}{}~\begin{quote}\begin{description}
+\item[{Parameters int index}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::getVertexP (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getVertexP}\pysiglinewithargsret{VertexP* \code{VertexData::}\bfcode{getVertexP}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::getVertexPT (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getVertexPT}\pysiglinewithargsret{VertexPT* \code{VertexData::}\bfcode{getVertexPT}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::getVertexPN (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getVertexPN}\pysiglinewithargsret{VertexPN* \code{VertexData::}\bfcode{getVertexPN}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::getVertexPTN (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getVertexPTN}\pysiglinewithargsret{VertexPTN* \code{VertexData::}\bfcode{getVertexPTN}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::getVertexPTNT (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getVertexPTNT}\pysiglinewithargsret{VertexPTNT* \code{VertexData::}\bfcode{getVertexPTNT}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::getVertexPNC (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getVertexPNC}\pysiglinewithargsret{VertexPNC* \code{VertexData::}\bfcode{getVertexPNC}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::getVertexPTNTB (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getVertexPTNTB}\pysiglinewithargsret{VertexPTNTB* \code{VertexData::}\bfcode{getVertexPTNTB}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::clearAttribs (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::clearAttribs}\pysiglinewithargsret{void \code{VertexData::}\bfcode{clearAttribs}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::enablePositionAttrib (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::enablePositionAttrib}\pysiglinewithargsret{void \code{VertexData::}\bfcode{enablePositionAttrib}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::enableNormalAttrib (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::enableNormalAttrib}\pysiglinewithargsret{void \code{VertexData::}\bfcode{enableNormalAttrib}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::enableColorAttrib (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::enableColorAttrib}\pysiglinewithargsret{void \code{VertexData::}\bfcode{enableColorAttrib}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::enableTexCoordAttrib (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::enableTexCoordAttrib}\pysiglinewithargsret{void \code{VertexData::}\bfcode{enableTexCoordAttrib}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::disablePositionAttrib (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::disablePositionAttrib}\pysiglinewithargsret{void \code{VertexData::}\bfcode{disablePositionAttrib}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::disableNormalAttrib (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::disableNormalAttrib}\pysiglinewithargsret{void \code{VertexData::}\bfcode{disableNormalAttrib}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::disableColorAttrib (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::disableColorAttrib}\pysiglinewithargsret{void \code{VertexData::}\bfcode{disableColorAttrib}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::disableTexCoordAttrib (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::disableTexCoordAttrib}\pysiglinewithargsret{void \code{VertexData::}\bfcode{disableTexCoordAttrib}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::clear (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::clear}\pysiglinewithargsret{void \code{VertexData::}\bfcode{clear}}{}{}
+\end{fulllineitems}
+
+\index{VertexData::setNormal (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::setNormal__i.Vec3}\pysiglinewithargsret{void \code{VertexData::}\bfcode{setNormal}}{int \emph{index}, Vec3 \emph{normal}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{int dx} -- 
+
+\item {} 
+\textbf{Vec3 normal} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::setVertex (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::setVertex__i.Vec3}\pysiglinewithargsret{void \code{VertexData::}\bfcode{setVertex}}{int \emph{index}, Vec3 \emph{vert}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{int dx} -- 
+
+\item {} 
+\textbf{Vec3 position} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::setVertex (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::setVertex__i.float.float.float}\pysiglinewithargsret{void \code{VertexData::}\bfcode{setVertex}}{int \emph{dx}, float \emph{x}, float \emph{y}, float \emph{z}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{int dx} -- 
+
+\item {} 
+\textbf{float x} -- 
+
+\item {} 
+\textbf{float y} -- 
+
+\item {} 
+\textbf{float z) \{ vertices{[}dx{]}.set(x} -- 
+
+\item {} 
+\textbf{y} -- 
+
+\item {} 
+\textbf{z} -- 
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::setName (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::setName__string}\pysiglinewithargsret{void \code{VertexData::}\bfcode{setName}}{string \emph{n}}{}~\begin{quote}\begin{description}
+\item[{Parameters string n}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VertexData::getName (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:VertexData::getName}\pysiglinewithargsret{string \code{VertexData::}\bfcode{getName}}{}{}
+\end{fulllineitems}
+
+
+
+\subsection{Shader}
+\label{gl:shader}\index{Shader (C++ class)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:Shader}\pysigline{\strong{class }\bfcode{Shader}}
+Shader class
+
+\end{fulllineitems}
+
+\index{Shader (C++ function)}
+
+\begin{fulllineitems}
+\pysiglinewithargsret{ \bfcode{Shader}}{}{}
+Create a new Shader object. Don't forget to set the name before you start
+loading and compiling the shader.
+
+\end{fulllineitems}
+
+\index{Shader (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:Shader__ssCR}\pysiglinewithargsret{ \bfcode{Shader}}{const std::string\& \emph{name}}{}
+Create a new Shader object with the given name. The name is used to load the
+files from the data directory.
+
+\end{fulllineitems}
+
+\index{Shader::load (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:Shader::load__ssCR}\pysiglinewithargsret{Shader\& \code{Shader::}\bfcode{load}}{const std::string\& \emph{name}}{}
+Load the shader source code using the given name.
+
+\end{fulllineitems}
+
+\index{Shader::load (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:Shader::load}\pysiglinewithargsret{Shader\& \code{Shader::}\bfcode{load}}{}{}
+Load the shader source code with the previously set name.
+
+\end{fulllineitems}
+
+\index{Shader::create (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:Shader::create__ssCR.ssR}\pysiglinewithargsret{void \code{Shader::}\bfcode{create}}{const std::string\& \emph{vertexSource}, std::string\& \emph{fragmentSource}}{}
+This function does the actual work by creating a vertex and fragment shader
+object using the given source code.
+
+\end{fulllineitems}
+
+\index{Shader::addAttribute (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:Shader::addAttribute__ssCR}\pysiglinewithargsret{Shader\& \code{Shader::}\bfcode{addAttribute}}{const std::string\& \emph{name}}{}
+Uses \code{glGetAttribLocation(prog\_id, name)} and stores the location of the
+attribute as a member. You can use \code{getAttribute(std::string name)} to
+retrieve the location of the attribute in the compiled shader.
+
+\end{fulllineitems}
+
+\index{Shader::addUniform (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:Shader::addUniform__ssCR}\pysiglinewithargsret{Shader\& \code{Shader::}\bfcode{addUniform}}{const std::string\& \emph{name}}{}
+Retrieves the location of the uniform using \code{glGetUniformLocation(prog\_id, name)}.
+The location is stored in the \code{Shader} object and you can use
+\code{GetUniform(std::string name)} to retrieve the uniform location.
+
+\end{fulllineitems}
+
+\index{Shader::getUniform (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:Shader::getUniform__ssCR}\pysiglinewithargsret{GLint \code{Shader::}\bfcode{getUniform}}{const std::string\& \emph{name}}{}
+Returns the uniform location for the given uniform name.
+
+\end{fulllineitems}
+
+\index{Shader::getAttribute (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:Shader::getAttribute__ssCR}\pysiglinewithargsret{GLint \code{Shader::}\bfcode{getAttribute}}{const std::string\& \emph{name}}{}
+Returns the attribute location for the given attribute name.
+
+\end{fulllineitems}
+
+\index{Shader::getVertexSource (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:Shader::getVertexSource__b}\pysiglinewithargsret{string \code{Shader::}\bfcode{getVertexSource}}{bool \emph{inDataPath}\emph{=true}}{}
+Get the vertex shader source using the name of the shader object.
+
+\end{fulllineitems}
+
+\index{Shader::getFragmentSource (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:Shader::getFragmentSource__b}\pysiglinewithargsret{string \code{Shader::}\bfcode{getFragmentSource}}{bool \emph{inDataPath}\emph{=true}}{}
+Get the fragment shader source using the name of the shader object.
+
+\end{fulllineitems}
+
+\index{Shader::enable (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:Shader::enable}\pysiglinewithargsret{void \code{Shader::}\bfcode{enable}}{}{}
+Start using the shader application. Call \code{disable()} to disable it again.
+
+\end{fulllineitems}
+
+\index{Shader::disable (C++ function)}
+
+\begin{fulllineitems}
+\phantomsection\label{gl:Shader::disable}\pysiglinewithargsret{void \code{Shader::}\bfcode{disable}}{}{}
+Disable the shader application. Call \code{enable()} to enable it again.
+
+\end{fulllineitems}
+
+
+
+\chapter{3D}
+\label{3d::doc}\label{3d:d}
+
+\section{EasyCam}
+\label{3d:easycam}
+The \code{EasyCam} camera creates a Arcball so you can move around easily in your
+scene. There are a couple of things you needs to call before you can use it.
+You have to call \code{EasyCam::setup(int screenWidth, int screenHeigth)} once
+and then translate the camera to a position from where you want to view the
+scene. We use a camera, so you need to move along the positive Z is you want to
+see something.
+
+In your setup code:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{cam}\PYG{p}{.}\PYG{n}{setup}\PYG{p}{(}\PYG{n}{ofGetWidth}\PYG{p}{(}\PYG{p}{)}\PYG{p}{,} \PYG{n}{ofGetHeight}\PYG{p}{(}\PYG{p}{)}\PYG{p}{;}
+\PYG{n}{cam}\PYG{p}{.}\PYG{n}{translate}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{l+m+mi}{10}\PYG{p}{)}\PYG{p}{;} \PYG{c+c1}{// 10 units away from the thing we draw}
+\end{Verbatim}
+
+Pass mouse events to the Camera
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kt}{void} \PYG{n}{testApp}\PYG{o}{:}\PYG{o}{:}\PYG{n}{mouseDragged}\PYG{p}{(}\PYG{k+kt}{int} \PYG{n}{x}\PYG{p}{,} \PYG{k+kt}{int} \PYG{n}{y}\PYG{p}{,} \PYG{k+kt}{int} \PYG{n}{button}\PYG{p}{)}\PYG{p}{\PYGZob{}}
+        \PYG{n}{cam}\PYG{p}{.}\PYG{n}{onMouseDragged}\PYG{p}{(}\PYG{n}{x}\PYG{p}{,}\PYG{n}{y}\PYG{p}{)}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k+kt}{void} \PYG{n}{testApp}\PYG{o}{:}\PYG{o}{:}\PYG{n}{mousePressed}\PYG{p}{(}\PYG{k+kt}{int} \PYG{n}{x}\PYG{p}{,} \PYG{k+kt}{int} \PYG{n}{y}\PYG{p}{,} \PYG{k+kt}{int} \PYG{n}{button}\PYG{p}{)}\PYG{p}{\PYGZob{}}
+        \PYG{n}{cam}\PYG{p}{.}\PYG{n}{onMouseDown}\PYG{p}{(}\PYG{n}{x}\PYG{p}{,}\PYG{n}{y}\PYG{p}{)}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}
+
+Place the camera in your draw function:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kt}{void} \PYG{n}{testApp}\PYG{o}{:}\PYG{o}{:}\PYG{n}{draw}\PYG{p}{(}\PYG{p}{)}\PYG{p}{\PYGZob{}}
+        \PYG{n}{cam}\PYG{p}{.}\PYG{n}{place}\PYG{p}{(}\PYG{p}{)}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}
+
+
+\chapter{Logging}
+\label{log:logging}\label{log::doc}
+We are using the Google-Glog library for logging. The documentation of this library
+is not good but the library has some nice features for logging and has a nice
+failure signal handler.
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+c1}{// Set destination for files. Set this before initializing}
+\PYG{n}{FLAGS\PYGZus{}log\PYGZus{}dir} \PYG{o}{=} \PYG{l+s}{"}\PYG{l+s}{./log/}\PYG{l+s}{"}\PYG{p}{;}
+
+\PYG{c+c1}{// Initialize with application name.}
+\PYG{n}{google}\PYG{o}{:}\PYG{o}{:}\PYG{n}{InitGoogleLogging}\PYG{p}{(}\PYG{l+s}{"}\PYG{l+s}{Application}\PYG{l+s}{"}\PYG{p}{)}\PYG{p}{;}
+
+\PYG{c+c1}{// If you want, you can set the logfile destination per level:}
+\PYG{c+c1}{// google::SetLogDestination(google::WARNING,"warning.log");}
+
+\PYG{c+c1}{// Log backtrace on crash:}
+\PYG{n}{google}\PYG{o}{:}\PYG{o}{:}\PYG{n}{InstallFailureSignalHandler}\PYG{p}{(}\PYG{p}{)}\PYG{p}{;}
+\end{Verbatim}
+
+Some log examples:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{LOG}\PYG{p}{(}\PYG{n}{INFO}\PYG{p}{)} \PYG{o}{\textless{}}\PYG{o}{\textless{}} \PYG{l+s}{"}\PYG{l+s}{Some info to log}\PYG{l+s}{"}\PYG{p}{;}
+\PYG{n}{LOG}\PYG{p}{(}\PYG{n}{WARNING}\PYG{p}{)} \PYG{o}{\textless{}}\PYG{o}{\textless{}} \PYG{l+s}{"}\PYG{l+s}{Warning level log message.}\PYG{l+s}{"}\PYG{p}{;}
+\PYG{n}{LOG}\PYG{p}{(}\PYG{n}{ERROR}\PYG{p}{)} \PYG{o}{\textless{}}\PYG{o}{\textless{}} \PYG{l+s}{"}\PYG{l+s}{Error level}\PYG{l+s}{"}\PYG{p}{;}
+\PYG{n}{LOG}\PYG{p}{(}\PYG{n}{FATAL}\PYG{p}{)} \PYG{o}{\textless{}}\PYG{o}{\textless{}} \PYG{l+s}{"}\PYG{l+s}{This will stop execution of the application and logs a backtrace}\PYG{l+s}{"}\PYG{p}{;}
+
+\PYG{n}{VLOG}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{)} \PYG{o}{\textless{}}\PYG{o}{\textless{}} \PYG{l+s}{"}\PYG{l+s}{Log custom level, 0}\PYG{l+s}{"}\PYG{p}{;}
+\PYG{n}{VLOG}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{)} \PYG{o}{\textless{}}\PYG{o}{\textless{}} \PYG{l+s}{"}\PYG{l+s}{Log custom level, 1}\PYG{l+s}{"}\PYG{p}{;} \PYG{c+c1}{// etc...}
+
+\PYG{c+c1}{// If you include "stl\PYGZus{}logging.h" you can log vectors too:}
+\PYG{n}{vector}\PYG{o}{\textless{}}\PYG{k+kt}{int}\PYG{o}{\textgreater{}} \PYG{n}{numbers}\PYG{p}{;}
+\PYG{n}{numbers}\PYG{p}{.}\PYG{n}{push\PYGZus{}back}\PYG{p}{(}\PYG{l+m+mi}{10}\PYG{p}{)}\PYG{p}{;}
+\PYG{n}{numbers}\PYG{p}{.}\PYG{n}{push\PYGZus{}back}\PYG{p}{(}\PYG{l+m+mi}{20}\PYG{p}{)}\PYG{p}{;}
+\PYG{n}{numbers}\PYG{p}{.}\PYG{n}{push\PYGZus{}back}\PYG{p}{(}\PYG{l+m+mi}{30}\PYG{p}{)}\PYG{p}{;}
+
+\PYG{n}{LOG}\PYG{p}{(}\PYG{n}{INFO}\PYG{p}{)} \PYG{o}{\textless{}}\PYG{o}{\textless{}} \PYG{l+s}{"}\PYG{l+s}{Numbers: }\PYG{l+s}{"} \PYG{o}{\textless{}}\PYG{o}{\textless{}} \PYG{n}{numbers}\PYG{p}{;}
+\end{Verbatim}
+
 
 \chapter{Indices and tables}
 \label{index:indices-and-tables}\begin{itemize}

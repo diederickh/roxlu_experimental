@@ -27,6 +27,7 @@ public:
 	VertexData(const string& meshName);
 	int 			addVertex(const Vec3& vec);
 	int 			addVertex(const float x, const float y, const float z);
+	vector<int>		addVertices(const vector<Vec3>& copy);
 	void 			addTexCoord(const Vec2& vec);
 	void 			addTexCoord(const float x, const float y);
 	void 			addColor(const Vec3& color);

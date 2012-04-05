@@ -18,7 +18,7 @@ VertexData::VertexData()
 	char auto_name[30];
 	sprintf(auto_name, "VertexData%04d", num_instances);
 	name = auto_name;
-	printf("Autoname: %s", name.c_str());
+	printf("Autoname: %s\n", name.c_str());
 }
 
 VertexData::VertexData(const string& meshName) 
@@ -44,6 +44,17 @@ int VertexData::addVertex(const float x, const float y, const float z) {
 	vertices.push_back(Vec3(x,y,z));
 	attribs |= VERT_POS;
 	return vertices.size()-1;
+}
+
+vector<int> VertexData::addVertices(const vector<Vec3>& copy) {
+	vector<int> new_indices;
+	vector<Vec3>::const_iterator it = copy.begin();
+	while(it != copy.end()) {
+		new_indices.push_back(addVertex(*it));
+		++it;
+	}	
+	attribs |= VERT_POS;
+	return new_indices;
 }
 
 void VertexData::addTexCoord(const Vec2& vec) {

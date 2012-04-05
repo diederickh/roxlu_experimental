@@ -2,7 +2,7 @@
 #define ROXLU_CONVEX_HULL3DH
 
 #include <vector>
-
+#include <string>
 
 #ifdef PI
 	#undef PI
@@ -35,7 +35,9 @@
 #include "Wm5Images.h"
 #include "Wm5Imagics.h"
 
+
 using std::vector;
+using std::string;
 
 namespace roxlu {
 
@@ -49,6 +51,9 @@ public:
 	void addPosition(float *p);
 	void addPosition(float x, float y, float z);
 	void create();
+	bool save(const string& filepath);
+	bool load(const string& filepath);
+	string toString();
 	
 	const Wm5::Vector3f* getVertices();
 	const int* getIndices();
@@ -79,6 +84,7 @@ inline void ConvexHull3D::addPosition(float* p) {
 }
 
 inline void ConvexHull3D::addPosition(float x, float y, float z) {
+//	printf("x: %f, y:%f, z:%f\n", x,y,z);
 	positions.push_back(x);
 	positions.push_back(y);
 	positions.push_back(z);

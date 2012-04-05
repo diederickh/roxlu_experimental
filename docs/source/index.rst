@@ -16,7 +16,7 @@ Contents:
    database
    gl
    3d
-   
+   log   
 
 Indices and tables
 ==================
