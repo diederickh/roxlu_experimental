@@ -8,8 +8,11 @@ failure signal handler.
 
 .. code-block:: c++
 
-	// Set destination for files. Set this before initializing
+		// Set destination for files. Set this before initializing
         FLAGS_log_dir = "./log/";
+        
+        // Log all messages to console (from GLOG_INFO and higher)
+        google::SetStderrLogging(google::GLOG_INFO);
 
         // Initialize with application name.
         google::InitGoogleLogging("Application");
