@@ -9,8 +9,8 @@
 #include <string>
 #include "parameter/Collection.h"
 #include "parameter/Parameter.h"
-#include "../../libs/curl/curl.h"
-#include "../../libs/crypto/urlencode.h"
+#include "../../external/includes/curl/curl.h"
+#include "../../external/includes/crypto/urlencode.h"
 #include "FTP.h"
 
 /**

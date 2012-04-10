@@ -24,7 +24,7 @@ Effect::Effect()
 
 Effect::~Effect() {
 	if(reload_shader_name != "") {
-		reload_timer.stop();
+		//reload_timer.stop();
 	}
 }
 
@@ -495,10 +495,12 @@ void Effect::bindMaterial(Material& m) {
 void Effect::updateShaders() {
 	if(reload_shader_enabled) {
 		shader.setName(reload_shader_name);
-		string vs_src = File::getFileContents(reload_shader_name +".vert", reload_shader_datapath);
-		string fs_src = File::getFileContents(reload_shader_name +".frag", reload_shader_datapath);
-		shader.recreate(vs_src, fs_src);
-		setupShaderAttributesAndUniforms();
+		printf("UPDATE SHADERS IS DISABLED! WE NEED TO CREATE A FILE CLASS!!!\n");
+		
+		//string vs_src = File::getFileContents(reload_shader_name +".vert", reload_shader_datapath);
+		//string fs_src = File::getFileContents(reload_shader_name +".frag", reload_shader_datapath);
+//		shader.recreate(vs_src, fs_src);
+//		setupShaderAttributesAndUniforms();
 		reload_shader_enabled = false;
 	}
 }
@@ -526,15 +528,16 @@ void Effect::updateLights() {
 void Effect::saveShaders(string name, bool inDataPath) {
 	string vs, fs;
 	createShaders(vs, fs);
-	File::putFileContents(name +".vert", vs, inDataPath);
-	File::putFileContents(name +".frag", fs, inDataPath);
+	printf("SAVESHADERS IS DISABLED, WE NEED TO CREATE A FILE CLASS\n");
+	//File::putFileContents(name +".vert", vs, inDataPath);
+	//File::putFileContents(name +".frag", fs, inDataPath);
 }
 
 void Effect::autoReloadShaders(string name, bool inDataPath) {
 	reload_shader_enabled = true;
 	reload_shader_datapath = inDataPath;
 	reload_shader_name = name;
-	reload_timer.start(*this, 1500,200);
+//	reload_timer.start(*this, 1500,200);
 }
 
 // Timer used to check if we need to update the shader
@@ -549,24 +552,25 @@ void Effect::reloadShaders(string name, bool inDataPath) {
 	string fs = name +".frag";
 
 	bool reload = false;
-	time_t new_fs_time = roxlu::File::getTimeModified(fs,inDataPath);
-	if(new_fs_time > reload_shader_last_modified_frag) {
-		reload = true;
-		reload_shader_last_modified_frag = new_fs_time;
-	}
-	
-	time_t new_vs_time = roxlu::File::getTimeModified(vs,inDataPath);
-	if(!reload && new_vs_time > reload_shader_last_modified_vert) {
-		reload = true;
-		reload_shader_last_modified_vert = new_vs_time;
-	}
-	
-	if(reload) {
-		reload_shader_last_modified_vert = new_vs_time;
-		reload_shader_enabled = true;
-		reload_shader_datapath = inDataPath;
-		reload_shader_name = name;
-	}
+//	time_t new_fs_time = roxlu::File::getTimeModified(fs,inDataPath);
+	printf("RELOAD SHADERS IS DISABLED WE NEED TO CREATE A FILE CLASS\n");
+//	if(new_fs_time > reload_shader_last_modified_frag) {
+//		reload = true;
+//		reload_shader_last_modified_frag = new_fs_time;
+//	}
+//	
+//	time_t new_vs_time = roxlu::File::getTimeModified(vs,inDataPath);
+//	if(!reload && new_vs_time > reload_shader_last_modified_vert) {
+//		reload = true;
+//		reload_shader_last_modified_vert = new_vs_time;
+//	}
+//	
+//	if(reload) {
+//		reload_shader_last_modified_vert = new_vs_time;
+//		reload_shader_enabled = true;
+//		reload_shader_datapath = inDataPath;
+//		reload_shader_name = name;
+//	}
 }
 
 

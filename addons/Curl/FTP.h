@@ -5,7 +5,7 @@
 #include <deque>
 #include <fstream>
 #include "Curl.h"
-#include "../../libs/curl/curl.h"
+#include "../../external/includes/curl/curl.h"
 
 using std::string;
 using std::deque;
@@ -13,10 +13,25 @@ using std::deque;
 namespace roxlu {
 namespace curl {
 
+class FTP;
+
 struct FTPFile {
+	FTPFile() {
+	}
+	
 	string url;
 	string remotepath;
 	CURL* curl;
+	struct curl_slist *headerlist;
+	double bytes_uploaded;
+	size_t file_size;
+	double upload_percentage;
+	FTP* ftp;
+};
+
+
+struct FTPProgressListener {
+	virtual void onProgress(FTPFile* file) = 0;
 };
 
 class FTP {
@@ -24,8 +39,14 @@ public:
 	FTP();
 	~FTP();
 	bool setup(const string& host, const string& username, const string& password, string remotepath = "", bool verbose = false);
-	bool addFile(const string& filepath, string remotepath = "");
-	void update();
+	bool addFile(const string& filepath, string remotepath = "", string remotefile="");
+	bool update();
+	void clear();
+	
+	static int onUploadProgress(FTPFile* ftpFile, double t, double d, double ultotal, double ulnow);
+	void setProgressListener(FTPProgressListener* listener);
+	float getTotalProgress();
+	FTPProgressListener* progress_listener;
 	
 private:
 	bool initCurl();
@@ -37,7 +58,7 @@ private:
 	string remotedir;
 	int still_running;
 	CURLM* curlm;
-	deque<FTPFile> files;
+	deque<FTPFile*> files;
 };
 
 }} // roxlu::curl

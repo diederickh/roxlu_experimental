@@ -48,8 +48,8 @@ public:
 	ConvexHull3D();
 	~ConvexHull3D();
 	
-	void addPosition(float *p);
-	void addPosition(float x, float y, float z);
+	int addPosition(float *p);
+	int addPosition(float x, float y, float z);
 	void create();
 	bool save(const string& filepath);
 	bool load(const string& filepath);
@@ -61,6 +61,7 @@ public:
 	size_t getNumPositions();
 	size_t getNumVertices();
 	size_t getNumIndices();
+	size_t getNumTriangles();
 	
 	void useRealQueryType();
 	
@@ -79,15 +80,16 @@ public:
 
 };
 
-inline void ConvexHull3D::addPosition(float* p) {
-	addPosition(*p, *(p+1), *(p+2));
+inline int ConvexHull3D::addPosition(float* p) {
+	return addPosition(*p, *(p+1), *(p+2));
 }
 
-inline void ConvexHull3D::addPosition(float x, float y, float z) {
+inline int ConvexHull3D::addPosition(float x, float y, float z) {
 //	printf("x: %f, y:%f, z:%f\n", x,y,z);
 	positions.push_back(x);
 	positions.push_back(y);
 	positions.push_back(z);
+	return getNumPositions()-1;
 }
 
 inline const int* ConvexHull3D::getIndices() {
@@ -110,9 +112,15 @@ inline size_t ConvexHull3D::getNumIndices() {
 	return num_indices;
 }
 
+inline size_t ConvexHull3D::getNumTriangles() {
+	return num_triangles;
+}
+
 inline void ConvexHull3D::useRealQueryType() {
 	query_type = Wm5::Query::QT_RATIONAL;
 }
+
+
 
 } // roxlu
 

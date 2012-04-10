@@ -3,9 +3,9 @@
 
 #include <string>
 #include <list>
-#include "../../../libs/crypto/urlencode.h"
-#include "../../../libs/crypto/HMAC_SHA1.h"
-#include "../../../libs/crypto/base64.h"
+#include "../../../external/includes/crypto/urlencode.h"
+#include "../../../external/includes/crypto/HMAC_SHA1.h"
+#include "../../../external/includes/crypto/base64.h"
 #include "../parameter/Collection.h"
 #include "../parameter/Parameter.h"
 

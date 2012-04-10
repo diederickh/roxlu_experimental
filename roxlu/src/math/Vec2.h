@@ -3,26 +3,26 @@
 
 // If you're smarter then the optimizer!
 //------------------------------------------------------------------------------
-#define dot2(a,b,r) 		r = (a.x * b.x) + (a.y * b.y);
+#define roxlu_dot2(a,b,r) 			r = (a.x * b.x) + (a.y * b.y);
 
-#define isqrt2(a,odist)  	odist=(float)(a.x*a.x+a.y*a.y); \
-		     	          	float rsf=odist*0.5f; \
-							long rsl=*(long*)&odist; \
-							const float rsopf = 1.5f; \
-							rsl=0x5f3759df-(rsl>>1); \
-							odist=*(float*)&rsl; \
-	 			            odist=odist*(rsopf-(rsf*odist*odist));  
-#define copy2(a,b)			b.x = a.x; b.y = a.y;;					
-#define set2(a,x,y)			a.x = x; a.y = y;;
-#define normalize2(a,l,b)	l = 0.0; \
-							isqrt2(a,l); \
-							b.x = a.x * l; \
-							b.y = a.y * l;
-#define	subtract2(a,b,c)	c.x = a.x - b.x; c.y = a.y - b.y;
-#define	add2(a,b,c)			c.x = a.x + b.x; c.y = a.y + b.y;;
-#define multiply2(a,b,c)	c.x = a.x * b; c.y = a.y * b;
-#define zero2(a)			a.x = 0; a.y = 0; 
-#define divide2(a,f,r)		r.x = a.x / f; r.y = a.y / f; 
+#define roxlu_isqrt2(a,odist)	  	odist=(float)(a.x*a.x+a.y*a.y); \
+			     		          	float rsf=odist*0.5f; \
+									long rsl=*(long*)&odist; \
+									const float rsopf = 1.5f; \
+									rsl=0x5f3759df-(rsl>>1); \
+									odist=*(float*)&rsl; \
+		 				            odist=odist*(rsopf-(rsf*odist*odist));  
+#define roxlu_copy2(a,b)			b.x = a.x; b.y = a.y;;					
+#define roxlu_set2(a,x,y)			a.x = x; a.y = y;;
+#define roxlu_normalize2(a,l,b)		l = 0.0; \
+									roxlu_isqrt2(a,l); \
+									b.x = a.x * l; \
+									b.y = a.y * l;
+#define	roxlu_subtract2(a,b,c)		c.x = a.x - b.x; c.y = a.y - b.y;
+#define	roxlu_add2(a,b,c)			c.x = a.x + b.x; c.y = a.y + b.y;;
+#define roxlu_multiply2(a,b,c)		c.x = a.x * b; c.y = a.y * b;
+#define roxlu_zero2(a)				a.x = 0; a.y = 0; 
+#define roxlu_divide2(a,f,r)		r.x = a.x / f; r.y = a.y / f; 
 
 #include <iostream>
 #include <math.h>

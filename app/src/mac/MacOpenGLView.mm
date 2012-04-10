@@ -96,7 +96,7 @@ static CVReturn MyDisplayLinkCallback(
     glViewport(0, 0, view_width, view_height);
 
     glClearColor(base_app->clear_color[0],base_app->clear_color[1],base_app->clear_color[2],base_app->clear_color[3]);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // draw here
 	[mac_win updateApp];
