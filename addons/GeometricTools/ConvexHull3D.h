@@ -29,8 +29,6 @@
 #endif
 
 #include "Wm5Core.h"
-
-
 #include "Wm5Mathematics.h"
 #include "Wm5Images.h"
 #include "Wm5Imagics.h"
@@ -48,8 +46,8 @@ public:
 	ConvexHull3D();
 	~ConvexHull3D();
 	
-	int addPosition(float *p);
-	int addPosition(float x, float y, float z);
+	int addPoint(float *p);
+	int addPoint(float x, float y, float z);
 	void create();
 	bool save(const string& filepath);
 	bool load(const string& filepath);
@@ -58,7 +56,7 @@ public:
 	const Wm5::Vector3f* getVertices();
 	const int* getIndices();
 	
-	size_t getNumPositions();
+	size_t getNumpoints();
 	size_t getNumVertices();
 	size_t getNumIndices();
 	size_t getNumTriangles();
@@ -72,7 +70,7 @@ public:
 	size_t num_indices;
 	size_t num_vertices;
 		
-	vector<float> positions;
+	vector<float> points;
 	Wm5::Vector3f* vertices;
 	const int* indices;
 	Wm5::Query::Type query_type;
@@ -80,16 +78,16 @@ public:
 
 };
 
-inline int ConvexHull3D::addPosition(float* p) {
-	return addPosition(*p, *(p+1), *(p+2));
+inline int ConvexHull3D::addPoint(float* p) {
+	return addPoint(*p, *(p+1), *(p+2));
 }
 
-inline int ConvexHull3D::addPosition(float x, float y, float z) {
+inline int ConvexHull3D::addPoint(float x, float y, float z) {
 //	printf("x: %f, y:%f, z:%f\n", x,y,z);
-	positions.push_back(x);
-	positions.push_back(y);
-	positions.push_back(z);
-	return getNumPositions()-1;
+	points.push_back(x);
+	points.push_back(y);
+	points.push_back(z);
+	return getNumpoints()-1;
 }
 
 inline const int* ConvexHull3D::getIndices() {
@@ -100,8 +98,8 @@ inline const Wm5::Vector3f* ConvexHull3D::getVertices() {
 	return vertices;
 }
 
-inline size_t ConvexHull3D::getNumPositions() {
-	return positions.size()/3;
+inline size_t ConvexHull3D::getNumpoints() {
+	return points.size()/3;
 }
 
 inline size_t ConvexHull3D::getNumVertices() {
