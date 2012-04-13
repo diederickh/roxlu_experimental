@@ -5,18 +5,15 @@
 #include <fstream>
 #include <cstdlib>
 
-//#include <unistd.h>
-
-// NO POCO!
-//#include "Poco/File.h"
-//#include "Poco/Timestamp.h"
-
 #ifdef __APPLE__
 	#include <TargetConditionals.h>
+	#include <mach-o/dyld.h>
 #endif
+
 
 using std::string;
 using std::ofstream;
+
 namespace roxlu {
 
 
@@ -65,7 +62,8 @@ public:
 		#ifdef __APPLE__
 			#ifdef TARGET_OS_MAC 
 				return getCWD() +"/../../../data/" +file;
-				//return getCWD() +"/data/" +file;
+				//printf("CWD: ------------------ %s\n", getCWD().c_str());
+				//return getCWD() +"/data/" +file; // ok this changes!!
 			#else
 				return getCWD() +"/../../../data/" +file;
 			#endif
@@ -78,15 +76,34 @@ public:
 		if(inDataPath) {
 			file = File::toDataPath(file);
 		}
-		printf("NOOOOOO\n");
-//		Poco::File f(file);
-//		Poco::Timestamp stamp = f.getLastModified();
-//		return stamp.epochTime();
+		printf("MUST IMPLEMENT getTimeModified\n");
 	}
 	
+	
 	static string getCWD() {
-		char buf[1024];
-		return getcwd(buf, 1024);		
+		#ifdef __APPLE__
+			// hackedyhack
+			char path[1024];
+			uint32_t size = sizeof(path);
+			if (_NSGetExecutablePath(path, &size) != 0) {
+				printf("buffer too small; need size %u\n", size);
+			}
+			char res[1024];
+			char* clean = realpath(path, res);
+			if(clean) {
+				string fullpath(clean);
+				size_t pos = fullpath.find_last_of('/');
+				if(pos != std::string::npos) {
+					string noexe = fullpath.substr(0,pos+1);
+					return noexe;
+				}
+			}
+			return clean;
+		#else
+			char buf[1024];
+			getcwd(buf, 1024);		
+			return buf;
+		#endif
 	}
 };
 }
