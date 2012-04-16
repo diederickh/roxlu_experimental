@@ -196,7 +196,7 @@ void Buttons::draw() {
 	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {
 		el = (*it);
-		end = start + el->num_vertices;
+		end = el->num_vertices;
 		glDrawArrays(GL_TRIANGLES, start, end);
 		start += el->num_vertices;
 		++it;
@@ -234,8 +234,12 @@ void Buttons::debugDraw() {
 }
 
 Slider& Buttons::addFloat(const string& label, float& value) {
-	int h = getElementsHeight();
 	buttons::Slider* el = new Slider(value);
+	addElement(el, label);
+	return *el;
+}
+
+void Buttons::addElement(Element* el, const string& label) {
 	el->setup();
 	el->label = label;
 	el->w = w;
@@ -245,8 +249,6 @@ Slider& Buttons::addFloat(const string& label, float& value) {
 	positionElements();
 	el->generateStaticText(*static_text);
 	el->generateDynamicText(*dynamic_text);
-
-	return *el;
 }
 
 void Buttons::onMouseMoved(int x, int y) {
@@ -258,7 +260,6 @@ void Buttons::onMouseMoved(int x, int y) {
 	if(is_mouse_inside && state == BSTATE_NONE) {
  		state = BSTATE_ENTER;
 		onMouseEnter(x,y);
-		triggered_drag = true; // the drag was triggered by the gui
 	}
 	else if(!is_mouse_inside && state == BSTATE_ENTER) {
 		state = BSTATE_NONE;
@@ -303,6 +304,10 @@ void Buttons::onMouseMoved(int x, int y) {
 }
 
 void Buttons::onMouseDown(int x, int y) {
+	if(BINSIDE_HEADER(this, x, y)) {
+		triggered_drag = true; // the drag was triggered by the gui
+	}
+
 	is_mouse_down = true;
 	Element* el;
 	vector<Element*>::iterator it = elements.begin();
@@ -406,5 +411,22 @@ void Buttons::updateStaticTextPositions() {
 	}
 }
 
+void Buttons::save() {
+	save(title);
+}
+
+void Buttons::save(const string& file) {
+	buttons::Storage storage;
+	storage.save(file, this);
+}
+
+void Buttons::load() {
+	load(title);
+}
+
+void Buttons::load(const string& file) {
+	buttons::Storage storage;
+	storage.load(file, this);
+}
 
 } // namespace buttons

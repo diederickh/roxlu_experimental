@@ -2,7 +2,7 @@
 
 namespace buttons {
 
-Element::Element() 
+Element::Element(int type) 
 	:x(0)
 	,y(0)
 	,w(0)
@@ -15,6 +15,7 @@ Element::Element()
 	,state(BSTATE_NONE)
 	,start_dx(0)
 	,end_dx(0)
+	,type(type)
 {
 }
 

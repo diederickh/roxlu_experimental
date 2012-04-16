@@ -16,6 +16,16 @@ using roxlu::Vec2;
 
 namespace buttons {
 
+enum ElementTypes {
+	BTYPE_SLIDER 	
+};
+
+enum ElementStates {
+	 BSTATE_NONE
+	,BSTATE_ENTER
+	,BSTATE_LEAVE
+};
+
 class ButtonVertex {
 
 public:

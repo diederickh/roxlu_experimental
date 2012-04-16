@@ -11,15 +11,9 @@ using std::string;
 
 namespace buttons {
 
-enum ElementStates {
-	 BSTATE_NONE
-	,BSTATE_ENTER
-	,BSTATE_LEAVE
-};
-
 class Element {
 public:	
-	Element();
+	Element(int type);
 	~Element();
 	
 	virtual void setup() = 0;
@@ -47,6 +41,7 @@ public:
 	int y; 
 	int w;
 	int h;
+	int type;
 
 	string label;
 	int state;

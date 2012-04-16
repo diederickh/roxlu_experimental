@@ -19,15 +19,17 @@ public:
 	void updateDynamicText(Text& dynText);
 	
 	void generateVertices(ButtonVertices& shapeVertices);
-	void generateVerticesSlider(ButtonVertices& shapeVertices);
+
 	void setup();
 	void draw();
 	void update();
-
+	
 	void onMouseUp(int mx, int my);
 	void onMouseEnter(int mx, int my);
 	void onMouseLeave(int mx, int my);	
 	void onMouseDragged(int mx, int my, int dx, int dy);
+
+	void setValue(const float& v);
 
 	float& value;
 	float minv; // min value

@@ -4,7 +4,7 @@ namespace buttons {
 
 Slider::Slider(float& val)
 	:value(val)
-	,Element()
+	,Element(BTYPE_SLIDER)
 	,minv(1)
 	,maxv(1000)
 	,p(0.5)

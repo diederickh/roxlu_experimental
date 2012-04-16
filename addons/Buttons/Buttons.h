@@ -5,7 +5,7 @@
 
 
 #include "ofMain.h"
-//#include "openGL.h"
+
 #include "Shader.h"
 #include "VertexData.h"
 #include "BitmapFont.h"
@@ -16,6 +16,7 @@
 #include "Types.h"
 #include "Element.h"
 #include "Slider.h"
+#include "Storage.h"
 
 using std::vector;
 using namespace roxlu;
@@ -51,6 +52,11 @@ public:
 	void draw();
 	void debugDraw();
 	
+	void save();
+	void save(const string& file);
+	void load();
+	void load(const string& file);
+	
 	Slider& addFloat(const string& label, float& value);
 	void createOrtho(float w, float h);
 	int getElementsHeight();
@@ -65,8 +71,10 @@ public:
 	
 	void setPosition(int x, int y);
 
-	
+	friend class Storage; 
+		
 private:
+	void addElement(Element* el, const string& label);
 	void onMouseEnter(int x, int y);
 	void onMouseLeave(int x, int y);
 	void onMouseDragged(int dx, int dy);

@@ -82,6 +82,7 @@ public:
 	void draw();
 	void debugDraw();
 	void createOrtho(float winW, float winH);
+	void setVertexAttributes();
 	GLuint vbo;
 	VAO vao;
 	

@@ -36,18 +36,14 @@ Text::Text(BitmapFont& bmfont)
 	glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
 	glBufferData(GL_ARRAY_BUFFER, buffer_size, NULL, GL_DYNAMIC_DRAW); eglGetError();
 
-	glEnableVertexAttribArray(shader.getAttribute("pos")); eglGetError();
-	glEnableVertexAttribArray(shader.getAttribute("tex")); eglGetError();
+	setVertexAttributes();
 	
-	glVertexAttribPointer(shader.getAttribute("pos"), 2, GL_FLOAT, GL_FALSE, sizeof(TextVertex), offsetof(TextVertex, pos)); eglGetError();
-	glVertexAttribPointer(shader.getAttribute("tex"), 2, GL_FLOAT, GL_FALSE, sizeof(TextVertex), (GLvoid*)offsetof(TextVertex, uv)); eglGetError();
-
 	shader.uniform1i("font_texture",0);
 	initialized = true;
 	
 	shader.disable();
-	vao.unbind(); // when I unbind here, I get a EXC_BAD_ACCESS in glDrawArrays in dra()
-	glBindTexture(GL_TEXTURE_2D, 0);
+	//vao.unbind(); // when I unbind here, I get a EXC_BAD_ACCESS in glDrawArrays in dra()
+	//glBindTexture(GL_TEXTURE_2D, 0);
 	
 	// create (re-used) model matrix.
 	memset(model, 0, sizeof(float) * 16);
@@ -82,8 +78,15 @@ void Text::createOrtho(float winW, float winH) {
 	ortho[12] = -(w)/w;
 	ortho[13] = -(h)/-h;
 	ortho[14] = -(f+n)/fmn;
-
 }
+
+void Text::setVertexAttributes() {
+	glEnableVertexAttribArray(shader.getAttribute("pos")); eglGetError();
+	glEnableVertexAttribArray(shader.getAttribute("tex")); eglGetError();
+	glVertexAttribPointer(shader.getAttribute("pos"), 2, GL_FLOAT, GL_FALSE, sizeof(TextVertex), offsetof(TextVertex, pos)); eglGetError();
+	glVertexAttribPointer(shader.getAttribute("tex"), 2, GL_FLOAT, GL_FALSE, sizeof(TextVertex), (GLvoid*)offsetof(TextVertex, uv)); eglGetError();
+}
+
 
 int Text::add(const float& tx, const float& ty, const string& str, float r, float g, float b, float a) {
 	is_changed = true;
@@ -95,10 +98,10 @@ int Text::add(const float& tx, const float& ty, const string& str, float r, floa
 	text.col[1] = g;
 	text.col[2] = b;
 	text.col[3] = a;
-	
+	text.vertices.clear();
 	bmfont.buildText(text.vertices, str, col, text.w);
 	texts.push_back(text);
-	printf(">>>>>>>>>>>>>>> %s, %zu\n",str.c_str(), texts.size());
+//	printf(">>>>>>>>>>>>>>> %zu\n", texts.size());
 	return texts.size()-1;
 }
 
@@ -114,7 +117,7 @@ int Text::updateText(const int& dx, const string& str, float r, float g, float b
 	
 	if(te.align == TEXT_ALIGN_RIGHT) {
 		te.pos[0] = te.pos[0] + (te.maxx - te.w);
-		printf("SET WIDTH %d !\n", te.w);
+		//printf("SET WIDTH %d !\n", te.w);
 	}
 	is_changed = true; // make sure we rebuild our internal buffer
 }
@@ -131,7 +134,7 @@ void Text::setTextAlign(const int& textIndex, int align, int maxx) {
 	if(te.align == TEXT_ALIGN_RIGHT) {
 		te.pos[0] = maxx - te.w;
 		te.maxx = maxx;
-		printf("SET WIDTH!\n");
+//		printf("SET WIDTH!\n");
 	}
 	// TODO: implement LEFT
 }
@@ -153,16 +156,20 @@ void Text::updateBuffer() {
 //	}
 	
 	// do we need to resize the vbo
-//	vao.bind();
-	glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
 	if(vertices.numBytes() > buffer_size) {
+		vao.bind();
+		glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
+	
 		buffer_size = vertices.numBytes() * 2;
 		printf("How much we need: %zu, how much we do: %zu\n", vertices.numBytes(), buffer_size);
-		glBufferData(GL_ARRAY_BUFFER, buffer_size, vertices.getPtr(), GL_DYNAMIC_DRAW); eglGetError();
+		glBufferData(GL_ARRAY_BUFFER, buffer_size, vertices.getPtr(), GL_STREAM_COPY); eglGetError();
+		setVertexAttributes();
 		printf("Bigger!\n");
 	}
 	else {
-		printf("numBytes:%zu, num vertices: %zu\n", vertices.numBytes(), vertices.size());
+		glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
+	
+		printf("SUB-DATA update numBytes:%zu, num vertices: %zu\n", vertices.numBytes(), vertices.size());
 		glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.numBytes(), vertices.getPtr()); eglGetError();
 	}
 
@@ -247,33 +254,12 @@ void Text::draw() {
 	glEnable(GL_BLEND);
 //
 
-	ofEnableAlphaBlending();
-//	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
-//	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	//glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
-	glColor4f(1,1,1,1); // check if this is necessary
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_TEXTURE_2D); eglGetError();
 	glActiveTexture(GL_TEXTURE0); eglGetError();
 	bmfont.bind();
 	
-//	shader.uniformMat4fv("projection_matrix", projection_matrix.getPtr());
-	
-	/*
-		start: 0, end: 18
-		start: 18, end: 36
-		start: 36, end: 54
-		
-		Start: 0, End:18
-		Start: 18, End:78
-		Start: 78, End:96
-		
-		Start: 0, End:18
-		Start: 18, End:78
-		Start: 78, End:96
-	*/
-//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	//shader.uniformMat4fv("projection_matrix", projection_matrix.getPtr());	
 	shader.uniformMat4fv("projection_matrix", ortho);	
 	int yy = 0;
 	for(int i = 0; i < texts.size(); ++i) {
