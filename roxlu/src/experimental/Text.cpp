@@ -1,6 +1,7 @@
 #include "Text.h"
 
 namespace roxlu {
+
 bool Text::initialized = false;
 Shader Text::shader = Shader("sh_text");
 
@@ -14,12 +15,14 @@ Text::Text(BitmapFont& bmfont)
 {
 	if(!initialized) {
 		shader.load();
+//		shader.create(TEXT_VS, TEXT_FS);
 		shader.enable();
 		shader.addUniform("projection_matrix");
 		shader.addUniform("model_matrix");
 		shader.addUniform("font_texture");
 		shader.addAttribute("pos");
 		shader.addAttribute("tex");
+		printf("Initialized the text\n");
 	}
 
 	shader.enable();
@@ -234,7 +237,11 @@ void Text::draw() {
 		//printf("Start: %d, End:%d\n", texts[i].start_dx, end);
 		//printf("Drag at: %f, %f\n", model[12], model[13]);
 		shader.uniformMat4fv("model_matrix", model);
-		glDrawArrays(GL_TRIANGLES, texts[i].start_dx, texts[i].end_dx);
+		int start = te.start_dx;
+		printf("Start: %d, end: %d\n", start, end);
+//		glDrawArrays(GL_POINTS, start, end); eglGetError();
+	//	glDrawArrays(GL_TRIANGLES, texts[i].start_dx, texts[i].end_dx); eglGetError();
+//		glDrawArrays(GL_TRIANGLES, texts[i].start_dx, end);
 	}
 	//printf("---\n");
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

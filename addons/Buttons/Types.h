@@ -5,15 +5,18 @@
 #include <vector>
 
 										//((x>=i)   && (x <=(i +w)) && (y >= j) && y <= (j+h))
-#define RMOUSE_INSIDE(mx,my,ex,ey,w,h) 	(mx>=ex && mx<=(ex+w) && my >= ey && my <= (ey+h))
-#define RINSIDE_ELEMENT(ptr, mx, my)  RMOUSE_INSIDE(mx, my, ptr->x, ptr->y, ptr->w, ptr->h)
-#define RINSIDE_HEADER(ptr, mx, my)  RMOUSE_INSIDE(mx, my, ptr->x, ptr->y, ptr->w, ptr->hh)
-#define RSET_COLOR(col, r, g, b, a) col[0] = r; col[1] = g; col[2] = b; col[3] = a;
-#define RSET_MAT_POS(mat, x, y, z) mat[11] = x; mat[12] = y; mat[13] = z;
+#define BMOUSE_INSIDE(mx,my,ex,ey,w,h) 	(mx>=ex && mx<=(ex+w) && my >= ey && my <= (ey+h))
+#define BINSIDE_ELEMENT(ptr, mx, my)  BMOUSE_INSIDE(mx, my, ptr->x, ptr->y, ptr->w, ptr->h)
+#define BINSIDE_HEADER(ptr, mx, my)  BMOUSE_INSIDE(mx, my, ptr->x, ptr->y, ptr->w, ptr->hh)
+#define BSET_COLOR(col, r, g, b, a) col[0] = r; col[1] = g; col[2] = b; col[3] = a;
+#define BSET_MAT_POS(mat, x, y, z) mat[11] = x; mat[12] = y; mat[13] = z;
+
 using std::vector;
 using roxlu::Vec2;
 
-class RuiVertex {
+namespace buttons {
+
+class ButtonVertex {
 
 public:
 
@@ -33,16 +36,17 @@ public:
 	}
 };
 
-class RuiVertices {
+class ButtonVertices {
 public:
-	RuiVertices() {}
+	ButtonVertices() {
+	}
 	
 	int add(const float& x, const float& y, const float* col4) {
 		return add(x,y,col4[0], col4[1], col4[2], col4[3]);
 	}
 	
 	int add(const float& x, const float& y, const float& r, const float& g, const float& b, const float& a) {
-		RuiVertex v;
+		ButtonVertex v;
 		v.setPos(x,y);
 		v.setCol(r,g,b,a);
 		verts.push_back(v);
@@ -61,11 +65,14 @@ public:
 		verts.clear();
 	}
 	
-	RuiVertex& operator[](const int& i) {
+	ButtonVertex& operator[](const int& i) {
 		return verts[i];
 	}
-	vector<RuiVertex> verts;
+	
+	vector<ButtonVertex> verts;
 };
+
+} // namespace buttons
 
 
 #endif

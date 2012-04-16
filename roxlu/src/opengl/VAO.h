@@ -20,6 +20,7 @@ public:
 	VAO& bind();
 	VAO& unbind();
 private:
+	bool is_bound;
 	GLuint vao_id;
 };
 

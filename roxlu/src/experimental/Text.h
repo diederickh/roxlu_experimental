@@ -21,6 +21,27 @@ struct TextEntry {
 	int end_dx;
 };
 
+const string TEXT_VS = "  \
+uniform mat4 projection_matrix; \
+uniform mat4 model_matrix; \
+attribute vec4 pos; \
+attribute vec2 tex; \
+varying vec2 texcoord; \
+void main() { \
+	texcoord = tex; \
+	gl_Position = projection_matrix * model_matrix * pos; \
+}";
+
+const string TEXT_FS =  " \
+uniform sampler2D font_texture; \
+varying vec2 texcoord; \
+void main() { \
+	vec4 col = texture2D(font_texture, texcoord); \
+	gl_FragColor.rgb = vec3(0.,0.,0.);	 \
+	gl_FragColor.a = col.r; \
+} \
+";
+
 class Text {
 public:
 	Text(BitmapFont& bmfont);

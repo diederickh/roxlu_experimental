@@ -13,24 +13,45 @@
 #include "VAO.h"
 #include "Error.h"
 
-#include "RTypes.h"
-#include "RElement.h"
-#include "RSlider.h"
+#include "Types.h"
+#include "Element.h"
+#include "Slider.h"
 
 using std::vector;
 using namespace roxlu;
 
+const string BUTTONS_VS = " \
+uniform mat4 projection_matrix; \
+uniform mat4 model_matrix; \
+attribute vec4 pos; \
+attribute vec4 col; \
+varying vec4 vcol; \
+void main() { \
+	vcol = col; \
+	gl_Position = projection_matrix * model_matrix * pos; \
+} \
+";
 
-class Rui {
+
+const string BUTTONS_FS = "  \
+varying vec4 vcol; \
+void main() { \
+	gl_FragColor = vcol; \
+}";
+
+
+namespace buttons {
+
+class Buttons {
 public:
-	Rui();
-	~Rui();
+	Buttons();
+	~Buttons();
 	
 	void update();
 	void draw();
 	void debugDraw();
 	
-	RSlider& addFloat(const string& label, float& value);
+	Slider& addFloat(const string& label, float& value);
 	void createOrtho(float w, float h);
 	int getHeight();
 		
@@ -51,6 +72,7 @@ private:
 	void generateElementVertices(); // create vertices for panel
 	void positionElements();
 	void flagChanged();
+	
 	int x; // TODO: do we create a generic "interactive object" ? 
 	int y;
 	int w; 
@@ -65,7 +87,7 @@ private:
 	int mdy; // drag y
 	int pmx; // prev mouse x
 	int pmy; // prev mouse y;
-	RuiVertices vd;
+	ButtonVertices vd;
 	
 	bool is_mouse_down;
 	static bool shaders_initialized;
@@ -73,19 +95,20 @@ private:
 	static BitmapFont* bmf;
 	Text* static_text;
 	static Shader gui_shader;
-	vector<RElement*> elements;	
+	vector<Element*> elements;	
 	
 	float ortho[16];
 	float model[16];
-	Mat4 model_matrix;
-//	Mat4 projection_matrix;
+
 	VAO vao;
 	GLuint vbo;
 	bool first_run;
 };
 
-inline void Rui::flagChanged() {
+inline void Buttons::flagChanged() {
 	is_changed = true;
 }
+
+} // buttons
 
 #endif

@@ -1,17 +1,19 @@
-#include "Rui.h"
+#include "Buttons.h"
 
-Shader Rui::gui_shader = Shader("sh_gui");
-bool Rui::shaders_initialized = false;
-BitmapFont* Rui::bmf = NULL;
+namespace buttons {
 
-Rui::Rui()
+Shader Buttons::gui_shader = Shader("sh_gui");
+bool Buttons::shaders_initialized = false;
+BitmapFont* Buttons::bmf = NULL;
+
+Buttons::Buttons()
 	:is_mouse_down(false)
 	,first_run(true)
 	,x(0)
 	,y(0)
 	,w(150)
 	,hh(20) // header height (draggable area)
-	,state(RSTATE_NONE)
+	,state(BSTATE_NONE)
 	,is_changed(false)
 	,is_mouse_inside(false)
 	,triggered_drag(false)
@@ -23,6 +25,7 @@ Rui::Rui()
 	if(!shaders_initialized) {
 		bmf = new BitmapFont();
 		gui_shader.load();
+		//gui_shader.create(BUTTONS_VS, BUTTONS_FS);
 		gui_shader.enable();
 		gui_shader.addUniform("projection_matrix");
 		gui_shader.addUniform("model_matrix");
@@ -37,8 +40,8 @@ Rui::Rui()
 	gui_shader.enable();	
 	glEnableVertexAttribArray(gui_shader.getAttribute("pos")); eglGetError();
 	glEnableVertexAttribArray(gui_shader.getAttribute("col")); eglGetError();
-	glVertexAttribPointer(gui_shader.getAttribute("pos"), 2, GL_FLOAT, GL_FALSE, sizeof(RuiVertex), offsetof(RuiVertex,pos));
-	glVertexAttribPointer(gui_shader.getAttribute("col"), 4, GL_FLOAT, GL_FALSE, sizeof(RuiVertex), (GLvoid*)offsetof(RuiVertex,col));
+	glVertexAttribPointer(gui_shader.getAttribute("pos"), 2, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), offsetof(ButtonVertex,pos));
+	glVertexAttribPointer(gui_shader.getAttribute("col"), 4, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), (GLvoid*)offsetof(ButtonVertex,col));
 	
 	gui_shader.disable();
 	vao.unbind();
@@ -52,14 +55,14 @@ Rui::Rui()
 	model[15] = 1.0f;
 	
 	// top draggable handle
-	RSET_COLOR(bg_color, 0.8,0.4,0,1.0);
+	BSET_COLOR(bg_color, 0.8,0.4,0,1.0);
 }
 
-Rui::~Rui() {
+Buttons::~Buttons() {
 
 }
 // http://en.wikipedia.org/wiki/Orthographic_projection_(geometry)
-void Rui::createOrtho(float w, float h) {
+void Buttons::createOrtho(float w, float h) {
 	float n = 0.0;
 	float f = 1.0;
 
@@ -83,8 +86,8 @@ void Rui::createOrtho(float w, float h) {
 	ortho[14] = -(f+n)/fmn;
 
 }
-void Rui::update() {
-	vector<RElement*>::iterator it = elements.begin();
+void Buttons::update() {
+	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {
 		(*it)->update();
 		++it;
@@ -113,23 +116,25 @@ void Rui::update() {
 	if(first_run) {
 		first_run = false;
 		glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
-		glBufferData(GL_ARRAY_BUFFER, sizeof(RuiVertex)*vd.size(), vd.getPtr(), GL_DYNAMIC_DRAW); eglGetError();
+		glBufferData(GL_ARRAY_BUFFER, sizeof(ButtonVertex)*vd.size(), vd.getPtr(), GL_DYNAMIC_DRAW); eglGetError();
+		printf("BUFFER CREATED\n");
 	}
 	else {
 		glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(RuiVertex)*vd.size(), (GLvoid*)vd.getPtr()); eglGetError();
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(ButtonVertex)*vd.size(), (GLvoid*)vd.getPtr()); eglGetError();
 
 	}
 }
 
 
-void Rui::generateVertices() {
+void Buttons::generateVertices() {
+	printf("GENERATE VERTICES!!!!!!!!!\n");
 	vd.clear();
 	generatePanelVertices();
 	generateElementVertices();
 }
 
-void Rui::generatePanelVertices() {
+void Buttons::generatePanelVertices() {
 	
 	vd.add(x,y,bg_color);
 	vd.add(x+w,y,bg_color);
@@ -142,10 +147,10 @@ void Rui::generatePanelVertices() {
 	is_changed = false;
 	printf("Number in header: %zu\n", vd.size());
 }
-void Rui::generateElementVertices() {
+void Buttons::generateElementVertices() {
 	
 
-	vector<RElement*>::iterator it = elements.begin();
+	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {
 		(*it)->generateVertices(vd);
 		(*it)->is_changed = false;
@@ -153,7 +158,8 @@ void Rui::generateElementVertices() {
 	}	
 }
 
-void Rui::draw() {
+void Buttons::draw() {
+
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
 	gui_shader.enable();
@@ -165,23 +171,23 @@ void Rui::draw() {
 	
 	gui_shader.uniformMat4fv("projection_matrix", &ortho[0]);
 	
-	RSET_MAT_POS(model, x, y, 0);
+	BSET_MAT_POS(model, x, y, 0);
 	gui_shader.uniformMat4fv("model_matrix", model);
-	glDrawArrays(GL_TRIANGLES, start, end);
+
+//	glDrawArrays(GL_TRIANGLES, start, end); eglGetError();
+
 	start = start + end;
 	
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	RElement* el;
-	vector<RElement*>::iterator it = elements.begin();
+	Element* el;
+	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {
 		el = (*it);
 		end = start + el->num_vertices;
-
-		//RSET_MAT_POS(model, el->x, el->y, -0.5);
-		RSET_MAT_POS(model, el->x, el->y, 0);
+		BSET_MAT_POS(model, el->x, el->y, 0);
 		gui_shader.uniformMat4fv("model_matrix", model);
 
-		glDrawArrays(GL_TRIANGLES, start, end);
+	//	glDrawArrays(GL_TRIANGLES, start, end);
 
 		start += el->num_vertices;
 		++it;
@@ -194,22 +200,22 @@ void Rui::draw() {
 	static_text->draw();
 }
 
-void Rui::debugDraw() {
+void Buttons::debugDraw() {
 	gui_shader.disable();
 	vao.unbind();
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	
 	int start = 0;
 	int end = 0;
-	RElement* el;
-	vector<RElement*>::iterator it = elements.begin();
+	Element* el;
+	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {
 		el = (*it);
 		end = start + el->num_vertices;
 	
 		glBegin(GL_TRIANGLES);
 		for(int i = start; i < end; ++i) {
-			RuiVertex& rv = vd[i];
+			ButtonVertex& rv = vd[i];
 			glVertex2f(rv.pos[0], rv.pos[1]);
 		}
 		glEnd();
@@ -221,9 +227,9 @@ void Rui::debugDraw() {
 
 }
 
-RSlider& Rui::addFloat(const string& label, float& value) {
+Slider& Buttons::addFloat(const string& label, float& value) {
 	int h = getHeight();
-	RSlider* el = new RSlider(value);
+	buttons::Slider* el = new Slider(value);
 	el->setup();
 	el->label = label;
 	el->w = w;
@@ -236,18 +242,18 @@ RSlider& Rui::addFloat(const string& label, float& value) {
 	return *el;
 }
 
-void Rui::onMouseMoved(int x, int y) {
+void Buttons::onMouseMoved(int x, int y) {
 	mdx = x - pmx;
 	mdy = y - pmy;
 	// are we inside our header area? TODO: we cn optimize here by returning early
-	is_mouse_inside = RINSIDE_HEADER(this, x, y);
-	if(is_mouse_inside && state == RSTATE_NONE) {
- 		state = RSTATE_ENTER;
+	is_mouse_inside = BINSIDE_HEADER(this, x, y);
+	if(is_mouse_inside && state == BSTATE_NONE) {
+ 		state = BSTATE_ENTER;
 		onMouseEnter(x,y);
 		triggered_drag = true; // the drag was triggered by the gui
 	}
-	else if(!is_mouse_inside && state == RSTATE_ENTER) {
-		state = RSTATE_NONE;
+	else if(!is_mouse_inside && state == BSTATE_ENTER) {
+		state = BSTATE_NONE;
 		onMouseLeave(x, y); 
 	}
 	
@@ -256,9 +262,9 @@ void Rui::onMouseMoved(int x, int y) {
 	}
 	
 	// check if we are inside an element
-	RElement* e = elements[0];
-	RElement* el;
-	vector<RElement*>::iterator it;
+	Element* e = elements[0];
+	Element* el;
+	vector<Element*>::iterator it;
 	if(is_mouse_down) {
 		it = elements.begin();
 		while(it != elements.end()) {
@@ -270,14 +276,14 @@ void Rui::onMouseMoved(int x, int y) {
 	it = elements.begin();
 	while(it != elements.end()) {
 		el = *it;
-		el->is_mouse_inside = RINSIDE_ELEMENT(el, x, y);
+		el->is_mouse_inside = BINSIDE_ELEMENT(el, x, y);
 	//	printf("B: %d\n", el->is_mouse_inside);
-		if(el->is_mouse_inside && el->state == RSTATE_NONE) {
-			el->state = RSTATE_ENTER;
+		if(el->is_mouse_inside && el->state == BSTATE_NONE) {
+			el->state = BSTATE_ENTER;
 			el->onMouseEnter(x,y);
 		}
-		else if(!el->is_mouse_inside && el->state == RSTATE_ENTER) {
-			el->state = RSTATE_NONE;
+		else if(!el->is_mouse_inside && el->state == BSTATE_ENTER) {
+			el->state = BSTATE_NONE;
 			el->onMouseLeave(x,y);
 		}
 		el->onMouseMoved(x,y);
@@ -289,41 +295,41 @@ void Rui::onMouseMoved(int x, int y) {
 	pmy = y;
 }
 
-void Rui::onMouseDown(int x, int y) {
+void Buttons::onMouseDown(int x, int y) {
 	is_mouse_down = true;
 }
 
-void Rui::onMouseUp(int x, int y) {
+void Buttons::onMouseUp(int x, int y) {
 	triggered_drag = false;
 	printf(">>>>>>>>>>>>>>>> MOUSE UP <<<<<<<<<<<<<<<<<<<\n");
 	is_mouse_down = false;
 }
 
-void Rui::onMouseEnter(int x, int y) {
-	RSET_COLOR(bg_color, 0.0,1.0,0.0, 1.0);
+void Buttons::onMouseEnter(int x, int y) {
+	BSET_COLOR(bg_color, 0.0,1.0,0.0, 1.0);
 	flagChanged();
 
 }
 
-void Rui::onMouseLeave(int x, int y) {
-	RSET_COLOR(bg_color, 0.8,0.4,0.0, 1.0);
+void Buttons::onMouseLeave(int x, int y) {
+	BSET_COLOR(bg_color, 0.8,0.4,0.0, 1.0);
 	flagChanged();
 }
 
-void Rui::onMouseDragged(int dx, int dy) {
+void Buttons::onMouseDragged(int dx, int dy) {
 	printf("dx:%d, dy:%y\n", dx, dy);
 	if(triggered_drag) {
 		setPosition(x+dx, y+dy);
 	}
 }
 
-void Rui::positionElements() {
+void Buttons::positionElements() {
 
 	int xx = x;
 	int yy = y+hh;
-	RElement* el;
+	Element* el;
 	
-	vector<RElement*>::iterator it = elements.begin();
+	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {
 		el = *it;
 		el->x = xx;
@@ -333,9 +339,9 @@ void Rui::positionElements() {
 	}
 }
 
-int Rui::getHeight() {
+int Buttons::getHeight() {
 	int h = 0;
-	vector<RElement*>::iterator it = elements.begin();
+	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {
 		h += (*it)->h;
 		++it;
@@ -343,10 +349,12 @@ int Rui::getHeight() {
 	return h;
 }
 
-void Rui::setPosition(int xx, int yy) {
+void Buttons::setPosition(int xx, int yy) {
 	x = xx;
 	y = yy;
 	positionElements();
 	static_text->setPosition(x,y);
 	flagChanged();
 }
+
+} // namespace buttons
