@@ -140,17 +140,17 @@ GLint Shader::getUniform(const std::string& uniform) {
 }
 
 void Shader::enable() {
-	if(!enabled) {
+	//if(!enabled) {
 		glUseProgram(prog_id); eglGetError();
-		enabled = true;
-	}
+	//	enabled = true;
+	//}
 }
 
 void Shader::disable() {
-	if(enabled) {
+	//if(enabled) {
 		glUseProgram(0); eglGetError();
-		enabled = false;
-	}
+	//	enabled = false;
+	//}
 }
 
 std::string Shader::readFile(std::string path) {

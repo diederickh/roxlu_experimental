@@ -21,23 +21,23 @@ using std::vector;
 using namespace roxlu;
 
 const string BUTTONS_VS = " \
-uniform mat4 projection_matrix; \
-uniform mat4 model_matrix; \
-attribute vec4 pos; \
-attribute vec4 col; \
-varying vec4 vcol; \
-void main() { \
-	vcol = col; \
-	gl_Position = projection_matrix * model_matrix * pos; \
-} \
+	uniform mat4 projection_matrix; \
+	attribute vec4 pos; \
+	attribute vec4 col; \
+	varying vec4 vcol; \
+	void main() { \
+		vcol = col; \
+		gl_Position = projection_matrix * pos; \
+	} \
 ";
 
 
 const string BUTTONS_FS = "  \
-varying vec4 vcol; \
-void main() { \
-	gl_FragColor = vcol; \
-}";
+	varying vec4 vcol; \
+	void main() { \
+		gl_FragColor = vcol; \
+	}\
+";
 
 
 namespace buttons {
@@ -55,12 +55,14 @@ public:
 	void createOrtho(float w, float h);
 	int getHeight();
 		
+	// must be called from your app
 	void onMouseMoved(int x, int y);
 	void onMouseDown(int x, int y);
 	void onMouseUp(int x, int y);
+	void onResize(int newW, int newH);
 	
 	void setPosition(int x, int y);
-	
+
 	
 private:
 	void onMouseEnter(int x, int y);
@@ -70,6 +72,8 @@ private:
 	void generateVertices();
 	void generatePanelVertices();
 	void generateElementVertices(); // create vertices for panel
+	void updateDynamicTexts();
+	void updateStaticTextPositions();
 	void positionElements();
 	void flagChanged();
 	
@@ -77,6 +81,8 @@ private:
 	int y;
 	int w; 
 	int h;
+	int win_w;
+	int win_h;
 	float bg_color[4];	
 	int hh;
 	int state;
@@ -94,11 +100,12 @@ private:
 	
 	static BitmapFont* bmf;
 	Text* static_text;
+	Text* dynamic_text;
 	static Shader gui_shader;
 	vector<Element*> elements;	
 	
 	float ortho[16];
-	float model[16];
+	//float model[16];
 
 	VAO vao;
 	GLuint vbo;

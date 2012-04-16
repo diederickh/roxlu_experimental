@@ -1669,6 +1669,10 @@ struct TextVertices {
 		return i;
 	}
 	
+	void clear() {
+		vertices.clear();
+	}
+	
 	size_t size() {
 		return vertices.size();
 	}
@@ -1711,7 +1715,7 @@ public:
 	BitmapFont();
 	~BitmapFont();
 
-	void buildText(TextVertices& vertices, const std::string& text, Color4* color);
+	void buildText(TextVertices& vertices, const std::string& text, Color4* color, int& outWidth);
 	
 	int getWidth();
 	int getHeight();

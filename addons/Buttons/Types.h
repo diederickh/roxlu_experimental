@@ -72,6 +72,17 @@ public:
 	vector<ButtonVertex> verts;
 };
 
+static int createRect(ButtonVertices& vd, int x, int y, int w, int h, float* topCol, float* botCol) {
+	vd.add(x,y,topCol);
+	vd.add(x+w,y,topCol);
+	vd.add(x+w,y+h,botCol);
+	
+	vd.add(x+w,y+h,botCol);
+	vd.add(x,y+h,botCol);
+	vd.add(x,y,topCol);
+	return 6; // number of vertices
+}
+
 } // namespace buttons
 
 

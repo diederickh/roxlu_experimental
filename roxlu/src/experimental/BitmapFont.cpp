@@ -209,14 +209,15 @@ void BitmapFont::bind() {
 	glBindTexture(GL_TEXTURE_2D, tex); eglGetError();
 }
 
-void BitmapFont::buildText(TextVertices& vertices, const std::string& text, Color4* color) {
+void BitmapFont::buildText(TextVertices& vertices, const std::string& text, Color4* color, int& outWidth) {
 	int x, x1, y, y1, i, len;
 	unsigned char c;
 	y = 0;
 	y1 = y+ch;
-	printf("y1: %d\n", y1);
 	len = text.length();
 	x = 0;
+	int min_x = INT_MAX;
+	int max_x = INT_MIN; 
 	for(i = 0; i < len; ++i) {
 		c = text[i];
 		x1 = x + cw[c];
@@ -230,27 +231,16 @@ void BitmapFont::buildText(TextVertices& vertices, const std::string& text, Colo
 		vertices.add(x1, y1, u1[c], v1[c]);
 		vertices.add(x, y1, u0[c], v1[c]);
 				
-		/*
-		tt.text_verts.push_back(Vec2(x,y));
-		tt.text_verts.push_back(Vec2(x1,y));
-		tt.text_verts.push_back(Vec2(x,y1));
-		
-		tt.text_verts.push_back(Vec2(x1,y));
-		tt.text_verts.push_back(Vec2(x1,y1));
-		tt.text_verts.push_back(Vec2(x,y1));
-		
-		tt.text_uvs.push_back(Vec2(u0[ch], v0[ch]));
-		tt.text_uvs.push_back(Vec2(u1[ch], v0[ch]));
-		tt.text_uvs.push_back(Vec2(u0[ch], v1[ch]));
-		
-		tt.text_uvs.push_back(Vec2(u1[ch], v0[ch]));
-		tt.text_uvs.push_back(Vec2(u1[ch], v1[ch]));
-		tt.text_uvs.push_back(Vec2(u0[ch], v1[ch]));
-		*/
-		
+		if(x < min_x) {
+			min_x = x;
+		}		
+		if(x1 > max_x) {
+			max_x = x1;
+		}
+
 		x = x1;
 	}
-	
+	outWidth = max_x - min_x;
 }
 
 
