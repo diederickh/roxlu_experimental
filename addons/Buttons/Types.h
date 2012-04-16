@@ -17,7 +17,8 @@ using roxlu::Vec2;
 namespace buttons {
 
 enum ElementTypes {
-	BTYPE_SLIDER 	
+	 BTYPE_SLIDER 	
+	,BTYPE_TOGGLE
 };
 
 enum ElementStates {

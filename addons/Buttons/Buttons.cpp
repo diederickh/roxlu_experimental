@@ -15,7 +15,7 @@ Buttons::Buttons(const string& title, int w)
 	,win_w(0)
 	,win_h(0)
 	,header_h(20) // header height (draggable area)
-	,border(2)
+	,border(1)
 	,state(BSTATE_NONE)
 	,is_changed(false)
 	,is_mouse_inside(false)
@@ -62,6 +62,11 @@ Buttons::Buttons(const string& title, int w)
 }
 
 Buttons::~Buttons() {
+	vector<Element*>::iterator it = elements.begin();
+	while(it != elements.end()) {
+		delete *it;
+		++it;
+	}
 }
 
 // http://en.wikipedia.org/wiki/Orthographic_projection_(geometry)
@@ -141,8 +146,9 @@ void Buttons::generateVertices() {
 }
 
 void Buttons::generatePanelVertices() {
+	float border_color[4] = { 1,1,1,0.3};
 	num_panel_vertices = buttons::createRect(vd, x+1, y+1, getPanelWidth(), getPanelHeight(), shadow_color, shadow_color);
-	num_panel_vertices += buttons::createRect(vd, x-border, y-border, getPanelWidth(), getPanelHeight(), header_color_top, header_color_bottom);
+	num_panel_vertices += buttons::createRect(vd, x-border, y-border, getPanelWidth(), getPanelHeight(), border_color, border_color);
 	num_panel_vertices += buttons::createRect(vd, x, y, w, header_h, header_color_top, header_color_bottom);
 	is_changed = false;
 }
@@ -165,7 +171,6 @@ void Buttons::generateElementVertices() {
 		++it;
 	}	
 }
-
 
 void Buttons::draw() {
 	// update projection matrix when viewport size changes.
@@ -239,6 +244,12 @@ Slider& Buttons::addFloat(const string& label, float& value) {
 	return *el;
 }
 
+Toggle& Buttons::addBool(const string& label, bool& value) {
+	buttons::Toggle* el = new Toggle(value);
+	addElement(el, label);
+	return *el;
+}
+
 void Buttons::addElement(Element* el, const string& label) {
 	el->setup();
 	el->label = label;
@@ -270,7 +281,7 @@ void Buttons::onMouseMoved(int x, int y) {
 		onMouseDragged(mdx, mdy);
 	}
 	
-	// check if we are inside an element
+	// check if we are inside an element and dragging...
 	Element* e = elements[0];
 	Element* el;
 	vector<Element*>::iterator it;
@@ -282,6 +293,7 @@ void Buttons::onMouseMoved(int x, int y) {
 		}
 	}
 
+	// call "leave" and "enter"
 	it = elements.begin();
 	while(it != elements.end()) {
 		el = *it;
@@ -330,9 +342,14 @@ void Buttons::onMouseUp(int x, int y) {
 	is_mouse_down = false;
 	vector<Element*>::iterator it = elements.begin();
 	it = elements.begin();
+	Element* el;
 	while(it != elements.end()) {
-		(*it)->onMouseUp(x,y);
-		(*it)->drag_inside = false;
+		el = *it;
+		el->onMouseUp(x,y);
+		if(el->drag_inside && el->is_mouse_inside) {
+			el->onMouseClick(x,y);
+		}	
+		el->drag_inside = false;
 		++it;
 	}
 }

@@ -16,7 +16,6 @@ Text::Text(BitmapFont& bmfont)
 	,win_h(0)
 {
 	if(!initialized) {
-//		shader.load();
 		shader.create(TEXT_VS, TEXT_FS);
 		shader.enable();
 		shader.addUniform("projection_matrix");
@@ -28,8 +27,6 @@ Text::Text(BitmapFont& bmfont)
 	}
 
 	shader.enable();
-//	projection_matrix.orthoTopLeft(ofGetWidth(),ofGetHeight(), 0.1, 10);
-	//shader.uniformMat4fv("projection_matrix", projection_matrix.getPtr());
 	vao.bind();		
 	
 	glGenBuffers(1, &vbo); eglGetError();
@@ -42,8 +39,7 @@ Text::Text(BitmapFont& bmfont)
 	initialized = true;
 	
 	shader.disable();
-	//vao.unbind(); // when I unbind here, I get a EXC_BAD_ACCESS in glDrawArrays in dra()
-	//glBindTexture(GL_TEXTURE_2D, 0);
+	vao.unbind();
 	
 	// create (re-used) model matrix.
 	memset(model, 0, sizeof(float) * 16);
@@ -101,7 +97,6 @@ int Text::add(const float& tx, const float& ty, const string& str, float r, floa
 	text.vertices.clear();
 	bmfont.buildText(text.vertices, str, col, text.w);
 	texts.push_back(text);
-//	printf(">>>>>>>>>>>>>>> %zu\n", texts.size());
 	return texts.size()-1;
 }
 
@@ -117,7 +112,6 @@ int Text::updateText(const int& dx, const string& str, float r, float g, float b
 	
 	if(te.align == TEXT_ALIGN_RIGHT) {
 		te.pos[0] = te.pos[0] + (te.maxx - te.w);
-		//printf("SET WIDTH %d !\n", te.w);
 	}
 	is_changed = true; // make sure we rebuild our internal buffer
 }
@@ -134,14 +128,12 @@ void Text::setTextAlign(const int& textIndex, int align, int maxx) {
 	if(te.align == TEXT_ALIGN_RIGHT) {
 		te.pos[0] = maxx - te.w;
 		te.maxx = maxx;
-//		printf("SET WIDTH!\n");
 	}
 	// TODO: implement LEFT
 }
 
 void Text::updateBuffer() {
 	vertices.clear();
-//	TextVertices tv;
 	vector<TextEntry>::iterator it = texts.begin();
 	while(it != texts.end()) {
 		TextEntry& t = *it;
@@ -151,29 +143,18 @@ void Text::updateBuffer() {
 		++it;			
 	}
 	
-//	for(int i = 0; i < texts.size(); ++i) {
-//		printf("text.start_x = %d, text.end_x = %d, total size:%zu\n", texts[i].start_dx, texts[i].end_dx, vertices.size());
-//	}
-	
 	// do we need to resize the vbo
 	if(vertices.numBytes() > buffer_size) {
 		vao.bind();
 		glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
-	
 		buffer_size = vertices.numBytes() * 2;
-		printf("How much we need: %zu, how much we do: %zu\n", vertices.numBytes(), buffer_size);
 		glBufferData(GL_ARRAY_BUFFER, buffer_size, vertices.getPtr(), GL_STREAM_COPY); eglGetError();
 		setVertexAttributes();
-		printf("Bigger!\n");
 	}
 	else {
 		glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
-	
-		printf("SUB-DATA update numBytes:%zu, num vertices: %zu\n", vertices.numBytes(), vertices.size());
 		glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.numBytes(), vertices.getPtr()); eglGetError();
 	}
-
-
 }
 
 void Text::debugDraw() {
@@ -197,11 +178,9 @@ void Text::debugDraw() {
 	bmfont.bind();
 	ofEnableAlphaBlending();
 	int h = bmfont.ch;
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 	glColor4f(1,1,1,1); // check if this is necessary
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
-//	glDepthFunc( GL_LEQUAL);
-	//glScalef(3,3,3);
 	int prev = 0;
 	vector<TextEntry>::iterator it =  texts.begin();
 	while(it != texts.end()) {
@@ -211,7 +190,6 @@ void Text::debugDraw() {
 		glBegin(GL_TRIANGLES);
 		int start = text.start_dx;
 		int end = start + text.end_dx;
-		//printf("Start: %d, End:%d\n", start, end);
 		for(int i = start; i < end; ++i) {
 			TextVertex& tv = vertices.vertices[i];
 			glTexCoord2f(tv.uv[0], tv.uv[1]);
@@ -240,11 +218,7 @@ void Text::draw() {
 		win_w = vp[2];
 		win_h = vp[3];
 		createOrtho(win_w, win_h);
-		printf("Ortho update\n");
-		
 	}
-//	printf("%d, %d, %d, %d\n", m_viewport[0],m_viewport[1],m_viewport[2],m_viewport[3]);
-
 
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
@@ -252,10 +226,7 @@ void Text::draw() {
 	shader.enable();
 
 	glEnable(GL_BLEND);
-//
-
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	glEnable(GL_TEXTURE_2D); eglGetError();
 	glActiveTexture(GL_TEXTURE0); eglGetError();
 	bmfont.bind();
@@ -268,21 +239,13 @@ void Text::draw() {
 		model[12] = x+texts[i].pos[0] ;
 		model[13] = y+texts[i].pos[1] ;
 		model[14] = -1;
-		//printf("Start: %d, End:%d\n", texts[i].start_dx, end);
-		//printf("Drag at: %f, %f\n", model[12], model[13]);
+
 		glUniform4fv(shader.getUniform("txtcol"), 1, te.col);
 		glUniformMatrix4fv(shader.getUniform("model_matrix"),1, false, model);
-//		shader.uniformMat4fv("model_matrix", model);
 		int start = te.start_dx;
-	//	printf("Start: %d, end: %d\n", start, end);
-		//glDrawArrays(GL_POINTS, start, end); eglGetError();
 		glDrawArrays(GL_TRIANGLES, texts[i].start_dx, texts[i].end_dx); eglGetError();
-//		glDrawArrays(GL_TRIANGLES, texts[i].start_dx, end);
 	}
-	//printf("---\n");
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	
-	
 }
 
 void Text::setPosition(const int& xx, const int& yy) {
@@ -293,12 +256,6 @@ void Text::setPosition(const int& xx, const int& yy) {
 void Text::translate(const int& xx, const int& yy) {
 	x += xx;
 	y += yy;
-//	vector<TextEntry>::iterator it = texts.begin();
-//	while(it != texts.end()) {
-//		(*it).pos[0] += x;
-//		(*it).pos[1] += y;
-//		++it;
-//	}
 }
 
 } // roxlu

@@ -1635,7 +1635,7 @@ static const unsigned char medium_font[] =
 struct TextVertex {
 	float pos[2];
 	float uv[2];
-//	float color[4];
+
 	TextVertex() {
 		pos[0] = 0;
 		pos[1] = 0;
@@ -1653,14 +1653,6 @@ struct TextVertex {
 		uv[1] = v;
 		return *this;
 	}
-	
-//	TextVertex& setColor(float r, float g, float b, float a = 1.0) {
-//		color[0] = r;
-//		color[1] = g;
-//		color[2] = b;
-//		color[3] = a;
-//		return *this;
-//	}
 	
 	float* getPtr() {
 		return &pos[0];
@@ -1695,10 +1687,7 @@ struct TextVertices {
 	}
 	
 	size_t append(const std::vector<TextVertex>& extra) {
-		printf("APPEND: %zu, NOW: %zu\n", extra.size(), vertices.size());
 		std::copy(extra.begin(), extra.end(), std::back_inserter(vertices));
-		printf("NOW: %zu\n",vertices.size());
-		printf("------------\n");
 		return size();
 	}
 	

@@ -16,6 +16,7 @@
 #include "Types.h"
 #include "Element.h"
 #include "Slider.h"
+#include "Toggle.h"
 #include "Storage.h"
 
 using std::vector;
@@ -58,6 +59,8 @@ public:
 	void load(const string& file);
 	
 	Slider& addFloat(const string& label, float& value);
+	Toggle& addBool(const string& label, bool& value);
+	
 	void createOrtho(float w, float h);
 	int getElementsHeight();
 	int getPanelHeight();

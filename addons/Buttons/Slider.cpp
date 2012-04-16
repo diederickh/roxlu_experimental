@@ -13,17 +13,12 @@ Slider::Slider(float& val)
 {
 	BSET_COLOR(bg_top_color, 0.0, 0.17, 0.21, 1.0);
 	BSET_COLOR(bg_bottom_color, 0.0, 0.17, 0.21, 1.0);
+	h = 20;
 }
 
 Slider::~Slider() {
 }
 
-void Slider::setup() {
-	h = 20;
-}
-
-void Slider::draw() {
-}
 
 void Slider::onMouseEnter(int mx, int my) {
 	BSET_COLOR(bg_top_color, 0.0, 0.41, 0.39, 1.0);
@@ -54,23 +49,22 @@ void Slider::onMouseDragged(int mx, int my, int dx, int dy) {
 		value = minv + (p * (maxv-minv));
 		needsRedraw();
 		needsTextUpdate();
-	//	printf("local_x: %d, x:%d, maxx:%d, perc:%f\n", local_x, x, (x+w), perc);
-		
 	}
 }
 
-void Slider::update() {
+void Slider::setValue(const float& v) {
+	value = v;
+	p = (v/maxv);
 }
 
 void Slider::generateStaticText(Text& txt) {
 	label_dx = txt.add(x+4, y+2, label, 0.9, 0.9, 0.9, 0.9);
 }
 
-
 void Slider::generateDynamicText(Text& txt) {
-	txtval_dx = txt.add(x,y+2, "dynamic",0,0.48,0.98,0.9);
+	txtval_dx = txt.add(x,y+2, "0.0",0,0.48,0.98,0.9);
 	txt.setTextAlign(txtval_dx, TEXT_ALIGN_RIGHT, x+(w - 5));
-};
+}
 
 void Slider::updateTextPosition(Text& staticText, Text& dynamicText) {
 	staticText.setTextPosition(label_dx, x+4, y+2);
@@ -81,15 +75,14 @@ void Slider::updateDynamicText(Text& txt) {
 	txt.setTextPosition(txtval_dx, x, y+2);
 	char buf[25];
 	sprintf(buf, "%5.3f", value);
-	printf("%f, %f\n", value, p);
 	txt.updateText(txtval_dx, buf,0,0.48,0.98,0.9);
 }
 
 void Slider::generateVertices(ButtonVertices& vd) {
 	num_vertices = buttons::createRect(vd, x, y, w, h, bg_top_color, bg_bottom_color);
 
-	BSET_COLOR(bar_filled_color, 0.0, 1.0, 0.0, 0.8);
-	BSET_COLOR(bar_empty_color, 0.0, 0.0, 0.0, 0.8);
+	BSET_COLOR(bar_filled_color, 0.0,0.8,0.4,1.0);
+	BSET_COLOR(bar_empty_color, 0.0,0.8,0.4,0.1);
 
 	int bar_h = 2; // bar height
 	int bar_filled_w = w * p;
@@ -99,24 +92,6 @@ void Slider::generateVertices(ButtonVertices& vd) {
 
 	num_vertices += buttons::createRect(vd, bar_x, bar_y, bar_filled_w, bar_h, bar_filled_color, bar_filled_color);
 	num_vertices += buttons::createRect(vd, bar_x + bar_filled_w, bar_y, bar_empty_w, bar_h, bar_empty_color, bar_empty_color);
-//	num_vertices = 2 * num_vert; // two rects
-//	vd.add(x,y,bg_top_color);
-//	vd.add(x+w,y,bg_top_color);
-//	vd.add(x+w,y+h,bg_bottom_color);
-//	
-//	vd.add(x+w,y+h,bg_bottom_color);
-//	vd.add(x,y+h,bg_bottom_color);
-//	vd.add(x,y,bg_top_color);
-	
-		
-	
-}
-void Slider::generateVerticesSlider(ButtonVertices& vd) {
-
-//	int bottomh = bh+h; // bottom	
-	
-//	vd.add(bx, by, bar
-	
 }
 
 

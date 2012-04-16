@@ -16,9 +16,8 @@ public:
 	Element(int type);
 	~Element();
 	
-	virtual void setup() = 0;
-	virtual void update() = 0;
-	virtual void draw() = 0;
+	virtual void setup(){}
+	virtual void update(){}
 	virtual void generateStaticText(Text& staticText) {}
 	virtual void updateTextPosition(Text& staticText, Text& dynText) {}
 	virtual void generateDynamicText(Text& dynText) {};
@@ -51,8 +50,8 @@ public:
 	bool needs_text_update;
 	bool drag_inside; // did the drag started from inside the element.
 	
-	int start_dx;
-	int end_dx;
+//	int start_dx;
+//	int end_dx;
 	int num_vertices;
 };
 

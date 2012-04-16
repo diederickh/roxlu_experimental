@@ -143,7 +143,6 @@ bool BitmapFont::generate(const unsigned char* src, int imgW, int imgH) {
 				v0[c+32] = (float(r*(h+MARGIN_Y))+dv)/float(th);
 				v1[c+32] = (float(r*(h+MARGIN_Y)+h)+dv)/float(th);
 				cw[c+32] = x1[c]-x0[c]+1;
-				//printf("%d\n", cw[c+32]);
 				xx += MARGIN_X;
 			}
 		}
@@ -162,20 +161,6 @@ bool BitmapFont::generate(const unsigned char* src, int imgW, int imgH) {
 	glGenTextures(1, &tex); eglGetError();
 	glBindTexture(GL_TEXTURE_2D, tex); eglGetError();
 	
-	//
-//	glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_FALSE);
-//    glPixelStorei(GL_UNPACK_LSB_FIRST, GL_FALSE);
-//    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-//    glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-//    glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-//    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-//    glPixelTransferf(GL_ALPHA_SCALE, 1);
-//    glPixelTransferf(GL_ALPHA_BIAS, 0);
-//    glPixelTransferf(GL_RED_BIAS, 1);
-//    glPixelTransferf(GL_GREEN_BIAS, 1);
-//    glPixelTransferf(GL_BLUE_BIAS, 1);
-	//
-	
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP); eglGetError(); 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP); eglGetError();
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); eglGetError();
@@ -191,17 +176,6 @@ bool BitmapFont::generate(const unsigned char* src, int imgW, int imgH) {
 		,GL_UNSIGNED_BYTE
 		,buffer
 	); eglGetError();
-	
-	//
-//  glBindTexture(GL_TEXTURE_2D, 0);
-//    glPixelTransferf(GL_ALPHA_BIAS, 0);
-//    glPixelTransferf(GL_RED_BIAS, 0);
-//    glPixelTransferf(GL_GREEN_BIAS, 0);
-//    glPixelTransferf(GL_BLUE_BIAS, 0);
-	//
-//,GL_RGBA
-	printf("h = %d, hh = %d, nb_row:%d, w:%d\n", h, hh, nb_row,w);
-	
 	return true;
 }
 
@@ -221,8 +195,7 @@ void BitmapFont::buildText(TextVertices& vertices, const std::string& text, floa
 	for(i = 0; i < len; ++i) {
 		c = text[i];
 		x1 = x + cw[c];
-		//printf("x: %f, y:%f\n", x, y);
-		//printf("SET: %d, %d, %d\n", x, y, int(c));
+
 		vertices.add(x, y, u0[c], v0[c]);
 		vertices.add(x1, y, u1[c], v0[c]);
 		vertices.add(x, y1, u0[c], v1[c]);
@@ -237,7 +210,6 @@ void BitmapFont::buildText(TextVertices& vertices, const std::string& text, floa
 		if(x1 > max_x) {
 			max_x = x1;
 		}
-
 		x = x1;
 	}
 	outWidth = max_x - min_x;

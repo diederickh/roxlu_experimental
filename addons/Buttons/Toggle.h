@@ -1,41 +1,35 @@
-#ifndef ROXLU_BSLIDERH
-#define ROXLU_BSLIDERH
+#ifndef ROXLU_BTOGGLEH
+#define ROXLU_BTOGGLEH
 
-#include "ofMain.h"
 #include "Types.h"
 #include "Element.h"
 
 namespace buttons {
 
-class Slider : public Element {
+class Toggle : public Element {
 public:	
-	Slider(float& val);
-	~Slider();
+	Toggle(bool& val);
+	~Toggle();
 
 	void generateStaticText(Text& txt);
 	void updateTextPosition(Text& staticText, Text& dynamicText);
-	void generateDynamicText(Text& dynText);
-	void updateDynamicText(Text& dynText);
+	
 	void generateVertices(ButtonVertices& shapeVertices);
-
-
+	
+	void onMouseDown(int mx, int my);
 	void onMouseUp(int mx, int my);
 	void onMouseEnter(int mx, int my);
 	void onMouseLeave(int mx, int my);	
-	void onMouseDragged(int mx, int my, int dx, int dy);
+	void onMouseClick(int mx, int my);
 
 	void setValue(const float& v);
 
-	float& value;
-	float minv; // min value
-	float maxv; // max value 
-	float p; // current percentage
+	bool& value;
 	
 	float bg_top_color[4];
 	float bg_bottom_color[4];
-	float bar_filled_color[4];
-	float bar_empty_color[4];
-	int txtval_dx;
+	float toggle_off_color[4];
+	float toggle_on_color[4];
 	int label_dx;
 };
 

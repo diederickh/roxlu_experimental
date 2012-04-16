@@ -13,8 +13,8 @@ Element::Element(int type)
 	,needs_text_update(false)
 	,needs_redraw(false)
 	,state(BSTATE_NONE)
-	,start_dx(0)
-	,end_dx(0)
+//	,start_dx(0)
+//	,end_dx(0)
 	,type(type)
 {
 }

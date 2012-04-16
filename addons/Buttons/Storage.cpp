@@ -29,6 +29,11 @@ bool Storage::save(const string& file, Buttons* buttons) {
 				ofs.write((char*)&slider->value, sizeof(float));
 				break;
 			}
+			case BTYPE_TOGGLE: {
+				Toggle* toggle = static_cast<Toggle*>((*it));
+				ofs.write((char*)&toggle->value, sizeof(bool));
+				break;
+			}
 			default: {
 				printf("Cannot store unhandled type: %d\n", e.type);
 				break;
@@ -69,6 +74,12 @@ bool Storage::load(const string& file, Buttons* buttons) {
 				slider->setValue(slider->value);
 				slider->needsRedraw();
 				slider->needsTextUpdate();
+				break;
+			}
+			case BTYPE_TOGGLE: {
+				Toggle* toggle = static_cast<Toggle*>(b.elements[i]);
+				ifs.read((char*)&toggle->value, sizeof(bool));
+				toggle->needsRedraw();
 				break;
 			}
 			default: {
