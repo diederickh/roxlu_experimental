@@ -209,7 +209,7 @@ void BitmapFont::bind() {
 	glBindTexture(GL_TEXTURE_2D, tex); eglGetError();
 }
 
-void BitmapFont::buildText(TextVertices& vertices, const std::string& text, Color4* color, int& outWidth) {
+void BitmapFont::buildText(TextVertices& vertices, const std::string& text, float* color, int& outWidth) {
 	int x, x1, y, y1, i, len;
 	unsigned char c;
 	y = 0;

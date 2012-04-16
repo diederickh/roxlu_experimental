@@ -6,15 +6,16 @@ Shader Buttons::gui_shader = Shader();
 bool Buttons::shaders_initialized = false;
 BitmapFont* Buttons::bmf = NULL;
 
-Buttons::Buttons()
+Buttons::Buttons(const string& title, int w)
 	:is_mouse_down(false)
 	,first_run(true)
 	,x(0)
 	,y(0)
-	,w(250)
+	,w(w)
 	,win_w(0)
 	,win_h(0)
-	,hh(20) // header height (draggable area)
+	,header_h(20) // header height (draggable area)
+	,border(2)
 	,state(BSTATE_NONE)
 	,is_changed(false)
 	,is_mouse_inside(false)
@@ -23,6 +24,8 @@ Buttons::Buttons()
 	,mdy(0)
 	,pmx(0)
 	,pmy(0)
+	,title(title)
+	,num_panel_vertices(0) 
 {
 	if(!shaders_initialized) {
 		bmf = new BitmapFont();
@@ -51,7 +54,11 @@ Buttons::Buttons()
 	createOrtho(ofGetWidth(), ofGetHeight());
 	
 	// top draggable handle
-	BSET_COLOR(bg_color, 0.8,0.4,0,1.0);
+	BSET_COLOR(header_color_top, 0.07,0.07,0.07,1.0);
+	BSET_COLOR(header_color_bottom, 0.1,0.1,0.1,0.8);
+	BSET_COLOR(shadow_color, 0.1, 0.1, 0.1, 0.1);
+	
+	title_dx = static_text->add(x+5, y+2, title);
 }
 
 Buttons::~Buttons() {
@@ -127,7 +134,6 @@ void Buttons::update() {
 	}
 }
 
-
 void Buttons::generateVertices() {
 	vd.clear();
 	generatePanelVertices();
@@ -135,14 +141,9 @@ void Buttons::generateVertices() {
 }
 
 void Buttons::generatePanelVertices() {
-	vd.add(x,y,bg_color);
-	vd.add(x+w,y,bg_color);
-	vd.add(x+w,y+hh,bg_color);
-	
-	vd.add(x+w,y+hh,bg_color);
-	vd.add(x,y+hh,bg_color);
-	vd.add(x,y,bg_color);
-	
+	num_panel_vertices = buttons::createRect(vd, x+1, y+1, getPanelWidth(), getPanelHeight(), shadow_color, shadow_color);
+	num_panel_vertices += buttons::createRect(vd, x-border, y-border, getPanelWidth(), getPanelHeight(), header_color_top, header_color_bottom);
+	num_panel_vertices += buttons::createRect(vd, x, y, w, header_h, header_color_top, header_color_bottom);
 	is_changed = false;
 }
 
@@ -186,8 +187,8 @@ void Buttons::draw() {
 	
 	// draw header.
 	int start = 0;
-	int end = 6;
-	glDrawArrays(GL_TRIANGLES, start, end); eglGetError();
+	int end = num_panel_vertices;
+	glDrawArrays(GL_TRIANGLES, start, num_panel_vertices); eglGetError();
 
 	start = start + end;
 	
@@ -233,7 +234,7 @@ void Buttons::debugDraw() {
 }
 
 Slider& Buttons::addFloat(const string& label, float& value) {
-	int h = getHeight();
+	int h = getElementsHeight();
 	buttons::Slider* el = new Slider(value);
 	el->setup();
 	el->label = label;
@@ -332,13 +333,15 @@ void Buttons::onMouseUp(int x, int y) {
 }
 
 void Buttons::onMouseEnter(int x, int y) {
-	BSET_COLOR(bg_color, 0.0,1.0,0.0, 1.0);
+	BSET_COLOR(header_color_top, 0.07,0.07,0.07,1.0);
+	BSET_COLOR(header_color_bottom, 0.2,0.2,0.2,0.8);
 	flagChanged();
 
 }
 
 void Buttons::onMouseLeave(int x, int y) {
-	BSET_COLOR(bg_color, 0.8,0.4,0.0, 1.0);
+	BSET_COLOR(header_color_top, 0.07,0.07,0.07,1.0);
+	BSET_COLOR(header_color_bottom, 0.1,0.1,0.1,0.8);
 	flagChanged();
 }
 
@@ -354,7 +357,7 @@ void Buttons::onResize(int nw, int nh) {
 
 void Buttons::positionElements() {
 	int xx = x;
-	int yy = y+hh;
+	int yy = y+header_h;
 	Element* el;
 	
 	vector<Element*>::iterator it = elements.begin();
@@ -367,7 +370,15 @@ void Buttons::positionElements() {
 	}
 }
 
-int Buttons::getHeight() {
+int Buttons::getPanelHeight() {
+	return header_h + getElementsHeight() + border * 2;
+}
+
+int Buttons::getPanelWidth() {
+	return w + border*2;
+}
+
+int Buttons::getElementsHeight() {
 	int h = 0;
 	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {
@@ -382,11 +393,11 @@ void Buttons::setPosition(int xx, int yy) {
 	y = yy;
 	positionElements();
 	updateStaticTextPositions();
-	//generateVertices();
-	//static_text->setPosition(x,y);
-	//dynamic_text->setPosition(x,y);
+
+	static_text->setTextPosition(title_dx, x + 5, y + 2);
 	flagChanged();
 }
+
 void Buttons::updateStaticTextPositions() {
 	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {

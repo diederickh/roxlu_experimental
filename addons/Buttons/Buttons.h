@@ -44,7 +44,7 @@ namespace buttons {
 
 class Buttons {
 public:
-	Buttons();
+	Buttons(const string& title, int w);
 	~Buttons();
 	
 	void update();
@@ -53,7 +53,9 @@ public:
 	
 	Slider& addFloat(const string& label, float& value);
 	void createOrtho(float w, float h);
-	int getHeight();
+	int getElementsHeight();
+	int getPanelHeight();
+	int getPanelWidth();
 		
 	// must be called from your app
 	void onMouseMoved(int x, int y);
@@ -83,8 +85,11 @@ private:
 	int h;
 	int win_w;
 	int win_h;
-	float bg_color[4];	
-	int hh;
+	float header_color_top[4];	
+	float header_color_bottom[4];
+	float shadow_color[4];
+	int header_h;
+	int border;
 	int state;
 	bool is_changed;
 	bool is_mouse_inside;
@@ -93,7 +98,10 @@ private:
 	int mdy; // drag y
 	int pmx; // prev mouse x
 	int pmy; // prev mouse y;
+	string title;
+	int title_dx; // static text index
 	ButtonVertices vd;
+	int num_panel_vertices; // number of vertices used by the panel itself
 	
 	bool is_mouse_down;
 	static bool shaders_initialized;

@@ -63,7 +63,7 @@ void Slider::update() {
 }
 
 void Slider::generateStaticText(Text& txt) {
-	label_dx = txt.add(x+4, y+2, label);
+	label_dx = txt.add(x+4, y+2, label, 0.9, 0.9, 0.9, 0.9);
 }
 
 
@@ -78,7 +78,7 @@ void Slider::updateTextPosition(Text& staticText, Text& dynamicText) {
 }
 
 void Slider::updateDynamicText(Text& txt) {
-	txt.setTextPosition(label_dx, x, y+2);
+	txt.setTextPosition(txtval_dx, x, y+2);
 	char buf[25];
 	sprintf(buf, "%5.3f", value);
 	printf("%f, %f\n", value, p);

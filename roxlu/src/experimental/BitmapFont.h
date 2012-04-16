@@ -3,7 +3,6 @@
 
 #include "OpenGL.h"
 #include "Vec2.h"
-#include "Color.h"
 #include "Error.h"
 #include <string>
 #include <vector>
@@ -1634,27 +1633,32 @@ static const unsigned char medium_font[] =
 
 
 struct TextVertex {
-	Vec2 pos;
-	Vec2 uv;
-	Color4 color;
+	float pos[2];
+	float uv[2];
+	float color[4];
 	
 	TextVertex& setPos(float x, float y) {
-		pos.set(x,y);
+		pos[0] = x;
+		pos[1] = y;
 		return *this;
 	}
 	
 	TextVertex& setUV(float u, float v) {
-		uv.set(u,v);
+		uv[0] = u;
+		uv[1] = v;
 		return *this;
 	}
 	
 	TextVertex& setColor(float r, float g, float b, float a = 1.0) {
-		color.set(r,g,b,a);
+		color[0] = r;
+		color[1] = g;
+		color[2] = b;
+		color[3] = a;
 		return *this;
 	}
 	
 	float* getPtr() {
-		return &pos.x;
+		return &pos[0];
 	}
 };
 
@@ -1715,7 +1719,7 @@ public:
 	BitmapFont();
 	~BitmapFont();
 
-	void buildText(TextVertices& vertices, const std::string& text, Color4* color, int& outWidth);
+	void buildText(TextVertices& vertices, const std::string& text, float* color, int& outWidth);
 	
 	int getWidth();
 	int getHeight();

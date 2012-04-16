@@ -87,10 +87,8 @@ void Text::createOrtho(float winW, float winH) {
 
 int Text::add(const float& tx, const float& ty, const string& str, float r, float g, float b, float a) {
 	is_changed = true;
-	printf("ADD TEXT: %f, %f (%s)\n", tx, ty, str.c_str());
-	Color4 col(1,1,1,1); // TODO: clean up, we want a float4 
+	float col[4] = {1,1,1,1}; 
 	TextEntry text;
-//	text.model_matrix.setPosition(x, y, 0);
 	text.pos[0] = tx;
 	text.pos[1] = ty;
 	text.col[0] = r;
@@ -98,22 +96,21 @@ int Text::add(const float& tx, const float& ty, const string& str, float r, floa
 	text.col[2] = b;
 	text.col[3] = a;
 	
-	bmfont.buildText(text.vertices, str, &col, text.w);
+	bmfont.buildText(text.vertices, str, col, text.w);
 	texts.push_back(text);
+	printf(">>>>>>>>>>>>>>> %s, %zu\n",str.c_str(), texts.size());
 	return texts.size()-1;
 }
 
 int Text::updateText(const int& dx, const string& str, float r, float g, float b, float a) {
 	TextEntry& te = texts.at(dx);
-//	te.pos[0] = tx;
-//	te.pos[1] = ty;
 	te.col[0] = r;
 	te.col[1] = g;
 	te.col[2] = b;
 	te.col[3] = a;
-	Color4 col(1,1,1,1); // TODO: clean up, we want a float4 
+	float col[4] = {1,1,1,1}; 
 	te.vertices.clear();
-	bmfont.buildText(te.vertices, str, &col, te.w);
+	bmfont.buildText(te.vertices, str, col, te.w);
 	
 	if(te.align == TEXT_ALIGN_RIGHT) {
 		te.pos[0] = te.pos[0] + (te.maxx - te.w);
@@ -210,8 +207,8 @@ void Text::debugDraw() {
 		//printf("Start: %d, End:%d\n", start, end);
 		for(int i = start; i < end; ++i) {
 			TextVertex& tv = vertices.vertices[i];
-			glTexCoord2f(tv.uv.x, tv.uv.y);
-			glVertex2f(tv.pos.x, tv.pos.y);
+			glTexCoord2f(tv.uv[0], tv.uv[1]);
+			glVertex2f(tv.pos[0], tv.pos[1]);
 		}
 
 		glEnd();
