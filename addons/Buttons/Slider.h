@@ -34,6 +34,7 @@ public:
 	float bg_top_color[4];
 	float bg_bottom_color[4];
 	float bar_filled_color[4];
+	float bar_filled_bottom[4];
 	float bar_empty_color[4];
 	int txtval_dx;
 	int label_dx;

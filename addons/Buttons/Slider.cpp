@@ -13,7 +13,7 @@ Slider::Slider(float& val)
 {
 	BSET_COLOR(bg_top_color, 0.0, 0.17, 0.21, 1.0);
 	BSET_COLOR(bg_bottom_color, 0.0, 0.17, 0.21, 1.0);
-	h = 20;
+	h = 22;
 }
 
 Slider::~Slider() {
@@ -82,15 +82,16 @@ void Slider::generateVertices(ButtonVertices& vd) {
 	num_vertices = buttons::createRect(vd, x, y, w, h, bg_top_color, bg_bottom_color);
 
 	BSET_COLOR(bar_filled_color, 0.0,0.8,0.4,1.0);
+	BSET_COLOR(bar_filled_bottom, 0.0,0.4,0.2,1.0);
 	BSET_COLOR(bar_empty_color, 0.0,0.8,0.4,0.1);
 
-	int bar_h = 2; // bar height
+	int bar_h = 4; // bar height
 	int bar_filled_w = w * p;
 	int bar_empty_w = w * (1.0 - p);
 	int bar_x = x; // start x
 	int bar_y = (y + h) - bar_h; // start y
 
-	num_vertices += buttons::createRect(vd, bar_x, bar_y, bar_filled_w, bar_h, bar_filled_color, bar_filled_color);
+	num_vertices += buttons::createRect(vd, bar_x, bar_y, bar_filled_w, bar_h, bar_filled_color, bar_filled_bottom);
 	num_vertices += buttons::createRect(vd, bar_x + bar_filled_w, bar_y, bar_empty_w, bar_h, bar_empty_color, bar_empty_color);
 }
 
