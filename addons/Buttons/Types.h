@@ -19,6 +19,7 @@ namespace buttons {
 enum ElementTypes {
 	 BTYPE_SLIDER 	
 	,BTYPE_TOGGLE
+	,BTYPE_BUTTON
 };
 
 enum ElementStates {
@@ -26,6 +27,8 @@ enum ElementStates {
 	,BSTATE_ENTER
 	,BSTATE_LEAVE
 };
+
+//typedef void(*ButtonCallback)(int); 
 
 class ButtonVertex {
 

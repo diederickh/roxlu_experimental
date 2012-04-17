@@ -16,11 +16,11 @@ Toggle::~Toggle() {
 }
 
 void Toggle::generateStaticText(Text& txt) {
-	label_dx = txt.add(x+16, y+2, label, 0.9, 0.9, 0.9, 0.9);
+	label_dx = txt.add(x+20, y+2, label, 0.9, 0.9, 0.9, 0.9);
 }
 
 void Toggle::updateTextPosition(Text& staticText, Text& dynamicText) {	
-	staticText.setTextPosition(label_dx, x+16, y+2);
+	staticText.setTextPosition(label_dx, x+20, y+2);
 }
 
 void Toggle::generateVertices(ButtonVertices& vd) { 
@@ -30,7 +30,7 @@ void Toggle::generateVertices(ButtonVertices& vd) {
 		c = toggle_on_color;
 	}
 	
-	num_vertices += buttons::createRect(vd, x+2, y+4, 10, 10, c, c);
+	num_vertices += buttons::createRect(vd, x+5, y+4, 10, 10, c, toggle_off_color);
 }
 
 void Toggle::onMouseDown(int mx, int my) {

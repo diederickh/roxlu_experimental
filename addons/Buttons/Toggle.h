@@ -13,7 +13,6 @@ public:
 
 	void generateStaticText(Text& txt);
 	void updateTextPosition(Text& staticText, Text& dynamicText);
-	
 	void generateVertices(ButtonVertices& shapeVertices);
 	
 	void onMouseDown(int mx, int my);

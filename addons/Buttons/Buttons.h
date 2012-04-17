@@ -17,6 +17,7 @@
 #include "Element.h"
 #include "Slider.h"
 #include "Toggle.h"
+#include "Button.h"
 #include "Storage.h"
 
 using std::vector;
@@ -60,6 +61,13 @@ public:
 	
 	Slider& addFloat(const string& label, float& value);
 	Toggle& addBool(const string& label, bool& value);
+
+	template<class T>
+	Button<T>& addButton(const std::string& label, int id,  T* cb) {
+		buttons::Button<T>* el = new Button<T>(id, cb);
+		addElement(el, label);
+		return *el;
+	}
 	
 	void createOrtho(float w, float h);
 	int getElementsHeight();

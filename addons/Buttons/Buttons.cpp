@@ -250,6 +250,11 @@ Toggle& Buttons::addBool(const string& label, bool& value) {
 	return *el;
 }
 
+
+//Button& Buttons::addButton(const string& label) {
+//
+//}
+
 void Buttons::addElement(Element* el, const string& label) {
 	el->setup();
 	el->label = label;
@@ -324,10 +329,12 @@ void Buttons::onMouseDown(int x, int y) {
 	Element* el;
 	vector<Element*>::iterator it = elements.begin();
 	it = elements.begin();
+	bool inside_el = false;
 	while(it != elements.end()) {
 		el = *it;
+		el->is_mouse_down_inside = BINSIDE_ELEMENT(el, x, y);
 		el->onMouseDown(x,y);
-		if(is_mouse_down && BINSIDE_ELEMENT(el, x, y)) {
+		if(is_mouse_down && el->is_mouse_down_inside) {
 			el->drag_inside = true;
 		}
 		else {
@@ -345,10 +352,12 @@ void Buttons::onMouseUp(int x, int y) {
 	Element* el;
 	while(it != elements.end()) {
 		el = *it;
+		el->is_mouse_down_inside = false;
 		el->onMouseUp(x,y);
 		if(el->drag_inside && el->is_mouse_inside) {
 			el->onMouseClick(x,y);
-		}	
+		}
+			
 		el->drag_inside = false;
 		++it;
 	}
