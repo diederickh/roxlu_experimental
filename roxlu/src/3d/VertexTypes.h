@@ -60,6 +60,10 @@ struct VertexPT : public Vertex  {
 		tex.set(u,v);
 		return *this;
 	}
+	
+	const float* getPtr() {
+		return pos.getPtr();
+	}
 };
 
 struct VertexPN : public Vertex  {
@@ -218,13 +222,33 @@ public:
 		verts.push_back(p);
 		return verts.size()-1;
 	}
-	void clear()		{ 		verts.clear();						}
-	size_t numBytes() 	{		return sizeof(VertexPT) * size();  	}
-	size_t size() 		{		return verts.size();				}
-	float* getPtr() 	{		return &verts[0].pos.x;				}
+	void clear() {
+		verts.clear();					
+	}
 	
-	vector<VertexPT>::iterator begin() 	{	return verts.begin();	}
-	vector<VertexPT>::iterator end() 	{	return verts.end();		}
+	size_t numBytes() {		
+		return sizeof(VertexPT) * size();  	
+	}
+	
+	size_t size() {	
+		return verts.size();
+	}
+	
+	float* getPtr() {
+		return &verts[0].pos.x;
+	}
+	
+	vector<VertexPT>::iterator begin() {	
+		return verts.begin();	
+	}
+	
+	vector<VertexPT>::iterator end() {
+		return verts.end();		
+	}
+	
+	VertexPT& operator[](const unsigned int dx) {
+		return verts[dx];
+	}
 	
 	vector<VertexPT> verts;
 };

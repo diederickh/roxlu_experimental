@@ -77,10 +77,10 @@ public:
 	// Streams
 	friend std::ostream& operator<<(std::ostream& os, const Vec2& v);		
 	friend std::istream& operator>>(std::istream& is, Vec2& v);		
-			
+	void print();
+	
 	float x;
 	float y;
-	float z;
 };
 
 // -----------------------------------------------------------------------------
@@ -170,6 +170,10 @@ inline std::istream& operator>>(std::istream& is, Vec2& v) {
 	is.ignore(2);
 	is >> v.y;
 	return is;
+}
+
+inline void Vec2::print() {
+	printf("%f, %f\n", x, y);
 }
 
 } // roxlu
