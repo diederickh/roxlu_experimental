@@ -98,6 +98,8 @@ private:
 	void positionElements();
 	void flagChanged();
 	
+	vector<Element*> elements;
+		
 	int x; // TODO: do we create a generic "interactive object" ? 
 	int y;
 	int w; 
@@ -129,7 +131,7 @@ private:
 	Text* static_text;
 	Text* dynamic_text;
 	static Shader gui_shader;
-	vector<Element*> elements;	
+	
 	
 	float ortho[16];
 	//float model[16];
