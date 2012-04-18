@@ -1,10 +1,13 @@
 #ifndef ROXLU_VERTEXTYPESH
 #define ROXLU_VERTEXTYPESH
 
+#include <vector>
 #include "Vec4.h"
 #include "Vec3.h"
 #include "Vec2.h"
 #include "../Graphics/Color.h"
+
+using std::vector;
 
 namespace roxlu {
 
@@ -42,6 +45,7 @@ struct VertexP : public Vertex {
 		pos.set(x,y,z);
 	}
 };
+
 
 struct VertexPT : public Vertex  {
 	Vec3 pos;
@@ -154,6 +158,78 @@ struct VertexPTNTB : public Vertex  { // can be used for normal mapping
 	Vec3 binorm;
 	Vec2 tex;
 };
+
+
+class VerticesP {
+public:
+	int add(const float& x, const float& y, const float& z) {
+		VertexP p;
+		p.setPos(x, y, z);
+		verts.push_back(p);
+		return verts.size()-1;
+	}
+	
+	int createRect(const float& x, const float& y, const float& z, const float& w, const float& h) {
+		// first triangle.
+		add(x  , y  , z);
+		add(x+w, y  , z);
+		add(x+w, y+h, z);
+		
+		// second triangle.
+		add(x  , y  , z);
+		add(x+w, y+h, z);
+		add(x  , y+h, z); 
+		return 6; // number of vertices created
+	}
+	
+	void clear() {
+		verts.clear();						
+	}
+		
+	size_t numBytes() {
+		return sizeof(VertexP) * size();  	
+	}
+	
+	size_t size() {
+		return verts.size();				
+	}
+	
+	float* getPtr() {
+		return &verts[0].pos.x;
+	}
+	
+	vector<VertexP>::iterator begin() 	{	
+		return verts.begin();	
+	}
+	
+	vector<VertexP>::iterator end() 	{	
+		return verts.end();		
+	}
+	
+	vector<VertexP> verts;
+};
+
+class VerticesPT {
+public:
+	int add(const float& x, const float& y, const float& z, const float& u, const float& v) {
+		VertexPT p;
+		p.setPos(x, y, z);
+		p.setTex(u,v);
+		verts.push_back(p);
+		return verts.size()-1;
+	}
+	void clear()		{ 		verts.clear();						}
+	size_t numBytes() 	{		return sizeof(VertexPT) * size();  	}
+	size_t size() 		{		return verts.size();				}
+	float* getPtr() 	{		return &verts[0].pos.x;				}
+	
+	vector<VertexPT>::iterator begin() 	{	return verts.begin();	}
+	vector<VertexPT>::iterator end() 	{	return verts.end();		}
+	
+	vector<VertexPT> verts;
+};
+
+
 
 } // roxlu
 
