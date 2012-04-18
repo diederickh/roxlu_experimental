@@ -25,6 +25,8 @@ public:
 	void onMouseDragged(int mx, int my, int dx, int dy);
 
 	void setValue(const float& v);
+	Slider& setMin(const float& m);
+	Slider& setMax(const float& m);
 
 	float& value;
 	float minv; // min value
@@ -34,10 +36,21 @@ public:
 	float bg_top_color[4];
 	float bg_bottom_color[4];
 	float bar_filled_color[4];
+	float bar_filled_bottom[4];
 	float bar_empty_color[4];
 	int txtval_dx;
 	int label_dx;
 };
+
+inline Slider& Slider::setMin(const float& m) {
+	minv = m;
+	return *this;
+}
+
+inline Slider& Slider::setMax(const float& m) {
+	maxv = m;
+	return *this;
+}
 
 } // namespace buttons
 

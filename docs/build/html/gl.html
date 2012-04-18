@@ -1,0 +1,1410 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>openGL &mdash; Roxlib 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Roxlib 0.0.1 documentation" href="index.html" />
+    <link rel="next" title="3D" href="3d.html" />
+    <link rel="prev" title="Database" href="database.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="3d.html" title="3D"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="database.html" title="Database"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Roxlib 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="opengl">
+<h1>openGL<a class="headerlink" href="#opengl" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="vertex-data">
+<h2>Vertex Data<a class="headerlink" href="#vertex-data" title="Permalink to this headline">¶</a></h2>
+<p>Use the <a class="reference internal" href="#VertexData" title="VertexData"><tt class="xref cpp cpp-class docutils literal"><span class="pre">VertexData</span></tt></a> class as a container for your vertices, texture
+coordinates, colors, normals, tangents and binormals. The VertexData class can
+convert the stored information to any of the generic vertex types as defined in
+<tt class="docutils literal"><span class="pre">VertexTypes</span></tt></p>
+<div class="highlight-c++"><div class="highlight"><pre><span class="n">VertexData</span> <span class="n">vd</span><span class="p">;</span>
+
+<span class="c1">// create a quad</span>
+<span class="kt">float</span> <span class="n">s</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">;</span>
+<span class="n">vd</span><span class="p">.</span><span class="n">addVertex</span><span class="p">(</span><span class="o">-</span><span class="n">s</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="n">vd</span><span class="p">.</span><span class="n">addVertex</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="n">vd</span><span class="p">.</span><span class="n">addVertex</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="o">-</span><span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="n">vd</span><span class="p">.</span><span class="n">addVertex</span><span class="p">(</span><span class="o">-</span><span class="n">s</span><span class="p">,</span><span class="o">-</span><span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+
+<span class="c1">// with texture coordinates</span>
+<span class="n">vd</span><span class="p">.</span><span class="n">addTexCoord</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">vd</span><span class="p">.</span><span class="n">addTexCoord</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">vd</span><span class="p">.</span><span class="n">addTexCoord</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">vd</span><span class="p">.</span><span class="n">addTexCoord</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+
+<span class="c1">// We must delete the vertices after using.</span>
+<span class="n">VertexP</span><span class="o">*</span> <span class="n">vertices</span> <span class="o">=</span> <span class="n">vd</span><span class="p">.</span><span class="n">getVertexP</span><span class="p">();</span>
+
+<span class="c1">// Getting VertexPT</span>
+<span class="n">VertexPT</span><span class="o">*</span> <span class="n">vertices_pt</span> <span class="o">=</span> <span class="n">vd</span><span class="p">.</span><span class="n">getVertexPT</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="using-shaders">
+<h2>Using shaders<a class="headerlink" href="#using-shaders" title="Permalink to this headline">¶</a></h2>
+<p>Example loading and setting up a <a class="reference internal" href="#Shader" title="Shader"><tt class="xref cpp cpp-class docutils literal"><span class="pre">Shader</span></tt></a>.</p>
+<div class="highlight-c++"><div class="highlight"><pre><span class="n">Shader</span> <span class="n">shader</span><span class="p">;</span>
+
+<span class="c1">// Create two files: rays.vert and rays.frag in your data dir.</span>
+<span class="n">shader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;rays&quot;</span><span class="p">);</span>
+<span class="n">shader</span><span class="p">.</span><span class="n">enable</span><span class="p">();</span>
+
+<span class="c1">// Tell the shader what attributes we have</span>
+<span class="n">shader</span><span class="p">.</span><span class="n">addAttribute</span><span class="p">(</span><span class="s">&quot;tex&quot;</span><span class="p">)</span>
+                <span class="p">.</span><span class="n">addAttribute</span><span class="p">(</span><span class="s">&quot;pos&quot;</span><span class="p">);</span>
+
+<span class="c1">// Tell the shader what uniforms we have</span>
+<span class="n">shader</span><span class="p">.</span><span class="n">addUniform</span><span class="p">(</span><span class="s">&quot;diffuse_texture&quot;</span><span class="p">)</span>
+                <span class="p">.</span><span class="n">addUniform</span><span class="p">(</span><span class="s">&quot;projection_matrix&quot;</span><span class="p">)</span>
+                <span class="p">.</span><span class="n">addUniform</span><span class="p">(</span><span class="s">&quot;modelview_matrix&quot;</span><span class="p">)</span>
+                <span class="p">.</span><span class="n">addUniform</span><span class="p">(</span><span class="s">&quot;exposure&quot;</span><span class="p">)</span>
+                <span class="p">.</span><span class="n">addUniform</span><span class="p">(</span><span class="s">&quot;decay&quot;</span><span class="p">)</span>
+                <span class="p">.</span><span class="n">addUniform</span><span class="p">(</span><span class="s">&quot;weight&quot;</span><span class="p">);</span>
+
+<span class="c1">// Set some uniform values</span>
+<span class="n">shader</span><span class="p">.</span><span class="n">uniform1f</span><span class="p">(</span><span class="s">&quot;exposure&quot;</span><span class="p">,</span> <span class="mf">1.5f</span><span class="p">)</span>
+                <span class="p">.</span><span class="n">uniform1f</span><span class="p">(</span><span class="s">&quot;density&quot;</span><span class="p">,</span> <span class="mf">0.999f</span><span class="p">)</span>
+                <span class="p">.</span><span class="n">uniform1f</span><span class="p">(</span><span class="s">&quot;weight&quot;</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Example vertex shader</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="n">attribute</span> <span class="n">vec4</span> <span class="n">pos</span><span class="p">;</span>
+<span class="n">attribute</span> <span class="n">vec2</span> <span class="n">tex</span><span class="p">;</span>
+
+<span class="n">uniform</span> <span class="n">mat4</span> <span class="n">projection_matrix</span><span class="p">;</span>
+<span class="n">uniform</span> <span class="n">mat4</span> <span class="n">modelview_matrix</span><span class="p">;</span>
+<span class="n">varying</span> <span class="n">vec2</span> <span class="n">v_tex</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">gl_Position</span> <span class="o">=</span> <span class="n">projection_matrix</span> <span class="o">*</span> <span class="n">modelview_matrix</span> <span class="o">*</span> <span class="n">pos</span><span class="p">;</span>
+        <span class="n">v_tex</span> <span class="o">=</span> <span class="n">tex</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Example fragment shader</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="kt">void</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">gl_FragColor</span> <span class="o">=</span> <span class="n">vec4</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="using-a-vbo-and-shader">
+<h2>Using a VBO and Shader<a class="headerlink" href="#using-a-vbo-and-shader" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c++"><div class="highlight"><pre><span class="kt">void</span> <span class="n">testApp</span><span class="o">::</span><span class="n">setup</span><span class="p">(){</span>
+        <span class="n">ofBackground</span><span class="p">(</span><span class="mi">33</span><span class="p">);</span>
+        <span class="n">ofSetFrameRate</span><span class="p">(</span><span class="mi">60</span><span class="p">);</span>
+        <span class="n">ofSetVerticalSync</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+
+
+        <span class="c1">// Create indices.</span>
+        <span class="kt">int</span> <span class="n">rows</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">cols</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+        <span class="kt">float</span> <span class="n">width</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">;</span>
+        <span class="kt">float</span> <span class="n">height</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">;</span>
+        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">cols</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">rows</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="kt">float</span> <span class="n">x</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">width</span><span class="p">;</span>
+                        <span class="kt">float</span> <span class="n">y</span> <span class="o">=</span> <span class="n">j</span> <span class="o">*</span> <span class="n">height</span><span class="p">;</span>
+                        <span class="n">vd</span><span class="p">.</span><span class="n">addVertex</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span>
+                <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">cols</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">rows</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="n">DX</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+                        <span class="kt">int</span> <span class="n">b</span> <span class="o">=</span> <span class="n">DX</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+                        <span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="n">DX</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+                        <span class="kt">int</span> <span class="n">d</span> <span class="o">=</span> <span class="n">DX</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">cols</span><span class="p">);</span>
+                        <span class="n">vd</span><span class="p">.</span><span class="n">addQuadIndices</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">);</span>
+                <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="c1">// Make sure VAO keeps state of the VBO</span>
+        <span class="n">vao</span><span class="p">.</span><span class="n">bind</span><span class="p">();</span>
+
+        <span class="c1">// Initialize shader.</span>
+        <span class="n">shader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;shader&quot;</span><span class="p">);</span>
+        <span class="n">shader</span><span class="p">.</span><span class="n">addUniform</span><span class="p">(</span><span class="s">&quot;projection_matrix&quot;</span><span class="p">).</span><span class="n">addUniform</span><span class="p">(</span><span class="s">&quot;view_matrix&quot;</span><span class="p">);</span>
+        <span class="n">shader</span><span class="p">.</span><span class="n">addAttribute</span><span class="p">(</span><span class="s">&quot;pos&quot;</span><span class="p">);</span>
+        <span class="n">shader</span><span class="p">.</span><span class="n">enableVertexAttribArray</span><span class="p">(</span><span class="s">&quot;pos&quot;</span><span class="p">);</span>
+
+
+        <span class="c1">// Fill VBO</span>
+        <span class="n">vbo</span><span class="p">.</span><span class="n">setIndices</span><span class="p">(</span><span class="n">vd</span><span class="p">.</span><span class="n">getIndicesPtr</span><span class="p">(),</span> <span class="n">vd</span><span class="p">.</span><span class="n">getNumIndices</span><span class="p">());</span>
+        <span class="n">vbo</span><span class="p">.</span><span class="n">setVertexData</span><span class="p">(</span><span class="n">vd</span><span class="p">.</span><span class="n">getVertexP</span><span class="p">(),</span> <span class="n">vd</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+        <span class="n">vbo</span><span class="p">.</span><span class="n">setPosVertexAttribPointer</span><span class="p">(</span><span class="n">shader</span><span class="p">.</span><span class="n">getAttribute</span><span class="p">(</span><span class="s">&quot;pos&quot;</span><span class="p">));</span>
+
+        <span class="n">projection_matrix</span><span class="p">.</span><span class="n">perspective</span><span class="p">(</span><span class="mf">45.0f</span><span class="p">,</span> <span class="n">ofGetWidth</span><span class="p">()</span><span class="o">/</span><span class="n">ofGetHeight</span><span class="p">(),</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>
+        <span class="n">view_matrix</span><span class="p">.</span><span class="n">translate</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">3</span><span class="p">);</span>
+<span class="p">}</span>
+
+
+
+<span class="kt">void</span> <span class="n">testApp</span><span class="o">::</span><span class="n">draw</span><span class="p">(){</span>
+        <span class="n">glPolygonMode</span><span class="p">(</span><span class="n">GL_FRONT_AND_BACK</span><span class="p">,</span> <span class="n">GL_LINE</span><span class="p">);</span>
+        <span class="n">shader</span><span class="p">.</span><span class="n">enable</span><span class="p">();</span>
+        <span class="n">shader</span><span class="p">.</span><span class="n">uniformMat4fv</span><span class="p">(</span><span class="s">&quot;projection_matrix&quot;</span><span class="p">,</span> <span class="n">projection_matrix</span><span class="p">.</span><span class="n">getPtr</span><span class="p">());</span>
+        <span class="n">shader</span><span class="p">.</span><span class="n">uniformMat4fv</span><span class="p">(</span><span class="s">&quot;view_matrix&quot;</span><span class="p">,</span> <span class="n">view_matrix</span><span class="p">.</span><span class="n">getPtr</span><span class="p">());</span>
+        <span class="n">vbo</span><span class="p">.</span><span class="n">drawElements</span><span class="p">(</span><span class="n">GL_QUADS</span><span class="p">,</span> <span class="n">vd</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="o">*</span><span class="mi">4</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="api-reference">
+<h2>API reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="vbo">
+<h3>VBO<a class="headerlink" href="#vbo" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="VBO::VBO">
+ <tt class="descclassname">VBO::</tt><tt class="descname">VBO</tt><big>(</big><big>)</big><a class="headerlink" href="#VBO::VBO" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VBO::setVertexData__VertexDataR">
+VBO&amp; <tt class="descclassname">VBO::</tt><tt class="descname">setVertexData</tt><big>(</big>VertexData&amp; <em>data</em><big>)</big><a class="headerlink" href="#VBO::setVertexData__VertexDataR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters VertexData&amp; data:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VBO::setVertexData__VertexDataP">
+VBO&amp; <tt class="descclassname">VBO::</tt><tt class="descname">setVertexData</tt><big>(</big>VertexData* <em>data</em><big>)</big><a class="headerlink" href="#VBO::setVertexData__VertexDataP" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters VertexData* data:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VBO::setVertexData__VertexPP.i">
+VBO&amp; <tt class="descclassname">VBO::</tt><tt class="descname">setVertexData</tt><big>(</big>VertexP* <em>data</em>, int <em>num</em><big>)</big><a class="headerlink" href="#VBO::setVertexData__VertexPP.i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>VertexP* data</strong> &#8211; </li>
+<li><strong>int num</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VBO::setVertexData__VertexPNP.i">
+VBO&amp; <tt class="descclassname">VBO::</tt><tt class="descname">setVertexData</tt><big>(</big>VertexPN* <em>data</em>, int <em>num</em><big>)</big><a class="headerlink" href="#VBO::setVertexData__VertexPNP.i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>VertexPN* data</strong> &#8211; </li>
+<li><strong>int num</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VBO::setVertexData__VertexPTP.i">
+VBO&amp; <tt class="descclassname">VBO::</tt><tt class="descname">setVertexData</tt><big>(</big>VertexPT* <em>data</em>, int <em>num</em><big>)</big><a class="headerlink" href="#VBO::setVertexData__VertexPTP.i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>VertexPT* data</strong> &#8211; </li>
+<li><strong>int num</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VBO::setVertexData__VertexPNCP.i">
+VBO&amp; <tt class="descclassname">VBO::</tt><tt class="descname">setVertexData</tt><big>(</big>VertexPNC* <em>data</em>, int <em>num</em><big>)</big><a class="headerlink" href="#VBO::setVertexData__VertexPNCP.i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>VertexPNC* data</strong> &#8211; </li>
+<li><strong>int num</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VBO::setVertexData__VertexPTNP.i">
+VBO&amp; <tt class="descclassname">VBO::</tt><tt class="descname">setVertexData</tt><big>(</big>VertexPTN* <em>data</em>, int <em>num</em><big>)</big><a class="headerlink" href="#VBO::setVertexData__VertexPTNP.i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>VertexPTN* data</strong> &#8211; </li>
+<li><strong>int num</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VBO::setVertexData__VertexPTNTP.i">
+VBO&amp; <tt class="descclassname">VBO::</tt><tt class="descname">setVertexData</tt><big>(</big>VertexPTNT* <em>data</em>, int <em>num</em><big>)</big><a class="headerlink" href="#VBO::setVertexData__VertexPTNTP.i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>VertexPTNT* data</strong> &#8211; </li>
+<li><strong>int num</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VBO::setVertexData__VertexPTNCP.i">
+VBO&amp; <tt class="descclassname">VBO::</tt><tt class="descname">setVertexData</tt><big>(</big>VertexPTNC* <em>data</em>, int <em>num</em><big>)</big><a class="headerlink" href="#VBO::setVertexData__VertexPTNCP.i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>VertexPTNC* data</strong> &#8211; </li>
+<li><strong>int num</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VBO::setVertexData__VertexPTNTBP.i">
+VBO&amp; <tt class="descclassname">VBO::</tt><tt class="descname">setVertexData</tt><big>(</big>VertexPTNTB* <em>data</em>, int <em>num</em><big>)</big><a class="headerlink" href="#VBO::setVertexData__VertexPTNTBP.i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>VertexPTNTB* data</strong> &#8211; </li>
+<li><strong>int num</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VBO::updateVertexData__VertexDataP">
+VBO&amp; <tt class="descclassname">VBO::</tt><tt class="descname">updateVertexData</tt><big>(</big>VertexData* <em>data</em><big>)</big><a class="headerlink" href="#VBO::updateVertexData__VertexDataP" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters VertexData* data:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VBO::setVertices__floatCP.i.i.i">
+VBO&amp; <tt class="descclassname">VBO::</tt><tt class="descname">setVertices</tt><big>(</big>const float* <em>vertices</em>, int <em>numCoords</em>, int <em>num</em>, int <em>usage</em><em>=GL_STATIC_DRAW</em><big>)</big><a class="headerlink" href="#VBO::setVertices__floatCP.i.i.i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>const float* vertices</strong> &#8211; </li>
+<li><strong>int numCoords</strong> &#8211; </li>
+<li><strong>int num</strong> &#8211; </li>
+<li><strong>int usage = GL_STATIC_DRAW</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VBO::setTexCoords__floatCP.i.i">
+VBO&amp; <tt class="descclassname">VBO::</tt><tt class="descname">setTexCoords</tt><big>(</big>const float* <em>texCoords</em>, int <em>num</em>, int <em>usage</em><em>=GL_STATIC_DRAW</em><big>)</big><a class="headerlink" href="#VBO::setTexCoords__floatCP.i.i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>const float* texCoords</strong> &#8211; </li>
+<li><strong>int num</strong> &#8211; </li>
+<li><strong>int usage = GL_STATIC_DRAW</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VBO::setIndices__iCP.i.i">
+VBO&amp; <tt class="descclassname">VBO::</tt><tt class="descname">setIndices</tt><big>(</big>const int* <em>indices</em>, int <em>num</em>, int <em>usage</em><em>=GL_STATIC_DRAW</em><big>)</big><a class="headerlink" href="#VBO::setIndices__iCP.i.i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>const int* indices</strong> &#8211; </li>
+<li><strong>int num</strong> &#8211; </li>
+<li><strong>int usage = GL_STATIC_DRAW</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VBO::setColors__floatCP.i.i">
+VBO&amp; <tt class="descclassname">VBO::</tt><tt class="descname">setColors</tt><big>(</big>const float* <em>colors</em>, int <em>numColors</em>, int <em>usage</em><em>=GL_STATIC_DRAW</em><big>)</big><a class="headerlink" href="#VBO::setColors__floatCP.i.i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>const float* colors</strong> &#8211; </li>
+<li><strong>int numColors</strong> &#8211; </li>
+<li><strong>int usage = GL_STATIC_DRAW</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VBO::bind">
+VBO&amp; <tt class="descclassname">VBO::</tt><tt class="descname">bind</tt><big>(</big><big>)</big><a class="headerlink" href="#VBO::bind" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VBO::unbind">
+VBO&amp; <tt class="descclassname">VBO::</tt><tt class="descname">unbind</tt><big>(</big><big>)</big><a class="headerlink" href="#VBO::unbind" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VBO::drawElements__i.i">
+VBO&amp; <tt class="descclassname">VBO::</tt><tt class="descname">drawElements</tt><big>(</big>int <em>drawMode</em>, int <em>total</em><big>)</big><a class="headerlink" href="#VBO::drawElements__i.i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>int drawMode</strong> &#8211; </li>
+<li><strong>int total</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VBO::setNormVertexAttribPointer__GLuint">
+void <tt class="descclassname">VBO::</tt><tt class="descname">setNormVertexAttribPointer</tt><big>(</big>GLuint <em>index</em><big>)</big><a class="headerlink" href="#VBO::setNormVertexAttribPointer__GLuint" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters GLuint index:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VBO::setPosVertexAttribPointer__GLuint">
+void <tt class="descclassname">VBO::</tt><tt class="descname">setPosVertexAttribPointer</tt><big>(</big>GLuint <em>index</em><big>)</big><a class="headerlink" href="#VBO::setPosVertexAttribPointer__GLuint" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters GLuint index:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VBO::setTexVertexAttribPointer__GLuint">
+void <tt class="descclassname">VBO::</tt><tt class="descname">setTexVertexAttribPointer</tt><big>(</big>GLuint <em>index</em><big>)</big><a class="headerlink" href="#VBO::setTexVertexAttribPointer__GLuint" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters GLuint index:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<tt class="descname">bool VBO::hasIndices();</tt></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VBO::hasType__VBOType">
+return <tt class="descclassname">VBO::</tt><tt class="descname">hasType</tt><big>(</big>VBOType <em>type</em><big>)</big><a class="headerlink" href="#VBO::hasType__VBOType" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters VBOType:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="vertexdata">
+<h3>VertexData<a class="headerlink" href="#vertexdata" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="VertexData">
+<em class="property">class </em><tt class="descname">VertexData</tt><a class="headerlink" href="#VertexData" title="Permalink to this definition">¶</a></dt>
+<dd><p>VertexData class</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::VertexData">
+ <tt class="descclassname">VertexData::</tt><tt class="descname">VertexData</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::VertexData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default constructor.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::VertexData__string">
+ <tt class="descclassname">VertexData::</tt><tt class="descname">VertexData</tt><big>(</big>string <em>meshName</em><big>)</big><a class="headerlink" href="#VertexData::VertexData__string" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters string meshName:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">You can give the vertex data a name, which can be
+used by exporters.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::addVertex__Vec3CR">
+int <tt class="descclassname">VertexData::</tt><tt class="descname">addVertex</tt><big>(</big>const Vec3&amp; <em>vec</em><big>)</big><a class="headerlink" href="#VertexData::addVertex__Vec3CR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters const Vec3&amp; vec:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">Add a vertex</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::addVertex__floatC.floatC.floatC">
+int <tt class="descclassname">VertexData::</tt><tt class="descname">addVertex</tt><big>(</big>const float <em>x</em>, const float <em>y</em>, const float <em>z</em><big>)</big><a class="headerlink" href="#VertexData::addVertex__floatC.floatC.floatC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>const float x</strong> &#8211; X of vertex</li>
+<li><strong>const float y</strong> &#8211; Y of vertex</li>
+<li><strong>const float z</strong> &#8211; Z of vertex</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::addTexCoord__Vec2CR">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">addTexCoord</tt><big>(</big>const Vec2&amp; <em>vec</em><big>)</big><a class="headerlink" href="#VertexData::addTexCoord__Vec2CR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters const Vec2&amp; vec:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">Add this texture coordinate</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::addTexCoord__floatC.floatC">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">addTexCoord</tt><big>(</big>const float <em>x</em>, const float <em>y</em><big>)</big><a class="headerlink" href="#VertexData::addTexCoord__floatC.floatC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a texture coordinate:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>const float x</strong> &#8211; x-value</li>
+<li><strong>const float y</strong> &#8211; y-value</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::addColor__Vec3CR">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">addColor</tt><big>(</big>const Vec3&amp; <em>color</em><big>)</big><a class="headerlink" href="#VertexData::addColor__Vec3CR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters const Vec3&amp; color:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::addColor__Color4CR">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">addColor</tt><big>(</big>const Color4&amp; <em>color</em><big>)</big><a class="headerlink" href="#VertexData::addColor__Color4CR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters const Color4&amp; color:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::addColor__floatC.floatC.floatC">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">addColor</tt><big>(</big>const float <em>r</em>, const float <em>g</em>, const float <em>b</em><big>)</big><a class="headerlink" href="#VertexData::addColor__floatC.floatC.floatC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>const float r</strong> &#8211; </li>
+<li><strong>const float g</strong> &#8211; </li>
+<li><strong>const float b</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::addNormal__floatC.floatC.floatC">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">addNormal</tt><big>(</big>const float <em>x</em>, const float <em>y</em>, const float <em>z</em><big>)</big><a class="headerlink" href="#VertexData::addNormal__floatC.floatC.floatC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>const float x</strong> &#8211; </li>
+<li><strong>const float y</strong> &#8211; </li>
+<li><strong>const float z</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::addNormal__Vec3CR">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">addNormal</tt><big>(</big>const Vec3&amp; <em>vec</em><big>)</big><a class="headerlink" href="#VertexData::addNormal__Vec3CR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters const Vec3&amp; vec:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::addIndex__iCR">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">addIndex</tt><big>(</big>const int&amp; <em>index</em><big>)</big><a class="headerlink" href="#VertexData::addIndex__iCR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters const int&amp; index:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::addTriangle__Triangle">
+int <tt class="descclassname">VertexData::</tt><tt class="descname">addTriangle</tt><big>(</big>Triangle <em>t</em><big>)</big><a class="headerlink" href="#VertexData::addTriangle__Triangle" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters Triangle t:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::addTriangle__i.i.i">
+int <tt class="descclassname">VertexData::</tt><tt class="descname">addTriangle</tt><big>(</big>int <em>a</em>, int <em>b</em>, int <em>c</em><big>)</big><a class="headerlink" href="#VertexData::addTriangle__i.i.i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>int a</strong> &#8211; </li>
+<li><strong>int b</strong> &#8211; </li>
+<li><strong>int c</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::addTriangleAndIndices__i.i.i">
+int <tt class="descclassname">VertexData::</tt><tt class="descname">addTriangleAndIndices</tt><big>(</big>int <em>a</em>, int <em>b</em>, int <em>c</em><big>)</big><a class="headerlink" href="#VertexData::addTriangleAndIndices__i.i.i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>int a</strong> &#8211; </li>
+<li><strong>int b</strong> &#8211; </li>
+<li><strong>int c</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::addQuad__i.i.i.i">
+int <tt class="descclassname">VertexData::</tt><tt class="descname">addQuad</tt><big>(</big>int <em>a</em>, int <em>b</em>, int <em>c</em>, int <em>d</em><big>)</big><a class="headerlink" href="#VertexData::addQuad__i.i.i.i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>int a</strong> &#8211; </li>
+<li><strong>int b</strong> &#8211; </li>
+<li><strong>int c</strong> &#8211; </li>
+<li><strong>int d</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::addQuad__Quad">
+int <tt class="descclassname">VertexData::</tt><tt class="descname">addQuad</tt><big>(</big>Quad <em>q</em><big>)</big><a class="headerlink" href="#VertexData::addQuad__Quad" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters Quad q:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::addQuadAndIndices__i.i.i.i">
+int <tt class="descclassname">VertexData::</tt><tt class="descname">addQuadAndIndices</tt><big>(</big>int <em>a</em>, int <em>b</em>, int <em>c</em>, int <em>d</em><big>)</big><a class="headerlink" href="#VertexData::addQuadAndIndices__i.i.i.i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>int a</strong> &#8211; </li>
+<li><strong>int b</strong> &#8211; </li>
+<li><strong>int c</strong> &#8211; </li>
+<li><strong>int d</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::addQuadIndices__i.i.i.i">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">addQuadIndices</tt><big>(</big>int <em>a</em>, int <em>b</em>, int <em>c</em>, int <em>d</em><big>)</big><a class="headerlink" href="#VertexData::addQuadIndices__i.i.i.i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>int a</strong> &#8211; </li>
+<li><strong>int b</strong> &#8211; </li>
+<li><strong>int c</strong> &#8211; </li>
+<li><strong>int d</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::debugDraw__i">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">debugDraw</tt><big>(</big>int <em>drawMode</em><em>=GL_TRIANGLES</em><big>)</big><a class="headerlink" href="#VertexData::debugDraw__i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters int drawMode = GL_TRIANGLES:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::debugDrawQuad__i">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">debugDrawQuad</tt><big>(</big>int <em>quadNum</em><big>)</big><a class="headerlink" href="#VertexData::debugDrawQuad__i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters int quadNum:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getVerticesPtr">
+const float* <tt class="descclassname">VertexData::</tt><tt class="descname">getVerticesPtr</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::getVerticesPtr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getTexCoordsPtr">
+const float* <tt class="descclassname">VertexData::</tt><tt class="descname">getTexCoordsPtr</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::getTexCoordsPtr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getColorsPtr">
+const float* <tt class="descclassname">VertexData::</tt><tt class="descname">getColorsPtr</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::getColorsPtr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getNormalsPtr">
+const float* <tt class="descclassname">VertexData::</tt><tt class="descname">getNormalsPtr</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::getNormalsPtr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getIndicesPtr">
+const int* <tt class="descclassname">VertexData::</tt><tt class="descname">getIndicesPtr</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::getIndicesPtr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getTrianglePtr__i">
+Triangle* <tt class="descclassname">VertexData::</tt><tt class="descname">getTrianglePtr</tt><big>(</big>int <em>triangle</em><big>)</big><a class="headerlink" href="#VertexData::getTrianglePtr__i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters int triangle:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getQuadPtr__i">
+Quad* <tt class="descclassname">VertexData::</tt><tt class="descname">getQuadPtr</tt><big>(</big>int <em>quad</em><big>)</big><a class="headerlink" href="#VertexData::getQuadPtr__i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters int quad:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getNumVertices">
+int <tt class="descclassname">VertexData::</tt><tt class="descname">getNumVertices</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::getNumVertices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getNumTexCoords">
+int <tt class="descclassname">VertexData::</tt><tt class="descname">getNumTexCoords</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::getNumTexCoords" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getNumColors">
+int <tt class="descclassname">VertexData::</tt><tt class="descname">getNumColors</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::getNumColors" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getNumNormals">
+int <tt class="descclassname">VertexData::</tt><tt class="descname">getNumNormals</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::getNumNormals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getNumTangents">
+int <tt class="descclassname">VertexData::</tt><tt class="descname">getNumTangents</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::getNumTangents" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getNumIndices">
+int <tt class="descclassname">VertexData::</tt><tt class="descname">getNumIndices</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::getNumIndices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getNumTriangles">
+int <tt class="descclassname">VertexData::</tt><tt class="descname">getNumTriangles</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::getNumTriangles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getNumQuads">
+int <tt class="descclassname">VertexData::</tt><tt class="descname">getNumQuads</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::getNumQuads" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getTexCoord__i">
+Vec2 <tt class="descclassname">VertexData::</tt><tt class="descname">getTexCoord</tt><big>(</big>int <em>index</em><big>)</big><a class="headerlink" href="#VertexData::getTexCoord__i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters int index:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getTexCoordPtr__i">
+Vec2* <tt class="descclassname">VertexData::</tt><tt class="descname">getTexCoordPtr</tt><big>(</big>int <em>index</em><big>)</big><a class="headerlink" href="#VertexData::getTexCoordPtr__i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters int index:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getVertex__i">
+Vec3 <tt class="descclassname">VertexData::</tt><tt class="descname">getVertex</tt><big>(</big>int <em>index</em><big>)</big><a class="headerlink" href="#VertexData::getVertex__i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters int index:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getVertexPtr__i">
+Vec3* <tt class="descclassname">VertexData::</tt><tt class="descname">getVertexPtr</tt><big>(</big>int <em>index</em><big>)</big><a class="headerlink" href="#VertexData::getVertexPtr__i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters int index:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getVertexRef__i">
+Vec3&amp; <tt class="descclassname">VertexData::</tt><tt class="descname">getVertexRef</tt><big>(</big>int <em>index</em><big>)</big><a class="headerlink" href="#VertexData::getVertexRef__i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters int index:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getNormal__i">
+Vec3 <tt class="descclassname">VertexData::</tt><tt class="descname">getNormal</tt><big>(</big>int <em>index</em><big>)</big><a class="headerlink" href="#VertexData::getNormal__i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters int index:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getNormalPtr__i">
+Vec3* <tt class="descclassname">VertexData::</tt><tt class="descname">getNormalPtr</tt><big>(</big>int <em>index</em><big>)</big><a class="headerlink" href="#VertexData::getNormalPtr__i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters int index:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getNormalRef__i">
+Vec3&amp; <tt class="descclassname">VertexData::</tt><tt class="descname">getNormalRef</tt><big>(</big>int <em>index</em><big>)</big><a class="headerlink" href="#VertexData::getNormalRef__i" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters int index:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getVertexP">
+VertexP* <tt class="descclassname">VertexData::</tt><tt class="descname">getVertexP</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::getVertexP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getVertexPT">
+VertexPT* <tt class="descclassname">VertexData::</tt><tt class="descname">getVertexPT</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::getVertexPT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getVertexPN">
+VertexPN* <tt class="descclassname">VertexData::</tt><tt class="descname">getVertexPN</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::getVertexPN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getVertexPTN">
+VertexPTN* <tt class="descclassname">VertexData::</tt><tt class="descname">getVertexPTN</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::getVertexPTN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getVertexPTNT">
+VertexPTNT* <tt class="descclassname">VertexData::</tt><tt class="descname">getVertexPTNT</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::getVertexPTNT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getVertexPNC">
+VertexPNC* <tt class="descclassname">VertexData::</tt><tt class="descname">getVertexPNC</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::getVertexPNC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getVertexPTNTB">
+VertexPTNTB* <tt class="descclassname">VertexData::</tt><tt class="descname">getVertexPTNTB</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::getVertexPTNTB" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::clearAttribs">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">clearAttribs</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::clearAttribs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::enablePositionAttrib">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">enablePositionAttrib</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::enablePositionAttrib" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::enableNormalAttrib">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">enableNormalAttrib</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::enableNormalAttrib" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::enableColorAttrib">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">enableColorAttrib</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::enableColorAttrib" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::enableTexCoordAttrib">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">enableTexCoordAttrib</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::enableTexCoordAttrib" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::disablePositionAttrib">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">disablePositionAttrib</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::disablePositionAttrib" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::disableNormalAttrib">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">disableNormalAttrib</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::disableNormalAttrib" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::disableColorAttrib">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">disableColorAttrib</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::disableColorAttrib" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::disableTexCoordAttrib">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">disableTexCoordAttrib</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::disableTexCoordAttrib" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::clear">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">clear</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::clear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="VertexData::setNormal__i.Vec3">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">setNormal</tt><big>(</big>int <em>index</em>, Vec3 <em>normal</em><big>)</big><a class="headerlink" href="#VertexData::setNormal__i.Vec3" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>int dx</strong> &#8211; </li>
+<li><strong>Vec3 normal</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::setVertex__i.Vec3">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">setVertex</tt><big>(</big>int <em>index</em>, Vec3 <em>vert</em><big>)</big><a class="headerlink" href="#VertexData::setVertex__i.Vec3" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>int dx</strong> &#8211; </li>
+<li><strong>Vec3 position</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::setVertex__i.float.float.float">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">setVertex</tt><big>(</big>int <em>dx</em>, float <em>x</em>, float <em>y</em>, float <em>z</em><big>)</big><a class="headerlink" href="#VertexData::setVertex__i.float.float.float" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>int dx</strong> &#8211; </li>
+<li><strong>float x</strong> &#8211; </li>
+<li><strong>float y</strong> &#8211; </li>
+<li><strong>float z) { vertices[dx].set(x</strong> &#8211; </li>
+<li><strong>y</strong> &#8211; </li>
+<li><strong>z</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::setName__string">
+void <tt class="descclassname">VertexData::</tt><tt class="descname">setName</tt><big>(</big>string <em>n</em><big>)</big><a class="headerlink" href="#VertexData::setName__string" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Parameters string n:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="VertexData::getName">
+string <tt class="descclassname">VertexData::</tt><tt class="descname">getName</tt><big>(</big><big>)</big><a class="headerlink" href="#VertexData::getName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="shader">
+<h3>Shader<a class="headerlink" href="#shader" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="Shader">
+<em class="property">class </em><tt class="descname">Shader</tt><a class="headerlink" href="#Shader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shader class</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+ <tt class="descname">Shader</tt><big>(</big><big>)</big></dt>
+<dd><p>Create a new Shader object. Don&#8217;t forget to set the name before you start
+loading and compiling the shader.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Shader__ssCR">
+ <tt class="descname">Shader</tt><big>(</big>const std::string&amp; <em>name</em><big>)</big><a class="headerlink" href="#Shader__ssCR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new Shader object with the given name. The name is used to load the
+files from the data directory.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Shader::load__ssCR">
+Shader&amp; <tt class="descclassname">Shader::</tt><tt class="descname">load</tt><big>(</big>const std::string&amp; <em>name</em><big>)</big><a class="headerlink" href="#Shader::load__ssCR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the shader source code using the given name.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Shader::load">
+Shader&amp; <tt class="descclassname">Shader::</tt><tt class="descname">load</tt><big>(</big><big>)</big><a class="headerlink" href="#Shader::load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the shader source code with the previously set name.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Shader::create__ssCR.ssR">
+void <tt class="descclassname">Shader::</tt><tt class="descname">create</tt><big>(</big>const std::string&amp; <em>vertexSource</em>, std::string&amp; <em>fragmentSource</em><big>)</big><a class="headerlink" href="#Shader::create__ssCR.ssR" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function does the actual work by creating a vertex and fragment shader
+object using the given source code.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Shader::addAttribute__ssCR">
+Shader&amp; <tt class="descclassname">Shader::</tt><tt class="descname">addAttribute</tt><big>(</big>const std::string&amp; <em>name</em><big>)</big><a class="headerlink" href="#Shader::addAttribute__ssCR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses <tt class="docutils literal"><span class="pre">glGetAttribLocation(prog_id,</span> <span class="pre">name)</span></tt> and stores the location of the
+attribute as a member. You can use <tt class="docutils literal"><span class="pre">getAttribute(std::string</span> <span class="pre">name)</span></tt> to
+retrieve the location of the attribute in the compiled shader.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Shader::addUniform__ssCR">
+Shader&amp; <tt class="descclassname">Shader::</tt><tt class="descname">addUniform</tt><big>(</big>const std::string&amp; <em>name</em><big>)</big><a class="headerlink" href="#Shader::addUniform__ssCR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the location of the uniform using <tt class="docutils literal"><span class="pre">glGetUniformLocation(prog_id,</span> <span class="pre">name)</span></tt>.
+The location is stored in the <tt class="docutils literal"><span class="pre">Shader</span></tt> object and you can use
+<tt class="docutils literal"><span class="pre">GetUniform(std::string</span> <span class="pre">name)</span></tt> to retrieve the uniform location.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Shader::getUniform__ssCR">
+GLint <tt class="descclassname">Shader::</tt><tt class="descname">getUniform</tt><big>(</big>const std::string&amp; <em>name</em><big>)</big><a class="headerlink" href="#Shader::getUniform__ssCR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the uniform location for the given uniform name.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Shader::getAttribute__ssCR">
+GLint <tt class="descclassname">Shader::</tt><tt class="descname">getAttribute</tt><big>(</big>const std::string&amp; <em>name</em><big>)</big><a class="headerlink" href="#Shader::getAttribute__ssCR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the attribute location for the given attribute name.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Shader::getVertexSource__b">
+string <tt class="descclassname">Shader::</tt><tt class="descname">getVertexSource</tt><big>(</big>bool <em>inDataPath</em><em>=true</em><big>)</big><a class="headerlink" href="#Shader::getVertexSource__b" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the vertex shader source using the name of the shader object.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Shader::getFragmentSource__b">
+string <tt class="descclassname">Shader::</tt><tt class="descname">getFragmentSource</tt><big>(</big>bool <em>inDataPath</em><em>=true</em><big>)</big><a class="headerlink" href="#Shader::getFragmentSource__b" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the fragment shader source using the name of the shader object.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Shader::enable">
+void <tt class="descclassname">Shader::</tt><tt class="descname">enable</tt><big>(</big><big>)</big><a class="headerlink" href="#Shader::enable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start using the shader application. Call <tt class="docutils literal"><span class="pre">disable()</span></tt> to disable it again.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Shader::disable">
+void <tt class="descclassname">Shader::</tt><tt class="descname">disable</tt><big>(</big><big>)</big><a class="headerlink" href="#Shader::disable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disable the shader application. Call <tt class="docutils literal"><span class="pre">enable()</span></tt> to enable it again.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">openGL</a><ul>
+<li><a class="reference internal" href="#vertex-data">Vertex Data</a></li>
+<li><a class="reference internal" href="#using-shaders">Using shaders</a></li>
+<li><a class="reference internal" href="#using-a-vbo-and-shader">Using a VBO and Shader</a></li>
+<li><a class="reference internal" href="#api-reference">API reference</a><ul>
+<li><a class="reference internal" href="#vbo">VBO</a></li>
+<li><a class="reference internal" href="#vertexdata">VertexData</a></li>
+<li><a class="reference internal" href="#shader">Shader</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="database.html"
+                        title="previous chapter">Database</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="3d.html"
+                        title="next chapter">3D</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/gl.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="3d.html" title="3D"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="database.html" title="Database"
+             >previous</a> |</li>
+        <li><a href="index.html">Roxlib 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Diederick Huijbers.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

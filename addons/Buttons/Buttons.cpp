@@ -95,6 +95,7 @@ void Buttons::createOrtho(float w, float h) {
 }
 
 void Buttons::update() {
+
 	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {
 		(*it)->update();
@@ -127,15 +128,17 @@ void Buttons::update() {
 	if(needs_text_update) {
 		updateDynamicTexts();
 	}
-	
+
 	if(first_run) {
 		first_run = false;
 		glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
 		glBufferData(GL_ARRAY_BUFFER, sizeof(ButtonVertex)*vd.size(), vd.getPtr(), GL_DYNAMIC_DRAW); eglGetError();
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 	else {
 		glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(ButtonVertex)*vd.size(), (GLvoid*)vd.getPtr()); eglGetError();
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 }
 
@@ -173,6 +176,16 @@ void Buttons::generateElementVertices() {
 }
 
 void Buttons::draw() {
+
+	// we will reset all of this...
+//	GLdouble curr_proj[16];
+//	GLdouble curr_model[16];
+//	GLdouble curr_texture[16];
+//	glGetDoublev(GL_PROJECTION_MATRIX, curr_proj);
+//	glGetDoublev(GL_MODELVIEW_MATRIX, curr_model);
+//	glGetDoublev(GL_TEXTURE_MATRIX, curr_texture);
+
+
 	// update projection matrix when viewport size changes.
 	GLint vp[4];
 	glGetIntegerv(GL_VIEWPORT, vp);
@@ -183,8 +196,17 @@ void Buttons::draw() {
 	}
 
 	// we draw in 2D so no depth test and cull fase.
-	glDisable(GL_CULL_FACE);
-	glDisable(GL_DEPTH_TEST);
+	bool cull_enabled = false;
+	if(glIsEnabled(GL_CULL_FACE)) {
+		glDisable(GL_CULL_FACE);
+		cull_enabled = true;
+	}
+	bool depth_enabled = false;
+	if(glIsEnabled(GL_DEPTH_TEST)) {
+		glDisable(GL_DEPTH_TEST);
+		depth_enabled = true;
+	}
+
 	gui_shader.enable();
 	vao.bind();
 	
@@ -208,9 +230,27 @@ void Buttons::draw() {
 	}
 	
 	vao.unbind();
-	gui_shader.disable();
+
 	static_text->draw();
 	dynamic_text->draw();
+	
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);	
+	glUseProgram(0);
+	
+	// reset previous projection and modelview matrices
+//	glMatrixMode(GL_TEXTURE);
+//	glLoadMatrixd(curr_texture);
+//	glMatrixMode(GL_PROJECTION);
+//	glLoadMatrixd(curr_proj);
+//	glMatrixMode(GL_MODELVIEW);
+//	glLoadMatrixd(curr_model);
+	if(cull_enabled) {
+		glEnable(GL_CULL_FACE);
+	}
+	if(depth_enabled) {
+		glEnable(GL_DEPTH_TEST);
+	}
 }
 
 void Buttons::debugDraw() {
