@@ -51,6 +51,12 @@ public:
 	void scale(float x, float y, float z);
 	
 	void setPosition(float x, float y, float z);
+	void setX(const float& x);
+	void setY(const float& y);
+	void setZ(const float& z);
+	float getX();
+	float getY();
+	float getZ();
 
 	static Mat4 translation(const Vec3& v);
 	static Mat4 translation(const float x, const float y, const float z);
@@ -241,6 +247,30 @@ inline float Mat4::operator[](const unsigned int dx) const {
 
 inline void Mat4::copy(float* f) {
 	memcpy(f,m,16*sizeof(float));
+}
+
+inline void Mat4::setX(const float& x) {
+	m[12] = x;
+}
+
+inline void Mat4::setY(const float& y) {
+	m[13] = y;
+}
+
+inline void Mat4::setZ(const float& z) {
+	m[14] = z; 
+}
+
+inline float Mat4::getX() {
+	return m[12];
+}
+
+inline float Mat4::getY() {
+	return m[13];
+}
+
+inline float Mat4::getZ() {
+	return m[14];
 }
 
 
