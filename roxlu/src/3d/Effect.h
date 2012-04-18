@@ -129,7 +129,7 @@ private:
 	time_t reload_shader_last_modified_frag;
 	time_t reload_shader_last_modified_vert;
 
-	roxlu::Timer<Effect> reload_timer;
+	//roxlu::Timer<Effect> reload_timer;
 	vector<string> uniforms;
 };
 

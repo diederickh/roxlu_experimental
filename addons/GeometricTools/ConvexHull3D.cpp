@@ -24,7 +24,7 @@ void ConvexHull3D::clear() {
 	if(chull != NULL) {
 		delete chull;
 	}
-	positions.clear();
+	points.clear();
 	num_triangles = 0;
 	num_indices = 0;
 	chull = NULL;
@@ -40,17 +40,17 @@ void ConvexHull3D::create() {
 	num_triangles = 0; 
 	num_indices = 0;
 		
-	// copy positions.
+	// copy points.
 	int dx = 0;
-	size_t num_pos = getNumPositions();
+	size_t num_pos = getNumpoints();
 	vertices = new Wm5::Vector3f[num_pos];
 	
 	for(int i = 0; i < num_pos; ++i) {
 		Wm5::Vector3f& v = *(vertices+i);
 		dx = i * 3;
-		v[0] = positions[dx];
-		v[1] = positions[dx+1];
-		v[2] = positions[dx+2];
+		v[0] = points[dx];
+		v[1] = points[dx+1];
+		v[2] = points[dx+2];
 	}
 
 	chull = new Wm5::ConvexHull3f(num_pos, vertices, 0.001f, false, query_type);
@@ -73,13 +73,13 @@ bool ConvexHull3D::save(const string& filepath) {
 string ConvexHull3D::toString() {
 	int dx = 0;
 	std::stringstream ss;
-	size_t num_pos = getNumPositions();
+	size_t num_pos = getNumpoints();
 	ss << num_pos << std::endl;
 	for(int i = 0; i < num_pos; ++i) {
 		dx = i * 3;
-		ss << positions[dx] 
-			<< " " << positions[dx+1]
-			<< " " << positions[dx+2]
+		ss << points[dx] 
+			<< " " << points[dx+1]
+			<< " " << points[dx+2]
 			<< std::endl;
 		
 	}
@@ -102,7 +102,7 @@ bool ConvexHull3D::load(const string& filepath) {
 		ifs >> y;
 		ifs >> z;
 		ifs >> skip; // endl
-		addPosition(x,y,z);
+		addPoint(x,y,z);
 	}
 	create();
 	return true;

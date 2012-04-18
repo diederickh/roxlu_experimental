@@ -40,11 +40,11 @@ void Light::debugDraw() {
 	// create plane.
 	float length;
 	Vec3 crossa, crossb;
-	normalize3(to_center, length, to_center);
-	cross3(to_center, help_axis, crossa);
-	cross3(to_center, crossa, crossb);
-	multiply3(crossa, 1.5, crossa);
-	multiply3(crossb, 1.5, crossb);
+	roxlu_normalize3(to_center, length, to_center);
+	roxlu_cross3(to_center, help_axis, crossa);
+	roxlu_cross3(to_center, crossa, crossb);
+	roxlu_multiply3(crossa, 1.5, crossa);
+	roxlu_multiply3(crossb, 1.5, crossb);
 		
 	Vec3 a = position + crossa;
 	Vec3 b = position - crossa;

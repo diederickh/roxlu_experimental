@@ -1,7 +1,7 @@
 #include "VAO.h"
 namespace roxlu {
 
-VAO::VAO() {
+VAO::VAO()  {
 	glGenVertexArraysAPPLE(1, &vao_id); eglGetError();
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Vec3.h"
-#include "Color.h"
+#include "../Graphics/Color.h"
 
 namespace roxlu {
 

@@ -4,7 +4,7 @@
 #include "Vec4.h"
 #include "Vec3.h"
 #include "Vec2.h"
-#include "Color.h"
+#include "../Graphics/Color.h"
 
 namespace roxlu {
 
@@ -37,28 +37,83 @@ struct Vertex {
 
 struct VertexP : public Vertex {
 	Vec3 pos;
+	
+	void setPos(const float& x, const float& y, const float& z) {
+		pos.set(x,y,z);
+	}
 };
 
 struct VertexPT : public Vertex  {
 	Vec3 pos;
 	Vec2 tex;
+	
+	VertexPT& setPos(const float& x, const float& y, const float& z) {
+		pos.set(x,y,z);
+		return *this;
+	}
+	
+	VertexPT& setTex(const float& u, const float& v) {
+		tex.set(u,v);
+		return *this;
+	}
 };
 
 struct VertexPN : public Vertex  {
 	Vec3 pos;
 	Vec3 norm;
+	
+	VertexPN& setPos(const float& x, const float& y, const float& z) {
+		pos.set(x,y,z);
+		return *this;
+	}
+	
+	VertexPN& setNorm(const float& x, const float& y, const float& z) {
+		norm.set(x,y,z);
+		return *this;
+	}
 };
 
 struct VertexPNC : public Vertex  {
 	Vec3 pos;
 	Vec3 norm;
 	Color4 col;
+	
+	VertexPNC& setNorm(const float& x, const float& y, const float& z) {
+		norm.set(x,y,z);
+		return *this;
+	}
+	
+	VertexPNC& setPos(const float& x, const float& y, const float& z) {
+		pos.set(x,y,z);
+		return *this;
+	}
+	
+	VertexPNC& setCol(const float& r, const float& g, const float& b, const float& a) {
+		col.set(r,g,b,a);
+		return *this;
+	}
 };
 
 struct VertexPTN : public Vertex  {
 	Vec3 pos;
 	Vec3 norm;
 	Vec2 tex;
+	
+	
+	VertexPTN& setPos(const float& x, const float& y, const float& z) {
+		pos.set(x,y,z);
+		return *this;
+	}
+	
+	VertexPTN& setNorm(const float& x, const float& y, const float& z) {
+		norm.set(x,y,z);
+		return *this;
+	}
+	
+	VertexPTN& setTex(const float& u, const float& v) {
+		tex.set(u,v);
+		return *this;
+	}
 };
 
 struct VertexPTNC : public Vertex  {
@@ -66,6 +121,23 @@ struct VertexPTNC : public Vertex  {
 	Vec3 norm;
 	Color4 col;
 	Vec2 tex;
+	
+	VertexPTNC& setPos(const float& x, const float& y, const float& z) {
+		pos.set(x,y,z);
+		return *this;
+	}
+	VertexPTNC& setNorm(const float& x, const float& y, const float& z) {
+		norm.set(x,y,z);
+		return *this;
+	}
+	VertexPTNC& setCol(const float& r, const float& g, const float& b, const float& a) {
+		col.set(r,g,b,a);
+		return *this;
+	}
+	VertexPTNC& setTex(const float& u, const float& v) {
+		tex.set(u,v);
+		return *this;
+	}
 };
 
 struct VertexPTNT : public Vertex  { // with tangent.

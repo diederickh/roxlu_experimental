@@ -32,8 +32,8 @@ void EasyCam::onMouseDragged(float x, float y, bool move) {
 		float dy = y - last_y;
 		float max_x = (screen_width * 0.25);
 		float max_y = (screen_height * 0.25);
-		float px = ((dx) / max_x) * MAX(0.4 * position.z, 0.1);
-		float py = ((dy) / max_y) * MAX(0.4 * position.z, 0.1);
+		float px = ((dx) / max_x) * MAX(0.4 * position.z, 0.2);
+		float py = ((dy) / max_y) * MAX(0.4 * position.z, 0.2);
 		translate(-px, py, 0);
 
 //		printf("dx: %f, dy: %f, px: %f, py: %f, %f\n", dx, dy, px, py, position.z);

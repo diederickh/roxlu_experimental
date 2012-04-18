@@ -3,49 +3,49 @@
 
 // When you're smarter than the compiler optimizer
 // -----------------------------------------------------------------------------
-#define dot3(a,b,r) 		r = (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
-#define cross3(a,b,dest)	dest.x = (a.y * b.z) - (b.y * a.z); \
-							dest.y = (a.z * b.x) - (b.z * a.x); \
-							dest.z = (a.x * b.y) - (b.x * a.y);
+#define roxlu_dot3(a,b,r) 		r = (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
+#define roxlu_cross3(a,b,dest)	dest.x = (a.y * b.z) - (b.y * a.z); \
+								dest.y = (a.z * b.x) - (b.z * a.x); \
+								dest.z = (a.x * b.y) - (b.x * a.y);
 
 
-#define isqrt3(a,odist)  { \
-							odist=(float)(a.x*a.x+a.y*a.y + a.z * a.z); \
-		     	          	float rsf=odist*0.5f; \
-							long rsl=*(long*)&odist; \
-							const float rsopf = 1.5f; \
-							rsl=0x5f3759df-(rsl>>1); \
-							odist=*(float*)&rsl; \
-	 			            odist=odist*(rsopf-(rsf*odist*odist));  \
-							}
-#define length3(a,r)		isqrt3(a,r); \
-							r = 1/r;
-#define copy3(a,b)			b.x = a.x; b.y = a.y; b.z = a.z;					
-#define set3(a,x,y,z)		a.x = x; a.y = y; a.z = z;
-#define normalize3(a,l,d)	l = 0.0; \
-							isqrt3(a,l); \
-							d.x = a.x * l; \
-							d.y = a.y * l; \
-							d.z = a.z * l; 
+#define roxlu_isqrt3(a,odist)  { \
+										odist=(float)(a.x*a.x+a.y*a.y + a.z * a.z); \
+		     		          			float rsf=odist*0.5f; \
+										long rsl=*(long*)&odist; \
+										const float rsopf = 1.5f; \
+										rsl=0x5f3759df-(rsl>>1); \
+										odist=*(float*)&rsl; \
+	 				        		    odist=odist*(rsopf-(rsf*odist*odist));  \
+								}
+#define roxlu_length3(a,r)			roxlu_isqrt3(a,r); \
+									r = 1/r;
+#define roxlu_copy3(a,b)			b.x = a.x; b.y = a.y; b.z = a.z;					
+#define roxlu_set3(a,x,y,z)			a.x = x; a.y = y; a.z = z;
+#define roxlu_normalize3(a,l,d)		l = 0.0; \
+									roxlu_isqrt3(a,l); \
+									d.x = a.x * l; \
+									d.y = a.y * l; \
+									d.z = a.z * l; 
 							
 
-#define rotate3(a, angle, ax, result)	\
-							{ \
-							float sina = sin(angle); \
-							float cosa = cos(angle); \
-							float cosb = 1.0f - cosa; \
-							result.x = a.x * (ax.x  * ax.x * cosb + cosa) + a.y * (ax.x * ax.y * cosb - ax.z * sina) + a.z * (ax.x * ax.z * cosb + ax.y * sina);   \
-							result.y = a.x * (ax.y  * ax.x * cosb + ax.z * sina) + a.y * (ax.y * ax.y * cosb + cosa) + a.z * (ax.y * ax.z * cosb - ax.x * sina);   \
-							result.z = a.x * (ax.z  * ax.x * cosb - ax.y * sina) + a.y * (ax.z * ax.y * cosb + ax.x * sina) + a.z * (ax.z * ax.z * cosb + cosa);   \
-							}
+#define roxlu_rotate3(a, angle, ax, result)	\
+									{ \
+										float sina = sin(angle); \
+										float cosa = cos(angle); \
+										float cosb = 1.0f - cosa; \
+										result.x = a.x * (ax.x  * ax.x * cosb + cosa) + a.y * (ax.x * ax.y * cosb - ax.z * sina) + a.z * (ax.x * ax.z * cosb + ax.y * sina);   \
+										result.y = a.x * (ax.y  * ax.x * cosb + ax.z * sina) + a.y * (ax.y * ax.y * cosb + cosa) + a.z * (ax.y * ax.z * cosb - ax.x * sina);   \
+										result.z = a.x * (ax.z  * ax.x * cosb - ax.y * sina) + a.y * (ax.z * ax.y * cosb + ax.x * sina) + a.z * (ax.z * ax.z * cosb + cosa);   \
+									}
 	
-#define	subtract3(a,b,c)	c.x = a.x - b.x; c.y = a.y - b.y; c.z = a.z - b.z;
-#define	add3(a,b,c)			c.x = a.x + b.x; c.y = a.y + b.y; c.z = a.z + b.z;
-#define multiply3(a,b,c)	c.x = a.x * b; c.y = a.y * b; c.z = a.z * b;
-#define zero3(a)			a.x = 0; a.y = 0; a.z = 0;
-#define divide3(a,f,r)		r.x = a.x / f; r.y = a.y / f; r.z = a.z / f;
-#define scale3(vec,s,l,r)	normalize3(vec,l,vec); r.x = vec.x * s; r.y  = vec.y * s; r.z = vec.z * s;
-#define ptr3(vec)			&(vec).x
+#define	roxlu_subtract3(a,b,c)		c.x = a.x - b.x; c.y = a.y - b.y; c.z = a.z - b.z;
+#define	roxlu_add3(a,b,c)			c.x = a.x + b.x; c.y = a.y + b.y; c.z = a.z + b.z;
+#define roxlu_multiply3(a,b,c)		c.x = a.x * b; c.y = a.y * b; c.z = a.z * b;
+#define roxlu_zero3(a)				a.x = 0; a.y = 0; a.z = 0;
+#define roxlu_divide3(a,f,r)		r.x = a.x / f; r.y = a.y / f; r.z = a.z / f;
+#define roxlu_scale3(vec,s,l,r)		roxlu_normalize3(vec,l,vec); r.x = vec.x * s; r.y  = vec.y * s; r.z = vec.z * s;
+#define roxlu_ptr3(vec)				&(vec).x
 
 #include <iostream>
 #include <math.h>
@@ -412,19 +412,19 @@ inline Vec3 operator*(float f, const Vec3& vec) {
 // -----------------------------------------------------------------------------
 inline Vec3 cross(const Vec3& a, const Vec3& b) {
 	Vec3 p;
-	cross3(a,b,p);
+	roxlu_cross3(a,b,p);
 	return p;
 }
 
 inline float dot(const Vec3& a, const Vec3& b) {
 	float r = 0.0;
-	dot3(a,b,r);
+	roxlu_dot3(a,b,r);
 	return r;
 }
 
 inline Vec3 rotate(const float angle, const Vec3& v, const Vec3& axis) {
 	Vec3 result;
-	rotate3(v, angle, axis, result);
+	roxlu_rotate3(v, angle, axis, result);
 	return result;
 /*
 rotate3(a, angle, ax, result)	\
