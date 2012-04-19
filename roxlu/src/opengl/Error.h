@@ -1,6 +1,6 @@
 #ifndef ROXLU_ERRORH
 #define ROXLU_ERRORH
-//#define DEBUG
+#define DEBUG
 #ifdef  DEBUG
 
 #include <stdlib.h>

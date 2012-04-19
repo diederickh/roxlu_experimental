@@ -61,7 +61,7 @@ bool FTP::setup(const string& server, const string& uname, const string& pw, str
 }
 
 int FTP::onUploadProgress(FTPFile* ftpFile, double t, double d, double ultotal, double ulnow) {
-	//printf("t=%fL d=%fL ultotal=%fL ulnow=%fL total size: %zu\n", t, d, ultotal, ulnow, ftpFile->file_size);
+	printf("t=%fL d=%fL ultotal=%fL ulnow=%fL total size: %zu f=%s\n", t, d, ultotal, ulnow, ftpFile->file_size, ftpFile->remotepath.c_str());
 	ftpFile->bytes_uploaded = ulnow;
 	if(ftpFile->bytes_uploaded > 0.0) {
 		ftpFile->upload_percentage = ftpFile->bytes_uploaded / (float)ftpFile->file_size;
