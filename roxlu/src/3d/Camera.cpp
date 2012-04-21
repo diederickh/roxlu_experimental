@@ -68,6 +68,15 @@ void Camera::orthoTopLeft(float nWidth, float nHeight, float nNear, float nFar) 
 	updateProjectionMatrix();
 }
 
+void Camera::orthoBottomLeft(float nWidth, float nHeight, float nNear, float nFar) {
+	ortho_width = nWidth;
+	ortho_height = nHeight;
+	near = nNear;
+	far = nFar;
+	projection_type = ORTHO_BOTTOM_LEFT;
+	updateProjectionMatrix();
+}
+
 // Moving around.
 // -----------------------------------------------------------------------------
 void Camera::place() {
@@ -119,18 +128,19 @@ void Camera::updateProjectionMatrix() {
 			fov_tan = tanf(fov * DEG_TO_RAD * 0.5);
 			near_width = (fov_tan * near) * 2; 
 			near_height = near_width / aspect;
-			//projection_matrix = Mat4::perspective(fov, aspect, near, far);
 			projection_matrix.perspective(fov, aspect, near, far);
 			break;
 		}
 		case ORTHO_CENTER: {
-			//projection_matrix = Mat4::orthoCenter(ortho_width, ortho_height, near, far);
 			projection_matrix.orthoCenter(ortho_width, ortho_height, near,far);
 			break;
 		}
 		case ORTHO_TOP_LEFT: {
-			//projection_matrix = Mat4::orthoTopLeft(ortho_width, ortho_height, near, far);
 			projection_matrix.orthoTopLeft(ortho_width, ortho_height, near, far);
+			break;
+		}
+		case ORTHO_BOTTOM_LEFT: {
+			projection_matrix.orthoBottomLeft(ortho_width, ortho_height, near, far);
 			break;
 		}
 	}

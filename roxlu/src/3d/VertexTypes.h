@@ -173,7 +173,7 @@ public:
 		return verts.size()-1;
 	}
 	
-	int createRect(const float& x, const float& y, const float& z, const float& w, const float& h) {
+	int addRectangle(const float& x, const float& y, const float& z, const float& w, const float& h) {
 		// first triangle.
 		add(x  , y  , z);
 		add(x+w, y  , z);
@@ -222,27 +222,25 @@ public:
 		verts.push_back(p);
 		return verts.size()-1;
 	}
-	
-	/**
-	 * Adds the vertices for a rectangle and returns the number of vertices
-	 * created. We create two triangles
-	 * 
-	 * hw = half width
-	 * hh = half height
-	 *
-	 * - We start with the positions at the bottom left
-	 * - Texture coordinates start at bottom left
-	 * - Z depth is 0
-	 * See: http://d1xzuxjlafny7l.cloudfront.net/wp-content/uploads/2012/02/TextureVertex.png 
-	 */
-	const int addRectangle(const float hw, const float hh) {
-		add(-hw, -hh, 0, 0,0);
-		add(hw, -hw, 0, 1,0);
-		add(hw, hw, 0, 1, 1);
+
+	// X,Y are bottom left coordinates
+	const int addRectangle(const float& x, const float& y, const float& z,  const float& w, const float& h) {
 		
-		add(hw, hw, 0, 1, 1);
-		add(-hw, hw, 0, 0, 1);
-		add(-hw, -hh, 0, 0,0);
+		add(x, y, 0, 0, 0);
+		add(x+w, y, 0, 1, 0);
+		add(x+w, y+h, 0, 1, 1);
+		
+		add(x+w, y+h, 0, 1, 1);
+		add(x, y+h, 0, 0, 1);
+		add(x, y, 0, 0, 0);
+		
+//		add(-hw, -hh, 0, 0,0);
+//		add(hw, -hw, 0, 1,0);
+//		add(hw, hw, 0, 1, 1);
+//		
+//		add(hw, hw, 0, 1, 1);
+//		add(-hw, hw, 0, 0, 1);
+//		add(-hw, -hh, 0, 0,0);
 		return 6;
 	}
 	

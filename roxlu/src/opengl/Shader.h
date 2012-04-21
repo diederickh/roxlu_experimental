@@ -94,5 +94,6 @@ class Shader {
 		GLuint prog_id;
 };
 
+
 } // roxlu
 #endif

@@ -17,6 +17,7 @@ public:
 		 PERSPECTIVE
 		,ORTHO_CENTER
 		,ORTHO_TOP_LEFT
+		,ORTHO_BOTTOM_LEFT
 	};
 	int projection_type;
 
@@ -24,6 +25,7 @@ public:
 	void perspective(float nFov, float nAspect, float nNear, float nFar);
 	void ortho(float nWidth, float nHeight, float nNear, float nFar);
 	void orthoTopLeft(float nWidth, float nHeight, float nNear, float nFar);
+	void orthoBottomLeft(float nWidth, float nHeight, float nNear, float nFar);
 	void setFar(float nFar);
 	void setNear(float nNear);
 	void setFov(float nFovY);

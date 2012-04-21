@@ -3,7 +3,7 @@
 namespace roxlu {
 
 Simulation2D::Simulation2D()
-	:gravity(0.0f, 10.0f)
+	:gravity(0.0f, -10.0f)
 	,world(gravity)
 	,velocity_iterations(10)
 	,position_iterations(8)
@@ -15,7 +15,7 @@ Simulation2D::Simulation2D()
 	uint32 flags = 0;
 	flags += b2Draw::e_shapeBit;
 	flags += b2Draw::e_jointBit;
-	//flags += b2Draw::e_aabbBit;
+//	flags += b2Draw::e_aabbBit;
 	flags += b2Draw::e_pairBit;
 //	flags += b2Draw::e_centerOfMassBit;
 	debug_draw.SetFlags(flags);
@@ -29,19 +29,34 @@ Simulation2D::~Simulation2D() {
 	}
 }
 
+void Simulation2D::destroyShape(Shape* shape) {
+	vector<Shape*>::iterator it = std::find(shapes.begin(), shapes.end(), shape);;
+	if(it != shapes.end()) {
+		world.DestroyBody(shape->body);
+		shapes.erase(it);
+		delete shape;
+	}
+}
+
 void Simulation2D::update() {
 	world.Step(timestep, velocity_iterations, position_iterations);
 	world.ClearForces();
 }
 
-void Simulation2D::debugDraw() {
+void Simulation2D::debugDraw(float* viewMatrix, float* projectionMatrix) {
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf(projectionMatrix);
+	
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(viewMatrix);
+	
 	glPushMatrix();
 		glScalef(b2_pixels_per_meter, b2_pixels_per_meter, 1);
 		world.DrawDebugData();
 	glPopMatrix();
 }
 
-Rectangle* Simulation2D::createRect(float x0, float x1, float y0, float y1) {
+Rectangle* Simulation2D::createRectangle(float x0, float x1, float y0, float y1) {
 	Rectangle* rect = new Rectangle();
 	rect->setPosition(x0, y0);
 	rect->setSize((x1-x0)*0.5, (y1-y0)*0.5);

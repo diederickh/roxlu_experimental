@@ -18,12 +18,14 @@ public:
 	virtual void setRestitution(const float& v);
 	virtual void setDensity(const float& v);
 	virtual void setFriction(const float& v);
+	virtual void setTransform(const float& x, const float& y, const float& angle);
 	virtual void setPosition(const float& x, const float& y);
 	virtual void setAllowSleep(const bool& allow);
 	virtual void setAwake(const bool& awake);
 	virtual void setDamping(const float& v);
-	
+	virtual void setBodyType(b2BodyType type);
 	virtual void addForce(const float& x, const float& y);
+	
 	Vec2 getScreenPosition();
 	
 	b2Body*			body;
@@ -34,8 +36,8 @@ public:
 	float restitution;
 	float friction;
 	
-//	static float pixels_per_meter;
-//	static float meter_per_pixels;
+	bool body_type_set;
+	
 };
 
 
@@ -51,12 +53,15 @@ inline void Shape::setFriction(const float& v) {
 	friction = v;
 }
 
+inline void Shape::setTransform(const float& x, const float& y, const float& angle) {
+	body->SetTransform(b2Vec2(PIXELS_TO_METERS(x), PIXELS_TO_METERS(y)), angle);
+}
+
 inline void Shape::setPosition(const float& x, const float& y) {
 	body_def.position.Set(PIXELS_TO_METERS(x),PIXELS_TO_METERS(y));
 }
 
 inline void Shape::addForce(const float& x, const float& y) {
-	//printf("ff: %f\n", body->GetPosition().x);
 	body->ApplyForce(b2Vec2(x,y), body->GetPosition());
 }
 
@@ -76,6 +81,12 @@ inline void Shape::setDamping(const float& v) {
 inline Vec2 Shape::getScreenPosition() {
 	b2Vec2 p = body->GetPosition();
 	return Vec2(METERS_TO_PIXELS(p.x), METERS_TO_PIXELS(p.y));
+}
+
+// b2_kinematicBody, b2_staticBody, b2_dynamicBody 
+ inline void Shape::setBodyType(b2BodyType t) {
+	body_def.type = t;
+	body_type_set = true;
 }
 
 } // namespace roxlu

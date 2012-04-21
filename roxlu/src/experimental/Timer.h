@@ -3,7 +3,7 @@
 
 // NO! POCO!!
 
-
+#include "sys/time.h"
 //#include "Poco/Timer.h"
 //#include "Poco/Thread.h"
 
@@ -11,7 +11,7 @@
 
 namespace roxlu {
 
-template<typename T>
+//template<typename T>
 class Timer {	
 public: 
 	Timer()
@@ -26,6 +26,17 @@ public:
 //		}
 	}
 	
+	
+	// now in millis
+	static uint64_t now() {
+		timeval time;
+		gettimeofday(&time, NULL);
+		uint64_t n = time.tv_usec;
+		n /= 1000; // convert seconds to millis
+		n += (time.tv_sec * 1000); // convert micros to millis
+		return n;
+	}
+	
 	void stop() {
 //		if(timer != NULL) {
 //			timer->stop();
@@ -36,11 +47,11 @@ public:
 //		callback->onTimer();	
 //	}
 	
-	void start(T& callbackObject, long startDelay, long interval) {
+//	void start(T& callbackObject, long startDelay, long interval) {
 //		callback = &callbackObject;
 //		timer = new Poco::Timer(startDelay, interval);
 //		timer->start(TimerCallback<roxlu::Timer<T> >(*this, &roxlu::Timer<T>::onTimer));
-	}
+//	}
 	
 //	Poco::Timer* timer;
 //	T* callback;

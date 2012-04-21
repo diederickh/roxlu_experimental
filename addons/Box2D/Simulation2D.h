@@ -22,13 +22,15 @@ public:
 	~Simulation2D();
 	void update();
 	
-	Rectangle* createRect(float x0, float x1, float y0, float y1);
+	Rectangle* createRectangle(float x0, float x1, float y0, float y1);
 	Circle* createCircle(float x, float y, float r);
 	Polygon* createPolygon();
 	Chain* createChain(); 
 	
+	void destroyShape(Shape* shape);
+	
 //	void setPixelsPerMeter(const float& ppm);
-	void debugDraw();
+	void debugDraw(float* viewMatrix, float* projectionMatrix);
 	
 	float timestep;
 	int velocity_iterations;

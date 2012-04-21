@@ -17,14 +17,17 @@ void Rectangle::make(b2World& w) {
 	shape.SetAsBox(PIXELS_TO_METERS(hw),PIXELS_TO_METERS(hh));
 	
 	// body
-	if(density == 0.0f) {
-		body_def.type = b2_staticBody;
-	}
-	else {
-		body_def.type = b2_dynamicBody;
+	if(!body_type_set) {
+		if(density == 0.0f) {
+			body_def.type = b2_staticBody;
+			printf("Creating static rect.\n");
+		}
+		else {
+			body_def.type = b2_dynamicBody;
+		}
 	}
 
-	body_def.position.Set(x+hw, y+hh);
+	body_def.position.Set(PIXELS_TO_METERS(x+hw), PIXELS_TO_METERS(y+hh));
 	body = w.CreateBody(&body_def);
 
 	// fixture

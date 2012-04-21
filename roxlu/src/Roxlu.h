@@ -26,6 +26,7 @@
 #include "experimental/ShaderGenerator.h"
 #include "experimental/SimpleClient.h"
 #include "experimental/SimpleServer.h"
+#include "experimental/ShaderTypes.h"
 #include "experimental/Timer.h"
 #include "experimental/Trackpad.h"
 #include "experimental/TrackpadCam.h"
