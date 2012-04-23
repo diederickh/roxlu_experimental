@@ -242,7 +242,7 @@ public:
 	}
 	
 	
-	vector<VertexP> verts;
+	vector<VertexP> verts;	
 };
 
 class VerticesPT {
@@ -274,6 +274,7 @@ public:
 		add(x, y, 0, 0, 0);
 		return 6;
 	}
+	
 	
 	void clear() {
 		verts.clear();					
