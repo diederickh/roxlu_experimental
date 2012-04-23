@@ -191,16 +191,16 @@ public:
 		return verts.size()-1;
 	}
 	
-	int addRectangle(const float& x, const float& y, const float& z, const float& w, const float& h) {
+	int addRectangle(const float& x, const float& y, const float& w, const float& h) {
 		// first triangle.
-		add(x  , y  , z);
-		add(x+w, y  , z);
-		add(x+w, y+h, z);
+		add(x  , y  , 0);
+		add(x+w, y  , 0);
+		add(x+w, y+h, 0);
 		
 		// second triangle.
-		add(x  , y  , z);
-		add(x+w, y+h, z);
-		add(x  , y+h, z); 
+		add(x  , y  , 0);
+		add(x+w, y+h, 0);
+		add(x  , y+h, 0); 
 		return 6; // number of vertices created
 	}
 	
@@ -249,7 +249,7 @@ public:
 	}
 
 	// X,Y are bottom left coordinates
-	const int addRectangle(const float& x, const float& y, const float& z,  const float& w, const float& h) {
+	const int addRectangle(const float& x, const float& y, const float& w, const float& h) {
 		
 		add(x, y, 0, 0, 0);
 		add(x+w, y, 0, 1, 0);

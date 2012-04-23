@@ -107,6 +107,11 @@ public:
 		}
 	}
 	
+	void drawEntry(const unsigned int dx) {
+		MeshEntry& me = entries.at(dx);
+		glDrawArrays(me.mode, me.start, me.count);
+	}
+	
 	void beginShape(GLenum drawMode) {
 		if(begin_called) {
 			printf("Already called VertexBuffer<T>::begin!\n");
@@ -155,9 +160,9 @@ public:
 	}
 	
 	// returns entries index
-	int addRectangle(const float& x, const float& y, const float& z, const float& w, const float& h) {
+	int addRectangle(const float& x, const float& y, const float& w, const float& h) {
 		int start = buffer.size();
-		int num = buffer.addRectangle(x,y,z,w,h);
+		int num = buffer.addRectangle(x,y,w,h);
 		MeshEntry entry(start, num, GL_TRIANGLES);
 		entries.push_back(entry);
 		checkResize();
