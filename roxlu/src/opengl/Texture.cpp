@@ -5,8 +5,8 @@
 namespace roxlu {
 
 Texture::Texture() 
-	:wrap_s(GL_REPEAT)
-	,wrap_t(GL_REPEAT)
+	:wrap_s(GL_CLAMP)
+	,wrap_t(GL_CLAMP)
 	,min_filter(GL_LINEAR)
 	,mag_filter(GL_LINEAR)
 	,internal_format(GL_RGBA)

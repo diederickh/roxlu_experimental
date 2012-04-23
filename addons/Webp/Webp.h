@@ -11,9 +11,26 @@ public:
 	WebP(const string& filename);
 	~WebP();
 	bool load(const string& filename);
+	int getWidth();
+	int getHeight();
 	unsigned char* getPixels();
 	WebPDecoderConfig config;
-	unsigned char* data;
+
+private:
+	bool loaded;
 };
+
+inline unsigned char* WebP::getPixels() {
+	return config.output.u.RGBA.rgba;
+}
+
+inline int WebP::getWidth() {
+	return config.output.width;
+}
+
+inline int WebP::getHeight() {
+	return config.output.height;
+}
+
 
 #endif

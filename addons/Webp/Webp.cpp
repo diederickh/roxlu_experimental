@@ -1,6 +1,6 @@
 #include "Webp.h"
 WebP::WebP() 
-	:data(NULL)
+	:loaded(false)
 {
 	if(!WebPInitDecoderConfig(&config)) {
 		printf("Wrong webp library.\n");
@@ -13,15 +13,21 @@ WebP::WebP(const string& filename) {
 }
 
 WebP::~WebP() {
-	if(data != NULL) {
-		delete[] data;
-		data = NULL;
+	if(loaded) {
+		WebPFreeDecBuffer(&config.output);
+		loaded = false;
 	}
 }
 
 // we assume files to be in data path.
 bool WebP::load(const string& filename) {
+	if(loaded) {
+		WebPFreeDecBuffer(&config.output);
+		loaded = false;
+	}
+	
 	string filepath = File::toDataPath(filename);
+	printf("Loading: %s\n", filepath.c_str());
 	WebPDecBuffer* const output_buffer = &config.output;
 	WebPBitstreamFeatures* const bitstream = &config.input;
 	VP8StatusCode status = VP8_STATUS_OK;
@@ -37,7 +43,8 @@ bool WebP::load(const string& filename) {
 	fseek(in, 0, SEEK_END);
 	data_size = ftell(in);
 	fseek(in, 0, SEEK_SET);
-	data = new unsigned char[data_size];	
+	printf("Data size: %zu\n", data_size);
+	unsigned char* data = new unsigned char[data_size];	
 	ok = (fread(data, data_size, 1, in) == 1);
 	if(!ok) {
 		printf("Cannot read from webp image.\n");
@@ -56,5 +63,9 @@ bool WebP::load(const string& filename) {
 	if(status != VP8_STATUS_OK) {
 		return false;
 	}
+	loaded = true;
+	delete[] data;
+	data = NULL;
 	return true;
 }
+
