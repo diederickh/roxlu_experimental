@@ -81,6 +81,11 @@ struct VertexPT : public Vertex  {
 		return *this;
 	}
 	
+	void set(const float& x, const float& y, const float& z, const float& u, const float& v) {
+		pos.set(x,y,z);
+		tex.set(u,v);
+	}
+	
 	const float* getPtr() {
 		return pos.getPtr();
 	}
@@ -263,15 +268,25 @@ public:
 	}
 
 	// X,Y are bottom left coordinates
-	const int addRectangle(const float& x, const float& y, const float& w, const float& h) {
-		
-		add(x, y, 0, 0, 0);
-		add(x+w, y, 0, 1, 0);
-		add(x+w, y+h, 0, 1, 1);
-		
-		add(x+w, y+h, 0, 1, 1);
-		add(x, y+h, 0, 0, 1);
-		add(x, y, 0, 0, 0);
+	const int addRectangle(const float& x, const float& y, const float& w, const float& h, bool flipUV = true) {
+		if(flipUV) {
+			add(x, y, 0, 0, 1);
+			add(x+w, y, 0, 1, 1);
+			add(x+w, y+h, 0, 1, 0);
+			
+			add(x+w, y+h, 0, 1, 0);
+			add(x, y+h, 0, 0, 0);
+			add(x, y, 0, 0, 1);
+		}
+		else {
+			add(x, y, 0, 0, 0);
+			add(x+w, y, 0, 1, 0);
+			add(x+w, y+h, 0, 1, 1);
+			
+			add(x+w, y+h, 0, 1, 1);
+			add(x, y+h, 0, 0, 1);
+			add(x, y, 0, 0, 0);		
+		}
 		return 6;
 	}
 	

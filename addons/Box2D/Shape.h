@@ -26,7 +26,7 @@ public:
 	virtual void setBodyType(b2BodyType type);
 	virtual void addForce(const float& x, const float& y);
 	
-	Vec2 getScreenPosition();
+	Vec2 getPosition();
 	
 	b2Body*			body;
 	b2BodyDef		body_def;
@@ -78,7 +78,7 @@ inline void Shape::setDamping(const float& v) {
 	body_def.linearDamping = v;
 }
 
-inline Vec2 Shape::getScreenPosition() {
+inline Vec2 Shape::getPosition() {
 	b2Vec2 p = body->GetPosition();
 	return Vec2(METERS_TO_PIXELS(p.x), METERS_TO_PIXELS(p.y));
 }

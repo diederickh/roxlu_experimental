@@ -325,28 +325,15 @@ public:
 	{
 	}
 	
-	int addRectangle(const float& x, const float& y, const float& w, const float& h, bool flipUV = false) {
+	int addRectangle(const float& x, const float& y, const float& w, const float& h, bool flipUV = true) {
 		int start = this->buffer.size();
-		int num = this->buffer.addRectangle(x,y,w,h);
+		int num = this->buffer.addRectangle(x,y,w,h, flipUV);
 		MeshEntry entry(start, num, GL_TRIANGLES);
 		this->entries.push_back(entry);
 		this->checkResize();
 		return this->entries.size()-1;
 	}
 	
-//	void setupShader() {
-//		printf("SetupShader!!!!\n");
-//		this->shader.addUniform("modelview_matrix").addUniform("projection_matrix").addUniform("texture");
-//		this->shader.addAttribute("tex").addAttribute("pos");
-//	}
-//	
-//	void setVertexAttributes() {
-//		printf("SetVertexAttributes!!!!\n");
-//		glEnableVertexAttribArray(this->shader.getAttribute("pos")); eglGetError();
-//		glEnableVertexAttribArray(this->shader.getAttribute("tex")); eglGetError();
-//		glVertexAttribPointer(this->shader.getAttribute("pos"), 3, GL_FLOAT, GL_FALSE, sizeof(VertexPT), (GLvoid*) offsetof(VertexPT, pos)); eglGetError();
-//		glVertexAttribPointer(this->shader.getAttribute("tex"), 2, GL_FLOAT, GL_FALSE, sizeof(VertexPT), (GLvoid*) offsetof(VertexPT, tex)); eglGetError();
-//	}
 
 };
 
@@ -366,16 +353,6 @@ public:
 		this->checkResize();
 		return this->entries.size()-1;
 	}	
-	
-//	void setupShader() {
-//		this->shader.addUniform("modelview_matrix").addUniform("projection_matrix");
-//		this->shader.addAttribute("pos");
-//	}
-//	
-//	void setVertexAttributes() {
-//		glEnableVertexAttribArray(this->shader.getAttribute("pos")); eglGetError();
-//		glVertexAttribPointer(this->shader.getAttribute("pos"), 3, GL_FLOAT, GL_FALSE, sizeof(VertexP), (GLvoid*)offsetof(VertexP, pos)); eglGetError();
-//	}
 
 };
 

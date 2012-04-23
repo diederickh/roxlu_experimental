@@ -31,6 +31,7 @@ void Circle::make(b2World& w) {
 	fixture_def.friction = friction;
 	fixture_def.restitution = restitution;
 	body->CreateFixture(&fixture_def);
+//	body->CreateFixture(&circle, 10);
 
 }
 
