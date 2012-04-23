@@ -13,7 +13,7 @@ namespace buttons {
 
 class Element {
 public:	
-	Element(int type);
+	Element(int type, const string& name);
 	~Element();
 	
 	virtual void setup(){}
@@ -43,6 +43,7 @@ public:
 	int type;
 
 	string label;
+	string name;
 	int state;
 	bool is_mouse_inside;
 	bool is_mouse_down_inside;
@@ -50,8 +51,6 @@ public:
 	bool needs_text_update;
 	bool drag_inside; // did the drag started from inside the element.
 	
-//	int start_dx;
-//	int end_dx;
 	int num_vertices;
 };
 

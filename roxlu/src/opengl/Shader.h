@@ -78,8 +78,8 @@ class Shader {
 		Shader& uniform3fv(GLint position, GLfloat* value, int count = 1);
 		Shader& uniform4fv(GLint position, GLfloat* value, int count = 1);
 
-		Shader& setTextureUnit(GLuint nUniformID, GLuint nTextureID, GLuint nNum, GLuint nTextureType = GL_TEXTURE_2D);
-		Shader& setTextureUnit(std::string sUniform, GLuint nTextureID, GLuint nNum, GLuint nTextureType = GL_TEXTURE_2D);	
+		Shader& setTextureUnit(GLuint nUniformID, GLuint nTextureID, int num, GLuint nTextureType = GL_TEXTURE_2D);
+		Shader& setTextureUnit(std::string sUniform, GLuint nTextureID, int num, GLuint nTextureType = GL_TEXTURE_2D);	
 
 
 		ShaderMap uniforms;

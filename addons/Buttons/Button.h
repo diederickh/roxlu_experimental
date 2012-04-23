@@ -8,8 +8,8 @@ namespace buttons {
 template<class T>
 class Button : public Element {
 public:
-	Button(int id, T* cb) 
-		:Element(BTYPE_BUTTON)
+	Button(int id, T* cb, const string& name) 
+		:Element(BTYPE_BUTTON, name)
 		,id(id)
 		,cb(cb)
 	{
@@ -19,7 +19,6 @@ public:
 		BSET_COLOR(toggle_on_color, 0.0,0.8,0.4,1.0);
 		BSET_COLOR(toggle_off_color, 0.0,0.5,0.2,0.8);
 		BSET_COLOR(button_bg_color, 0.04,0.04,0.04,0.9);
-
 	}
 	
 	~Button() {

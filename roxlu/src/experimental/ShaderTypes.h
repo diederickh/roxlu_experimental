@@ -29,33 +29,23 @@ const std::string SHADER_PT_FS = " \
 	} \
 ";
 
-class ShaderPT {
-public:
-	ShaderPT();
-	~ShaderPT();	
-	Shader shader;
-	GLuint getTextureUniform();
-	void enable();
-	void disable();
-};
-
-
-static ShaderPT& shader_pt() {
-	static ShaderPT pt;
-	return pt;
-}
-
-inline GLuint ShaderPT::getTextureUniform() {
-	return shader.getUniform("texture");
-}
-
-inline void ShaderPT::enable() {
-	shader.enable();
-}
-
-inline void ShaderPT::disable() {
-	shader.disable();
-}
+// gl_FragColor.r = 1.0; \
+//
+//static Shader& shader_pt() {
+//	static Shader pt;
+//	static bool created = false;
+//	if(!created) {
+//		pt.create(SHADER_PT_VS, SHADER_PT_FS);
+//		pt.addUniform("projection_matrix");
+//		pt.addUniform("modelview_matrix");
+//		pt.addUniform("texture");
+//		pt.addAttribute("pos");
+//		pt.addAttribute("tex");
+//		printf("SHADER PT CREATED+++++++++++++++++++++++++++++\n");
+//		created = true;
+//	}
+//	return pt;
+//}
 
 } // namespace roxlu
 

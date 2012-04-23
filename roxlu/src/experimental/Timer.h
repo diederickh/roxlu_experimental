@@ -26,7 +26,12 @@ public:
 //		}
 	}
 	
-	
+	// returns millis since first call.
+	static uint64_t millis() {
+		static uint64_t t = Timer::now();
+		return Timer::now() - t;
+	}	
+				
 	// now in millis
 	static uint64_t now() {
 		timeval time;

@@ -56,8 +56,8 @@ void Shader::create(const std::string& vertexSource, const std::string& fragment
 	const char* vss_ptr = vertexSource.c_str();
 	const char* fss_ptr = fragmentSource.c_str();
 	
-	std::cout << vertexSource << std::endl;
-	std::cout << fragmentSource << std::endl;
+//	std::cout << vertexSource << std::endl;
+//	std::cout << fragmentSource << std::endl;
 	
 	// create shader.
 	vert_id = glCreateShader(GL_VERTEX_SHADER); eglGetError();
@@ -266,7 +266,7 @@ Shader& Shader::uniform4fv(std::string uniform, GLfloat* value, int count) {
 Shader& Shader::setTextureUnit(
 	 std::string uniform
 	,GLuint textureID
-	,GLuint num
+	,int num
 	,GLuint textureType
 ) 
 {
@@ -337,16 +337,17 @@ Shader& Shader::uniform4fv(GLint position, GLfloat* value, int count) {
 Shader& Shader::setTextureUnit(
 	 GLuint nUniformID
 	,GLuint nTextureID
-	,GLuint nNum
+	,int num
 	,GLuint nTextureType) 
 {
 	enable();
-	glActiveTexture(GL_TEXTURE0 +nNum); eglGetError();
 	glEnable(nTextureType); eglGetError();
+	
+	glActiveTexture(GL_TEXTURE0+num); eglGetError();
 	glBindTexture(nTextureType, nTextureID); eglGetError();
-	uniform1i(nUniformID, nNum); eglGetError();
+	uniform1i(nUniformID, num); eglGetError();
 
-	glDisable(nTextureType); eglGetError();
+	//glDisable(nTextureType); eglGetError();
 	//glActiveTexture(GL_TEXTURE0); eglGetError();
 	return *this;
 }

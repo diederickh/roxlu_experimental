@@ -4,7 +4,13 @@
 
 namespace roxlu {
 
-Texture::Texture() {
+Texture::Texture() 
+	:wrap_s(GL_REPEAT)
+	,wrap_t(GL_REPEAT)
+	,min_filter(GL_LINEAR)
+	,mag_filter(GL_LINEAR)
+	,internal_format(GL_RGBA)
+{
 	glGenTextures(1, &texture_id); eglGetError();
 }
 
@@ -14,41 +20,20 @@ Texture::~Texture() {
 void Texture::setParams() {
 	bind();
 		glEnable(GL_TEXTURE_2D); eglGetError();
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); eglGetError(); // or GL_CLAMP (=> clamp give artifacts with uvsphere) ?
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); eglGetError();
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); eglGetError();
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); eglGetError();
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_s); eglGetError(); // or GL_CLAMP (=> clamp give artifacts with uvsphere) ?
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_t); eglGetError();
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter); eglGetError();
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter); eglGetError();
 	unbind();
-}
 
-/*
-void Texture::loadImage(string fileName, GLint imageFormat) {
-	// load image.
-	image_file = fileName;
-	printf("Loaded texture path: '%s'\n", image_file.c_str());
-	if(!img.loadImage(fileName)) {
-		ofLog(OF_LOG_ERROR, "Cannot load file: %s", fileName.c_str());
-		return;
-	}
-	setParams();
-	
-	// upload texture.
-	bind();
-		glTexImage2D(
-			 GL_TEXTURE_2D, 0
-			,GL_RGBA, img.getWidth(), img.getHeight(), 0
-			,imageFormat, GL_UNSIGNED_BYTE, img.getPixels());
-		eglGetError();
-	unbind();
 }
-*/
 
 void Texture::setPixels(unsigned char* pixels, int width, int height, GLenum format) {
 	bind();
 	glTexImage2D(
 		 GL_TEXTURE_2D
 		,0
-		,GL_RGBA8 
+		,internal_format 
 		,width
 		,height
 		,0
@@ -75,7 +60,7 @@ void Texture::unbind() {
 }
 
 
-GLuint Texture::getTextureID() {
+GLuint Texture::getID() {
 	return texture_id;
 }
 

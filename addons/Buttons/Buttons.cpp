@@ -177,15 +177,6 @@ void Buttons::generateElementVertices() {
 
 void Buttons::draw() {
 
-	// we will reset all of this...
-//	GLdouble curr_proj[16];
-//	GLdouble curr_model[16];
-//	GLdouble curr_texture[16];
-//	glGetDoublev(GL_PROJECTION_MATRIX, curr_proj);
-//	glGetDoublev(GL_MODELVIEW_MATRIX, curr_model);
-//	glGetDoublev(GL_TEXTURE_MATRIX, curr_texture);
-
-
 	// update projection matrix when viewport size changes.
 	GLint vp[4];
 	glGetIntegerv(GL_VIEWPORT, vp);
@@ -206,6 +197,9 @@ void Buttons::draw() {
 		glDisable(GL_DEPTH_TEST);
 		depth_enabled = true;
 	}
+	
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	gui_shader.enable();
 	vao.bind();
@@ -237,14 +231,8 @@ void Buttons::draw() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);	
 	glUseProgram(0);
-	
-	// reset previous projection and modelview matrices
-//	glMatrixMode(GL_TEXTURE);
-//	glLoadMatrixd(curr_texture);
-//	glMatrixMode(GL_PROJECTION);
-//	glLoadMatrixd(curr_proj);
-//	glMatrixMode(GL_MODELVIEW);
-//	glLoadMatrixd(curr_model);
+
+
 	if(cull_enabled) {
 		glEnable(GL_CULL_FACE);
 	}
@@ -279,21 +267,16 @@ void Buttons::debugDraw() {
 }
 
 Slider& Buttons::addFloat(const string& label, float& value) {
-	buttons::Slider* el = new Slider(value);
+	buttons::Slider* el = new Slider(value, createCleanName(label));
 	addElement(el, label);
 	return *el;
 }
 
 Toggle& Buttons::addBool(const string& label, bool& value) {
-	buttons::Toggle* el = new Toggle(value);
+	buttons::Toggle* el = new Toggle(value, createCleanName(label));
 	addElement(el, label);
 	return *el;
 }
-
-
-//Button& Buttons::addButton(const string& label) {
-//
-//}
 
 void Buttons::addElement(Element* el, const string& label) {
 	el->setup();
@@ -493,6 +476,14 @@ void Buttons::load() {
 void Buttons::load(const string& file) {
 	buttons::Storage storage;
 	storage.load(file, this);
+}
+
+Element* Buttons::getElement(const string& name) {
+	vector<Element*>::iterator it = std::find_if(elements.begin(), elements.end(), ElementByName(name));
+	if(it == elements.end()) {
+		return NULL;
+	}
+	return *it;
 }
 
 } // namespace buttons

@@ -479,14 +479,14 @@ void Effect::bindMaterial(Material& m) {
 	int n = 0;
 	if(m.hasDiffuseTexture()) {
 		Texture* tex = m.getDiffuseTexture();
-		shader.setTextureUnit("diffuse_texture", tex->getTextureID(), n, GL_TEXTURE_2D);
+		shader.setTextureUnit("diffuse_texture", tex->getID(), n, GL_TEXTURE_2D);
 		tex->bind();
 		n++;
 	}
 	
 	if(m.hasNormalTexture()) {
 		Texture* tex = m.getNormalTexture();
-		shader.setTextureUnit("normal_texture", tex->getTextureID(), n, GL_TEXTURE_2D);
+		shader.setTextureUnit("normal_texture", tex->getID(), n, GL_TEXTURE_2D);
 		tex->bind();
 		n++;
 	}

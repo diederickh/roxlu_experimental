@@ -51,6 +51,17 @@ struct VertexPT : public Vertex  {
 	Vec3 pos;
 	Vec2 tex;
 	
+	VertexPT() {
+	}
+	
+	VertexPT(const float& x, const float& y, const float& z, const float& u, const float& v) 
+		:pos(x,y,z)
+		,tex(u,v)
+	{
+		pos.set(x,y,z);
+		tex.set(u,v);
+	}
+		
 	VertexPT& setPos(const float& x, const float& y, const float& z) {
 		pos.set(x,y,z);
 		return *this;
@@ -166,6 +177,13 @@ struct VertexPTNTB : public Vertex  { // can be used for normal mapping
 
 class VerticesP {
 public:
+	typedef VertexP element_type;
+	
+	int add(const VertexP& el) {
+		verts.push_back(el);
+		return verts.size() - 1;
+	}
+	
 	int add(const float& x, const float& y, const float& z) {
 		VertexP p;
 		p.setPos(x, y, z);
@@ -215,6 +233,13 @@ public:
 
 class VerticesPT {
 public:
+	typedef VertexPT element_type;
+	
+	int add(const VertexPT& el) {
+		verts.push_back(el);
+		return verts.size() - 1;
+	}
+	
 	int add(const float& x, const float& y, const float& z, const float& u, const float& v) {
 		VertexPT p;
 		p.setPos(x, y, z);
@@ -233,14 +258,6 @@ public:
 		add(x+w, y+h, 0, 1, 1);
 		add(x, y+h, 0, 0, 1);
 		add(x, y, 0, 0, 0);
-		
-//		add(-hw, -hh, 0, 0,0);
-//		add(hw, -hw, 0, 1,0);
-//		add(hw, hw, 0, 1, 1);
-//		
-//		add(hw, hw, 0, 1, 1);
-//		add(-hw, hw, 0, 0, 1);
-//		add(-hw, -hh, 0, 0,0);
 		return 6;
 	}
 	

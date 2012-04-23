@@ -2,9 +2,9 @@
 
 namespace buttons {
 
-Slider::Slider(float& val)
+Slider::Slider(float& val, const string& name)
 	:value(val)
-	,Element(BTYPE_SLIDER)
+	,Element(BTYPE_SLIDER, name)
 	,minv(1)
 	,maxv(1000)
 	,p(0.5)

@@ -9,7 +9,7 @@ namespace buttons {
 
 class Slider : public Element {
 public:	
-	Slider(float& val);
+	Slider(float& val, const string& name);
 	~Slider();
 
 	void generateStaticText(Text& txt);

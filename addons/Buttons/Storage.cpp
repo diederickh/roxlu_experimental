@@ -22,7 +22,15 @@ bool Storage::save(const string& file, Buttons* buttons) {
 	vector<Element*>::iterator it = b.elements.begin();
 	while(it != b.elements.end()) {
 		Element& e = *(*it);
+		
+		// store type
 		ofs.write((char*)&e.type, sizeof(int));
+		
+		// store name.
+		size_t name_size = e.name.length()+1;
+		ofs.write((char*)&name_size, sizeof(size_t));
+		ofs.write((char*)e.name.c_str(), name_size);
+		
 		switch(e.type) {
 			case BTYPE_SLIDER: {
 				Slider* slider = static_cast<Slider*>((*it));
@@ -64,12 +72,24 @@ bool Storage::load(const string& file, Buttons* buttons) {
 	ifs.read((char*)&num_els, sizeof(size_t));
 	
 	// Load elements.
+	char name_buf[1024];
 	for(int i = 0; i < num_els; ++i) {
 		int type = 0;
 		ifs.read((char*)&type, sizeof(int));
+		
+		// retrieve name.
+		size_t name_size;
+		ifs.read((char*)&name_size, sizeof(size_t));
+		ifs.read((char*)name_buf, name_size);
+		
+		Element* el = buttons->getElement(name_buf);
+		if(el == NULL) {
+			continue;
+		}
+
 		switch(type) {
 			case BTYPE_SLIDER: {
-				Slider* slider = static_cast<Slider*>(b.elements[i]);
+				Slider* slider = static_cast<Slider*>(el);
 				ifs.read((char*)&slider->value, sizeof(float));
 				slider->setValue(slider->value);
 				slider->needsRedraw();
@@ -77,7 +97,7 @@ bool Storage::load(const string& file, Buttons* buttons) {
 				break;
 			}
 			case BTYPE_TOGGLE: {
-				Toggle* toggle = static_cast<Toggle*>(b.elements[i]);
+				Toggle* toggle = static_cast<Toggle*>(el);
 				ifs.read((char*)&toggle->value, sizeof(bool));
 				toggle->needsRedraw();
 				break;

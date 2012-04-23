@@ -45,6 +45,18 @@ const string BUTTONS_FS = "  \
 
 namespace buttons {
 
+struct ElementByName {
+	ElementByName(const string& name)
+		:name(name)
+	{
+	}
+	
+	bool operator()(const Element* el) {
+		return el->name == name;
+	}
+	string name;
+};
+
 class Buttons {
 public:
 	Buttons(const string& title, int w);
@@ -64,7 +76,7 @@ public:
 
 	template<class T>
 	Button<T>& addButton(const std::string& label, int id,  T* cb) {
-		buttons::Button<T>* el = new Button<T>(id, cb);
+		buttons::Button<T>* el = new Button<T>(id, cb, createCleanName(label));
 		addElement(el, label);
 		return *el;
 	}
@@ -81,8 +93,8 @@ public:
 	void onResize(int newW, int newH);
 	
 	void setPosition(int x, int y);
-
 	friend class Storage; 
+	Element* getElement(const string& name);
 		
 private:
 	void addElement(Element* el, const string& label);
@@ -97,6 +109,7 @@ private:
 	void updateStaticTextPositions();
 	void positionElements();
 	void flagChanged();
+	string createCleanName(const string& ugly);
 	
 	vector<Element*> elements;
 		
@@ -143,6 +156,16 @@ private:
 
 inline void Buttons::flagChanged() {
 	is_changed = true;
+}
+
+inline string Buttons::createCleanName(const string& ugly) {
+	string clean_name;
+	for(int i = 0; i < ugly.size(); ++i) {
+		if(isalnum(ugly[i])) {
+			clean_name.push_back(tolower(ugly[i]));
+		}
+	}
+	return clean_name;
 }
 
 } // buttons

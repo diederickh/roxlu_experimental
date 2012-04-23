@@ -1,9 +1,9 @@
 #include "Toggle.h"
 namespace buttons {
 
-Toggle::Toggle(bool& val) 
+Toggle::Toggle(bool& val, const string& name) 
 	:value(val)
-	,Element(BTYPE_TOGGLE)
+	,Element(BTYPE_TOGGLE, name)
 {
 	h = 20;
 	BSET_COLOR(bg_top_color, 0.0, 0.17, 0.21, 1.0);

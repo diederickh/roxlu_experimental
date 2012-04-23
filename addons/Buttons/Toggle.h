@@ -8,7 +8,7 @@ namespace buttons {
 
 class Toggle : public Element {
 public:	
-	Toggle(bool& val);
+	Toggle(bool& val, const string& name);
 	~Toggle();
 
 	void generateStaticText(Text& txt);
