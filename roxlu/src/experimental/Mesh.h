@@ -99,6 +99,8 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
 		
 		mesh_setup.setVertexAttributes();
+		
+		unbind();
 	}
 	
 	void setCamera(Mat4& vm, Mat4& pm) {
@@ -125,6 +127,7 @@ public:
 			glDrawArrays(me.mode, me.start, me.count);
 			++it;
 		}
+		unbind();
 	}
 	
 	void drawEntry(const unsigned int dx) {
@@ -201,12 +204,17 @@ public:
 			glBufferData(GL_ARRAY_BUFFER, buffer.numBytes(), buffer.getPtr(), GL_DYNAMIC_DRAW); eglGetError();
 			
 			shader.enable();
-			mesh_setup.setVertexAttributes();
+				mesh_setup.setVertexAttributes();
+			shader.disable();
+			
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindVertexArrayAPPLE(0);			
 			return 0;
 		}
 		else {
 			glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
 			glBufferSubData(GL_ARRAY_BUFFER, 0, buffer.numBytes(), buffer.getPtr());
+			unbind();
 			return 1;
 		}
 	}
