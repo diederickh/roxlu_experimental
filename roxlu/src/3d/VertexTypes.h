@@ -41,6 +41,15 @@ struct Vertex {
 struct VertexP : public Vertex {
 	Vec3 pos;
 	
+	VertexP() 
+		:pos(0,0,0)
+	{
+	}
+	
+	VertexP(const float& x, const float& y, const float& z) 
+		:pos(x,y,z)
+	{
+	}
 	void setPos(const float& x, const float& y, const float& z) {
 		pos.set(x,y,z);
 	}
@@ -227,6 +236,11 @@ public:
 	vector<VertexP>::iterator end() 	{	
 		return verts.end();		
 	}
+	
+	VertexP& operator[](const unsigned int dx) {
+		return verts[dx];
+	}
+	
 	
 	vector<VertexP> verts;
 };

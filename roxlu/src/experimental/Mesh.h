@@ -1,5 +1,5 @@
 #ifndef ROXLU_MESHH
-#define ROXLU_MESH
+#define ROXLU_MESHH
 
 #include "OpenGL.h"
 #include "VertexTypes.h"
@@ -24,23 +24,23 @@ struct MeshEntry {
 	GLenum mode;
 };
 
-class MeshSetupPT { 
+class MeshSetup {
+public:
+	MeshSetup(Shader& shader):shader(shader){}
+	~MeshSetup() {}
+	virtual void setupShader() = 0;
+	virtual void setVertexAttributes() = 0;
+	Shader& shader;
+};
+
+class MeshSetupPT : public MeshSetup { 
 public:	
-	MeshSetupPT(Shader& shader) 
-		:shader(shader)
-	{
-	}
-	~MeshSetupPT() {
-	}
+	MeshSetupPT(Shader& shader):MeshSetup(shader){}
+	~MeshSetupPT() {}
 	
 	void setupShader() {
-		shader.addUniform("modelview_matrix")
-			.addUniform("projection_matrix")
-			.addUniform("texture");
-
-		shader.addAttribute("tex")
-			.addAttribute("pos");
-
+		shader.addUniform("modelview_matrix").addUniform("projection_matrix").addUniform("texture");
+		shader.addAttribute("tex").addAttribute("pos");
 	}
 	
 	void setVertexAttributes() {
@@ -49,8 +49,23 @@ public:
 		glVertexAttribPointer(shader.getAttribute("pos"), 3, GL_FLOAT, GL_FALSE, sizeof(VertexPT), (GLvoid*) offsetof(VertexPT, pos)); eglGetError();
 		glVertexAttribPointer(shader.getAttribute("tex"), 2, GL_FLOAT, GL_FALSE, sizeof(VertexPT), (GLvoid*) offsetof(VertexPT, tex)); eglGetError();
 	}
+};
+
+class MeshSetupP : public MeshSetup {
+public:
+	MeshSetupP(Shader& shader):MeshSetup(shader){}
+	~MeshSetupP(){}
 	
-	Shader& shader;
+	void setupShader() {
+		shader.addUniform("modelview_matrix").addUniform("projection_matrix");
+		shader.addAttribute("pos");
+	}
+	
+	void setVertexAttributes() {
+		glEnableVertexAttribArray(shader.getAttribute("pos")); eglGetError();
+		glVertexAttribPointer(shader.getAttribute("pos"), 3, GL_FLOAT, GL_FALSE, sizeof(VertexP), (GLvoid*)offsetof(VertexP, pos)); eglGetError();
+	}
+	
 };
 
 // T = vertices buffer
@@ -95,8 +110,13 @@ public:
 		shader.enable();
 		glBindVertexArrayAPPLE(vao); eglGetError();
 	}
+	void unbind() {
+		shader.disable();
+		glBindVertexArrayAPPLE(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
 	
-	void draw(Mat4& vm, Mat4& pm) {
+	void draw(const Mat4& vm, const Mat4& pm) {
 		bind();
 		setCamera(vm, pm);
 		std::vector<MeshEntry>::iterator it = entries.begin();
@@ -122,6 +142,44 @@ public:
 		begin_mode = drawMode;
 	}
 	
+	void debugDraw(const Mat4& vm, const Mat4& pm) {
+		unbind();
+		glMatrixMode(GL_PROJECTION); eglGetError();
+		glLoadMatrixf(pm.getPtr()); eglGetError();
+		
+		glMatrixMode(GL_MODELVIEW); eglGetError();
+		glLoadMatrixf(vm.getPtr()); eglGetError();
+
+		std::vector<MeshEntry>::iterator it = entries.begin();
+		while(it != entries.end()) {
+			MeshEntry& me = *it;
+			glBegin(me.mode);
+			for(int i = me.start; i < (me.start+me.count); ++i) {
+				glVertex3fv(buffer[i].pos.getPtr());
+			}
+			glEnd();
+			++it;
+		}
+		
+	}
+
+	void debugDrawEntry(const MeshEntry& me, const Mat4& vm, const Mat4& pm) {
+		unbind();
+		
+		glMatrixMode(GL_PROJECTION); eglGetError();
+		glLoadMatrixf(pm.getPtr()); eglGetError();
+		
+		glMatrixMode(GL_MODELVIEW); eglGetError();
+		glLoadMatrixf(vm.getPtr()); eglGetError();
+
+		glBegin(me.mode);
+		for(int i = me.start; i < (me.start+me.count); ++i) {
+			glVertex3fv(buffer[i].pos.getPtr());
+		}
+		glEnd();
+	}
+	
+	
 	// returns entries index
 	int endShape() {
 		begin_called = false;
@@ -138,7 +196,6 @@ public:
 	int update() {
 		if(needsResize()) {
 			resize();
-		
 			glBindVertexArrayAPPLE(vao); eglGetError();
 			glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
 			glBufferData(GL_ARRAY_BUFFER, buffer.numBytes(), buffer.getPtr(), GL_DYNAMIC_DRAW); eglGetError();
@@ -231,6 +288,7 @@ private:
 
 
 typedef Mesh<VerticesPT, MeshSetupPT> MeshPT;
+typedef Mesh<VerticesP, MeshSetupP> MeshP;
 
 } // namespace roxlu
 
