@@ -24,53 +24,53 @@ struct MeshEntry {
 	GLenum mode;
 };
 
-//class MeshSetup {
-//public:
-//	MeshSetup(Shader& shader):shader(shader){}
-//	~MeshSetup() {}
-//	virtual void setupShader() = 0;
-//	virtual void setVertexAttributes() = 0;
-//	Shader& shader;
-//};
+class MeshSetup {
+public:
+	MeshSetup(Shader& shader):shader(shader){}
+	~MeshSetup() {}
+	virtual void setupShader() = 0;
+	virtual void setVertexAttributes() = 0;
+	Shader& shader;
+};
 
-//class MeshSetupPT : public MeshSetup { 
-//public:	
-//	MeshSetupPT(Shader& shader):MeshSetup(shader){}
-//	~MeshSetupPT() {}
-//	
-//	void setupShader() {
-//		shader.addUniform("modelview_matrix").addUniform("projection_matrix").addUniform("texture");
-//		shader.addAttribute("tex").addAttribute("pos");
-//	}
-//	
-//	void setVertexAttributes() {
-//		glEnableVertexAttribArray(shader.getAttribute("pos")); eglGetError();
-//		glEnableVertexAttribArray(shader.getAttribute("tex")); eglGetError();
-//		glVertexAttribPointer(shader.getAttribute("pos"), 3, GL_FLOAT, GL_FALSE, sizeof(VertexPT), (GLvoid*) offsetof(VertexPT, pos)); eglGetError();
-//		glVertexAttribPointer(shader.getAttribute("tex"), 2, GL_FLOAT, GL_FALSE, sizeof(VertexPT), (GLvoid*) offsetof(VertexPT, tex)); eglGetError();
-//	}
-//};
+class MeshSetupPT : public MeshSetup { 
+public:	
+	MeshSetupPT(Shader& shader):MeshSetup(shader){}
+	~MeshSetupPT() {}
+	
+	void setupShader() {
+		shader.addUniform("modelview_matrix").addUniform("projection_matrix").addUniform("texture");
+		shader.addAttribute("tex").addAttribute("pos");
+	}
+	
+	void setVertexAttributes() {
+		glEnableVertexAttribArray(shader.getAttribute("pos")); eglGetError();
+		glEnableVertexAttribArray(shader.getAttribute("tex")); eglGetError();
+		glVertexAttribPointer(shader.getAttribute("pos"), 3, GL_FLOAT, GL_FALSE, sizeof(VertexPT), (GLvoid*) offsetof(VertexPT, pos)); eglGetError();
+		glVertexAttribPointer(shader.getAttribute("tex"), 2, GL_FLOAT, GL_FALSE, sizeof(VertexPT), (GLvoid*) offsetof(VertexPT, tex)); eglGetError();
+	}
+};
 
-//class MeshSetupP : public MeshSetup {
-//public:
-//	MeshSetupP(Shader& shader):MeshSetup(shader){}
-//	~MeshSetupP(){}
-//	
-//	void setupShader() {
-//		shader.addUniform("modelview_matrix").addUniform("projection_matrix");
-//		shader.addAttribute("pos");
-//	}
-//	
-//	void setVertexAttributes() {
-//		glEnableVertexAttribArray(shader.getAttribute("pos")); eglGetError();
-//		glVertexAttribPointer(shader.getAttribute("pos"), 3, GL_FLOAT, GL_FALSE, sizeof(VertexP), (GLvoid*)offsetof(VertexP, pos)); eglGetError();
-//	}
-//	
-//};
+class MeshSetupP : public MeshSetup {
+public:
+	MeshSetupP(Shader& shader):MeshSetup(shader){}
+	~MeshSetupP(){}
+	
+	void setupShader() {
+		shader.addUniform("modelview_matrix").addUniform("projection_matrix");
+		shader.addAttribute("pos");
+	}
+	
+	void setVertexAttributes() {
+		glEnableVertexAttribArray(shader.getAttribute("pos")); eglGetError();
+		glVertexAttribPointer(shader.getAttribute("pos"), 3, GL_FLOAT, GL_FALSE, sizeof(VertexP), (GLvoid*)offsetof(VertexP, pos)); eglGetError();
+	}
+	
+};
 
 // T = vertices buffer
 // S = mesh setup
-template<class T>
+template<class T, class S>
 class Mesh {
 public:
 	Mesh(Shader& shader, size_t bufferPageSize = 4096)
@@ -79,7 +79,7 @@ public:
 		,needs_resize(true)
 		,begin_called(false)
 		,shader(shader)
-	//	,mesh_setup(shader)
+		,mesh_setup(shader)
 	{
 	}
 	
@@ -89,8 +89,8 @@ public:
 	void setup() {
 		shader.enable();
 		
-		//mesh_setup.setupShader();
-		setupShader();
+		mesh_setup.setupShader();
+		//setupShader();
 		
 		shader.enable();		
 		glGenVertexArraysAPPLE(1, &vao); eglGetError();
@@ -99,8 +99,8 @@ public:
 		glGenBuffers(1, &vbo); eglGetError();
 		glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
 		
-		//mesh_setup.setVertexAttributes();
-		setupVertexAttributes();
+		mesh_setup.setVertexAttributes();
+		//setVertexAttributes();
 		
 		unbind();
 	}
@@ -135,6 +135,11 @@ public:
 	void drawEntry(const unsigned int dx) {
 		MeshEntry& me = entries.at(dx);
 		glDrawArrays(me.mode, me.start, me.count);
+//		for(int i = me.start; i < (me.start+me.count); ++i) {
+//			typename T::element_type& el = buffer[i];
+//			el.tex.print();
+//		}
+//		printf("--\n");
 	}
 	
 	void beginShape(GLenum drawMode) {
@@ -166,6 +171,10 @@ public:
 			++it;
 		}
 		
+	}
+	
+	void debugDrawEntry(const unsigned int dx, const Mat4& vm, const Mat4& pm) {
+		debugDrawEntry(entries.at(dx), vm, pm);
 	}
 
 	void debugDrawEntry(const MeshEntry& me, const Mat4& vm, const Mat4& pm) {
@@ -206,8 +215,8 @@ public:
 			glBufferData(GL_ARRAY_BUFFER, buffer.numBytes(), buffer.getPtr(), GL_DYNAMIC_DRAW); eglGetError();
 			
 			shader.enable();
-				//mesh_setup.setVertexAttributes();
-				setupVertexAttributes();
+				mesh_setup.setVertexAttributes();
+				//setVertexAttributes();
 			shader.disable();
 			
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -275,13 +284,16 @@ public:
 	std::vector<MeshEntry>::iterator end() {
 		return entries.end();
 	}
-	
-	void setupShader()  {
-	}
-	void setupVertexAttributes() {
-	}
+//	
+//	void setupShader()  {
+//		printf("<< setupshader\n");
+//	}
+//	void setVertexAttributes() {
+//		printf("<< setVertexattributes()\n");
+//	}
 	
 	Shader& shader;
+	S mesh_setup;
 	T buffer;
 	GLuint vbo;
 	GLuint vao;
@@ -305,11 +317,11 @@ protected:
 	std::vector<MeshEntry> entries;
 };
 
-template<class T>
-class MeshPT_Implementation : public Mesh<T> {
+template<class T, class S>
+class MeshPT_Implementation : public Mesh<T, S> {
 public:
 	MeshPT_Implementation(Shader& shader, size_t bufferPageSize = 4096)
-		:Mesh<T>(shader, bufferPageSize)
+		:Mesh<T, S>(shader, bufferPageSize)
 	{
 	}
 	
@@ -322,27 +334,27 @@ public:
 		return this->entries.size()-1;
 	}
 	
-	void setupShader() {
-		printf("SetupShader!\n");
-		this->shader.addUniform("modelview_matrix").addUniform("projection_matrix").addUniform("texture");
-		this->shader.addAttribute("tex").addAttribute("pos");
-	}
-	
-	void setVertexAttributes() {
-		printf("SetVertexAttributes!\n");
-		glEnableVertexAttribArray(this->shader.getAttribute("pos")); eglGetError();
-		glEnableVertexAttribArray(this->shader.getAttribute("tex")); eglGetError();
-		glVertexAttribPointer(this->shader.getAttribute("pos"), 3, GL_FLOAT, GL_FALSE, sizeof(VertexPT), (GLvoid*) offsetof(VertexPT, pos)); eglGetError();
-		glVertexAttribPointer(this->shader.getAttribute("tex"), 2, GL_FLOAT, GL_FALSE, sizeof(VertexPT), (GLvoid*) offsetof(VertexPT, tex)); eglGetError();
-	}
+//	void setupShader() {
+//		printf("SetupShader!!!!\n");
+//		this->shader.addUniform("modelview_matrix").addUniform("projection_matrix").addUniform("texture");
+//		this->shader.addAttribute("tex").addAttribute("pos");
+//	}
+//	
+//	void setVertexAttributes() {
+//		printf("SetVertexAttributes!!!!\n");
+//		glEnableVertexAttribArray(this->shader.getAttribute("pos")); eglGetError();
+//		glEnableVertexAttribArray(this->shader.getAttribute("tex")); eglGetError();
+//		glVertexAttribPointer(this->shader.getAttribute("pos"), 3, GL_FLOAT, GL_FALSE, sizeof(VertexPT), (GLvoid*) offsetof(VertexPT, pos)); eglGetError();
+//		glVertexAttribPointer(this->shader.getAttribute("tex"), 2, GL_FLOAT, GL_FALSE, sizeof(VertexPT), (GLvoid*) offsetof(VertexPT, tex)); eglGetError();
+//	}
 
 };
 
-template<class T>
-class MeshP_Implementation : public Mesh<T> {
+template<class T, class S>
+class MeshP_Implementation : public Mesh<T, S> {
 public:
 	MeshP_Implementation(Shader& shader, size_t bufferPageSize = 4096)
-		:Mesh<T>(shader, bufferPageSize)
+		:Mesh<T, S>(shader, bufferPageSize)
 	{
 	}
 	
@@ -355,21 +367,21 @@ public:
 		return this->entries.size()-1;
 	}	
 	
-	void setupShader() {
-		this->shader.addUniform("modelview_matrix").addUniform("projection_matrix");
-		this->shader.addAttribute("pos");
-	}
-	
-	void setVertexAttributes() {
-		glEnableVertexAttribArray(this->shader.getAttribute("pos")); eglGetError();
-		glVertexAttribPointer(this->shader.getAttribute("pos"), 3, GL_FLOAT, GL_FALSE, sizeof(VertexP), (GLvoid*)offsetof(VertexP, pos)); eglGetError();
-	}
+//	void setupShader() {
+//		this->shader.addUniform("modelview_matrix").addUniform("projection_matrix");
+//		this->shader.addAttribute("pos");
+//	}
+//	
+//	void setVertexAttributes() {
+//		glEnableVertexAttribArray(this->shader.getAttribute("pos")); eglGetError();
+//		glVertexAttribPointer(this->shader.getAttribute("pos"), 3, GL_FLOAT, GL_FALSE, sizeof(VertexP), (GLvoid*)offsetof(VertexP, pos)); eglGetError();
+//	}
 
 };
 
 
-typedef MeshPT_Implementation<VerticesPT> MeshPT;
-typedef MeshP_Implementation<VerticesP> MeshP;
+typedef MeshPT_Implementation<VerticesPT, MeshSetupPT> MeshPT;
+typedef MeshP_Implementation<VerticesP, MeshSetupP> MeshP;
 
 } // namespace roxlu
 
