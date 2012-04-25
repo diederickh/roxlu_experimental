@@ -174,9 +174,9 @@ void Text::debugDraw() {
 	
 	
 	//glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);
+//	glEnable(GL_TEXTURE_2D);
 	bmfont.bind();
-	ofEnableAlphaBlending();
+//	ofEnableAlphaBlending();
 	int h = bmfont.ch;
 
 	glColor4f(1,1,1,1); // check if this is necessary
@@ -227,7 +227,10 @@ void Text::draw() {
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glColor4f(1,1,1,1);
 	glEnable(GL_TEXTURE_2D); eglGetError();
+	shader.uniform1i("font_texture", 0);
 	glActiveTexture(GL_TEXTURE0); eglGetError();
 	bmfont.bind();
 	
@@ -245,6 +248,7 @@ void Text::draw() {
 		int start = te.start_dx;
 		glDrawArrays(GL_TRIANGLES, texts[i].start_dx, texts[i].end_dx); eglGetError();
 	}
+
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 

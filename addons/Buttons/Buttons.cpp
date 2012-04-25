@@ -176,7 +176,7 @@ void Buttons::generateElementVertices() {
 }
 
 void Buttons::draw() {
-
+	
 	// update projection matrix when viewport size changes.
 	GLint vp[4];
 	glGetIntegerv(GL_VIEWPORT, vp);
@@ -239,6 +239,7 @@ void Buttons::draw() {
 	if(depth_enabled) {
 		glEnable(GL_DEPTH_TEST);
 	}
+	
 }
 
 void Buttons::debugDraw() {
