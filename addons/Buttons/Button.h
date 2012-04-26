@@ -9,7 +9,7 @@ template<class T>
 class Button : public Element {
 public:
 	Button(int id, T* cb, const string& name) 
-		:Element(BTYPE_BUTTON, name)
+		:Element(BTYPE_BUTTON, name, BVALUE_NONE)
 		,id(id)
 		,cb(cb)
 	{

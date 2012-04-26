@@ -71,7 +71,8 @@ public:
 	void load();
 	void load(const string& file);
 	
-	Slider& addFloat(const string& label, float& value);
+	Sliderf& addFloat(const string& label, float& value);
+	Slideri& addInt(const string& label, int& value);
 	Toggle& addBool(const string& label, bool& value);
 
 	template<class T>

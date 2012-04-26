@@ -13,9 +13,9 @@ namespace buttons {
 
 class Element {
 public:	
-	Element(int type, const string& name);
+	Element(int type, const string& name, int valueType);
 	~Element();
-	
+
 	virtual void setup(){}
 	virtual void update(){}
 	virtual void generateStaticText(Text& staticText) {}
@@ -33,6 +33,8 @@ public:
 	virtual void onMouseEnter(int mx, int my) { }
 	virtual void onMouseLeave(int mx, int my) { }
 	
+	void setValueType(int valueType);
+	int getValueType();
 	void needsRedraw();
 	void needsTextUpdate(); // when you want to change the dynamic text
 	
@@ -41,6 +43,7 @@ public:
 	int w;
 	int h;
 	int type;
+	int value_type; // what kind of data do you store.
 
 	string label;
 	string name;
@@ -60,6 +63,14 @@ inline void Element::needsRedraw() {
 
 inline void Element::needsTextUpdate() {
 	needs_text_update = true;
+}
+
+inline void Element::setValueType(int valueType) {
+	value_type = valueType;
+}
+
+inline int Element::getValueType() {
+	return value_type;
 }
 
 } // namespace buttons

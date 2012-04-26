@@ -2,6 +2,14 @@
 #include "OpenGL.h"
 
 namespace roxlu {
+Particle::Particle() 
+	:position(0,0,0)
+	,mass(1.0)
+	,inverse_mass(1.0)
+	,is_enabled(true)
+{
+}
+
 Particle::Particle(Vec3 pos) 
 	:position(pos)
 	,mass(1.0)
@@ -10,6 +18,7 @@ Particle::Particle(Vec3 pos)
 {
 
 }
+
 
 Particle::Particle(Vec3 pos, float m, float fric) 
 	:position(pos)

@@ -28,6 +28,12 @@ enum ElementStates {
 	,BSTATE_LEAVE
 };
 
+enum ElementValueTypes {
+	 BVALUE_NONE
+	,BVALUE_INT
+	,BVALUE_FLOAT
+};
+
 //typedef void(*ButtonCallback)(int); 
 
 class ButtonVertex {

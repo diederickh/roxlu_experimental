@@ -267,8 +267,16 @@ void Buttons::debugDraw() {
 	}
 }
 
-Slider& Buttons::addFloat(const string& label, float& value) {
-	buttons::Slider* el = new Slider(value, createCleanName(label));
+Sliderf& Buttons::addFloat(const string& label, float& value) {
+	buttons::Sliderf* el = new Sliderf(value, createCleanName(label), Sliderf::SLIDER_FLOAT);
+	el->setValueType(BVALUE_FLOAT);
+	addElement(el, label);
+	return *el;
+}
+
+Slideri& Buttons::addInt(const string& label, int& value) {
+	buttons::Slideri* el = new Slideri(value, createCleanName(label), Slideri::SLIDER_INT);
+	el->setValueType(BVALUE_INT);
 	addElement(el, label);
 	return *el;
 }

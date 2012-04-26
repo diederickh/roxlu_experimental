@@ -2,7 +2,7 @@
 
 namespace buttons {
 
-Element::Element(int type, const string& name) 
+Element::Element(int type, const string& name, int valueType) 
 	:x(0)
 	,y(0)
 	,w(0)
@@ -15,6 +15,7 @@ Element::Element(int type, const string& name)
 	,state(BSTATE_NONE)
 	,type(type)
 	,name(name)
+	,value_type(valueType)
 {
 }
 

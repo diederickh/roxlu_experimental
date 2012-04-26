@@ -8,6 +8,7 @@ class Particle;
 
 class Spring {
 public:
+	Spring();
 	Spring(Particle* a, Particle* b, float k = 0.2);
 	void debugDraw();
 	void update();

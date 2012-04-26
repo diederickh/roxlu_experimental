@@ -3,6 +3,13 @@
 
 namespace roxlu {
 
+Spring::Spring() 
+	:a(NULL)
+	,b(NULL)
+	,k(0.01)
+{
+}
+
 Spring::Spring(Particle* a, Particle* b, float k)
 	:a(a)
 	,b(b)

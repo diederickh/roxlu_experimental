@@ -33,8 +33,17 @@ bool Storage::save(const string& file, Buttons* buttons) {
 		
 		switch(e.type) {
 			case BTYPE_SLIDER: {
-				Slider* slider = static_cast<Slider*>((*it));
-				ofs.write((char*)&slider->value, sizeof(float));
+				int value_type = (*it)->getValueType();
+				if(value_type == BVALUE_INT) {
+					Slideri* slider = static_cast<Slideri*>((*it));
+					ofs.write((char*)&value_type, sizeof(int));
+					ofs.write((char*)&slider->value, sizeof(float));
+				}
+				else if(value_type == BVALUE_FLOAT) {
+					Sliderf* slider = static_cast<Sliderf*>((*it));
+					ofs.write((char*)&value_type, sizeof(int));
+					ofs.write((char*)&slider->value, sizeof(float));
+				}
 				break;
 			}
 			case BTYPE_TOGGLE: {
@@ -43,7 +52,7 @@ bool Storage::save(const string& file, Buttons* buttons) {
 				break;
 			}
 			default: {
-				printf("Cannot store unhandled type: %d\n", e.type);
+				printf("Cannot store unhandled gui type: %d\n", e.type);
 				break;
 			}
 		}
@@ -89,11 +98,22 @@ bool Storage::load(const string& file, Buttons* buttons) {
 
 		switch(type) {
 			case BTYPE_SLIDER: {
-				Slider* slider = static_cast<Slider*>(el);
-				ifs.read((char*)&slider->value, sizeof(float));
-				slider->setValue(slider->value);
-				slider->needsRedraw();
-				slider->needsTextUpdate();
+				int value_type = BVALUE_NONE;
+				ifs.read((char*)&value_type, sizeof(int));
+				if(value_type == BVALUE_FLOAT) {
+					Sliderf* slider = static_cast<Sliderf*>(el);
+					ifs.read((char*)&slider->value, sizeof(float));
+					slider->setValue(slider->value);
+					slider->needsRedraw();
+					slider->needsTextUpdate();
+				}
+				else if(value_type == BVALUE_INT) {
+					Slideri* slider = static_cast<Slideri*>(el);
+					ifs.read((char*)&slider->value, sizeof(int));
+					slider->setValue(slider->value);
+					slider->needsRedraw();
+					slider->needsTextUpdate();
+				}
 				break;
 			}
 			case BTYPE_TOGGLE: {
@@ -103,7 +123,7 @@ bool Storage::load(const string& file, Buttons* buttons) {
 				break;
 			}
 			default: {
-				printf("Cannot load type: %d\n", type);
+				printf("Cannot load gui type: %d\n", type);
 				break;
 			}	
 				

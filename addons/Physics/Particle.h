@@ -7,6 +7,7 @@ namespace roxlu {
 
 class Particle {
 public:
+	Particle();
 	Particle(Vec3 position);
 	Particle(Vec3 position, float mass, float fric = 0.96f);
 	virtual void addForce(const Vec3& f);
