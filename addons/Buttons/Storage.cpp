@@ -103,6 +103,7 @@ bool Storage::load(const string& file, Buttons* buttons) {
 				if(value_type == BVALUE_FLOAT) {
 					Sliderf* slider = static_cast<Sliderf*>(el);
 					ifs.read((char*)&slider->value, sizeof(float));
+					printf("Loaded value : %f\n", slider->value);
 					slider->setValue(slider->value);
 					slider->needsRedraw();
 					slider->needsTextUpdate();

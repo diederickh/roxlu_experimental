@@ -84,7 +84,7 @@ Slider::Slider(float& val, const string& name)
 		BSET_COLOR(bar_filled_color, 0.0,0.8,0.4,1.0);
 		BSET_COLOR(bar_filled_bottom, 0.0,0.4,0.2,1.0);
 		BSET_COLOR(bar_empty_color, 0.0,0.8,0.4,0.1);
-
+	
 		int bar_h = 4; // bar height
 		int bar_filled_w = w * p;
 		int bar_empty_w = w * (1.0 - p);
@@ -101,7 +101,6 @@ Slider::Slider(float& val, const string& name)
 			BSET_COLOR(bg_bottom_color, 0.0, 0.17, 0.21, 1.0);
 			needsRedraw();
 		}
-
 	}
 	
 	void onMouseEnter(int mx, int my) {
@@ -116,7 +115,6 @@ Slider::Slider(float& val, const string& name)
 			BSET_COLOR(bg_bottom_color, 0.0, 0.17, 0.21, 1.0);
 			needsRedraw();
 		}
-
 	}
 	
 	void onMouseDragged(int mx, int my, int dx, int dy) {
@@ -127,18 +125,17 @@ Slider::Slider(float& val, const string& name)
 			needsRedraw();
 			needsTextUpdate();
 		}
-	
+	}
+	void setPercentage(const float perc) {
+		p = perc;
+		value = minv +((maxv-minv) * p);
 	}
 
 	void setValue(const T& v) {
 		value = v;
-		p = (float)v/maxv;
-		/*
-		void Slider::setValue(const float& v) {
-	value = v;
-	p = (v/maxv);
-}
-		*/
+		T absv = std::abs(minv + std::abs(v));
+		T nrange = maxv-minv;
+		p = (float)absv/nrange;
 	}
 	
 	Slider& setMin(const T& m) {

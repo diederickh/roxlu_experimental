@@ -22,11 +22,22 @@ public:
 	void update();
 	void debugDraw();
 	
+	vector<Particle*>::iterator begin();
+	vector<Particle*>::iterator end();
+	
 	vector<Particle*> particles;
 	vector<Spring*> springs;
 
 }; // ParticleSystem
 
+
+inline vector<Particle*>::iterator ParticleSystem::begin() {
+	return particles.begin();
+}
+
+inline vector<Particle*>::iterator ParticleSystem::end() {
+	return particles.end();
+}
 
 
 inline void ParticleSystem::addParticle(Particle& p) {
