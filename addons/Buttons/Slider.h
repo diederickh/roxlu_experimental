@@ -74,7 +74,7 @@ Slider::Slider(float& val, const string& name)
 		std::stringstream ss;
 		ss << value;
 		ss >> v;
-		sprintf(buf, "%5.3f", v);
+		sprintf(buf, "%5.4f", v);
 		txt.updateText(txtval_dx, buf,0,0.48,0.98,0.9);
 	}
 	
