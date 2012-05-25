@@ -2,8 +2,16 @@
 #define ROXLU_TWITTER_PARSER_JSONH
 
 #include <string>
-#include "../../../libs/curl/curl.h"
-#include "../../../libs/jansson/jansson.h"
+#include <stdint.h>
+
+#if INTPTR_MAX == INT32_MAX
+	#include "../../../external/includes/curl32/curl.h"
+#elif INTPTR_MAX == INT64_MAX
+	#include "../../../external/includes/curl64/curl.h"
+#endif
+
+
+#include "../../../external/includes/jansson/jansson.h"
 #include "../types/General.h"
 #include "../types/Tweet.h"
 

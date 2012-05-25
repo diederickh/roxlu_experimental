@@ -23,7 +23,7 @@ void Tweet::addURL(rtt::URL* url) {
 	urls.push_back(url);
 }
 
-vector<rtt::URL*>& Tweet::getURLs() {
+const vector<rtt::URL*>& Tweet::getURLs() const {
 	return urls;
 }
 

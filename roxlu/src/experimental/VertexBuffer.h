@@ -116,6 +116,7 @@ private:
 
 
 typedef VertexBuffer<VerticesPT> VertexBufferPT;
+typedef VertexBuffer<VerticesPTN> VertexBufferPTN;
 
 } // namespace roxlu
 

@@ -4,7 +4,16 @@
 
 #include <fstream>
 #include <string>
-#include "../../../libs/curl/curl.h"
+
+#if INTPTR_MAX == INT32_MAX
+	#include "../../../external/includes/curl32/curl.h"
+#elif INTPTR_MAX == INT64_MAX
+	#include "../../../external/includes/curl64/curl.h"
+#endif
+
+
+
+
 
 using std::string;
 
@@ -16,6 +25,7 @@ struct URL {
 	enum TweetURLType {
 		 NONE
 		,TWITPIC
+		,INSTAGRAM
 	};
 	URL() {}
 	URL(string url);
@@ -24,6 +34,7 @@ struct URL {
 	
 	void detectURLType();
 	bool isTwitPic();
+	bool isInstagram();
 	string getTwitPicURL();
 	string getTwitPicCode();
 	string getURL();
@@ -52,6 +63,10 @@ private:
 
 inline bool URL::isTwitPic() {
 	return type == TWITPIC;
+}
+
+inline bool URL::isInstagram() {
+	return type == INSTAGRAM;
 }
 
 inline string URL::getURL() {

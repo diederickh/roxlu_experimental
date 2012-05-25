@@ -4,7 +4,8 @@
 #include <string>
 #include "Twitter.h"
 #include "Curl/Curl.h"
-#include "../../libs/jansson/jansson.h"
+
+#include "../../external/includes/jansson/jansson.h"
 
 using std::string;
 

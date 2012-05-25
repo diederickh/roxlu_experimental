@@ -66,6 +66,14 @@ bool Stream::connect(const string& streamURL) {
 		printf("Tracklist: %s\n", track_list.c_str());
 	}
 	
+	// LOCATIONS
+	// ----------
+	string location_list;
+	if(getLocationsList(location_list)) {
+		req.getParams().addString("locations", location_list);
+		printf("Location list: %s\n", location_list.c_str());
+	}
+	
 	// FOLLOW
 	// ------
 	string follow_list;
@@ -261,22 +269,50 @@ void Stream::track(const string& hashTag) {
  *
  * @param	string[out]		Is set to the list of tracks.
  */
-bool Stream::getTrackList(string& result) {
+ 
+void Stream::join(vector<string>& collection, const string& sep, string& result) {
 	result.assign("");
-	vector<string>::iterator it = to_track.begin();
-	while(it != to_track.end()) {
+	vector<string>::iterator it = collection.begin();
+	while(it != collection.end()) {
 		result.append(*it);
 		++it;
-		if(it != to_track.end()) {
-			result.append(",");
-		}	
+		if(it != collection.end()) {
+			result.append(sep);
+		}
 	}
-	return result.length();	
+}
+
+bool Stream::getTrackList(string& result) {
+	join(to_track, ",", result);
+	return result.length();
 }
 
 void Stream::clearTrackList() {
 	to_track.clear();
 }
+
+/**
+ * Add a bounding box from where you want to track tweets.
+ * 
+ * @param	string	lat0		Lower left latitude
+ * @param	string	long0		Lower left longitude
+ * @param	string	lat1		Top right latitude
+ * @param	string	long1		Top right longitude
+ */ 
+void Stream::addLocation(const string& lat0, const string& long0, const string& lat1, const string& long1) {
+	string location = lat0 +"," +long0 +"," +lat1 +"," +long1;
+	locations.push_back(location);
+}
+
+void Stream::clearLocations() {
+	locations.clear();
+}
+
+bool Stream::getLocationsList(string& result) {
+	join(locations, ",", result);
+	return result.length();
+}
+
 
 void Stream::parseBuffer() {
 	// after we received the http response
@@ -316,9 +352,6 @@ bool Stream::getResponseHeader(const string& name, string& result) {
 size_t Stream::curlWriteCallback(char *ptr, size_t size, size_t nmemb, Stream* obj) {
 	size_t bytes_to_write = size * nmemb;
 	obj->buffer.append(ptr, bytes_to_write);
-//	for(int i = 0; i < bytes_to_write; ++i) {
-//		printf("%c", ptr[i]);
-//	}
 	obj->parseBuffer();
 	return bytes_to_write;
 }
@@ -345,7 +378,6 @@ size_t Stream::curlHeaderCallback(char* ptr, size_t size, size_t nmemb, Stream* 
 			oss >> msg >> code >> msg;;
 			if(code == 401) {
 				printf("Error: while connecting to twitter server: %s, code: %lu\n", msg.c_str(), code);
-//				exit(0);
 			}
 		}
 	}

@@ -39,6 +39,10 @@ void URL::detectURLType() {
 	if(pos != std::string::npos) {
 		type = TWITPIC;
 	}
+	pos = url.find("instagr.am");
+	if(pos != std::string::npos) {
+		type = INSTAGRAM;
+	}
 }
 
 void URL::update() {

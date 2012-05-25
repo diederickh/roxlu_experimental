@@ -8,8 +8,19 @@ Gif::Gif(int width, int height, int numColorsInPalette, int loop)
 	,palette_size(numColorsInPalette)
 	,palette_created(false)
 	,num_loops(loop)
+	,is_setup(true)
 {
 
+}
+
+Gif::Gif() 
+	:width(0)
+	,height(0)
+	,palette_size(32)
+	,palette_created(false)
+	,num_loops(0)
+	,is_setup(false)
+{
 }
 
 Gif::~Gif() {
@@ -23,7 +34,17 @@ void Gif::addColor(unsigned char r, unsigned char g, unsigned char b) {
 	palette.push_back(p);
 }
 
+void Gif::setup(int w, int h) {
+	width = w;
+	height = h;
+	is_setup = true;
+}
+
 void Gif::addFrame(unsigned char* pixels, int delay, bool useForPalette) {
+	if(!is_setup) {
+		return;
+	}
+	
 	// add a new frame to the queue.
 	GifFrame* frame = new GifFrame();
 	frame->pixels = new unsigned char[width*height*3];

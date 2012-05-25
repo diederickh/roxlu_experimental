@@ -216,7 +216,7 @@ void Quat::setRotation(const float radians, const float xx, const float yy, cons
 }
 
 
-Vec3 Quat::rotate(const Vec3& rVec) const {
+Vec3 Quat::transform(const Vec3& rVec) const {
 	float vmult = (2.0f * x * rVec.x + y * rVec.y + z * rVec.z);
 	float cross_mult = 2.0f * w;
 	float pmult = cross_mult*w - 1.0f;

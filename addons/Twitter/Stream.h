@@ -7,8 +7,15 @@
 #include "../Curl/Request.h"
 #include "../Curl/oauth/Header.h"
 #include "../Curl/oauth/Signature.h"
-#include "../../libs/curl/curl.h"
-#include "../../libs/jansson/jansson.h"
+
+#if INTPTR_MAX == INT32_MAX
+	#include "../../external/includes/curl32/curl.h"
+#elif INTPTR_MAX == INT64_MAX
+	#include "../../external/includes/curl64/curl.h"
+#endif
+
+#include "../../external/includes/jansson/jansson.h"
+
 #include "Twitter.h"
 #include "IStreamEventListener.h"
 
@@ -35,14 +42,20 @@ public:
 	bool disconnect();
 	bool isConnected();
 	bool update();
-	//void setDisconnectedCallback(TWITTER_STREAM_DISCONNECT_FUNC func, void* userdata);
 	
 	// Parameters
 	void follow(const vector<string>& followers);
 	bool getFollowList(string& result);
+
 	void track(const string& tag); // adds a hashtag to the list of hashtags to track.
 	void clearTrackList();
 	bool getTrackList(string& result);
+
+	void addLocation(const string& lat0, const string& long0, const string& lat1, const string& long1); // add a bounding box to track.
+	void clearLocations();
+	bool getLocationsList(string& result);
+
+
 	
 	// Callback & helpers
 	static size_t curlWriteCallback(char *ptr, size_t size, size_t nmemb, Stream* obj);
@@ -64,10 +77,13 @@ public:
 	string buffer;
 
 private:
+	void join(vector<string>& collection, const string& sep, string& result);
+
 	struct curl_slist* curl_header;
 	map<string, string> response_headers;
 	vector<string> to_follow;
 	vector<string> to_track;
+	vector<string> locations;
 	vector<IStreamEventListener*> event_listeners;
 	CURL* curl;
 	CURLM* curlm;

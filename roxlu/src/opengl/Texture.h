@@ -14,6 +14,7 @@ public:
 	~Texture();
 	void setWrapS(GLenum wrapS);
 	void setWrapT(GLenum wrapT);
+	void setWrap(GLenum wrapST);
 	void setWrap(GLenum wrapS, GLenum wrapT);
 	void setMinFilter(GLenum minFilter);
 	void setMagFilter(GLenum magFilter);
@@ -47,6 +48,11 @@ inline void Texture::setWrapS(GLenum wrapS) {
 
 inline void Texture::setWrapT(GLenum wrapT) {
 	wrap_t = wrapT;
+}
+
+
+inline void Texture::setWrap(GLenum wrapST) {
+	setWrap(wrapST, wrapST);
 }
 
 inline void Texture::setWrap(GLenum s, GLenum t) {

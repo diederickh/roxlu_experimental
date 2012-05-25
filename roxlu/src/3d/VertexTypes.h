@@ -132,6 +132,19 @@ struct VertexPTN : public Vertex  {
 	Vec3 norm;
 	Vec2 tex;
 	
+	VertexPTN() {
+	}
+	
+	VertexPTN(
+		 const float& x, const float& y, const float& z
+		,const float& nx, const float& ny, const float& nz
+		,const float& s, const float& t
+	)
+	{
+		pos.set(x,y,z);
+		norm.set(nx,ny,nz);
+		tex.set(s,t);
+	}
 	
 	VertexPTN& setPos(const float& x, const float& y, const float& z) {
 		pos.set(x,y,z);
@@ -146,6 +159,10 @@ struct VertexPTN : public Vertex  {
 	VertexPTN& setTex(const float& u, const float& v) {
 		tex.set(u,v);
 		return *this;
+	}
+	
+	float* getPtr() {
+		return pos.getPtr();
 	}
 };
 
@@ -188,21 +205,66 @@ struct VertexPTNTB : public Vertex  { // can be used for normal mapping
 	Vec2 tex;
 };
 
-
-class VerticesP {
+template<class T>
+class Vertices_Template {
 public:
-	typedef VertexP element_type;
+	typedef T element_type;
 	
-	int add(const VertexP& el) {
+	// returns index
+	int add(const T& el) {
 		verts.push_back(el);
 		return verts.size() - 1;
 	}
 	
+	void clear() {
+		verts.clear();
+	}
+	
+	size_t size() {
+		return verts.size();
+	}
+	
+	size_t numBytes() {
+		return sizeof(T) * size();
+	}
+	
+	float* getPtr() {
+		return verts[0].getPtr();
+	}
+	
+	typename vector<T>::iterator begin() {
+		return verts.begin();
+	}
+	
+	typename vector<T>::iterator end() {
+		return verts.end();
+	}
+	
+	T& operator[](const unsigned int dx) {
+		return verts[dx];
+	}
+	
+	
+	vector<T> verts;
+};
+
+
+//class VerticesP {
+template <class T>
+class Vertices_TemplateP : public Vertices_Template<T> {
+public:
+	//typedef VertexP element_type;
+	/*
+	int add(const VertexP& el) {
+		verts.push_back(el);
+		return verts.size() - 1;
+	}
+	*/
 	int add(const float& x, const float& y, const float& z) {
 		VertexP p;
 		p.setPos(x, y, z);
-		verts.push_back(p);
-		return verts.size()-1;
+		this->verts.push_back(p);
+		return this->verts.size()-1;
 	}
 	
 	int addRectangle(const float& x, const float& y, const float& w, const float& h) {
@@ -217,7 +279,7 @@ public:
 		add(x  , y+h, 0); 
 		return 6; // number of vertices created
 	}
-	
+	/*
 	void clear() {
 		verts.clear();						
 	}
@@ -248,23 +310,26 @@ public:
 	
 	
 	vector<VertexP> verts;	
+	*/
 };
 
-class VerticesPT {
+//class VerticesPT {
+template<class T>
+class Vertices_TemplatePT : public Vertices_Template<T> {
 public:
-	typedef VertexPT element_type;
-	
+//	typedef VertexPT element_type;
+/*	
 	int add(const VertexPT& el) {
 		verts.push_back(el);
 		return verts.size() - 1;
 	}
-	
+*/	
 	int add(const float& x, const float& y, const float& z, const float& u, const float& v) {
 		VertexPT p;
 		p.setPos(x, y, z);
 		p.setTex(u,v);
-		verts.push_back(p);
-		return verts.size()-1;
+		this->verts.push_back(p);
+		return this->verts.size()-1;
 	}
 
 	// X,Y are bottom left coordinates
@@ -290,7 +355,7 @@ public:
 		return 6;
 	}
 	
-	
+	/*
 	void clear() {
 		verts.clear();					
 	}
@@ -320,8 +385,16 @@ public:
 	}
 	
 	vector<VertexPT> verts;
+	*/
 };
 
+template<class T>
+class Vertices_TemplatePTN : public Vertices_Template<T> {
+};
+
+typedef Vertices_TemplateP<VertexP>	VerticesP;
+typedef Vertices_TemplatePT<VertexPT> VerticesPT;
+typedef Vertices_TemplatePTN<VertexPTN> VerticesPTN;
 
 
 } // roxlu

@@ -86,7 +86,9 @@ struct Vec3 {
 	Vec3& rotate(float angle, float x, float y, float z);
 	Vec3& rotate(float angle, Vec3 axis);
 	Vec3& rotate(float angle, Vec3 axis, Vec3 pivot);
-	Vec3& rotateY(float angle);
+	Vec3& rotateY(const float& angle);
+	Vec3& rotateX(const float& angle);
+	Vec3& rotateZ(const float& angle);
 	Vec3& limit(float size);
 	Vec3& scale(float length);
 	Vec3& normalize();
@@ -192,8 +194,16 @@ inline Vec3& Vec3::rotate(float a, float xx, float yy, float zz) {
 	return *this;
 }
 
-inline Vec3& Vec3::rotateY(float angle) {
+inline Vec3& Vec3::rotateX(const float& angle) {
+	return rotate(angle, 1.0f, 0.0f, 0.0f);
+}
+
+inline Vec3& Vec3::rotateY(const float& angle) {
 	return rotate(angle, 0.0f, 1.0f, 0.0f);
+}
+
+inline Vec3& Vec3::rotateZ(const float& angle) {
+	return rotate(angle, 0.0f, 0.0f, 1.0f);
 }
 
 inline Vec3& Vec3::rotate(float a, Vec3 ax) {

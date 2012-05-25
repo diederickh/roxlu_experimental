@@ -5,7 +5,16 @@
 #include <deque>
 #include <fstream>
 #include "Curl.h"
-#include "../../external/includes/curl/curl.h"
+
+// Include 32 or 64 bit version.
+#include <stdint.h>
+#if INTPTR_MAX == INT32_MAX
+	#include "../../external/includes/curl32/curl.h"
+#elif INTPTR_MAX == INT64_MAX
+	#include "../../external/includes/curl64/curl.h"
+#endif
+
+
 
 using std::string;
 using std::deque;

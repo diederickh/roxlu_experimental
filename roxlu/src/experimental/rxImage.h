@@ -8,6 +8,7 @@
 #include "File.h"
 #include "WebP.h"
 #include "ShaderTypes.h"
+#include "VertexTypes.h"
 #include <string>
 using namespace roxlu;
 

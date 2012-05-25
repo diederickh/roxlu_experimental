@@ -12,6 +12,7 @@ class Quat {
 public:	
 	float x,y,z,w;
 	Quat(float x = 0, float y = 0, float z = 0, float w = 1);
+	void set(const float& x, const float& y, const float& z, const float& w);
 	void normalize();
 	void toMat4(Mat4& aDest);
 	Mat4 getMat4() ;
@@ -30,7 +31,7 @@ public:
 	// relative rotation
 	void rotate(const float radians, const float x, const float y, const float z); 
 	void rotate(const float radians, const Vec3& rAxis) { rotate(radians, rAxis.x, rAxis.y, rAxis.z); }
-	Vec3 rotate(const Vec3& rVec) const;
+	Vec3 transform(const Vec3& rVec) const;
 	
 	Quat operator*(const Quat& rOther) const;
 	Quat operator*(float nScalar) const;
@@ -46,6 +47,13 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, const Quat& rQuat);
 	
 };
+
+inline void Quat::set(const float& x, const float& y, const float& z, const float& w) {
+	this->x = x;
+	this->y = y;
+	this->z = z;
+	this->w = w;
+}
 
 inline void Quat::setXRotation(const float radians) {
 	setRotation(radians, 1, 0, 0);

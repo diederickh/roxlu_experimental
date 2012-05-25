@@ -133,7 +133,7 @@ inline Vec3 Camera::getPosition() {
 }
 
 inline Vec3 Camera::getWorldPosition() {
-	Vec3 p = rotation.rotate(position * -1);	
+	Vec3 p = rotation.transform(position * -1);	
 	return p;
 }
 

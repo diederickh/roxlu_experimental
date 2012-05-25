@@ -1,7 +1,7 @@
 #include "JSON.h"
 #include "../Twitter.h"
-#include "../../../libs/curl/curl.h"
-#include "../../../libs/jansson/jansson.h"
+
+
 #define RETURN_JSON(msg) string m = msg; printf("Error: %s", m.c_str()); return false;
 
 namespace rtt = roxlu::twitter::type;
@@ -32,9 +32,7 @@ JSON& JSON::operator=(const roxlu::twitter::parser::JSON& other) {
 
 
 JSON::~JSON() {
-	printf("~JSON()");
 }
-
 
 
 bool JSON::parseStatus(json_t* root, rtt::Tweet& tweet) {
@@ -148,6 +146,25 @@ bool JSON::parseStatus(json_t* root, rtt::Tweet& tweet) {
 			}
 		}
 		
+		// get urls
+		subnode = json_object_get(node, "urls");
+		if(subnode != NULL && json_is_array(subnode)) {
+			size_t num = json_array_size(subnode);
+			json_t* val = NULL;
+			for(int i = 0; i < num; ++i) {
+				val = json_array_get(subnode, i);
+				if(val == NULL || !json_is_object(val)) {
+					continue;
+				}
+				json_t* exp_url = json_object_get(val, "expanded_url");
+				if(exp_url == NULL) {
+					continue;
+				}
+				string expanded_url = json_string_value(exp_url);
+				rtt::URL* url = new rtt::URL(expanded_url);
+				tweet.addURL(url);
+			}
+		}
 
 	}
 	return true;	

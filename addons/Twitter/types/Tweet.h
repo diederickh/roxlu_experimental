@@ -48,7 +48,7 @@ public:
 	string getAvatar() const		{ return avatar;		}
 	string getUserID() const 		{ return user_id; 		}
 	string getTweetID() const		{ return tweet_id;		}
-	vector<rtt::URL*>& getURLs();
+	const vector<rtt::URL*>& getURLs() const;
 	
 	uint64_t tweet_id_int;
 	string text;

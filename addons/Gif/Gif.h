@@ -32,8 +32,10 @@ struct GifFrame {
 class Gif {
 public:
 	Gif(int width, int height, int numColorsInPalette = 32, int numLoop = 0);
+	Gif();
 	~Gif();
 	
+	void setup(int width, int height);
 	void addColor(unsigned char r, unsigned char g, unsigned char b);
 	void addFrame(unsigned char* pixels, int delay = 0, bool useForPalette = true);
 	bool save(const char* filepath);
@@ -48,6 +50,7 @@ public:
 	std::vector<MCPoint> palette;
 	
 private:
+	bool is_setup;
 	vector<GifFrame*> frames;
 	bool palette_created;
 };
