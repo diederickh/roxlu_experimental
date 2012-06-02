@@ -1,5 +1,21 @@
 #ifndef RUIH
 #define RUIH
+/* 
+OpenFrameworks example:
+==========================
+void testApp::mouseMoved(int x, int y){
+	gui.onMouseMoved(x,y);
+}
+void testApp::mouseDragged(int x, int y, int button){
+	cam.onMouseMoved(x,y);
+}
+void testApp::mousePressed(int x, int y, int button){
+	gui.onMouseDown(x,y);	
+}
+void testApp::mouseReleased(int x, int y, int button){
+	gui.onMouseUp(x,y);
+}
+*/
 
 #include <vector>
 

@@ -102,6 +102,7 @@ public:
 	
 	friend ostream& operator <<(ostream& os, const VertexData& data);
 	Vec3& operator[](const unsigned int dx);
+	Vec3& at(const unsigned int dx);
 	const size_t size() const; // num vertices 
 		
 	Vec3			computeQuadNormal(int nQuad);
@@ -235,6 +236,9 @@ inline ostream& operator <<(ostream& os, const VertexData& data) {
 // you can use the index operator to access vertices.
 inline Vec3& VertexData::operator[](const unsigned int dx) {
 	return vertices[dx];
+}
+inline Vec3& VertexData::at(const unsigned int dx) {
+	return vertices.at(dx);
 }
 
 } // roxlu

@@ -8,6 +8,12 @@ namespace roxlu {
 ParticleSystem::ParticleSystem() {
 }
 
+Particle* ParticleSystem::createParticle(const float& x, const float& y, const float& z, float mass) {
+	Particle* p = new Particle(Vec3(x,y,z), mass);
+	particles.push_back(p);
+	return p;
+}
+
 Particle* ParticleSystem::createParticle(Vec3 pos, float mass, float friction) {
 	Particle* p = new Particle(pos, mass, friction);
 	particles.push_back(p);
@@ -35,6 +41,10 @@ void ParticleSystem::update() {
 		ptr[i]->update();
 	}
 
+}
+
+void ParticleSystem::addForce(const float& x, const float& y, const float& z) {
+	addForce(Vec3(x,y,z));
 }
 
 void ParticleSystem::addForce(const Vec3& f)  {

@@ -14,10 +14,13 @@ class Particle;
 class ParticleSystem {
 public:
 	ParticleSystem();
+	Particle* createParticle(const float& x, const float& y, const float& z, float mass = 1.0f);
 	Particle* createParticle(Vec3 pos, float mass = 1.0f, float friction = 0.96f);
 	Spring* createSpring(Particle* a, Particle* b);
+	
 	void addParticle(Particle& p);
 	void addParticle(Particle* p);
+	void addForce(const float& x, const float& y, const float& z);
 	void addForce(const Vec3& force);
 	void update();
 	void debugDraw();
