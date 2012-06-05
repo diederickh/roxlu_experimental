@@ -26,6 +26,7 @@ Buttons::Buttons(const string& title, int w)
 	,pmy(0)
 	,title(title)
 	,num_panel_vertices(0) 
+	,is_locked(false)
 {
 	if(!shaders_initialized) {
 		bmf = new BitmapFont();
@@ -304,14 +305,16 @@ void Buttons::onMouseMoved(int x, int y) {
 	mdy = y - pmy;
 	
 	// are we inside our header area? TODO: we cn optimize here by returning early
-	is_mouse_inside = BINSIDE_HEADER(this, x, y);
-	if(is_mouse_inside && state == BSTATE_NONE) {
- 		state = BSTATE_ENTER;
-		onMouseEnter(x,y);
-	}
-	else if(!is_mouse_inside && state == BSTATE_ENTER) {
-		state = BSTATE_NONE;
-		onMouseLeave(x, y); 
+	if(!is_locked) {
+		is_mouse_inside = BINSIDE_HEADER(this, x, y);
+		if(is_mouse_inside && state == BSTATE_NONE) {
+			state = BSTATE_ENTER;
+			onMouseEnter(x,y);
+		}
+		else if(!is_mouse_inside && state == BSTATE_ENTER) {
+			state = BSTATE_NONE;
+			onMouseLeave(x, y); 
+		}
 	}
 	
 	if(is_mouse_down) {
@@ -353,7 +356,7 @@ void Buttons::onMouseMoved(int x, int y) {
 }
 
 void Buttons::onMouseDown(int x, int y) {
-	if(BINSIDE_HEADER(this, x, y)) {
+	if(!is_locked && BINSIDE_HEADER(this, x, y)) {
 		triggered_drag = true; // the drag was triggered by the gui
 	}
 
@@ -493,6 +496,10 @@ Element* Buttons::getElement(const string& name) {
 		return NULL;
 	}
 	return *it;
+}
+
+void Buttons::setLock(bool yn) {
+	is_locked = yn;
 }
 
 } // namespace buttons

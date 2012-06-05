@@ -96,6 +96,8 @@ public:
 	void setPosition(int x, int y);
 	friend class Storage; 
 	Element* getElement(const string& name);
+	
+	void setLock(bool yn);
 		
 private:
 	void addElement(Element* el, const string& label);
@@ -140,7 +142,7 @@ private:
 	
 	bool is_mouse_down;
 	static bool shaders_initialized;
-	
+	bool is_locked;
 	static BitmapFont* bmf;
 	Text* static_text;
 	Text* dynamic_text;
