@@ -1,5 +1,5 @@
-#ifndef ROXLU_DELAUNAYH
-#define ROXLU_DELAUNAYH
+#ifndef ROXLU_INC_DELAUNAYH
+#define ROXLU_INC_DELAUNAYH
 
 #include "Wm5Core.h"
 #include "Wm5Mathematics.h"

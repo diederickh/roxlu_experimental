@@ -26,8 +26,8 @@ static float random(float x, float y) {
 	float low = 0;
 	float result = 0;
 	
-	high = MAX(x,y);
-	low = MIN(x,y);
+	high = std::max<float>(x,y);
+	low = std::min<float>(x,y);
 	result = low + ((high-low) * rand()/(RAND_MAX + 1.0));
 	return result;
 }

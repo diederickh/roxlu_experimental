@@ -95,7 +95,7 @@ public:
 	inline void setSpecularity(float spec);
 	inline float getSpecularity();
 	inline void setAttenuation(float ambientAttenuation, float specularAttenuation, float diffuseAttenuation);
-	inline float* getAttenuationPtr();
+	const inline float* getAttenuationPtr();
 	
 	// matrix related
 	inline Mat4& mm(); // get model matrix.
@@ -388,7 +388,7 @@ inline void SceneItem::setAttenuation(float ambientAttenuation, float specularAt
 	attenuation.set(ambientAttenuation, specularAttenuation, diffuseAttenuation);
 }
 
-inline float* SceneItem::getAttenuationPtr() {
+inline const float* SceneItem::getAttenuationPtr() {
 	return attenuation.getPtr();
 }
 

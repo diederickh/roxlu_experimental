@@ -104,7 +104,8 @@ struct Vec3 {
 	float lengthSquared();
 	float lengthSquared(const Vec3& other);
 	float dot(const Vec3& vec);
-	float* getPtr() { return &x; };
+//	float* getPtr() { return &x; };
+	const float* getPtr() { return &x; }
 	void print() const;
 
 	// Accessors

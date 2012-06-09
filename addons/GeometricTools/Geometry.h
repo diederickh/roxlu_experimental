@@ -3,6 +3,7 @@
 
 #include "ConvexHull3D.h"
 #include "IncrementalDelaunay2D.h"
+#include "Delaunay2D.h"
 
 // testing... geometry tools defines it's own static pi/two_pi etc..
 

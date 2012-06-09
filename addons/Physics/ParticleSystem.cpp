@@ -84,4 +84,59 @@ void ParticleSystem::debugDraw() {
 	
 }
 
+
+void ParticleSystem::repel(float influence) {
+	int num = particles.size();
+	for(int i = 0; i < num; ++i) {
+		// get particle A
+		Particle& a = *particles[i];
+		if(!a.isEnabled()) {
+			continue;
+		}
+		
+		for(int j = i; j < num; ++j) {
+			// get particle B
+			Particle& b = *particles[j];
+			if(!b.isEnabled()) {
+				continue;
+			}
+			
+			// calc. energy between both.
+			Vec3 dir = b.position - a.position;
+			float ls = dir.lengthSquared();
+			
+			if(ls > 0.01) {
+				float energy = 1.0 / ls;
+				dir.normalize();
+				dir *= (energy * influence);
+				a.addForce(dir * -1);
+				b.addForce(dir);
+			}
+		}
+	}
+}
+
 }; // roxlu
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

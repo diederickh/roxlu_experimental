@@ -57,10 +57,10 @@ class Shader {
 		Shader& uniformMat3fv(std::string name, const GLfloat* matrix, bool transpose = false);
 		Shader& uniformMat4fv(std::string name, const GLfloat* matrix, bool transpose = false);	
 		
-		Shader& uniform1fv(std::string name, GLfloat* value, int count = 1);
-		Shader& uniform2fv(std::string name, GLfloat* value, int count = 1);
-		Shader& uniform3fv(std::string name, GLfloat* value, int count = 1);
-		Shader& uniform4fv(std::string name, GLfloat* value, int count = 1);
+		Shader& uniform1fv(std::string name, const GLfloat* value, int count = 1);
+		Shader& uniform2fv(std::string name, const GLfloat* value, int count = 1);
+		Shader& uniform3fv(std::string name, const GLfloat* value, int count = 1);
+		Shader& uniform4fv(std::string name, const GLfloat* value, int count = 1);
 
 		// Faster versions...
 		Shader& uniform1f(GLint position, GLfloat x);
@@ -73,10 +73,10 @@ class Shader {
 		Shader& uniform3i(GLint position, GLint x, GLint y, GLint z);
 		Shader& uniform4i(GLint position, GLint x, GLint y, GLint z, GLint w);
 
-		Shader& uniform1fv(GLint position, GLfloat* value, int count = 1);
-		Shader& uniform2fv(GLint position, GLfloat* value, int count = 1);
-		Shader& uniform3fv(GLint position, GLfloat* value, int count = 1);
-		Shader& uniform4fv(GLint position, GLfloat* value, int count = 1);
+		Shader& uniform1fv(GLint position, const GLfloat* value, int count = 1);
+		Shader& uniform2fv(GLint position, const GLfloat* value, int count = 1);
+		Shader& uniform3fv(GLint position, const GLfloat* value, int count = 1);
+		Shader& uniform4fv(GLint position, const GLfloat* value, int count = 1);
 
 		Shader& setTextureUnit(GLuint nUniformID, GLuint nTextureID, int num, GLuint nTextureType = GL_TEXTURE_2D);
 		Shader& setTextureUnit(std::string sUniform, GLuint nTextureID, int num, GLuint nTextureType = GL_TEXTURE_2D);	

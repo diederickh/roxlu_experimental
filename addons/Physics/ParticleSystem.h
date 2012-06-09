@@ -24,15 +24,25 @@ public:
 	void addForce(const Vec3& force);
 	void update();
 	void debugDraw();
+	void repel(float influence = 1.0f);
+	size_t size();
 	
 	vector<Particle*>::iterator begin();
 	vector<Particle*>::iterator end();
 	
 	vector<Particle*> particles;
 	vector<Spring*> springs;
+	
+	const Particle& operator[](const unsigned int& dx) {
+		return *particles[dx];
+	}
 
 }; // ParticleSystem
 
+
+inline size_t ParticleSystem::size() {
+	return particles.size();
+}
 
 inline vector<Particle*>::iterator ParticleSystem::begin() {
 	return particles.begin();

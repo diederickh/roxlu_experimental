@@ -18,6 +18,7 @@ public:
 	virtual void update();
 	xn::DepthGenerator& getGenerator();
 	xn::DepthMetaData& getMetaData();
+	const XnDepthPixel* getDepthPixels();
 	int getWidth();
 	int getHeight();
 
@@ -42,6 +43,10 @@ inline int DepthGenerator::getWidth() {
 
 inline int DepthGenerator::getHeight() {
 	return height;
+}
+
+inline const XnDepthPixel* DepthGenerator::getDepthPixels() {
+	return meta.Data();
 }
 
 

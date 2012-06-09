@@ -9,6 +9,8 @@
 using std::string;
 using std::vector;
 
+// see pystring
+
 namespace roxlu {
 
 class StringParts {

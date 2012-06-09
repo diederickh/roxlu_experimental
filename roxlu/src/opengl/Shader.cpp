@@ -243,22 +243,22 @@ Shader& Shader::uniformMat4fv(std::string uniform, const GLfloat* matrix, bool t
 	return *this;
 }
 
-Shader& Shader::uniform1fv(std::string uniform, GLfloat* value, int count) {
+Shader& Shader::uniform1fv(std::string uniform, const GLfloat* value, int count) {
 	glUniform1fv(getUniform(uniform), count, value); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform2fv(std::string uniform, GLfloat* value, int count) {
+Shader& Shader::uniform2fv(std::string uniform, const GLfloat* value, int count) {
 	glUniform2fv(getUniform(uniform), count, value); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform3fv(std::string uniform, GLfloat* value, int count) {
+Shader& Shader::uniform3fv(std::string uniform, const GLfloat* value, int count) {
 	glUniform3fv(getUniform(uniform), count, value); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform4fv(std::string uniform, GLfloat* value, int count) {
+Shader& Shader::uniform4fv(std::string uniform, const GLfloat* value, int count) {
 	glUniform4fv(getUniform(uniform), count, value); eglGetError();
 	return *this;
 }
@@ -314,22 +314,22 @@ Shader& Shader::uniform4f(GLint position, GLfloat x, GLfloat y, GLfloat z, GLflo
 	return *this;
 }
 
-Shader& Shader::uniform1fv(GLint position, GLfloat* value, int count) {
+Shader& Shader::uniform1fv(GLint position, const GLfloat* value, int count) {
 	glUniform1fv(position, count, value); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform2fv(GLint position, GLfloat* value, int count) {
+Shader& Shader::uniform2fv(GLint position, const GLfloat* value, int count) {
 	glUniform2fv(position, count, value); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform3fv(GLint position, GLfloat* value, int count) {
+Shader& Shader::uniform3fv(GLint position, const GLfloat* value, int count) {
 	glUniform3fv(position, count, value); eglGetError();
 	return *this;
 }
 
-Shader& Shader::uniform4fv(GLint position, GLfloat* value, int count) {
+Shader& Shader::uniform4fv(GLint position, const GLfloat* value, int count) {
 	glUniform4fv(position, count, value); eglGetError();
 	return *this;
 }

@@ -161,7 +161,7 @@ struct VertexPTN : public Vertex  {
 		return *this;
 	}
 	
-	float* getPtr() {
+	const float* getPtr() {
 		return pos.getPtr();
 	}
 };

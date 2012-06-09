@@ -28,6 +28,9 @@ public:
 	Vec3 getPosition();
 	Vec3 getVelocity();
 	Vec3 getForces();
+	
+	void setLifeTime(const unsigned int& ltime);
+	int getAge();
 
 	
 	Vec3 position;
@@ -37,10 +40,21 @@ public:
 	float mass;
 	float inverse_mass;
 	bool is_enabled;
+	unsigned int lifetime;
+	int age;
 }; // Particle
 
 
 // -----------------------------------------------------------------------------
+inline void Particle::setLifeTime(const unsigned int& ltime) {
+	lifetime = ltime;
+}
+
+inline int Particle::getAge() {
+	return age;
+}
+
+
 inline float Particle::getMass() {
 	return mass;
 }

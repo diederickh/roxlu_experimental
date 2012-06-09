@@ -38,6 +38,7 @@ public:
 	ro::ImageGenerator& getImage();
 	xn::ImageMetaData& getImageMetaData();
 	xn::DepthMetaData& getDepthMetaData();
+	const XnDepthPixel* getDepthPixels();
 	ro::DepthGenerator& getDepth();
 	int getDepthWidth();
 	int getDepthHeight();
@@ -89,6 +90,11 @@ inline int OpenNI::getDepthHeight() {
 inline void OpenNI::setGlobalMirror(bool mirror) {
 	context.SetGlobalMirror(mirror);
 }
+
+inline const XnDepthPixel* OpenNI::getDepthPixels() {
+	return depth.getDepthPixels();
+}
+
 
 }} // roxlu
 

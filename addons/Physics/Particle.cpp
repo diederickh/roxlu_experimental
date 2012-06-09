@@ -7,6 +7,8 @@ Particle::Particle()
 	,mass(1.0)
 	,inverse_mass(1.0)
 	,is_enabled(true)
+	,age(0)
+	,lifetime(0)
 {
 }
 
@@ -15,6 +17,8 @@ Particle::Particle(Vec3 pos)
 	,mass(1.0)
 	,inverse_mass(1.0)
 	,is_enabled(true)
+	,age(0)
+	,lifetime(0)
 {
 
 }
@@ -25,6 +29,8 @@ Particle::Particle(Vec3 pos, float m, float fric)
 	,mass(m)
 	,friction(fric)
 	,is_enabled(true)
+	,age(0)
+	,lifetime(0)
 {
 	if(mass < 0.001) {
 		mass = 0.001;
@@ -37,9 +43,16 @@ void Particle::addForce(const Vec3& f) {
 }
 
 void Particle::update() {
+	age++;
 	if(!is_enabled) {
 		return;
 	}
+	
+	
+	if(lifetime != 0 && age >= lifetime) {
+		is_enabled = false;	
+	}
+	
 	forces *= inverse_mass;
 	velocity += forces;
 	position += velocity;
