@@ -1,6 +1,9 @@
 #ifndef ROXLU_SNOTH
 #define ROXLU_SNOTH
 
+
+namespace pbd {
+
 class Particles;
 class Particle;
 class Spring;
@@ -15,4 +18,5 @@ public:
 	Particles& ps;
 };
 
+} // pbd
 #endif

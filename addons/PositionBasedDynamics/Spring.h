@@ -1,6 +1,8 @@
 #ifndef ROXLU_SPRINGH
 #define ROXLU_SPRINGH
 
+namespace pbd {
+
 class Particle;
 
 class Spring {
@@ -15,4 +17,5 @@ public:
 	float k;
 };
 
+}
 #endif

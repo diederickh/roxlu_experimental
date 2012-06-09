@@ -5,6 +5,9 @@
 #include "Vec3.h"
 using namespace roxlu;
 
+
+namespace pbd {
+
 class Particle {
 public:
 	Particle(const Vec3& pos, float mass = 1.0f);
@@ -21,9 +24,12 @@ public:
 	Vec3 velocity;
 	
 	float mass;
+	float size; // used for i.e. drawing
+	float energy; // custom use
 	float inv_mass;
 	bool enabled;
 	int num_springs;
+	float color[3];
 };
 
 inline void Particle::enable() {
@@ -34,5 +40,5 @@ inline void Particle::disable() {
 	enabled = false;
 }
 
-
+} // pbd
 #endif

@@ -12,6 +12,8 @@ using namespace roxlu;
 using std::vector;
 using std::map;
 
+namespace pbd {
+
 class Particles {
 public:
 	Particles();
@@ -20,8 +22,9 @@ public:
 	BendingConstraint* createBendingConstraint(Particle* a, Particle* b, Particle* c, float max);
 	BendingConstraint* addBendingConstraint(BendingConstraint* bc);
 	
-	Particle* createParticle(const float& x, const float& y, const float& z);
+	Particle* createParticle(const float& x, const float& y, const float& z = 0.0f);
 	Particle* createParticle(const Vec3& pos, float mass = 1.0f);
+	Particle* addParticle(const float& x, const float& y, const float& z = 0.0f);
 	Particle* addParticle(Particle* p);
 	
 	Spring* createSpring(Particle* a, Particle* b);
@@ -31,7 +34,7 @@ public:
 	void removeSpring(Particle* a, Particle* b);
 	void addForce(const float& x, const float& y, const float& z);
 	void addForce(const Vec3& f);
-	void update();
+	void update(const float& dt);
 	void draw();
 	void repel(float f = 0.9);
 	Particle* operator[](const unsigned int& dx);
@@ -55,6 +58,10 @@ inline size_t Particles::size() {
 	return particles.size();
 }
 
+inline Particle* Particles::addParticle(const float& x, const float& y, const float& z) {
+	return addParticle(createParticle(x,y,z));
+}
+
 inline Particle* Particles::createParticle(const float& x, const float& y, const float& z) {
 	return createParticle(Vec3(x,y,z));
 }
@@ -62,5 +69,7 @@ inline Particle* Particles::createParticle(const float& x, const float& y, const
 inline void Particles::addSpring(Particle* a, Particle* b) {
 	addSpring(createSpring(a,b));
 }
+
+} // pbd
 
 #endif

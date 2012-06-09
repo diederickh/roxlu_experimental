@@ -1,7 +1,10 @@
 #ifndef ROXLU_BENDING_CONSTRAINTH
 #define ROXLU_BENDING_CONSTRAINTH
 
+namespace pbd {
+
 class Particle;
+
 class BendingConstraint {
 public:
 	BendingConstraint(Particle& a, Particle& b, Particle& c, float max);
@@ -14,4 +17,6 @@ public:
 	float k;
 };
 
+
+} // pbd
 #endif

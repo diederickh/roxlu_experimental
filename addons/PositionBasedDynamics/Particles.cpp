@@ -1,4 +1,6 @@
 #include "Particles.h"
+namespace pbd {
+
 Particles::Particles() {
 }
 
@@ -51,9 +53,9 @@ void Particles::addForce(const Vec3& f) {
 	}
 }
 	
-void Particles::update() {
-	float fps = 30.0f;
-	float dt = 1.0/fps;
+void Particles::update(const float& dt) {
+	float fps = 1/dt;
+	//float dt = 1.0/fps;
 	
 	// predict new locations.
 	vector<Particle*>::iterator it = particles.begin();
@@ -115,11 +117,18 @@ void Particles::repel(float f) {
 		for(int j = i+1; j < size(); ++j) {
 			Vec3 dir = particles[j]->position - particles[i]->position;
 			float dist_sq = dir.lengthSquared();
-			if(dist_sq > 0.01 && dist_sq < 200) {
-				float e = 1.0f/dist_sq;
+			//if(dist_sq > 0.01 && dist_sq < 200) {
+			if(dist_sq > 0.1) {
+				float e = f * (1.0f/dist_sq);
 				dir.normalize();
-				particles[i]->addForce(e*dir);
-				particles[j]->addForce(e*dir);
+				dir *= e;
+				particles[i]->addForce(-dir * particles[i]->inv_mass * particles[i]->energy);
+				particles[j]->addForce(dir * particles[j]->inv_mass  * particles[j]->energy);
+//				printf("e: %f\n", e);
+//				particles[i]->tmp_position += dir * e;
+//				particles[j]->tmp_position -= dir * e;
+//				particles[i]->addForce(e*dir);
+//				particles[j]->addForce(e*-dir);
 			}
 		}
 	}
@@ -167,4 +176,6 @@ void Particles::removeSpring(Particle* a, Particle* b) {
 		++sit;
 	}
 }
+
+} // pbd
 

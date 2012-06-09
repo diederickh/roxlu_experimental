@@ -5,6 +5,8 @@
 
 using namespace roxlu;
 
+namespace pbd {
+
 Spring::Spring(Particle& a, Particle& b)
 	:a(a)
 	,b(b)
@@ -41,3 +43,5 @@ void Spring::draw() {
 	glEnd();
 	glColor3f(1.0, 1.0, 1.0);
 }
+
+} // pbd

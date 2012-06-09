@@ -1,6 +1,8 @@
 #include "Snot.h"
 #include "PBD.h"
 
+namespace pbd {
+
 Snot::Snot(Particles& ps)
 	:ps(ps)
 	,connect_dist(50)
@@ -40,3 +42,6 @@ void Snot::update() {
 	}
 	
 }
+
+
+} // pbd

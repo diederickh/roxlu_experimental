@@ -1,5 +1,6 @@
 #include "BendingConstraint.h"
 #include "Particle.h"
+namespace pbd {
 
 BendingConstraint::BendingConstraint(
 	Particle& a
@@ -26,7 +27,7 @@ void BendingConstraint::update(const float& dt) {
 		ca.normalize();
 		float f = (max - angle) * k;
 		c.tmp_position += (ca * f * dt * c.inv_mass);
-	//	printf("YES! %f\n", angle * (180/3.13));
 	//}
 }
-	
+
+} // pbd

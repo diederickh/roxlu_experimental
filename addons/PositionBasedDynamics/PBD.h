@@ -2,3 +2,4 @@
 #include "Particle.h"
 #include "Spring.h"
 #include "BendingConstraint.h"
+#include "Snot.h"
