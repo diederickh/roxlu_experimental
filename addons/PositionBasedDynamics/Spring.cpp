@@ -12,21 +12,21 @@ Spring::Spring(Particle& a, Particle& b)
 	,b(b)
 {
 	rest_length = (b.position - a.position).length();
-	if(rest_length < 10) {
-		rest_length = 10;
-	}
-	k = 1.0;	
+	curr_length = rest_length;
+	k = 0.6;	
 }
 
 void Spring::update(const float& dt) {
+	
 	Vec3 dir = b.tmp_position - a.tmp_position;
 	const float len = dir.length();
 	const float inv_mass = a.inv_mass + b.inv_mass;
 	const float f = ((rest_length - len) /inv_mass) * k;
+	curr_length = len;
 	dir /= len;
 	dir *= f;
 	dir *= dt;
-	
+
 	if(a.enabled) {
 		a.tmp_position -= (dir * a.inv_mass);
 	}

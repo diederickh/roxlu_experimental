@@ -14,6 +14,7 @@ public:
 	Particle& a;
 	Particle& b;
 	float rest_length;
+	float curr_length;
 	float k;
 };
 

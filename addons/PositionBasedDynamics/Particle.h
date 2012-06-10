@@ -3,6 +3,7 @@
 
 #include "OpenGL.h"
 #include "Vec3.h"
+#include "Vec2.h"
 using namespace roxlu;
 
 
@@ -22,6 +23,7 @@ public:
 	Vec3 position;
 	Vec3 tmp_position;
 	Vec3 velocity;
+	Vec2 tex; // can be used to store texture coordinates
 	
 	float mass;
 	float size; // used for i.e. drawing
@@ -29,6 +31,7 @@ public:
 	float inv_mass;
 	bool enabled;
 	int num_springs;
+	int dx; // index of particle in Particles container.
 	float color[3];
 };
 

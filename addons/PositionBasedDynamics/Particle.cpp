@@ -14,6 +14,7 @@ Particle::Particle(const Vec3& pos, float mass)
 	}
 	inv_mass = 1.0f/mass;
 	color[0] = color[1] = color[2] = 0.8;
+
 }
 
 void Particle::addForce(const Vec3& v) {

@@ -32,11 +32,13 @@ public:
 	void addSpring(Spring* spring);
 	bool springExists(Particle* a, Particle* b);
 	void removeSpring(Particle* a, Particle* b);
+	void removeAllSprings();
 	void addForce(const float& x, const float& y, const float& z);
 	void addForce(const Vec3& f);
 	void update(const float& dt);
 	void draw();
 	void repel(float f = 0.9);
+
 	Particle* operator[](const unsigned int& dx);
 	size_t size();
 	
@@ -49,6 +51,8 @@ public:
 	map<Particle*, Particle*> springs_ab;
 	map<Particle*, Particle*> springs_ba;	
 };
+
+
 
 inline Particle* Particles::operator[](const unsigned int& dx) {
 	return particles[dx];

@@ -13,6 +13,7 @@ Particle* Particles::createParticle(const Vec3& pos, float mass) {
 }
 
 Particle* Particles::addParticle(Particle* p) {
+	p->dx = particles.size();
 	particles.push_back(p);
 	return p;
 }
@@ -71,6 +72,7 @@ void Particles::update(const float& dt) {
 		p.velocity = p.velocity + (dt * p.forces); // add external forces, like gravity.
 		p.velocity *= 0.99; // damping if necessary 
 		p.tmp_position = p.position + (p.velocity * dt); // explicit euler.
+		
 		p.forces = 0; // reset forces.
 		++it;
 	}
@@ -105,6 +107,7 @@ void Particles::update(const float& dt) {
 		
 		p.velocity = (p.tmp_position - p.position) * fps;
 		p.position = p.tmp_position;
+
 		p.tmp_position = 0;
 		
 		++it;
@@ -175,6 +178,14 @@ void Particles::removeSpring(Particle* a, Particle* b) {
 		}
 		++sit;
 	}
+}
+
+void Particles::removeAllSprings() {
+	vector<Spring*>::iterator it = springs.begin();
+	while(it != springs.end()) {
+		delete (*it);
+		it = springs.erase(it);
+	}	
 }
 
 } // pbd
