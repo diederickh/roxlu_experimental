@@ -48,7 +48,10 @@ public:
 	
 	inline float& operator()(unsigned int row, unsigned int col);
 	inline float operator()(unsigned int row, unsigned int col) const;
-	inline float* getPtr();
+	//inline float* getPtr();
+	
+	float* getPtr() { return &m[0]; }
+	const float* getPtr() const { return &m[0]; }
 	
 	// Comparison
 	bool operator==(const Mat3& o) const;
@@ -103,9 +106,9 @@ inline float Mat3::operator()(unsigned int row, unsigned int col) const {
 	return m[col * 3 + row];
 }
 
-inline float* Mat3::getPtr() {
-	return &m[0];
-}
+//inline float* Mat3::getPtr() {
+//	return &m[0];
+//}
 
 extern Mat3 inverse(Mat3& o);
 
