@@ -20,6 +20,7 @@ enum ElementTypes {
 	 BTYPE_SLIDER 	
 	,BTYPE_TOGGLE
 	,BTYPE_BUTTON
+	,BTYPE_RADIO
 };
 
 enum ElementStates {

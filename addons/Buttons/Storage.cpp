@@ -51,6 +51,14 @@ bool Storage::save(const string& file, Buttons* buttons) {
 				ofs.write((char*)&toggle->value, sizeof(bool));
 				break;
 			}
+			/*
+			case BTYPE_RADIO: {
+				printf("Save radio.\n");
+				Radio* radio = static_cast<Radio*>((*it));
+				ofs.write((char*)&toggle->selected, sizeof(int));
+				break;
+			}
+			*/
 			default: {
 				printf("Cannot store unhandled gui type: %d\n", e.type);
 				break;
@@ -103,7 +111,6 @@ bool Storage::load(const string& file, Buttons* buttons) {
 				if(value_type == BVALUE_FLOAT) {
 					Sliderf* slider = static_cast<Sliderf*>(el);
 					ifs.read((char*)&slider->value, sizeof(float));
-					printf("Loaded value : %f\n", slider->value);
 					slider->setValue(slider->value);
 					slider->needsRedraw();
 					slider->needsTextUpdate();
@@ -123,6 +130,14 @@ bool Storage::load(const string& file, Buttons* buttons) {
 				toggle->needsRedraw();
 				break;
 			}
+			/*
+			case BTYPE_RADIO: {
+				printf("Load radio.\n");
+				Radio* radio = static_cast<Radio*>((el));
+				ifs.read((char*)&radio->selected, sizeof(int));
+				break;
+			}
+			*/
 			default: {
 				printf("Cannot load gui type: %d\n", type);
 				break;
