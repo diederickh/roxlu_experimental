@@ -34,6 +34,7 @@ void testApp::mouseReleased(int x, int y, int button){
 #include "Slider.h"
 #include "Toggle.h"
 #include "Button.h"
+#include "Radio.h"
 #include "Storage.h"
 
 using std::vector;
@@ -90,7 +91,21 @@ public:
 	Sliderf& addFloat(const string& label, float& value);
 	Slideri& addInt(const string& label, int& value);
 	Toggle& addBool(const string& label, bool& value);
-
+	
+	template<class T>
+	Radio<T>& addRadio(const string& label, int id, T* cb, const vector<string>& options, int& value) {
+		buttons::Radio<T>* el = new Radio<T>(id, options, value, createCleanName(label), cb);
+		addElement(el, label);
+		
+		for(int i = 0; i < options.size(); ++i) {
+			Toggle& toggle = addBool(options[i], el->values[i]);
+			el->addOption(&toggle);
+			toggle.value = false;
+			toggle.needsRedraw();
+		}
+		return *el;
+	}
+	
 	template<class T>
 	Button<T>& addButton(const std::string& label, int id,  T* cb) {
 		buttons::Button<T>* el = new Button<T>(id, cb, createCleanName(label));

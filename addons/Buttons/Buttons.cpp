@@ -288,6 +288,7 @@ Toggle& Buttons::addBool(const string& label, bool& value) {
 	return *el;
 }
 
+
 void Buttons::addElement(Element* el, const string& label) {
 	el->setup();
 	el->label = label;
@@ -479,6 +480,14 @@ void Buttons::save() {
 void Buttons::save(const string& file) {
 	buttons::Storage storage;
 	storage.save(file, this);
+
+	// notify elements.
+	vector<Element*>::iterator it = elements.begin();
+	while(it != elements.end()) {
+		(*it)->onSaved();
+		++it;
+	}
+
 }
 
 void Buttons::load() {
@@ -488,6 +497,13 @@ void Buttons::load() {
 void Buttons::load(const string& file) {
 	buttons::Storage storage;
 	storage.load(file, this);
+
+	// notify elements.
+	vector<Element*>::iterator it = elements.begin();
+	while(it != elements.end()) {
+		(*it)->onLoaded();
+		++it;
+	}
 }
 
 Element* Buttons::getElement(const string& name) {

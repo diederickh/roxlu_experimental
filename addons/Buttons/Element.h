@@ -33,6 +33,9 @@ public:
 	virtual void onMouseEnter(int mx, int my) { }
 	virtual void onMouseLeave(int mx, int my) { }
 	
+	virtual void onSaved(){}  // gets called once all data has been saved
+	virtual void onLoaded(){}  // gets called once all data has been loaded 
+	
 	void setValueType(int valueType);
 	int getValueType();
 	void needsRedraw();
