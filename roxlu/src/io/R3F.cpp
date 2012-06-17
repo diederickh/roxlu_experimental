@@ -248,9 +248,9 @@ void R3F::storeVertexData(IOBuffer& buffer, VertexData& vd) {
 	buffer.storeUI32LE(num_t);
 	for(int i = 0; i < num_t; ++i) {
 		Triangle& tri = *vd.getTrianglePtr(i);
-		buffer.storeUI32LE(tri.a);
-		buffer.storeUI32LE(tri.b);
-		buffer.storeUI32LE(tri.c);
+		buffer.storeUI32LE(tri.va);
+		buffer.storeUI32LE(tri.vb);
+		buffer.storeUI32LE(tri.vc);
 	}
 }
 

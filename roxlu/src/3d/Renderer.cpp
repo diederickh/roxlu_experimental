@@ -328,6 +328,7 @@ void Renderer::setLightSpecularColor(string name, float r, float g, float b, flo
 	l->setSpecularColor(r,g,b,a);
 }
 
+/*
 void Renderer::exportToOBJ(string fileName, bool inDataPath) {
 	OBJ obj;
 	
@@ -349,7 +350,7 @@ void Renderer::exportToOBJ(string fileName, bool inDataPath) {
 	
 	obj.save(fileName, inDataPath);
 }
-
+*/
 void Renderer::exportToR3F(string fileName, bool inDataPath) {
 	R3F rf;
 	

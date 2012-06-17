@@ -57,42 +57,58 @@ vector<int> VertexData::addVertices(const vector<Vec3>& copy) {
 	return new_indices;
 }
 
-void VertexData::addTexCoord(const Vec2& vec) {
+int VertexData::addTexCoord(const Vec2& vec) {
 	texcoords.push_back(vec);
 	attribs |= VERT_TEX;
+	return texcoords.size()-1;
 }
 
-void VertexData::addTexCoord(const float x, const float y) {
+int VertexData::addTexCoord(const float x, const float y) {
 	texcoords.push_back(Vec2(x, y));
 	attribs |= VERT_TEX;
+	return texcoords.size()-1;
 }
 
-void VertexData::addColor(const Vec3& color) {
-	addColor(Color4(color.x, color.y, color.z, 1));
+int VertexData::addColor(const Vec3& color) {
+	return addColor(Color4(color.x, color.y, color.z, 1));
 }
 
-void VertexData::addColor(const float r, const float g, const float b) {
-	addColor(Color4(r, g, b, 1.0f));
+int VertexData::addColor(const float r, const float g, const float b) {
+	return addColor(Color4(r, g, b, 1.0f));
 }
 
-void VertexData::addColor(const Color4& color) {
+int VertexData::addColor(const Color4& color) {
 	colors.push_back(color);
 	attribs |= VERT_COL;
+	return colors.size()-1;
 }
 
-void VertexData::addNormal(const float x, const float y, const float z) {
+int VertexData::addNormal(const float x, const float y, const float z) {
 	normals.push_back(Vec3(x, y, z));
 	attribs |= VERT_NORM;
+	return normals.size()-1;
 }
 
-void VertexData::addNormal(const Vec3& vec) {
+int VertexData::addNormal(const Vec3& vec) {
 	normals.push_back(vec);
 	attribs |= VERT_NORM;
+	return normals.size()-1;
 }
 
 void VertexData::addIndex(const int& index) {
 	indices.push_back(index);
 }
+
+int	VertexData::addTangent(const Vec3& tangent) {
+	tangents.push_back(tangent);
+	return tangents.size()-1;
+}
+
+int	VertexData::addBinormal(const Vec3& binorm) {
+	binormals.push_back(binorm);
+	return binormals.size()-1;
+}
+
 
 // triangles are i.e. used when exporting. It's just a simple reference
 int VertexData::addTriangle(const int a, const int b, const int c) {
@@ -141,6 +157,10 @@ int VertexData::addQuad(int a, int b, int c, int d) {
 int VertexData::addQuad(Quad q) {
 	quads.push_back(q);
 	return quads.size()-1;	
+}
+
+Triangle& VertexData::getTriangle(int index) {
+	return triangles[index];
 }
 
 Triangle* VertexData::getTrianglePtr(int triangle) {
@@ -360,7 +380,7 @@ VertexPTNTB* VertexData::getVertexPTNTB() {
 		vertex_ptntb[i].tex = texcoords[i]; 
 		vertex_ptntb[i].norm = normals[i]; 
 		vertex_ptntb[i].tan = tangents[i]; 
-		vertex_ptntb[i].binorm = bitangents[i]; 
+		vertex_ptntb[i].binorm = binormals[i]; 
 	}
 	return vertex_ptntb;
 
@@ -426,6 +446,7 @@ void VertexData::computeTangentForTriangle(Vec3& v1, Vec3& v2, Vec3& v3, Vec2& w
 }
  
 void VertexData::computeTangents() {
+/*
 	vector<Vec3> tan1;
 	vector<Vec3> tan2;
 	int len = vertices.size();
@@ -493,23 +514,23 @@ void VertexData::computeTangents() {
 			
 			// first triangle.
 			computeTangentForTriangle(
-				vertices[t.a]
-				,vertices[t.b]
-				,vertices[t.c]
-				,texcoords[t.a]
-				,texcoords[t.b]
-				,texcoords[t.c]
+				vertices[t.va]
+				,vertices[t.vb]
+				,vertices[t.vc]
+				,texcoords[t.va]
+				,texcoords[t.vb]
+				,texcoords[t.vc]
 				,sdir
 				,tdir
 			);
 			
-			tan1[t.a] += sdir;
-			tan1[t.b] += sdir;
-			tan1[t.c] += sdir;
+			tan1[t.va] += sdir;
+			tan1[t.vb] += sdir;
+			tan1[t.vc] += sdir;
 			
-			tan2[t.a] += tdir;
-			tan2[t.b] += tdir;
-			tan2[t.c] += tdir;
+			tan2[t.va] += tdir;
+			tan2[t.vb] += tdir;
+			tan2[t.vc] += tdir;
 		}
 	}
 	
@@ -523,6 +544,7 @@ void VertexData::computeTangents() {
 	}
 	
 	attribs |= VERT_TAN;
+	*/
 
 };
 /**
@@ -543,12 +565,14 @@ void VertexData::createTangentAndBiTangent(
 	,Vec3& out_tangent
 	,Vec3& out_bitangent) 
 {
+	/*
 	Vec3 norm = normal;
 	float coef = 1.0f / (ta.x * tb.y - tb.x * ta.y);
 	out_tangent.x = coef * ((va.x * tb.y) + (vb.x * -ta.y));
 	out_tangent.y = coef * ((va.y * tb.y) + (vb.y * -ta.y)); 
 	out_tangent.y = coef * ((va.z * tb.y) + (vb.y * -ta.y)); 
 	out_bitangent = norm.getCrossed(out_tangent);
+	*/
 }
 
 
@@ -577,7 +601,106 @@ void VertexData::debugDraw(int drawMode) {
 	};
 	 
 	// draw using indices
-	if(getNumIndices() > 0) {
+	if(getNumTriangles() > 0) {
+		// triangles (fills)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glColor3f(0.8,0.8,0.8);
+		glBegin(GL_TRIANGLES);
+			Triangle tri;
+			for(int i = 0; i < triangles.size(); ++i) {	
+				tri = triangles[i];
+				glVertex3fv(vertices[tri.va].getPtr());
+				glVertex3fv(vertices[tri.vb].getPtr());
+				glVertex3fv(vertices[tri.vc].getPtr());
+			}
+		glEnd();
+		
+		// triangles lines.
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glColor3f(0.1,0.1,0.1);
+		glBegin(GL_TRIANGLES);
+			for(int i = 0; i < triangles.size(); ++i) {	
+				tri = triangles[i];
+				glVertex3fv(vertices[tri.va].getPtr());
+				glVertex3fv(vertices[tri.vb].getPtr());
+				glVertex3fv(vertices[tri.vc].getPtr());
+			}
+		glEnd();
+		
+		// normals, tangents and binormals
+		float s = 0.2;
+		glBegin(GL_LINES);
+			for(int i = 0; i < triangles.size(); ++i) {	
+				tri = triangles[i];
+
+				// normal - a
+				if(tri.na) {
+					glColor3f(0,1,1);
+					glVertex3fv(vertices[tri.va].getPtr());
+					glVertex3fv((vertices[tri.va]+normals[tri.na]*s).getPtr());	
+				}
+				
+				// tangent - a
+				if(tri.ta) {
+					glColor3f(1,0,0);
+					glVertex3fv(vertices[tri.va].getPtr());
+					glVertex3fv((vertices[tri.va]+(tangents[tri.ta]*s)).getPtr());	
+				}
+				
+				// binormal - a 
+				if(tri.ba) {
+					glColor3f(0,1,0);
+					glVertex3fv(vertices[tri.va].getPtr());
+					glVertex3fv((vertices[tri.va]+(binormals[tri.ba]*s)).getPtr());	
+				}
+				
+				// normal - b
+				if(tri.nb) {
+					glColor3f(0,1,1);
+					glVertex3fv(vertices[tri.vb].getPtr());
+					glVertex3fv((vertices[tri.vb]+normals[tri.nb]*s).getPtr());	
+				}
+				
+				// tangent - b
+				if(tri.tb) {
+					glColor3f(1,0,0);
+					glVertex3fv(vertices[tri.vb].getPtr());
+					glVertex3fv((vertices[tri.vb]+(tangents[tri.tb]*s)).getPtr());	
+				}
+				
+				// binormal - b
+				if(tri.bb) {
+					glColor3f(0,1,0);
+					glVertex3fv(vertices[tri.vb].getPtr());
+					glVertex3fv((vertices[tri.vb]+(binormals[tri.bb]*s)).getPtr());	
+				}
+				
+				// normal - c
+				if(tri.nc) {
+					glColor3f(0,1,1);
+					glVertex3fv(vertices[tri.vc].getPtr());
+					glVertex3fv((vertices[tri.vc]+normals[tri.nc]*s).getPtr());	
+				}
+				
+				// tangent - c
+				if(tri.tc) {
+					glColor3f(1,0,0);
+					glVertex3fv(vertices[tri.vc].getPtr());
+					glVertex3fv((vertices[tri.vc]+(tangents[tri.tc]*s)).getPtr());	
+				}
+				
+				// binormal - c
+				if(tri.bc) {
+					glColor3f(0,1,0);
+					glVertex3fv(vertices[tri.vc].getPtr());
+					glVertex3fv((vertices[tri.vc]+(binormals[tri.bc]*s)).getPtr());	
+				}
+
+			}
+		glEnd();
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+	else if(getNumIndices() > 0) {
 		if(getNumTexCoords() > 0) {
 			int len = indices.size();
 			glBegin(drawMode);
@@ -701,6 +824,7 @@ void VertexData::debugDraw(int drawMode) {
 		}
 		
 		// tangents
+		/*
 		if(tangents.size() > 0) {
 			int len = tangents.size();
 			glBegin(GL_LINES);
@@ -715,7 +839,7 @@ void VertexData::debugDraw(int drawMode) {
 			};
 			glEnd();
 		}
-		
+		*/
 		// draw lines
 		glPolygonOffset(-1.0f, -1.0f);
 		glEnable(GL_POLYGON_OFFSET_LINE);
@@ -774,7 +898,7 @@ void VertexData::clear() {
 	triangles.clear();
 	quads.clear();
 	tangents.clear();
-	bitangents.clear();
+	binormals.clear();
 }
 
 Vec3 VertexData::computeQuadNormal(int quad) {

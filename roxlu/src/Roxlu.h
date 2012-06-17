@@ -50,6 +50,7 @@
 #include "math/Vec2.h"
 #include "math/Vec3.h"
 #include "math/Vec4.h"
+#include "opengl/Billboard.h"
 #include "opengl/Error.h"
 #include "opengl/FBO.h"
 #include "opengl/MatrixStrack.h"

@@ -95,8 +95,17 @@ struct VertexPN : public Vertex  {
 	Vec3 pos;
 	Vec3 norm;
 	
+	const float* getPtr() {
+		return pos.getPtr();
+	}
+	
 	VertexPN& setPos(const float& x, const float& y, const float& z) {
 		pos.set(x,y,z);
+		return *this;
+	}
+	
+	VertexPN setPos(const Vec3& p) {
+		pos = p;
 		return *this;
 	}
 	
@@ -104,6 +113,12 @@ struct VertexPN : public Vertex  {
 		norm.set(x,y,z);
 		return *this;
 	}
+	
+	VertexPN& setNorm(const Vec3& n) {
+		norm = n;
+		return*this;
+	}
+
 };
 
 struct VertexPNC : public Vertex  {
@@ -111,9 +126,17 @@ struct VertexPNC : public Vertex  {
 	Vec3 norm;
 	Color4 col;
 	
+	VertexPNC& setNorm(const Vec3& n) {
+		return setNorm(n.x, n.y, n.z);
+	}
+	
 	VertexPNC& setNorm(const float& x, const float& y, const float& z) {
 		norm.set(x,y,z);
 		return *this;
+	}
+	
+	VertexPNC& setPos(const Vec3& p) {
+		return setPos(p.x, p.y, p.z);
 	}
 	
 	VertexPNC& setPos(const float& x, const float& y, const float& z) {
@@ -146,14 +169,26 @@ struct VertexPTN : public Vertex  {
 		tex.set(s,t);
 	}
 	
+	VertexPTN& setPos(const Vec3& p) {
+		return setPos(p.x, p.y, p.z);
+	}
+	
 	VertexPTN& setPos(const float& x, const float& y, const float& z) {
 		pos.set(x,y,z);
 		return *this;
 	}
 	
+	VertexPTN& setNorm(const Vec3& n) {
+		return setNorm(n.x, n.y, n.z);
+	}
+	
 	VertexPTN& setNorm(const float& x, const float& y, const float& z) {
 		norm.set(x,y,z);
 		return *this;
+	}
+	
+	VertexPTN& setTex(const Vec2& t) {
+		return setTex(t.x, t.y);
 	}
 	
 	VertexPTN& setTex(const float& u, const float& v) {
@@ -228,7 +263,7 @@ public:
 		return sizeof(T) * size();
 	}
 	
-	float* getPtr() {
+	const float* getPtr() {
 		return verts[0].getPtr();
 	}
 	
@@ -249,17 +284,12 @@ public:
 };
 
 
-//class VerticesP {
 template <class T>
 class Vertices_TemplateP : public Vertices_Template<T> {
 public:
-	//typedef VertexP element_type;
-	/*
-	int add(const VertexP& el) {
-		verts.push_back(el);
-		return verts.size() - 1;
-	}
-	*/
+
+	using Vertices_Template<T>::add;
+
 	int add(const float& x, const float& y, const float& z) {
 		VertexP p;
 		p.setPos(x, y, z);
@@ -279,51 +309,14 @@ public:
 		add(x  , y+h, 0); 
 		return 6; // number of vertices created
 	}
-	/*
-	void clear() {
-		verts.clear();						
-	}
-		
-	size_t numBytes() {
-		return sizeof(VertexP) * size();  	
-	}
-	
-	size_t size() {
-		return verts.size();				
-	}
-	
-	float* getPtr() {
-		return &verts[0].pos.x;
-	}
-	
-	vector<VertexP>::iterator begin() 	{	
-		return verts.begin();	
-	}
-	
-	vector<VertexP>::iterator end() 	{	
-		return verts.end();		
-	}
-	
-	VertexP& operator[](const unsigned int dx) {
-		return verts[dx];
-	}
-	
-	
-	vector<VertexP> verts;	
-	*/
 };
 
-//class VerticesPT {
 template<class T>
 class Vertices_TemplatePT : public Vertices_Template<T> {
 public:
-//	typedef VertexPT element_type;
-/*	
-	int add(const VertexPT& el) {
-		verts.push_back(el);
-		return verts.size() - 1;
-	}
-*/	
+
+	using Vertices_Template<T>::add;
+
 	int add(const float& x, const float& y, const float& z, const float& u, const float& v) {
 		VertexPT p;
 		p.setPos(x, y, z);
@@ -354,47 +347,38 @@ public:
 		}
 		return 6;
 	}
+
+};
+
+template<class T>
+class Vertices_TemplatePN : public Vertices_Template<T> {
+public:
+
+	using Vertices_Template<T>::add;
 	
-	/*
-	void clear() {
-		verts.clear();					
+	int add(const float* f) {
+		return this->add(f+0, f+1, f+2, f+3, f+4, f+5);	
 	}
 	
-	size_t numBytes() {		
-		return sizeof(VertexPT) * size();  	
+	int add(const float& vx, const float& vy, const float& vz, const float& nx, const float& ny, const float& nz) {
+		VertexPN p;
+		p.setPos(vx, vy, vz);
+		p.setNorm(nx, ny, nz);
+		this->verts.push_back(p);
+		return this->verts.size()-1;
 	}
-	
-	size_t size() {	
-		return verts.size();
-	}
-	
-	float* getPtr() {
-		return &verts[0].pos.x;
-	}
-	
-	vector<VertexPT>::iterator begin() {	
-		return verts.begin();	
-	}
-	
-	vector<VertexPT>::iterator end() {
-		return verts.end();		
-	}
-	
-	VertexPT& operator[](const unsigned int dx) {
-		return verts[dx];
-	}
-	
-	vector<VertexPT> verts;
-	*/
 };
 
 template<class T>
 class Vertices_TemplatePTN : public Vertices_Template<T> {
+	using Vertices_Template<T>::add;
 };
 
 typedef Vertices_TemplateP<VertexP>	VerticesP;
+typedef Vertices_TemplatePN<VertexPN> VerticesPN;
 typedef Vertices_TemplatePT<VertexPT> VerticesPT;
 typedef Vertices_TemplatePTN<VertexPTN> VerticesPTN;
+
 
 
 } // roxlu

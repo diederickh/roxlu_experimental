@@ -2,7 +2,7 @@
 #define ROXLU_RANDOMH
 
 // random: source openFrameworks + stackoverflow
-
+#include "Vec3.h"
 #include "float.h"
 #include <sys/time.h>
 
@@ -44,4 +44,16 @@ static float randomuf() {
 	return rand_num;
 }
 
+
+static roxlu::Vec3 randomVec3() {
+	roxlu::Vec3 r;
+	float phi = random(3.1415f * 2.0f);
+	float costheta = random(-1.0f, 1.0f);
+
+	float rho = sqrt(1.0f - costheta * costheta);
+	r.x = rho * cos(phi);
+	r.y = rho * sin(phi);
+	r.z = costheta;
+	return r;
+}
 #endif

@@ -84,7 +84,7 @@ public:
 	
 	// Exporting
 	void 				exportToPly(string sceneItemName, string fileName, bool inDataPath = true);
-	void 				exportToOBJ(string fileName, bool inDataPath = true);
+//	void 				exportToOBJ(string fileName, bool inDataPath = true);
 	void 				exportToR3F(string fileName, bool inDataPath = true);
 
 	

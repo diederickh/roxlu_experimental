@@ -75,10 +75,37 @@ void Shader::create(const std::string& vertexSource, const std::string& fragment
 	prog_id = glCreateProgram(); eglGetError();
 	glAttachShader(prog_id, vert_id); eglGetError();
 	glAttachShader(prog_id, frag_id); eglGetError();
+
+}
+
+Shader& Shader::link() {
 	glLinkProgram(prog_id); eglGetError();
 	glUseProgram(prog_id); eglGetError();
 	disable();
+	return *this;
+}
 
+Shader& Shader::a(const std::string& attribute) {
+	return addAttribute(attribute);
+}
+
+// add an attribue, enable vertex attrib array and set index
+Shader& Shader::a(const std::string& name, GLuint index) {
+	return addAttribute(name, index);
+}
+
+Shader& Shader::addAttribute(const std::string& name, GLuint index) {
+	// check if it's already added.
+	ShaderMap::iterator it = attributes.find(name);
+	if(it != attributes.end()) {
+		return *this;
+	}
+	
+	// set the attribute location and enable the vertex attrib array.
+	glBindAttribLocation(prog_id, index, name.c_str());
+	glEnableVertexAttribArray(index);
+	attributes[name] = index;
+	return *this;
 }
 
 Shader& Shader::addAttribute(const std::string& attribute) {
@@ -92,6 +119,10 @@ Shader& Shader::addAttribute(const std::string& attribute) {
 	attributes[attribute] = attribute_id;
 	return *this;
 };
+
+Shader& Shader::u(const std::string& uniform) {
+	return addUniform(uniform);
+}
 
 Shader& Shader::addUniform(const std::string& uniform) {
 	GLint uni_loc = -1;

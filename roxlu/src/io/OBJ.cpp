@@ -1,233 +1,153 @@
-#include "../Roxlu.h"
-/*
-#include "SceneItem.h"
 #include "OBJ.h"
-#include "File.h"
-//#include "HalfEdge.h"
-#include "Material.h"
-#include "Mat4.h"
-*/
 
 namespace roxlu {
 
-OBJ::OBJ() 
-{
-	printf("c--------------------");
-}
-
-OBJ::~OBJ() {
-}
-
-void OBJ::exportSceneItem(SceneItem* si, stringstream& ss) {
-	return exportSceneItem(*si,ss);
-}
-
-void OBJ::createMaterialFile(Material& mat) {
-	string material_file = "mat_" +mat.getName() +".mtl";
-	printf("Material file: '%s'\n", material_file.c_str());
-	stringstream ss;
-	ss << "newmtl " << mat.getName() << endl;
-	ss << "Ka 1.0 1.0 1.0" << endl;
-	ss << "Kd 1.0 1.0 1.0" << endl;
-	ss << "Ks 1.0 1.0 1.0" << endl;
-	ss << "Ni 1.0" << endl;
-	ss << "d 1.0" << endl;
-	ss << "illum 2" << endl;
+bool OBJ::import(const string& filepath) {
+	ifstream ifs;
+	ifs.open(filepath.c_str());
+	if(!ifs.is_open()) {
+		printf("Cannot open: %s\n", filepath.c_str());
+		return false;
+	}	
 	
-	if(mat.hasDiffuseTexture()) {
-		printf("File: '%s'\n", mat.getDiffuseTextureFilePath().c_str());	
-		ss << "map_Kd " << mat.getDiffuseTextureFilePath() << endl;
-	}
-	if(mat.hasNormalTexture()) {
-		ss << "map_Bump " << mat.getNormalTextureFilePath() << endl;
-	}
-	else {
-		printf("??????");
-	}
-	File::putFileContents(File::toDataPath(material_file), ss.str(), true);
-}
-
-bool OBJ::save(string fileName, bool inDataPath) {
-//	printf("Num exported vertices: %d\n", num_exported_vertices);
-//	return;
-	stringstream ss;
-	ss << "# Roxlu OBJ export 0.01" << endl;	
-	// create material files.
-	vector<Material*>::iterator mat_it = materials.begin();
-	while(mat_it != materials.end()) {	
-		createMaterialFile(*(*mat_it));
-		ss << "mtllib mat_" << (*(*mat_it)).getName() << ".mtl" << endl;
-		++mat_it;
-	}
-
-	// export scene items.
-	vector<SceneItem*>::iterator scene_it = scene_items.begin();
-	while(scene_it != scene_items.end()) {
-		exportSceneItem(*scene_it, ss);
-		++scene_it;
-	}
-	//printf("result:\n%s\n", ss.str().c_str());
-	
-	File::putFileContents(fileName, ss.str(), inDataPath);
-	return true;
-}
-
-void OBJ::exportSceneItem(SceneItem& si, stringstream& ss) {
-	//si.updateModelMatrix();
-	Mat4 mm = si.mm();
-//	mm.print();
-//	printf("position: %f, %f, %f\n", si.getPosition().x,si.getPosition().y,si.getPosition().z);
-//	printf("-----------\n");
-	static int num = 0;
-	static int to_add = 0;
-	ss << "o " << si.getName() << endl;
-//	printf("object: %s\n", si.getName().c_str());
-//	createMaterialFile(*si.getMaterial());
-	
-//	printf("num %d\n", num);
-	ss.precision(5);
-	ss.setf(ios::fixed,ios::floatfield);
-
-	VertexData& vd = *si.getVertexData();		
-	
-	// vertices
-	for(int i = 0; i < vd.getNumVertices(); ++i) {
-		Vec3& v = *vd.getVertexPtr(i);
-		v = mm.transform(v);
-//		v += si.getPosition();
-		ss << "v " << v.x << " " << v.y << " " << v.z << endl;
-//		v.print();
-//		num_exported_vertices++;
-		++num;
-	}
-	
-	// texcoords
-	for(int i = 0; i < vd.getNumTexCoords(); ++i) {
-		Vec2& tc = *vd.getTexCoordPtr(i);
-		ss << "vt " << tc.x << " " << tc.y << endl;
-	}
-		
-	//if(si.getMaterial()->hasDiffuseTexture()) {
-	if(si.hasMaterial()) {
-		ss << "usemtl " << si.getMaterial()->getName() << endl;
-//		printf(">> material: %s\n", si.getMaterial()->getName().c_str());
-	}
-	ss << "s off" << endl;
-	if(vd.getNumTexCoords() == 0) {
-		// quads.
-		for(int i = 0; i < vd.getNumQuads(); ++i) {
-			Quad& q = *vd.getQuadPtr(i);
-			//printf("%d, %d, %d, %d <---\n", q.a, q.b, q.c, q.d);
-			ss << "f " << q.d+1+to_add << " " << q.c+1+to_add << " " << q.b+1+to_add << endl;
-			ss << "f " << q.b+1+to_add << " " << q.a+1+to_add << " " << q.d+1+to_add << endl;
+	Triangle tri;
+	Vec3 v;
+	Vec2 t;
+	OBJ::Object object;
+	string line;
+	bool object_added = false;
+	bool found_object = false;
+	while(getline(ifs, line)) {
+		if(line.at(0) == '#') {
+			continue;
 		}
 		
-		// triangles
-		for(int i = 0; i < vd.getNumTriangles(); ++i) {
-			Triangle& t = *vd.getTrianglePtr(i);
-			ss << "f " << t.a+1+to_add << " " << t.b+1+to_add << " " << t.c+1+to_add << endl;
-		}
-	}
-	else {
-		// quads.
-		for(int i = 0; i < vd.getNumQuads(); ++i) {
-			Quad& q = *vd.getQuadPtr(i);
-			ss << "f " 	<< q.d+1+to_add << "/" << q.d+1+to_add << " "
-						<< q.c+1+to_add << "/" << q.c+1+to_add << " "
-						<< q.b+1+to_add << "/" << q.b+1+to_add << endl;
-						
-			ss << "f " 	<< q.b+1+to_add << "/" << q.b+1+to_add << " "
-						<< q.a+1+to_add << "/" << q.a+1+to_add << " "
-						<< q.d+1+to_add << "/" << q.d+1+to_add << endl;
-			
-		
+		int space = line.find(" ");
+		if(space == string::npos) {
+			continue;
 		}
 		
-		// triangles
-		for(int i = 0; i < vd.getNumTriangles(); ++i) {
-			Triangle& t = *vd.getTrianglePtr(i);
-			ss << "f " 	<< t.a+1+to_add << "/" << t.a+1+to_add << " "
-						<< t.b+1+to_add << "/" << t.b+1+to_add << " "
-						<< t.c+1+to_add << "/" << t.c+1+to_add << endl;
-		}
-	}
-	to_add = (num);
-	
-	// create unique list with vertices.
-	/*
-	vector<Vec2> unique_texcoords;
-	vector<Vec3> unique_vertices;
-	VertexData& vd = *si.getVertexData();	
-	for(int i = 0; i < vd.getNumVertices(); ++i) {
-		bool found = false;
-		Vec3& a = *vd.getVertexPtr(i);
-		int dx = 0;
-		for(int j = 0; j < unique_vertices.size(); ++j) {
-			Vec3 b = unique_vertices[j];
-			if(b.lengthSquared(a) < 0.01) {
-				dx = j;
-				found = true;
-				break;
+		string cmd = line.substr(0, space);
+		
+		// object
+		if(cmd == "o") {
+			if(found_object) {
+				object_added = true;
+				objects[object.name] = object;
 			}
+			found_object = true;
+			object.name = line.substr(space+1, line.size()-1);
 		}
-		if(!found) {
-			unique_vertices.push_back(a);
+		// vertex
+		else if(found_object && cmd == "v") {
+			stringstream ss;
+			ss << line.substr(space+1, line.size()-1);
+			ss >> v.x >> v.y >> v.z;
+			object.vd.addVertex(v);
+		}
+		// normal
+		else if(found_object && cmd == "vn") {
+			stringstream ss;
+			ss << line.substr(space+1, line.size()-1);
+			ss >> v.x >> v.y >> v.z;
+			object.vd.addNormal(v);
+		}
+		// texcoord
+		else if(found_object && cmd == "vt") {
+			stringstream ss;
+			ss << line.substr(space+1, line.size()-1);
+			ss >> t.x >> t.y;
+			object.vd.addTexCoord(t);
+		}
+		// face
+		else if(found_object && cmd == "f") {
+			stringstream ss;
+			ss << line.substr(space+1, line.size()-1);
+			string face;
 			
-			// copy texcoord
-			if(vd.getNumTexCoords() > 0) {
-				unique_texcoords.push_back(vd.getTexCoord(i));
-			}
-		}
-	}
-
-	// write vertices
-	for(int i = 0; i < unique_vertices.size(); ++i) {
-		Vec3& v = unique_vertices[i];
-		ss << "v " << v.x << " " << v.y << " " << v.z << endl;
-	}
-	
-	// now for face find the index from the unique vertices.
-	
-	int num_quads = vd.getNumQuads();
-	if(num_quads > 0) {
-		vector<Quad> new_quads;
-		for(int i = 0; i < vd.getNumQuads(); ++i) {
-			Quad new_quad;
-			Quad& q = *vd.getQuadPtr(i);
-			Vec3 v;
-			// = vd.getVertex(q.a);
-			for(int k = 0; k < 4; ++k) {
-				v = vd.getVertex(q[k]);
-				for(int j = 0; j < unique_vertices.size(); ++j) {
-					if(v.lengthSquared(unique_vertices[j]) < 0.01) {
-						printf("%d wordt %d\n", q[k], j);
-						new_quad[k] = j;
-						break;
-					}
-				}
-			}
-			new_quads.push_back(new_quad);
-		}
-	
-		for(int i = 0; i < new_quads.size(); ++i) {
-			Quad& q = new_quads[i];
-			ss << "f " << q.d+1 << " " << q.c+1 << " " << q.b+1 << endl;
-			ss << "f " << q.b+1 << " " << q.a+1 << " " << q.d+1 << endl;
-		}
-
-		printf("We have: %d  unique vertices\n", unique_vertices.size());		
-	}
-	
-	*/
-	
-			
-
+			ss >> face;
+			extractFace(face, tri.va, tri.na, tri.tc_a);
 		
-	// And write everything to a file.
-	//File::putFileContents(File::toDataPath("test2.obj"), ss.str());
+			
+			ss >> face;			
+			extractFace(face, tri.vb, tri.nb, tri.tc_b);
+			
+			ss >> face;			
+			extractFace(face, tri.vc, tri.nc, tri.tc_c);
+			
+			object.vd.addTriangle(tri);
+		}
+	}
+	if(!object_added) {
+		objects[object.name] = object;
+	}
+	
 
+	// Calculate binormal + tangent;
+	map<string, Object>::iterator it = objects.begin();
+	while(it != objects.end()) {
+		Object& obj = it->second;
+		for(int i = 0; i < obj.vd.triangles.size(); ++i) {
+			Triangle& tri = obj.vd.triangles[i];
+			
+			if(obj.vd.normals.size() <= 0) {
+				continue;
+			}
+			
+			Vec3 a_b = (obj.vd.vertices[tri.vb] - obj.vd.vertices[tri.va]).normalize();
+			Vec3 b_c = (obj.vd.vertices[tri.vc] - obj.vd.vertices[tri.vb]).normalize();
+			Vec3 c_a = (obj.vd.vertices[tri.va] - obj.vd.vertices[tri.vc]).normalize();
+			
+			Vec3 ba = cross(a_b,obj.vd.normals[tri.na]).normalize();
+			Vec3 bb = cross(b_c,obj.vd.normals[tri.nb]).normalize();
+			Vec3 bc = cross(c_a,obj.vd.normals[tri.nc]).normalize();
+			
+			tri.ta = obj.vd.addTangent(a_b);
+			tri.tb = obj.vd.addTangent(b_c);
+			tri.tc = obj.vd.addTangent(c_a);
+			
+			tri.ba = obj.vd.addBinormal(ba);
+			tri.bb = obj.vd.addBinormal(bb);
+			tri.bc = obj.vd.addBinormal(bc);
+		}
+		++it;
+	}
 }
 
+bool OBJ::extractFace(string info, int& vertexIndex, int& normalIndex, int& texcoordIndex) {
+	stringstream fss;
+	fss << info;
+	string fv;
+	
+	// get vertex index
+	if(getline(fss, fv, '/')) {
+		if(fv.size()) {
+			stringstream ofss;
+			ofss << fv;
+			ofss >> vertexIndex;
+			--vertexIndex;
+		}
+	}
+	
+	// get texcoord index
+	if(getline(fss, fv, '/')) {
+		if(fv.size()) {
+			stringstream ofss;
+			ofss << fv;
+			ofss >> texcoordIndex;
+			--texcoordIndex;
+		}
+	}
+	
+	// get normal index
+	if(getline(fss, fv, '/')) {
+		if(fv.size()) {
+			stringstream ofss;
+			ofss << fv;
+			ofss >> normalIndex;
+			--normalIndex;
+		}
+	}
+}
 
-
-}; // roxlu
+};

@@ -29,6 +29,7 @@ void Texture::setParams() {
 }
 
 void Texture::setPixels(unsigned char* pixels, int width, int height, GLenum format) {
+	//printf("format=%d, GL_RGB=%d, GL_RGBA=%d\n", format, GL_RGB, GL_RGBA);
 	bind();
 	glTexImage2D(
 		 GL_TEXTURE_2D

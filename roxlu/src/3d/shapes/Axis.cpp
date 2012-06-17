@@ -54,7 +54,7 @@ void Axis::draw() {
 	glLineWidth(1.0);
 	glDisable(GL_TEXTURE_2D); eglGetError();
 	vbo.drawArrays(GL_LINES, 0, num_vertices); eglGetError();
-	glEnable(GL_TEXTURE_2D); eglGetError();
+	//glEnable(GL_TEXTURE_2D); eglGetError();
 }
 
 } // roxlu

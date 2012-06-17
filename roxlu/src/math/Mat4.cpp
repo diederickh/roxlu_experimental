@@ -602,6 +602,7 @@ Mat4 Mat4::rotation(float angleX, float angleY, float angleZ) {
 }
 
 Mat4 Mat4::rotation(float a, float x, float y, float z) {
+	printf("Mat4 rotation is broken!\n");
 	Mat4 mat;
 	a = DEG_TO_RAD;
 	float c = cosf(a);

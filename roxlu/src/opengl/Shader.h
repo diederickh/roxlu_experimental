@@ -23,13 +23,21 @@ class Shader {
 		Shader& setName(const std::string& name);
 		Shader& load(const std::string& name);
 		Shader& load();
+		Shader& link();
 		void create(const std::string& vertexSource, const std::string& fragmentSource); 
-		Shader& addAttribute(const std::string& sName);
-		Shader& addUniform(const std::string& sName);
-		Shader& enableVertexAttribArray(const std::string& sName);
-		GLint getAttribute(const std::string& sName);
-		GLint getUniform(const std::string& sName);
+		Shader& addAttribute(const std::string& name);
+		Shader& addAttribute(const std::string& name, GLuint index); // add attribute, enable vertex attrib array and set index
+		Shader& addUniform(const std::string& name);
+		Shader& enableVertexAttribArray(const std::string& name);
+		GLint getAttribute(const std::string& name);
+		GLint getUniform(const std::string& name);
+		GLuint getProgID();
 
+		// short hand functions. 
+		Shader& u(const std::string& name); // add an uniform
+		Shader& a(const std::string& name); // add an attribute
+		Shader& a(const std::string& name, GLuint index); // add an attribue, enable vertex attrib array and set index
+		
 		string getVertexSource(bool inDataPath = true);
 		string getFragmentSource(bool inDataPath = true);
 				
@@ -93,6 +101,10 @@ class Shader {
 		GLuint frag_id;
 		GLuint prog_id;
 };
+
+inline GLuint Shader::getProgID() {
+	return prog_id;
+}
 
 
 } // roxlu

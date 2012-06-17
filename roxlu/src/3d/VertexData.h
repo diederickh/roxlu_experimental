@@ -28,13 +28,15 @@ public:
 	int 			addVertex(const Vec3& vec);
 	int 			addVertex(const float x, const float y, const float z);
 	vector<int>		addVertices(const vector<Vec3>& copy);
-	void 			addTexCoord(const Vec2& vec);
-	void 			addTexCoord(const float x, const float y);
-	void 			addColor(const Vec3& color);
-	void 			addColor(const Color4& color);
-	void 			addColor(const float r, const float g, const float b);
-	void			addNormal(const float x, const float y, const float z);
-	void 			addNormal(const Vec3& vec);
+	int 			addTexCoord(const Vec2& vec);
+	int				addTexCoord(const float x, const float y);
+	int 			addColor(const Vec3& color);
+	int 			addColor(const Color4& color);
+	int 			addColor(const float r, const float g, const float b);
+	int				addNormal(const float x, const float y, const float z);
+	int				addTangent(const Vec3& tangent);
+	int				addBinormal(const Vec3& binorm);
+	int 			addNormal(const Vec3& vec);
 	void 			addIndex(const int& index);
 	int				addTriangle(Triangle t);
 	int 			addTriangle(int a, int b, int c); 
@@ -53,7 +55,8 @@ public:
 	const float* 	getNormalsPtr();
 	const int* 		getIndicesPtr();
 
-    Triangle* 		getTrianglePtr(int triangle);
+	Triangle&		getTriangle(int index);
+    Triangle* 		getTrianglePtr(int index);
 	Quad* 			getQuadPtr(int quad);
 	
 
@@ -106,9 +109,10 @@ public:
 	const size_t size() const; // num vertices 
 		
 	Vec3			computeQuadNormal(int nQuad);
+	
+	// tangent compute: experimental
 	void 			computeTangents();
 	void			computeTangentForTriangle(Vec3& v1, Vec3& v2, Vec3& v3, Vec2& w1, Vec2& w2, Vec2& w3, Vec3& sdir, Vec3& tdir);
-	
 	void 			createTangentAndBiTangent(Vec3 va, Vec3 vb, Vec2 ta, Vec2 tb, Vec3& normal, Vec3& out_tangent, Vec3& out_bitangent);
 	
 	vector<Vec3>		normals;
@@ -118,8 +122,8 @@ public:
 	vector<int> 		indices;
 	vector<Triangle> 	triangles; 
 	vector<Quad> 		quads;
-	vector<Vec4>		tangents;
-	vector<Vec3>		bitangents;
+	vector<Vec3>		tangents;
+	vector<Vec3>		binormals;
 	
 	int 				attribs;
 	VertexP* 			vertex_p;

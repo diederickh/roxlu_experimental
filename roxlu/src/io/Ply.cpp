@@ -80,7 +80,7 @@ bool Ply::save(string path, VertexData& vd) {
 	// -------------------------------------------
 	if(vd.getNumTriangles() > 0) {
 		for (int i = 0; i < vd.getNumTriangles(); ++i) {
-			ss << "3 " << vd.triangles[i].a << " " << vd.triangles[i].b << " " << vd.triangles[i].c << cr;
+			ss << "3 " << vd.triangles[i].va << " " << vd.triangles[i].vb << " " << vd.triangles[i].vc << cr;
 		}
 	}
 	else if(vd.getNumQuads() > 0) {

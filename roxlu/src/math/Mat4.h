@@ -51,13 +51,19 @@ public:
 	void scale(float x, float y, float z);
 	
 	void setPosition(float x, float y, float z);
+	void setPosition(const Vec3& pos);
 	void setX(const float& x);
 	void setY(const float& y);
 	void setZ(const float& z);
 	float getX();
 	float getY();
 	float getZ();
-
+	
+	void setBillboard(const Vec3& right, const Vec3& up); // create billboard matrix (z-axis is calculated)
+	void setXAxis(const Vec3& ax); // indices: 0,1,2
+	void setYAxis(const Vec3& ax); // indices: 4,5,6
+	void setZAxis(const Vec3& ax); // indices: 8,9,10
+	
 	static Mat4 translation(const Vec3& v);
 	static Mat4 translation(const float x, const float y, const float z);
 	static Mat4 rotation(const Mat3& o);
@@ -99,6 +105,7 @@ public:
 	Vec4  operator*(const Vec4& v) const;
 	
 	
+	float& operator[](const unsigned int);
 	float operator[](const unsigned int) const;
 	
 	inline float* getPtr() { return &m[0]; }
@@ -235,10 +242,20 @@ inline Vec3 Mat4::transform(const Vec3& o) const {
 }
 
 
+inline void Mat4::setPosition(const Vec3& pos) {
+	m[12] = pos.x;
+	m[13] = pos.y;
+	m[14] = pos.z;
+}
+
 inline void Mat4::setPosition(float x, float y, float z) {
 	m[12] = x;
 	m[13] = y; 
 	m[14] = z;
+}
+
+inline float& Mat4::operator[](const unsigned int dx) {
+	return m[dx];
 }
 
 inline float Mat4::operator[](const unsigned int dx) const {
@@ -273,7 +290,32 @@ inline float Mat4::getZ() {
 	return m[14];
 }
 
+inline void Mat4::setXAxis(const Vec3& ax) { // indices: 0,1,2
+	m[0] = ax.x;
+	m[1] = ax.y;
+	m[2] = ax.z;	
+}
 
+inline void Mat4::setYAxis(const Vec3& ax) { // indices: 4,5,6
+	m[4] = ax.x;
+	m[5] = ax.y;
+	m[6] = ax.z;	
+}
+
+inline void Mat4::setZAxis(const Vec3& ax) { // indices: 8,9,10
+	m[8] = ax.x;
+	m[9] = ax.y;
+	m[10] = ax.z;	
+}
+
+// create billboard matrix (z-axis is calculated)
+inline void Mat4::setBillboard(const Vec3& right, const Vec3& up) {
+	Vec3 z = cross(right, up);
+	setXAxis(right);
+	setYAxis(up);
+//	setZAxis(z); // do we need this?
+}
+	
 } // roxlu
 
 /* create unrolled multiplication 
