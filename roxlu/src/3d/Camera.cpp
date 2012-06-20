@@ -118,7 +118,12 @@ void Camera::updateViewMatrix() {
 	Mat4 rot_mat = rotation.getMat4();
 	Mat4 trans_mat = Mat4::translation(position);
 	view_matrix = rot_mat * trans_mat;
-	view_matrix.inverse(); // view matrix is the inverse of the camera matrix! http://robertokoci.com/world-view-projection-matrix-unveiled/
+	
+	// view matrix is the inverse of the camera matrix! http://robertokoci.com/world-view-projection-matrix-unveiled/
+	// this basically means that you translate/rotate with "positive" values for i..e the z.
+	// so when you want to use 10 units in z, you use 10. Normally you would do
+	// glTranslatef(0,0,-10) to set the camera at -10, then draw your object
+	view_matrix.inverse(); 
 }
 
 // TODO: check this great tutorial: http://www.vb6.us/tutorials/using-mouse-click-3d-space-directx-8

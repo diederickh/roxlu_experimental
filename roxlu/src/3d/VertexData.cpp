@@ -577,12 +577,10 @@ void VertexData::createTangentAndBiTangent(
 
 
 void VertexData::debugDraw(int drawMode) {
-	bool blend_enabled = glIsEnabled(GL_BLEND);
-	if(!blend_enabled) {
-	//	glEnable(GL_BLEND);
-	//	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	}
-	
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	glDisable(GL_TEXTURE_2D);
+	glUseProgram(0);
+	glEnable(GL_DEPTH_TEST);
 	// we adjust the size of the normals lines dynamically
 	float line_length = 0.2;
 	if(vertices.size() > 2) {
@@ -602,11 +600,12 @@ void VertexData::debugDraw(int drawMode) {
 	 
 	// draw using indices
 	if(getNumTriangles() > 0) {
+		
 		// triangles (fills)
+		Triangle tri;
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glColor3f(0.8,0.8,0.8);
 		glBegin(GL_TRIANGLES);
-			Triangle tri;
 			for(int i = 0; i < triangles.size(); ++i) {	
 				tri = triangles[i];
 				glVertex3fv(vertices[tri.va].getPtr());
@@ -628,69 +627,72 @@ void VertexData::debugDraw(int drawMode) {
 		glEnd();
 		
 		// normals, tangents and binormals
+		bool draw_normals= true;
+		bool draw_tangents = true;
+		bool draw_binormals = true;
 		float s = 0.2;
 		glBegin(GL_LINES);
 			for(int i = 0; i < triangles.size(); ++i) {	
 				tri = triangles[i];
-
+				
 				// normal - a
-				if(tri.na) {
+				if(draw_normals && tri.na) {
 					glColor3f(0,1,1);
 					glVertex3fv(vertices[tri.va].getPtr());
 					glVertex3fv((vertices[tri.va]+normals[tri.na]*s).getPtr());	
 				}
-				
+
 				// tangent - a
-				if(tri.ta) {
+				if(draw_tangents && tri.ta) {
 					glColor3f(1,0,0);
 					glVertex3fv(vertices[tri.va].getPtr());
 					glVertex3fv((vertices[tri.va]+(tangents[tri.ta]*s)).getPtr());	
 				}
-				
+
 				// binormal - a 
-				if(tri.ba) {
+				if(draw_binormals && tri.ba) {
 					glColor3f(0,1,0);
 					glVertex3fv(vertices[tri.va].getPtr());
 					glVertex3fv((vertices[tri.va]+(binormals[tri.ba]*s)).getPtr());	
 				}
 				
 				// normal - b
-				if(tri.nb) {
+				if(draw_normals && tri.nb) {
 					glColor3f(0,1,1);
 					glVertex3fv(vertices[tri.vb].getPtr());
 					glVertex3fv((vertices[tri.vb]+normals[tri.nb]*s).getPtr());	
 				}
 				
 				// tangent - b
-				if(tri.tb) {
+				if(draw_tangents && tri.tb) {
 					glColor3f(1,0,0);
 					glVertex3fv(vertices[tri.vb].getPtr());
 					glVertex3fv((vertices[tri.vb]+(tangents[tri.tb]*s)).getPtr());	
 				}
 				
 				// binormal - b
-				if(tri.bb) {
+				if(draw_binormals && tri.bb) {
 					glColor3f(0,1,0);
 					glVertex3fv(vertices[tri.vb].getPtr());
 					glVertex3fv((vertices[tri.vb]+(binormals[tri.bb]*s)).getPtr());	
 				}
 				
 				// normal - c
-				if(tri.nc) {
+				if(draw_normals && tri.nc) {
 					glColor3f(0,1,1);
 					glVertex3fv(vertices[tri.vc].getPtr());
 					glVertex3fv((vertices[tri.vc]+normals[tri.nc]*s).getPtr());	
 				}
 				
 				// tangent - c
-				if(tri.tc) {
+				if(draw_tangents && tri.tc) {
 					glColor3f(1,0,0);
 					glVertex3fv(vertices[tri.vc].getPtr());
 					glVertex3fv((vertices[tri.vc]+(tangents[tri.tc]*s)).getPtr());	
 				}
 				
 				// binormal - c
-				if(tri.bc) {
+				if(draw_binormals && tri.bc) {
 					glColor3f(0,1,0);
 					glVertex3fv(vertices[tri.vc].getPtr());
 					glVertex3fv((vertices[tri.vc]+(binormals[tri.bc]*s)).getPtr());	
@@ -753,13 +755,16 @@ void VertexData::debugDraw(int drawMode) {
 	}
 	// w/o indices
 	else {
+
 		glColor4f(1,1,1,1);
 		glUseProgram(0);
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_BLEND);
-		
-		
-		if(getNumTexCoords() > 0) {
+		bool draw_texture = false;		
+		bool draw_tangents = true;
+		bool draw_normals = true;
+		bool draw_binormals = true;
+		if(draw_texture && getNumTexCoords() > 0) {
 			glColor3f(0.98, 0.92, 0.75); // yellowish
 			int len = vertices.size();
 			glEnable(GL_TEXTURE_2D);
@@ -780,52 +785,39 @@ void VertexData::debugDraw(int drawMode) {
 		}
 		else {
 			// shape	
-			glColor3f(0.98, 0.92, 0.75); // yellowish
+			//glColor3f(0.98, 0.92, 0.75); // yellowish
+			glColor3f(0.8,0.8,0.8);
 			glBegin(drawMode);
 			vector<Vec3>::iterator it = vertices.begin();
 			float len = vertices.size();
-			int i = 0;
 			while(it != vertices.end()) {	
-				int parts = 3;
-				if(drawMode == GL_QUADS) {
-					parts = 4;
-				}
-				glColor3fv(colors[i%parts]);
 				glVertex3fv((*it).getPtr());
 				++it;
-				++i;
 			}
-
 			glEnd();
 		}
 
 		// normals.
 		int len = normals.size();
-		if(len == vertices.size()) {	
-			glColor3f(1,1,1);
-			glLineWidth(1.5);
-			
-			
+		if(draw_normals && len == vertices.size()) {	
+			glColor3f(0,1,1);
+			glLineWidth(3.0);
 			glBegin(GL_LINES);
-
 			for(int i = 0; i < len; ++i) {
 				Vec3 pos = vertices[i];
 				Vec3 norm = normals[i];
 				norm.normalize();
 				Vec3 end = pos + (norm.scale(line_length));
-				glColor4f(1.0f,0.0f,0.4f,1.0f);
-				glColor3f(0.98, 0.92, 0.75);
 				glVertex3fv(pos.getPtr());
-				glColor4f(1.0f, 0.0f,1.0f,1.0f);
-				glColor3f(0.98, 0.92, 0.75);
 				glVertex3fv(end.getPtr());
 			}
 			glEnd();
 		}
 		
 		// tangents
-		/*
-		if(tangents.size() > 0) {
+		if(draw_tangents && tangents.size() > 0) {
+			glLineWidth(3.0);
+			glColor3f(1.0f,0.0f,0.0f);
 			int len = tangents.size();
 			glBegin(GL_LINES);
 			for(int i = 0; i < len; ++i) {
@@ -833,13 +825,29 @@ void VertexData::debugDraw(int drawMode) {
 				Vec3 norm = tangents[i];
 				norm.normalize();
 				Vec3 end = pos + (norm.scale(line_length));
-				glColor4f(1.0f,0.0f,0.0f,1.0f);
 				glVertex3fv(pos.getPtr());
 				glVertex3fv(end.getPtr());
 			};
 			glEnd();
 		}
-		*/
+
+		// binormals
+		if(draw_binormals && binormals.size() > 0) {
+			glLineWidth(3.0);
+			glColor4f(0.0f,1.0f,0.0f,1.0f);
+			int len = tangents.size();
+			glBegin(GL_LINES);
+			for(int i = 0; i < len; ++i) {
+				Vec3 pos = vertices[i];
+				Vec3 binorm = binormals[i].normalize();
+				Vec3 end = pos + (binorm.scale(line_length));
+				glVertex3fv(pos.getPtr());
+				glVertex3fv(end.getPtr());
+			};
+			glEnd();
+		}
+
+		
 		// draw lines
 		glPolygonOffset(-1.0f, -1.0f);
 		glEnable(GL_POLYGON_OFFSET_LINE);
@@ -849,7 +857,7 @@ void VertexData::debugDraw(int drawMode) {
 		glLineWidth(0.5f);
 		glDisable(GL_TEXTURE_2D);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glColor3f(1,1,1);
+		glColor3f(0.4,0.4,0.4);
 		glBegin(drawMode);
 		for(int i = 0; i < vertices.size(); ++i) {
 			glVertex3fv(vertices[i].getPtr());
@@ -866,9 +874,11 @@ void VertexData::debugDraw(int drawMode) {
 		
 	}
 	
-	if(!blend_enabled) {
-		glDisable(GL_BLEND);
-	}
+//	if(!blend_enabled) {
+//		glDisable(GL_BLEND);
+//	}
+	
+	glPopAttrib();
 	
 }
 
@@ -907,6 +917,60 @@ Vec3 VertexData::computeQuadNormal(int quad) {
 	Vec3 bc = vertices[q.c] - vertices[q.b];
 	Vec3 crossed = ab.getCrossed(bc);
 	return crossed;
+}
+
+// Debug
+//------------------------------------------------------------------------------
+void VertexData::print() {
+	printf("\nVertices:\n"); printVertices();
+	printf("\nNormals:\n"); printNormals();
+	printf("\nTangents:\n");printTangents();
+	printf("\nBinormals:\n"); printBinormals();
+	printf("\nTexCoords:\n"); printTexCoords();
+	printf("\nTriangles:\n"); printTriangles();	
+}
+
+void VertexData::printVertices() {
+	for(int i = 0; i < vertices.size(); ++i) {
+		vertices[i].print();
+	}
+}
+
+void VertexData::printNormals() {
+	for(int i = 0; i < normals.size(); ++i) {
+		normals[i].print();
+	}
+}
+
+void VertexData::printTangents() {
+	for(int i = 0; i < tangents.size(); ++i) {
+		tangents[i].print();
+	}
+}
+
+void VertexData::printBinormals() {
+	for(int i = 0; i < binormals.size(); ++i) {
+		binormals[i].print();
+	}
+}
+
+void VertexData::printTexCoords() {
+	for(int i = 0; i < texcoords.size(); ++i) {
+		texcoords[i].print();
+	}
+}
+
+void VertexData::printTriangles() {	
+	for(int i = 0; i < triangles.size(); ++i) {
+		Triangle& tri = triangles[i];
+		printf("va/vb/vc: (%d, %d, %d), na/nb/nc: (%d, %d, %d), ta/tb/tc: (%d, %d, %d), ba/bb/bc: (%d, %d, %d), tc_a/tc_b,tc_c: (%d, %d, %d)\n"
+			,tri.va, tri.vb, tri.vc
+			,tri.na, tri.nb, tri.nc
+			,tri.ta, tri.tb, tri.tc
+			,tri.ba, tri.bb, tri.bc
+			,tri.tc_a, tri.tc_b, tri.tc_c
+		);
+	}
 }
 
 } // roxlu

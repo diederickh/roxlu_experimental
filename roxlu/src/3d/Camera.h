@@ -117,7 +117,9 @@ inline const Mat4& Camera::pm() const {
 }
 
 inline Mat3 Camera::nm() {
-	return rotation.getMat3();
+	Quat q = rotation;
+	q.inverse();
+	return q.getMat3();
 }
 
 inline const Mat3 Camera::nm() const {

@@ -207,18 +207,35 @@ struct VertexPTNC : public Vertex  {
 	Color4 col;
 	Vec2 tex;
 	
+	VertexPTNC& setPos(const Vec3& p) {
+		return setPos(p.x, p.y, p.z);
+	}
+	
 	VertexPTNC& setPos(const float& x, const float& y, const float& z) {
 		pos.set(x,y,z);
 		return *this;
 	}
+	
+	
+	VertexPTNC& setNorm(const Vec3& n) {
+		return setNorm(n.x, n.y, n.z);
+	}
+	
+	
 	VertexPTNC& setNorm(const float& x, const float& y, const float& z) {
 		norm.set(x,y,z);
 		return *this;
 	}
+	
 	VertexPTNC& setCol(const float& r, const float& g, const float& b, const float& a) {
 		col.set(r,g,b,a);
 		return *this;
 	}
+	
+	VertexPTNC& setTex(const Vec2& t) {
+		return setTex(t.x, t.y);
+	}
+	
 	VertexPTNC& setTex(const float& u, const float& v) {
 		tex.set(u,v);
 		return *this;
@@ -235,9 +252,67 @@ struct VertexPTNT : public Vertex  { // with tangent.
 struct VertexPTNTB : public Vertex  { // can be used for normal mapping
 	Vec3 pos;
 	Vec3 norm;
-	Vec4 tan;
-	Vec3 binorm;
 	Vec2 tex;
+	Vec3 tan;
+	Vec3 binorm;
+	
+	
+	// POS
+	VertexPTNTB& setPos(const Vec3& p) {
+		return setPos(p.x, p.y, p.z);
+	}
+	
+	VertexPTNTB& setPos(const float& x, const float& y, const float& z) {
+		pos.set(x,y,z);
+		return *this;
+	}
+	
+	
+	// NORM
+	VertexPTNTB& setNorm(const Vec3& n) {
+		return setNorm(n.x, n.y, n.z);
+	}
+	
+	VertexPTNTB& setNorm(const float& x, const float& y, const float& z) {
+		norm.set(x,y,z);
+		return *this;
+	}
+	
+	// TAN
+	VertexPTNTB& setTan(const Vec3& t) {
+		return setTan(t.x, t.y, t.z);
+	}
+	
+	VertexPTNTB& setTan(const float& x, const float& y, const float& z) {
+		tan.set(x,y,z);
+		return *this;
+	}
+	
+	// BINORM
+	VertexPTNTB& setBinorm(const Vec3& b) {
+		return setBinorm(b.x, b.y, b.z);
+	}
+	
+	VertexPTNTB& setBinorm(const float& x, const float& y, const float& z) {
+		binorm.set(x,y,z);
+		return *this;
+	}
+	
+	// TEX	
+	VertexPTNTB& setTex(const Vec2& t) {
+		return setTex(t.x,t.y);
+	}
+	
+	VertexPTNTB& setTex(const float& u, const float& v) {
+		tex.set(u,v);
+		return *this;
+	}
+
+	// GETPTR
+	const float* getPtr() {
+		return pos.getPtr();
+	}
+
 };
 
 template<class T>
@@ -374,10 +449,16 @@ class Vertices_TemplatePTN : public Vertices_Template<T> {
 	using Vertices_Template<T>::add;
 };
 
+template<class T>
+class Vertices_VertexPTNTB : public Vertices_Template<T> {
+	using Vertices_Template<T>::add;
+}; 
+
 typedef Vertices_TemplateP<VertexP>	VerticesP;
 typedef Vertices_TemplatePN<VertexPN> VerticesPN;
 typedef Vertices_TemplatePT<VertexPT> VerticesPT;
 typedef Vertices_TemplatePTN<VertexPTN> VerticesPTN;
+typedef Vertices_TemplatePTN<VertexPTNTB> VerticesPTNTB;
 
 
 

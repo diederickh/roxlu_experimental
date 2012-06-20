@@ -84,6 +84,7 @@ bool OBJ::import(const string& filepath) {
 	
 
 	// Calculate binormal + tangent;
+	/*
 	map<string, Object>::iterator it = objects.begin();
 	while(it != objects.end()) {
 		Object& obj = it->second;
@@ -112,6 +113,7 @@ bool OBJ::import(const string& filepath) {
 		}
 		++it;
 	}
+	*/
 }
 
 bool OBJ::extractFace(string info, int& vertexIndex, int& normalIndex, int& texcoordIndex) {

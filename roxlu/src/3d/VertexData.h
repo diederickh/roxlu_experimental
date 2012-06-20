@@ -115,6 +115,15 @@ public:
 	void			computeTangentForTriangle(Vec3& v1, Vec3& v2, Vec3& v3, Vec2& w1, Vec2& w2, Vec2& w3, Vec3& sdir, Vec3& tdir);
 	void 			createTangentAndBiTangent(Vec3 va, Vec3 vb, Vec2 ta, Vec2 tb, Vec3& normal, Vec3& out_tangent, Vec3& out_bitangent);
 	
+	// debug
+	void print();
+	void printVertices();
+	void printNormals();
+	void printTangents();
+	void printBinormals();
+	void printTexCoords();
+	void printTriangles();
+	
 	vector<Vec3>		normals;
 	vector<Vec3>		vertices;
 	vector<Vec2>		texcoords;

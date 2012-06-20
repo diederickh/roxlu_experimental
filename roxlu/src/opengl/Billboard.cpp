@@ -75,3 +75,12 @@ void Billboard::draw(const Vec3& position, const float& scale, const float& rota
 	glBindVertexArrayAPPLE(vao); eglGetError();
 	glDrawArrays(GL_QUADS, 0, 4);
 }
+
+void Billboard::unbind() {
+	glBindVertexArrayAPPLE(0);
+	shader.disable();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D,0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+}
