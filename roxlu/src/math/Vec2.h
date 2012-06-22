@@ -60,6 +60,7 @@ public:
 	bool operator!=(const Vec2& v) const; // v2 != v2 ? 
 	
 	// Assignment operators
+	Vec2& operator=(const float& scalar); // v1 = 50.0f;
 	Vec2& operator=(const Vec2& v);  // v1 = v2
 	Vec2& operator+=(const Vec2& v); // v1 += v2
 	Vec2& operator-=(const Vec2& v); // v1 -= v2
@@ -98,6 +99,12 @@ inline float Vec2::lengthSquared() {
 }
 
 // -----------------------------------------------------------------------------
+inline Vec2& Vec2::operator=(const float& scalar) {
+	x = scalar;
+	y = scalar;
+	return *this;
+}
+
 inline Vec2& Vec2::operator=(const Vec2& v) {
 	x = v.x;
 	y = v.y;

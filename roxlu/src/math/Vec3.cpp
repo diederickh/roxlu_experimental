@@ -4,6 +4,13 @@
 
 namespace roxlu {
 
+Vec3::Vec3(const float* v) 
+	:x(v[0])
+	,y(v[1])
+	,z(v[2])
+{
+}
+
 Vec3::Vec3(const float xx, const float yy, const float zz)
 	:x(xx)
 	,y(yy)

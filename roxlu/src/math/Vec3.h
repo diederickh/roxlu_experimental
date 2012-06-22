@@ -67,6 +67,7 @@ Vec3 rotate(const float angle, const Vec3& v, const Vec3& axis);
 // -----------------------------------------------------------------------------
 struct Vec3 {
 	friend class Mat3;
+	Vec3(const float* v);
 	Vec3(const float xx = 0.0f, const float yy = 0.0f, const float zz = 0.0f);
 	Vec3(const Vec2& v);
 	Vec3(const Vec3& v);
