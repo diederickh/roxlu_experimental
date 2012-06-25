@@ -2,7 +2,8 @@
 #define APOLLO_TWEENH
 
 // Based on: http://robertpenner.com/easing/penner_easing_as2.zip
-
+#include <iostream>
+#include <math.h>
 #include <sys/time.h>
 
 #ifndef PI

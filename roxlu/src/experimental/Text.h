@@ -1,7 +1,7 @@
 #ifndef ROXLU_TEXTH
 #define ROXLU_TEXTH
 
-#include "ofMain.h"  // tmp
+//#include "ofMain.h"  // tmp
 #include "Mat4.h"
 #include "OpenGL.h"
 #include "Shader.h"
