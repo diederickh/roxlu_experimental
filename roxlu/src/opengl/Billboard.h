@@ -30,9 +30,9 @@ class Billboard {
 public:	
 	Billboard();
 	void setTexture(const GLuint& id);
-	void setup(const Mat4& pm, const Mat4& vm, const Vec3& right, const Vec3& up);
+	void start(const Mat4& pm, const Mat4& vm, const Vec3& right, const Vec3& up);
 	void draw(const Vec3& position, const float& scale, const float& rotationDegrees, float alpha = 1.0);
-	void unbind(); // or disable() ?
+	void stop(); // or disable() ?
 private:
 	GLuint tex;
 	const Vec3* right;

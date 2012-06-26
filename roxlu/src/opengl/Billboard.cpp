@@ -42,7 +42,7 @@ Billboard::Billboard()
 	}
 }
 
-void Billboard::setup(const Mat4& pm, const Mat4& vm, const Vec3& right, const Vec3& up) {
+void Billboard::start(const Mat4& pm, const Mat4& vm, const Vec3& right, const Vec3& up) {
 	this->right = &right;
 	this->up = &up;
 	
@@ -77,7 +77,7 @@ void Billboard::draw(const Vec3& position, const float& scale, const float& rota
 	glDrawArrays(GL_QUADS, 0, 4);
 }
 
-void Billboard::unbind() {
+void Billboard::stop() {
 	glBindVertexArrayAPPLE(0);
 	shader.disable();
 	glActiveTexture(GL_TEXTURE0);
