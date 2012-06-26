@@ -23,6 +23,7 @@
 #include "core/StringUtil.h"
 #include "core/Utils.h"
 #include "core/Keyboard.h"
+#include "experimental/Binning2D.h"
 #include "experimental/ShaderGenerator.h"
 #include "experimental/SimpleClient.h"
 #include "experimental/SimpleServer.h"
