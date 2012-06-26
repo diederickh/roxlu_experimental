@@ -17,6 +17,7 @@ Text::Text(BitmapFont& bmfont)
 {
 	if(!initialized) {
 		shader.create(TEXT_VS, TEXT_FS);
+		shader.link();
 		shader.enable();
 		shader.addUniform("projection_matrix");
 		shader.addUniform("model_matrix");

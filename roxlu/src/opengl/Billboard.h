@@ -34,6 +34,7 @@ public:
 	void draw(const Vec3& position, const float& scale, const float& rotationDegrees, float alpha = 1.0);
 	void unbind(); // or disable() ?
 private:
+	GLuint tex;
 	const Vec3* right;
 	const Vec3* up;
 	const Texture* texture;

@@ -23,13 +23,14 @@ Spring* Particles::createSpring(Particle* a, Particle* b) {
 	return s;
 }
 
-void Particles::addSpring(Spring* spring) {
+Spring* Particles::addSpring(Spring* spring) {
 	springs_ab.insert(std::pair<Particle*, Particle*>(&spring->a, &spring->b));
 	springs_ba.insert(std::pair<Particle*, Particle*>(&spring->b, &spring->a));
 	
 	++spring->a.num_springs;
 	++spring->b.num_springs;
 	springs.push_back(spring);
+	return spring;
 }
 
 BendingConstraint* Particles::createBendingConstraint(Particle* a, Particle* b, Particle* c, float max) {

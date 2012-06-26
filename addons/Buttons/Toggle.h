@@ -21,7 +21,7 @@ public:
 	void onMouseLeave(int mx, int my);	
 	void onMouseClick(int mx, int my);
 
-	bool value;
+	bool& value;
 	
 	float bg_top_color[4];
 	float bg_bottom_color[4];

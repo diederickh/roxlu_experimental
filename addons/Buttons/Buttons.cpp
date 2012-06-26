@@ -31,6 +31,7 @@ Buttons::Buttons(const string& title, int w)
 	if(!shaders_initialized) {
 		bmf = new BitmapFont();
 		gui_shader.create(BUTTONS_VS, BUTTONS_FS);
+		gui_shader.link();
 		gui_shader.enable();
 		gui_shader.addUniform("projection_matrix");
 		gui_shader.addAttribute("pos");

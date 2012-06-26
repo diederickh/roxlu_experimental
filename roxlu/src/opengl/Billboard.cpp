@@ -49,13 +49,14 @@ void Billboard::setup(const Mat4& pm, const Mat4& vm, const Vec3& right, const V
 	shader.enable();
 	shader.uniformMat4fv("u_projection_matrix", pm.getPtr());
 	shader.uniformMat4fv("u_view_matrix", vm.getPtr());
+	
+	shader.uniform1i("u_texture",2);
+	glActiveTexture(GL_TEXTURE2); eglGetError();
+	glBindTexture(GL_TEXTURE_2D, tex); eglGetError();
 }
 
 void Billboard::setTexture(const GLuint& id) {
-	shader.enable();
-	shader.uniform1i("u_texture",2);
-	glActiveTexture(GL_TEXTURE2); eglGetError();
-	glBindTexture(GL_TEXTURE_2D, id); eglGetError();
+	tex = id;
 }
 
 

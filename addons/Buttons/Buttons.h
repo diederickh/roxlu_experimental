@@ -1,5 +1,6 @@
 #ifndef RUIH
 #define RUIH
+
 /* 
 OpenFrameworks example:
 ==========================
@@ -14,6 +15,9 @@ void testApp::mousePressed(int x, int y, int button){
 }
 void testApp::mouseReleased(int x, int y, int button){
 	gui.onMouseUp(x,y);
+}
+void testApp::update() {
+	gui.update();
 }
 */
 

@@ -26,10 +26,12 @@ public:
 	Particle* createParticle(const Vec3& pos, float mass = 1.0f);
 	Particle* addParticle(const float& x, const float& y, const float& z = 0.0f);
 	Particle* addParticle(Particle* p);
+	Particle* addParticle(const Vec3& pos, float mass = 1.0f);
 	
 	Spring* createSpring(Particle* a, Particle* b);
-	void addSpring(Particle* a, Particle* b);
-	void addSpring(Spring* spring);
+	Spring* addSpring(Particle* a, Particle* b);
+	Spring* addSpring(Spring* spring);
+	
 	bool springExists(Particle* a, Particle* b);
 	void removeSpring(Particle* a, Particle* b);
 	void removeAllSprings();
@@ -62,6 +64,10 @@ inline size_t Particles::size() {
 	return particles.size();
 }
 
+inline Particle* Particles::addParticle(const Vec3& pos, float mass) {
+	return addParticle(createParticle(pos, mass));
+}
+
 inline Particle* Particles::addParticle(const float& x, const float& y, const float& z) {
 	return addParticle(createParticle(x,y,z));
 }
@@ -70,8 +76,8 @@ inline Particle* Particles::createParticle(const float& x, const float& y, const
 	return createParticle(Vec3(x,y,z));
 }
 
-inline void Particles::addSpring(Particle* a, Particle* b) {
-	addSpring(createSpring(a,b));
+inline Spring* Particles::addSpring(Particle* a, Particle* b) {
+	return addSpring(createSpring(a,b));
 }
 
 } // pbd
