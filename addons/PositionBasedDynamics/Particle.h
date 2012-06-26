@@ -19,6 +19,8 @@ public:
 	void disable();
 	void enable();
 	
+	void setColor(const float& r, const float& g, const float& b, float a = 1.0f);
+	
 	Vec3 forces;	
 	Vec3 position;
 	Vec3 tmp_position;
@@ -32,7 +34,12 @@ public:
 	bool enabled;
 	int num_springs;
 	int dx; // index of particle in Particles container.
-	float color[3];
+	float color[4];
+	
+	float lifespan;
+	float age;
+	float agep;
+	
 };
 
 inline void Particle::enable() {
@@ -41,6 +48,14 @@ inline void Particle::enable() {
 
 inline void Particle::disable() {
 	enabled = false;
+}
+
+
+inline void Particle::setColor(const float& r, const float& g, const float& b, float a) {
+	color[0] = r;
+	color[1] = g;
+	color[2] = b;
+	color[3] = a;
 }
 
 } // pbd

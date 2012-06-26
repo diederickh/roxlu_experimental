@@ -7,13 +7,13 @@ const std::string BILLBOARD_VS = " \
 	uniform mat4 u_projection_matrix; \
 	uniform mat4 u_view_matrix; \
 	uniform mat4 u_model_matrix; \
+	attribute vec3 a_pos; \
 	attribute vec2 a_tex; \
-	attribute vec4 a_pos; \
 	varying vec2 v_tex; \
 	\
 	void main() { \
 		v_tex = a_tex; \
-		gl_Position = u_projection_matrix * u_view_matrix * u_model_matrix * a_pos; \
+		gl_Position = u_projection_matrix * u_view_matrix * u_model_matrix * vec4(a_pos, 1.0); \
 	}";
 	
 const std::string BILLBOARD_FS = " \
@@ -26,6 +26,21 @@ const std::string BILLBOARD_FS = " \
 		gl_FragColor.a = texcol.a * u_alpha; \
 	}";
 
+
+struct BillboardVertex {
+	float pos[3];
+	float tex[2];
+	
+	void set(const float& x, const float& y, const float& s, const float& t) {
+		pos[0] = x;
+		pos[1] = y;
+		pos[2] = 0.0;
+		tex[0] = s;
+		tex[1] = t;
+	}
+};
+
+
 class Billboard {
 public:	
 	Billboard();
@@ -37,6 +52,8 @@ private:
 	GLuint tex;
 	const Vec3* right;
 	const Vec3* up;
+	const float* pm;
+	const float* vm;
 	const Texture* texture;
 	static bool created;
 	static Shader shader;

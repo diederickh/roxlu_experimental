@@ -20,7 +20,7 @@ public:
 	void setMagFilter(GLenum magFilter);
 	void setInternalFormat(GLint internalFormat);
 	void setParams();
-	void setPixels(unsigned char* pixels, int width, int height, GLenum format = GL_RGB);
+	void setPixels(const unsigned char* pixels, int width, int height, GLenum format = GL_RGB);
 
 	void bind();
 	void unbind();

@@ -35,6 +35,7 @@ public:
 	bool springExists(Particle* a, Particle* b);
 	void removeSpring(Particle* a, Particle* b);
 	void removeAllSprings();
+	void removeDeadParticles();
 	void addForce(const float& x, const float& y, const float& z);
 	void addForce(const Vec3& f);
 	void update(const float& dt);
@@ -52,6 +53,8 @@ public:
 	
 	map<Particle*, Particle*> springs_ab;
 	map<Particle*, Particle*> springs_ba;	
+
+	float drag;
 };
 
 

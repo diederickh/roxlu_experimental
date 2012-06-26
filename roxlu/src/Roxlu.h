@@ -30,6 +30,7 @@
 #include "experimental/StereoCam.h"
 #include "experimental/Timer.h"
 #include "experimental/VertexBuffer.h"
+#include "experimental/TGA.h"
 #include "graphics/Color.h"
 #include "graphics/Image.h"
 #include "io/Dictionary.h"

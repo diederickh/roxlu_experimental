@@ -1,7 +1,9 @@
 #include "Particles.h"
 namespace pbd {
 
-Particles::Particles() {
+Particles::Particles() 
+	:drag(0.99f)
+{
 }
 
 Particles::~Particles() {
@@ -54,6 +56,20 @@ void Particles::addForce(const Vec3& f) {
 		++it;
 	}
 }
+
+void Particles::removeDeadParticles() {
+	vector<Particle*>::iterator it = particles.begin();
+	while(it != particles.end()) {
+		Particle& p = *(*it);
+		if(p.age > p.lifespan) {
+			it = particles.erase(it);
+		}
+		else {
+			++it;
+		}
+	}
+}
+
 	
 void Particles::update(const float& dt) {
 	float fps = 1/dt;
@@ -71,7 +87,7 @@ void Particles::update(const float& dt) {
 		}
 		
 		p.velocity = p.velocity + (dt * p.forces); // add external forces, like gravity.
-		p.velocity *= 0.99; // damping if necessary 
+		p.velocity *= drag; // damping if necessary 
 		p.tmp_position = p.position + (p.velocity * dt); // explicit euler.
 		
 		p.forces = 0; // reset forces.
@@ -108,7 +124,8 @@ void Particles::update(const float& dt) {
 		
 		p.velocity = (p.tmp_position - p.position) * fps;
 		p.position = p.tmp_position;
-
+		p.age += dt;
+		p.agep = (p.age / p.lifespan);
 		p.tmp_position = 0;
 		
 		++it;

@@ -5,8 +5,8 @@
 namespace roxlu {
 
 Texture::Texture() 
-	:wrap_s(GL_CLAMP)
-	,wrap_t(GL_CLAMP)
+	:wrap_s(GL_CLAMP_TO_EDGE)
+	,wrap_t(GL_CLAMP_TO_EDGE)
 	,min_filter(GL_LINEAR)
 	,mag_filter(GL_LINEAR)
 	,internal_format(GL_RGBA)
@@ -28,7 +28,7 @@ void Texture::setParams() {
 
 }
 
-void Texture::setPixels(unsigned char* pixels, int width, int height, GLenum format) {
+void Texture::setPixels(const unsigned char* pixels, int width, int height, GLenum format) {
 	//printf("format=%d, GL_RGB=%d, GL_RGBA=%d\n", format, GL_RGB, GL_RGBA);
 	bind();
 	glTexImage2D(

@@ -67,6 +67,7 @@ struct VertexPT : public Vertex  {
 		:pos(x,y,z)
 		,tex(u,v)
 	{
+		
 		pos.set(x,y,z);
 		tex.set(u,v);
 	}

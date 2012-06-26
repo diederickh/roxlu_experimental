@@ -8,12 +8,15 @@ Particle::Particle(const Vec3& pos, float mass)
 	,num_springs(0)
 	,size(4.0)
 	,energy(1.0)
+	,lifespan(40) 
+	,age(0.0f)
+	,agep(0.0f)
 {
 	if(mass < 0.0001) {
 		mass = 0.0001;
 	}
 	inv_mass = 1.0f/mass;
-	color[0] = color[1] = color[2] = 0.8;
+	color[0] = color[1] = color[2] = color[3] = 0.8;
 
 }
 
