@@ -34,13 +34,13 @@ VertexData::VertexData(const string& meshName)
 {	
 }
 
-int VertexData::addVertex(const Vec3& vec) {
+size_t VertexData::addVertex(const Vec3& vec) {
 	vertices.push_back(vec);
 	attribs |= VERT_POS;
 	return vertices.size()-1;
 }
 
-int VertexData::addVertex(const float x, const float y, const float z) {
+size_t VertexData::addVertex(const float x, const float y, const float z) {
 	vertices.push_back(Vec3(x,y,z));
 	attribs |= VERT_POS;
 	return vertices.size()-1;
@@ -57,39 +57,39 @@ vector<int> VertexData::addVertices(const vector<Vec3>& copy) {
 	return new_indices;
 }
 
-int VertexData::addTexCoord(const Vec2& vec) {
+size_t VertexData::addTexCoord(const Vec2& vec) {
 	texcoords.push_back(vec);
 	attribs |= VERT_TEX;
 	return texcoords.size()-1;
 }
 
-int VertexData::addTexCoord(const float x, const float y) {
+size_t VertexData::addTexCoord(const float x, const float y) {
 	texcoords.push_back(Vec2(x, y));
 	attribs |= VERT_TEX;
 	return texcoords.size()-1;
 }
 
-int VertexData::addColor(const Vec3& color) {
+size_t VertexData::addColor(const Vec3& color) {
 	return addColor(Color4(color.x, color.y, color.z, 1));
 }
 
-int VertexData::addColor(const float r, const float g, const float b) {
+size_t VertexData::addColor(const float r, const float g, const float b) {
 	return addColor(Color4(r, g, b, 1.0f));
 }
 
-int VertexData::addColor(const Color4& color) {
+size_t VertexData::addColor(const Color4& color) {
 	colors.push_back(color);
 	attribs |= VERT_COL;
 	return colors.size()-1;
 }
 
-int VertexData::addNormal(const float x, const float y, const float z) {
+size_t VertexData::addNormal(const float x, const float y, const float z) {
 	normals.push_back(Vec3(x, y, z));
 	attribs |= VERT_NORM;
 	return normals.size()-1;
 }
 
-int VertexData::addNormal(const Vec3& vec) {
+size_t VertexData::addNormal(const Vec3& vec) {
 	normals.push_back(vec);
 	attribs |= VERT_NORM;
 	return normals.size()-1;
@@ -99,30 +99,30 @@ void VertexData::addIndex(const int& index) {
 	indices.push_back(index);
 }
 
-int	VertexData::addTangent(const Vec3& tangent) {
+size_t	VertexData::addTangent(const Vec3& tangent) {
 	tangents.push_back(tangent);
 	return tangents.size()-1;
 }
 
-int	VertexData::addBinormal(const Vec3& binorm) {
+size_t	VertexData::addBinormal(const Vec3& binorm) {
 	binormals.push_back(binorm);
 	return binormals.size()-1;
 }
 
 
 // triangles are i.e. used when exporting. It's just a simple reference
-int VertexData::addTriangle(const int a, const int b, const int c) {
+size_t VertexData::addTriangle(const int a, const int b, const int c) {
 	Triangle t(a,b,c);
 	triangles.push_back(t);
 	return triangles.size()-1;
 }
 
-int	VertexData::addTriangle(Triangle t) {
+size_t	VertexData::addTriangle(Triangle t) {
 	triangles.push_back(t);
 	return triangles.size()-1;
 }
 
-int VertexData::addTriangleAndIndices(const int a, const int b, const int c) {
+size_t VertexData::addTriangleAndIndices(const int a, const int b, const int c) {
 	// keep track of triangle.
 	Triangle t(a, b, c);
 	triangles.push_back(t);
@@ -136,7 +136,7 @@ int VertexData::addTriangleAndIndices(const int a, const int b, const int c) {
 	return triangles.size()-1;
 }
 
-int VertexData::addQuadAndIndices(int a, int b, int c, int d) {
+size_t VertexData::addQuadAndIndices(int a, int b, int c, int d) {
 	addQuadIndices(a,b,c,d);
 	return addQuad(a,b,c,d);
 }
@@ -148,13 +148,13 @@ void VertexData::addQuadIndices(int a, int b, int c, int d) {
 	indices.push_back(d);
 }
 
-int VertexData::addQuad(int a, int b, int c, int d) {
+size_t VertexData::addQuad(int a, int b, int c, int d) {
 	Quad q(a, b, c, d);
 	quads.push_back(q);
 	return quads.size()-1;
 }
 
-int VertexData::addQuad(Quad q) {
+size_t VertexData::addQuad(Quad q) {
 	quads.push_back(q);
 	return quads.size()-1;	
 }
@@ -224,38 +224,41 @@ const int* VertexData::getIndicesPtr() {
 	return &indices[0];
 }
 
-int VertexData::getNumVertices() {
-	return (int)vertices.size();
+size_t VertexData::getNumVertices() {
+	return vertices.size();
 }
 
-int VertexData::getNumTexCoords() {
-	return (int)texcoords.size();
+size_t VertexData::getNumTexCoords() {
+	return texcoords.size();
 }
 
-int VertexData::getNumTangents() {
-	return (int)tangents.size();
+size_t VertexData::getNumTangents() {
+	return tangents.size();
 }
 
-int VertexData::getNumColors() {
-	return (int)colors.size();
+size_t VertexData::getNumColors() {
+	return colors.size();
 }
 
-int VertexData::getNumNormals() {
-	return (int)normals.size();
+size_t VertexData::getNumNormals() {
+	return normals.size();
 }
 
-int VertexData::getNumIndices() {
-	return (int)indices.size();
+size_t VertexData::getNumIndices() {
+	return indices.size();
 }
 
-int VertexData::getNumTriangles() {
-	return (int)triangles.size();
+size_t VertexData::getNumTriangles() {
+	return triangles.size();
 }
 
-int VertexData::getNumQuads() {
-	return (int)quads.size();
+size_t VertexData::getNumQuads() {
+	return quads.size();
 }
 
+size_t VertexData::getNumVertexGroups() {
+	return vertex_groups.size();
+}
 
 VertexP* VertexData::getVertexP() {
 	if(vertex_p != NULL) { 	
@@ -383,9 +386,21 @@ VertexPTNTB* VertexData::getVertexPTNTB() {
 		vertex_ptntb[i].binorm = binormals[i]; 
 	}
 	return vertex_ptntb;
-
 }
 
+void VertexData::addToVertexGroup(const string& name, const int& vertexIndex) {
+	vertex_groups[name].push_back(vertexIndex);
+}
+
+// fill result with vertex indices for the given group name
+bool VertexData::getVertexGroup(const string& name, vector<int>& result) {
+	map<string, vector<int> >::iterator it = vertex_groups.find(name);
+	if(it == vertex_groups.end()) {
+		return false;
+	}
+	result = it->second;
+	return true;
+}
 
 /** 
  * Here we calculate the tangent and bitangents. We want the tangent and 

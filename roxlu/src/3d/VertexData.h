@@ -13,11 +13,13 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <map>
 
 using std::endl;
 using std::ostream;
 using std::vector;
 using std::string;
+using std::map;
 
 namespace roxlu {
 
@@ -25,26 +27,27 @@ class VertexData {
 public:
 	VertexData(); 
 	VertexData(const string& meshName);
-	int 			addVertex(const Vec3& vec);
-	int 			addVertex(const float x, const float y, const float z);
+	size_t 			addVertex(const Vec3& vec);
+	size_t 			addVertex(const float x, const float y, const float z);
 	vector<int>		addVertices(const vector<Vec3>& copy);
-	int 			addTexCoord(const Vec2& vec);
-	int				addTexCoord(const float x, const float y);
-	int 			addColor(const Vec3& color);
-	int 			addColor(const Color4& color);
-	int 			addColor(const float r, const float g, const float b);
-	int				addNormal(const float x, const float y, const float z);
-	int				addTangent(const Vec3& tangent);
-	int				addBinormal(const Vec3& binorm);
-	int 			addNormal(const Vec3& vec);
-	void 			addIndex(const int& index);
-	int				addTriangle(Triangle t);
-	int 			addTriangle(int a, int b, int c); 
-	int				addTriangleAndIndices(int a, int b, int c);
-	int 			addQuad(int a, int b, int c, int d);
-	int				addQuad(Quad q);
-	int				addQuadAndIndices(int a, int b, int c, int d);
+	size_t 			addTexCoord(const Vec2& vec);
+	size_t			addTexCoord(const float x, const float y);
+	size_t 			addColor(const Vec3& color);
+	size_t 			addColor(const Color4& color);
+	size_t 			addColor(const float r, const float g, const float b);
+	size_t			addNormal(const float x, const float y, const float z);
+	size_t			addTangent(const Vec3& tangent);
+	size_t			addBinormal(const Vec3& binorm);
+	size_t 			addNormal(const Vec3& vec);
+	size_t			addTriangle(Triangle t);
+	size_t 			addTriangle(int a, int b, int c); 
+	size_t			addTriangleAndIndices(int a, int b, int c);
+	size_t 			addQuad(int a, int b, int c, int d);
+	size_t			addQuad(Quad q);
+	size_t			addQuadAndIndices(int a, int b, int c, int d);
 	void			addQuadIndices(int a, int b, int c, int d);
+	void 			addIndex(const int& index);	
+	void			addToVertexGroup(const string& name, const int& vertexIndex);
 
 	void debugDraw(int drawMode = GL_TRIANGLES);
 	void debugDrawQuad(int quadNum);
@@ -60,14 +63,16 @@ public:
 	Quad* 			getQuadPtr(int quad);
 	
 
-	int 			getNumVertices();
-	int 			getNumTexCoords();
-	int 			getNumColors();
-	int 			getNumNormals();
-	int				getNumTangents();
-	int 			getNumIndices();
-	int 			getNumTriangles();
-	int 			getNumQuads();
+	size_t 			getNumVertices();
+	size_t 			getNumTexCoords();
+	size_t 			getNumColors();
+	size_t 			getNumNormals();
+	size_t			getNumTangents();
+	size_t 			getNumIndices();
+	size_t 			getNumTriangles();
+	size_t 			getNumQuads();
+	size_t			getNumVertexGroups();
+	
 	Vec2			getTexCoord(int index);
 	Vec2*			getTexCoordPtr(int index);
 	Vec3 			getVertex(int index);
@@ -84,6 +89,8 @@ public:
 	VertexPTNT*		getVertexPTNT();
 	VertexPNC* 		getVertexPNC();
 	VertexPTNTB* 	getVertexPTNTB();
+	
+	bool			getVertexGroup(const string& name, vector<int>& result);
 	
 	void			clearAttribs();
 	void			enablePositionAttrib();
@@ -133,6 +140,7 @@ public:
 	vector<Quad> 		quads;
 	vector<Vec3>		tangents;
 	vector<Vec3>		binormals;
+	map<string, vector<int> >	vertex_groups; // name, vertex index for vertex groups
 	
 	int 				attribs;
 	VertexP* 			vertex_p;

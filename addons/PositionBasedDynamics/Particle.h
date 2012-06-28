@@ -20,6 +20,7 @@ public:
 	void enable();
 	
 	void setColor(const float& r, const float& g, const float& b, float a = 1.0f);
+	void setPosition(const float* p);
 	
 	Vec3 forces;	
 	Vec3 position;
@@ -56,6 +57,12 @@ inline void Particle::setColor(const float& r, const float& g, const float& b, f
 	color[1] = g;
 	color[2] = b;
 	color[3] = a;
+}
+
+inline void Particle::setPosition(const float* p) {
+	position.x = p[0];
+	position.y = p[1];
+	position.z = p[2];
 }
 
 } // pbd

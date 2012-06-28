@@ -35,6 +35,7 @@ bool Stream::connect(const string& streamURL) {
 		time_t current_time = time(NULL);
 		time_t http_time = mktime(&tm);
 		time_t difference = std::abs(current_time - http_time);
+		printf("Difference: %zu\n", difference);
 		if(difference > 180) {
 			printf("\n\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 			printf("MAKE SURE THAT YOUR COMPUTER TIME IS SYNCRHONIZED WITH A REMOTE TIME SERVER\n");
@@ -125,7 +126,8 @@ bool Stream::connect(const string& streamURL) {
 	r = curl_easy_setopt(curl, CURLOPT_WRITEHEADER, this);
 	CHECK_CURL_ERROR(r);	
 	
-	//curl_easy_setopt(curl, CURLOPT_VERBOSE, true);
+	curl_easy_setopt(curl, CURLOPT_USERPWD, "roxlu:zgkdsbuswa56"); 
+	curl_easy_setopt(curl, CURLOPT_VERBOSE, true);
 
 	// set the oauth headers.
 	const vector<string>& headers = req.getHeaders();

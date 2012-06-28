@@ -41,6 +41,7 @@
 #include "io/INI.h"
 #include "io/IOBuffer.h"
 #include "io/OBJ.h"
+#include "io/ROX.h"
 #include "io/Ply.h"
 #include "io/R3F.h"
 #include "math/Interpolator.h"

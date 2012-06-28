@@ -23,6 +23,9 @@ public:
 	
 	bool import(const string& filepath);
 	bool extractFace(string info, int& vertexIndex, int& normalIndex, int& texcoordIndex);
+	void print();
+	bool contains(const string& objectName);
+	
 	std::map<string, Object> objects;
 	VertexData operator[](const string& name);
 };
@@ -34,6 +37,14 @@ inline VertexData OBJ::operator[](const string& name) {
 		return vd;	
 	}
 	return it->second.vd;
+}
+
+inline bool OBJ::contains(const string& objectName) {
+	map<string,Object>::iterator it = objects.find(objectName);
+	if(it == objects.end()) {
+		return false;
+	}
+	return true;
 }
 
 };

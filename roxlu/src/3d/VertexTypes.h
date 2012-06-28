@@ -35,6 +35,26 @@ enum VertexAttrib {
 	,ARRAY_INDEX	= (1 << 10)
 };
 
+struct VertexIndices {
+	void add(unsigned int dx) {
+		indices.push_back(dx);
+	}
+		
+	size_t numBytes() {
+		return indices.size() * sizeof(unsigned int);
+	}
+	
+	size_t size() {
+		return indices.size();
+	}
+	
+	const unsigned int* getPtr() {
+		return &indices[0];
+	}
+	
+	vector<unsigned int> indices;
+};
+
 struct Vertex {
 };
 
@@ -96,8 +116,23 @@ struct VertexPN : public Vertex  {
 	Vec3 pos;
 	Vec3 norm;
 	
+	
+	VertexPN() {
+	}
+	
+	VertexPN(const Vec3& pos, const Vec3& norm)
+		:pos(pos)
+		,norm(norm)
+	{
+	}
+	
 	const float* getPtr() {
 		return pos.getPtr();
+	}
+	
+	VertexPN& set(const Vec3& p, const Vec3& n) {
+		pos = p;
+		norm = n;
 	}
 	
 	VertexPN& setPos(const float& x, const float& y, const float& z) {

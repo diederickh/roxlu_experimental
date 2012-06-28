@@ -1,8 +1,8 @@
-#include "OBJ.h"
+#include "ROX.h"
 
 namespace roxlu {
 
-bool OBJ::import(const string& filepath) {
+bool ROX::import(const string& filepath) {
 	ifstream ifs;
 	ifs.open(filepath.c_str());
 	if(!ifs.is_open()) {
@@ -13,12 +13,12 @@ bool OBJ::import(const string& filepath) {
 	Triangle tri;
 	Vec3 v;
 	Vec2 t;
-	OBJ::Object object;
+	ROX::Object object;
 	string line;
 	bool object_added = false;
 	bool found_object = false;
 	string vertex_group = "none";
-	size_t tri_index = 0;
+	int vert_dx = 0;
 	
 	while(getline(ifs, line)) {
 		if(line.at(0) == '#') {
@@ -66,7 +66,10 @@ bool OBJ::import(const string& filepath) {
 		else if(found_object && cmd == "g") {
 			stringstream ss;
 			ss << line.substr(space+1, line.size()-1);
-			vertex_group = ss.str();
+			ss >> vertex_group;
+			while(ss >> vert_dx) {
+				object.vd.addToVertexGroup(vertex_group, vert_dx);
+			}
 		}
 		// face
 		else if(found_object && cmd == "f") {
@@ -86,7 +89,7 @@ bool OBJ::import(const string& filepath) {
 			
 			object.vd.addTriangle(tri);
 			
-			object.vd.addToVertexGroup(vertex_group, tri_index);
+			
 		}
 
 	}
@@ -128,7 +131,7 @@ bool OBJ::import(const string& filepath) {
 	*/
 }
 
-bool OBJ::extractFace(string info, int& vertexIndex, int& normalIndex, int& texcoordIndex) {
+bool ROX::extractFace(string info, int& vertexIndex, int& normalIndex, int& texcoordIndex) {
 	stringstream fss;
 	fss << info;
 	string fv;
@@ -164,7 +167,7 @@ bool OBJ::extractFace(string info, int& vertexIndex, int& normalIndex, int& texc
 	}
 }
 
-void OBJ::print() {
+void ROX::print() {
 	std::map<string, Object>::iterator it = objects.begin();
 	while(it != objects.end()) {
 		printf("- '%s'\n", it->first.c_str());
