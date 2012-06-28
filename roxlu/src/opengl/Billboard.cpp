@@ -7,6 +7,7 @@ GLuint Billboard::vao = 0;
 
 Billboard::Billboard()
 	:texture(NULL)
+	,texture_set(false)
 {
 	if(!created) {
 		printf("Billboard needs to be created\n");
@@ -49,24 +50,39 @@ Billboard::Billboard()
 	}
 }
 
+//Billboard::Billboard(const Billboard& other) 
+//	:texture(other.texture)
+//	,texture_set(other.texture_set)
+//{
+//
+//}
+
 void Billboard::start(const Mat4& pm, const Mat4& vm, const Vec3& right, const Vec3& up) {
+	if(!texture_set) {
+		printf("Cannot use billboard w/o texture.\n");
+	}
+	
 	this->right = &right;
 	this->up = &up;
 	this->pm = pm.getPtr();
 	this->vm = vm.getPtr();
+
+	
+	glEnable(GL_TEXTURE_2D);
+	glActiveTexture(GL_TEXTURE2); eglGetError();
+	glBindTexture(GL_TEXTURE_2D, tex); eglGetError();
 	
 	shader.enable();
 	shader.uniformMat4fv("u_projection_matrix", pm.getPtr());
 	shader.uniformMat4fv("u_view_matrix", vm.getPtr());
 	shader.uniform1i("u_texture",2);
 
-	glActiveTexture(GL_TEXTURE2); eglGetError();
-	glBindTexture(GL_TEXTURE_2D, tex); eglGetError();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Billboard::setTexture(const GLuint& id) {
 	tex = id;
+	texture_set = true;
 }
 
 

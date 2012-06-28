@@ -44,11 +44,13 @@ struct BillboardVertex {
 class Billboard {
 public:	
 	Billboard();
+	//Billboard(const Billboard& other);
 	void setTexture(const GLuint& id);
 	void start(const Mat4& pm, const Mat4& vm, const Vec3& right, const Vec3& up);
 	void draw(const Vec3& position, const float& scale, const float& rotationDegrees, float alpha = 1.0);
 	void stop(); // or disable() ?
 private:
+	bool texture_set;
 	GLuint tex;
 	const Vec3* right;
 	const Vec3* up;

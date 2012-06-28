@@ -19,6 +19,7 @@ public:
 	Particle(const Vec3& pos, float mass = 1.0f);
 	void update(const float& dt);
 	void draw();
+	void addForce(const float& x, const float& y, const float& z);
 	void addForce(const Vec3& f);
 	
 	void disable();
@@ -62,6 +63,13 @@ inline void Particle::disable() {
 
 inline void Particle::addSpring(Spring* sp) {
 	springs.push_back(sp);
+}
+
+
+inline void Particle::addForce(const float& x, const float& y, const float& z) {
+	forces.x += x;
+	forces.y += y;
+	forces.z += z;
 }
 
 inline void Particle::setColor(const float& r, const float& g, const float& b, float a) {
