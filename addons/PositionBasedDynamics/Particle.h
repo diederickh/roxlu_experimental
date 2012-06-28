@@ -4,10 +4,15 @@
 #include "OpenGL.h"
 #include "Vec3.h"
 #include "Vec2.h"
+#include <vector>
+
+using std::vector;
 using namespace roxlu;
 
 
 namespace pbd {
+
+class Spring;
 
 class Particle {
 public:
@@ -22,6 +27,8 @@ public:
 	void setColor(const float& r, const float& g, const float& b, float a = 1.0f);
 	void setPosition(const float* p);
 	
+	void addSpring(Spring* sp);
+	
 	Vec3 forces;	
 	Vec3 position;
 	Vec3 tmp_position;
@@ -30,7 +37,7 @@ public:
 	
 	float mass;
 	float size; // used for i.e. drawing
-	float energy; // custom use
+	float energy; // custom use; used to as repel force
 	float inv_mass;
 	bool enabled;
 	int num_springs;
@@ -40,6 +47,8 @@ public:
 	float lifespan;
 	float age;
 	float agep;
+	
+	vector<Spring*> springs; // connected springs;
 	
 };
 
@@ -51,6 +60,9 @@ inline void Particle::disable() {
 	enabled = false;
 }
 
+inline void Particle::addSpring(Spring* sp) {
+	springs.push_back(sp);
+}
 
 inline void Particle::setColor(const float& r, const float& g, const float& b, float a) {
 	color[0] = r;

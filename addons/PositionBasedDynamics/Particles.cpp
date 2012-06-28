@@ -101,7 +101,10 @@ void Particles::update(const float& dt) {
 	for(int i = 0; i < k; ++i) {
 		sit = springs.begin();
 		while(sit != springs.end()) {
-			(*sit)->update(dt);
+			Spring& s = *(*sit);
+			if(s.isEnabled()) {
+				s.update(dt);
+			}
 			++sit;
 		}
 		bit = bending_constraints.begin();

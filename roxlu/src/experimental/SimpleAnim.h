@@ -73,6 +73,7 @@ public:
 	void addFrame(const string& group, const float* pos);	
 	bool load(const string& filepath);
 	bool save(const string& filepath);
+	void setFPS(const unsigned int& fps);
 	void play();
 	bool update();
 	void getPosition(const string& group, float* dest);

@@ -45,9 +45,13 @@ bool SimpleAnim::load(const string& filepath) {
 		}
 	}
 	
+	setFPS(12);
 	
-	millis_per_frame = (1.0f/12) * 1000;
 	return true;
+}
+
+void SimpleAnim::setFPS(const unsigned int& fps) {
+	millis_per_frame = (1.0f/fps) * 1000;
 }
 
 void SimpleAnim::play() {

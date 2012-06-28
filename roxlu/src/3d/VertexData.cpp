@@ -615,7 +615,6 @@ void VertexData::debugDraw(int drawMode) {
 	 
 	// draw using indices
 	if(getNumTriangles() > 0) {
-		
 		// triangles (fills)
 		Triangle tri;
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
