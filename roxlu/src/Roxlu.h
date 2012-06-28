@@ -25,6 +25,7 @@
 #include "core/Keyboard.h"
 #include "experimental/Binning2D.h"
 #include "experimental/ShaderGenerator.h"
+#include "experimental/SimpleAnim.h"
 #include "experimental/SimpleClient.h"
 #include "experimental/SimpleServer.h"
 #include "experimental/ShaderTypes.h"
