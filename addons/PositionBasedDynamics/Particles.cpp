@@ -160,7 +160,24 @@ void Particles::repel(float f) {
 			}
 		}
 	}
-	
+}
+
+void Particles::repel(Particle* p, const float& radius, const float& energy) {
+	Vec3& pos = p->position;
+	float radius_sq = radius * radius;
+	for(vector<Particle*>::iterator it = particles.begin(); it != particles.end(); ++it) {
+		Particle& other = *(*it);
+		Vec3& other_pos = other.position;
+		Vec3 dir = pos - other_pos;
+		float ls = dir.lengthSquared();
+		if(ls < radius_sq) {
+			dir.normalize();
+			float f = 1.0f/ls;
+			dir *= (f* energy);
+			other.addForce(-dir);
+			//dir.print();
+		}
+	}
 }
 
 void Particles::draw() {

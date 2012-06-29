@@ -77,7 +77,7 @@ public:
 	void play();
 	bool update();
 	void getPosition(const string& group, float* dest);
-
+	bool hasGroup(const string& group);
 	uint64_t now();
 	
 	int64_t millis_per_frame;

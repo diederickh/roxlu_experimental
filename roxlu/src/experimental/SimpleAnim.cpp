@@ -131,3 +131,8 @@ bool SimpleAnim::save(const string& filepath) {
 	ofs.close();
 	return true;
 }
+
+bool SimpleAnim::hasGroup(const string& group) {
+	map<string, vector<AnimData> >::iterator it = animations.find(group);
+	return (it != animations.end());
+}

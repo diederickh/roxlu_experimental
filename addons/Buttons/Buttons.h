@@ -128,6 +128,8 @@ public:
 	void onMouseUp(int x, int y);
 	void onResize(int newW, int newH);
 	
+	
+	bool isMouseInsidePanel();
 	void setPosition(int x, int y);
 	friend class Storage; 
 	Element* getElement(const string& name);
@@ -147,6 +149,7 @@ private:
 	void updateStaticTextPositions();
 	void positionElements();
 	void flagChanged();
+	
 	string createCleanName(const string& ugly);
 	
 	vector<Element*> elements;
@@ -164,7 +167,8 @@ private:
 	int border;
 	int state;
 	bool is_changed;
-	bool is_mouse_inside;
+	bool is_mouse_inside_header;
+	bool is_mouse_inside_panel;
 	bool triggered_drag;
 	int mdx; // drag x
 	int mdy; // drag y
@@ -204,6 +208,10 @@ inline string Buttons::createCleanName(const string& ugly) {
 		}
 	}
 	return clean_name;
+}
+
+inline bool Buttons::isMouseInsidePanel() {
+	return is_mouse_inside_panel;
 }
 
 } // buttons

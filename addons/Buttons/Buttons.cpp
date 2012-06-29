@@ -18,7 +18,8 @@ Buttons::Buttons(const string& title, int w)
 	,border(1)
 	,state(BSTATE_NONE)
 	,is_changed(false)
-	,is_mouse_inside(false)
+	,is_mouse_inside_header(false)
+	,is_mouse_inside_panel(false)
 	,triggered_drag(false)
 	,mdx(0)
 	,mdy(0)
@@ -97,10 +98,12 @@ void Buttons::createOrtho(float w, float h) {
 }
 
 void Buttons::update() {
-
+	h = 0;
 	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {
-		(*it)->update();
+		Element& el = *(*it);
+		el.update();
+		h += el.h;
 		++it;
 	}
 	
@@ -178,7 +181,6 @@ void Buttons::generateElementVertices() {
 }
 
 void Buttons::draw() {
-	
 	// update projection matrix when viewport size changes.
 	GLint vp[4];
 	glGetIntegerv(GL_VIEWPORT, vp);
@@ -302,20 +304,20 @@ void Buttons::addElement(Element* el, const string& label) {
 	el->generateDynamicText(*dynamic_text);
 }
 
-void Buttons::onMouseMoved(int x, int y) {
-	mdx = x - pmx;
-	mdy = y - pmy;
+void Buttons::onMouseMoved(int mx, int my) {
+	mdx = mx - pmx;
+	mdy = my - pmy;
 	
 	// are we inside our header area? TODO: we cn optimize here by returning early
 	if(!is_locked) {
-		is_mouse_inside = BINSIDE_HEADER(this, x, y);
-		if(is_mouse_inside && state == BSTATE_NONE) {
+		is_mouse_inside_header = BINSIDE_HEADER(this, mx, my);
+		if(is_mouse_inside_header && state == BSTATE_NONE) {
 			state = BSTATE_ENTER;
-			onMouseEnter(x,y);
+			onMouseEnter(mx,my);
 		}
-		else if(!is_mouse_inside && state == BSTATE_ENTER) {
+		else if(!is_mouse_inside_header && state == BSTATE_ENTER) {
 			state = BSTATE_NONE;
-			onMouseLeave(x, y); 
+			onMouseLeave(mx, my); 
 		}
 	}
 	
@@ -330,7 +332,7 @@ void Buttons::onMouseMoved(int x, int y) {
 	if(is_mouse_down) {
 		it = elements.begin();
 		while(it != elements.end()) {
-			(*it)->onMouseDragged(x, y, mdx,mdy);
+			(*it)->onMouseDragged(mx, my, mdx, mdy);
 			++it;
 		}
 	}
@@ -339,22 +341,31 @@ void Buttons::onMouseMoved(int x, int y) {
 	it = elements.begin();
 	while(it != elements.end()) {
 		el = *it;
-		el->is_mouse_inside = BINSIDE_ELEMENT(el, x, y);
+		el->is_mouse_inside = BINSIDE_ELEMENT(el, mx, my);
 		if(el->is_mouse_inside && el->state == BSTATE_NONE) {
 			el->state = BSTATE_ENTER;
 			el->onMouseEnter(x,y);
 		}
 		else if(!el->is_mouse_inside && el->state == BSTATE_ENTER) {
 			el->state = BSTATE_NONE;
-			el->onMouseLeave(x,y);
+			el->onMouseLeave(mx,my);
 		}
-		el->onMouseMoved(x,y);
+		el->onMouseMoved(mx,my);
 		++it;
 	}
 	
+	// is mouse inside the gui
+	int panel_h = getPanelHeight();
+	if(mx > x && mx < (x+w) && my > y && my < (y+panel_h)) {
+		is_mouse_inside_panel = true;
+	}
+	else {
+		is_mouse_inside_panel = false;
+	}
+	
 	// keep track of current x and y;
-	pmx = x;
-	pmy = y;
+	pmx = mx;
+	pmy = my;
 }
 
 void Buttons::onMouseDown(int x, int y) {
@@ -446,7 +457,10 @@ int Buttons::getPanelWidth() {
 	return w + border*2;
 }
 
+// @todo, we can use the member "h"
 int Buttons::getElementsHeight() {
+	return h;
+	/*
 	int h = 0;
 	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {
@@ -454,6 +468,7 @@ int Buttons::getElementsHeight() {
 		++it;
 	}
 	return h;
+	*/
 }
 
 void Buttons::setPosition(int xx, int yy) {
