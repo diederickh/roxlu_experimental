@@ -5,7 +5,9 @@
 #include "Vec3.h"
 #include "Vec2.h"
 #include <vector>
+#include <deque>
 
+using std::deque;
 using std::vector;
 using namespace roxlu;
 
@@ -41,6 +43,7 @@ public:
 	float energy; // custom use; used to as repel force
 	float inv_mass;
 	bool enabled;
+	bool aging;
 	int num_springs;
 	int dx; // index of particle in Particles container.
 	float color[4];
@@ -50,6 +53,7 @@ public:
 	float agep;
 	
 	vector<Spring*> springs; // connected springs;
+	deque<Vec3> trail;
 	
 };
 

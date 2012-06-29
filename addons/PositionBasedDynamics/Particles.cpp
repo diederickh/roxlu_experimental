@@ -127,8 +127,12 @@ void Particles::update(const float& dt) {
 		
 		p.velocity = (p.tmp_position - p.position) * fps;
 		p.position = p.tmp_position;
-		p.age += dt;
-		p.agep = (p.age / p.lifespan);
+		
+		if(p.aging) {
+			p.age += dt;
+			p.agep = (p.age / p.lifespan);
+		}
+		
 		p.tmp_position = 0;
 		
 		++it;
