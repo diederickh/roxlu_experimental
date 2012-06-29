@@ -112,6 +112,49 @@ struct VertexPT : public Vertex  {
 	}
 };
 
+struct VertexPC : public Vertex {
+	Vec3 pos;
+	Vec4 col;
+	
+	VertexPC() {
+	}
+	
+	VertexPC(const float& x, const float& y, const float& z, const float& r, const float& g, const float& b, const float& a) {
+		pos.set(x,y,z);
+		col.set(r,g,b,a);
+	}
+	
+	const float* getPtr() {
+		return pos.getPtr();
+	}
+	
+	VertexPC& setCol(const Vec4& c) {
+		col = c;
+		return *this;
+	}
+	
+	VertexPC& setCol(const float& r, const float& g, const float& b, const float& a) {
+		col.set(r,g,b,a);
+		return *this;	
+	}
+	
+	VertexPC& setPos(const Vec3& p) {
+		pos = p;
+		return *this;
+	}
+	
+	VertexPC& setPos(const float& x, const float& y, const float& z) {
+		pos.set(x,y,z);
+		return *this;
+	}
+	
+	VertexPC& set(const Vec3& p, const Vec3& c) {
+		pos = p;
+		col = c;
+		return *this;
+	}
+};
+
 struct VertexPN : public Vertex  {
 	Vec3 pos;
 	Vec3 norm;
@@ -390,6 +433,9 @@ public:
 		return verts[dx];
 	}
 	
+	void resize(const size_t& newSize) {
+		verts.resize(newSize);
+	}
 	
 	vector<T> verts;
 };
@@ -486,15 +532,21 @@ class Vertices_TemplatePTN : public Vertices_Template<T> {
 };
 
 template<class T>
-class Vertices_VertexPTNTB : public Vertices_Template<T> {
+class Vertices_TemplatePTNTB : public Vertices_Template<T> {
 	using Vertices_Template<T>::add;
 }; 
 
+template<class T>
+class Vertices_TemplatePC : public Vertices_Template<T> {
+	using Vertices_Template<T>::add;
+};
+
 typedef Vertices_TemplateP<VertexP>	VerticesP;
+typedef Vertices_TemplatePC<VertexPC> VerticesPC;
 typedef Vertices_TemplatePN<VertexPN> VerticesPN;
 typedef Vertices_TemplatePT<VertexPT> VerticesPT;
 typedef Vertices_TemplatePTN<VertexPTN> VerticesPTN;
-typedef Vertices_TemplatePTN<VertexPTNTB> VerticesPTNTB;
+typedef Vertices_TemplatePTNTB<VertexPTNTB> VerticesPTNTB;
 
 
 

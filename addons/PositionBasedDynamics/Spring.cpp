@@ -10,10 +10,13 @@ namespace pbd {
 Spring::Spring(Particle& a, Particle& b)
 	:a(a)
 	,b(b)
+	,enabled(true)
 {
 	rest_length = (b.position - a.position).length();
 	curr_length = rest_length;
-	k = 0.6;	
+	k = 1.0;	
+	a.addSpring(this);
+	b.addSpring(this);
 }
 
 void Spring::update(const float& dt) {
@@ -36,7 +39,15 @@ void Spring::update(const float& dt) {
 }
 
 void Spring::draw() {
-	glColor3f(0.7, 0.7, 0.7);
+	if(!enabled) {
+		return;
+	}
+	if(enabled) {
+		glColor3f(0.7, 0.7, 0.7);
+	}
+	else {
+		glColor3f(1.0, 0.1, 0.0);
+	}
 	glBegin(GL_LINES);
 		glVertex3fv(a.position.getPtr());
 		glVertex3fv(b.position.getPtr());

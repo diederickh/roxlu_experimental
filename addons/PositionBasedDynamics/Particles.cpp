@@ -101,7 +101,10 @@ void Particles::update(const float& dt) {
 	for(int i = 0; i < k; ++i) {
 		sit = springs.begin();
 		while(sit != springs.end()) {
-			(*sit)->update(dt);
+			Spring& s = *(*sit);
+			if(s.isEnabled()) {
+				s.update(dt);
+			}
 			++sit;
 		}
 		bit = bending_constraints.begin();
@@ -124,8 +127,12 @@ void Particles::update(const float& dt) {
 		
 		p.velocity = (p.tmp_position - p.position) * fps;
 		p.position = p.tmp_position;
-		p.age += dt;
-		p.agep = (p.age / p.lifespan);
+		
+		if(p.aging) {
+			p.age += dt;
+			p.agep = (p.age / p.lifespan);
+		}
+		
 		p.tmp_position = 0;
 		
 		++it;
@@ -153,7 +160,24 @@ void Particles::repel(float f) {
 			}
 		}
 	}
-	
+}
+
+void Particles::repel(Particle* p, const float& radius, const float& energy) {
+	Vec3& pos = p->position;
+	float radius_sq = radius * radius;
+	for(vector<Particle*>::iterator it = particles.begin(); it != particles.end(); ++it) {
+		Particle& other = *(*it);
+		Vec3& other_pos = other.position;
+		Vec3 dir = pos - other_pos;
+		float ls = dir.lengthSquared();
+		if(ls < radius_sq) {
+			dir.normalize();
+			float f = 1.0f/ls;
+			dir *= (f* energy);
+			other.addForce(-dir);
+			//dir.print();
+		}
+	}
 }
 
 void Particles::draw() {

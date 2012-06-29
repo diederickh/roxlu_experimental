@@ -38,7 +38,7 @@ Slider::Slider(float& val, const string& name)
 		,Element(BTYPE_SLIDER, name, BVALUE_FLOAT)
 		,minv(1)
 		,maxv(1000)
-		,p(0.5)
+		,p(0.0)
 		,txtval_dx(-1)
 		,label_dx(-1)
 		,value_type(valueType)
@@ -84,7 +84,9 @@ Slider::Slider(float& val, const string& name)
 		BSET_COLOR(bar_filled_color, 0.0,0.8,0.4,1.0);
 		BSET_COLOR(bar_filled_bottom, 0.0,0.4,0.2,1.0);
 		BSET_COLOR(bar_empty_color, 0.0,0.8,0.4,0.1);
-	
+
+		p = std::min<float>(1.0, p);
+		
 		int bar_h = 4; // bar height
 		int bar_filled_w = w * p;
 		int bar_empty_w = w * (1.0 - p);

@@ -73,10 +73,11 @@ public:
 	void addFrame(const string& group, const float* pos);	
 	bool load(const string& filepath);
 	bool save(const string& filepath);
+	void setFPS(const unsigned int& fps);
 	void play();
 	bool update();
 	void getPosition(const string& group, float* dest);
-
+	bool hasGroup(const string& group);
 	uint64_t now();
 	
 	int64_t millis_per_frame;

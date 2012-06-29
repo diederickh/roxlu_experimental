@@ -33,6 +33,7 @@ public:
 inline VertexData OBJ::operator[](const string& name) {
 	map<string,Object>::iterator it = objects.find(name);
 	if(it == objects.end()) {
+		printf("Cannot find object in OBJ: %s\n", name.c_str());
 		VertexData vd;
 		return vd;	
 	}

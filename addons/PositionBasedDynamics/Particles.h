@@ -41,6 +41,7 @@ public:
 	void update(const float& dt);
 	void draw();
 	void repel(float f = 0.9);
+	void repel(Particle* p, const float& radius, const float& energy);
 
 	Particle* operator[](const unsigned int& dx);
 	size_t size();

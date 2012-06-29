@@ -4,16 +4,24 @@
 #include "OpenGL.h"
 #include "Vec3.h"
 #include "Vec2.h"
+#include <vector>
+#include <deque>
+
+using std::deque;
+using std::vector;
 using namespace roxlu;
 
 
 namespace pbd {
+
+class Spring;
 
 class Particle {
 public:
 	Particle(const Vec3& pos, float mass = 1.0f);
 	void update(const float& dt);
 	void draw();
+	void addForce(const float& x, const float& y, const float& z);
 	void addForce(const Vec3& f);
 	
 	void disable();
@@ -21,6 +29,8 @@ public:
 	
 	void setColor(const float& r, const float& g, const float& b, float a = 1.0f);
 	void setPosition(const float* p);
+	
+	void addSpring(Spring* sp);
 	
 	Vec3 forces;	
 	Vec3 position;
@@ -30,9 +40,10 @@ public:
 	
 	float mass;
 	float size; // used for i.e. drawing
-	float energy; // custom use
+	float energy; // custom use; used to as repel force
 	float inv_mass;
 	bool enabled;
+	bool aging;
 	int num_springs;
 	int dx; // index of particle in Particles container.
 	float color[4];
@@ -40,6 +51,9 @@ public:
 	float lifespan;
 	float age;
 	float agep;
+	
+	vector<Spring*> springs; // connected springs;
+	deque<Vec3> trail;
 	
 };
 
@@ -51,6 +65,16 @@ inline void Particle::disable() {
 	enabled = false;
 }
 
+inline void Particle::addSpring(Spring* sp) {
+	springs.push_back(sp);
+}
+
+
+inline void Particle::addForce(const float& x, const float& y, const float& z) {
+	forces.x += x;
+	forces.y += y;
+	forces.z += z;
+}
 
 inline void Particle::setColor(const float& r, const float& g, const float& b, float a) {
 	color[0] = r;

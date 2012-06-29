@@ -11,6 +11,7 @@ Particle::Particle(const Vec3& pos, float mass)
 	,lifespan(40) 
 	,age(0.0f)
 	,agep(0.0f)
+	,aging(true)
 {
 	if(mass < 0.0001) {
 		mass = 0.0001;
