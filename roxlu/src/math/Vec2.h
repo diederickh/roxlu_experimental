@@ -42,8 +42,11 @@ public:
 	
 	// Basic vector math.
 	void set(float x, float y);
-	float length();
+	float length() const;
 	float lengthSquared();
+	Vec2& normalize();
+	Vec2 getNormalized() const;
+	
 	const float* getPtr() { return &x; }
 	
 	// Accessors
@@ -91,13 +94,31 @@ inline void Vec2::set(float xx, float yy) {
 	y = yy;
 }
 
-inline float Vec2::length() {
+inline float Vec2::length() const{
 	return sqrt(x*x + y*y);
 }
 
 inline float Vec2::lengthSquared() {
 	return x*x + y*y;
 }
+
+
+inline Vec2& Vec2::normalize() {
+	float l = length();
+	x/=l;
+	y/=l;
+	return *this;
+}
+
+inline Vec2 Vec2::getNormalized() const {
+	float l = length();
+	float il = 0;
+	if(l > 0) {
+		il = 1/l;
+	}
+	return Vec2(x*il, y*il);
+}
+
 
 // -----------------------------------------------------------------------------
 inline Vec2& Vec2::operator=(const float& scalar) {
@@ -167,12 +188,6 @@ inline Vec2 Vec2::operator*(const float s) const {
 }
 
 
-// for: float * Vec2 (<-- is something else then: Vec2 * float)
-inline Vec2 operator*(const float& s, const Vec2& v) {
-	return Vec2(v.x * s, v.y * s);
-}
-
-
 inline Vec2 Vec2::operator/(const float s) const {
 	float inv = 1.0f/s;
 	return Vec2(x*inv, y*inv);
@@ -190,6 +205,26 @@ inline std::istream& operator>>(std::istream& is, Vec2& v) {
 	return is;
 }
 
+// non members
+// -----------------------------------------------------------------------------
+// for: float * Vec2 (<-- is something else then: Vec2 * float)
+inline Vec2 operator*(const float& s, const Vec2& v) {
+	return Vec2(v.x * s, v.y * s);
+}
+
+inline Vec2 operator-(const float& f, const Vec2& v) {
+	return Vec2(f-v.x, f-v.y);
+}
+
+inline Vec2 operator/(const float& f, const Vec2& v) {
+	return Vec2(f/v.x, f/v.y);
+}
+
+inline Vec2 operator+(const float& f, const Vec2& v) {
+	return Vec2(f+v.x, f+v.y);
+}
+
+// -----------------------------------------------------------------------------
 inline void Vec2::print() {
 	printf("%f, %f\n", x, y);
 }

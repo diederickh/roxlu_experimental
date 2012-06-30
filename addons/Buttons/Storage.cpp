@@ -5,6 +5,7 @@ namespace buttons {
 bool Storage::save(const string& file, Buttons* buttons) {
 	std::ofstream ofs(file.c_str(), std::ios::out | std::ios::binary);
 	if(!ofs.is_open()) {
+		printf("Cannot save: %s\n", file.c_str());
 		return false;
 	}
 	
@@ -73,6 +74,7 @@ bool Storage::save(const string& file, Buttons* buttons) {
 bool Storage::load(const string& file, Buttons* buttons) {
 	std::ifstream ifs(file.c_str(), std::ios::out | std::ios::binary);
 	if(!ifs.is_open()) {
+		printf("Cannot load: %s\n", file.c_str());
 		return false;
 	}
 	

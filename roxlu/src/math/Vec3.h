@@ -411,17 +411,18 @@ inline std::istream& operator>>(std::istream& is, Vec3& v) {
 
 // non members
 // -----------------------------------------------------------------------------
-inline Vec3 operator+( float f, const Vec3& vec ) {
+inline Vec3 operator+(float f, const Vec3& vec) {
     return Vec3( f+vec.x, f+vec.y, f+vec.z );
 }
 
-inline Vec3 operator-( float f, const Vec3& vec ) {
+inline Vec3 operator-(float f, const Vec3& vec) {
     return Vec3( f-vec.x, f-vec.y, f-vec.z );
 }
 
-inline Vec3 operator/( float f, const Vec3& vec ) {
+inline Vec3 operator/(float f, const Vec3& vec) {
     return Vec3( f/vec.x, f/vec.y, f/vec.z);
 }
+
 inline Vec3 operator*(float f, const Vec3& vec) {
     return Vec3(f*vec.x, f*vec.y, f*vec.z );
 }

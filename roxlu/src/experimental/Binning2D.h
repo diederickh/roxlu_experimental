@@ -19,7 +19,9 @@ struct Particle {
 	Vec2 position;
 	Vec2 forces	
 };
- 
+
+Binning2D<Particle<Vec2> > bins; 
+bins(ps.particles, ofGetWidth(), ofGetHeight(), 10)
 */
 
 #define BIN2D_DX(i,j) (((j)*cols) + (i))
