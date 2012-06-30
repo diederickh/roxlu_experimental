@@ -10,10 +10,11 @@ using namespace roxlu;
 
 typedef Particle<Vec2> Particle2;
 typedef Particle<Vec3> Particle3;
+typedef Flocking<Vec2> Flocking2;
 
 typedef Particles<Vec2> Particles2;
 typedef Particles<Vec3> Particles3;
-
+typedef Flocking<Vec3> Flocking3;
 
 template<class T>
 inline void draw(Particles<T>& ps) {

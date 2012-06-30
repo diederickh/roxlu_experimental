@@ -137,7 +137,7 @@ Slider::Slider(float& val, const string& name)
 		value = v;
 		T absv = std::abs(minv + std::abs(v));
 		T nrange = maxv-minv;
-		p = (float)absv/nrange;
+		p = (float)1.0f/nrange * (value-minv);
 	}
 	
 	Slider& setMin(const T& m) {
