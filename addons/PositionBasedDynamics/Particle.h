@@ -1,93 +1,104 @@
-#ifndef ROXLU_PARTICLEH
-#define ROXLU_PARTICLEH
+#ifndef ROXLU_PBD_PARTICLEH
+#define ROXLU_PBD_PARTICLEH
 
-#include "OpenGL.h"
-#include "Vec3.h"
-#include "Vec2.h"
-#include <vector>
-#include <deque>
-
-using std::deque;
-using std::vector;
-using namespace roxlu;
+#include "Roxlu.h"
+//#include "Spring.h"
 
 
-namespace pbd {
-
+template<class T>
 class Spring;
 
+
+template<class T>
 class Particle {
 public:
-	Particle(const Vec3& pos, float mass = 1.0f);
+
+	Particle(const T& pos, float mass = 1.0f);
 	void update(const float& dt);
 	void draw();
-	void addForce(const float& x, const float& y, const float& z);
-	void addForce(const Vec3& f);
-	
-	void disable();
+	void addForce(const T& f);
 	void enable();
-	
-	void setColor(const float& r, const float& g, const float& b, float a = 1.0f);
-	void setPosition(const float* p);
-	
-	void addSpring(Spring* sp);
-	
-	Vec3 forces;	
-	Vec3 position;
-	Vec3 tmp_position;
-	Vec3 velocity;
-	Vec2 tex; // can be used to store texture coordinates
+	void disable();
+	void addSpring(Spring<T>* s); 
+	void setColor(const float r, const float g, const float b, float a = 1.0f);
+		
+	T position;
+	T forces;
+	T tmp_position;
+	T velocity;
 	
 	float mass;
-	float size; // used for i.e. drawing
-	float energy; // custom use; used to as repel force
+	float size;
+	float energy;
 	float inv_mass;
 	bool enabled;
-	bool aging;
-	int num_springs;
-	int dx; // index of particle in Particles container.
+	int dx;
 	float color[4];
 	
 	float lifespan;
 	float age;
 	float agep;
+	bool aging;
 	
-	vector<Spring*> springs; // connected springs;
-	deque<Vec3> trail;
-	
+	vector<Spring<T>* > springs;
 };
 
-inline void Particle::enable() {
+
+template<class T>
+Particle<T>::Particle(const T& pos, float mass) 
+	:position(pos)
+	,mass(mass)
+	,enabled(true)
+	,aging(true)
+	,dx(0)
+	,size(1.0f)
+	,energy(1.0f)
+	,lifespan(0.0f)
+	,age(0.0f)
+	,agep(0.0f)
+{
+	color[0] = color[1] = color[2] = color[3] = 1.0f;
+	if(mass < 0.01) {
+		mass = 0.0f;
+		inv_mass = 0.0f;
+	}
+	else {
+		inv_mass = 1.0f / mass;
+	}
+}
+
+template<class T>
+inline void Particle<T>::addSpring(Spring<T>* s) {
+	springs.push_back(s);
+}
+
+template<class T>
+inline void Particle<T>::addForce(const T& f) {
+	forces += f;
+}
+
+template<class T>
+inline void Particle<T>::update(const float& dt) {
+}
+
+
+template<class T>
+inline void Particle<T>::enable() {
 	enabled = true;
 }
 
-inline void Particle::disable() {
+template<class T>
+inline void Particle<T>::disable() {
 	enabled = false;
 }
 
-inline void Particle::addSpring(Spring* sp) {
-	springs.push_back(sp);
-}
-
-
-inline void Particle::addForce(const float& x, const float& y, const float& z) {
-	forces.x += x;
-	forces.y += y;
-	forces.z += z;
-}
-
-inline void Particle::setColor(const float& r, const float& g, const float& b, float a) {
+template<class T>
+inline void Particle<T>::setColor(const float r, const float g, const float b, float a) {
 	color[0] = r;
 	color[1] = g;
 	color[2] = b;
 	color[3] = a;
 }
 
-inline void Particle::setPosition(const float* p) {
-	position.x = p[0];
-	position.y = p[1];
-	position.z = p[2];
-}
 
-} // pbd
 #endif
