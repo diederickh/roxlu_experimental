@@ -345,11 +345,6 @@ inline Vec3 Vec3::operator*(const float scalar) const {
 	return Vec3(x*scalar, y*scalar, z*scalar);
 }
 
-// float * Vec3
-inline Vec3 operator*(const float& s, const Vec3& v) {
-	return Vec3(v.x * s, v.y * s, v.z * s);
-}
-
 inline Vec3& Vec3::operator*=(const float scalar) {
 	x *= scalar;
 	y *= scalar;
