@@ -64,6 +64,7 @@ public:
 	
 	float* bg_top_color;
 	float* bg_bottom_color;
+	float col_text[4];
 	float col_bg_default[4];
 	float col_bg_top_hover[4];
 	float col_bg_bottom_hover[4];
@@ -86,26 +87,33 @@ inline int Element::getValueType() {
 }
 
 inline Element& Element::setColor(const float r, const float g, const float b, const float a) {
+
+
 	// set default color
 	float hue,sat,bright;
+//	printf("Col in: %f, %f, %f\n", r,g,b);
 	Color::RGBToHLSf(r,g,b,&hue,&bright, &sat);
-	col_bg_default[0] = r;
 	BSET_COLOR(col_bg_default, r, g, b, a);
-	
+//	float rr,gg,bb;
+//	Color::HLSToRGBf(hue,bright, sat, &rr, &gg, &bb);	
+//	printf("Col out: %f, %f, %f\n", rr,gg,bb);	
+
 	bg_bottom_color = col_bg_default;
 	bg_top_color = col_bg_default;
 	
 	// top hover is a bit lighter
-	float bright_copy = bright;
-	bright = bright * 1.2;
-	Color::HLSToRGBf(hue, bright, sat, &col_bg_top_hover[0], &col_bg_top_hover[1], &col_bg_top_hover[2]);
+	//Color::HLSToRGBf(hue, bright * 1.2, sat, &col_bg_top_hover[0], &col_bg_top_hover[1], &col_bg_top_hover[2]);
+	Color::HLSToRGBf(hue, bright +0.2, sat +0.2, &col_bg_top_hover[0], &col_bg_top_hover[1], &col_bg_top_hover[2]);
 	col_bg_top_hover[3] = 1.0f;
 		
 	// bottom hover is a bit darker
-	bright = bright_copy * 0.5;
-	Color::HLSToRGBf(hue, bright, sat, &col_bg_bottom_hover[0], &col_bg_bottom_hover[1], &col_bg_bottom_hover[2]);
+	//Color::HLSToRGBf(hue, bright * 0.5, sat, &col_bg_bottom_hover[0], &col_bg_bottom_hover[1], &col_bg_bottom_hover[2]);
+	Color::HLSToRGBf(hue, bright - 0.2 , sat - 0.2, &col_bg_bottom_hover[0], &col_bg_bottom_hover[1], &col_bg_bottom_hover[2]);
 	col_bg_bottom_hover[3] = 1.0f;
 	
+	// text color
+	Color::HLSToRGBf(hue, bright + 0.6, sat + 0.6, &col_text[0], &col_text[1], &col_text[2]);
+	col_text[3] = 0.9f;	
 	return *this;
 }
 

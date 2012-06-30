@@ -16,23 +16,7 @@ public:
 		 SLIDER_INT
 		,SLIDER_FLOAT
 	};
-	/*
-	
-Slider::Slider(float& val, const string& name)
-	:value(val)
-	,Element(BTYPE_SLIDER, name)
-	,minv(1)
-	,maxv(1000)
-	,p(0.5)
-	,txtval_dx(-1)
-	,label_dx(-1)
-{
-	BSET_COLOR(bg_top_color, 0.0, 0.17, 0.21, 1.0);
-	BSET_COLOR(bg_bottom_color, 0.0, 0.17, 0.21, 1.0);
-	h = 22;
-}
 
-	*/
 	Slider(T& val, const string& name, int valueType) 
 		:value(val)
 		,Element(BTYPE_SLIDER, name, BVALUE_FLOAT)
@@ -44,10 +28,6 @@ Slider::Slider(float& val, const string& name)
 		,value_type(valueType)
 
 	{
-//		BSET_COLOR(bg_top_color, 0.0, 0.17, 0.21, 1.0);
-//		BSET_COLOR(bg_bottom_color, 0.0, 0.17, 0.21, 1.0);
-	//	bg_top_color = col_bg_default;
-	//	bg_bottom_color = col_bg_default; 
 		setColor(col_bg_default[0], col_bg_default[1], col_bg_default[2]);
 		h = 22;
 	}
@@ -85,7 +65,7 @@ Slider::Slider(float& val, const string& name)
 	}
 	
 	void generateDynamicText(Text& txt) {
-		txtval_dx = txt.add(x,y+2, "0.0",0,0.48,0.98,0.9);
+		txtval_dx = txt.add(x,y+2, "0.0", col_text[0], col_text[1], col_text[2], col_text[3]);
 		txt.setTextAlign(txtval_dx, TEXT_ALIGN_RIGHT, x+(w - 5));
 	}
 	
@@ -97,15 +77,12 @@ Slider::Slider(float& val, const string& name)
 		ss << value;
 		ss >> v;
 		sprintf(buf, "%5.4f", v);
-		txt.updateText(txtval_dx, buf,0,0.48,0.98,0.9);
+		txt.updateText(txtval_dx, buf, col_text[0], col_text[1], col_text[2], col_text[3]);
 	}
 	
 	
 	void generateVertices(ButtonVertices& vd) {
 		num_vertices = buttons::createRect(vd, x, y, w, h, bg_top_color, bg_bottom_color);
-		//BSET_COLOR(bar_filled_color, 0.0,0.8,0.4,1.0);
-		//BSET_COLOR(bar_filled_bottom, 0.0,0.4,0.2,1.0);
-		//BSET_COLOR(bar_empty_color, 0.0,0.8,0.4,0.1);
 
 		p = std::min<float>(1.0, p);
 		
@@ -121,8 +98,6 @@ Slider::Slider(float& val, const string& name)
 
 	void onMouseUp(int mx, int my) {
 		if(!is_mouse_inside) { // mouse up after
-			//BSET_COLOR(bg_top_color, 0.0, 0.17, 0.21, 1.0);
-			//BSET_COLOR(bg_bottom_color, 0.0, 0.17, 0.21, 1.0);
 			bg_top_color = col_bg_default;
 			bg_bottom_color = col_bg_default;
 			needsRedraw();
@@ -130,10 +105,6 @@ Slider::Slider(float& val, const string& name)
 	}
 	
 	void onMouseEnter(int mx, int my) {
-		/*
-		BSET_COLOR(bg_top_color, 0.0, 0.41, 0.39, 1.0);
-		BSET_COLOR(bg_bottom_color, 0.0, 0.17, 0.21, 1.0);
-		*/
 		bg_top_color = col_bg_top_hover;
 		bg_bottom_color = col_bg_bottom_hover;
 		needsRedraw();
@@ -141,8 +112,6 @@ Slider::Slider(float& val, const string& name)
 	
 	void onMouseLeave(int mx, int my) {
 		if(!drag_inside){
-			//BSET_COLOR(bg_top_color, 0.0, 0.17, 0.21, 1.0);
-			//BSET_COLOR(bg_bottom_color, 0.0, 0.17, 0.21, 1.0);
 			bg_top_color = col_bg_default;
 			bg_bottom_color = col_bg_default;
 			needsRedraw();
@@ -186,8 +155,6 @@ Slider::Slider(float& val, const string& name)
 	float p; // current percentage
 	int value_type; // SLIDER_FLOAT, SLIDER_INT (for storage)
 	
-//	float bg_top_color[4];
-//	float bg_bottom_color[4];
 	float bar_filled_color[4];
 	float bar_filled_bottom[4];
 	float bar_empty_color[4];
