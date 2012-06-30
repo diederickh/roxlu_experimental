@@ -31,27 +31,30 @@ that I'm using exponential forces: (1.0f/length_squared)*force
 */
 
 
-template<class T>
+template<class T, class P>
 class Flocking {
 public:
-	Flocking(vector<Particle<T>* >& ps, const float& zoneRadius);
+	Flocking(vector<P*>& ps, const float zoneRadius, const float maxSpeed);
 	void update();
+	void setMaxSpeed(const float max);
 	
-	vector<Particle<T>* >& ps;
-	float zone_radius;
+	vector<P*>& ps;
 	float zone_radius_sq;
-	float low;
-	float high;
-	float align_energy;
+	float low;  // separate
+	float high; // align
+ 	float align_energy;
 	float separate_energy;
 	float attract_energy;
+	float max_speed_sq;
+	float max_speed;
 };
 
-template<class T>
-Flocking<T>::Flocking(vector<Particle<T>* >& ps, const float& zoneRadius) 
+template<class T, class P>
+Flocking<T,P>::Flocking(vector<P*>& ps, const float zoneRadius, const float maxSpeed) 
 	:ps(ps)
-	,zone_radius(zoneRadius)
 	,zone_radius_sq(zoneRadius * zoneRadius)
+	,max_speed_sq(maxSpeed * maxSpeed)
+	,max_speed(maxSpeed)
 	,low(0.4)
 	,high(0.6)
 	,align_energy(1.0f)
@@ -60,20 +63,20 @@ Flocking<T>::Flocking(vector<Particle<T>* >& ps, const float& zoneRadius)
 {
 }
 
-template<class T>
-void Flocking<T>::update() {
+template<class T, class P>
+void Flocking<T, P>::update() {
 	T dir;
 	float ls;
 	float f;
 	float perc;
 	
-	for(typename vector<Particle<T>* >::iterator ita = ps.begin(); ita != ps.end(); ++ita) {
-		Particle<T>& a = *(*ita);
-		typename vector<Particle<T>* >::iterator itb = ita;
+	for(typename vector<P*>::iterator ita = ps.begin(); ita != ps.end(); ++ita) {
+		P& a = *(*ita);
+		typename vector<P*>::iterator itb = ita;
 		
 		
 		for(++itb; itb != ps.end(); ++itb) {
-			Particle<T>& b = *(*itb);
+			P& b = *(*itb);
 			dir = a.position - b.position;
 			ls = dir.lengthSquared();
 			
@@ -111,11 +114,24 @@ void Flocking<T>::update() {
 				b.addForce(dir);
 			}
 		}
+		
+	}
+	
+	for(typename vector<P*>::iterator ita = ps.begin(); ita != ps.end(); ++ita) {
+		P& a = *(*ita);
+		ls = a.velocity.lengthSquared();
+		if(ls > max_speed_sq) {
+			a.velocity = a.velocity.getNormalized() * max_speed;
+		}
 	}
 	
 }
 
-
+template<class T, class P>
+inline void Flocking<T, P>::setMaxSpeed(const float max) {
+	max_speed = max;
+	max_speed_sq = max * max;
+}
 
 	
 

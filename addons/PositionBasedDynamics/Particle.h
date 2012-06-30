@@ -14,6 +14,7 @@ class Particle {
 public:
 
 	Particle(const T& pos, float mass = 1.0f);
+//	virtual ~Particle();
 	void update(const float& dt);
 	void draw();
 	void addForce(const T& f);
@@ -66,6 +67,12 @@ Particle<T>::Particle(const T& pos, float mass)
 		inv_mass = 1.0f / mass;
 	}
 }
+
+/*
+template<class T>
+virtual Particle<T>::~Particle() {
+}
+*/
 
 template<class T>
 inline void Particle<T>::addSpring(Spring<T>* s) {

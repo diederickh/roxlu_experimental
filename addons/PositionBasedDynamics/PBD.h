@@ -10,19 +10,28 @@ using namespace roxlu;
 
 typedef Particle<Vec2> Particle2;
 typedef Particle<Vec3> Particle3;
-typedef Flocking<Vec2> Flocking2;
+typedef Flocking<Vec2, Particle<Vec2> > Flocking2;
 
-typedef Particles<Vec2> Particles2;
-typedef Particles<Vec3> Particles3;
-typedef Flocking<Vec3> Flocking3;
+typedef Particles<Vec2, Particle<Vec2>, Spring<Vec2> > Particles2;
+typedef Particles<Vec3, Particle<Vec3>, Spring<Vec3> > Particles3;
+typedef Flocking<Vec3, Particle<Vec3> > Flocking3;
 
-template<class T>
-inline void draw(Particles<T>& ps) {
+
+inline void drawVertex(Vec3 p) {
+	glVertex3fv(p.getPtr());
+}
+
+inline void drawVertex(Vec2 p) {
+	glVertex2fv(p.getPtr());
+}
+
+template<class T, class P, class S>
+inline void draw(Particles<T, P, S>& ps) {
 	glColor3f(1.0f,1.0f,1.0f);	
 	glBegin(GL_LINES);
-	typename vector<Spring<T>* >::iterator sit = ps.springs.begin();
+	typename vector<S* >::iterator sit = ps.springs.begin();
 	while(sit != ps.springs.end()) {
-		Spring<T>& s = *(*sit);
+		S& s = *(*sit);
 		drawVertex(s.a.position);
 		drawVertex(s.b.position);
 		++sit;
@@ -30,9 +39,9 @@ inline void draw(Particles<T>& ps) {
 	glEnd();
 
 	
-	typename vector<Particle<T>* >::iterator it = ps.particles.begin();
+	typename vector<P* >::iterator it = ps.particles.begin();
 	while(it != ps.particles.end()) {
-		Particle<T>& p = *(*it);
+		P& p = *(*it);
 		if(!p.enabled) {
 			glColor3f(1.0f,0.0f,0.0f);
 		}
@@ -48,13 +57,7 @@ inline void draw(Particles<T>& ps) {
 	glColor3f(1.0f, 1.0f, 1.0f);
 }
 
-inline void drawVertex(Vec3 p) {
-	glVertex3fv(p.getPtr());
-}
 
-inline void drawVertex(Vec2 p) {
-	glVertex2fv(p.getPtr());
-}
 
 
 

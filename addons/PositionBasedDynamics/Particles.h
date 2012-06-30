@@ -14,124 +14,125 @@ enum ParticleCallbacks {
 
 // C A L L B A C K    F U N C T O R 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-template<class T>
+template<class T, class P>
 struct NOP {
-	void operator()(Particle<T>& a, Particle<T>& b, T& dir, const float& f, const float& lengthSQ, int type) const {}
+	void operator()(P& a, P& b, T& dir, const float& f, const float& lengthSQ, int type) const {}
 };
 
 
 // P A R T I C L E S
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-template<class T>
+template<class T, class P, class S>
 class Particles {
 public:
 	Particles();
 	~Particles();
 	
-	Particle<T>* createParticle(const T& pos, float mass = 1.0f);
-	Particle<T>* addParticle(const T& pos, float mass = 1.0f);
-	Particle<T>* addParticle(Particle<T>* p);
+	P* createParticle(const T& pos, float mass = 1.0f);
+	P* addParticle(const T& pos, float mass = 1.0f);
+	P* addParticle(P* p);
 	
-	Spring<T>* createSpring(Particle<T>* a, Particle<T>* b);
-	Spring<T>* addSpring(Spring<T>* s);
+	S* createSpring(P* a, P* b);
+	S* addSpring(S* s);
 		
 	void addForce(const T& f); 
 	
 	// attract to another particle
 	template<class F>
-	void attract(Particle<T>* p, const float& energy, F& cb = NOP<T>());
-	void attract(Particle<T>* p, const float& energy);
+	void attract(P* p, const float& energy, F& cb);
+	void attract(P* p, const float& energy);
 	
 	// repel from each other, with callback when repelled
 	template<class F>
-	void repel(const float& f, F& cb = NOP<T>());
+	void repel(const float& f, F& cb);
 	void repel(const float& f);
 	
 	// repel from particle, with callback when repelled
 	template<class F>
-	void repel(Particle<T>* p, const float& radius, const float& energy, F& cb = NOP<T>());
-	void repel(Particle<T>* p, const float& radius, const float& energy);
+	void repel(P* p, const float& radius, const float& energy, F& cb);
+	void repel(P* p, const float& radius, const float& energy);
 	
 	void update(const float& dt);
 	void removeDeadParticles();
 	
-	Particle<T>* operator[](const unsigned int& dx);
+	P* operator[](const unsigned int& dx);
 	size_t size();
 		
-	vector<Spring<T>* > springs;
-	vector<Particle<T>* > particles;
+	vector<S*> springs;
+	vector<P*> particles;
 	float drag;
 };
 
 
-template<class T>
-Particles<T>::Particles() 
+template<class T, class P, class S>
+Particles<T,P,S>::Particles() 
 	:drag(0.99f)
 {
 }
 
-template<class T>
-Particles<T>::~Particles() {
+template<class T, class P, class S>
+Particles<T, P, S>::~Particles() {
+	for(typename vector<P* >::iterator it = particles.begin(); it != particles.end(); ++it) {
+		delete (*it);
+	}
 }
 
-template<class T>
-inline size_t Particles<T>::size() {
+template<class T, class P, class S>
+inline size_t Particles<T, P, S>::size() {
 	return particles.size();
 }
 
-template<class T>
-Particle<T>* Particles<T>::operator[](const unsigned int& dx) {
+template<class T, class P, class S>
+P* Particles<T,P,S>::operator[](const unsigned int& dx) {
 	return particles[dx];
 }
 
-template<class T>
-inline Particle<T>* Particles<T>::addParticle(const T& pos, float mass) {
-	Particle<T>* p = createParticle(pos, mass);
+template<class T, class P, class S>
+inline P* Particles<T, P, S>::addParticle(const T& pos, float mass) {
+	P* p = createParticle(pos, mass);
 	return addParticle(p);
 }
 
-template<class T>
-inline Particle<T>* Particles<T>::createParticle(const T& pos, float mass) {
-	Particle<T>* p = new Particle<T>(pos, mass);
+template<class T, class P, class S>
+inline P* Particles<T, P, S>::createParticle(const T& pos, float mass) {
+	P* p = new P(pos, mass);
 	return p;
 }
 
-template<class T>
-inline Particle<T>* Particles<T>::addParticle(Particle<T>* p) {
+template<class T, class P, class S>
+inline P* Particles<T, P, S>::addParticle(P* p) {
 	particles.push_back(p);
 	return p;
 }
 
-template<class T>
-void Particles<T>::update(const float& dt) {
+template<class T, class P, class S>
+void Particles<T, P, S>::update(const float& dt) {
 	float fps = 1.0f/dt;
 	
 	// PREDICT NEW LOCATIONS
-	typename vector<Particle<T>* >::iterator it = particles.begin();
+	typename vector<P*>::iterator it = particles.begin();
 	while(it != particles.end()) {
-		Particle<T>& p = *(*it);
+		P& p = *(*it);
 		
 		if(!p.enabled) {
 			p.tmp_position = p.position;
 			++it;
 			continue;
 		}
-
 		p.velocity = p.velocity + (dt * p.forces);
 		p.velocity *= drag; 
-
 		p.tmp_position = p.position +(p.velocity * dt);
 		p.forces = 0;
 		++it;
 	}
 	
 	// CONSTRAINTS
-	typename vector<Spring<T>* >::iterator sit = springs.begin();
+	typename vector<S*>::iterator sit = springs.begin();
 	const int k = 3;
 	for(int i = 0; i < k; ++i) {
 		sit = springs.begin();
 		while(sit != springs.end()) {
-			Spring<T>& s = *(*sit);
+			S& s = *(*sit);
 			if(s.isEnabled()) {
 				s.update(dt);
 			}
@@ -142,7 +143,7 @@ void Particles<T>::update(const float& dt) {
 	// UPDATE VELOCITY AND POSITIONS
 	it = particles.begin();
 	while(it != particles.end()) {
-		Particle<T>& p = *(*it);
+		P& p = *(*it);
 		
 		if(!p.enabled) {
 			++it;
@@ -163,18 +164,18 @@ void Particles<T>::update(const float& dt) {
 	}
 }
 
-template<class T>
-void Particles<T>::addForce(const T& f) {
-	typename vector<Particle<T>* >::iterator it = particles.begin();
+template<class T, class P, class S>
+void Particles<T, P, S>::addForce(const T& f) {
+	typename vector<P*>::iterator it = particles.begin();
 	while(it != particles.end()) {
 		(*it)->addForce(f);
 		++it;
 	}
 }
 
-template<class T>
+template<class T, class P, class S>
 template<class F>
-void Particles<T>::repel(const float& f, F& cb) {
+void Particles<T, P, S>::repel(const float& f, F& cb) {
 	float dist_sq;
 	T dir;
 	for(int i = 0; i < size(); ++i) {
@@ -194,18 +195,18 @@ void Particles<T>::repel(const float& f, F& cb) {
 	}
 }
 
-template<class T>
+template<class T, class P, class S>
 template<class F>
-void Particles<T>::repel(Particle<T>* p, const float& radius, const float& energy, F& cb) {
+void Particles<T, P, S>::repel(P* p, const float& radius, const float& energy, F& cb) {
 	T& pos = p->position;
 	float radius_sq = radius * radius;
 	T dir;
 	float ls, f;
-	Particle<T>& sourcep = *p;
+	P& sourcep = *p;
 	
-	typename vector<Particle<T>* >::iterator it = particles.begin();
+	typename vector<P*>::iterator it = particles.begin();
 	while(it != particles.end()) {
-		Particle<T>& other = *(*it);
+		P& other = *(*it);
 		T& other_pos = other.position;
 		dir = pos - other_pos;
 		ls = dir.lengthSquared();
@@ -226,17 +227,17 @@ void Particles<T>::repel(Particle<T>* p, const float& radius, const float& energ
 
 
 // attract to a particle
-template<class T>
+template<class T, class P, class S>
 template<class F>
-void Particles<T>::attract(Particle<T>* p, const float& energy, F& cb) {
-	typename vector<Particle<T>* >::iterator it = particles.begin();
+void Particles<T, P, S>::attract(P* p, const float& energy, F& cb) {
+	typename vector<P*>::iterator it = particles.begin();
 	float ls;
 	T dir;
 	float f;
-	Particle<T>& sourcep = *p;
+	P& sourcep = *p;
 	T& pos = p->position;
 	while(it != particles.end()) {
-		Particle<T>& other = *(*it);
+		P& other = *(*it);
 		dir = pos - other.position;
 		ls = dir.lengthSquared();
 		if(ls > 0.01) {
@@ -252,11 +253,11 @@ void Particles<T>::attract(Particle<T>* p, const float& energy, F& cb) {
 	}
 }
 
-template<class T>
-void Particles<T>::removeDeadParticles() {
-	typename vector<Particle<T>* >::iterator it = particles.begin();
+template<class T, class P, class S>
+void Particles<T, P, S>::removeDeadParticles() {
+	typename vector<P*>::iterator it = particles.begin();
 	while(it != particles.end()) {
-		Particle<T>& p = *(*it);
+		P& p = *(*it);
 		if(p.age > p.lifespan) {
 			it = particles.erase(it);
 		}
@@ -266,38 +267,41 @@ void Particles<T>::removeDeadParticles() {
 	}
 }
 
-template<class T>
-Spring<T>* Particles<T>::addSpring(Spring<T>* s) {
+template<class T, class P, class S>
+S* Particles<T, P, S>::addSpring(S* s) {
 	springs.push_back(s);
 	return s;
 }
 
 
-template<class T>
-Spring<T>* Particles<T>::createSpring(Particle<T>* a, Particle<T>* b) {
-	Spring<T>* s = new Spring<T>(*a, *b);
+template<class T, class P, class S>
+S* Particles<T, P, S>::createSpring(P* a, P* b) {
+	S* s = new S(*a, *b);
 	return s;
 }
 
 // -----------------------------------------------------------------------------
 // C++ quirks... 
-template<class T>
-void Particles<T>::repel(const float& f) { 
-	NOP<T> n;
-	this->repel<NOP<T> >(f, n); 
+
+template<class T, class P, class S>
+void Particles<T, P, S>::repel(const float& f) { 
+	NOP<T, P> n;
+	this->repel<NOP<T, P> >(f, n); 
 }
 
-template<class T>
-void Particles<T>::repel(Particle<T>* p, const float& radius, const float& energy) {
-	NOP<T> n;
-	this->repel<NOP<T> >(p, radius, energy, n);
+
+template<class T, class P, class S>
+void Particles<T, P, S>::repel(P* p, const float& radius, const float& energy) {
+	NOP<T, P> n;
+	this->repel<NOP<T, P> >(p, radius, energy, n);
 }
 
-template<class T>
-void Particles<T>::attract(Particle<T>* p, const float& energy) {
-	NOP<T> n;
-	this->attract<NOP<T> >(p, energy, n);
+template<class T, class P, class S>
+void Particles<T, P, S>::attract(P* p, const float& energy) {
+	NOP<T, P> n;
+	this->attract<NOP<T, P> >(p, energy, n);
 }
+
 
 
 
