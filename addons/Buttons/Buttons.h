@@ -32,6 +32,7 @@ void testApp::update() {
 #include "Text.h"
 #include "VAO.h"
 #include "Error.h"
+#include "Color.h"
 
 #include "Types.h"
 #include "Element.h"

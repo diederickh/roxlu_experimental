@@ -3,6 +3,8 @@
 
 #include "Text.h"
 #include "Types.h"
+#include "Color.h"
+
 #include <string>
 
 using namespace roxlu;
@@ -23,8 +25,7 @@ public:
 	virtual void generateDynamicText(Text& dynText) {};
 	virtual void updateDynamicText(Text& dynText) {};
 	virtual void generateVertices(ButtonVertices& shapeVertices) = 0;
-	
-	
+		
 	virtual void onMouseMoved(int mx, int my) { } // global  move
 	virtual void onMouseDragged(int mx, int my, int dx, int dy) { } // global drag (check: drag_inside)
 	virtual void onMouseDown(int mx, int my) { } // global down
@@ -35,6 +36,9 @@ public:
 	
 	virtual void onSaved(){}  // gets called once all data has been saved
 	virtual void onLoaded(){}  // gets called once all data has been loaded 
+	
+	
+	virtual Element& setColor(const float r, const float g, const float b, const float a = 1.0f);
 	
 	void setValueType(int valueType);
 	int getValueType();
@@ -56,8 +60,13 @@ public:
 	bool needs_redraw;	
 	bool needs_text_update;
 	bool drag_inside; // did the drag started from inside the element.
-	
 	int num_vertices;
+	
+	float* bg_top_color;
+	float* bg_bottom_color;
+	float col_bg_default[4];
+	float col_bg_top_hover[4];
+	float col_bg_bottom_hover[4];
 };
 
 inline void Element::needsRedraw() {
@@ -75,6 +84,31 @@ inline void Element::setValueType(int valueType) {
 inline int Element::getValueType() {
 	return value_type;
 }
+
+inline Element& Element::setColor(const float r, const float g, const float b, const float a) {
+	// set default color
+	float hue,sat,bright;
+	Color::RGBToHLSf(r,g,b,&hue,&bright, &sat);
+	col_bg_default[0] = r;
+	BSET_COLOR(col_bg_default, r, g, b, a);
+	
+	bg_bottom_color = col_bg_default;
+	bg_top_color = col_bg_default;
+	
+	// top hover is a bit lighter
+	float bright_copy = bright;
+	bright = bright * 1.2;
+	Color::HLSToRGBf(hue, bright, sat, &col_bg_top_hover[0], &col_bg_top_hover[1], &col_bg_top_hover[2]);
+	col_bg_top_hover[3] = 1.0f;
+		
+	// bottom hover is a bit darker
+	bright = bright_copy * 0.5;
+	Color::HLSToRGBf(hue, bright, sat, &col_bg_bottom_hover[0], &col_bg_bottom_hover[1], &col_bg_bottom_hover[2]);
+	col_bg_bottom_hover[3] = 1.0f;
+	
+	return *this;
+}
+
 
 } // namespace buttons
 

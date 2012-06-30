@@ -17,6 +17,9 @@ Element::Element(int type, const string& name, int valueType)
 	,name(name)
 	,value_type(valueType)
 {
+	BSET_COLOR(col_bg_default, 0.0, 0.17, 0.21, 1.0);
+	bg_top_color = col_bg_default;
+	bg_bottom_color = col_bg_default;
 }
 
 Element::~Element() {
