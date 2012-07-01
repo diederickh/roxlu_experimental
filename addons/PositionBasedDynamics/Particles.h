@@ -159,7 +159,9 @@ void Particles<T, P, S>::update(const float& dt) {
 		}
 		
 		p.tmp_position = 0;
-				
+
+		p.update(dt);
+
 		++it;
 	}
 }
