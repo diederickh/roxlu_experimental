@@ -1,9 +1,12 @@
 #ifndef ROXLU_BSLIDERH
 #define ROXLU_BSLIDERH
 
-#include "ofMain.h"
-#include "Types.h"
-#include "Element.h"
+#include "ofMain.h" // @todo remove
+#include <buttons/Types.h>
+#include <buttons/Element.h>
+
+// #include "Types.h"
+// #include "Element.h"
 #include <sstream>
 
 namespace buttons {

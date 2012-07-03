@@ -3,6 +3,7 @@
 #include <roxlu/experimental/BitmapFont.h>
 
 BitmapFont::BitmapFont() {
+	printf("BitmapFont.cpp\n");
 	for(int i = 0; i < 256; ++i) {
 		u0[i] = 0;
 		u1[i] = 0;

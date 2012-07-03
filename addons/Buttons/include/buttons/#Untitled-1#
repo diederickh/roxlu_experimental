@@ -1,0 +1,6 @@
+>	emptyExample_debug.exe!std::_Vector_val<buttons::ButtonVertex
+,std::allocator<buttons::ButtonVertex> >::_Vector_val<buttons::ButtonVertex
+,std::allocator<buttons::ButtonVertex> >(std::allocator<buttons::ButtonVertex> _Al) 
+
+Line 449 + 0x36 bytes	C++
+

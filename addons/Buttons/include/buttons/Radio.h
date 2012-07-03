@@ -3,9 +3,16 @@
 
 #include <string>
 #include <vector>
+
+#include <buttons/Types.h>
+#include <buttons/Element.h>
+#include <buttons/Toggle.h>
+
+/*
 #include "Types.h"
 #include "Element.h"
 #include "Toggle.h"
+*/
 
 using std::string;
 using std::vector;

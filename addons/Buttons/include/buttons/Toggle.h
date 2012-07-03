@@ -1,8 +1,13 @@
 #ifndef ROXLU_BTOGGLEH
 #define ROXLU_BTOGGLEH
 
+/*
 #include "Types.h"
 #include "Element.h"
+*/
+
+#include <buttons/Types.h>
+#include <buttons/Element.h>
 
 namespace buttons {
 

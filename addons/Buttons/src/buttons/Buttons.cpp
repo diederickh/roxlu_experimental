@@ -1,4 +1,5 @@
-#include "Buttons.h"
+//#include "Buttons.h"
+#include <buttons/Buttons.h>
 
 namespace buttons {
 
@@ -29,6 +30,7 @@ Buttons::Buttons(const string& title, int w)
 	,num_panel_vertices(0) 
 	,is_locked(false)
 {
+	
 	if(!shaders_initialized) {
 		bmf = new BitmapFont();
 		gui_shader.create(BUTTONS_VS, BUTTONS_FS);
@@ -236,6 +238,7 @@ void Buttons::draw() {
 	
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);	
+	VAO::unbind();
 	glUseProgram(0);
 
 
@@ -245,6 +248,7 @@ void Buttons::draw() {
 	if(depth_enabled) {
 		glEnable(GL_DEPTH_TEST);
 	}
+	
 	
 }
 

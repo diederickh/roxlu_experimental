@@ -1,7 +1,7 @@
 #ifndef ROXLU_RTYPESH
 #define ROXLU_RTYPESH
 
-#include "Vec2.h"
+#include <roxlu/math/Vec2.h>
 #include <vector>
 
 										//((x>=i)   && (x <=(i +w)) && (y >= j) && y <= (j+h))

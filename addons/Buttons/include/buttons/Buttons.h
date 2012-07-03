@@ -1,5 +1,5 @@
-#ifndef RUIH
-#define RUIH
+#ifndef ROXLU_BUTTONSH
+#define ROXLU_BUTTONSH
 
 /* 
 OpenFrameworks example:
@@ -24,8 +24,9 @@ void testApp::update() {
 #include <vector>
 
 
-#include "ofMain.h"
+#include "ofMain.h" // @todo remove
 
+/*
 #include "Shader.h"
 #include "VertexData.h"
 #include "BitmapFont.h"
@@ -33,7 +34,24 @@ void testApp::update() {
 #include "VAO.h"
 #include "Error.h"
 #include "Color.h"
+*/
 
+#include <roxlu/opengl/Shader.h>
+#include <roxlu/experimental/BitmapFont.h>
+#include <roxlu/experimental/Text.h>
+#include <roxlu/opengl/VAO.h>
+#include <roxlu/opengl/Error.h>
+#include <roxlu/graphics/Color.h>
+
+#include <buttons/Types.h>
+#include <buttons/Element.h>
+#include <buttons/Slider.h>
+#include <buttons/Toggle.h>
+#include <buttons/Button.h>
+#include <buttons/Radio.h>
+#include <buttons/Storage.h>
+
+/*
 #include "Types.h"
 #include "Element.h"
 #include "Slider.h"
@@ -41,6 +59,7 @@ void testApp::update() {
 #include "Button.h"
 #include "Radio.h"
 #include "Storage.h"
+*/
 
 using std::vector;
 using namespace roxlu;

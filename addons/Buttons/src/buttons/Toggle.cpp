@@ -1,4 +1,6 @@
-#include "Toggle.h"
+//#include "Toggle.h"
+#include <buttons/Toggle.h>
+
 namespace buttons {
 
 Toggle::Toggle(bool& val, const string& name) 

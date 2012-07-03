@@ -25,8 +25,8 @@ namespace roxlu {
 class VAO {
 public:	
 	VAO();
-	VAO& bind();
-	VAO& unbind();
+	void bind();
+	static void unbind();
 private:
 	GLuint vao_id;
 };

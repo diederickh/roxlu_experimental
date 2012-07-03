@@ -12,6 +12,7 @@ Shader::Shader()
 ,prog_id(0)
 ,enabled(false)
 {
+	printf("Shader.cpp\n");
 }
 
 Shader::Shader(const std::string& sName) 

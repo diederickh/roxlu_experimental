@@ -1,5 +1,8 @@
-#include "Storage.h"
-#include "Buttons.h"
+//#include "Storage.h"
+//#include "Buttons.h"
+#include <buttons/Storage.h>
+#include <buttons/Buttons.h>
+
 namespace buttons {
 
 bool Storage::save(const string& file, Buttons* buttons) {

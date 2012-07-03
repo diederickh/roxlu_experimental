@@ -1,10 +1,15 @@
 #ifndef ROXLU_RELEMENTH
 #define ROXLU_RELEMENTH
 
+/*
 #include "Text.h"
-#include "Types.h"
-#include "Color.h"
+//#include "Color.h"
+*/
 
+#include <roxlu/experimental/Text.h>
+#include <roxlu/graphics/Color.h>
+
+#include "Types.h"
 #include <string>
 
 using namespace roxlu;
