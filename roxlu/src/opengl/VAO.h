@@ -9,9 +9,12 @@
 // some nice info: http://www.opengl.org/wiki/Vertex_Array_Object
 // vertex array object. (only mac for now)
 
+//#include "Roxlu.h"
+
 #include "Constants.h"
 #include "OpenGL.h"
 #include "Error.h"
+
 namespace roxlu {
 
 class VAO {

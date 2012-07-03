@@ -25,10 +25,15 @@ public:
 	bool extractFace(string info, int& vertexIndex, int& normalIndex, int& texcoordIndex);
 	void print();
 	bool contains(const string& objectName);
+	VertexData get(const string& name);
 	
 	std::map<string, Object> objects;
 	VertexData operator[](const string& name);
 };
+
+inline VertexData OBJ::get(const string& name) {
+	return (*this)[name];
+}
 
 inline VertexData OBJ::operator[](const string& name) {
 	map<string,Object>::iterator it = objects.find(name);
