@@ -1,7 +1,7 @@
 #ifndef ROXLU_PBD_PARTICLEH
 #define ROXLU_PBD_PARTICLEH
 
-#include "Roxlu.h"
+//#include "Roxlu.h"
 //#include "Spring.h"
 
 

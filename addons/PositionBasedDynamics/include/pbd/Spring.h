@@ -1,8 +1,11 @@
 #ifndef ROXLU_PBD_SPRINGH
 #define ROXLU_PBD_SPRINGH
 
-#include "Roxlu.h"
-#include "Particle.h"
+#include <roxlu/Roxlu.h>
+#include <pbd/Particle.h>
+
+//#include "Roxlu.h"
+//#include "Particle.h"
 
 template<class T>
 class Spring {

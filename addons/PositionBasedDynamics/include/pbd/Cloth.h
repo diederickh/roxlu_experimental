@@ -1,8 +1,13 @@
 #ifndef ROXLU_PBD_CLOTH
 #define ROXLU_PBD_CLOTH
 
-#include "Roxlu.h"
-#include "PBD.h"
+
+//#include "Roxlu.h"
+//#include "PBD.h"
+#include <roxlu/math/Vec3.h>
+#include <roxlu/math/Vec2.h>
+#include <roxlu/3d/Triangle.h>
+#include <pbd/PBD.h>
 
 #define CLOTH_DX(i,j) (((j)*(cols+1))+(i))
 

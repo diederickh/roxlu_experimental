@@ -24,7 +24,7 @@ void testApp::update() {
 #include <vector>
 
 
-#include "ofMain.h" // @todo remove
+//#include "ofMain.h" // @todo remove
 
 /*
 #include "Shader.h"

@@ -2,8 +2,11 @@
 #ifndef ROXLU_PBD_PARTICLESH
 #define ROXLU_PBD_PARTICLESH
 
-#include "Particle.h"
-#include "Spring.h"
+#include <pbd/Particle.h>
+#include <pbd/Spring.h>
+
+//#include "Particle.h"
+//#include "Spring.h"
 
 enum ParticleCallbacks {
 	 CB_REPEL

@@ -1,11 +1,19 @@
 #ifndef ROXLU_PBDH
 #define ROXLU_PBDH
 
+/*
 #include "Roxlu.h"
 #include "Particles.h"
 #include "Particle.h"
 #include "Flocking.h"
 #include "Cloth.h"
+*/
+
+#include <roxlu/Roxlu.h>
+#include <pbd/Particles.h>
+#include <pbd/Particle.h>
+#include <pbd/Flocking.h>
+#include <pbd/Cloth.h>
 
 using namespace roxlu;
 

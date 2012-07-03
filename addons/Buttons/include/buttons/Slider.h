@@ -1,7 +1,7 @@
 #ifndef ROXLU_BSLIDERH
 #define ROXLU_BSLIDERH
 
-#include "ofMain.h" // @todo remove
+//#include "ofMain.h" // @todo remove
 #include <buttons/Types.h>
 #include <buttons/Element.h>
 

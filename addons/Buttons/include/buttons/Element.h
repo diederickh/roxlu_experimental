@@ -9,7 +9,7 @@
 #include <roxlu/experimental/Text.h>
 #include <roxlu/graphics/Color.h>
 
-#include "Types.h"
+#include <buttons/Types.h>
 #include <string>
 
 using namespace roxlu;
