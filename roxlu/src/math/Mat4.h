@@ -7,6 +7,8 @@
 #include "Vec3.h"
 #include "Vec4.h"
 
+// see here: https://github.com/evanw/gl4/blob/master/gl4.cpp
+
 using std::ostream;
 
 namespace roxlu {

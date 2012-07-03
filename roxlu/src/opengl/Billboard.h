@@ -40,16 +40,24 @@ struct BillboardVertex {
 	}
 };
 
+enum BillboardDrawModes {
+	 BILLBOARD_NONE // this billboard class is also used to draw simple quadds
+	,BILLBOARD_PERSPECTIVE
+};
 
 class Billboard {
 public:	
 	Billboard();
 	//Billboard(const Billboard& other);
 	void setTexture(const GLuint& id);
-	void start(const Mat4& pm, const Mat4& vm, const Vec3& right, const Vec3& up);
-	void draw(const Vec3& position, const float& scale, const float& rotationDegrees, float alpha = 1.0);
-	void stop(); // or disable() ?
+	void bind(const Mat4& pm, const Mat4& vm, const Vec3& right, const Vec3& up);
+	void bind(const Mat4& pm, const Mat4& vm);
+	void draw(const Vec3& position, const float scale, const float rotationDegrees, float alpha = 1.0);
+	void unbind(); 
 private:
+	void initBillboard();
+	
+	int mode;
 	bool texture_set;
 	GLuint tex;
 	const Vec3* right;

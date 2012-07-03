@@ -25,6 +25,8 @@ struct NOP {
 template<class T, class P, class S>
 class Particles {
 public:
+	typedef typename std::vector<P*>::iterator iterator;
+
 	Particles();
 	~Particles();
 	
@@ -39,21 +41,26 @@ public:
 	
 	// attract to another particle
 	template<class F>
-	void attract(P* p, const float& energy, F& cb);
-	void attract(P* p, const float& energy);
+	void attract(P* p, const float minDist, const float energy, F& cb);
+	void attract(P* p, const float minDist, const float energy);
 	
 	// repel from each other, with callback when repelled
 	template<class F>
-	void repel(const float& f, F& cb);
-	void repel(const float& f);
+	void repel(const float f, F& cb);
+	void repel(const float f);
 	
 	// repel from particle, with callback when repelled
 	template<class F>
-	void repel(P* p, const float& radius, const float& energy, F& cb);
-	void repel(P* p, const float& radius, const float& energy);
+	void repel(P* p, const float radius, const float energy, F& cb);
+	void repel(P* p, const float radius, const float energy);
 	
-	void update(const float& dt);
+	void limitSpeed(const float speed);
+	
+	void update(const float dt);
 	void removeDeadParticles();
+	
+	typename vector<P*>::iterator begin();
+	typename vector<P*>::iterator end();
 	
 	P* operator[](const unsigned int& dx);
 	size_t size();
@@ -75,6 +82,16 @@ Particles<T, P, S>::~Particles() {
 	for(typename vector<P* >::iterator it = particles.begin(); it != particles.end(); ++it) {
 		delete (*it);
 	}
+}
+
+template<class T, class P, class S>
+inline typename vector<P*>::iterator Particles<T,P,S>::begin() {
+	return particles.begin();
+}
+
+template<class T, class P, class S>
+inline typename vector<P*>::iterator Particles<T,P,S>::end() {
+	return particles.end();
 }
 
 template<class T, class P, class S>
@@ -101,12 +118,13 @@ inline P* Particles<T, P, S>::createParticle(const T& pos, float mass) {
 
 template<class T, class P, class S>
 inline P* Particles<T, P, S>::addParticle(P* p) {
+	p->dx = particles.size();
 	particles.push_back(p);
 	return p;
 }
 
 template<class T, class P, class S>
-void Particles<T, P, S>::update(const float& dt) {
+void Particles<T, P, S>::update(const float dt) {
 	float fps = 1.0f/dt;
 	
 	// PREDICT NEW LOCATIONS
@@ -177,7 +195,7 @@ void Particles<T, P, S>::addForce(const T& f) {
 
 template<class T, class P, class S>
 template<class F>
-void Particles<T, P, S>::repel(const float& f, F& cb) {
+void Particles<T, P, S>::repel(const float f, F& cb) {
 	float dist_sq;
 	T dir;
 	for(int i = 0; i < size(); ++i) {
@@ -199,7 +217,7 @@ void Particles<T, P, S>::repel(const float& f, F& cb) {
 
 template<class T, class P, class S>
 template<class F>
-void Particles<T, P, S>::repel(P* p, const float& radius, const float& energy, F& cb) {
+void Particles<T, P, S>::repel(P* p, const float radius, const float energy, F& cb) {
 	T& pos = p->position;
 	float radius_sq = radius * radius;
 	T dir;
@@ -231,25 +249,41 @@ void Particles<T, P, S>::repel(P* p, const float& radius, const float& energy, F
 // attract to a particle
 template<class T, class P, class S>
 template<class F>
-void Particles<T, P, S>::attract(P* p, const float& energy, F& cb) {
+void Particles<T, P, S>::attract(P* p, const float minDist, const float energy, F& cb) {
 	typename vector<P*>::iterator it = particles.begin();
-	float ls;
-	T dir;
-	float f;
 	P& sourcep = *p;
+	T dir;
 	T& pos = p->position;
+	float ls;
+	float f;
+	float mindist_sq = minDist * minDist;
+	
 	while(it != particles.end()) {
 		P& other = *(*it);
 		dir = pos - other.position;
 		ls = dir.lengthSquared();
-		if(ls > 0.01) {
-			f = 1.0f/ls;
-			dir.normalize();
-			dir *= energy;
-			dir *= f;
-			other.addForce(dir);
+		if(ls < mindist_sq) {
+			ls = mindist_sq;
+		}
 
-			cb(sourcep, other, dir, f, ls, CB_ATTRACT_PARTICLE);
+		dir.normalize();
+		f = energy * sourcep.mass * other.mass / ls;
+		dir *= f;
+		other.addForce(dir);
+		
+		cb(sourcep, other, dir, f, ls, CB_ATTRACT_PARTICLE);
+		++it;
+	}
+}
+
+template<class T, class P, class S>
+void Particles<T, P, S>::limitSpeed(const float speed) {
+	float sq = speed * speed;
+	typename vector<P*>::iterator it = particles.begin();
+	while(it != particles.end()) {
+		P& p = **it;
+		if(p.velocity.lengthSquared() > sq) {
+			p.velocity = p.velocity.getNormalized() * speed;
 		}
 		++it;
 	}
@@ -286,22 +320,22 @@ S* Particles<T, P, S>::createSpring(P* a, P* b) {
 // C++ quirks... 
 
 template<class T, class P, class S>
-void Particles<T, P, S>::repel(const float& f) { 
+void Particles<T, P, S>::repel(const float f) { 
 	NOP<T, P> n;
 	this->repel<NOP<T, P> >(f, n); 
 }
 
 
 template<class T, class P, class S>
-void Particles<T, P, S>::repel(P* p, const float& radius, const float& energy) {
+void Particles<T, P, S>::repel(P* p, const float radius, const float energy) {
 	NOP<T, P> n;
 	this->repel<NOP<T, P> >(p, radius, energy, n);
 }
 
 template<class T, class P, class S>
-void Particles<T, P, S>::attract(P* p, const float& energy) {
+void Particles<T, P, S>::attract(P* p, const float minDist, const float energy) {
 	NOP<T, P> n;
-	this->attract<NOP<T, P> >(p, energy, n);
+	this->attract<NOP<T, P> >(p, minDist, energy, n);
 }
 
 

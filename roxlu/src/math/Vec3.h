@@ -77,6 +77,7 @@ struct Vec3 {
 	// Assignment operators
 	Vec3& operator=(const float& scalar);
 	Vec3& operator=(const Vec4& v4);
+	Vec3& operator=(const Vec2& other);
 	Vec3& operator-=(const Vec3& other);
 	Vec3& operator+=(const Vec3& other);
 	Vec3& operator+=(const float scalar);
@@ -324,6 +325,14 @@ inline Vec3 Vec3::operator-(const Vec3& v) const {
 
 inline Vec3 Vec3::operator+(const Vec3& v) const {
 	return Vec3(x+v.x, y+v.y, z+v.z);
+}
+
+
+inline Vec3& Vec3::operator=(const float& scalar) {
+	x = scalar;
+	y = scalar;
+	z = scalar;
+	return *this;
 }
 
 inline Vec3& Vec3::operator-=(const Vec3& v) {

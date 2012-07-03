@@ -5,6 +5,7 @@
 #include "Particles.h"
 #include "Particle.h"
 #include "Flocking.h"
+#include "Cloth.h"
 
 using namespace roxlu;
 
@@ -21,12 +22,14 @@ inline void drawVertex(Vec3 p) {
 	glVertex3fv(p.getPtr());
 }
 
-inline void drawVertex(Vec2 p) {
+inline void drawVertex(Vec2 p) {	
 	glVertex2fv(p.getPtr());
 }
 
 template<class T, class P, class S>
 inline void draw(Particles<T, P, S>& ps) {
+	glBindTexture(GL_TEXTURE_2D, 0);
+	
 	glColor3f(1.0f,1.0f,1.0f);	
 	glBegin(GL_LINES);
 	typename vector<S* >::iterator sit = ps.springs.begin();

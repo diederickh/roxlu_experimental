@@ -119,6 +119,13 @@ struct VertexPC : public Vertex {
 	VertexPC() {
 	}
 	
+	VertexPC(const Vec3& pos, const Vec4& col)
+		:pos(pos)
+		,col(col)
+	{
+		
+	}
+	
 	VertexPC(const float& x, const float& y, const float& z, const float& r, const float& g, const float& b, const float& a) {
 		pos.set(x,y,z);
 		col.set(r,g,b,a);
@@ -203,7 +210,18 @@ struct VertexPN : public Vertex  {
 struct VertexPNC : public Vertex  {
 	Vec3 pos;
 	Vec3 norm;
-	Color4 col;
+	Vec4 col;
+	
+	VertexPNC() {
+	}
+	
+	VertexPNC(const Vec3& p, const Vec3& n, const Vec4& c) 
+		:pos(p)
+		,norm(n)
+		,col(c)
+	{
+	
+	}
 	
 	VertexPNC& setNorm(const Vec3& n) {
 		return setNorm(n.x, n.y, n.z);
@@ -226,6 +244,10 @@ struct VertexPNC : public Vertex  {
 	VertexPNC& setCol(const float& r, const float& g, const float& b, const float& a) {
 		col.set(r,g,b,a);
 		return *this;
+	}
+	
+	const float* getPtr() {
+		return pos.getPtr();
 	}
 };
 
@@ -395,8 +417,8 @@ struct VertexPTNTB : public Vertex  { // can be used for normal mapping
 };
 
 template<class T>
-class Vertices_Template {
-public:
+struct Vertices_Template {
+
 	typedef T element_type;
 	
 	// returns index
@@ -442,10 +464,11 @@ public:
 
 
 template <class T>
-class Vertices_TemplateP : public Vertices_Template<T> {
-public:
+struct Vertices_TemplateP : public Vertices_Template<T> {
 
 	using Vertices_Template<T>::add;
+	
+	
 
 	int add(const float& x, const float& y, const float& z) {
 		VertexP p;
@@ -469,8 +492,7 @@ public:
 };
 
 template<class T>
-class Vertices_TemplatePT : public Vertices_Template<T> {
-public:
+struct Vertices_TemplatePT : public Vertices_Template<T> {
 
 	using Vertices_Template<T>::add;
 
@@ -508,8 +530,7 @@ public:
 };
 
 template<class T>
-class Vertices_TemplatePN : public Vertices_Template<T> {
-public:
+struct Vertices_TemplatePN : public Vertices_Template<T> {
 
 	using Vertices_Template<T>::add;
 	
@@ -527,23 +548,24 @@ public:
 };
 
 template<class T>
-class Vertices_TemplatePTN : public Vertices_Template<T> {
+struct Vertices_TemplatePTN : public Vertices_Template<T> {
 	using Vertices_Template<T>::add;
 };
 
 template<class T>
-class Vertices_TemplatePTNTB : public Vertices_Template<T> {
+struct Vertices_TemplatePTNTB : public Vertices_Template<T> {
 	using Vertices_Template<T>::add;
 }; 
 
 template<class T>
-class Vertices_TemplatePC : public Vertices_Template<T> {
+struct Vertices_TemplatePC : public Vertices_Template<T> {
 	using Vertices_Template<T>::add;
 };
 
 typedef Vertices_TemplateP<VertexP>	VerticesP;
 typedef Vertices_TemplatePC<VertexPC> VerticesPC;
 typedef Vertices_TemplatePN<VertexPN> VerticesPN;
+typedef Vertices_TemplatePN<VertexPNC> VerticesPNC;
 typedef Vertices_TemplatePT<VertexPT> VerticesPT;
 typedef Vertices_TemplatePTN<VertexPTN> VerticesPTN;
 typedef Vertices_TemplatePTNTB<VertexPTNTB> VerticesPTNTB;

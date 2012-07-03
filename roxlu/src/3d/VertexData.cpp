@@ -363,7 +363,7 @@ VertexPNC* VertexData::getVertexPNC() {
 	for(int i = 0; i < num; ++i) {	
 		vertex_pnc[i].pos = vertices[i]; 
 		vertex_pnc[i].norm = normals[i]; 
-		vertex_pnc[i].col = colors[i]; 
+		vertex_pnc[i].col.set(colors[i].r, colors[i].g, colors[i].b, colors[i].a); 
 	}
 	return vertex_pnc;
 }

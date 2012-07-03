@@ -53,12 +53,14 @@ Vec3& Vec3::operator=(const Vec4& v4) {
 	return *this;
 }
 
-Vec3& Vec3::operator=(const float& scalar) {
-	x = scalar;
-	y = scalar;
-	z = scalar;
+
+Vec3& Vec3::operator=(const Vec2& other) {
+	x = other.x;
+	y = other.y;
+	z = 0.0f;
 	return *this;
 }
+
 
 }; // roxlu
 

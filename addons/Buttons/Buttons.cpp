@@ -98,6 +98,7 @@ void Buttons::createOrtho(float w, float h) {
 }
 
 void Buttons::update() {
+
 	h = 0;
 	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {
@@ -133,6 +134,7 @@ void Buttons::update() {
 	if(needs_text_update) {
 		updateDynamicTexts();
 	}
+
 
 	if(first_run) {
 		first_run = false;
