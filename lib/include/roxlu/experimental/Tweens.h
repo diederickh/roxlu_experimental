@@ -7,7 +7,8 @@
 //#include "Tween.h"
 #include <roxlu/experimental/Tween.h>
 
-
+namespace roxlu {
+	
 class Tweens {
 public:
 	Tweens();
@@ -27,4 +28,5 @@ inline Tween& Tweens::operator[](const std::string& name) {
 	return *t;
 }
 
+} // roxlu
 #endif

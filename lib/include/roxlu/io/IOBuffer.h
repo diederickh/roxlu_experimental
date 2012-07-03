@@ -1,7 +1,7 @@
 #ifndef ROXLU_IOBUFFERH
 #define ROXLU_IOBUFFERH
-
-#include <inttypes.h>
+                           
+#include <roxlu/core/platform/Platform.h>
 #include <string>
 #include <algorithm>
 #include <fstream>

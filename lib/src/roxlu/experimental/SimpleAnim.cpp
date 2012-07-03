@@ -2,6 +2,8 @@
 
 #include <roxlu/experimental/SimpleAnim.h>
 
+namespace roxlu {
+	
 SimpleAnim::SimpleAnim()
 	:mode(ANIM_NONE)
 	,frame(0)
@@ -61,13 +63,13 @@ void SimpleAnim::play() {
 	next_frame = now() + millis_per_frame;
 }
 
-bool SimpleAnim::update() {
+void SimpleAnim::update() {
 	switch(mode) {
 		case ANIM_PLAY: {
 			int64_t millis_now = now();
 			int64_t millis_dif = next_frame - millis_now;
 			millis_dif *= millis_dif;
-			millis_dif = sqrt(millis_dif);
+			millis_dif = sqrtf(float(millis_dif));
 			perc = float(millis_dif)/millis_per_frame;
 			frame = int(perc) % total_frames; // restart every time
 	
@@ -76,6 +78,7 @@ bool SimpleAnim::update() {
 		}
 		default:break;
 	}
+	
 }
 
 
@@ -138,3 +141,5 @@ bool SimpleAnim::hasGroup(const string& group) {
 	map<string, vector<AnimData> >::iterator it = animations.find(group);
 	return (it != animations.end());
 }
+
+} // roxlu	

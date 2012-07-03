@@ -8,6 +8,7 @@
 #include <roxlu/math/Vec3.h>
 #include <roxlu/math/Quat.h>
 
+
 /*
 #include "OpenGL.h"
 #include "Quat.h"
@@ -85,8 +86,8 @@ public:
 	Vec3 position;
 
 	float fov;
-	float near;
-	float far;
+	float n; // near (near and far gives errors on msvc++)
+	float f;
 	float aspect;
 	float fov_tan;
 	float near_width;

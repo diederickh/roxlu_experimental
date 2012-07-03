@@ -2,7 +2,7 @@
 #define ROXLU_NOISEH
 
 //#include "Vec2.h"
-
+#include <roxlu/core/platform/Platform.h>
 #include <roxlu/math/Vec2.h>
 
 namespace roxlu {

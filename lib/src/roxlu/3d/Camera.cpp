@@ -9,8 +9,8 @@ namespace roxlu {
 Camera::Camera() 
 :fov(60.0f)
 ,aspect(4.0f/3.0f)
-,near(1.0f)
-,far(600.0f)
+,n(1.0f)
+,f(600.0f)
 ,screen_width(0)
 ,screen_height(0)
 ,projection_type(PERSPECTIVE)
@@ -23,12 +23,12 @@ Camera::Camera()
 // Projection
 // -----------------------------------------------------------------------------
 void Camera::setFar(float nFar) {
-	far = nFar;
+	f = nFar;
 	updateProjectionMatrix();
 }
 
 void Camera::setNear(float nNear) {
-	near = nNear;
+	n = nNear;
 	updateProjectionMatrix();
 }
 
@@ -46,8 +46,8 @@ void Camera::setUpVector(float nX, float nY, float nZ) {
 void Camera::perspective(float nFov, float nAspect, float nNear, float nFar) {
 	fov = nFov;
 	aspect = nAspect;
-	near = nNear;
-	far = nFar;
+	n = nNear;
+	f = nFar;
 	projection_type = PERSPECTIVE;
 	updateProjectionMatrix();
 }
@@ -55,8 +55,8 @@ void Camera::perspective(float nFov, float nAspect, float nNear, float nFar) {
 void Camera::ortho(float nWidth, float nHeight, float nNear, float nFar) {
 	ortho_width = nWidth;
 	ortho_height = nHeight;
-	near = nNear;
-	far = nFar;
+	n = nNear;
+	f = nFar;
 	projection_type = ORTHO_CENTER;
 	updateProjectionMatrix();
 }
@@ -65,8 +65,8 @@ void Camera::ortho(float nWidth, float nHeight, float nNear, float nFar) {
 void Camera::orthoTopLeft(float nWidth, float nHeight, float nNear, float nFar) {
 	ortho_width = nWidth;
 	ortho_height = nHeight;
-	near = nNear;
-	far = nFar;
+	n = nNear;
+	f = nFar;
 	projection_type = ORTHO_TOP_LEFT;
 	updateProjectionMatrix();
 }
@@ -74,8 +74,8 @@ void Camera::orthoTopLeft(float nWidth, float nHeight, float nNear, float nFar) 
 void Camera::orthoBottomLeft(float nWidth, float nHeight, float nNear, float nFar) {
 	ortho_width = nWidth;
 	ortho_height = nHeight;
-	near = nNear;
-	far = nFar;
+	n = nNear;
+	f = nFar;
 	projection_type = ORTHO_BOTTOM_LEFT;
 	updateProjectionMatrix();
 }
@@ -134,21 +134,21 @@ void Camera::updateProjectionMatrix() {
 	switch(projection_type) {
 		case PERSPECTIVE: {
 			fov_tan = tanf(fov * DEG_TO_RAD * 0.5);
-			near_width = (fov_tan * near) * 2; 
+			near_width = (fov_tan * n) * 2; 
 			near_height = near_width / aspect;
-			projection_matrix.perspective(fov, aspect, near, far);
+			projection_matrix.perspective(fov, aspect, n, f);
 			break;
 		}
 		case ORTHO_CENTER: {
-			projection_matrix.orthoCenter(ortho_width, ortho_height, near,far);
+			projection_matrix.orthoCenter(ortho_width, ortho_height, n,f);
 			break;
 		}
 		case ORTHO_TOP_LEFT: {
-			projection_matrix.orthoTopLeft(ortho_width, ortho_height, near, far);
+			projection_matrix.orthoTopLeft(ortho_width, ortho_height, n, f);
 			break;
 		}
 		case ORTHO_BOTTOM_LEFT: {
-			projection_matrix.orthoBottomLeft(ortho_width, ortho_height, near, far);
+			projection_matrix.orthoBottomLeft(ortho_width, ortho_height, n, f);
 			break;
 		}
 	}

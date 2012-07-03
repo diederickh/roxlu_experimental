@@ -147,6 +147,9 @@ bool ROX::extractFace(string info, int& vertexIndex, int& normalIndex, int& texc
 			--vertexIndex;
 		}
 	}
+	else {
+		return false;
+	}
 	
 	// get texcoord index
 	if(getline(fss, fv, '/')) {
@@ -167,6 +170,7 @@ bool ROX::extractFace(string info, int& vertexIndex, int& normalIndex, int& texc
 			--normalIndex;
 		}
 	}
+	return true;
 }
 
 void ROX::print() {

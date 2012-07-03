@@ -38,11 +38,11 @@ using namespace roxlu;
 class StereoCam {
 public:
 	StereoCam();
-	void setNear(const float& n);
-	void setFar(const float& f);
-	void setAspect(const float& a);
-	void setConvergence(const float& c);
-	void setEyeSeparation(const float& s);
+	void setNear(const float nn);
+	void setFar(const float ff);
+	void setAspect(const float a);
+	void setConvergence(const float c);
+	void setEyeSeparation(const float s);
 	
 	void setupLeft();
 	void setupRight(); 
@@ -50,8 +50,8 @@ public:
 	void placeLeft();
 	void placeRight();
 	
-	void setPosition(const float& x, const float& y, const float& z);
-	void translate(const float& x, const float& y, const float& z);
+	void setPosition(const float x, const float y, const float z);
+	void translate(const float x, const float y, const float z);
 
 	const Mat4& vm();
 	const Mat4& pml();
@@ -64,8 +64,8 @@ public:
 	float convergence;
 	float eye_separation;
 	float fov;
-	float near;
-	float far;	
+	float n; // near (near is a win macro)
+	float f; // far plane (plane is a win macro!)
 	Vec3 position; // the camera position (10 units on z is "10" not -10)
 	Mat4 view_matrix; // view matrix is inverse of i.e. position. So view.translate(0,0,10) is cam.position(0,0,-10)
 	Mat4 l_projection_matrix;
@@ -82,23 +82,23 @@ inline const Mat4& StereoCam::pmr() {
 	return r_projection_matrix;
 }
 
-inline void StereoCam::setNear(const float& n) {
-	near = n;
+inline void StereoCam::setNear(const float nn) {
+	n = nn;
 }
 
-inline void StereoCam::setFar(const float& f) {
-	far = f;
+inline void StereoCam::setFar(const float ff) {
+	f = ff;
 }
 
-inline void StereoCam::setAspect(const float& a) {
+inline void StereoCam::setAspect(const float a) {
 	aspect = a;
 }
 
-inline void StereoCam::setConvergence(const float& c) {
+inline void StereoCam::setConvergence(const float c) {
 	convergence = c;
 }
 
-inline void StereoCam::setEyeSeparation(const float& s) {
+inline void StereoCam::setEyeSeparation(const float s) {
 	eye_separation = s;
 }
 

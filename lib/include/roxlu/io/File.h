@@ -5,6 +5,9 @@
 #include <fstream>
 #include <cstdlib>
 
+#include <roxlu/core/platform/Platform.h>
+
+// @todo move to the platform file..
 #ifdef __APPLE__
 	#include <TargetConditionals.h>
 	#include <mach-o/dyld.h>
@@ -16,7 +19,7 @@ using std::ofstream;
 
 namespace roxlu {
 
-
+	
 class File {
 public:
 	File();
@@ -56,7 +59,7 @@ public:
 	
 	static string toDataPath(string file) {
 		return toDataPath(file.c_str());
-	}	
+	}	          
 	
 	static string toDataPath(const char* file) {
 		#ifdef __APPLE__
@@ -81,7 +84,7 @@ public:
 	
 	
 	static string getCWD() {
-		#ifdef __APPLE__
+		#if ROXLU_PLATFORM == ROXLU_APPLE
 			// hackedyhack
 			char path[1024];
 			uint32_t size = sizeof(path);
@@ -99,6 +102,10 @@ public:
 				}
 			}
 			return clean;
+		
+		#elif ROXLU_PLATFORM == ROXLU_WINDOWS
+			return ".";
+		//	#error "Implement getcwd for windows in File.h"
 		#else
 			char buf[1024];
 			getcwd(buf, 1024);		

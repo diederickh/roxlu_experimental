@@ -12,6 +12,7 @@
 
 #include <string>
 #include <vector>
+#include <iterator>  // for std::back_inserter on MSVC
 
 //using namespace roxlu;
 

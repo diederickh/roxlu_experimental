@@ -4,7 +4,9 @@
 // Based on: http://robertpenner.com/easing/penner_easing_as2.zip
 #include <iostream>
 #include <math.h>
-#include <sys/time.h>
+
+#include <roxlu/core/platform/Platform.h>
+#include <roxlu/experimental/Timer.h>
 
 #ifndef PI
 	#define PI 3.1415926535897932384626433832795
@@ -17,6 +19,8 @@
 #ifndef TWO_PI
 	#define TWO_PI 6.283185307179586476925286766559
 #endif
+
+namespace roxlu {
 
 enum TweenFuncs {
 	 TWEEN_LINEAR
@@ -102,13 +106,16 @@ inline Tween& Tween::setType(int t) {
 }
 
 inline uint64_t Tween::now() {
+	return Timer::now();
+	/*
 	timeval time;
 	gettimeofday(&time, NULL);
 	uint64_t n = time.tv_usec;
 	n /= 1000;
 	n += (time.tv_sec * 1000);
 	return n;
+	*/
 }
 
-
+} // roxlu
 #endif

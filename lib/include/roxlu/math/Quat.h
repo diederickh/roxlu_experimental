@@ -152,8 +152,8 @@ inline void Quat::fromMat3(const Mat3& src) {
 		biggest_index = 3;
 	}
 	
-	float biggest_val = sqrt(four_biggest_sq_min1 + 1.0) * 0.5;
-	float mult = 0.25 / biggest_val;
+	float biggest_val = sqrtf(four_biggest_sq_min1 + 1.0f) * 0.5f;
+	float mult = 0.25f / biggest_val;
 	switch(biggest_index) {
 		case 0: {
 			w = biggest_val;

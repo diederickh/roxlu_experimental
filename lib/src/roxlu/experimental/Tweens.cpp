@@ -2,6 +2,8 @@
 
 #include <roxlu/experimental/Tweens.h>
 
+namespace roxlu {
+	
 Tweens::Tweens() {
 }
 
@@ -22,3 +24,5 @@ void Tweens::update() {
 		++it;
 	}
 }
+
+} // roxlu

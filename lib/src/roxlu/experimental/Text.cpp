@@ -117,6 +117,8 @@ int Text::updateText(const int& dx, const string& str, float r, float g, float b
 		te.pos[0] = te.pos[0] + (te.maxx - te.w);
 	}
 	is_changed = true; // make sure we rebuild our internal buffer
+	return 0; // @todo just added this to make it compile on MSVC++
+	
 }
 
 void Text::setTextPosition(const int& textIndex, const float& tx, const float& ty) {

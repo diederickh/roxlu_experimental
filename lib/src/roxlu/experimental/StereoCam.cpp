@@ -4,8 +4,8 @@
 
 StereoCam::StereoCam() 
 	:fov(45.0f * DEG_TO_RAD)
-	,near(1.0f)
-	,far(100.0f)
+	,n(1.0f)
+	,f(100.0f)
 	,aspect(1.33333f)
 	,convergence(1.0f)
 	,eye_separation(0.0f)
@@ -17,30 +17,30 @@ void StereoCam::updateProjectionMatrices() {
 	float top, bottom, left, right;
 	
 	// left matrix.
-	top = near * tanf(fov*0.5f) ;
+	top = n * tanf(fov*0.5f) ;
 	bottom = -top;
 	float a = aspect * tanf(fov*0.5f) * convergence;
 	float b = a - (eye_separation * 0.5f);
 	float c = a + (eye_separation * 0.5f);
-	left = -b * (near/convergence);
-	right = c * (near/convergence);
-	l_projection_matrix.frustum(left, right, bottom, top, near, far);
+	left = -b * (n/convergence);
+	right = c * (n/convergence);
+	l_projection_matrix.frustum(left, right, bottom, top, n, f);
 	
 	// right matrix.
-	left = -c * (near/convergence);
-	right = b * (near/convergence);
-	r_projection_matrix.frustum(left, right, bottom, top, near, far);
+	left = -c * (n/convergence);
+	right = b * (n/convergence);
+	r_projection_matrix.frustum(left, right, bottom, top, n, f);
 	
 }
 
-void StereoCam::setPosition(const float& x, const float& y, const float& z) {
+void StereoCam::setPosition(const float x, const float y, const float z) {
 	position.x = x;
 	position.y = y;
 	position.z = z;
 	updateViewMatrix();	
 }
 
-void StereoCam::translate(const float& x, const float& y, const float& z) {
+void StereoCam::translate(const float x, const float y, const float z) {
 	position.x += x;
 	position.y += y;
 	position.z += z;

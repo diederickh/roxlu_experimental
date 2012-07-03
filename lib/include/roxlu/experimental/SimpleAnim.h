@@ -6,7 +6,8 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <sys/time.h>
+
+#include <roxlu/experimental/Timer.h>
 
 using std::string;
 using std::map;
@@ -45,7 +46,9 @@ using std::vector;
 
  
  */
-
+ 
+namespace roxlu {
+	
 enum SimpleAnimStates {
 	ANIM_NONE
 	,ANIM_PLAY
@@ -75,7 +78,7 @@ public:
 	bool save(const string& filepath);
 	void setFPS(const unsigned int& fps);
 	void play();
-	bool update();
+	void update();
 	void getPosition(const string& group, float* dest);
 	bool hasGroup(const string& group);
 	uint64_t now();
@@ -92,11 +95,16 @@ public:
 
 
 inline uint64_t SimpleAnim::now() {
+	return Timer::now();
+	/*
 	timeval time;
 	gettimeofday(&time, NULL);
 	uint64_t n = time.tv_usec;
 	n /= 1000; // convert seconds to millis
 	n += (time.tv_sec * 1000); // convert micros to millis
 	return n;
+	*/
 }
+
+} // roxlu
 #endif

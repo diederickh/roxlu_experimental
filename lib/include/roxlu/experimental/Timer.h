@@ -2,8 +2,9 @@
 #define ROXLU_TIMERH
 
 // NO! POCO!!
+#include <roxlu/core/platform/Platform.h>
 
-#include "sys/time.h"
+
 //#include "Poco/Timer.h"
 //#include "Poco/Thread.h"
 
@@ -27,19 +28,25 @@ public:
 	}
 	
 	// returns millis since first call.
-	static uint64_t millis() {
+	static uint64_t millis() {             
 		static uint64_t t = Timer::now();
 		return Timer::now() - t;
 	}	
 				
 	// now in millis
 	static uint64_t now() {
-		timeval time;
-		gettimeofday(&time, NULL);
-		uint64_t n = time.tv_usec;
-		n /= 1000; // convert seconds to millis
-		n += (time.tv_sec * 1000); // convert micros to millis
-		return n;
+		#if ROXLU_PLATFORM == ROXLU_APPLE
+			timeval time;
+			gettimeofday(&time, NULL);
+			uint64_t n = time.tv_usec;
+			n /= 1000; // convert seconds to millis
+			n += (time.tv_sec * 1000); // convert micros to millis
+			return n;
+		#elif ROXLU_PLATFORM == ROXLU_WINDOWS 
+			return timeGetTime(); // not exactly the same value as unix/apple
+		#else
+			#error Timer::now() not supported 
+		#endif
 	}
 	
 	void stop() {

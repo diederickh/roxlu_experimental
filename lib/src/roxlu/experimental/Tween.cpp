@@ -2,6 +2,8 @@
 
 #include <roxlu/experimental/Tween.h>
 
+namespace roxlu {
+	
 Tween::Tween(int type)
 	:type(type)
 {
@@ -335,3 +337,5 @@ void Tween::update() {
 		default:break;
 	};
 }
+
+} // roxlu

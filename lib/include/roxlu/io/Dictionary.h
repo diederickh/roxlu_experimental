@@ -1,7 +1,8 @@
 #ifndef ROXLU_DICTIONARYH
 #define ROXLU_DICTIONARYH
 
-#include <inttypes.h>
+#include <roxlu/core/platform/Platform.h>
+
 #include <string>
 #include <sstream>
 #include <map>

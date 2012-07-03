@@ -144,6 +144,9 @@ bool OBJ::extractFace(string info, int& vertexIndex, int& normalIndex, int& texc
 			--vertexIndex;
 		}
 	}
+	else {
+		return false;
+	}
 	
 	// get texcoord index
 	if(getline(fss, fv, '/')) {
@@ -164,6 +167,8 @@ bool OBJ::extractFace(string info, int& vertexIndex, int& normalIndex, int& texc
 			--normalIndex;
 		}
 	}
+	
+	return true;
 }
 
 void OBJ::print() {

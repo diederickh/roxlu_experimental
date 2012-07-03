@@ -12,8 +12,7 @@ using std::setw;
 
 namespace roxlu {
 
-class Vec4 {
-public:
+struct Vec4 {
 	inline Vec4()
 		:x(0.0f)
 		,y(0.0f)

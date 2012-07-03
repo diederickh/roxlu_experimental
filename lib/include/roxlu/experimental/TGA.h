@@ -2,6 +2,7 @@
 #define ROXLU_TARGAH
 
 #include <string> 
+#include <roxlu/core/platform/Platform.h>
 
 using std::string;
 
