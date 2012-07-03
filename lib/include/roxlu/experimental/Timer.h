@@ -43,7 +43,8 @@ public:
 			n += (time.tv_sec * 1000); // convert micros to millis
 			return n;
 		#elif ROXLU_PLATFORM == ROXLU_WINDOWS 
-			return timeGetTime(); // not exactly the same value as unix/apple
+			return GetTickCount();
+			//return timeGetTime(); // not exactly the same value as unix/apple
 		#else
 			#error Timer::now() not supported 
 		#endif

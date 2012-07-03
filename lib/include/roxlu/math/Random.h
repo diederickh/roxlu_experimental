@@ -8,15 +8,21 @@
 */
 #include <roxlu/math/Vec3.h>
 #include <roxlu/math/Vec2.h>
-
+#include <roxlu/core/platform/Platform.h>
 #include "float.h"
-#include <sys/time.h>
+//#include <sys/time.h>
 
 static void initRandom() {
-	struct timeval tv;
-	gettimeofday(&tv, 0);
-	long int n = (tv.tv_sec ^ tv.tv_usec) ^ getpid();
-	srand(n);
+	#if ROXLU_PLATFORM == ROXLU_APPLE
+		struct timeval tv;
+		gettimeofday(&tv, 0);
+		long int n = (tv.tv_sec ^ tv.tv_usec) ^ getpid();
+		srand(n);
+	#elif ROXLU_PLATFORM == ROXLU_WINDOWS
+		srand(GetTickCount());
+	#else
+		#error initRandom cannot execute on this operating system
+	#endif
 }
 
 static void initRandom(int val) {

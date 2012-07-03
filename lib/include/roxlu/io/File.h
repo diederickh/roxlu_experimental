@@ -1,18 +1,16 @@
 #ifndef ROXLU_FILEH
 #define ROXLU_FILEH
 
+#include <windows.h>
 #include <string>
 #include <fstream>
 #include <cstdlib>
-
 #include <roxlu/core/platform/Platform.h>
 
-// @todo move to the platform file..
-#ifdef __APPLE__
+#if ROXLU_PLATFORM == ROXLU_APPLE
 	#include <TargetConditionals.h>
 	#include <mach-o/dyld.h>
 #endif
-
 
 using std::string;
 using std::ofstream;
@@ -62,15 +60,11 @@ public:
 	}	          
 	
 	static string toDataPath(const char* file) {
-		#ifdef __APPLE__
-			#ifdef TARGET_OS_MAC 
-				return getCWD() +"/../../../data/" +file;
-				//printf("CWD: ------------------ %s\n", getCWD().c_str());
-				//return getCWD() +"/data/" +file; // ok this changes!!
-			#else
-				return getCWD() +"/../../../data/" +file;
-			#endif
-		#else 
+		#if ROXLU_PLATFORM == ROXLU_APPLE
+			return getCWD() +"/../../../data/" +file;	
+		#elif ROXLU_PLATFORM == ROXLU_WINDOWS
+			return getCWD() +"\\data\\" +file;
+		#else	
 			return getCWD() +"/" +file;
 		#endif
 	}
@@ -81,7 +75,6 @@ public:
 		}
 		printf("MUST IMPLEMENT getTimeModified\n");
 	}
-	
 	
 	static string getCWD() {
 		#if ROXLU_PLATFORM == ROXLU_APPLE
@@ -104,8 +97,10 @@ public:
 			return clean;
 		
 		#elif ROXLU_PLATFORM == ROXLU_WINDOWS
-			return ".";
-		//	#error "Implement getcwd for windows in File.h"
+			 char buffer[MAX_PATH];
+			 GetModuleFileNameA( NULL, buffer, MAX_PATH );
+			 string::size_type pos = string( buffer ).find_last_of( "\\/" );
+			 return string( buffer ).substr( 0, pos);
 		#else
 			char buf[1024];
 			getcwd(buf, 1024);		
