@@ -57,7 +57,7 @@ Buttons::Buttons(const string& title, int w)
 	gui_shader.disable();
 	vao.unbind();
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	createOrtho(ofGetWidth(), ofGetHeight());
+	createOrtho(ofGetWidth(), ofGetHeight()); // @todo remove call to getwidth/height @todo windows
 	
 	// top draggable handle
 	BSET_COLOR(header_color_top, 0.07,0.07,0.07,1.0);

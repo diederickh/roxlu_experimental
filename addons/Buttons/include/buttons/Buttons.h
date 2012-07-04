@@ -23,8 +23,7 @@ void testApp::update() {
 
 #include <vector>
 
-
-//#include "ofMain.h" // @todo remove
+#include "ofMain.h" // @todo remove, needed in c'tor for ofGetWidth()/ofGetHeight()
 
 /*
 #include "Shader.h"

@@ -1,7 +1,6 @@
 #ifndef ROXLU_FILEH
 #define ROXLU_FILEH
 
-#include <windows.h>
 #include <string>
 #include <fstream>
 #include <cstdlib>
@@ -10,6 +9,8 @@
 #if ROXLU_PLATFORM == ROXLU_APPLE
 	#include <TargetConditionals.h>
 	#include <mach-o/dyld.h>
+#elif ROXLU_PLATFORM == ROXLU_WINDOWS
+	#include <windows.h>
 #endif
 
 using std::string;
