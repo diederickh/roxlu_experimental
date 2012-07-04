@@ -25,6 +25,7 @@ namespace roxlu {
 class VAO {
 public:	
 	VAO();
+	void create();
 	void bind();
 	static void unbind();
 private:

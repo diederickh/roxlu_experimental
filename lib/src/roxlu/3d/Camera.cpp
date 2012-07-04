@@ -15,7 +15,7 @@ Camera::Camera()
 ,screen_height(0)
 ,projection_type(PERSPECTIVE)
 {
-	
+	printf("Camera.cpp\n");
 	updateProjectionMatrix();
 	
 }

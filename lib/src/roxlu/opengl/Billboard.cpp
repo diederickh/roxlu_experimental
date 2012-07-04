@@ -7,7 +7,7 @@ namespace roxlu {
 Shader Billboard::shader = Shader();
 bool Billboard::created = false;
 GLuint Billboard::vbo = 0;
-GLuint Billboard::vao = 0;
+VAO Billboard::vao = VAO();
 
 Billboard::Billboard()
 	:texture(NULL)
@@ -15,6 +15,7 @@ Billboard::Billboard()
 	,mode(BILLBOARD_PERSPECTIVE)
 {
 	if(!created) {
+		vao.create();
 		printf("Billboard needs to be created\n");
 		
 		shader.create(BILLBOARD_VS, BILLBOARD_FS);
@@ -22,9 +23,9 @@ Billboard::Billboard()
 		shader.link();
 		shader.u("u_projection_matrix").u("u_view_matrix").u("u_model_matrix").u("u_texture").u("u_alpha");
 		
-		
-		glGenVertexArraysAPPLE(1, &vao); eglGetError();
-		glBindVertexArrayAPPLE(vao); eglGetError();
+		vao.bind();
+		//glGenVertexArraysAPPLE(1, &vao); eglGetError();
+		//glBindVertexArrayAPPLE(vao); eglGetError();
 		glGenBuffers(1, &vbo); eglGetError();
 		glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();		
 		
@@ -47,8 +48,10 @@ Billboard::Billboard()
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(BillboardVertex), (GLvoid*)offsetof(BillboardVertex, pos));
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(BillboardVertex), (GLvoid*)offsetof(BillboardVertex, tex));
 
-		glBindVertexArrayAPPLE(0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		//glBindVertexArrayAPPLE(0);
+		//glBindBuffer(GL_ARRAY_BUFFER, 0);
+		vao.unbind();
 		shader.disable();
 		created = true;
 	}
@@ -122,12 +125,14 @@ void Billboard::draw(const Vec3& position, const float scale, const float rotati
 	shader.uniform1f("u_alpha", alpha);
 	shader.uniformMat4fv("u_model_matrix", mm.getPtr());
 	
-	glBindVertexArrayAPPLE(vao); eglGetError();
+	//glBindVertexArrayAPPLE(vao); eglGetError();
+	vao.bind();
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 void Billboard::unbind() {
-	glBindVertexArrayAPPLE(0);
+	//glBindVertexArrayAPPLE(0);
+	vao.unbind();
 	shader.disable();
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D,0);

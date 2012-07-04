@@ -10,6 +10,7 @@
 #include <roxlu/opengl/Error.h>
 #include <roxlu/opengl/Shader.h>
 #include <roxlu/opengl/Texture.h>
+#include <roxlu/opengl/VAO.h>
 
 const std::string BILLBOARD_VS = " \
 	uniform mat4 u_projection_matrix; \
@@ -77,7 +78,8 @@ private:
 	static bool created;
 	static Shader shader;
 	static GLuint vbo;
-	static GLuint vao;
+	static VAO vao;
+	//static GLuint vao;
 };
 
 } // roxlu

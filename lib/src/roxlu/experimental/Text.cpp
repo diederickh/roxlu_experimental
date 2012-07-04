@@ -18,7 +18,12 @@ Text::Text(BitmapFont& bmfont)
 	,win_h(0)
 {
 	printf("Text.cpp\n");
+	vao.create();
+
+	// @todo VAO could be static !
 	if(!initialized) {
+		printf("Creating VAO in Text.cpp\n");
+		
 		shader.create(TEXT_VS, TEXT_FS);
 		shader.link();
 		shader.enable();
@@ -29,7 +34,7 @@ Text::Text(BitmapFont& bmfont)
 		shader.addAttribute("pos");
 		shader.addAttribute("tex");
 	}
-
+	
 	shader.enable();
 	vao.bind();		
 	
@@ -144,7 +149,8 @@ void Text::updateBuffer() {
 	while(it != texts.end()) {
 		TextEntry& t = *it;
 		t.start_dx = vertices.size();
-		vertices += t.vertices;
+	//	vertices += t.vertices; // works on mac
+		vertices.append(t.vertices); // @todo windows
 		t.end_dx = t.vertices.size();
 		++it;			
 	}
@@ -152,10 +158,12 @@ void Text::updateBuffer() {
 	// do we need to resize the vbo
 	if(vertices.numBytes() > buffer_size) {
 		vao.bind();
+	
 		glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
-		buffer_size = vertices.numBytes() * 2;
+		buffer_size = vertices.numBytes(); // * 2; // why did we have * 2 here??
 		glBufferData(GL_ARRAY_BUFFER, buffer_size, vertices.getPtr(), GL_STREAM_COPY); eglGetError();
 		setVertexAttributes();
+		
 	}
 	else {
 		glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
@@ -175,7 +183,7 @@ void Text::debugDraw() {
 	glMatrixMode(GL_TEXTURE);
 	glLoadIdentity();
 	
-	glMatrixMode(GL_MODELVIEW);
+	glMatrixMode(GL_MODELVIEW); 
 	glEnable(GL_BLEND);
 	
 	
