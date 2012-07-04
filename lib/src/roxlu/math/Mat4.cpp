@@ -2,7 +2,7 @@
 //#include "Mat4.h"
 //#include "../core/Utils.h"
 
-#include <roxlu/math/Mat3.h>
+#include <roxlu/math/Vec3.h>
 #include <roxlu/math/Mat3.h>
 #include <roxlu/core/Utils.h>
 

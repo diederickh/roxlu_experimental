@@ -1,4 +1,4 @@
-#include "PolyTri.h"
+#include <polytri/PolyTri.h>
 
 PolyTri::PolyTri() 
 	:cdt(NULL)

@@ -1,0 +1,8 @@
+1. Add include path to:
+
+	include
+	src
+	lib	
+
+2. Add all files to your project
+

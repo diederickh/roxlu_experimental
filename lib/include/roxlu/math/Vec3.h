@@ -50,7 +50,6 @@
 #include <iostream>
 #include <math.h>
 
-
 namespace roxlu {
 
 struct Vec2;

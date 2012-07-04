@@ -1,10 +1,10 @@
 #ifndef ROLXU_POLYTRIH
 #define ROLXU_POLYTRIH
 
-#include "poly2tri.h"
+#include <poly2tri.h>
+#include <roxlu/opengl/OpenGLInit.h>
 #include <vector>
 #include <list>
-#include "OpenGL.h"
 
 
 using std::vector;
