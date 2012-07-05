@@ -17,13 +17,12 @@ Text::Text(BitmapFont& bmfont)
 	,win_w(0)
 	,win_h(0)
 {
-	printf("Text.cpp\n");
+
 	vao.create();
 
 	// @todo VAO could be static !
 	if(!initialized) {
-		printf("Creating VAO in Text.cpp\n");
-		
+	
 		shader.create(TEXT_VS, TEXT_FS);
 		shader.link();
 		shader.enable();

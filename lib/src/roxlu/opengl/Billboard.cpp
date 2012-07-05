@@ -57,21 +57,21 @@ Billboard::Billboard()
 	}
 }
 
-void Billboard::bind(const Mat4& pm, const Mat4& vm) {
+void Billboard::bind(const float* pm, const float* vm) {
 	if(!texture_set) {
 		printf("Cannot use billboard w/o texture.\n");
 	}
 	
 	mode = BILLBOARD_NONE;
 	
-	this->vm = vm.getPtr();
-	this->pm = pm.getPtr();
+	this->vm = vm;
+	this->pm = pm;
 
 	initBillboard();	
 }
 
 
-void Billboard::bind(const Mat4& pm, const Mat4& vm, const Vec3& right, const Vec3& up) {
+void Billboard::bind(const float* pm, const float* vm, const Vec3& right, const Vec3& up) {
 	if(!texture_set) {
 		printf("Cannot use billboard w/o texture.\n");
 	}
@@ -80,8 +80,8 @@ void Billboard::bind(const Mat4& pm, const Mat4& vm, const Vec3& right, const Ve
 	
 	this->right = &right;
 	this->up = &up;
-	this->pm = pm.getPtr();
-	this->vm = vm.getPtr();
+	this->pm = pm;
+	this->vm = vm;
 
 	initBillboard();
 }

@@ -7,12 +7,10 @@ namespace roxlu {
 #if ROXLU_PLATFORM == ROXLU_APPLE
 	
 	VAO::VAO()  {
-		//printf("APPLE!!\n");	
 	}
 
 	void VAO::create() {
 		glGenVertexArraysAPPLE(1, &vao_id); eglGetError();
-		//glGenVertexArrays(1, &vao_id);// eglGetError();
 	}
 	
 	void VAO::bind() {
@@ -26,15 +24,13 @@ namespace roxlu {
 #elif ROXLU_PLATFORM == ROXLU_WINDOWS
 		
 	VAO::VAO()  {
-		//printf("VAO WINDOWS!\n");
 	}
 
 	void VAO::create() {
-		glGenVertexArrays(1, &vao_id);// eglGetError();
+		glGenVertexArrays(1, &vao_id); eglGetError();
 	}
 	
 	void VAO::bind() {
-		//printf("binding VAO with id: %d\n", vao_id);
 		glBindVertexArray(vao_id); eglGetError();
 	}
 	

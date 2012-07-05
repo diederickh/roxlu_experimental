@@ -1,5 +1,6 @@
 #ifndef ROXLU_MAT3H
 #define ROXLU_MAT3H
+
 /*
  
  Using column major:
@@ -14,12 +15,6 @@
 #include <roxlu/math/Vec3.h>
 #include <roxlu/core/Constants.h>
 
-/*
-#include "Mat4.h"
-#include "Vec3.h"
-#include "../core/Constants.h"
-*/
-
 using std::ostream;
 using std::setw;
 using std::endl; 
@@ -27,8 +22,8 @@ using std::cout;
 
 namespace roxlu {
 
-class Mat3 {
-public:
+struct Mat3 {
+
 	Mat3(){
 	}
 	
