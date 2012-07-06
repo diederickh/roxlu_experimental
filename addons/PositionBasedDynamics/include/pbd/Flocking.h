@@ -18,12 +18,28 @@ Without correct energy levels it will just look like a group of particles
 moving around. I've got a pretty nice behavior with these settings.. note btw,
 that I'm using exponential forces: (1.0f/length_squared)*force
 
+2D settings:
+------------------
 - Alignement energy: 180 
 - Separation energy: 160
 - Attraction energy: 120
 - Flocking zone radius SQUARED: 3700
 - Low threshold (see cinder tutorial): 0.1333
 - High threshold: 06867
+
+3D settings
+------------
+- Area 5x5x5 units (so simulation is done in this area (opengl units)
+- Flocking zone radius SQUARED:  1.7760
+- Flocking max speed: 0.1 (try w/o enabling this)
+- High threshold: 0.8267
+- Low threshold: 0.65
+- Alignment energy: 0.0009
+- Separation energy: 0.0020
+- Attraction energy: 0.0041
+- Also make sure to keep the flock in a sphere, I used a sphere with squared
+radius 25.0f and added an attractive force towards the center when boids fly
+out of this sphere. Forces was about 0.0867
 
 
 + Make sure to check the bounds and reposition the boids when they go out 
@@ -74,7 +90,6 @@ void Flocking<T, P>::update() {
 		P& a = *(*ita);
 		typename vector<P*>::iterator itb = ita;
 		
-		
 		for(++itb; itb != ps.end(); ++itb) {
 			P& b = *(*itb);
 			dir = a.position - b.position;
@@ -114,7 +129,7 @@ void Flocking<T, P>::update() {
 				b.addForce(dir);
 			}
 		}
-		
+				
 	}
 	
 	for(typename vector<P*>::iterator ita = ps.begin(); ita != ps.end(); ++ita) {

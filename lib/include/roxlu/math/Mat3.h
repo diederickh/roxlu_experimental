@@ -97,9 +97,14 @@ public:
 	Mat3 operator-();
 	
 	// handy stuff
+	void makeCoordinateSystem(const Vec3& z); // make coordinate system from one direction vector (x/y axis may flip)
+	void makeCoordinateSystem(const Vec3& vz, const Vec3& up);  // make coordinate system from direction vector + up
+	Vec3 getXAxis() const;
+	Vec3 getYAxis() const;
+	Vec3 getZAxis() const;
 	static Mat3 getLookAtMatrix(const Vec3& eye, const Vec3& lookAtPoint, const Vec3& upVec = Vec3(0,1,0));
 	float trace() const;
-	inline void print();
+	inline void print() const;
 	inline friend ostream& operator<<(ostream& os, const Mat3& m);
 	float m[9];
 };
@@ -224,7 +229,7 @@ inline float Mat3::trace() const {
 	return m[0] + m[4] + m[8];
 }
 
-inline void Mat3::print() {
+inline void Mat3::print() const {
 	printf("%3.3f, %3.3f, %3.3f\n", m[0], m[3], m[6]);
 	printf("%3.3f, %3.3f, %3.3f\n", m[1], m[4], m[7]);
 	printf("%3.3f, %3.3f, %3.3f\n", m[2], m[5], m[8]);

@@ -56,7 +56,7 @@ struct Vec2;
 struct Vec3;
 struct Vec4;
 
-class Mat3;
+struct Mat3;
 
 Vec3 cross(const Vec3& a, const Vec3& b);
 float dot(const Vec3& a, const Vec3& b);
@@ -65,7 +65,7 @@ Vec3 rotate(const float angle, const Vec3& v, const Vec3& axis);
 // Vector 3 class.
 // -----------------------------------------------------------------------------
 struct Vec3 {
-	friend class Mat3;
+	friend struct Mat3;
 	Vec3(const float* v);
 	Vec3(const float xx = 0.0f, const float yy = 0.0f, const float zz = 0.0f);
 	Vec3(const Vec2& v);
@@ -81,6 +81,7 @@ struct Vec3 {
 	Vec3& operator+=(const Vec3& other);
 	Vec3& operator+=(const float scalar);
 	Vec3& operator*=(const float scalar);
+	Vec3& operator*=(const Vec3& other);
 	Vec3& operator/=(const float scalar);
 
 	// Basic methods.	
@@ -348,6 +349,13 @@ inline Vec3& Vec3::operator+=(const Vec3& v) {
 	return *this;
 }
 
+inline Vec3& Vec3::operator*=(const Vec3& other) {
+	x *= other.x;
+	y *= other.y;
+	z *= other.z;
+	return *this;
+}
+
 // Vec3 * float
 inline Vec3 Vec3::operator*(const float scalar) const {
 	return Vec3(x*scalar, y*scalar, z*scalar);
@@ -430,6 +438,9 @@ inline Vec3 operator*(float f, const Vec3& vec) {
     return Vec3(f*vec.x, f*vec.y, f*vec.z );
 }
 
+inline Vec3 operator*(const Vec3& a, const Vec3& b) {
+	return Vec3(a.x * b.x, a.y * b.y, a.z * b.z);
+}
 
 // -----------------------------------------------------------------------------
 inline Vec3 cross(const Vec3& a, const Vec3& b) {

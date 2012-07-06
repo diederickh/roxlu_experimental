@@ -6,6 +6,7 @@
 	#include <roxlu/experimental/StereoCam.h>
 	#include <roxlu/experimental/Timer.h>
 	#include <roxlu/experimental/TGA.h>
+	#include <roxlu/experimental/TGARecorder.h>
 	
 	using namespace roxlu;
 	

@@ -342,6 +342,96 @@ Mat3 Mat3::getLookAtMatrix(const Vec3& eye, const Vec3& center, const Vec3& up) 
 	return m;
 }
 
+
+
+// Creates a coordinate system from a direction vector. 
+// vz must be normalized!!!!!!!
+void Mat3::makeCoordinateSystem(const Vec3& vz)  {
+	Vec3 vx,vy;
+	if(fabsf(vz.x) > fabsf(vz.y)) {
+		float invl = 1.0f / sqrtf(vz.x * vz.x + vz.z * vz.z);
+		vx.x = -vz.z * invl;
+		vx.y = 0.0f;
+		vx.z = vz.x * invl;
+	}
+	else {
+		float invl = 1.0f / sqrtf(vz.y * vz.y + vz.z * vz.z);
+		vx.x = 0.0f;
+		vx.y = vz.z * invl;
+		vx.z = -vz.y * invl;
+	}
+	vy = cross(vz, vx);
+	
+	
+	m[0] = vx.x;
+	m[1] = vx.y;
+	m[2] = vx.z;
+	
+	m[3] = vy.x;
+	m[4] = vy.y;
+	m[5] = vy.z;
+	
+	m[6] = vz.x;
+	m[7] = vz.y;
+	m[8] = vz.z;
+}
+
+void Mat3::makeCoordinateSystem(const Vec3& vz, const Vec3& up)  {
+	Vec3 vx,vy;
+	
+	roxlu_cross3(vz, up, vx);
+	roxlu_cross3(vx, vz, vy);
+	//vz.normalize();
+	//up.normalize();
+//	vx = cross(vz, up);
+//	vx.normalize();
+	
+//	vy = cross(vx, vz);
+//	vy.normalize();
+//	printf("vx: %f, vy: %f, vz:%f\n", vx.length(), vy.length(), vz.length());
+//	vx.print();
+//	vy.print();
+//	vz.print();
+//	printf("--\n");
+	m[0] = vx.x;
+	m[1] = vx.y;
+	m[2] = vx.z;
+	
+	m[3] = vy.x;
+	m[4] = vy.y;
+	m[5] = vy.z;
+	
+	m[6] = vz.x;
+	m[7] = vz.y;
+	m[8] = vz.z;
+	
+}
+
+Vec3 Mat3::getXAxis() const {
+	Vec3 v;
+	v.x = m[0];
+	v.y = m[1];
+	v.z = m[2];
+	return v;
+}
+
+Vec3 Mat3::getYAxis() const {
+	Vec3 v;
+	v.x = m[3];
+	v.y = m[4];
+	v.z = m[5];
+	return v;
+}
+
+Vec3 Mat3::getZAxis() const {
+	Vec3 v;
+	v.x = m[6];
+	v.y = m[7];
+	v.z = m[8];
+	return v;
+}
+
+
 // Operators.
 //------------------------------------------------------------------------------
 bool Mat3::operator==(const Mat3& o) const {

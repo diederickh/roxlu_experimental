@@ -1,7 +1,7 @@
 #include <fstream>
-//#include "TGA.h"
-
 #include <roxlu/experimental/TGA.h>
+
+namespace roxlu {
 
 TGA::TGA()
 	:pixels(NULL)
@@ -16,6 +16,42 @@ TGA::~TGA() {
 	if(pixels != NULL) {
 		delete[] pixels;
 	}
+}
+
+bool TGA::save(const string& filepath, unsigned char* rgb, int w, int h) {
+	TGAHeader header;
+	int color_mode;
+	uint8_t color_swap;
+	uint64_t image_size;
+	
+	std::ofstream ofs(filepath.c_str(), std::ios::out | std::ios::binary);
+	if(!ofs.is_open()) {
+		return false;
+	}
+	
+	memset(&header, 0, sizeof(TGAHeader));
+	header.bit_count = 24;
+	header.color_map_entry_size = 0;
+	header.color_map_length = 0;
+	header.color_map_origin = 0;
+	header.image_descriptor = 0;
+	header.image_height = h;
+	header.image_width = w;
+	header.image_id_length = 0;
+	header.image_type_code = 2;
+	header.image_x_origin = 0;
+	header.image_y_origin = 0;
+	
+	ofs.write((char*)&header, sizeof(TGAHeader));
+	image_size = w * h * 3;
+	for(int i = 0; i < image_size; i += 3) {
+		color_swap = rgb[i];
+		rgb[i] = rgb[i+2];
+		rgb[i+2] = color_swap;
+	}
+	ofs.write((char*)rgb, image_size);
+	ofs.close();
+	return true;
 }
 
 
@@ -66,3 +102,5 @@ void TGA::print() {
 		}
 	}
 }
+
+} // roxlu

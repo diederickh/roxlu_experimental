@@ -142,6 +142,7 @@ void Particles<T, P, S>::update(const float dt) {
 		}
 		p.velocity = p.velocity + (dt * p.forces);
 		p.velocity *= drag; 
+		
 		p.tmp_position = p.position +(p.velocity * dt);
 		p.forces = 0;
 		++it;
@@ -172,6 +173,7 @@ void Particles<T, P, S>::update(const float dt) {
 		}
 			
 		p.velocity = (p.tmp_position - p.position) * fps;
+		
 		p.position = p.tmp_position;
 		
 		if(p.aging) {
