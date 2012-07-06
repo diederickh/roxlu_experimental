@@ -29,7 +29,8 @@ template<class T, class P, class S>
 class Particles {
 public:
 	typedef typename std::vector<P*>::iterator iterator;
-
+	typedef	T Vec;
+	
 	Particles();
 	~Particles();
 	

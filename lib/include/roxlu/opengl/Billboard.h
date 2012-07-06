@@ -58,12 +58,13 @@ enum BillboardDrawModes {
 class Billboard {
 public:	
 	Billboard();
-	//Billboard(const Billboard& other);
+
 	void setTexture(const GLuint& id);
-	void bind(const Mat4& pm, const Mat4& vm, const Vec3& right, const Vec3& up);
-	void bind(const Mat4& pm, const Mat4& vm);
+	void bind(const float* pm, const float* vm, const Vec3& right, const Vec3& up);
+	void bind(const float* pm, const float* vm);
 	void draw(const Vec3& position, const float scale, const float rotationDegrees, float alpha = 1.0);
 	void unbind(); 
+
 private:
 	void initBillboard();
 	
@@ -79,7 +80,6 @@ private:
 	static Shader shader;
 	static GLuint vbo;
 	static VAO vao;
-	//static GLuint vao;
 };
 
 } // roxlu

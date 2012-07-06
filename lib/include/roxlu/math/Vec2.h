@@ -32,7 +32,7 @@ namespace roxlu {
 struct Vec3;
 
 struct Vec2 {
-public:
+
 	Vec2(const float xx = 0.0f, const float yy = 0.0f);
 	Vec2(const float n);
 	Vec2(const Vec2& v);

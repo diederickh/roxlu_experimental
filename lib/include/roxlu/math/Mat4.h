@@ -18,10 +18,10 @@ using std::ostream;
 
 namespace roxlu {
 
-class Mat3;
+struct Mat3;
 
-class Mat4 {
-public:	
+struct Mat4 {
+
 	inline Mat4();
 
 	// pass all values to the c'tor. numbers indicate array index
