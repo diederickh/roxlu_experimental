@@ -73,12 +73,23 @@ struct VertexP : public Vertex {
 	{
 	}
 	
+	VertexP(const Vec3& v) 
+		:pos(v.x, v.y, v.z)
+	{
+		
+	}
+	
 	VertexP(const float& x, const float& y, const float& z) 
 		:pos(x,y,z)
 	{
 	}
+	
 	void setPos(const float& x, const float& y, const float& z) {
 		pos.set(x,y,z);
+	}
+	
+	const float* getPtr() {
+		return pos.getPtr();
 	}
 };
 
@@ -476,7 +487,6 @@ struct Vertices_TemplateP : public Vertices_Template<T> {
 	using Vertices_Template<T>::add;
 	
 	
-
 	int add(const float& x, const float& y, const float& z) {
 		VertexP p;
 		p.setPos(x, y, z);

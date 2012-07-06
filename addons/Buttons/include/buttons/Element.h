@@ -44,6 +44,7 @@ public:
 	
 	
 	virtual Element& setColor(const float r, const float g, const float b, const float a = 1.0f);
+	virtual Element& setColor(const float* col, int num = 3);
 	
 	void setValueType(int valueType);
 	int getValueType();
@@ -91,6 +92,16 @@ inline int Element::getValueType() {
 	return value_type;
 }
 
+inline Element& Element::setColor(const float* col, int num) {
+	if(num = 3) {
+		setColor(col[0], col[1], col[2]);
+	}
+	else if(num == 4) {
+		setColor(col[0], col[1], col[2], col[3]);
+	}	
+	return *this;	
+}
+	
 inline Element& Element::setColor(const float r, const float g, const float b, const float a) {
 
 

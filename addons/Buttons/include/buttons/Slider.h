@@ -38,6 +38,16 @@ public:
 	~Slider() {
 	}
 	
+	Slider& setColor(const float* col, int num = 3) {
+		if(num == 3) {
+			setColor(col[0], col[1], col[2]);
+		}
+		else if (num == 4) {
+			setColor(col[0], col[1], col[2], col[3]);
+		}
+		return *this;
+	}
+	
 	Slider& setColor(const float r, const float g, const float b, const float a = 1.0) {
 		Element::setColor(r,g,b,a);
 		bar_empty_color[3] = 1.0f;
