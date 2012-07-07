@@ -277,6 +277,13 @@ struct VertexPTN : public Vertex  {
 	VertexPTN() {
 	}
 	
+	VertexPTN(const Vec3& p, const Vec2& t, const Vec3& n) 
+		:pos(p)
+		,tex(t)
+		,norm(n)
+	{
+	}
+	
 	VertexPTN(
 		 const float& x, const float& y, const float& z
 		,const float& nx, const float& ny, const float& nz
