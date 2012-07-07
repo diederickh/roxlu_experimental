@@ -4,6 +4,7 @@
 
 #include <roxlu/math/Vec3.h>
 #include <roxlu/math/Mat3.h>
+#include <roxlu/math/Mat4.h>
 #include <roxlu/core/Utils.h>
 
 namespace roxlu {

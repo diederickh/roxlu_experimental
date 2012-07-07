@@ -60,7 +60,8 @@ public:
 	Billboard();
 
 	void setTexture(const GLuint& id);
-	void bind(const float* pm, const float* vm, const Vec3& right, const Vec3& up);
+	//void bind(const float* pm, const float* vm, const Vec3& right, const Vec3& up);
+	void bind(const float* pm, const float* vm, const float* right, const float* up);
 	void bind(const float* pm, const float* vm);
 	void draw(const Vec3& position, const float scale, const float rotationDegrees, float alpha = 1.0);
 	void unbind(); 
@@ -71,8 +72,10 @@ private:
 	int mode;
 	bool texture_set;
 	GLuint tex;
-	const Vec3* right;
-	const Vec3* up;
+	//const Vec3* right;
+	//const Vec3* up;
+	const float* right;
+	const float* up;
 	const float* pm;
 	const float* vm;
 	const Texture* texture;

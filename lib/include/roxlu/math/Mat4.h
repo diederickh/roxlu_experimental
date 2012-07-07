@@ -67,9 +67,14 @@ struct Mat4 {
 	float getZ();
 	
 	void setBillboard(const Vec3& right, const Vec3& up); // create billboard matrix (z-axis is calculated)
+	void setBillboard(const float* right, const float* up);
 	void setXAxis(const Vec3& ax); // indices: 0,1,2
+	void setXAxis(const float* ax); 
 	void setYAxis(const Vec3& ax); // indices: 4,5,6
+	void setYAxis(const float* ax); 
 	void setZAxis(const Vec3& ax); // indices: 8,9,10
+	void setZAxis(const float* ax);
+	
 	
 	static Mat4 translation(const Vec3& v);
 	static Mat4 translation(const float x, const float y, const float z);
@@ -297,6 +302,12 @@ inline float Mat4::getZ() {
 	return m[14];
 }
 
+inline void Mat4::setXAxis(const float* ax) {
+	m[0] = ax[0];
+	m[1] = ax[1];
+	m[2] = ax[2];
+}
+
 inline void Mat4::setXAxis(const Vec3& ax) { // indices: 0,1,2
 	m[0] = ax.x;
 	m[1] = ax.y;
@@ -309,18 +320,35 @@ inline void Mat4::setYAxis(const Vec3& ax) { // indices: 4,5,6
 	m[6] = ax.z;	
 }
 
+inline void Mat4::setYAxis(const float* ax) {
+	m[4] = ax[0];
+	m[5] = ax[1];
+	m[6] = ax[2];
+}
+
 inline void Mat4::setZAxis(const Vec3& ax) { // indices: 8,9,10
 	m[8] = ax.x;
 	m[9] = ax.y;
 	m[10] = ax.z;	
 }
 
+inline void Mat4::setZAxis(const float* ax) {
+	m[8] = ax[0];
+	m[9] = ax[1];
+	m[10] = ax[2];
+}
+
 // create billboard matrix (z-axis is calculated)
 inline void Mat4::setBillboard(const Vec3& right, const Vec3& up) {
-	Vec3 z = cross(right, up);
+//	Vec3 z = cross(right, up);
 	setXAxis(right);
 	setYAxis(up);
 //	setZAxis(z); // do we need this?
+}
+
+inline void Mat4::setBillboard(const float* right, const float* up) {
+	setXAxis(right);
+	setYAxis(up);
 }
 	
 } // roxlu

@@ -71,15 +71,15 @@ void Billboard::bind(const float* pm, const float* vm) {
 }
 
 
-void Billboard::bind(const float* pm, const float* vm, const Vec3& right, const Vec3& up) {
+void Billboard::bind(const float* pm, const float* vm, const float* right, const float* up) {
 	if(!texture_set) {
 		printf("Cannot use billboard w/o texture.\n");
 	}
 	
 	mode = BILLBOARD_PERSPECTIVE;
 	
-	this->right = &right;
-	this->up = &up;
+	this->right = right;
+	this->up = up;
 	this->pm = pm;
 	this->vm = vm;
 
@@ -110,7 +110,7 @@ void Billboard::draw(const Vec3& position, const float scale, const float rotati
 	Mat4 mm;
 	
 	if(mode == BILLBOARD_PERSPECTIVE) {
-		mm.setBillboard(*this->right, *this->up);
+		mm.setBillboard(right,up);
 	}
 
 	mm.setPosition(position);

@@ -63,6 +63,8 @@ public:
 	void update(const float dt);
 	void removeDeadParticles();
 	
+	void clear(); 
+	
 	typename vector<P*>::iterator begin();
 	typename vector<P*>::iterator end();
 	
@@ -320,6 +322,20 @@ template<class T, class P, class S>
 S* Particles<T, P, S>::createSpring(P* a, P* b) {
 	S* s = new S(*a, *b);
 	return s;
+}
+
+template<class T, class P, class S>
+void Particles<T, P, S>::clear() {
+	for(int i = 0; i < particles.size(); ++i) {
+		delete particles[i];
+	}
+	
+	for(int i = 0; i < springs.size(); ++i) {
+		delete springs[i];
+	}
+	
+	springs.clear();
+	particles.clear();
 }
 
 // -----------------------------------------------------------------------------
