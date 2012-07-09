@@ -47,7 +47,19 @@ out of this sphere. Forces was about 0.0867
 */
 
 
+
 template<class T, class P>
+class FlockingForceAdder {
+public:
+	void operator()(const T& force, P& boid) {
+		boid.addForce(force);
+	}
+};
+
+// T - Vector Type
+// P - Particle Type.
+// FA - Force adder: by default we call p->addForce, but you can customize this.
+template<class T, class P, class FA>
 class Flocking {
 public:
 	Flocking(vector<P*>& ps, const float zoneRadius, const float maxSpeed);
@@ -63,10 +75,11 @@ public:
 	float attract_energy;
 	float max_speed_sq;
 	float max_speed;
+	FA force_adder;
 };
 
-template<class T, class P>
-Flocking<T,P>::Flocking(vector<P*>& ps, const float zoneRadius, const float maxSpeed) 
+template<class T, class P, class FA>
+Flocking<T,P, FA>::Flocking(vector<P*>& ps, const float zoneRadius, const float maxSpeed) 
 	:ps(ps)
 	,zone_radius_sq(zoneRadius * zoneRadius)
 	,max_speed_sq(maxSpeed * maxSpeed)
@@ -79,8 +92,8 @@ Flocking<T,P>::Flocking(vector<P*>& ps, const float zoneRadius, const float maxS
 {
 }
 
-template<class T, class P>
-void Flocking<T, P>::update() {
+template<class T, class P, class FA>
+void Flocking<T, P, FA>::update() {
 	T dir;
 	float ls;
 	float f;
@@ -108,15 +121,19 @@ void Flocking<T, P>::update() {
 				dir.normalize();
 				dir *= f;
 				dir *= separate_energy;
-				a.addForce(dir);
-				b.addForce(-dir);
+				force_adder(dir, a);
+				force_adder(-dir, b);
+//				a.addForce(dir);
+//				b.addForce(-dir);
 			}
 			else if(perc < high) {
 				// align
 				f = 1.0f/ls;
 				f *= align_energy;
-				a.addForce(b.velocity.getNormalized() * f);
-				b.addForce(a.velocity.getNormalized() * f);
+				force_adder(b.velocity.getNormalized() * f, a);
+				force_adder(a.velocity.getNormalized() * f, b);
+//				a.addForce(b.velocity.getNormalized() * f);
+//				b.addForce(a.velocity.getNormalized() * f);
 				
 			}
 			else {
@@ -125,8 +142,10 @@ void Flocking<T, P>::update() {
 				dir.normalize();
 				dir *= f;
 				dir *= attract_energy;
-				a.addForce(-dir);
-				b.addForce(dir);
+				force_adder(-dir, a);
+				force_adder(dir, b);
+//				a.addForce(-dir);
+//				b.addForce(dir);
 			}
 		}
 				
@@ -142,8 +161,8 @@ void Flocking<T, P>::update() {
 	
 }
 
-template<class T, class P>
-inline void Flocking<T, P>::setMaxSpeed(const float max) {
+template<class T, class P, class FA>
+inline void Flocking<T, P, FA>::setMaxSpeed(const float max) {
 	max_speed = max;
 	max_speed_sq = max * max;
 }

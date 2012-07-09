@@ -19,11 +19,11 @@ using namespace roxlu;
 
 typedef Particle<Vec2> Particle2;
 typedef Particle<Vec3> Particle3;
-typedef Flocking<Vec2, Particle<Vec2> > Flocking2;
+typedef Flocking<Vec2, Particle<Vec2>, FlockingForceAdder<Vec2, Particle<Vec2> > > Flocking2;
 
 typedef Particles<Vec2, Particle<Vec2>, Spring<Vec2> > Particles2;
 typedef Particles<Vec3, Particle<Vec3>, Spring<Vec3> > Particles3;
-typedef Flocking<Vec3, Particle<Vec3> > Flocking3;
+typedef Flocking<Vec3, Particle<Vec3>, FlockingForceAdder<Vec3, Particle<Vec3> > > Flocking3;
 
 
 inline void drawVertex(Vec3 p) {
