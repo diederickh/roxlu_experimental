@@ -45,8 +45,8 @@ public:
 	
 	// attract to another particle
 	template<class F>
-	void attract(P* p, const float minDist, const float energy, F& cb);
-	void attract(P* p, const float minDist, const float energy);
+	void attract(P* p, const float radius, const float energy, F& cb);
+	void attract(P* p, const float radius, const float energy);
 	
 	// repel from each other, with callback when repelled
 	template<class F>
@@ -257,29 +257,27 @@ void Particles<T, P, S>::repel(P* p, const float radius, const float energy, F& 
 // attract to a particle
 template<class T, class P, class S>
 template<class F>
-void Particles<T, P, S>::attract(P* p, const float minDist, const float energy, F& cb) {
+void Particles<T, P, S>::attract(P* p, const float radius, const float energy, F& cb) {
 	typename vector<P*>::iterator it = particles.begin();
 	P& sourcep = *p;
 	T dir;
 	T& pos = p->position;
 	float ls;
 	float f;
-	float mindist_sq = minDist * minDist;
+	float dist_sq = radius * radius;
 	
 	while(it != particles.end()) {
 		P& other = *(*it);
 		dir = pos - other.position;
 		ls = dir.lengthSquared();
-		if(ls < mindist_sq) {
-			ls = mindist_sq;
-		}
 
-		dir.normalize();
-		f = energy * sourcep.mass * other.mass / ls;
-		dir *= f;
-		other.addForce(dir);
-		
-		cb(sourcep, other, dir, f, ls, CB_ATTRACT_PARTICLE);
+		if(ls > dist_sq) {
+			dir.normalize();
+			f = (1.0-(1.0f/ls)) * energy;
+			dir *= f;
+			other.addForce(dir);
+			cb(sourcep, other, dir, f, ls, CB_ATTRACT_PARTICLE);
+		}
 		++it;
 	}
 }
