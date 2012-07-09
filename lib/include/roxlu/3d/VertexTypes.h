@@ -101,6 +101,13 @@ struct VertexPT : public Vertex  {
 	VertexPT() {
 	}
 	
+	VertexPT(const Vec3& pos, const Vec2& tex)	
+		:pos(pos)
+		,tex(tex)
+	{
+	
+	}
+	
 	VertexPT(const float& x, const float& y, const float& z, const float& u, const float& v) 
 		:pos(x,y,z)
 		,tex(u,v)

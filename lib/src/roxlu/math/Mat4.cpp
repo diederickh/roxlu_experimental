@@ -1,11 +1,10 @@
-//#include "Mat3.h"
-//#include "Mat4.h"
-//#include "../core/Utils.h"
 
 #include <roxlu/math/Vec3.h>
 #include <roxlu/math/Mat3.h>
 #include <roxlu/math/Mat4.h>
 #include <roxlu/core/Utils.h>
+
+// good resource: https://github.com/Kazade/kazmath/blob/master/kazmath/mat4.c
 
 namespace roxlu {
 

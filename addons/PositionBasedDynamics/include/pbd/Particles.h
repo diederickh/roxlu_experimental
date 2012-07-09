@@ -303,6 +303,7 @@ void Particles<T, P, S>::removeDeadParticles() {
 	while(it != particles.end()) {
 		P& p = *(*it);
 		if(p.age > p.lifespan) {
+			delete &p;
 			it = particles.erase(it);
 		}
 		else {
