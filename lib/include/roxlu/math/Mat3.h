@@ -25,6 +25,17 @@ namespace roxlu {
 struct Mat3 {
 
 	Mat3(){
+		m[0] = 1.0f;
+		m[1] = 0.0f;
+		m[2] = 0.0f;
+		
+		m[3] = 0.0f;
+		m[4] = 1.0f;
+		m[5] = 0.0f;
+		
+		m[6] = 0.0f;
+		m[7] = 0.0f;
+		m[8] = 1.0f;
 	}
 	
 	Mat3(
@@ -92,7 +103,9 @@ struct Mat3 {
 	Mat3 operator-();
 	
 	// handy stuff
-	void makeCoordinateSystem(const Vec3& z); // make coordinate system from one direction vector (x/y axis may flip)
+
+	//void makeCoordinateSystemPBRT(const Vec3& z); // make coordinate system from one direction vector (x/y axis may flip) from Physically Based Rendering (pbrt)
+	void makeCoordinateSystem(const Vec3& z); // Jeppe Revall Frisvad implementation, Fast orthonormal basis (2012): http://www2.imm.dtu.dk/~jrf/papers/abstracts/onb.html
 	void makeCoordinateSystem(const Vec3& vz, const Vec3& up);  // make coordinate system from direction vector + up
 	Vec3 getXAxis() const;
 	Vec3 getYAxis() const;

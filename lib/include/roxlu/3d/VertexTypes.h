@@ -208,6 +208,7 @@ struct VertexPN : public Vertex  {
 	VertexPN& set(const Vec3& p, const Vec3& n) {
 		pos = p;
 		norm = n;
+		return *this;
 	}
 	
 	VertexPN& setPos(const float& x, const float& y, const float& z) {

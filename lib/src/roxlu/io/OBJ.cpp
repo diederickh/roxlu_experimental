@@ -96,7 +96,8 @@ bool OBJ::import(const string& filepath) {
 		objects[object.name] = object;
 	}
 	
-
+	return true;
+	
 	// Calculate binormal + tangent;
 	/*
 	map<string, Object>::iterator it = objects.begin();

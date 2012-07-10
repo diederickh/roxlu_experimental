@@ -75,6 +75,7 @@ public:
 			file = File::toDataPath(file);
 		}
 		printf("MUST IMPLEMENT getTimeModified\n");
+		return 0;
 	}
 	
 	static string getCWD() {

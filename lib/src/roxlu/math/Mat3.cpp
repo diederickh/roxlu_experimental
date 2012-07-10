@@ -290,25 +290,13 @@ Mat3 Mat3::rotationZ(float a) {
 	return mat;
 }
 
+// @todo, we could use createCoordinateSystem
 Mat3 Mat3::getLookAtMatrix(const Vec3& eye, const Vec3& center, const Vec3& up) {
 	Vec3 f = (center - eye).getNormalized();
 	Vec3 u = up.getNormalized();
 	Vec3 s = cross(f, u).getNormalized();
 	u = cross(s,f);
-//	printf("f.x = %f, f.y = %f, f.z = %f\n", f.x, f.y, f.z);  
-	/*
-	Mat3 m(
-		s.x
-		,s.y
-		,s.z
-		,u.x
-		,u.y
-		,u.z
-		,-f.x
-		,-f.y
-		,-f.z
-	);
-	*/
+
 	Mat3 m(
 		s.x
 		,u.x
@@ -323,22 +311,6 @@ Mat3 Mat3::getLookAtMatrix(const Vec3& eye, const Vec3& center, const Vec3& up) 
 		,-f.z
 	);
 
-//	Vec3 d =  center - eye;
-//	d.normalize();
-//	d *= -1;
-//	
-//	Vec3 right = cross(d,up);
-//	right.normalize();
-//	right *= -1;
-//			
-//	Vec3 up = cross(d,right);
-//	up.normalize();
-//	
-//	Mat3 m(	
-//		right.x, up.x, d.x
-//		,right.y, up.y, d.y
-//		,right.z, up.z, d.z
-//	);
 	return m;
 }
 
@@ -346,7 +318,8 @@ Mat3 Mat3::getLookAtMatrix(const Vec3& eye, const Vec3& center, const Vec3& up) 
 
 // Creates a coordinate system from a direction vector. 
 // vz must be normalized!!!!!!!
-void Mat3::makeCoordinateSystem(const Vec3& vz)  {
+/*
+void Mat3::makeCoordinateSystemPBRT(const Vec3& vz)  {
 	Vec3 vx,vy;
 	if(fabsf(vz.x) > fabsf(vz.y)) {
 		float invl = 1.0f / sqrtf(vz.x * vz.x + vz.z * vz.z);
@@ -375,24 +348,47 @@ void Mat3::makeCoordinateSystem(const Vec3& vz)  {
 	m[7] = vz.y;
 	m[8] = vz.z;
 }
+*/
+
+// from: http://www2.imm.dtu.dk/~jrf/papers/abstracts/onb.html
+// https://gist.github.com/3082114
+void Mat3::makeCoordinateSystem(const Vec3& z) {
+	if(z.z < -0.9999999f) {
+		m[0] = 0.0f;
+		m[1] = -1.0f;
+		m[2] = 0.0f;
+		
+		m[3] = -1.0f;
+		m[4] = 0.0f;
+		m[5] = 0.0f;
+		
+		m[6] = z.x;
+		m[7] = z.y;
+		m[8] = z.z;
+		return;
+    }
+    const float a = 1.0f/(1.0f + z.z);
+    const float b = -z.x * z.y * a;
+	
+	m[0] = 1.0f - z.x * z.x * a;
+	m[1] = b;
+	m[2] = -z.x;
+	
+	m[3] = b;
+	m[4] = 1.0f - z.y * z.y * a;
+	m[5] = -z.y;
+	
+	m[6] = z.x;
+	m[7] = z.y;
+	m[8] = z.z;
+}
 
 void Mat3::makeCoordinateSystem(const Vec3& vz, const Vec3& up)  {
 	Vec3 vx,vy;
 	
 	roxlu_cross3(vz, up, vx);
 	roxlu_cross3(vx, vz, vy);
-	//vz.normalize();
-	//up.normalize();
-//	vx = cross(vz, up);
-//	vx.normalize();
-	
-//	vy = cross(vx, vz);
-//	vy.normalize();
-//	printf("vx: %f, vy: %f, vz:%f\n", vx.length(), vy.length(), vz.length());
-//	vx.print();
-//	vy.print();
-//	vz.print();
-//	printf("--\n");
+
 	m[0] = vx.x;
 	m[1] = vx.y;
 	m[2] = vx.z;
