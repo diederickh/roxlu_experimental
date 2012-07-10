@@ -2,6 +2,7 @@
 
 #include <roxlu/core/Utils.h>
 
+
 uint32_t gl_string_id(const char * data, int len) {
 	uint32_t hash = len, tmp;
 	int rem;

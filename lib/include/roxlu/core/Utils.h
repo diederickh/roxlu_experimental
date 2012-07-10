@@ -22,4 +22,11 @@ extern uint32_t gl_string_id(const char * data, int len);
 #define EPSILON 0.000001
 #define IS_ZERO(f) 	(fabs(f) < EPSILON)	
 
+
+// as suggested: http://stackoverflow.com/questions/4100657/problem-with-my-clamp-macro
+template <typename T> 
+inline T clamp(T value, T low, T high) {
+    return (value < low) ? low : ((value > high) ? high : value);
+}
+
 #endif
