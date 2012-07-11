@@ -13,7 +13,8 @@ class Buttons;
 class Storage {
 
 public: 
-
+	Storage() {}
+	~Storage() { printf("Storage::~Storage()\n"); } 
 	bool save(const string& file, Buttons* b);
 	bool load(const string& file, Buttons* b);
 };

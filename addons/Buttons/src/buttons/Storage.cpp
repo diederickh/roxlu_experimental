@@ -73,8 +73,11 @@ bool Storage::save(const string& file, Buttons* buttons) {
 	ofs.close();
 	return true;
 }
-
+// @todo make this work when one adds/removes elements to gui! 
+// crashes on windows when you save with 10 elements en load 
+// with 8 for example.
 bool Storage::load(const string& file, Buttons* buttons) {
+	
 	std::ifstream ifs(file.c_str(), std::ios::out | std::ios::binary);
 	if(!ifs.is_open()) {
 		printf("Cannot load: %s\n", file.c_str());
@@ -88,69 +91,91 @@ bool Storage::load(const string& file, Buttons* buttons) {
 	ifs.read((char*)&y, sizeof(int));
 	ifs.read((char*)&w, sizeof(int));
 	b.setPosition(x,y);
-	
+
 	// Number of elements.
 	size_t num_els = 0;
 	ifs.read((char*)&num_els, sizeof(size_t));
 	
 	// Load elements.
 	char name_buf[1024];
+	
 	for(int i = 0; i < num_els; ++i) {
 		int type = 0;
 		ifs.read((char*)&type, sizeof(int));
-		
+		//printf("Storage::load() - 4 " );
 		// retrieve name.
 		size_t name_size;
+		
 		ifs.read((char*)&name_size, sizeof(size_t));
+		//printf("Name size: %d \n", int(name_size));
+		
+		//printf("Storage.load() - name size: %zu\n", name_size);
 		ifs.read((char*)name_buf, name_size);
+		//printf("Storage::load() - Name buf: %s\n", name_buf);
 		
 		Element* el = buttons->getElement(name_buf);
+		//printf("Storage::load() - getElements()\n");
 		if(el == NULL) {
-			continue;
+			// when the element wasn't found we need to eat some more bytes
+			// continue
 		}
-
+		//printf("Storage::load() - 5 " );
+		
 		switch(type) {
 			case BTYPE_SLIDER: {
 				int value_type = BVALUE_NONE;
 				ifs.read((char*)&value_type, sizeof(int));
 				if(value_type == BVALUE_FLOAT) {
-					Sliderf* slider = static_cast<Sliderf*>(el);
-					ifs.read((char*)&slider->value, sizeof(float));
-					slider->setValue(slider->value);
-					slider->needsRedraw();
-					slider->needsTextUpdate();
+					float value;
+					ifs.read((char*)&value, sizeof(float));
+					if(el != NULL) {
+						Sliderf* slider = static_cast<Sliderf*>(el);
+						//ifs.read((char*)&slider->value, sizeof(float));
+						//slider->setValue(slider->value);
+						slider->setValue(value);
+						slider->needsRedraw();
+						slider->needsTextUpdate();
+					}
 				}
 				else if(value_type == BVALUE_INT) {
-					Slideri* slider = static_cast<Slideri*>(el);
-					ifs.read((char*)&slider->value, sizeof(int));
-					slider->setValue(slider->value);
-					slider->needsRedraw();
-					slider->needsTextUpdate();
+					int value;
+					ifs.read((char*)&value, sizeof(int));
+					if(el != NULL) {
+						Slideri* slider = static_cast<Slideri*>(el);
+						//ifs.read((char*)&slider->value, sizeof(int));
+						//slider->setValue(slider->value);
+						slider->setValue(value);
+						slider->needsRedraw();
+						slider->needsTextUpdate();
+					}
 				}
 				break;
 			}
 			case BTYPE_TOGGLE: {
-				Toggle* toggle = static_cast<Toggle*>(el);
-				ifs.read((char*)&toggle->value, sizeof(bool));
-				toggle->needsRedraw();
+				bool value;
+				ifs.read((char*)&value, sizeof(bool));
+				if(el != NULL) {
+					Toggle* toggle = static_cast<Toggle*>(el);
+					toggle->value = value;
+					//ifs.read((char*)&toggle->value, sizeof(bool));
+					toggle->needsRedraw();
+				}
 				break;
 			}
-			/*
-			case BTYPE_RADIO: {
-				printf("Load radio.\n");
-				Radio* radio = static_cast<Radio*>((el));
-				ifs.read((char*)&radio->selected, sizeof(int));
-				break;
-			}
-			*/
+			
 			default: {
 				printf("Cannot load gui type: %d\n", type);
 				break;
 			}	
-				
+			
 		}	
+		
 	}
+	
+	//printf("Storage::load() - 6 " );
 	ifs.close();
+//	printf("Storage::load() - 7a ");
+	
 	return true;
 }
 

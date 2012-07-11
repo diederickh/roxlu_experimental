@@ -17,7 +17,7 @@ Text::Text(BitmapFont& bmfont)
 	,win_w(0)
 	,win_h(0)
 {
-
+	printf("Text()\n");
 	vao.create();
 
 	// @todo VAO could be static !

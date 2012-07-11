@@ -54,10 +54,14 @@ void Axis::setup(int nSize) {
 }
 
 void Axis::draw() {
+#ifdef _WIN32
+	printf("@todo Axis::draw() - this crashes on Windows. needs to be fixed.\n");
+#else 
 	glLineWidth(1.0);
 	glDisable(GL_TEXTURE_2D); eglGetError();
 	vbo.drawArrays(GL_LINES, 0, num_vertices); eglGetError();
 	//glEnable(GL_TEXTURE_2D); eglGetError();
+#endif
 }
 
 } // roxlu

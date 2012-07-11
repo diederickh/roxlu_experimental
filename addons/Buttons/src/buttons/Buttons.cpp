@@ -30,7 +30,9 @@ Buttons::Buttons(const string& title, int w)
 	,num_panel_vertices(0) 
 	,is_locked(false)
 {
+		
 	
+	printf("Button()\n");
 	if(!shaders_initialized) {
 		vao.create();
 		bmf = new BitmapFont();
@@ -51,12 +53,12 @@ Buttons::Buttons(const string& title, int w)
 	gui_shader.enable();	
 	glEnableVertexAttribArray(gui_shader.getAttribute("pos")); eglGetError();
 	glEnableVertexAttribArray(gui_shader.getAttribute("col")); eglGetError();
-	glVertexAttribPointer(gui_shader.getAttribute("pos"), 2, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), offsetof(ButtonVertex,pos));
+	glVertexAttribPointer(gui_shader.getAttribute("pos"), 2, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), (GLvoid*)offsetof(ButtonVertex,pos));
 	glVertexAttribPointer(gui_shader.getAttribute("col"), 4, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), (GLvoid*)offsetof(ButtonVertex,col));
 	
 	gui_shader.disable();
 	vao.unbind();
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0); eglGetError();
 	createOrtho(ofGetWidth(), ofGetHeight()); // @todo remove call to getwidth/height @todo windows
 	
 	// top draggable handle
@@ -65,6 +67,7 @@ Buttons::Buttons(const string& title, int w)
 	BSET_COLOR(shadow_color, 0.1, 0.1, 0.1, 0.1);
 	
 	title_dx = static_text->add(x+5, y+2, title);
+	
 }
 
 Buttons::~Buttons() {
@@ -101,7 +104,7 @@ void Buttons::createOrtho(float w, float h) {
 }
 
 void Buttons::update() {
-
+	
 	h = 0;
 	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {
@@ -518,8 +521,10 @@ void Buttons::load() {
 }
 
 void Buttons::load(const string& file) {
+	printf("Buttons::Load() 1\n");
 	buttons::Storage storage;
 	storage.load(file, this);
+	printf("Buttons::Load() 2\n");
 
 	// notify elements.
 	vector<Element*>::iterator it = elements.begin();
@@ -527,6 +532,7 @@ void Buttons::load(const string& file) {
 		(*it)->onLoaded();
 		++it;
 	}
+	printf("Buttons::Load() 3\n");
 }
 
 Element* Buttons::getElement(const string& name) {

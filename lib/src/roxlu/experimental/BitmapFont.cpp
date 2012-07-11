@@ -43,6 +43,7 @@ bool BitmapFont::load() {
 }
 
 bool BitmapFont::generate(const unsigned char* src, int imgW, int imgH) {
+	printf("BitmapFont::generate()\n");
 	// find height of font
 	int i,j;
 	int h = 0, hh = 0;
