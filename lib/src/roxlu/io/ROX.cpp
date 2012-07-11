@@ -131,6 +131,8 @@ bool ROX::import(const string& filepath) {
 		++it;
 	}
 	*/
+	
+	return true;
 }
 
 bool ROX::extractFace(string info, int& vertexIndex, int& normalIndex, int& texcoordIndex) {

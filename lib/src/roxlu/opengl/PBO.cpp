@@ -64,6 +64,7 @@ PBO& PBO::setPixels(unsigned char* pRGBA) {
 		,color_type, GL_UNSIGNED_BYTE, (char*)0
 	); eglGetError();
 	//unbind();
+	return *this;
 }
 
 PBO& PBO::bind() {
