@@ -100,25 +100,15 @@ bool Storage::load(const string& file, Buttons* buttons) {
 	for(int i = 0; i < num_els; ++i) {
 		int type = 0;
 		ifs.read((char*)&type, sizeof(int));
-		//printf("Storage::load() - 4 " );
+		
 		// retrieve name.
 		size_t name_size;
-		
 		ifs.read((char*)&name_size, sizeof(size_t));
-		//printf("Name size: %d \n", int(name_size));
-		
-		//printf("Storage.load() - name size: %zu\n", name_size);
 		ifs.read((char*)name_buf, name_size);
-		//printf("Storage::load() - Name buf: %s\n", name_buf);
 		
 		Element* el = buttons->getElement(name_buf);
-		//printf("Storage::load() - getElements()\n");
-		if(el == NULL) {
-			// when the element wasn't found we need to eat some more bytes
-			// continue
-		}
-		//printf("Storage::load() - 5 " );
 		
+		// retrieve all element values
 		switch(type) {
 			case BTYPE_SLIDER: {
 				int value_type = BVALUE_NONE;
@@ -128,8 +118,6 @@ bool Storage::load(const string& file, Buttons* buttons) {
 					ifs.read((char*)&value, sizeof(float));
 					if(el != NULL) {
 						Sliderf* slider = static_cast<Sliderf*>(el);
-						//ifs.read((char*)&slider->value, sizeof(float));
-						//slider->setValue(slider->value);
 						slider->setValue(value);
 						slider->needsRedraw();
 						slider->needsTextUpdate();
@@ -140,8 +128,6 @@ bool Storage::load(const string& file, Buttons* buttons) {
 					ifs.read((char*)&value, sizeof(int));
 					if(el != NULL) {
 						Slideri* slider = static_cast<Slideri*>(el);
-						//ifs.read((char*)&slider->value, sizeof(int));
-						//slider->setValue(slider->value);
 						slider->setValue(value);
 						slider->needsRedraw();
 						slider->needsTextUpdate();
@@ -155,7 +141,6 @@ bool Storage::load(const string& file, Buttons* buttons) {
 				if(el != NULL) {
 					Toggle* toggle = static_cast<Toggle*>(el);
 					toggle->value = value;
-					//ifs.read((char*)&toggle->value, sizeof(bool));
 					toggle->needsRedraw();
 				}
 				break;
@@ -165,15 +150,9 @@ bool Storage::load(const string& file, Buttons* buttons) {
 				printf("Cannot load gui type: %d\n", type);
 				break;
 			}	
-			
 		}	
-		
 	}
-	
-	//printf("Storage::load() - 6 " );
 	ifs.close();
-//	printf("Storage::load() - 7a ");
-	
 	return true;
 }
 
