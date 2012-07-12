@@ -1,12 +1,8 @@
 #ifndef ROXLU_BSLIDERH
 #define ROXLU_BSLIDERH
 
-//#include "ofMain.h" // @todo remove
 #include <buttons/Types.h>
 #include <buttons/Element.h>
-
-// #include "Types.h"
-// #include "Element.h"
 #include <sstream>
 
 namespace buttons {
@@ -177,16 +173,6 @@ public:
 
 typedef Slider<float> Sliderf;
 typedef Slider<int> Slideri;
-
-//inline Slider& Slider::setMin(const float& m) {
-//	minv = m;
-//	return *this;
-//}
-//
-//inline Slider& Slider::setMax(const float& m) {
-//	maxv = m;
-//	return *this;
-//}
 
 } // namespace buttons
 

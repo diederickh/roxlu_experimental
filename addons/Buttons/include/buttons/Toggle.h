@@ -28,8 +28,8 @@ public:
 
 	bool& value;
 	
-	float bg_top_color[4];
-	float bg_bottom_color[4];
+	//float bg_top_color[4];
+	//float bg_bottom_color[4];
 	float toggle_off_color[4];
 	float toggle_on_color[4];
 	int label_dx;

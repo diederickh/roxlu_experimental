@@ -1,4 +1,3 @@
-//#include "Buttons.h"
 #include <buttons/Buttons.h>
 
 namespace buttons {
@@ -13,6 +12,7 @@ Buttons::Buttons(const string& title, int w)
 	,x(0)
 	,y(0)
 	,w(w)
+	,h(0)
 	,win_w(0)
 	,win_h(0)
 	,header_h(20) // header height (draggable area)
@@ -27,8 +27,11 @@ Buttons::Buttons(const string& title, int w)
 	,pmx(0)
 	,pmy(0)
 	,title(title)
+	,title_dx(0)
 	,num_panel_vertices(0) 
 	,is_locked(false)
+	,static_text(NULL)
+	,dynamic_text(NULL)
 {
 		
 	

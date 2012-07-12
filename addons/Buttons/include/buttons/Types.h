@@ -3,7 +3,6 @@
 
 #include <roxlu/math/Vec2.h>
 #include <vector>
-
 										//((x>=i)   && (x <=(i +w)) && (y >= j) && y <= (j+h))
 #define BMOUSE_INSIDE(mx,my,ex,ey,w,h) 	(mx>=ex && mx<=(ex+w) && my >= ey && my <= (ey+h))
 #define BINSIDE_ELEMENT(ptr, mx, my)  BMOUSE_INSIDE(mx, my, ptr->x, ptr->y, ptr->w, ptr->h)
@@ -35,14 +34,17 @@ enum ElementValueTypes {
 	,BVALUE_FLOAT
 };
 
-//typedef void(*ButtonCallback)(int); 
-
 class ButtonVertex {
 
 public:
 
 	float pos[2];
 	float col[4];
+	
+	ButtonVertex() {
+		pos[0] = pos[1] = 0.0f;
+		col[0] = col[1] = col[2] = col[3] = 0.0f
+	}
 	
 	void setPos(const float& x, const float& y) {
 		pos[0] = x;

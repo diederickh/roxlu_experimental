@@ -1,19 +1,12 @@
 #ifndef ROXLU_RELEMENTH
 #define ROXLU_RELEMENTH
 
-/*
-#include "Text.h"
-//#include "Color.h"
-*/
-
 #include <roxlu/experimental/Text.h>
 #include <roxlu/graphics/Color.h>
-
 #include <buttons/Types.h>
 #include <string>
 
 using namespace roxlu;
-
 using std::string;
 
 namespace buttons {
@@ -41,7 +34,6 @@ public:
 	
 	virtual void onSaved(){}  // gets called once all data has been saved
 	virtual void onLoaded(){}  // gets called once all data has been loaded 
-	
 	
 	virtual Element& setColor(const float r, const float g, const float b, const float a = 1.0f);
 	virtual Element& setColor(const float* col, int num = 3);
@@ -103,27 +95,19 @@ inline Element& Element::setColor(const float* col, int num) {
 }
 	
 inline Element& Element::setColor(const float r, const float g, const float b, const float a) {
-
-
 	// set default color
 	float hue,sat,bright;
-//	printf("Col in: %f, %f, %f\n", r,g,b);
 	Color::RGBToHLSf(r,g,b,&hue,&bright, &sat);
 	BSET_COLOR(col_bg_default, r, g, b, a);
-//	float rr,gg,bb;
-//	Color::HLSToRGBf(hue,bright, sat, &rr, &gg, &bb);	
-//	printf("Col out: %f, %f, %f\n", rr,gg,bb);	
 
 	bg_bottom_color = col_bg_default;
 	bg_top_color = col_bg_default;
 	
 	// top hover is a bit lighter
-	//Color::HLSToRGBf(hue, bright * 1.2, sat, &col_bg_top_hover[0], &col_bg_top_hover[1], &col_bg_top_hover[2]);
 	Color::HLSToRGBf(hue, bright +0.2, sat +0.2, &col_bg_top_hover[0], &col_bg_top_hover[1], &col_bg_top_hover[2]);
 	col_bg_top_hover[3] = 1.0f;
 		
 	// bottom hover is a bit darker
-	//Color::HLSToRGBf(hue, bright * 0.5, sat, &col_bg_bottom_hover[0], &col_bg_bottom_hover[1], &col_bg_bottom_hover[2]);
 	Color::HLSToRGBf(hue, bright - 0.2 , sat - 0.2, &col_bg_bottom_hover[0], &col_bg_bottom_hover[1], &col_bg_bottom_hover[2]);
 	col_bg_bottom_hover[3] = 1.0f;
 	
