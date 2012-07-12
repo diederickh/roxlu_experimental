@@ -106,6 +106,7 @@ bool Ply::save(string path, VertexData& vd) {
 	
 	cout << vd.getNumColors() << "===" << vd.getNumVertices() << endl;
 	//cout << ss.str() << endl;
+	return true;
 }
 
 }; // roxlu
