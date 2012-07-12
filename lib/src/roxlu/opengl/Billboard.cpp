@@ -47,7 +47,6 @@ void Billboard::bind(const float* pm, const float* vm, const float* right, const
 }
 
 void Billboard::initBillboard() {
-	
 	if(!created) {
 		vao.create();
 		printf("Billboard needs to be created\n");
@@ -60,10 +59,8 @@ void Billboard::initBillboard() {
 		shader.a("a_pos", 0).a("a_tex", 1);
 		shader.link();
 		shader.u("u_projection_matrix").u("u_view_matrix").u("u_model_matrix").u("u_texture").u("u_alpha");
-	
 		vao.bind();
-		//glGenVertexArraysAPPLE(1, &vao); eglGetError();
-		//glBindVertexArrayAPPLE(vao); eglGetError();
+		
 		glGenBuffers(1, &vbo); eglGetError();
 		glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();		
 		
@@ -86,8 +83,6 @@ void Billboard::initBillboard() {
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(BillboardVertex), (GLvoid*)offsetof(BillboardVertex, pos));
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(BillboardVertex), (GLvoid*)offsetof(BillboardVertex, tex));
 
-
-		//glBindVertexArrayAPPLE(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		vao.unbind();
 		shader.disable();
@@ -103,8 +98,6 @@ void Billboard::initBillboard() {
 	shader.uniformMat4fv("u_projection_matrix", pm);
 	shader.uniformMat4fv("u_view_matrix", vm);
 	shader.uniform1i("u_texture",2);
-
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Billboard::setTexture(const GLuint& id) {
@@ -132,13 +125,11 @@ void Billboard::draw(const Vec3& position, const float scale, const float rotati
 	shader.uniform1f("u_alpha", alpha);
 	shader.uniformMat4fv("u_model_matrix", mm.getPtr());
 	
-	//glBindVertexArrayAPPLE(vao); eglGetError();
 	vao.bind();
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 void Billboard::unbind() {
-	//glBindVertexArrayAPPLE(0);
 	vao.unbind();
 	shader.disable();
 	glActiveTexture(GL_TEXTURE0);

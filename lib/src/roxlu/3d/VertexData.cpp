@@ -20,7 +20,6 @@ VertexData::VertexData()
 	char auto_name[30];
 	sprintf(auto_name, "VertexData%04d", num_instances);
 	name = auto_name;
-	printf("Autoname: %s\n", name.c_str());
 }
 
 VertexData::VertexData(const string& meshName) 

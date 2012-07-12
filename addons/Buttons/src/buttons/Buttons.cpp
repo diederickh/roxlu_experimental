@@ -33,9 +33,6 @@ Buttons::Buttons(const string& title, int w)
 	,static_text(NULL)
 	,dynamic_text(NULL)
 {
-		
-	
-	printf("Button()\n");
 	if(!shaders_initialized) {
 		vao.create();
 		bmf = new BitmapFont();
@@ -524,10 +521,8 @@ void Buttons::load() {
 }
 
 void Buttons::load(const string& file) {
-	printf("Buttons::Load() 1\n");
 	buttons::Storage storage;
 	storage.load(file, this);
-	printf("Buttons::Load() 2\n");
 
 	// notify elements.
 	vector<Element*>::iterator it = elements.begin();
@@ -535,7 +530,6 @@ void Buttons::load(const string& file) {
 		(*it)->onLoaded();
 		++it;
 	}
-	printf("Buttons::Load() 3\n");
 }
 
 Element* Buttons::getElement(const string& name) {

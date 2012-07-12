@@ -3,7 +3,6 @@
 #include <roxlu/experimental/BitmapFont.h>
 
 BitmapFont::BitmapFont() {
-	printf("BitmapFont.cpp\n");
 	for(int i = 0; i < 256; ++i) {
 		u0[i] = 0;
 		u1[i] = 0;
@@ -43,7 +42,6 @@ bool BitmapFont::load() {
 }
 
 bool BitmapFont::generate(const unsigned char* src, int imgW, int imgH) {
-	printf("BitmapFont::generate()\n");
 	// find height of font
 	int i,j;
 	int h = 0, hh = 0;

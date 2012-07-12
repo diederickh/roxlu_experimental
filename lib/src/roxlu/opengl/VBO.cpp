@@ -157,7 +157,7 @@ VBO& VBO::setVertices(const float* pVertices, int nNumCoords, int nNum, int nUsa
 		created_types |= VBO_TYPE_VERTEX_ARRAY;
 	}
 	
-	printf("In VBO::setVertices, we need to test the sizeof check!, moved from ofVec3f to Vec3/Vec2\n");
+	//printf("In VBO::setVertices, we need to test the sizeof check!, moved from ofVec3f to Vec3/Vec2\n");
 	if(nNumCoords == 3) {
 		vertex_stride = sizeof(Vec3);
 	}

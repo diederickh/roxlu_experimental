@@ -102,11 +102,10 @@ Shader& Shader::addAttribute(const std::string& name, GLuint index) {
 		printf("Error: Attribute not found: %s\n", name.c_str());
 		return *this;
 	}
-	printf("Adding an attribute with index: %s, %d, program is: %d\n", name.c_str(), index,prog_id);
+
 	// set the attribute location and enable the vertex attrib array.
 	glBindAttribLocation(prog_id, index, name.c_str());
-	printf("boudn\n");
-	//glEnableVertexAttribArray(index);
+
 	attributes[name] = index;
 	return *this;
 }
