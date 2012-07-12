@@ -43,7 +43,7 @@ public:
 	
 	ButtonVertex() {
 		pos[0] = pos[1] = 0.0f;
-		col[0] = col[1] = col[2] = col[3] = 0.0f
+		col[0] = col[1] = col[2] = col[3] = 0.0f;
 	}
 	
 	void setPos(const float& x, const float& y) {
