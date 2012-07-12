@@ -25,10 +25,10 @@ class Shader {
 		Shader();
 		Shader(const std::string& name);
 		Shader& setName(const std::string& name);
-		Shader& load(const std::string& name);
-		Shader& load();
-		Shader& link();
-		void create(const std::string& vertexSource, const std::string& fragmentSource); 
+		bool load(const std::string& name);
+		bool load();
+		void link();
+		bool create(const std::string& vertexSource, const std::string& fragmentSource); 
 		Shader& addAttribute(const std::string& name);
 		Shader& addAttribute(const std::string& name, GLuint index); // add attribute, enable vertex attrib array and set index
 		Shader& addUniform(const std::string& name);

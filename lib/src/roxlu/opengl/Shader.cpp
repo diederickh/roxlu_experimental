@@ -24,17 +24,16 @@ Shader& Shader::setName(const std::string& sName) {
 	return *this;
 }
 
-Shader& Shader::load(const std::string& sName) {
+bool Shader::load(const std::string& sName) {
 	name = sName;
 	return load();
 }
 
 // load and create a shader
-Shader& Shader::load() {
+bool Shader::load() {
 	std::string vs_src = getVertexSource();
 	std::string fs_src = getFragmentSource();
-	create(vs_src, fs_src);
-	return *this;
+	return create(vs_src, fs_src);
 }
 
 string Shader::getVertexSource(bool inDataPath) {
@@ -47,10 +46,10 @@ string Shader::getFragmentSource(bool inDataPath) {
 	return File::getFileContents(vs_file, inDataPath);
 }
 
-void Shader::create(const std::string& vertexSource, const std::string& fragmentSource) {
+bool Shader::create(const std::string& vertexSource, const std::string& fragmentSource) {
 	if(!vertexSource.length() || !fragmentSource.length()) {
 		printf("No shader source given.\n");
-		return;
+		return false;
 	}
 	
 	vert_shader_source = vertexSource;
@@ -78,14 +77,13 @@ void Shader::create(const std::string& vertexSource, const std::string& fragment
 	prog_id = glCreateProgram(); eglGetError();
 	glAttachShader(prog_id, vert_id); eglGetError();
 	glAttachShader(prog_id, frag_id); eglGetError();
-
+	return true;
 }
 
-Shader& Shader::link() {
+void Shader::link() {
 	glLinkProgram(prog_id); eglGetError();
 	glUseProgram(prog_id); eglGetError();
 	disable();
-	return *this;
 }
 
 Shader& Shader::a(const std::string& attribute) {
@@ -101,12 +99,14 @@ Shader& Shader::addAttribute(const std::string& name, GLuint index) {
 	// check if it's already added.
 	ShaderMap::iterator it = attributes.find(name);
 	if(it != attributes.end()) {
+		printf("Error: Attribute not found: %s\n", name.c_str());
 		return *this;
 	}
-	
+	printf("Adding an attribute with index: %s, %d, program is: %d\n", name.c_str(), index,prog_id);
 	// set the attribute location and enable the vertex attrib array.
 	glBindAttribLocation(prog_id, index, name.c_str());
-	glEnableVertexAttribArray(index);
+	printf("boudn\n");
+	//glEnableVertexAttribArray(index);
 	attributes[name] = index;
 	return *this;
 }
