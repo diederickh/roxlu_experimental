@@ -25,16 +25,6 @@ void testApp::update() {
 
 #include "ofMain.h" // @todo remove, needed in c'tor for ofGetWidth()/ofGetHeight()
 
-/*
-#include "Shader.h"
-#include "VertexData.h"
-#include "BitmapFont.h"
-#include "Text.h"
-#include "VAO.h"
-#include "Error.h"
-#include "Color.h"
-*/
-
 #include <roxlu/opengl/Shader.h>
 #include <roxlu/experimental/BitmapFont.h>
 #include <roxlu/experimental/Text.h>
@@ -50,15 +40,6 @@ void testApp::update() {
 #include <buttons/Radio.h>
 #include <buttons/Storage.h>
 
-/*
-#include "Types.h"
-#include "Element.h"
-#include "Slider.h"
-#include "Toggle.h"
-#include "Button.h"
-#include "Radio.h"
-#include "Storage.h"
-*/
 
 using std::vector;
 using namespace roxlu;
@@ -146,8 +127,7 @@ public:
 	void onMouseDown(int x, int y);
 	void onMouseUp(int x, int y);
 	void onResize(int newW, int newH);
-	
-	
+		
 	bool isMouseInsidePanel();
 	void setPosition(int x, int y);
 	friend class Storage; 

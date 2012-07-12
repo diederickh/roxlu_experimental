@@ -8,12 +8,6 @@
 #include <buttons/Element.h>
 #include <buttons/Toggle.h>
 
-/*
-#include "Types.h"
-#include "Element.h"
-#include "Toggle.h"
-*/
-
 using std::string;
 using std::vector;
 
@@ -43,8 +37,8 @@ public:
 
 	bool updateSelected();
 
-	float bg_top_color[4];
-	float bg_bottom_color[4];
+	//float bg_top_color[4];
+	//float bg_bottom_color[4];
 	int label_dx;
 	const vector<string>& options;
 	T* cb;
@@ -62,6 +56,8 @@ Radio<T>::Radio(int id, const vector<string>& options, int& selected, const stri
 	,cb(cb)
 	,id(id)
 	,selected(selected)
+	,label_dx(0)
+	,values(NULL)
 {
 	h = 20;
 	BSET_COLOR(bg_top_color, 0.0, 0.17, 0.21, 1.0);

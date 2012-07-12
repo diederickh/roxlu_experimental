@@ -16,6 +16,7 @@ public:
 		:Element(BTYPE_BUTTON, name, BVALUE_NONE)
 		,id(id)
 		,cb(cb)
+		,label_dx(0)
 	{
 		h = 20;
 		BSET_COLOR(bg_top_color, 0.0, 0.17, 0.21, 1.0);

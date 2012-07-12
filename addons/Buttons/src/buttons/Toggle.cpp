@@ -1,11 +1,11 @@
-//#include "Toggle.h"
 #include <buttons/Toggle.h>
 
 namespace buttons {
-
+	
 Toggle::Toggle(bool& val, const string& name) 
 	:value(val)
 	,Element(BTYPE_TOGGLE, name, BVALUE_NONE)
+	,label_dx(0)
 {
 	h = 20;
 	BSET_COLOR(bg_top_color, 0.0, 0.17, 0.21, 1.0);
