@@ -24,6 +24,10 @@ bool Storage::save(const string& file, Buttons* buttons) {
 	vector<Element*>::iterator it = b.elements.begin();
 	while(it != b.elements.end()) {
 		Element& e = *(*it);
+		if(!e.canSave()) {
+			++it;
+			continue;
+		}
 		
 		// store type
 		ofs.write((char*)&e.type, sizeof(int));
@@ -33,39 +37,8 @@ bool Storage::save(const string& file, Buttons* buttons) {
 		ofs.write((char*)&name_size, sizeof(size_t));
 		ofs.write((char*)e.name.c_str(), name_size);
 		
-		switch(e.type) {
-			case BTYPE_SLIDER: {
-				int value_type = (*it)->getValueType();
-				if(value_type == BVALUE_INT) {
-					Slideri* slider = static_cast<Slideri*>((*it));
-					ofs.write((char*)&value_type, sizeof(int));
-					ofs.write((char*)&slider->value, sizeof(float));
-				}
-				else if(value_type == BVALUE_FLOAT) {
-					Sliderf* slider = static_cast<Sliderf*>((*it));
-					ofs.write((char*)&value_type, sizeof(int));
-					ofs.write((char*)&slider->value, sizeof(float));
-				}
-				break;
-			}
-			case BTYPE_TOGGLE: {
-				Toggle* toggle = static_cast<Toggle*>((*it));
-				ofs.write((char*)&toggle->value, sizeof(bool));
-				break;
-			}
-			/*
-			case BTYPE_RADIO: {
-				printf("Save radio.\n");
-				Radio* radio = static_cast<Radio*>((*it));
-				ofs.write((char*)&toggle->selected, sizeof(int));
-				break;
-			}
-			*/
-			default: {
-				printf("Cannot store unhandled gui type: %d\n", e.type);
-				break;
-			}
-		}
+		e.save(ofs);
+		
 		++it;
 	}
 	ofs.close();
@@ -107,50 +80,17 @@ bool Storage::load(const string& file, Buttons* buttons) {
 		ifs.read((char*)name_buf, name_size);
 		
 		Element* el = buttons->getElement(name_buf);
+
+		size_t data_size;
+		ifs.read((char*)&data_size, sizeof(size_t));
 		
-		// retrieve all element values
-		switch(type) {
-			case BTYPE_SLIDER: {
-				int value_type = BVALUE_NONE;
-				ifs.read((char*)&value_type, sizeof(int));
-				if(value_type == BVALUE_FLOAT) {
-					float value;
-					ifs.read((char*)&value, sizeof(float));
-					if(el != NULL) {
-						Sliderf* slider = static_cast<Sliderf*>(el);
-						slider->setValue(value);
-						slider->needsRedraw();
-						slider->needsTextUpdate();
-					}
-				}
-				else if(value_type == BVALUE_INT) {
-					int value;
-					ifs.read((char*)&value, sizeof(int));
-					if(el != NULL) {
-						Slideri* slider = static_cast<Slideri*>(el);
-						slider->setValue(value);
-						slider->needsRedraw();
-						slider->needsTextUpdate();
-					}
-				}
-				break;
-			}
-			case BTYPE_TOGGLE: {
-				bool value;
-				ifs.read((char*)&value, sizeof(bool));
-				if(el != NULL) {
-					Toggle* toggle = static_cast<Toggle*>(el);
-					toggle->value = value;
-					toggle->needsRedraw();
-				}
-				break;
-			}
-			
-			default: {
-				printf("Cannot load gui type: %d\n", type);
-				break;
-			}	
-		}	
+		if(el == NULL) {
+			printf("%s not found, forgetting about value...\n", name_buf);
+			ifs.seekg(data_size, ios_base::cur);
+		}
+		else {
+			el->load(ifs);
+		}
 	}
 	ifs.close();
 	return true;

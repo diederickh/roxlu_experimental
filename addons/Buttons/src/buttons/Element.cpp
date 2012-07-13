@@ -3,7 +3,7 @@
 
 namespace buttons {
 
-Element::Element(int type, const string& name, int valueType) 
+Element::Element(int type, const string& name) 
 	:x(0)
 	,y(0)
 	,w(0)
@@ -16,14 +16,14 @@ Element::Element(int type, const string& name, int valueType)
 	,state(BSTATE_NONE)
 	,type(type)
 	,name(name)
-	,value_type(valueType)
 	,label("")
 	,num_vertices(0)
 {
 	BSET_COLOR(col_bg_bottom_hover, 0.0, 0.17, 0.21, 1.0);
 	BSET_COLOR(col_bg_top_hover, 0.0, 0.17, 0.21, 1.0);
 	BSET_COLOR(col_bg_default, 0.0, 0.17, 0.21, 1.0);
-	BSET_COLOR(col_text, 0,0.48,0.98,0.9);
+	//BSET_COLOR(col_text, 0,0.48,0.98,0.9);
+	BSET_COLOR(col_text, 0.9,0.9,0.9,0.9);
 	bg_top_color = col_bg_default;
 	bg_bottom_color = col_bg_default;
 }

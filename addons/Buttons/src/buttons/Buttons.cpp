@@ -33,6 +33,7 @@ Buttons::Buttons(const string& title, int w)
 	,static_text(NULL)
 	,dynamic_text(NULL)
 {
+
 	if(!shaders_initialized) {
 		vao.create();
 		bmf = new BitmapFont();
@@ -221,8 +222,10 @@ void Buttons::draw() {
 	// draw header.
 	int start = 0;
 	int end = num_panel_vertices;
-	glDrawArrays(GL_TRIANGLES, start, num_panel_vertices); eglGetError();
-
+	
+	
+	//glDrawArrays(GL_TRIANGLES, start, num_panel_vertices); eglGetError();
+	/*
 	start = start + end;
 	
 	Element* el;
@@ -230,11 +233,20 @@ void Buttons::draw() {
 	while(it != elements.end()) {
 		el = (*it);
 		end = el->num_vertices;
+	
 		glDrawArrays(GL_TRIANGLES, start, end);
 		start += el->num_vertices;
 		++it;
 	}
 	
+	*/
+	
+	for(int i = 0; i < vd.draw_arrays.size(); ++i) {
+		ButtonDrawArray& bda = vd.draw_arrays[i];
+		//printf("Start: %d, end: %d, mode: %d\n", bda.start, bda.count, bda.mode);
+		glDrawArrays(bda.mode, bda.start, bda.count);
+	}
+	//printf("--\n");
 	vao.unbind();
 
 	static_text->draw();
@@ -245,14 +257,22 @@ void Buttons::draw() {
 	VAO::unbind();
 	glUseProgram(0);
 
-
+	// Allow custom drawing.
+	/*
+	it = elements.begin();
+	while(it != elements.end()) {
+		el = (*it);
+		el->draw(gui_shader, ortho);
+		++it;
+	}
+	*/
 	if(cull_enabled) {
 		glEnable(GL_CULL_FACE);
 	}
+
 	if(depth_enabled) {
 		glEnable(GL_DEPTH_TEST);
 	}
-	
 	
 }
 
@@ -283,20 +303,24 @@ void Buttons::debugDraw() {
 
 Sliderf& Buttons::addFloat(const string& label, float& value) {
 	buttons::Sliderf* el = new Sliderf(value, createCleanName(label), Sliderf::SLIDER_FLOAT);
-	el->setValueType(BVALUE_FLOAT);
 	addElement(el, label);
 	return *el;
 }
 
 Slideri& Buttons::addInt(const string& label, int& value) {
 	buttons::Slideri* el = new Slideri(value, createCleanName(label), Slideri::SLIDER_INT);
-	el->setValueType(BVALUE_INT);
 	addElement(el, label);
 	return *el;
 }
 
 Toggle& Buttons::addBool(const string& label, bool& value) {
 	buttons::Toggle* el = new Toggle(value, createCleanName(label));
+	addElement(el, label);
+	return *el;
+}
+
+SplineEditor& Buttons::addSpline(const string& label, Spline& spline) {
+	buttons::SplineEditor* el = new SplineEditor(label, spline);
 	addElement(el, label);
 	return *el;
 }

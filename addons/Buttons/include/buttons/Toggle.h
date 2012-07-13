@@ -25,7 +25,11 @@ public:
 	void onMouseEnter(int mx, int my);
 	void onMouseLeave(int mx, int my);	
 	void onMouseClick(int mx, int my);
-
+	
+	void save(std::ofstream& ofs);
+	void load(std::ifstream& ifs);
+	bool canSave();
+	
 	bool& value;
 	
 	//float bg_top_color[4];

@@ -5,6 +5,7 @@
 #include <roxlu/graphics/Color.h>
 #include <buttons/Types.h>
 #include <string>
+#include <fstream>
 
 using namespace roxlu;
 using std::string;
@@ -13,11 +14,13 @@ namespace buttons {
 
 class Element {
 public:	
-	Element(int type, const string& name, int valueType);
+	Element(int type, const string& name);
 	~Element();
 
 	virtual void setup(){}
 	virtual void update(){}
+	virtual void draw(Shader& shader, const float* pm){} // custom drawing! pm = projection matrix
+	
 	virtual void generateStaticText(Text& staticText) {}
 	virtual void updateTextPosition(Text& staticText, Text& dynText) {}
 	virtual void generateDynamicText(Text& dynText) {};
@@ -32,15 +35,18 @@ public:
 	virtual void onMouseEnter(int mx, int my) { }
 	virtual void onMouseLeave(int mx, int my) { }
 	
+
+	virtual bool canSave() = 0;
+	virtual void save(std::ofstream& ofs) = 0; 	// each element which stores something must write a size_t with the amount of data it stores
+	virtual void load(std::ifstream& ifs) = 0;
+	
 	virtual void onSaved(){}  // gets called once all data has been saved
 	virtual void onLoaded(){}  // gets called once all data has been loaded 
 	
 	virtual Element& setColor(const float r, const float g, const float b, const float a = 1.0f);
 	virtual Element& setColor(const float* col, int num = 3);
 	
-	void setValueType(int valueType);
-	int getValueType();
-	void needsRedraw();
+ 	void needsRedraw();
 	void needsTextUpdate(); // when you want to change the dynamic text
 	
 	int x;
@@ -48,10 +54,10 @@ public:
 	int w;
 	int h;
 	int type;
-	int value_type; // what kind of data do you store.
 
 	string label;
 	string name;
+	
 	int state;
 	bool is_mouse_inside;
 	bool is_mouse_down_inside;
@@ -74,14 +80,6 @@ inline void Element::needsRedraw() {
 
 inline void Element::needsTextUpdate() {
 	needs_text_update = true;
-}
-
-inline void Element::setValueType(int valueType) {
-	value_type = valueType;
-}
-
-inline int Element::getValueType() {
-	return value_type;
 }
 
 inline Element& Element::setColor(const float* col, int num) {

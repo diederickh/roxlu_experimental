@@ -18,7 +18,7 @@ public:
 
 	Slider(T& val, const string& name, int valueType) 
 		:value(val)
-		,Element(BTYPE_SLIDER, name, BVALUE_FLOAT)
+		,Element(BTYPE_SLIDER, name)
 		,minv(1)
 		,maxv(1000)
 		,p(0.0)
@@ -81,15 +81,18 @@ public:
 	void updateDynamicText(Text& txt) {
 		txt.setTextPosition(txtval_dx, x, y+2);
 		char buf[256];
-		float v;
-		std::stringstream ss;
-		ss << value;
-		ss >> v;
-		sprintf(buf, "%5.4f", v);
+		valueToChar(buf, value);
 		txt.updateText(txtval_dx, buf, col_text[0], col_text[1], col_text[2], col_text[3]);
 	}
 	
+	void valueToChar(char* buf, int v) {
+		sprintf(buf, "%d", v);
+	}
 	
+	void valueToChar(char* buf, float v) {
+		sprintf(buf, "%5.4f", v);
+	}
+		
 	void generateVertices(ButtonVertices& vd) {
 		num_vertices = buttons::createRect(vd, x, y, w, h, bg_top_color, bg_bottom_color);
 
@@ -156,6 +159,26 @@ public:
 	Slider& setMax(const T& m) {
 		maxv = m;
 		return *this;
+	}
+	
+	bool canSave() {
+		return true;
+	}
+	
+	void save(std::ofstream& ofs) {
+		size_t data_size = sizeof(int) + sizeof(T);
+		ofs.write((char*)&data_size, sizeof(size_t));
+
+		ofs.write((char*)&value_type, sizeof(int));
+		ofs.write((char*)&value, sizeof(T));
+	}
+	
+	void load(std::ifstream& ifs) {
+		ifs.read((char*)&value_type, sizeof(int));
+		ifs.read((char*)&value, sizeof(T));
+		setValue(value);
+		needsRedraw();
+		needsTextUpdate();
 	}
 
 	T& value;

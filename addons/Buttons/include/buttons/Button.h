@@ -13,7 +13,7 @@ template<class T>
 class Button : public Element {
 public:
 	Button(int id, T* cb, const string& name) 
-		:Element(BTYPE_BUTTON, name, BVALUE_NONE)
+		:Element(BTYPE_BUTTON, name)
 		,id(id)
 		,cb(cb)
 		,label_dx(0)
@@ -77,6 +77,9 @@ public:
 		(*cb)(id);
 	}
 	
+	void save(std::ofstream& ofs) {	}
+	void load(std::ifstream& ifs) { }
+	bool canSave() { return false; }
 
 	int label_dx;
 	float bg_top_color[4];

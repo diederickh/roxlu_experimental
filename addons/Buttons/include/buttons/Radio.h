@@ -34,7 +34,11 @@ public:
 	void onMouseClick(int mx, int my);
 	void onSaved();
 	void onLoaded();
-
+	
+	void save(std::ofstream& ofs);
+	void load(std::ifstream& ifs);
+	bool canSave();
+	
 	bool updateSelected();
 
 	//float bg_top_color[4];
@@ -51,7 +55,7 @@ public:
 
 template<class T>
 Radio<T>::Radio(int id, const vector<string>& options, int& selected, const string& name, T* cb) 
-	:Element(BTYPE_RADIO, name, BVALUE_NONE)
+	:Element(BTYPE_RADIO, name)
 	,options(options)
 	,cb(cb)
 	,id(id)
@@ -160,8 +164,16 @@ void Radio<T>::onLoaded() {
 	}
 }
 
+template<class T>
+void Radio<T>::save(std::ofstream& ofs) {}
 
+template<class T>
+void Radio<T>::load(std::ifstream& ifs) { }
 
+template<class T>
+bool Radio<T>::canSave() { 
+	return false; 
+}
 
 } // namespace buttons
 

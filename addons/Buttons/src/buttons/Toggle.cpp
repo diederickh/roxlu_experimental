@@ -4,7 +4,7 @@ namespace buttons {
 	
 Toggle::Toggle(bool& val, const string& name) 
 	:value(val)
-	,Element(BTYPE_TOGGLE, name, BVALUE_NONE)
+	,Element(BTYPE_TOGGLE, name)
 	,label_dx(0)
 {
 	h = 20;
@@ -58,5 +58,22 @@ void Toggle::onMouseClick(int mx, int my) {
 	needsRedraw();
 }
 
+bool Toggle::canSave() {
+	return true;
+}
+
+void Toggle::save(ofstream& ofs) {
+	size_t data_size = sizeof(int);
+	ofs.write((char*)&data_size, data_size);
+	int data = (value) ? 1 : 0;
+	ofs.write((char*)&data, sizeof(int));
+}
+
+void Toggle::load(std::ifstream& ifs) {
+	int data = 0;
+	ifs.read((char*)&data, sizeof(int));
+	value = (data == 1);
+	needsRedraw();
+}
 
 } // namespace buttons

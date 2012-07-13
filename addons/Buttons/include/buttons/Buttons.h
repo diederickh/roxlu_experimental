@@ -38,6 +38,7 @@ void testApp::update() {
 #include <buttons/Toggle.h>
 #include <buttons/Button.h>
 #include <buttons/Radio.h>
+#include <buttons/Spline.h>
 #include <buttons/Storage.h>
 
 
@@ -95,6 +96,10 @@ public:
 	Sliderf& addFloat(const string& label, float& value);
 	Slideri& addInt(const string& label, int& value);
 	Toggle& addBool(const string& label, bool& value);
+	SplineEditor& addSpline(const string& label, Spline& value);
+	
+	
+	//Curves& addCurve(const string& name, std::vector<T>
 	
 	template<class T>
 	Radio<T>& addRadio(const string& label, int id, T* cb, const vector<string>& options, int& value) {
