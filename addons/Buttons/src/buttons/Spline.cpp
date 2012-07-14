@@ -8,12 +8,14 @@ Spline::Spline() {
 Spline::~Spline() {
 }
 
-void Spline::createCurves(int numCurves) {
+void Spline::createPoints(int numPoints) {
 	points.clear();
-	int num = 1 + numCurves * 3; // 4 points for a cubic bezier
-	
-	for(int i = 0; i < num; ++i) {
-		float p = float(i)/(num-1);
+	//int num = 1 + numCurves * 3; // 4 points for a cubic spline
+	if(numPoints < 4) {
+		numPoints = 4;
+	}
+	for(int i = 0; i < numPoints; ++i) {
+		float p = float(i)/(numPoints-1);
 		points.push_back(CurvePoint(p,0.5));
 	}
 }

@@ -84,11 +84,11 @@ Flocking<T,P, FA>::Flocking(vector<P*>& ps, const float zoneRadius, const float 
 	,zone_radius_sq(zoneRadius * zoneRadius)
 	,max_speed_sq(maxSpeed * maxSpeed)
 	,max_speed(maxSpeed)
-	,low(0.4)
-	,high(0.6)
-	,align_energy(1.0f)
-	,separate_energy(1.0f)
-	,attract_energy(1.0f)
+	,low(0.1575)
+	,high(0.6925)
+	,align_energy(0.0003f)
+	,separate_energy(0.0003f)
+	,attract_energy(0.0003f)
 {
 }
 
@@ -123,8 +123,6 @@ void Flocking<T, P, FA>::update() {
 				dir *= separate_energy;
 				force_adder(dir, a);
 				force_adder(-dir, b);
-//				a.addForce(dir);
-//				b.addForce(-dir);
 			}
 			else if(perc < high) {
 				// align
@@ -132,9 +130,6 @@ void Flocking<T, P, FA>::update() {
 				f *= align_energy;
 				force_adder(b.velocity.getNormalized() * f, a);
 				force_adder(a.velocity.getNormalized() * f, b);
-//				a.addForce(b.velocity.getNormalized() * f);
-//				b.addForce(a.velocity.getNormalized() * f);
-				
 			}
 			else {
 				// attract
@@ -144,8 +139,6 @@ void Flocking<T, P, FA>::update() {
 				dir *= attract_energy;
 				force_adder(-dir, a);
 				force_adder(dir, b);
-//				a.addForce(-dir);
-//				b.addForce(dir);
 			}
 		}
 				

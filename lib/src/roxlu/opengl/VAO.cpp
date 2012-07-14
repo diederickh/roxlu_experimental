@@ -27,7 +27,6 @@ namespace roxlu {
 	}
 
 	void VAO::create() {
-		printf("VAO::Create()...\n");
 		glGenVertexArrays(1, &vao_id); eglGetError();
 	}
 	

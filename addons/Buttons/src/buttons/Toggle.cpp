@@ -12,6 +12,8 @@ Toggle::Toggle(bool& val, const string& name)
 	BSET_COLOR(bg_bottom_color, 0.0, 0.17, 0.21, 1.0);
 	BSET_COLOR(toggle_on_color, 0.0,0.8,0.4,1.0);
 	BSET_COLOR(toggle_off_color, 0.0,0.8,0.2,0.1);
+	
+	
 }
 
 Toggle::~Toggle() {

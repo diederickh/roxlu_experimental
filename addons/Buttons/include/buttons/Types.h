@@ -162,6 +162,27 @@ static int createRect(ButtonVertices& vd, int x, int y, int w, int h, float* top
 	return 6; // number of vertices
 }
 
+static int createCircle(ButtonVertices& vd, const float x, const float y, const float r, float* col) {
+	static int num = 7;
+	static vector<ButtonVertex> res;
+	if(!res.size()) {
+		float def_col[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+		float pip = float(num) / 6.283185307;
+		for(int i = 0; i <= num; ++i) {
+			float a = pip * i;
+			res.push_back(ButtonVertex(cos(a),sin(a), def_col));
+		}
+	}
+	
+	vector<ButtonVertex> new_verts(res.size());
+	for(int i = 0; i <= num; ++i) {
+		new_verts[i].set(x + res[i].pos[0] * r, y + res[i].pos[1] * r, col);
+	}
+	vd.add(new_verts, GL_TRIANGLE_FAN);
+	
+	return new_verts.size();
+}
+
 } // namespace buttons
 
 
