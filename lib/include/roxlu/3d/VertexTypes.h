@@ -2,13 +2,6 @@
 #define ROXLU_VERTEXTYPESH
 
 #include <vector>
-/*
-#include "Vec4.h"
-#include "Vec3.h"
-#include "Vec2.h"
-#include "../Graphics/Color.h"
-*/
-
 #include <roxlu/math/Vec3.h>
 #include <roxlu/math/Vec4.h>
 #include <roxlu/math/Vec2.h>
@@ -18,6 +11,8 @@ using std::vector;
 
 namespace roxlu {
 
+// Good read: http://www.opengl.org/wiki/Tutorial1:_Rendering_shapes_with_glDrawRangeElements,_VAO,_VBO,_shaders_%28C%2B%2B_/_freeGLUT%29
+	
 // Here we define a couple of different vertex types; 
 // P = position
 // N = normal
@@ -65,6 +60,7 @@ struct VertexIndices {
 struct Vertex {
 };
 
+// @todo, add padding for memory alignment
 struct VertexP : public Vertex {
 	Vec3 pos;
 	
@@ -93,7 +89,7 @@ struct VertexP : public Vertex {
 	}
 };
 
-
+// @todo, add padding for memory alignment
 struct VertexPT : public Vertex  {
 	Vec3 pos;
 	Vec2 tex;
@@ -137,6 +133,7 @@ struct VertexPT : public Vertex  {
 	}
 };
 
+// @todo, add padding for memory alignment
 struct VertexPC : public Vertex {
 	Vec3 pos;
 	Vec4 col;
@@ -187,6 +184,7 @@ struct VertexPC : public Vertex {
 	}
 };
 
+// @todo, add padding for memory alignment
 struct VertexPN : public Vertex  {
 	Vec3 pos;
 	Vec3 norm;
@@ -233,6 +231,7 @@ struct VertexPN : public Vertex  {
 
 };
 
+// @todo, add padding for memory alignment
 struct VertexPNC : public Vertex  {
 	Vec3 pos;
 	Vec3 norm;
@@ -277,6 +276,8 @@ struct VertexPNC : public Vertex  {
 	}
 };
 
+
+// @todo, add padding for memory alignment
 struct VertexPTN : public Vertex  {
 	Vec3 pos;
 	Vec3 norm;
@@ -335,6 +336,7 @@ struct VertexPTN : public Vertex  {
 	}
 };
 
+// @todo, add padding for memory alignment
 struct VertexPTNC : public Vertex  {
 	Vec3 pos;
 	Vec3 norm;
@@ -376,6 +378,7 @@ struct VertexPTNC : public Vertex  {
 	}
 };
 
+// @todo, add padding for memory alignment
 struct VertexPTNT : public Vertex  { // with tangent.
 	Vec3 pos;
 	Vec3 norm;
@@ -383,6 +386,7 @@ struct VertexPTNT : public Vertex  { // with tangent.
 	Vec2 tex;
 };
 
+// @todo, add padding for memory alignment
 struct VertexPTNTB : public Vertex  { // can be used for normal mapping
 	Vec3 pos;
 	Vec3 norm;
@@ -449,6 +453,7 @@ struct VertexPTNTB : public Vertex  { // can be used for normal mapping
 
 };
 
+// @todo, add padding for memory alignment
 template<class T>
 struct Vertices_Template {
 
@@ -496,6 +501,7 @@ struct Vertices_Template {
 };
 
 
+// @todo, add padding for memory alignment
 template <class T>
 struct Vertices_TemplateP : public Vertices_Template<T> {
 

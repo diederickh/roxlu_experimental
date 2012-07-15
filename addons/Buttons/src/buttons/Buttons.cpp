@@ -32,6 +32,7 @@ Buttons::Buttons(const string& title, int w)
 	,is_locked(false)
 	,static_text(NULL)
 	,dynamic_text(NULL)
+	,allocated_bytes(0)
 {
 
 	if(!shaders_initialized) {
@@ -52,11 +53,11 @@ Buttons::Buttons(const string& title, int w)
 	glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
 	
 	gui_shader.enable();	
-	glEnableVertexAttribArray(gui_shader.getAttribute("pos")); eglGetError();
-	glEnableVertexAttribArray(gui_shader.getAttribute("col")); eglGetError();
-	glVertexAttribPointer(gui_shader.getAttribute("pos"), 2, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), (GLvoid*)offsetof(ButtonVertex,pos));
-	glVertexAttribPointer(gui_shader.getAttribute("col"), 4, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), (GLvoid*)offsetof(ButtonVertex,col));
-	
+//	glEnableVertexAttribArray(gui_shader.getAttribute("pos")); eglGetError();
+//	glEnableVertexAttribArray(gui_shader.getAttribute("col")); eglGetError();
+//	glVertexAttribPointer(gui_shader.getAttribute("pos"), 2, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), (GLvoid*)offsetof(ButtonVertex,pos));
+//	glVertexAttribPointer(gui_shader.getAttribute("col"), 4, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), (GLvoid*)offsetof(ButtonVertex,col));
+//	
 	gui_shader.disable();
 	vao.unbind();
 	glBindBuffer(GL_ARRAY_BUFFER, 0); eglGetError();
@@ -111,6 +112,12 @@ void Buttons::update() {
 	while(it != elements.end()) {
 		Element& el = *(*it);
 		el.update();
+		
+		if(el.is_child) {
+			++it;
+			continue;
+		}
+		
 		h += el.h;
 		++it;
 	}
@@ -142,7 +149,34 @@ void Buttons::update() {
 		updateDynamicTexts();
 	}
 
+	// do we need to grow our buffer?
+	size_t size_needed = vd.size() * sizeof(ButtonVertex);
+	if(size_needed > allocated_bytes) {
+		while(allocated_bytes < size_needed) {
+			allocated_bytes = std::max<size_t>(allocated_bytes * 2, 4096);
+		}
+		printf("To allocate: %zu\n", allocated_bytes);
+		
+		first_run = false; // we don't need this one anymore @todo cleanup
+		vao.bind();
+		glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
+		glBufferData(GL_ARRAY_BUFFER, allocated_bytes, NULL, GL_DYNAMIC_DRAW); eglGetError();
+		
+		glEnableVertexAttribArray(gui_shader.getAttribute("pos")); eglGetError();
+		glEnableVertexAttribArray(gui_shader.getAttribute("col")); eglGetError();
+		glVertexAttribPointer(gui_shader.getAttribute("pos"), 2, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), (GLvoid*)offsetof(ButtonVertex,pos));
+		glVertexAttribPointer(gui_shader.getAttribute("col"), 4, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), (GLvoid*)offsetof(ButtonVertex,col));
+	
+		vao.unbind();
+		glBindBuffer(GL_ARRAY_BUFFER, 0);	
+	}
+	
+	// And update the vbo.
+	glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(ButtonVertex)*vd.size(), (GLvoid*)vd.getPtr()); eglGetError();
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+/*
 	if(first_run) {
 		first_run = false;
 		glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
@@ -154,6 +188,7 @@ void Buttons::update() {
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(ButtonVertex)*vd.size(), (GLvoid*)vd.getPtr()); eglGetError();
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
+	*/
 }
 
 void Buttons::generateVertices() {
@@ -173,8 +208,9 @@ void Buttons::generatePanelVertices() {
 void Buttons::updateDynamicTexts() {
 	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {
-		(*it)->updateDynamicText(*dynamic_text);
-		(*it)->needs_text_update = false;
+		Element* el = *it;
+		el->updateDynamicText();
+		el->needs_text_update = false;
 		++it;
 	}
 }
@@ -183,10 +219,13 @@ void Buttons::updateDynamicTexts() {
 void Buttons::generateElementVertices() {
 	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {
-		(*it)->generateVertices(vd);
-		(*it)->needs_redraw = false;
+		Element* el = *it;
+		if(el->is_visible) {
+			el->generateVertices(vd);
+		}
+		el->needs_redraw = false;
 		++it;
-	}	
+	}
 }
 
 void Buttons::draw() {
@@ -219,34 +258,10 @@ void Buttons::draw() {
 	
 	gui_shader.uniformMat4fv("projection_matrix", &ortho[0]);
 	
-	// draw header.
-	int start = 0;
-	int end = num_panel_vertices;
-	
-	
-	//glDrawArrays(GL_TRIANGLES, start, num_panel_vertices); eglGetError();
-	/*
-	start = start + end;
-	
-	Element* el;
-	vector<Element*>::iterator it = elements.begin();
-	while(it != elements.end()) {
-		el = (*it);
-		end = el->num_vertices;
-	
-		glDrawArrays(GL_TRIANGLES, start, end);
-		start += el->num_vertices;
-		++it;
-	}
-	
-	*/
-	
 	for(int i = 0; i < vd.draw_arrays.size(); ++i) {
 		ButtonDrawArray& bda = vd.draw_arrays[i];
-		//printf("Start: %d, end: %d, mode: %d\n", bda.start, bda.count, bda.mode);
 		glDrawArrays(bda.mode, bda.start, bda.count);
 	}
-	//printf("--\n");
 	vao.unbind();
 
 	static_text->draw();
@@ -266,6 +281,7 @@ void Buttons::draw() {
 		++it;
 	}
 	*/
+	
 	if(cull_enabled) {
 		glEnable(GL_CULL_FACE);
 	}
@@ -280,7 +296,8 @@ void Buttons::debugDraw() {
 	gui_shader.disable();
 	vao.unbind();
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	
+	// @todo draw using the subarrays of ButtonVertices
+	/*
 	int start = 0;
 	int end = 0;
 	Element* el;
@@ -299,6 +316,7 @@ void Buttons::debugDraw() {
 		start += el->num_vertices;
 		++it;
 	}
+	*/
 }
 
 Sliderf& Buttons::addFloat(const string& label, float& value) {
@@ -319,23 +337,46 @@ Toggle& Buttons::addBool(const string& label, bool& value) {
 	return *el;
 }
 
-SplineEditor& Buttons::addSpline(const string& label, Spline& spline) {
-	buttons::SplineEditor* el = new SplineEditor(label, spline);
-	addElement(el, label);
+ColorPicker& Buttons::addColor(const string& label, float* value) {
+	buttons::ColorPicker* el = new ColorPicker(createCleanName(label), value);
+	addElement(el, label);		
 	return *el;
 }
-
 
 void Buttons::addElement(Element* el, const string& label) {
 	el->setup();
 	el->label = label;
 	el->w = w;
+	el->static_text = static_text;
+	el->dynamic_text = dynamic_text;
 	el->needsRedraw();
 	
 	elements.push_back(el);
 	positionElements();
-	el->generateStaticText(*static_text);
-	el->generateDynamicText(*dynamic_text);
+
+	el->generateStaticText();
+	el->generateDynamicText();
+
+	// Add child elements
+	vector<Element*> children;
+	el->getChildElements(children);
+	addChildElements(children);
+
+}
+
+void Buttons::addChildElements(vector<Element*>& children) {
+	for(vector<Element*>::iterator it = children.begin(); it != children.end(); ++it) {
+		Element* el = *it;
+		el->setup();
+		el->needsRedraw();
+		el->is_child = true;
+		el->static_text = static_text;
+		el->dynamic_text = dynamic_text;
+		elements.push_back(el);	
+
+		el->generateStaticText();
+		el->generateDynamicText();	
+	}
 }
 
 void Buttons::onMouseMoved(int mx, int my) {
@@ -366,7 +407,13 @@ void Buttons::onMouseMoved(int mx, int my) {
 	if(is_mouse_down) {
 		it = elements.begin();
 		while(it != elements.end()) {
-			(*it)->onMouseDragged(mx, my, mdx, mdy);
+			el = *it;
+			if(!el->is_visible) {
+				++it;
+				continue;
+			}
+			
+			el->onMouseDragged(mx, my, mdx, mdy);
 			++it;
 		}
 	}
@@ -375,6 +422,11 @@ void Buttons::onMouseMoved(int mx, int my) {
 	it = elements.begin();
 	while(it != elements.end()) {
 		el = *it;
+		if(!el->is_visible) {
+			++it;
+			continue;
+		}
+		
 		el->is_mouse_inside = BINSIDE_ELEMENT(el, mx, my);
 		if(el->is_mouse_inside && el->state == BSTATE_NONE) {
 			el->state = BSTATE_ENTER;
@@ -414,6 +466,12 @@ void Buttons::onMouseDown(int x, int y) {
 	bool inside_el = false;
 	while(it != elements.end()) {
 		el = *it;
+		
+		if(!el->is_visible) {
+			++it;
+			continue;
+		}
+		
 		el->is_mouse_down_inside = BINSIDE_ELEMENT(el, x, y);
 		el->onMouseDown(x,y);
 		if(is_mouse_down && el->is_mouse_down_inside) {
@@ -434,6 +492,12 @@ void Buttons::onMouseUp(int x, int y) {
 	Element* el;
 	while(it != elements.end()) {
 		el = *it;
+		
+		if(!el->is_visible) {
+			++it;
+			continue;
+		}
+		
 		el->is_mouse_down_inside = false;
 		el->onMouseUp(x,y);
 		if(el->drag_inside && el->is_mouse_inside) {
@@ -476,8 +540,15 @@ void Buttons::positionElements() {
 	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {
 		el = *it;
+		if(el->is_child || !el->is_visible) { // child elements are handled by the parent element
+			++it;
+			continue;
+		}
+		
 		el->x = xx;
 		el->y = yy;
+		el->positionChildren();
+		
 		yy += el->h;
 		++it;
 	}
@@ -518,7 +589,8 @@ void Buttons::setPosition(int xx, int yy) {
 void Buttons::updateStaticTextPositions() {
 	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {
-		(*it)->updateTextPosition(*static_text, *dynamic_text);	
+		Element* el = *it;
+		el->updateTextPosition();	
 		++it;
 	}
 }

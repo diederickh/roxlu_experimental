@@ -1,4 +1,5 @@
 #include <buttons/Toggle.h>
+#include <buttons/Buttons.h>
 
 namespace buttons {
 	
@@ -19,22 +20,22 @@ Toggle::Toggle(bool& val, const string& name)
 Toggle::~Toggle() {
 }
 
-void Toggle::generateStaticText(Text& txt) {
-	label_dx = txt.add(x+20, y+2, label, 0.9, 0.9, 0.9, 0.9);
+void Toggle::generateStaticText() {
+	label_dx = static_text->add(x+20, y+2, label, 0.9, 0.9, 0.9, 0.9);
 }
 
-void Toggle::updateTextPosition(Text& staticText, Text& dynamicText) {	
-	staticText.setTextPosition(label_dx, x+20, y+2);
+void Toggle::updateTextPosition() {	
+	static_text->setTextPosition(label_dx, x+20, y+2);
 }
 
 void Toggle::generateVertices(ButtonVertices& vd) { 
-	num_vertices = buttons::createRect(vd, x, y, w, h, bg_top_color, bg_bottom_color);
+	buttons::createRect(vd, x, y, w, h, bg_top_color, bg_bottom_color);
 	float* c = toggle_off_color;
 	if(value) {
 		c = toggle_on_color;
 	}
 	
-	num_vertices += buttons::createRect(vd, x+5, y+4, 10, 10, c, toggle_off_color);
+	buttons::createRect(vd, x+5, y+4, 10, 10, c, toggle_off_color);
 }
 
 void Toggle::onMouseDown(int mx, int my) {

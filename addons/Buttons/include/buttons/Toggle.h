@@ -1,11 +1,6 @@
 #ifndef ROXLU_BTOGGLEH
 #define ROXLU_BTOGGLEH
 
-/*
-#include "Types.h"
-#include "Element.h"
-*/
-
 #include <buttons/Types.h>
 #include <buttons/Element.h>
 
@@ -16,8 +11,8 @@ public:
 	Toggle(bool& val, const string& name);
 	~Toggle();
 
-	void generateStaticText(Text& txt);
-	void updateTextPosition(Text& staticText, Text& dynamicText);
+	void generateStaticText();
+	void updateTextPosition();
 	void generateVertices(ButtonVertices& shapeVertices);
 	
 	void onMouseDown(int mx, int my);

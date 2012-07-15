@@ -21,6 +21,21 @@ void testApp::update() {
 }
 */
 
+
+/** 
+
+Buttons is a simple openGL GUI for tweaking parameters. It's being developed
+using openFrameworks but my goal is to make this work in any opengl context on 
+both Windows and Mac. 
+
+TODO:
+- All elements use absolute coordinates now. Instead of using absolute vertices
+we need to check out if it isn't faster to change to a "modelview" approach
+where all vertices are translated on GPU. We're using absolute coordinates 
+because this makes testing for mouseenter/leave (etc) faster.
+
+*/
+
 #include <vector>
 
 #include "ofMain.h" // @todo remove, needed in c'tor for ofGetWidth()/ofGetHeight()
@@ -39,6 +54,7 @@ void testApp::update() {
 #include <buttons/Button.h>
 #include <buttons/Radio.h>
 #include <buttons/Spline.h>
+#include <buttons/Color.h>
 #include <buttons/Storage.h>
 
 
@@ -96,11 +112,17 @@ public:
 	Sliderf& addFloat(const string& label, float& value);
 	Slideri& addInt(const string& label, int& value);
 	Toggle& addBool(const string& label, bool& value);
-	SplineEditor& addSpline(const string& label, Spline& value);
+	ColorPicker& addColor(const string& label, float* value); 
+		
+	// Spline
+	template<class S, class V>
+	SplineEditor<S, V>& addSpline(const string& label, S& spline) {
+		buttons::SplineEditor<S, V>* el = new SplineEditor<S,V>(label, spline);
+		addElement(el, label);
+		return *el;
+	}
 	
-	
-	//Curves& addCurve(const string& name, std::vector<T>
-	
+	// Radio
 	template<class T>
 	Radio<T>& addRadio(const string& label, int id, T* cb, const vector<string>& options, int& value) {
 		buttons::Radio<T>* el = new Radio<T>(id, options, value, createCleanName(label), cb);
@@ -115,6 +137,7 @@ public:
 		return *el;
 	}
 	
+	// Button
 	template<class T>
 	Button<T>& addButton(const std::string& label, int id,  T* cb) {
 		buttons::Button<T>* el = new Button<T>(id, cb, createCleanName(label));
@@ -142,6 +165,7 @@ public:
 		
 private:
 	void addElement(Element* el, const string& label);
+	void addChildElements(vector<Element*>& children);
 	void onMouseEnter(int x, int y);
 	void onMouseLeave(int x, int y);
 	void onMouseDragged(int dx, int dy);
@@ -190,6 +214,7 @@ private:
 	Text* static_text;
 	Text* dynamic_text;
 	static Shader gui_shader;
+	size_t allocated_bytes; // number of bytes we allocated for the vbo
 	
 	
 	float ortho[16];

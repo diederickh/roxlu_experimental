@@ -45,86 +45,24 @@ struct EditorCoords {
 // It would probably be cleaner to let the "user" of this gui, define it's spline
 // ... but for now this will do.
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-/**
- * Catmull Rom interpolation. 
- * --------------------------
- * Catmull Rom interpolation works with 4 points, there the 
- * local "t" value is used to interpolate between points B and C. The 
- * points A and D are used as "direction" (kind of). Therefore, for the first
- * and last point we have to choose the indices correctly. (see the index
- * checking for a,b,c,d below.). Basically for the first point, we use 0,0
- * for points A and Bs.
- *
- * Everything is normalized between [0,1]
- */
-struct Spline {
-	Spline();
-	~Spline();
-	void createPoints(int num); // resets points!
-	bool at(float t, float& x, float& y);
-	void add(const float x, const float y);
-	std::vector<CurvePoint> points;
-};
 
-inline bool Spline::at(float t, float& x, float& y) {
-	if(points.size() < 4) {
-		return false;
-	}
-	if(t > 0.999f) {
-		//return false;
-		t = 0.99f;
-	}
-	else if(t < 0) {
-		t = 0;
-	}
-
-	// get local "t" (also mu)	
-	float curve_p = t * (points.size()-1);
-	int curve_num = curve_p;
-	t = curve_p - curve_num; // local t
-	
-	// get the 4 point
-	int b = curve_num;
-	int a = b - 1;
-	int c = b + 1;
-	int d = c + 1;
-	if(a < 0) {
-		a = 0;
-	}
-	if(d >= points.size()) {
-		d = points.size()-1;
-	}
-	CurvePoint& p0 = points[a]; // a
-	CurvePoint& p1 = points[b]; // b 
-	CurvePoint& p2 = points[c]; // c
-	CurvePoint& p3 = points[d]; // d 
-
-	
-	float t2 = t*t;
-	float t3 = t*t*t;
-
-	// Catmull interpolation	
-	x = 0.5 * ((2 * p1.x) + (-p0.x + p2.x) * t + (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 + (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3);
-	y = 0.5 * ((2 * p1.y) + (-p0.y + p2.y) * t + (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 + (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3);	
-	
-	return true;
-}
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 // Experimental...
-// C: container for curve values: vector<Vec2>, vector<CurvePoint> etc..
-template<class C> 
-class SplineEditor_Template : public Element {
+// S: spline
+// V: vec type (vec2,vec3)
+template<class S, class V> 
+class SplineEditor : public Element {
 public:	
-	SplineEditor_Template(const string& name, C& spline);
-	~SplineEditor_Template();
+	SplineEditor(const string& name, S& spline);
+	~SplineEditor();
 
 	void setup();
 	void draw(Shader& shader, const float* pm);
 	
-	void generateStaticText(Text& txt);
-	void updateTextPosition(Text& staticText, Text& dynamicText);
+	void generateStaticText();
+	void updateTextPosition();
 	void generateVertices(ButtonVertices& shapeVertices);
 	
 	void onMouseDown(int mx, int my);
@@ -139,7 +77,7 @@ public:
 	void load(std::ifstream& ifs);
 	bool canSave();
 	
-	SplineEditor_Template<C>& setColor(const float r, const float g, const float b, const float a = 1.0f);
+	SplineEditor<S, V>& setColor(const float r, const float g, const float b, const float a = 1.0f);
 	
 	int selected_handle_dx;
 	float selected_handle_col[4];
@@ -150,13 +88,13 @@ public:
 	
 	EditorCoords editor_coords;
 	int label_dx;
-	C& spline;
-	vector<CurvePoint> screen_handles;
+	S& spline;
+	vector<V> screen_handles;
 };
 
 
-template<class C> 
-SplineEditor_Template<C>::SplineEditor_Template(const string& name, C& spline) 
+template<class S, class V> 
+SplineEditor<S,V>::SplineEditor(const string& name, S& spline) 
 	:Element(BTYPE_SPLINE, name)
 	,spline(spline)
 	,label_dx(0)
@@ -166,49 +104,44 @@ SplineEditor_Template<C>::SplineEditor_Template(const string& name, C& spline)
 	BSET_COLOR(selected_handle_col, 1.0, 0.7,0.0,1.0);
 	default_handle_col = col_text;
 	setColor(col_bg_default[0], col_bg_default[1], col_bg_default[2]);
-	printf("%f, %f, %f\n", this->col_bg_default[0], this->col_bg_default[1], this->col_bg_default[2]);
 }
 
-template<class C> 
-SplineEditor_Template<C>& SplineEditor_Template<C>::setColor(const float r, const float g, const float b, const float a) {
+template<class S, class V> 
+SplineEditor<S, V>& SplineEditor<S,V>::setColor(const float r, const float g, const float b, const float a) {
 	// bar_empty_color: saturated default color
 	editor_bg_top_col[3] = 1.0f;
 	editor_spline_col[3] = 1.0f;
 	default_handle_col[3] = 1.0f;
-	
-	float hue, sat, bright;
-	Color::RGBToHLSf(r,g,b,&hue, &bright, &sat);
-	Color::HLSToRGBf(hue, bright, sat * 0.5, &editor_bg_top_col[0], &editor_bg_top_col[1], &editor_bg_top_col[2]);
-	BSET_COLOR(editor_bg_bottom_col, editor_bg_top_col[0], editor_bg_top_col[1], editor_bg_top_col[2], 1.0f);
-	
-	Color::HLSToRGBf(hue, bright * 2.7, sat * 2.5, &editor_spline_col[0], &editor_spline_col[1], &editor_spline_col[2]);
-	
-	Color::HLSToRGBf(hue, bright * 1.5, sat * 1.5, &col_bg_top_hover[0], &col_bg_top_hover[1], &col_bg_top_hover[2]);
-	Color::HLSToRGBf(hue, bright * 1.2, sat * 1.2, &col_bg_bottom_hover[0], &col_bg_bottom_hover[1], &col_bg_bottom_hover[2]);
-	
-	//BSET_COLOR(col_text, 0.9,0.9,0.9,0.9);
 
+	float hue, sat, bright;
+
+	RGB_to_HSL(r,g,b,&hue, &sat, &bright);
+	HSL_to_RGB(hue, sat * 0.5,bright,  &editor_bg_top_col[0], &editor_bg_top_col[1], &editor_bg_top_col[2]);
+	BSET_COLOR(editor_bg_bottom_col, editor_bg_top_col[0], editor_bg_top_col[1], editor_bg_top_col[2], 1.0f);
+	HSL_to_RGB(hue, sat * 2.5, bright * 2.7,  &editor_spline_col[0], &editor_spline_col[1], &editor_spline_col[2]);
+	HSL_to_RGB(hue, sat * 1.5, bright * 1.5, &col_bg_top_hover[0], &col_bg_top_hover[1], &col_bg_top_hover[2]);
+	HSL_to_RGB(hue, sat * 1.2, bright * 1.2, &col_bg_bottom_hover[0], &col_bg_bottom_hover[1], &col_bg_bottom_hover[2]);
 	return *this;
 }
 
-template<class C> 
-SplineEditor_Template<C>::~SplineEditor_Template() {
+template<class S, class V>  
+SplineEditor<S,V>::~SplineEditor() {
 }
 
-template<class C> 
-void SplineEditor_Template<C>::generateStaticText(Text& txt) {
-	this->label_dx = txt.add(this->x+4, this->y+2, this->label,  0.9, 0.9, 0.9, 0.9);
+template<class S, class V> 
+void SplineEditor<S,V>::generateStaticText() {
+	this->label_dx = static_text->add(this->x+4, this->y+5, this->label,  0.9, 0.9, 0.9, 0.9);
 }
 
-template<class C> 
-void SplineEditor_Template<C>::updateTextPosition(Text& staticText, Text& dynamicText) {
-	staticText.setTextPosition(this->label_dx, this->x+4, this->y+2);
+template<class S, class V> 
+void SplineEditor<S,V>::updateTextPosition() {
+	static_text->setTextPosition(this->label_dx, this->x+4, this->y+5);
 }
 
-template<class C> 
-void SplineEditor_Template<C>::generateVertices(ButtonVertices& vd) {
-	// create background:
-	this->num_vertices = buttons::createRect(vd, this->x, this->y, this->w, this->h, this->bg_top_color, this->bg_bottom_color);
+template<class S, class V> 
+void SplineEditor<S,V>::generateVertices(ButtonVertices& vd) {
+	
+	buttons::createRect(vd, this->x, this->y, this->w, this->h, this->bg_top_color, this->bg_bottom_color);
 
 	// set sizes for all calculations
 	float hh = h * 0.3333;
@@ -227,8 +160,8 @@ void SplineEditor_Template<C>::generateVertices(ButtonVertices& vd) {
 	screen_handles.clear();
 	float max_hx = editor_coords.max_x-editor_coords.handle_hs-2; // max handle x
 	for(int i = 0; i < spline.points.size(); ++i) {	
-		CurvePoint& p = spline.points[i];
-		screen_handles.push_back(CurvePoint(
+		V& p = spline.points[i];
+		screen_handles.push_back(V(
 			 editor_coords.min_x + (p.x * editor_coords.w)
 			,editor_coords.max_y - (p.y * editor_coords.h)
 		));
@@ -236,15 +169,14 @@ void SplineEditor_Template<C>::generateVertices(ButtonVertices& vd) {
 
 	// Create the line
 	vector<ButtonVertex> spline_verts;
-	float spline_x = 0;
-	float spline_y = 0;	
 	int num = 50;
+	V spline_pos;
 	for(int i = 0; i <= num; ++i) {
 		float p = float(i)/num;
-		if(spline.at(p, spline_x, spline_y)) {
+		if(spline.at(p, spline_pos)) {
 			spline_verts.push_back(ButtonVertex(
-				editor_coords.min_x + spline_x * editor_coords.w
-				,editor_coords.max_y - spline_y * editor_coords.h
+				editor_coords.min_x + spline_pos.x * editor_coords.w
+				,editor_coords.max_y - spline_pos.y * editor_coords.h
 				,editor_spline_col
 			));
 		}
@@ -254,26 +186,30 @@ void SplineEditor_Template<C>::generateVertices(ButtonVertices& vd) {
 	// Create the handles.	
 	float* handle_col = default_handle_col;
 	for(int i = 0; i < screen_handles.size(); ++i) {
-		CurvePoint& p = screen_handles[i];
+		V& p = screen_handles[i];
 		handle_col = (i == selected_handle_dx) ? selected_handle_col : default_handle_col;
 		buttons::createCircle(vd, p.x, p.y, editor_coords.handle_hs, handle_col);
 	}
 }
 
-template<class C> 
-void SplineEditor_Template<C>::setup() {
-	if(spline.points.size() == 0) {
-		spline.createPoints(6);
+template<class S, class V> 
+void SplineEditor<S, V>::setup() {
+	if(spline.size() == 0) {
+		int num = 6;
+		for(int i = 0; i < num; ++i) {
+			float p = float(i)/(num-1);
+			spline.add(V(p,0.5));
+		}
 	}
 }
 
-template<class C> 
-void SplineEditor_Template<C>::draw(Shader& shader, const float* pm) {
+template<class S, class V> 
+void SplineEditor<S, V>::draw(Shader& shader, const float* pm) {
 	
 }
 
-template<class C> 
-void SplineEditor_Template<C>::onMouseMoved(int mx, int my) {
+template<class S, class V> 
+void SplineEditor<S, V>::onMouseMoved(int mx, int my) {
 
 	// find the handle which must be selected.
 	float dist_sq = 225;
@@ -282,8 +218,8 @@ void SplineEditor_Template<C>::onMouseMoved(int mx, int my) {
 	int curr_sel = selected_handle_dx;
 	selected_handle_dx = -1;
 	if(is_mouse_inside) {	
-		for(vector<CurvePoint>::iterator it = screen_handles.begin(); it != screen_handles.end(); ++it) {
-			CurvePoint& p = *it;
+		for(typename vector<V>::iterator it = screen_handles.begin(); it != screen_handles.end(); ++it) {
+			V& p = *it;
 			dx = (mx - p.x);
 			dy = (my - p.y);
 			sq = (dx * dx) + (dy*dy);
@@ -299,10 +235,10 @@ void SplineEditor_Template<C>::onMouseMoved(int mx, int my) {
 	}
 }
 
-template<class C> 
-void SplineEditor_Template<C>::onMouseDragged(int mx, int my, int dx, int dy) {
+template<class S, class V> 
+void SplineEditor<S, V>::onMouseDragged(int mx, int my, int dx, int dy) {
 	if(drag_inside && selected_handle_dx != -1) {
-		CurvePoint& screen_point = screen_handles[selected_handle_dx];
+		V& screen_point = screen_handles[selected_handle_dx];
 		
 		// First, calculate the local relative position
 		screen_point.x = float(mx) - editor_coords.handle_hs;
@@ -315,52 +251,76 @@ void SplineEditor_Template<C>::onMouseDragged(int mx, int my, int dx, int dy) {
 		float yp =  1.0f - (local_y / editor_coords.h);
 		
 		spline.points[selected_handle_dx].x = std::max<float>(0.0f,std::min<float>(1.0f,xp));
-		spline.points[selected_handle_dx].y = std::max<float>(0.0f,std::min<float>(1.0f,yp)); // measured
+		spline.points[selected_handle_dx].y = std::max<float>(0.0f,std::min<float>(1.0f,yp)); 
 		needsRedraw();
 	}
 }
 
-template<class C> 
-void SplineEditor_Template<C>::onMouseDown(int mx, int my) {
+template<class S, class V> 
+void SplineEditor<S, V>::onMouseDown(int mx, int my) {
 }
 
-template<class C> 
-void SplineEditor_Template<C>::onMouseUp(int mx, int my) {
+template<class S, class V> 
+void SplineEditor<S,V>::onMouseUp(int mx, int my) {
 }
 
-template<class C> 
-void SplineEditor_Template<C>::onMouseEnter(int mx, int my) {
+template<class S, class V> 
+void SplineEditor<S, V>::onMouseClick(int mx, int my) {
+}
+
+template<class S, class V> 
+void SplineEditor<S, V>::onMouseEnter(int mx, int my) {
 	this->bg_top_color = this->col_bg_top_hover;
 	this->bg_bottom_color = this->col_bg_bottom_hover;
 	needsRedraw();
 }
 
-template<class C> 
-void SplineEditor_Template<C>::onMouseLeave(int mx, int my) {
+template<class S, class V> 
+void SplineEditor<S, V>::onMouseLeave(int mx, int my) {
 	this->bg_top_color = this->col_bg_default;
 	this->bg_bottom_color = this->col_bg_default;
 	needsRedraw();
 }
 
-template<class C> 
-void SplineEditor_Template<C>::onMouseClick(int mx, int my) {
+
+
+template<class S, class V> 
+bool SplineEditor<S, V>::canSave() {
+	return true;
 }
 
-template<class C> 
-bool SplineEditor_Template<C>::canSave() {
-	return false;
+template<class S, class V> 
+void SplineEditor<S, V>::save(std::ofstream& ofs) {
+	size_t data_size = sizeof(V) * spline.size() + sizeof(size_t); 
+	ofs.write((char*)&data_size, sizeof(size_t));
+	
+	// number of elements.
+	size_t num_els = spline.size();
+	ofs.write((char*)&num_els, sizeof(size_t));
+	
+	// write elements.
+	for(int i = 0; i < spline.size(); ++i) {
+		V& p = spline[i];
+		ofs.write((char*)&p.x, sizeof(float));
+		ofs.write((char*)&p.y, sizeof(float));
+	}
 }
 
-template<class C> 
-void SplineEditor_Template<C>::save(std::ofstream& ofs) {
+template<class S, class V> 
+void SplineEditor<S, V>::load(std::ifstream& ifs) {
+	spline.clear();
+	size_t num_saved = 0;
+	ifs.read((char*)&num_saved, sizeof(size_t));
+	for(int i = 0; i < num_saved; ++i) {
+		V p;
+		ifs.read((char*)&p.x, sizeof(float));
+		ifs.read((char*)&p.y, sizeof(float));
+		spline.add(p);
+	}
 }
 
-template<class C> 
-void SplineEditor_Template<C>::load(std::ifstream& ifs) {
-}
 
-
-typedef SplineEditor_Template<Spline> SplineEditor;
+//typedef SplineEditor<Spline> SplineEditor;
 
 
 /*

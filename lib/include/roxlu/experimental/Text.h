@@ -32,6 +32,7 @@ struct TextEntry {
 		,end_dx(0)
 		,align(TEXT_ALIGN_LEFT)
 		,maxx(0)
+		,is_visible(true)
 	{
 		pos[0] = 0;
 		pos[1] = 0;
@@ -48,7 +49,8 @@ struct TextEntry {
 	int end_dx;
 	int align;
 	int w; // text width;
-	int maxx;
+	int maxx; // when align == TEXT_ALIGN_RIGHT, this is the "space" that is used to align the text.
+	bool is_visible;
 }; 
 
 
@@ -80,17 +82,19 @@ class Text {
 public:
 	Text(BitmapFont& bmfont);
 	~Text();
-	int add(const float& tx, const float& ty, const string& text, float r = 1.0, float g = 1.0, float b = 1.0, float a = 0.9);
-	int updateText(const int& textIndex, const string& str,float r = 1.0, float g = 1.0, float b = 1.0, float a = 0.9);
-	void setTextPosition(const int& textIndex, const float& x, const float& y);
-	void setTextAlign(const int& textIndex, int align, int maxx = 0); // mx is max X when alignment is RIGHT
-	void translate(const int& tx, const int& ty);
-	void setPosition(const int& tx, const int& ty);
+	int add(const float tx, const float ty, const string& text, float r = 1.0, float g = 1.0, float b = 1.0, float a = 0.9);
+	int updateText(const int textIndex, const string& str,float r = 1.0, float g = 1.0, float b = 1.0, float a = 0.9);
+	void setTextPosition(const int textIndex, const float tx, const float ty);
+	void setTextAlign(const int textIndex, int align, int maxx = 0); // mx is max X when alignment is RIGHT
+	void setTextVisible(const int textIndex, bool visible);
+	void translate(const int tx, const int ty);
+	void setPosition(const int tx, const int ty);
 	void updateBuffer();
 	void draw();
 	void debugDraw();
 	void createOrtho(float winW, float winH);
 	void setVertexAttributes();
+	
 	GLuint vbo;
 	VAO vao;
 	
@@ -101,9 +105,7 @@ public:
 	vector<TextEntry> texts;
 	TextVertices vertices;
 	size_t buffer_size;
-
 	
-	//Mat4 projection_matrix;
 	float model[16];
 	float ortho[16];
 	int x; 

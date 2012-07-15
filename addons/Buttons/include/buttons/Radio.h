@@ -23,8 +23,8 @@ public:
 	void addOption(Toggle* toggle);
 	vector<Toggle*>& getOptions();
 
-	void generateStaticText(Text& txt);
-	void updateTextPosition(Text& staticText, Text& dynamicText);
+	void generateStaticText();
+	void updateTextPosition();
 	void generateVertices(ButtonVertices& shapeVertices);
 	
 	void onMouseDown(int mx, int my);
@@ -85,18 +85,18 @@ vector<Toggle*>& Radio<T>::getOptions() {
 }
 
 template<class T>
-void Radio<T>::generateStaticText(Text& txt) {
-	label_dx = txt.add(x+4, y+2, label, 0.9, 0.9, 0.9, 0.9);
+void Radio<T>::generateStaticText() {
+	label_dx = static_text->add(x+4, y+2, label, 0.9, 0.9, 0.9, 0.9);
 }
 
 template<class T>
-void Radio<T>::updateTextPosition(Text& staticText, Text& dynamicText) {
-	staticText.setTextPosition(label_dx, x+4, y+2);
+void Radio<T>::updateTextPosition() {
+	static_text->setTextPosition(label_dx, x+4, y+2);
 }
 
 template<class T>
 void Radio<T>::generateVertices(ButtonVertices& vd) {
-	num_vertices = buttons::createRect(vd, x, y, w, h, bg_top_color, bg_bottom_color);
+	buttons::createRect(vd, x, y, w, h, bg_top_color, bg_bottom_color);
 }
 
 template<class T>

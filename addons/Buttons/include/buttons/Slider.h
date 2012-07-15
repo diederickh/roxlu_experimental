@@ -50,39 +50,33 @@ public:
 		bar_filled_color[3] = 1.0f;
 		bar_filled_bottom[3] = 1.0f;
 		
-		// bar_empty_color: saturated default color
 		float hue, sat, bright;
-		Color::RGBToHLSf(r,g,b,&hue, &bright, &sat);
-		Color::HLSToRGBf(hue, bright, sat * 0.5, &bar_empty_color[0], &bar_empty_color[1], &bar_empty_color[2]);
-
-		// bar filled color 
-		Color::HLSToRGBf(hue, bright * 1.7, sat * 1.7, &bar_filled_color[0], &bar_filled_color[1], &bar_filled_color[2]);
-	
-		// bar filled bottom color
-		Color::HLSToRGBf(hue, bright * 0.9 , sat * 0.9, &bar_filled_bottom[0], &bar_filled_bottom[1], &bar_filled_bottom[2]);
+		RGB_to_HSL(r,g,b,&hue, &sat, &bright);
+		HSL_to_RGB(hue, sat * 0.5, bright, &bar_empty_color[0], &bar_empty_color[1], &bar_empty_color[2]);
+		HSL_to_RGB(hue, sat * 1.7, bright * 1.7, &bar_filled_color[0], &bar_filled_color[1], &bar_filled_color[2]);
+		HSL_to_RGB(hue, sat * 0.9, bright * 0.9, &bar_filled_bottom[0], &bar_filled_bottom[1], &bar_filled_bottom[2]);
 		return *this;
 	}
 
-	void generateStaticText(Text& txt) {
-		label_dx = txt.add(x+4, y+2, label, 0.9, 0.9, 0.9, 0.9);
+	void generateStaticText() {
+		label_dx = static_text->add(x+4, y+2, label, 0.9, 0.9, 0.9, 0.9);
+	}
+		
+	void updateTextPosition() {
+		static_text->setTextPosition(label_dx, x+4, y+2);
+		updateDynamicText();
 	}
 	
-	
-	void updateTextPosition(Text& staticText, Text& dynamicText) {
-		staticText.setTextPosition(label_dx, x+4, y+2);
-		updateDynamicText(dynamicText);
+	void generateDynamicText() {
+		txtval_dx = dynamic_text->add(x,y+2, "0.0", col_text[0], col_text[1], col_text[2], col_text[3]);
+		dynamic_text->setTextAlign(txtval_dx, TEXT_ALIGN_RIGHT, (w - 5));
 	}
 	
-	void generateDynamicText(Text& txt) {
-		txtval_dx = txt.add(x,y+2, "0.0", col_text[0], col_text[1], col_text[2], col_text[3]);
-		txt.setTextAlign(txtval_dx, TEXT_ALIGN_RIGHT, x+(w - 5));
-	}
-	
-	void updateDynamicText(Text& txt) {
-		txt.setTextPosition(txtval_dx, x, y+2);
+	void updateDynamicText() {
 		char buf[256];
 		valueToChar(buf, value);
-		txt.updateText(txtval_dx, buf, col_text[0], col_text[1], col_text[2], col_text[3]);
+		dynamic_text->updateText(txtval_dx, buf, col_text[0], col_text[1], col_text[2], col_text[3]);
+		dynamic_text->setTextPosition(txtval_dx, x, y+2);		
 	}
 	
 	void valueToChar(char* buf, int v) {
@@ -94,7 +88,7 @@ public:
 	}
 		
 	void generateVertices(ButtonVertices& vd) {
-		num_vertices = buttons::createRect(vd, x, y, w, h, bg_top_color, bg_bottom_color);
+		buttons::createRect(vd, x, y, w, h, bg_top_color, bg_bottom_color);
 
 		p = std::min<float>(1.0, p);
 		
@@ -104,8 +98,8 @@ public:
 		int bar_x = x; // start x
 		int bar_y = (y + h) - bar_h; // start y
 
-		num_vertices += buttons::createRect(vd, bar_x, bar_y, bar_filled_w, bar_h, bar_filled_color, bar_filled_bottom);
-		num_vertices += buttons::createRect(vd, bar_x + bar_filled_w, bar_y, bar_empty_w, bar_h, bar_empty_color, bar_empty_color);
+		buttons::createRect(vd, bar_x, bar_y, bar_filled_w, bar_h, bar_filled_color, bar_filled_bottom);
+		buttons::createRect(vd, bar_x + bar_filled_w, bar_y, bar_empty_w, bar_h, bar_empty_color, bar_empty_color);
 	}
 
 	void onMouseUp(int mx, int my) {
@@ -180,6 +174,21 @@ public:
 		needsRedraw();
 		needsTextUpdate();
 	}
+	
+	
+	void hide() {
+		this->is_visible = false;
+		static_text->setTextVisible(label_dx, false);
+		dynamic_text->setTextVisible(txtval_dx, false);
+	}
+	
+	void show() {
+		this->is_visible = true;
+		static_text->setTextVisible(label_dx, true);
+		dynamic_text->setTextVisible(txtval_dx, true);
+		updateTextPosition();
+	}
+		
 
 	T& value;
 	T minv; // min value

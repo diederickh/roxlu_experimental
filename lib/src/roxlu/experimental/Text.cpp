@@ -91,7 +91,7 @@ void Text::setVertexAttributes() {
 }
 
 
-int Text::add(const float& tx, const float& ty, const string& str, float r, float g, float b, float a) {
+int Text::add(const float tx, const float ty, const string& str, float r, float g, float b, float a) {
 	is_changed = true;
 	float col[4] = {1,1,1,1}; 
 	TextEntry text;
@@ -107,7 +107,7 @@ int Text::add(const float& tx, const float& ty, const string& str, float r, floa
 	return texts.size()-1;
 }
 
-int Text::updateText(const int& dx, const string& str, float r, float g, float b, float a) {
+int Text::updateText(const int dx, const string& str, float r, float g, float b, float a) {
 	TextEntry& te = texts.at(dx);
 	te.col[0] = r;
 	te.col[1] = g;
@@ -118,20 +118,26 @@ int Text::updateText(const int& dx, const string& str, float r, float g, float b
 	bmfont.buildText(te.vertices, str, col, te.w);
 	
 	if(te.align == TEXT_ALIGN_RIGHT) {
-		te.pos[0] = te.pos[0] + (te.maxx - te.w);
+		te.pos[0] = (te.maxx - te.w);
 	}
 	is_changed = true; // make sure we rebuild our internal buffer
 	return 0; // @todo just added this to make it compile on MSVC++
 	
 }
 
-void Text::setTextPosition(const int& textIndex, const float& tx, const float& ty) {
+void Text::setTextPosition(const int textIndex, const float tx, const float ty) {
 	TextEntry& te = texts.at(textIndex);
-	te.pos[0] = tx;
-	te.pos[1] = ty;
+	if(te.align == TEXT_ALIGN_RIGHT) {
+		te.pos[0] = tx + (te.maxx - te.w);
+		te.pos[1] = ty;
+	}
+	else {
+		te.pos[0] = tx;
+		te.pos[1] = ty;
+	}
 }
 
-void Text::setTextAlign(const int& textIndex, int align, int maxx) {
+void Text::setTextAlign(const int textIndex, int align, int maxx) {
 	TextEntry& te = texts.at(textIndex);
 	te.align = align;
 	if(te.align == TEXT_ALIGN_RIGHT) {
@@ -141,13 +147,24 @@ void Text::setTextAlign(const int& textIndex, int align, int maxx) {
 	// TODO: implement LEFT
 }
 
+void Text::setTextVisible(const int textIndex, bool visible) {
+	TextEntry& te = texts.at(textIndex);
+	te.is_visible = visible;
+	updateBuffer();
+}
+
 void Text::updateBuffer() {
 	vertices.clear();
 	vector<TextEntry>::iterator it = texts.begin();
 	while(it != texts.end()) {
 		TextEntry& t = *it;
+		if(!t.is_visible) {
+			printf("TEXT NOT VISIBLE..\n");
+			++it;
+			continue;
+		}
+		
 		t.start_dx = vertices.size();
-	//	vertices += t.vertices; // works on mac
 		vertices.append(t.vertices); // @todo windows
 		t.end_dx = t.vertices.size();
 		++it;			
@@ -250,6 +267,10 @@ void Text::draw() {
 	int yy = 0;
 	for(int i = 0; i < texts.size(); ++i) {
 		TextEntry& te = texts[i];
+		if(!te.is_visible) {
+			continue;
+		}
+		
 		int end = texts[i].start_dx + texts[i].end_dx;	
 		model[12] = x+texts[i].pos[0] ;
 		model[13] = y+texts[i].pos[1] ;
@@ -264,12 +285,12 @@ void Text::draw() {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-void Text::setPosition(const int& xx, const int& yy) {
+void Text::setPosition(const int xx, const int yy) {
 	x = xx;
 	y = yy;
 }
 
-void Text::translate(const int& xx, const int& yy) {
+void Text::translate(const int xx, const int yy) {
 	x += xx;
 	y += yy;
 }

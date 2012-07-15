@@ -9,6 +9,9 @@
 #include <buttons/Element.h>
 
 namespace buttons {
+
+class Buttons;
+
 template<class T>
 class Button : public Element {
 public:
@@ -29,11 +32,11 @@ public:
 	~Button() {
 	}
 	
-	void generateStaticText(Text& txt) {
-			label_dx = txt.add(x+4, y+2, label, 0.9, 0.9, 0.9, 0.9);
+	void generateStaticText() {
+			label_dx = static_text->add(x+4, y+2, label, 0.9, 0.9, 0.9, 0.9);
 	}
-	void updateTextPosition(Text& staticText, Text& dynamicText) {
-		staticText.setTextPosition(label_dx, x+4, y+2);
+	void updateTextPosition() {
+		static_text->setTextPosition(label_dx, x+4, y+2);
 	}
 	
 	void generateVertices(ButtonVertices& vd) {
@@ -47,9 +50,9 @@ public:
 			bt_y = bt_bg_y;
 		}
 		
-		num_vertices = buttons::createRect(vd, x, y, w, h, bg_top_color, bg_bottom_color);
-		num_vertices += buttons::createRect(vd, bt_bg_x, bt_bg_y, bt_size, bt_size, button_bg_color, button_bg_color);
-		num_vertices += buttons::createRect(vd, bt_x, bt_y, bt_size, bt_size, toggle_on_color, toggle_off_color);
+		buttons::createRect(vd, x, y, w, h, bg_top_color, bg_bottom_color);
+		buttons::createRect(vd, bt_bg_x, bt_bg_y, bt_size, bt_size, button_bg_color, button_bg_color);
+		buttons::createRect(vd, bt_x, bt_y, bt_size, bt_size, toggle_on_color, toggle_off_color);
 	}
 
 

@@ -23,6 +23,7 @@ enum ElementTypes {
 	,BTYPE_BUTTON 	= 2
 	,BTYPE_RADIO  	= 3
 	,BTYPE_SPLINE 	= 4
+	,BTYPE_COLOR	= 5
 };
 
 enum ElementStates {
@@ -59,6 +60,10 @@ public:
 		pos[1] = y;
 	}
 	
+	void setCol(const float* c) {
+		setCol(c[0], c[1], c[2], c[3]);
+	}
+	
 	void setCol(const float r, const float g, const float b, const float a) {
 		col[0] = r;
 		col[1] = g;
@@ -88,25 +93,6 @@ public:
 	ButtonVertices() {
 	}
 	
-	/*
-	int add(const float& x, const float& y, const float* col4) {
-		return add(x,y,col4[0], col4[1], col4[2], col4[3]);
-	}
-
-	int add(const float& x, const float& y, const float& r, const float& g, const float& b, const float& a) {
-		printf("ADD CALLED\n");
-		
-		
-		ButtonVertex v;
-		v.setPos(x,y);
-		v.setCol(r,g,b,a);
-		verts.push_back(v);
-		return verts.size()-1;
-		
-		
-	}
-	*/
-	
 	size_t size() {
 		return verts.size();
 	}
@@ -116,7 +102,6 @@ public:
 	}
 	
 	void clear() {
-	//	printf("CLEAR CALLED?\n");
 		draw_arrays.clear();
 		verts.clear();
 	}
@@ -125,30 +110,17 @@ public:
 		int start = size();
 		std::copy(newVertices.begin(), newVertices.end(), std::back_inserter(verts));
 		draw_arrays.push_back(ButtonDrawArray(drawMode, start, newVertices.size()));
-	//	printf("added: %zu\n", newVertices.size());
 	}
 	
 	ButtonVertex& operator[](const int& i) {
-	//	return tmp_verts[i];
 		return verts[i];
 	}
-//	vector<ButtonVertex> tmp_verts; // testing
+	
 	vector<ButtonVertex> verts;
 	vector<ButtonDrawArray> draw_arrays;
 };
 
 static int createRect(ButtonVertices& vd, int x, int y, int w, int h, float* topCol, float* botCol) {
-	/*
-	vd.add(x,y,topCol);
-	vd.add(x+w,y,topCol);
-	vd.add(x+w,y+h,botCol);
-	
-	vd.add(x+w,y+h,botCol);
-	vd.add(x,y+h,botCol);
-	vd.add(x,y,topCol);
-	*/
-	
-	// new way of adding elements.
 	vector<ButtonVertex> new_verts(6);
 	new_verts[0].set(x,y,topCol);
 	new_verts[1].set(x+w,y,topCol);

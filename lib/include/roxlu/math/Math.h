@@ -1,7 +1,7 @@
 #ifndef ROXLU_MATH_INCLUDEDH
 #define ROXLU_MATH_INCLUDEDH
 
-	#include <roxlu/math/Interpolator.h>
+	#include <roxlu/math/Spline.h>
 	#include <roxlu/math/Random.h>
 	#include <roxlu/math/Mat3.h>
 	#include <roxlu/math/Mat4.h>
