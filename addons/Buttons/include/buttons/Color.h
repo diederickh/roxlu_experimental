@@ -18,12 +18,17 @@ struct ColorPickerCoords {
 		:circle_cx(0.0f)
 		,circle_cy(0.0f)
 		,circle_radius(75.0f)
+		,circle_radius_sq(circle_radius * circle_radius)
 		,preview_x(0)
 		,preview_y(0)
 		,preview_w(0)
 		,preview_h(0)
+		,selected_color_radius(10.0f)
+		,selected_color_angle(0.0f)
+		,selected_color_dist(0.0f)
 	{
 	}
+	
 	int preview_x;
 	int preview_y;
 	int preview_w;
@@ -31,6 +36,11 @@ struct ColorPickerCoords {
 	float circle_cx;
 	float circle_cy;
 	float circle_radius;
+	float circle_radius_sq;
+	float selected_color_radius;
+	float selected_color_angle;
+	float selected_color_dist;
+	
 };
 
 // T = color container, we assume RGBA colors, that can be accessed by [0]..[3]
@@ -72,6 +82,7 @@ public:
 	int h_big; 
 	int h_small; 
 	bool is_big;
+	bool drag_started_in_circle;
 	Slideri hue_slider;
 	Slideri sat_slider;
 	Slideri light_slider;
@@ -87,9 +98,10 @@ ColorT<T>::ColorT(const string& name, T* color)
 	,label_dx(-1)
 	,H(0)
 	,S(1)
-	,L(0)
-	,A(0)
+	,L(60)
+	,A(1)
 	,is_big(false)
+	,drag_started_in_circle(false)
 	,h_big(140)
 	,h_small(20)
 	,hue_slider(H, name+"_H", Slideri::SLIDER_INT)
@@ -130,8 +142,10 @@ void ColorT<T>::positionChildren() {
 	float circle_space = (this->w > this->h) ? this->h : this->w;
 	
 	coords.circle_radius = circle_space * (p_circle * 0.5);
+	coords.circle_radius_sq = coords.circle_radius * coords.circle_radius;
 	coords.circle_cx = 10 + this->x + coords.circle_radius;
 	coords.circle_cy = this->y + coords.circle_radius + 0.5 * (this->h+20 - (coords.circle_radius*2));
+	coords.selected_color_radius = 3.0f;
 
 	hue_slider.x = coords.circle_cx + coords.circle_radius + 15;
 	hue_slider.y = coords.circle_cy - (2.0 * hue_slider.h);
@@ -151,26 +165,23 @@ void ColorT<T>::positionChildren() {
 
 	coords.preview_w = 20;
 	coords.preview_h = 15;
-	coords.preview_x = (this->x + this->w) - (coords.preview_w + 10);
-	coords.preview_y = this->y + 2; 
+	coords.preview_x = (this->x + this->w) - (coords.preview_w + 5);
+	coords.preview_y = this->y + 3; 
 }
 
 
 template<class T>
 void ColorT<T>::generateStaticText() {
-	this->label_dx = static_text->add(this->x+4, this->y+5, this->label,  0.9, 0.9, 0.9, 0.9);
-	//hue_slider.generateStaticText(txt);
+	this->label_dx = static_text->add(this->x+4, this->y+2, this->label,  0.9, 0.9, 0.9, 0.9);
 }
 
 template<class T>
 void ColorT<T>::generateDynamicText() {
-	//hue_slider.generateDynamicText(txt);
 }
 
 template<class T>
 void ColorT<T>::updateTextPosition() {
-	static_text->setTextPosition(this->label_dx, this->x+4, this->y+5);
-	//hue_slider.updateTextPosition(staticText, dynamicText);
+	static_text->setTextPosition(this->label_dx, this->x+4, this->y+2);
 }
 
 template<class T>
@@ -183,14 +194,12 @@ void ColorT<T>::generateVertices(ButtonVertices& vd) {
 	// CREATE SMALL VERSION OF COLOR PICKER
 	// ++++++++++++++++++++++++++++++++++++++++
 	if(light_slider.is_visible && !is_big) {
-		printf("light_slider.is_visible == FALSE and we are SMALL\n");
 		light_slider.hide();
 		sat_slider.hide();
 		hue_slider.hide();
 		alpha_slider.hide();
 	}
 	else if(!light_slider.is_visible && is_big) {
-		printf("We are big!\n");
 		light_slider.show();
 		sat_slider.show();
 		hue_slider.show();
@@ -228,7 +237,6 @@ void ColorT<T>::generateVertices(ButtonVertices& vd) {
 	color[3] = float(A)/100.0f;
 	HSL_to_RGB(float(hue_slider.value)/360.0f, float(sat_slider.value)/100.0f, float(light_slider.value)/100.0f, &color[0], &color[1], &color[2]);
 	
-	
 	// create color rect
 	buttons::createRect(vd, coords.preview_x, coords.preview_y, coords.preview_w, coords.preview_h, color, color);
 	
@@ -261,7 +269,8 @@ void ColorT<T>::generateVertices(ButtonVertices& vd) {
 	
 	for(std::vector<ColorPickerVertex>::iterator it = circle_vertices.begin(); it != circle_vertices.end(); ++it) {
 		ColorPickerVertex& pv = *it;
-		HSL_to_RGB(pv.H, float(S)/100.0f, float(L)/100.0f, &hsl_col[0], &hsl_col[1], &hsl_col[2]);
+		//float(S)/100.0f
+		HSL_to_RGB(pv.H, 1.0, 0.4, &hsl_col[0], &hsl_col[1], &hsl_col[2]);
 		ButtonVertex bv(coords.circle_cx + pv.bv.pos[0], coords.circle_cy + pv.bv.pos[1], hsl_col);
 		ui_circle_fill.push_back(bv);
 		bv.setCol(outline_col);
@@ -269,33 +278,54 @@ void ColorT<T>::generateVertices(ButtonVertices& vd) {
 	}
 	vd.add(ui_circle_fill, GL_TRIANGLE_FAN);
 	vd.add(ui_circle_outline, GL_LINE_STRIP);
+	
+	// The selected color point.
+	float sel_col_black[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+	float sel_col_white[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+	float sel_angle = (float(H)) * DEG_TO_RAD;
+	float sel_dist = (float(S)/100.0f) * coords.circle_radius;
+	float sel_col_x = coords.circle_cx + cos(sel_angle) * sel_dist;
+	float sel_col_y = coords.circle_cy + sin(sel_angle) * sel_dist;
+
+	buttons::createCircle(vd, sel_col_x, sel_col_y, coords.selected_color_radius+1, sel_col_black);
+	buttons::createCircle(vd, sel_col_x, sel_col_y, coords.selected_color_radius, sel_col_white);
 }
+
 
 template<class T>
 void ColorT<T>::onMouseDown(int mx, int my) {
-	
+	drag_started_in_circle = false;
+	if(is_mouse_inside && is_big) {	
+		// check if the draw started inside the circle
+		float dist_x = coords.circle_cx - mx;
+		float dist_y = coords.circle_cy - my;
+		float dist_sq = (dist_x * dist_x) + (dist_y * dist_y);
+		drag_started_in_circle = dist_sq < coords.circle_radius_sq;
+	}
 }
 
 template<class T>
 void ColorT<T>::onMouseUp(int mx, int my) {
-	
+	drag_started_in_circle = false;
 }
 
 template<class T>
 void ColorT<T>::onMouseEnter(int mx, int my) {
-	
+	this->bg_top_color = this->col_bg_top_hover;
+	this->bg_bottom_color = this->col_bg_bottom_hover;
+	needsRedraw();
 }
 
 template<class T>
 void ColorT<T>::onMouseLeave(int mx, int my) {
-	
+	this->bg_top_color = this->col_bg_default;
+	this->bg_bottom_color = this->col_bg_default;
+	needsRedraw();
 }
 
 template<class T>
 void ColorT<T>::onMouseClick(int mx, int my) {
-	
 	if(is_mouse_inside) {
-	//BMOUSE_INSIDE(mx,my,ex,ey,w,h)
 		if(BMOUSE_INSIDE(mx, my, coords.preview_x, coords.preview_y, coords.preview_w, coords.preview_h)) {
 			is_big = !is_big;
 			this->h = (is_big) ? h_big : h_small;
@@ -303,7 +333,6 @@ void ColorT<T>::onMouseClick(int mx, int my) {
 			needsRedraw();
 		}
 	}
-		
 }
 
 template<class T>
@@ -313,7 +342,34 @@ void ColorT<T>::onMouseMoved(int mx, int my) {
 
 template<class T>
 void ColorT<T>::onMouseDragged(int mx, int my, int dx, int dy) {
+
+	if(drag_started_in_circle) {	
+		float dist_x = coords.circle_cx - mx;
+		float dist_y = coords.circle_cy - my;
+		float dist_sq = (dist_x * dist_x) + (dist_y * dist_y);
+		if(dist_sq > coords.circle_radius_sq) {
+			dist_sq = coords.circle_radius_sq;
+		}
+
+		coords.selected_color_dist = sqrt(dist_sq);
+		coords.selected_color_angle = atan2(-dist_y, -dist_x);
+
 	
+		if(coords.selected_color_angle < 0) {
+			H = (coords.selected_color_angle + TWO_PI) * RAD_TO_DEG;
+		}
+		else {
+			H = coords.selected_color_angle * RAD_TO_DEG;
+		}
+		S = (coords.selected_color_dist / coords.circle_radius) * 100;
+		hue_slider.setValue(H);
+		sat_slider.setValue(S);
+		sat_slider.needsRedraw();
+		hue_slider.needsRedraw();
+		sat_slider.needsTextUpdate();
+		hue_slider.needsTextUpdate();
+		
+	}	
 }
 
 template<class T>

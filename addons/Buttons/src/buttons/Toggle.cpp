@@ -13,8 +13,6 @@ Toggle::Toggle(bool& val, const string& name)
 	BSET_COLOR(bg_bottom_color, 0.0, 0.17, 0.21, 1.0);
 	BSET_COLOR(toggle_on_color, 0.0,0.8,0.4,1.0);
 	BSET_COLOR(toggle_off_color, 0.0,0.8,0.2,0.1);
-	
-	
 }
 
 Toggle::~Toggle() {
@@ -45,14 +43,14 @@ void Toggle::onMouseUp(int mx, int my) {
 }
 
 void Toggle::onMouseEnter(int mx, int my) {
-	BSET_COLOR(bg_top_color, 0.0, 0.41, 0.39, 1.0);
-	BSET_COLOR(bg_bottom_color, 0.0, 0.17, 0.21, 1.0);
+	bg_top_color = col_bg_top_hover;
+	bg_bottom_color = col_bg_bottom_hover;
 	needsRedraw();
 }
 
 void Toggle::onMouseLeave(int mx, int my) {
-	BSET_COLOR(bg_top_color, 0.0, 0.17, 0.21, 1.0);
-	BSET_COLOR(bg_bottom_color, 0.0, 0.17, 0.21, 1.0);
+	bg_top_color = col_bg_default;
+	bg_bottom_color = col_bg_default;
 	needsRedraw();
 }
 

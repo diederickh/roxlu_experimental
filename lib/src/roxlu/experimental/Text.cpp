@@ -159,7 +159,6 @@ void Text::updateBuffer() {
 	while(it != texts.end()) {
 		TextEntry& t = *it;
 		if(!t.is_visible) {
-			printf("TEXT NOT VISIBLE..\n");
 			++it;
 			continue;
 		}

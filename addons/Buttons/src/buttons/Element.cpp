@@ -28,6 +28,7 @@ Element::Element(int type, const string& name)
 	BSET_COLOR(col_text, 0.9,0.9,0.9,0.9);
 	bg_top_color = col_bg_default;
 	bg_bottom_color = col_bg_default;
+	setColor(col_bg_default[0], col_bg_default[1], col_bg_default[2]);
 }
 
 Element::~Element() {

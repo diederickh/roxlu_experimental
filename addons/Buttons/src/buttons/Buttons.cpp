@@ -75,6 +75,11 @@ Buttons::Buttons(const string& title, int w)
 Buttons::~Buttons() {
 	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {
+		Element* el = *it;
+		if(el->is_child) {
+			++it;
+			continue;
+		}
 		delete *it;
 		++it;
 	}
@@ -143,6 +148,9 @@ void Buttons::update() {
 	}
 	
 	if(needs_redraw) {
+		positionElements();
+		updateDynamicTexts(); // need to update everything when a element i.e. get bigger
+		updateStaticTextPositions();
 		generateVertices();
 	}
 	if(needs_text_update) {

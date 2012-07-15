@@ -108,27 +108,17 @@ inline Element& Element::setColor(const float* col, int num) {
 inline Element& Element::setColor(const float r, const float g, const float b, const float a) {
 	// set default color
 	float hue,sat,bright;
-	//Color::RGBToHLSf(r,g,b,&hue,&bright, &sat);
 	RGB_to_HSL(r,g,b,&hue, &sat, &bright);
 	BSET_COLOR(col_bg_default, r, g, b, a);
-
 	bg_bottom_color = col_bg_default;
 	bg_top_color = col_bg_default;
-	
-	// top hover is a bit lighter
-	//Color::HLSToRGBf(hue, bright +0.2, sat +0.2, &col_bg_top_hover[0], &col_bg_top_hover[1], &col_bg_top_hover[2]);
-	HSL_to_RGB(hue, sat +0.2, bright +0.2, &col_bg_top_hover[0], &col_bg_top_hover[1], &col_bg_top_hover[2]);
 	col_bg_top_hover[3] = 1.0f;
-		
-	// bottom hover is a bit darker
-	//Color::HLSToRGBf(hue, bright - 0.2 , sat - 0.2, &col_bg_bottom_hover[0], &col_bg_bottom_hover[1], &col_bg_bottom_hover[2]);
-	HSL_to_RGB(hue, sat - 0.2, bright - 0.2, &col_bg_bottom_hover[0], &col_bg_bottom_hover[1], &col_bg_bottom_hover[2]);
 	col_bg_bottom_hover[3] = 1.0f;
-	
-	// text color
-	//Color::HLSToRGBf(hue, bright + 0.6, sat + 0.6, &col_text[0], &col_text[1], &col_text[2]);
-	HSL_to_RGB(hue, sat + 0.6, bright + 0.6, &col_text[0], &col_text[1], &col_text[2]);
 	col_text[3] = 0.9f;	
+	
+	HSL_to_RGB(hue, sat * 1.5, bright * 1.5, &col_bg_top_hover[0], &col_bg_top_hover[1], &col_bg_top_hover[2]);
+	HSL_to_RGB(hue, sat * 1.2, bright * 1.2, &col_bg_bottom_hover[0], &col_bg_bottom_hover[1], &col_bg_bottom_hover[2]);
+	HSL_to_RGB(hue, sat + 0.6, bright + 0.6, &col_text[0], &col_text[1], &col_text[2]);
 	return *this;
 }
 
