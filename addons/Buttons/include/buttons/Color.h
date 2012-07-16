@@ -236,7 +236,7 @@ void ColorT<T>::generateVertices(ButtonVertices& vd) {
 	//hue_slider.generateVertices(vd);
 	color[3] = float(A)/100.0f;
 	HSL_to_RGB(float(hue_slider.value)/360.0f, float(sat_slider.value)/100.0f, float(light_slider.value)/100.0f, &color[0], &color[1], &color[2]);
-	
+	//printf("Color is: %f, %f, %f, %f\n", color[0], color[1], color[2], color[3]);	
 	// create color rect
 	buttons::createRect(vd, coords.preview_x, coords.preview_y, coords.preview_w, coords.preview_h, color, color);
 	
