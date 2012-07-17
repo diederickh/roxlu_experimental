@@ -1,8 +1,8 @@
 #ifndef ROXLU_DICTIONARYH
 #define ROXLU_DICTIONARYH
 
-#include <roxlu/core/platform/Platform.h>
-
+//#include <roxlu/core/platform/Platform.h>
+#include <cstdint>
 #include <string>
 #include <sstream>
 #include <map>

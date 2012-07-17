@@ -1005,7 +1005,8 @@ bool Dictionary::jsonReadNumber(string& raw, Dictionary& result, uint32_t& start
 		printf("jsonReadNumber: invalid json number\n");
 		return false;
 	}
-	result = (int64_t)atoll(str.c_str());
+// @todo make this work on windows...
+//	result = (int64_t)atoll(str.c_str());
 	return true;
 }
 
