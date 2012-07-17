@@ -33,6 +33,7 @@ Buttons::Buttons(const string& title, int w)
 	,static_text(NULL)
 	,dynamic_text(NULL)
 	,allocated_bytes(0)
+	,is_open(true)
 {
 
 	if(!shaders_initialized) {
@@ -52,13 +53,6 @@ Buttons::Buttons(const string& title, int w)
 	glGenBuffers(1, &vbo); eglGetError();
 	glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
 	
-	gui_shader.enable();	
-//	glEnableVertexAttribArray(gui_shader.getAttribute("pos")); eglGetError();
-//	glEnableVertexAttribArray(gui_shader.getAttribute("col")); eglGetError();
-//	glVertexAttribPointer(gui_shader.getAttribute("pos"), 2, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), (GLvoid*)offsetof(ButtonVertex,pos));
-//	glVertexAttribPointer(gui_shader.getAttribute("col"), 4, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), (GLvoid*)offsetof(ButtonVertex,col));
-//	
-	gui_shader.disable();
 	vao.unbind();
 	glBindBuffer(GL_ARRAY_BUFFER, 0); eglGetError();
 	createOrtho(ofGetWidth(), ofGetHeight()); // @todo remove call to getwidth/height @todo windows
@@ -111,43 +105,45 @@ void Buttons::createOrtho(float w, float h) {
 }
 
 void Buttons::update() {
-	
 	h = 0;
-	vector<Element*>::iterator it = elements.begin();
-	while(it != elements.end()) {
-		Element& el = *(*it);
-		el.update();
-		
-		if(el.is_child) {
-			++it;
-			continue;
-		}
-		
-		h += el.h;
-		++it;
-	}
-	
-	// check if we need to update the vertices.
-	it = elements.begin();
 	bool needs_redraw = false;
 	bool needs_text_update = false;
-	if(!is_changed) { // is this panel self changed.
+	
+	if(is_open) {
+		vector<Element*>::iterator it = elements.begin();
 		while(it != elements.end()) {
-			if((*it)->needs_redraw) {
-				needs_redraw = true;
-			} 
-			if((*it)->needs_text_update) {
-				needs_text_update = true;
+			Element& el = *(*it);
+			el.update();
+			
+			if(el.is_child) {
+				++it;
+				continue;
 			}
+			
+			h += el.h;
 			++it;
 		}
+		
+		// check if we need to update the vertices.
+		it = elements.begin();
+		if(!is_changed) { // is this panel self changed.
+			while(it != elements.end()) {
+				if((*it)->needs_redraw) {
+					needs_redraw = true;
+				} 
+				if((*it)->needs_text_update) {
+					needs_text_update = true;
+				}
+				++it;
+			}
+		}
+		else {
+			// when the gui itself is changed we always update!
+			needs_redraw = true;
+		}
 	}
-	else {
-		// when the gui itself is changed we always update!
-		needs_redraw = true;
-	}
-	
-	if(needs_redraw) {
+
+	if(needs_redraw || is_changed) {
 		positionElements();
 		updateDynamicTexts(); // need to update everything when a element i.e. get bigger
 		updateStaticTextPositions();
@@ -206,10 +202,18 @@ void Buttons::generateVertices() {
 }
 
 void Buttons::generatePanelVertices() {
+	coords.close_x = (x+w)-17;
+	coords.close_y = y+4;
+	coords.close_w = 13;
+	coords.close_h = 13;
+
 	float border_color[4] = { 1,1,1,0.3};
 	num_panel_vertices = buttons::createRect(vd, x+1, y+1, getPanelWidth(), getPanelHeight(), shadow_color, shadow_color);
 	num_panel_vertices += buttons::createRect(vd, x-border, y-border, getPanelWidth(), getPanelHeight(), border_color, border_color);
 	num_panel_vertices += buttons::createRect(vd, x, y, w, header_h, header_color_top, header_color_bottom);
+	
+	buttons::createRect(vd, coords.close_x, coords.close_y, coords.close_w, coords.close_h, border_color, border_color);
+	buttons::createRect(vd, coords.close_x+1, coords.close_y+1, coords.close_w-2, coords.close_h-2, header_color_bottom, header_color_top);
 	is_changed = false;
 }
 
@@ -225,6 +229,10 @@ void Buttons::updateDynamicTexts() {
 
 
 void Buttons::generateElementVertices() {
+	if(!is_open) {
+		return;
+	}
+	
 	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {
 		Element* el = *it;
@@ -407,12 +415,28 @@ void Buttons::onMouseMoved(int mx, int my) {
 	if(is_mouse_down) {
 		onMouseDragged(mdx, mdy);
 	}
-	
-	// check if we are inside an element and dragging...
-	Element* e = elements[0];
-	Element* el;
-	vector<Element*>::iterator it;
-	if(is_mouse_down) {
+
+	// check elements when we're opened.	
+	if(is_open) {
+		// check if we are inside an element and dragging...
+		Element* e = elements[0];
+		Element* el;
+		vector<Element*>::iterator it;
+		if(is_mouse_down) {
+			it = elements.begin();
+			while(it != elements.end()) {
+				el = *it;
+				if(!el->is_visible) {
+					++it;
+					continue;
+				}
+				
+				el->onMouseDragged(mx, my, mdx, mdy);
+				++it;
+			}
+		}
+
+		// call "leave" and "enter"
 		it = elements.begin();
 		while(it != elements.end()) {
 			el = *it;
@@ -421,31 +445,18 @@ void Buttons::onMouseMoved(int mx, int my) {
 				continue;
 			}
 			
-			el->onMouseDragged(mx, my, mdx, mdy);
+			el->is_mouse_inside = BINSIDE_ELEMENT(el, mx, my);
+			if(el->is_mouse_inside && el->state == BSTATE_NONE) {
+				el->state = BSTATE_ENTER;
+				el->onMouseEnter(x,y);
+			}
+			else if(!el->is_mouse_inside && el->state == BSTATE_ENTER) {
+				el->state = BSTATE_NONE;
+				el->onMouseLeave(mx,my);
+			}
+			el->onMouseMoved(mx,my);
 			++it;
 		}
-	}
-
-	// call "leave" and "enter"
-	it = elements.begin();
-	while(it != elements.end()) {
-		el = *it;
-		if(!el->is_visible) {
-			++it;
-			continue;
-		}
-		
-		el->is_mouse_inside = BINSIDE_ELEMENT(el, mx, my);
-		if(el->is_mouse_inside && el->state == BSTATE_NONE) {
-			el->state = BSTATE_ENTER;
-			el->onMouseEnter(x,y);
-		}
-		else if(!el->is_mouse_inside && el->state == BSTATE_ENTER) {
-			el->state = BSTATE_NONE;
-			el->onMouseLeave(mx,my);
-		}
-		el->onMouseMoved(mx,my);
-		++it;
 	}
 	
 	// is mouse inside the gui
@@ -462,12 +473,29 @@ void Buttons::onMouseMoved(int mx, int my) {
 	pmy = my;
 }
 
-void Buttons::onMouseDown(int x, int y) {
-	if(!is_locked && BINSIDE_HEADER(this, x, y)) {
+void Buttons::onMouseDown(int mx, int my) {
+	if(!is_locked && BINSIDE_HEADER(this, mx, my)) {
 		triggered_drag = true; // the drag was triggered by the gui
 	}
 
+	if(BMOUSE_INSIDE(mx, my, coords.close_x, coords.close_y, coords.close_w, coords.close_h)) {
+		if(!is_open) {
+			open();
+		}
+		else {
+			close();
+		}
+		return;
+	}
+	
 	is_mouse_down = true;
+	
+	
+	if(!is_open) {
+		return;
+	}
+
+	
 	Element* el;
 	vector<Element*>::iterator it = elements.begin();
 	it = elements.begin();
@@ -480,8 +508,8 @@ void Buttons::onMouseDown(int x, int y) {
 			continue;
 		}
 		
-		el->is_mouse_down_inside = BINSIDE_ELEMENT(el, x, y);
-		el->onMouseDown(x,y);
+		el->is_mouse_down_inside = BINSIDE_ELEMENT(el, mx, my);
+		el->onMouseDown(mx,my);
 		if(is_mouse_down && el->is_mouse_down_inside) {
 			el->drag_inside = true;
 		}
@@ -492,9 +520,14 @@ void Buttons::onMouseDown(int x, int y) {
 	}
 }
 
-void Buttons::onMouseUp(int x, int y) {
+void Buttons::onMouseUp(int mx, int my) {
 	triggered_drag = false;
 	is_mouse_down = false;
+	
+	if(!is_open) {
+		return;
+	}
+	
 	vector<Element*>::iterator it = elements.begin();
 	it = elements.begin();
 	Element* el;
@@ -507,9 +540,9 @@ void Buttons::onMouseUp(int x, int y) {
 		}
 		
 		el->is_mouse_down_inside = false;
-		el->onMouseUp(x,y);
+		el->onMouseUp(mx,my);
 		if(el->drag_inside && el->is_mouse_inside) {
-			el->onMouseClick(x,y);
+			el->onMouseClick(mx,my);
 		}
 			
 		el->drag_inside = false;
@@ -517,14 +550,14 @@ void Buttons::onMouseUp(int x, int y) {
 	}
 }
 
-void Buttons::onMouseEnter(int x, int y) {
+void Buttons::onMouseEnter(int mx, int my) {
 	BSET_COLOR(header_color_top, 0.07,0.07,0.07,1.0);
 	BSET_COLOR(header_color_bottom, 0.2,0.2,0.2,0.8);
 	flagChanged();
 
 }
 
-void Buttons::onMouseLeave(int x, int y) {
+void Buttons::onMouseLeave(int mx, int my) {
 	BSET_COLOR(header_color_top, 0.07,0.07,0.07,1.0);
 	BSET_COLOR(header_color_bottom, 0.1,0.1,0.1,0.8);
 	flagChanged();
@@ -544,7 +577,6 @@ void Buttons::positionElements() {
 	int xx = x;
 	int yy = y+header_h;
 	Element* el;
-	
 	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {
 		el = *it;
@@ -647,5 +679,14 @@ Element* Buttons::getElement(const string& name) {
 void Buttons::setLock(bool yn) {
 	is_locked = yn;
 }
+
+void Buttons::setColor(const float r, const float g, const float b, float a) {
+	printf("Set color: %f, %f, %f\n", r,g,b);
+	for(vector<Element*>::iterator it = elements.begin(); it != elements.end(); ++it) {
+		Element& el = **it;
+		el.setColor(r,g,b,a);
+	}
+}
+
 
 } // namespace buttons

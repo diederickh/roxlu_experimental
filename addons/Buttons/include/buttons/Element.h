@@ -50,7 +50,7 @@ public:
 	virtual void hide();
 	virtual void show();
 		
-	virtual Element& setColor(const float r, const float g, const float b, const float a = 1.0f);
+	virtual Element& setColor(const float hue, const float sat, const float bright, float a = 1.0f);
 	virtual Element& setColor(const float* col, int num = 3);
 	
  	void needsRedraw();
@@ -105,20 +105,46 @@ inline Element& Element::setColor(const float* col, int num) {
 	return *this;	
 }
 	
-inline Element& Element::setColor(const float r, const float g, const float b, const float a) {
+inline Element& Element::setColor(const float hue, const float sat, const float bright, float a) {
 	// set default color
-	float hue,sat,bright;
-	RGB_to_HSL(r,g,b,&hue, &sat, &bright);
-	BSET_COLOR(col_bg_default, r, g, b, a);
+//	float rr = std::max<float>(0.1,r);
+//	float gg = std::max<float>(0.1,g);
+//	float bb = std::max<float>(0.1,b);
+//	printf("%f, %f, %f\n", rr,gg,bb);
+//	rr = r;
+//	gg = g; 
+//	bb = b;
+//	printf("%f, %f, %f\n", rr,gg,bb);	
+//	float hue,sat,bright;
+//	RGB_to_HSL(rr,gg,bb,&hue, &sat, &bright);
+	float ss, ll;
+	ss = std::min<float>(sat, 0.5);
+	ll = std::min<float>(bright, 0.3);
+	
+	float rr,gg,bb;
+	HSL_to_RGB(hue, ss, ll, &rr, &gg, &bb);
+	BSET_COLOR(col_bg_default, rr, gg, bb, a);
 	bg_bottom_color = col_bg_default;
 	bg_top_color = col_bg_default;
-	col_bg_top_hover[3] = 1.0f;
-	col_bg_bottom_hover[3] = 1.0f;
+	col_bg_top_hover[3] = a;
+	col_bg_bottom_hover[3] = a;
 	col_text[3] = 0.9f;	
 	
-	HSL_to_RGB(hue, sat * 1.5, bright * 1.5, &col_bg_top_hover[0], &col_bg_top_hover[1], &col_bg_top_hover[2]);
-	HSL_to_RGB(hue, sat * 1.2, bright * 1.2, &col_bg_bottom_hover[0], &col_bg_bottom_hover[1], &col_bg_bottom_hover[2]);
-	HSL_to_RGB(hue, sat + 0.6, bright + 0.6, &col_text[0], &col_text[1], &col_text[2]);
+	float top_bright = std::min<float>(1.0, ll + 0.1);
+	float bot_bright = std::max<float>(0.0, ll - 0.1);
+
+	HSL_to_RGB(hue, ss , top_bright, &col_bg_top_hover[0], &col_bg_top_hover[1], &col_bg_top_hover[2]);
+	HSL_to_RGB(hue, ss , bot_bright, &col_bg_bottom_hover[0], &col_bg_bottom_hover[1], &col_bg_bottom_hover[2]);
+	HSL_to_RGB(hue, ss , ll + 0.6, &col_text[0], &col_text[1], &col_text[2]);
+	
+//	HSL_to_RGB(hue, sat * 1.5, bright * 1.5, &col_bg_top_hover[0], &col_bg_top_hover[1], &col_bg_top_hover[2]);
+//	HSL_to_RGB(hue, sat * 1.2, bright * 1.2, &col_bg_bottom_hover[0], &col_bg_bottom_hover[1], &col_bg_bottom_hover[2]);
+//	HSL_to_RGB(hue, sat + 0.6, bright + 0.6, &col_text[0], &col_text[1], &col_text[2]);
+	//printf("---> Col bg default: %f, %f, %f\n", col_bg_top_hover[0], col_bg_top_hover[1], col_bg_top_hover[2]);
+//	col_bg_top_hover[0] = 0.229032;
+//	col_bg_top_hover[1] = 0.389355;
+//	col_bg_top_hover[2] = 0.480968;
+
 	return *this;
 }
 

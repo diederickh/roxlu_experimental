@@ -70,7 +70,11 @@ public:
 	
 	void save(std::ofstream& ofs);
 	void load(std::ifstream& ifs);
+	void onLoaded();
 	bool canSave();
+	
+	void hide();
+	void show();
 
 	int label_dx;	
 	T* color;
@@ -368,7 +372,6 @@ void ColorT<T>::onMouseDragged(int mx, int my, int dx, int dy) {
 		hue_slider.needsRedraw();
 		sat_slider.needsTextUpdate();
 		hue_slider.needsTextUpdate();
-		
 	}	
 }
 
@@ -379,14 +382,31 @@ bool ColorT<T>::canSave() {
 
 template<class T>
 void ColorT<T>::save(std::ofstream& ofs) {
-	
 }
 
 template<class T>
 void ColorT<T>::load(std::ifstream& ifs) {
-	
 }
 
+template<class T>
+void ColorT<T>::onLoaded() {
+	color[3] = float(A)/100.0f;
+	HSL_to_RGB(float(hue_slider.value)/360.0f, float(sat_slider.value)/100.0f, float(light_slider.value)/100.0f, &color[0], &color[1], &color[2]);
+} 
+
+template<class T>
+void ColorT<T>::hide() {
+	this->is_visible = false;
+	this->static_text->setTextVisible(this->label_dx, false);
+
+}
+
+template<class T>
+void ColorT<T>::show() {
+	this->is_visible = true;
+	this->static_text->setTextVisible(this->label_dx, true);
+
+}
 
 typedef ColorT<float> ColorPicker;
 

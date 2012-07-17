@@ -25,6 +25,10 @@ public:
 	void load(std::ifstream& ifs);
 	bool canSave();
 	
+	Toggle& setColor(const float hue, const float sat, const float bright, const float a = 1.0);
+	void hide();
+	void show();
+	
 	bool& value;
 	
 	float toggle_off_color[4];

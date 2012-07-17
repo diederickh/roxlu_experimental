@@ -12,7 +12,7 @@
 static void HSL_to_RGB(float h, float sl, float l, float* r, float* g, float* b) {
     float v;
     v = (l <= 0.5) ? (l * (1.0 + sl)) : (l + sl - l * sl);
-    if (v <= 0) {
+     if (v <= 0) {
 		*r = *g = *b = 0.0;
     } 
 	else {

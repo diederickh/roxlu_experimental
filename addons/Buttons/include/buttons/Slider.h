@@ -44,17 +44,15 @@ public:
 		return *this;
 	}
 	
-	Slider& setColor(const float r, const float g, const float b, const float a = 1.0) {
-		Element::setColor(r,g,b,a);
-		bar_empty_color[3] = 1.0f;
-		bar_filled_color[3] = 1.0f;
-		bar_filled_bottom[3] = 1.0f;
+	Slider& setColor(const float hue, const float sat, const float bright, const float a = 1.0) {
+		Element::setColor(hue,sat,bright,a);
+		bar_empty_color[3] = a;
+		bar_filled_color[3] = a;
+		bar_filled_bottom[3] = a;
 		
-		float hue, sat, bright;
-		RGB_to_HSL(r,g,b,&hue, &sat, &bright);
-		HSL_to_RGB(hue, sat * 0.5, bright, &bar_empty_color[0], &bar_empty_color[1], &bar_empty_color[2]);
-		HSL_to_RGB(hue, sat * 1.7, bright * 1.7, &bar_filled_color[0], &bar_filled_color[1], &bar_filled_color[2]);
-		HSL_to_RGB(hue, sat * 0.9, bright * 0.9, &bar_filled_bottom[0], &bar_filled_bottom[1], &bar_filled_bottom[2]);
+		HSL_to_RGB(hue, sat, bright - 0.2, &bar_empty_color[0], &bar_empty_color[1], &bar_empty_color[2]);
+		HSL_to_RGB(hue, sat, bright + 0.2, &bar_filled_color[0], &bar_filled_color[1], &bar_filled_color[2]);
+		HSL_to_RGB(hue, sat, bright - 0.1, &bar_filled_bottom[0], &bar_filled_bottom[1], &bar_filled_bottom[2]);
 		return *this;
 	}
 

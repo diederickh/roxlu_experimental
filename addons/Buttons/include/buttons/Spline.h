@@ -77,6 +77,9 @@ public:
 	void load(std::ifstream& ifs);
 	bool canSave();
 	
+	void hide();
+	void show();
+	
 	SplineEditor<S, V>& setColor(const float r, const float g, const float b, const float a = 1.0f);
 	
 	int selected_handle_dx;
@@ -107,21 +110,32 @@ SplineEditor<S,V>::SplineEditor(const string& name, S& spline)
 }
 
 template<class S, class V> 
-SplineEditor<S, V>& SplineEditor<S,V>::setColor(const float r, const float g, const float b, const float a) {
+SplineEditor<S, V>& SplineEditor<S,V>::setColor(const float hue, const float sat, const float bright, const float a) {
+	Element::setColor(hue,sat,bright,a);
+	
 	// bar_empty_color: saturated default color
-	editor_bg_top_col[3] = 1.0f;
-	editor_spline_col[3] = 1.0f;
-	default_handle_col[3] = 1.0f;
+	editor_bg_top_col[3] = a;
+	editor_spline_col[3] = a;
+	default_handle_col[3] = a;
 
-	float hue, sat, bright;
 
-	RGB_to_HSL(r,g,b,&hue, &sat, &bright);
-	HSL_to_RGB(hue, sat * 0.5,bright,  &editor_bg_top_col[0], &editor_bg_top_col[1], &editor_bg_top_col[2]);
-	BSET_COLOR(editor_bg_bottom_col, editor_bg_top_col[0], editor_bg_top_col[1], editor_bg_top_col[2], 1.0f);
-	HSL_to_RGB(hue, sat * 2.5, bright * 2.7,  &editor_spline_col[0], &editor_spline_col[1], &editor_spline_col[2]);
-	HSL_to_RGB(hue, sat * 1.5, bright * 1.5, &col_bg_top_hover[0], &col_bg_top_hover[1], &col_bg_top_hover[2]);
-	HSL_to_RGB(hue, sat * 1.2, bright * 1.2, &col_bg_bottom_hover[0], &col_bg_bottom_hover[1], &col_bg_bottom_hover[2]);
-	return *this;
+/*
+		HSL_to_RGB(hue, sat, bright - 0.2, &bar_empty_color[0], &bar_empty_color[1], &bar_empty_color[2]);
+		HSL_to_RGB(hue, sat, bright + 0.2, &bar_filled_color[0], &bar_filled_color[1], &bar_filled_color[2]);
+		HSL_to_RGB(hue, sat, bright - 0.1, &bar_filled_bottom[0], &bar_filled_bottom[1], &bar_filled_bottom[2]);
+
+*/
+
+	HSL_to_RGB(hue, sat, bright - 0.1,  &editor_bg_top_col[0], &editor_bg_top_col[1], &editor_bg_top_col[2]);
+	BSET_COLOR(editor_bg_bottom_col, editor_bg_top_col[0], editor_bg_top_col[1], editor_bg_top_col[2], a);
+	HSL_to_RGB(hue, sat, bright + 0.5,  &editor_spline_col[0], &editor_spline_col[1], &editor_spline_col[2]);
+
+
+
+//	HSL_to_RGB(hue, sat * 0.5,bright,  &editor_bg_top_col[0], &editor_bg_top_col[1], &editor_bg_top_col[2]);
+//	BSET_COLOR(editor_bg_bottom_col, editor_bg_top_col[0], editor_bg_top_col[1], editor_bg_top_col[2], 1.0f);
+//	HSL_to_RGB(hue, sat * 2.5, bright * 2.7,  &editor_spline_col[0], &editor_spline_col[1], &editor_spline_col[2]);
+ 	return *this;
 }
 
 template<class S, class V>  
@@ -319,6 +333,19 @@ void SplineEditor<S, V>::load(std::ifstream& ifs) {
 	}
 }
 
+
+template<class S, class V> 
+void SplineEditor<S, V>::hide() {
+	this->is_visible = false;
+	this->static_text->setTextVisible(this->label_dx, false);
+
+}
+
+template<class S, class V> 
+void SplineEditor<S, V>::show() {
+	this->is_visible = true;
+	this->static_text->setTextVisible(this->label_dx, true);
+}
 
 //typedef SplineEditor<Spline> SplineEditor;
 

@@ -83,6 +83,21 @@ const string BUTTONS_FS = "  \
 
 namespace buttons {
 
+struct ButtonsCoords {
+	ButtonsCoords()
+		:close_x(0)
+		,close_y(0)
+		,close_w(0)
+		,close_h(0)
+	{
+	}
+	
+	int close_x;
+	int close_y;
+	int close_w;
+	int close_h;
+};
+
 struct ElementByName {
 	ElementByName(const string& name)
 		:name(name)
@@ -162,7 +177,10 @@ public:
 	Element* getElement(const string& name);
 	
 	void setLock(bool yn);
-		
+	void close();
+	void open();
+	void setColor(const float r, const float g, const float b, float a = 1.0);
+	
 private:
 	void addElement(Element* el, const string& label);
 	void addChildElements(vector<Element*>& children);
@@ -198,6 +216,7 @@ private:
 	bool is_mouse_inside_header;
 	bool is_mouse_inside_panel;
 	bool triggered_drag;
+	bool is_open; // mimized or maximized
 	int mdx; // drag x
 	int mdy; // drag y
 	int pmx; // prev mouse x
@@ -215,7 +234,7 @@ private:
 	Text* dynamic_text;
 	static Shader gui_shader;
 	size_t allocated_bytes; // number of bytes we allocated for the vbo
-	
+	ButtonsCoords coords;
 	
 	float ortho[16];
 	//float model[16];
@@ -241,6 +260,24 @@ inline string Buttons::createCleanName(const string& ugly) {
 
 inline bool Buttons::isMouseInsidePanel() {
 	return is_mouse_inside_panel;
+}
+
+inline void Buttons::close() {
+	is_open = false;
+	for(vector<Element*>::iterator it = elements.begin(); it != elements.end(); ++it) {
+		Element& el = **it;
+		el.hide();
+	}
+	flagChanged();
+}
+
+inline void Buttons::open() {
+	is_open = true;
+	for(vector<Element*>::iterator it = elements.begin(); it != elements.end(); ++it) {
+		Element& el = **it;
+		el.show();
+	}
+	flagChanged();
 }
 
 } // buttons
