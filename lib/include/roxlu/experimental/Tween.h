@@ -73,7 +73,7 @@ public:
 	~Tween();
 	
 	Tween& setType(int t);
-	uint64_t now();
+	rx_uint64 now();
 	void start(float fromValue, float toValue, rx_uint64 millis, rx_uint64 delay = 0);
 	void update();
 	
@@ -105,7 +105,7 @@ inline Tween& Tween::setType(int t) {
 	return *this;
 }
 
-inline uint64_t Tween::now() {
+inline rx_uint64 Tween::now() {
 	return Timer::now();
 	/*
 	timeval time;
