@@ -1,8 +1,8 @@
 #ifndef ROXLU_IOBUFFERH
 #define ROXLU_IOBUFFERH
                            
-//#include <roxlu/core/platform/Platform.h>
-#include <cstdint>
+#include <roxlu/core/platform/Platform.h>
+//#include <cstdint>
 #include <string>
 #include <algorithm>
 #include <fstream>
@@ -14,16 +14,16 @@ using std::ofstream;
 // Based on CRTMP server source code.
 namespace roxlu {
 
-#define GET_IB_POINTER(x) 				 ((uint8_t *)((x).buffer + (x).consumed))
-#define GET_AVAILABLE_BYTES_COUNT(x)     ((x).published - (x).consumed)
+#define GET_IB_POINTER(x) 				((rx_uint8 *)((x).buffer + (x).consumed))
+#define GET_AVAILABLE_BYTES_COUNT(x)   	((x).published - (x).consumed)
 
 class IOBuffer {
 public:	
-	uint8_t*	buffer;
-	uint32_t	size;
-	uint32_t	published;
-	uint32_t	consumed;
-	uint32_t	min_chunk_size;
+	rx_uint8*	buffer;
+	rx_uint32	size;
+	rx_uint32	published;
+	rx_uint32	consumed;
+	rx_uint32	min_chunk_size;
 	
 public:
 	IOBuffer();
@@ -31,116 +31,116 @@ public:
 	
 	// setup
 	void 		setup();
-	void 		setup(uint32_t expectedSize);
+	void 		setup(rx_uint32 expectedSize);
 		
 	bool 		loadFromFile(string path); // no datapath (needs to be clean)	
 	bool 		saveToFile(string path);
 		
 	// moving the read head
-	bool 		reuse(uint32_t numBytes); 
-	bool 		ignore(uint32_t numBytes);
+	bool 		reuse(rx_uint32 numBytes); 
+	bool 		ignore(rx_uint32 numBytes);
 	void 		reset(); 
 	void 		resetConsumed();
 	void 		resetStored();
 		
 	// get the number of bytes published.
-	uint32_t 	getNumBytesStored();
-	void 		setNumBytesStored(uint32_t numBytes); 
-	void 		addNumBytesStored(uint32_t numBytes); 
+	rx_uint32 	getNumBytesStored();
+	void 		setNumBytesStored(rx_uint32 numBytes); 
+	void 		addNumBytesStored(rx_uint32 numBytes); 
 	bool 		hasBytesToRead();
-	void 		addNumBytesConsumed(uint32_t numByes);
-	uint32_t 	getMostNumberOfBytesWeCanConsume(uint32_t tryToRead);
+	void 		addNumBytesConsumed(rx_uint32 numByes);
+	rx_uint32 	getMostNumberOfBytesWeCanConsume(rx_uint32 tryToRead);
 
 		
 	// store: system byte order
-	bool 		storeBytes(const char* someData, const uint32_t numBytes);
-	bool 		storeBytes(const uint8_t* someData, const uint32_t numBytes);
-	void 		storeByte(uint8_t byte);
-	void 		storeUI8(uint8_t byte);
-	void 		storeUI16(uint16_t data);
-	void 		storeUI32(uint32_t data);
+	bool 		storeBytes(const char* someData, const rx_uint32 numBytes);
+	bool 		storeBytes(const rx_uint8* someData, const rx_uint32 numBytes);
+	void 		storeByte(rx_uint8 byte);
+	void 		storeUI8(rx_uint8 byte);
+	void 		storeUI16(rx_uint16 data);
+	void 		storeUI32(rx_uint32 data);
 	void 		storeString(string data);
-	void 		storeRepeat(uint8_t byte, uint32_t numBytes); 
+	void 		storeRepeat(rx_uint8 byte, rx_uint32 numBytes); 
 	void 		storeBuffer(IOBuffer& other); 
-	int  		storeBuffer(IOBuffer& other, uint32_t numBytes);
+	int  		storeBuffer(IOBuffer& other, rx_uint32 numBytes);
 	void 		storeFloat(float data);
 	void 		storeBool(bool data);
 	
 	// store: little endian
-	void 		storeUI16LE(uint16_t data);
-	void 		storeUI32LE(uint32_t data);
+	void 		storeUI16LE(rx_uint16 data);
+	void 		storeUI32LE(rx_uint32 data);
 	void 		storeFloatLE(float data);
 	void 		storeDoubleLE(double data);
 	void 		storeStringWithSizeLE(string data); 
 	
 	// store: big endian (network byte order)
-	void 		storeUI16BE(uint16_t data);
-	void 		storeUI32BE(uint32_t data);
-	void 		storeUI64BE(uint64_t data);
+	void 		storeUI16BE(rx_uint16 data);
+	void 		storeUI32BE(rx_uint32 data);
+	void 		storeUI64BE(rx_uint64 data);
 	void 		storeDoubleBE(double data);
 	void 		storeFloatBE(float data);
 	void 		storeStringWithSizeBE(string data); 
 
 	// consume: system byte order
-	uint8_t 	consumeByte();
-	uint8_t 	consumeUI8();
-	uint16_t	consumeUI16();
-	uint32_t 	consumeUI32();
-	uint64_t 	consumeUI64();
+	rx_uint8 	consumeByte();
+	rx_uint8 	consumeUI8();
+	rx_uint16	consumeUI16();
+	rx_uint32 	consumeUI32();
+	rx_uint64 	consumeUI64();
 	float		consumeFloat();
 	bool		consumeBool();
-	int8_t  	consumeI8();
-	int16_t 	consumeI16();
-	int32_t 	consumeI32();
-	int64_t 	consumeI64();
+	rx_int8  	consumeI8();
+	rx_int16 	consumeI16();
+	rx_int32 	consumeI32();
+	rx_int64 	consumeI64();
 	double 		consumeDouble();
-	int 		consumeUntil(uint8_t until, string& found);
+	int 		consumeUntil(rx_uint8 until, string& found);
 	int 		consumeUntil(string until, string& found);
-	int 		consumeBytes(uint8_t* buff, uint32_t numBytes);
-	string 		consumeString(uint32_t upToNumBytes);
+	int 		consumeBytes(rx_uint8* buff, rx_uint32 numBytes);
+	string 		consumeString(rx_uint32 upToNumBytes);
 
 	// consume: little endian
-	int16_t 	consumeI16LE();
-	int32_t 	consumeI32LE();
-	int64_t 	consumeI64LE();
+	rx_int16 	consumeI16LE();
+	rx_int32 	consumeI32LE();
+	rx_int64 	consumeI64LE();
 	double 		consumeDoubleLE();
-	uint16_t 	consumeUI16LE();
-	uint32_t 	consumeUI32LE();
-	uint64_t 	consumeUI64LE();
+	rx_uint16 	consumeUI16LE();
+	rx_uint32 	consumeUI32LE();
+	rx_uint64 	consumeUI64LE();
 	float 		consumeFloatLE();
 	string 		consumeStringWithSizeLE();
 		
 	// consume: big endian
-	uint16_t 	consumeUI16BE();
-	uint32_t 	consumeUI32BE();
-	uint64_t 	consumeUI64BE();
-	int16_t 	consumeI16BE();
-	int32_t 	consumeI32BE();
-	int64_t 	consumeI64BE();
+	rx_uint16 	consumeUI16BE();
+	rx_uint32 	consumeUI32BE();
+	rx_uint64 	consumeUI64BE();
+	rx_int16 	consumeI16BE();
+	rx_int32 	consumeI32BE();
+	rx_int64 	consumeI64BE();
 	double 		consumeDoubleBE();	
 	string 		consumeStringWithSizeBE();
 	
 	// operators
-	uint8_t& operator[](uint32_t index) const;
+	rx_uint8& operator[](rx_uint32 index) const;
 	
 	// helpers
-	inline uint8_t 	getAt(uint8_t position);
-	void 			printHex(uint32_t start = 0, uint32_t end = 0);
+	inline rx_uint8 	getAt(rx_uint8 position);
+	void 			printHex(rx_uint32 start = 0, rx_uint32 end = 0);
 	void 			printDoubleAsHex(double toPrint);
-	void 			printUI16AsHex(uint16_t toPrint);
+	void 			printUI16AsHex(rx_uint16 toPrint);
 	void 			recycle();
-	bool 			ensureSize(uint32_t expectedSize);
+	bool 			ensureSize(rx_uint32 expectedSize);
 	void 			cleanup();
 	bool 			moveData();
-	void 			setMinChunkSize(uint32_t minSize);
-	uint32_t 		getMinChunkSize();
-	uint8_t* 		getPtr();
-	uint8_t* 		getStorePtr();
-	uint8_t* 		getConsumePtr();
+	void 			setMinChunkSize(rx_uint32 minSize);
+	rx_uint32 		getMinChunkSize();
+	rx_uint8* 		getPtr();
+	rx_uint8* 		getStorePtr();
+	rx_uint8* 		getConsumePtr();
 };
 
 
-inline uint8_t IOBuffer::getAt(uint8_t position) {
+inline rx_uint8 IOBuffer::getAt(rx_uint8 position) {
 	return buffer[position];
 }
 

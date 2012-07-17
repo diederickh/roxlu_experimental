@@ -34,7 +34,7 @@ bool IOBuffer::loadFromFile(string path) {
 		return false;
 	}
 	// get size and go back to start.
-	uint32_t file_size = ifs.tellg();
+	rx_uint32 file_size = ifs.tellg();
  	ifs.seekg(0, std::ios::beg);
 	
 	// read bytes into buffer.
@@ -70,7 +70,7 @@ void IOBuffer::setup() {
 	setup(min_chunk_size);	
 }
 
-void IOBuffer::setup(uint32_t expectedSize) {
+void IOBuffer::setup(rx_uint32 expectedSize) {
 	if( (buffer != NULL)
 		|| (size != 0)
 		|| (published != 0)
@@ -85,7 +85,7 @@ void IOBuffer::setup(uint32_t expectedSize) {
 	//memset(buffer, 0, expectedSize);
 }
 
-bool IOBuffer::ensureSize(uint32_t expectedSize) {
+bool IOBuffer::ensureSize(rx_uint32 expectedSize) {
 	
 	// 1. we have enough space
 	if(published + expectedSize <= size) {
@@ -110,7 +110,7 @@ bool IOBuffer::ensureSize(uint32_t expectedSize) {
 	}
 	
 	// 5. create a new buffer.
-	uint8_t* tmp_buffer = new uint8_t[published + expectedSize];
+	rx_uint8* tmp_buffer = new rx_uint8[published + expectedSize];
 	
 	// 6. copy exising data to tmp buffer
 	if(buffer != NULL) {
@@ -124,15 +124,15 @@ bool IOBuffer::ensureSize(uint32_t expectedSize) {
 	return true;
 }
 
-uint8_t* IOBuffer::getPtr() {
+rx_uint8* IOBuffer::getPtr() {
 	return buffer;
 }
 
-uint8_t* IOBuffer::getStorePtr() {
+rx_uint8* IOBuffer::getStorePtr() {
 	return buffer+published;
 }
 
-uint8_t* IOBuffer::getConsumePtr() {
+rx_uint8* IOBuffer::getConsumePtr() {
 	return buffer+consumed;
 }
 
@@ -156,22 +156,22 @@ void IOBuffer::cleanup() {
 	published = 0;
 }
 
-void IOBuffer::setMinChunkSize(uint32_t minSize) {
+void IOBuffer::setMinChunkSize(rx_uint32 minSize) {
 	min_chunk_size = minSize;
 }
 
-uint32_t IOBuffer::getMinChunkSize() {
+rx_uint32 IOBuffer::getMinChunkSize() {
 	return min_chunk_size;
 }
 
-void IOBuffer::storeByte(uint8_t byte) {
+void IOBuffer::storeByte(rx_uint8 byte) {
 	ensureSize(1);
 	buffer[published] = byte;
 	published++;
 }
 
 void IOBuffer::storeBool(bool data) {
-	storeByte((uint8_t)data);
+	storeByte((rx_uint8)data);
 }
 
 void IOBuffer::storeFloat(float data) {
@@ -180,7 +180,7 @@ void IOBuffer::storeFloat(float data) {
 	published +=4;
 }
 
-bool IOBuffer::storeBytes(const uint8_t* someData, const uint32_t numBytes) {
+bool IOBuffer::storeBytes(const rx_uint8* someData, const rx_uint32 numBytes) {
 	if(!ensureSize(numBytes)) {
 		return false;
 	}
@@ -189,7 +189,7 @@ bool IOBuffer::storeBytes(const uint8_t* someData, const uint32_t numBytes) {
 	return true;
 }
 
-bool IOBuffer::storeBytes(const char* someData, const uint32_t numBytes) {
+bool IOBuffer::storeBytes(const char* someData, const rx_uint32 numBytes) {
 	if(!ensureSize(numBytes)) {
 		return false;
 	}
@@ -199,43 +199,43 @@ bool IOBuffer::storeBytes(const char* someData, const uint32_t numBytes) {
 }
 
 
-void IOBuffer::storeRepeat(uint8_t byte, uint32_t numBytes) {
+void IOBuffer::storeRepeat(rx_uint8 byte, rx_uint32 numBytes) {
 	ensureSize(numBytes);
 	memset(buffer + published, byte, numBytes);
 	published += numBytes;
 }
 
-void IOBuffer::storeUI8(uint8_t byte) {
+void IOBuffer::storeUI8(rx_uint8 byte) {
 	storeByte(byte);
 }
 
-void IOBuffer::storeUI16(uint16_t data) {
+void IOBuffer::storeUI16(rx_uint16 data) {
 	ensureSize(16);
 	memcpy(buffer+published, &data, 2);
 	published += 2;
 }
 
-void IOBuffer::storeUI32(uint32_t data) {
+void IOBuffer::storeUI32(rx_uint32 data) {
 	ensureSize(32);
 	memcpy(buffer+published, &data, 4);
 	published += 4;
 }
 
-void IOBuffer::storeUI16BE(uint16_t data) {
+void IOBuffer::storeUI16BE(rx_uint16 data) {
 	ensureSize(16);
 	data = ToBE16(data);
 	memcpy(buffer+published, &data, 2);
 	published += 2;
 }
 
-void IOBuffer::storeUI32BE(uint32_t data) {
+void IOBuffer::storeUI32BE(rx_uint32 data) {
 	ensureSize(4);
 	data = ToBE32(data);
 	memcpy(buffer+published, &data, 4);
 	published += 4;
 }
 
-void IOBuffer::storeUI64BE(uint64_t data) {
+void IOBuffer::storeUI64BE(rx_uint64 data) {
 	ensureSize(8);
 	data = ToBE64(data);
 	memcpy(buffer+published, &data, 8);
@@ -244,7 +244,7 @@ void IOBuffer::storeUI64BE(uint64_t data) {
 
 void IOBuffer::storeDoubleBE(double data) {
 	ensureSize(8);
-	uint64_t val = 0;
+	rx_uint64 val = 0;
 	memcpy(&val, &data, 8);
 	val = ToBE64(val);
 	memcpy(buffer+published, &val, 8);
@@ -259,14 +259,14 @@ void IOBuffer::storeFloatBE(float data) {
 }
 
 
-void IOBuffer::storeUI16LE(uint16_t data) {
+void IOBuffer::storeUI16LE(rx_uint16 data) {
 	ensureSize(2);
 	data = ToLE16(data);
 	memcpy(buffer+published, &data, 2);
 	published += 2;
 }
 
-void IOBuffer::storeUI32LE(uint32_t data) {
+void IOBuffer::storeUI32LE(rx_uint32 data) {
 	ensureSize(4);
 	data = ToLE32(data);
 	memcpy(buffer+published, &data, 4);
@@ -275,7 +275,7 @@ void IOBuffer::storeUI32LE(uint32_t data) {
 
 void IOBuffer::storeDoubleLE(double data) {
 	ensureSize(8);
-	uint64_t val = 0;
+	rx_uint64 val = 0;
 	memcpy(&val, &data, 8);
 	val = ToLE64(data);
 	memcpy(buffer+published, &val, 8);
@@ -290,13 +290,13 @@ void IOBuffer::storeFloatLE(float data) {
 }
 
 void IOBuffer::storeString(string data) {
-	uint32_t len = (uint32_t)data.length();
+	rx_uint32 len = (rx_uint32)data.length();
 	ensureSize(len);
-	memcpy(buffer+published, (uint8_t *)data.c_str(), len);
+	memcpy(buffer+published, (rx_uint8 *)data.c_str(), len);
 	published += len;
 }
 
-// stores a uint16_t (big endian) + string
+// stores a rx_uint16 (big endian) + string
 void IOBuffer::storeStringWithSizeBE(string data) {
 	storeUI16BE(data.size());
 	storeString(data);
@@ -312,7 +312,7 @@ void IOBuffer::storeBuffer(IOBuffer& other) {
 	storeBuffer(other, other.getNumBytesStored());	
 }
 
-int IOBuffer::storeBuffer(IOBuffer& other, uint32_t numBytes) {
+int IOBuffer::storeBuffer(IOBuffer& other, rx_uint32 numBytes) {
 	// check if we can read this many bytes from other buffer.
 	numBytes = other.getMostNumberOfBytesWeCanConsume(numBytes);
 	if(numBytes == 0) {
@@ -325,7 +325,7 @@ int IOBuffer::storeBuffer(IOBuffer& other, uint32_t numBytes) {
 	return numBytes;
 }
 
-uint32_t IOBuffer::getMostNumberOfBytesWeCanConsume(uint32_t tryToRead) {
+rx_uint32 IOBuffer::getMostNumberOfBytesWeCanConsume(rx_uint32 tryToRead) {
 	int space = published - consumed;
 	if(space <= 0) {
 		return 0;
@@ -338,29 +338,29 @@ uint32_t IOBuffer::getMostNumberOfBytesWeCanConsume(uint32_t tryToRead) {
 }
 
 
-bool IOBuffer::ignore(uint32_t numBytes) {
+bool IOBuffer::ignore(rx_uint32 numBytes) {
 	consumed += numBytes;
 	recycle();	
 	return true;
 }
-bool IOBuffer::reuse(uint32_t numBytes) {
+bool IOBuffer::reuse(rx_uint32 numBytes) {
 	consumed -= numBytes;
 	return true;
 }
 
-void IOBuffer::setNumBytesStored(uint32_t numBytes) {
+void IOBuffer::setNumBytesStored(rx_uint32 numBytes) {
 	published = numBytes;
 }
 
-void IOBuffer::addNumBytesStored(uint32_t numBytes) {
+void IOBuffer::addNumBytesStored(rx_uint32 numBytes) {
 	published += numBytes;
 }
 
-void IOBuffer::addNumBytesConsumed(uint32_t numBytes) {
+void IOBuffer::addNumBytesConsumed(rx_uint32 numBytes) {
 	consumed += numBytes;
 }
 
-uint32_t IOBuffer::getNumBytesStored() {
+rx_uint32 IOBuffer::getNumBytesStored() {
 	return published;
 }
 
@@ -387,12 +387,12 @@ void IOBuffer::resetStored() {
 
 // Retrieve from buffer and return data
 //------------------------------------------------------------------------------
-int IOBuffer::consumeBytes(uint8_t* buf, uint32_t numBytes) {
-	int32_t left = (published - consumed);
+int IOBuffer::consumeBytes(rx_uint8* buf, rx_uint32 numBytes) {
+	rx_int32 left = (published - consumed);
 	if(left < numBytes) {
 		numBytes = left;
 	}
-	int32_t available = left - numBytes;
+	rx_int32 available = left - numBytes;
 
 	if(available <= 0) {
 		return 0;
@@ -406,12 +406,12 @@ int IOBuffer::consumeBytes(uint8_t* buf, uint32_t numBytes) {
 	return numBytes;
 }
 
-uint8_t IOBuffer::consumeByte() {
+rx_uint8 IOBuffer::consumeByte() {
 	return consumeUI8();
 }
 
-uint8_t IOBuffer::consumeUI8() {
-	uint8_t val = 0;
+rx_uint8 IOBuffer::consumeUI8() {
+	rx_uint8 val = 0;
 	memcpy(&val, buffer+consumed, 1);
 	consumed += 1;
 	return val;
@@ -421,51 +421,51 @@ bool IOBuffer::consumeBool() {
 	return (bool)consumeUI8();
 }
 
-uint16_t IOBuffer::consumeUI16() {
-	uint16_t val = 0;
+rx_uint16 IOBuffer::consumeUI16() {
+	rx_uint16 val = 0;
 	memcpy(&val, buffer+consumed, 2);
 	consumed += 2;
 	return val;
 
 }
 
-uint32_t IOBuffer::consumeUI32() {
-	uint32_t val = 0;
+rx_uint32 IOBuffer::consumeUI32() {
+	rx_uint32 val = 0;
 	memcpy(&val, buffer+consumed, 4);
 	consumed += 4;
 	return val;
 }
 
-uint64_t IOBuffer::consumeUI64() {
-	uint64_t val = 0;
+rx_uint64 IOBuffer::consumeUI64() {
+	rx_uint64 val = 0;
 	memcpy(&val, buffer+consumed, 8);
 	consumed += 8;
 	return val;
 }
 
-int8_t  IOBuffer::consumeI8() {
-	int8_t val = 0;
+rx_int8  IOBuffer::consumeI8() {
+	rx_int8 val = 0;
 	memcpy(&val, buffer+consumed, 1);
 	consumed += 1;
 	return val;
 }
 
-int16_t IOBuffer::consumeI16() {
-	int16_t val = 0;
+rx_int16 IOBuffer::consumeI16() {
+	rx_int16 val = 0;
 	memcpy(&val, buffer+consumed, 2);
 	consumed += 2;
 	return val;
 }
 
-int32_t IOBuffer::consumeI32() {
-	int32_t val = 0;
+rx_int32 IOBuffer::consumeI32() {
+	rx_int32 val = 0;
 	memcpy(&val, buffer+consumed, 4);
 	consumed += 4;
 	return val;
 }
 
-int64_t IOBuffer::consumeI64() {
-	int64_t val = 0;
+rx_int64 IOBuffer::consumeI64() {
+	rx_int64 val = 0;
 	memcpy(&val, buffer+consumed, 8);
 	consumed += 8;
 	return val;
@@ -487,24 +487,24 @@ double IOBuffer::consumeDouble() {
 
 // when you assume the data is big endian, convert it to system 
 // -----------------------------------------------------------------------------
-uint16_t IOBuffer::consumeUI16BE() {
-	uint16_t val = 0;
+rx_uint16 IOBuffer::consumeUI16BE() {
+	rx_uint16 val = 0;
 	memcpy(&val, buffer+consumed, 2);
 	consumed += 2;
 	val = FromBE16(val);
 	return val;
 }
 
-uint32_t IOBuffer::consumeUI32BE() {
-	uint32_t val = 0;
+rx_uint32 IOBuffer::consumeUI32BE() {
+	rx_uint32 val = 0;
 	memcpy(&val, buffer+consumed, 4);
 	consumed += 4;
 	val = FromBE32(val);
 	return val;
 }
 
-uint64_t IOBuffer::consumeUI64BE() {
-	uint64_t val = 0;
+rx_uint64 IOBuffer::consumeUI64BE() {
+	rx_uint64 val = 0;
 	memcpy(&val, buffer+consumed, 8);
 	val = FromBE64(val);
 	consumed += 8;
@@ -512,7 +512,7 @@ uint64_t IOBuffer::consumeUI64BE() {
 }
 
 double IOBuffer::consumeDoubleBE() {
-	uint64_t val = 0;
+	rx_uint64 val = 0;
 	memcpy(&val, buffer+consumed, 8);
 	val = FromBE64(val);
 
@@ -523,16 +523,16 @@ double IOBuffer::consumeDoubleBE() {
 	return d;
 }
 
-int16_t IOBuffer::consumeI16BE() {
-	int16_t val = 0;
+rx_int16 IOBuffer::consumeI16BE() {
+	rx_int16 val = 0;
 	memcpy(&val, buffer+consumed, 2);
 	val = FromBE16(val);
 	consumed += 2;
 	return val;
 }
 
-int32_t IOBuffer::consumeI32BE() {
-	int32_t val = 0;
+rx_int32 IOBuffer::consumeI32BE() {
+	rx_int32 val = 0;
 	memcpy(&val, buffer+consumed, 4);
 	val = FromBE32(val);
 	consumed += 4;
@@ -540,24 +540,24 @@ int32_t IOBuffer::consumeI32BE() {
 }
 
 // Little Endian
-uint16_t IOBuffer::consumeUI16LE() {
-	uint16_t val = 0;
+rx_uint16 IOBuffer::consumeUI16LE() {
+	rx_uint16 val = 0;
 	memcpy(&val, buffer+consumed, 2);
 	consumed += 2;
 	val = FromLE16(val);
 	return val;
 }
 
-uint32_t IOBuffer::consumeUI32LE() {
-	uint32_t val = 0;
+rx_uint32 IOBuffer::consumeUI32LE() {
+	rx_uint32 val = 0;
 	memcpy(&val, buffer+consumed, 4);
 	consumed += 4;
 	val = FromLE32(val);
 	return val;
 }
 
-uint64_t IOBuffer::consumeUI64LE() {
-	uint64_t val = 0;
+rx_uint64 IOBuffer::consumeUI64LE() {
+	rx_uint64 val = 0;
 	memcpy(&val, buffer+consumed, 8);
 	val = FromLE64(val);
 	consumed += 8;
@@ -565,7 +565,7 @@ uint64_t IOBuffer::consumeUI64LE() {
 }
 
 double IOBuffer::consumeDoubleLE() {
-	uint64_t val = 0;
+	rx_uint64 val = 0;
 	memcpy(&val, buffer+consumed, 8);
 	val = FromLE64(val);
 
@@ -576,24 +576,24 @@ double IOBuffer::consumeDoubleLE() {
 	return d;
 }
 
-int16_t IOBuffer::consumeI16LE() {
-	int16_t val = 0;
+rx_int16 IOBuffer::consumeI16LE() {
+	rx_int16 val = 0;
 	memcpy(&val, buffer+consumed, 2);
 	val = FromLE16(val);
 	consumed += 2;
 	return val;
 }
 
-int32_t IOBuffer::consumeI32LE() {
-	int32_t val = 0;
+rx_int32 IOBuffer::consumeI32LE() {
+	rx_int32 val = 0;
 	memcpy(&val, buffer+consumed, 4);
 	val = FromLE32(val);
 	consumed += 4;
 	return val;
 }
 
-int64_t IOBuffer::consumeI64LE() {
-	int64_t val = 0;
+rx_int64 IOBuffer::consumeI64LE() {
+	rx_int64 val = 0;
 	memcpy(&val, buffer+consumed, 8);
 	val = FromLE64(val);
 	consumed += 8;
@@ -613,7 +613,7 @@ float IOBuffer::consumeFloatLE() {
 // -----------------------------------------------------------------------------
 
 // returns where we found the string, or 0 when not found.
-int IOBuffer::consumeUntil(uint8_t until, string& found) {
+int IOBuffer::consumeUntil(rx_uint8 until, string& found) {
 	for(int i = consumed; i < published; ++i) {
 		found.push_back((char)buffer[i]);
 		if(buffer[i] == until) {
@@ -654,7 +654,7 @@ int IOBuffer::consumeUntil(string until, string& found) {
 	return 0;
 }	
 
-string IOBuffer::consumeString(uint32_t upToNumBytes) {
+string IOBuffer::consumeString(rx_uint32 upToNumBytes) {
 	string str((char*)buffer+consumed, upToNumBytes);
 	consumed += upToNumBytes;
 	return str;
@@ -662,24 +662,24 @@ string IOBuffer::consumeString(uint32_t upToNumBytes) {
 
 
 string IOBuffer::consumeStringWithSizeBE() {
-	uint16_t num_bytes_in_string = consumeUI16BE();
+	rx_uint16 num_bytes_in_string = consumeUI16BE();
 	return consumeString(num_bytes_in_string);
 }
 
 string IOBuffer::consumeStringWithSizeLE() {
-	uint16_t num_bytes_in_string = consumeUI16LE();
+	rx_uint16 num_bytes_in_string = consumeUI16LE();
 	return consumeString(num_bytes_in_string);
 }
 
 // operators
 //------------------------------------------------------------------------------
-uint8_t& IOBuffer::operator[](uint32_t index) const {
+rx_uint8& IOBuffer::operator[](rx_uint32 index) const {
 	return buffer[index];
 }
 
 // helpers
 //------------------------------------------------------------------------------
-void IOBuffer::printHex(uint32_t start, uint32_t end) {
+void IOBuffer::printHex(rx_uint32 start, rx_uint32 end) {
 	if(end == 0) {
 		end = published;
 	}
@@ -701,7 +701,7 @@ void IOBuffer::printHex(uint32_t start, uint32_t end) {
 }
 
 void IOBuffer::printDoubleAsHex(double d) {
-	uint8_t tmp_buf[8];
+	rx_uint8 tmp_buf[8];
 	memcpy(tmp_buf,&d,8);
 	for(int i = 0; i < 8; ++i) {
 		printf("%02X ", tmp_buf[i]);
@@ -709,8 +709,8 @@ void IOBuffer::printDoubleAsHex(double d) {
 	printf("\n");
 }
 
-void IOBuffer::printUI16AsHex(uint16_t toPrint) {
-	uint8_t tmp_buf[2];
+void IOBuffer::printUI16AsHex(rx_uint16 toPrint) {
+	rx_uint8 tmp_buf[2];
 	memcpy(tmp_buf, &toPrint, 2);
 	printf("%02X %02X\n", tmp_buf[0], tmp_buf[1]);
 }

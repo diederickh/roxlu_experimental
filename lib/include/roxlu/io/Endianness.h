@@ -5,7 +5,6 @@
 //--------------
 #define ROXLU_LITTLE_ENDIAN 
 
-#include <cstdint>
 
 // apache license, thanks to: http://www.google.com/codesearch#wZuuyuB8jKQ/chromium/src/third_party/sfntly/src/sfntly/port/endian.h
 static inline uint16_t EndianSwap16(uint16_t value) {

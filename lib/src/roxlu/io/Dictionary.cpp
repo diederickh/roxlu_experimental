@@ -36,49 +36,49 @@ Dictionary::Dictionary(const bool& val) {
 	value.b = val;	
 }
 
-Dictionary::Dictionary(const int8_t &val) {
+Dictionary::Dictionary(const rx_int8 &val) {
 	type = D_INT8;
 	memset(&value, 0, sizeof(value));
 	value.i8 = val;
 }
 
-Dictionary::Dictionary(const int16_t &val) {
+Dictionary::Dictionary(const rx_int16 &val) {
 	type = D_INT16;
 	memset(&value, 0, sizeof(value));
 	value.i16 = val;
 }
 
-Dictionary::Dictionary(const int32_t &val) {
+Dictionary::Dictionary(const rx_int32 &val) {
 	type = D_INT32;
 	memset(&value, 0, sizeof(value));
 	value.i32 = val;
 }
 
-Dictionary::Dictionary(const int64_t &val) {
+Dictionary::Dictionary(const rx_int64 &val) {
 	type = D_INT64;
 	memset(&value, 0, sizeof(value));
 	value.i64 = val;
 }
 
-Dictionary::Dictionary(const uint8_t &val) {
+Dictionary::Dictionary(const rx_uint8 &val) {
 	type = D_UINT8;
 	memset(&value, 0, sizeof(value));
 	value.ui8 = val;
 }
 
-Dictionary::Dictionary(const uint16_t &val) {
+Dictionary::Dictionary(const rx_uint16 &val) {
 	type = D_UINT16;
 	memset(&value, 0, sizeof(value));
 	value.ui16 = val;
 }
 
-Dictionary::Dictionary(const uint32_t &val) {
+Dictionary::Dictionary(const rx_uint32 &val) {
 	type = D_UINT32;
 	memset(&value, 0, sizeof(value));
 	value.ui32 = val;
 }
 
-Dictionary::Dictionary(const uint64_t &val) {
+Dictionary::Dictionary(const rx_uint64 &val) {
 	type = D_UINT64;
 	memset(&value, 0, sizeof(value));
 	value.ui64 = val;
@@ -194,56 +194,56 @@ Dictionary& Dictionary::operator=(const char* chars) {
 }
 
 
-Dictionary& Dictionary::operator=(const int8_t &val) {
+Dictionary& Dictionary::operator=(const rx_int8 &val) {
 	reset();
 	type = D_INT8;
 	value.i8 = val;
 	return *this;
 }
 
-Dictionary& Dictionary::operator=(const int16_t &val) {
+Dictionary& Dictionary::operator=(const rx_int16 &val) {
 	reset();
 	type = D_INT16;
 	value.i16 = val;
 	return *this;
 }
 
-Dictionary& Dictionary::operator=(const int32_t &val) {
+Dictionary& Dictionary::operator=(const rx_int32 &val) {
 	reset();
 	type = D_INT32;
 	value.i32 = val;
 	return *this;
 }
 
-Dictionary& Dictionary::operator=(const int64_t &val) {
+Dictionary& Dictionary::operator=(const rx_int64 &val) {
 	reset();
 	type = D_INT64;
 	value.i64 = val;
 	return *this;
 }
 
-Dictionary& Dictionary::operator=(const uint8_t &val) {
+Dictionary& Dictionary::operator=(const rx_uint8 &val) {
 	reset();
 	type = D_UINT8;
 	value.ui8 = val;
 	return *this;
 }
 
-Dictionary& Dictionary::operator=(const uint16_t &val) {
+Dictionary& Dictionary::operator=(const rx_uint16 &val) {
 	reset();
 	type = D_UINT16;
 	value.ui16 = val;
 	return *this;
 }
 
-Dictionary& Dictionary::operator=(const uint32_t &val) {
+Dictionary& Dictionary::operator=(const rx_uint32 &val) {
 	reset();
 	type = D_UINT32;
 	value.ui32 = val;
 	return *this;
 }
 
-Dictionary& Dictionary::operator=(const uint64_t &val) {
+Dictionary& Dictionary::operator=(const rx_uint64 &val) {
 	reset();
 	type = D_UINT64;
 	value.ui64 = val;
@@ -282,7 +282,7 @@ bool Dictionary::operator!=(DictionaryType checkType) {
 
 
 
-Dictionary& Dictionary::operator[](const uint32_t& key) {
+Dictionary& Dictionary::operator[](const rx_uint32& key) {
 	stringstream ss;
 	ss << VAR_INDEX_VALUE << key;
 	return operator[](ss.str());
@@ -392,14 +392,14 @@ Dictionary& Dictionary::operator[](Dictionary& key) {
 			
 //DICT_OPERATOR(bool);	
 DICT_OPERATOR(double);
-DICT_OPERATOR(int8_t);	
-DICT_OPERATOR(int16_t);			
-DICT_OPERATOR(int32_t);	
-DICT_OPERATOR(int64_t);	
-DICT_OPERATOR(uint8_t);	
-DICT_OPERATOR(uint16_t);	
-DICT_OPERATOR(uint32_t);	
-DICT_OPERATOR(uint64_t);	
+DICT_OPERATOR(rx_int8);	
+DICT_OPERATOR(rx_int16);			
+DICT_OPERATOR(rx_int32);	
+DICT_OPERATOR(rx_int64);	
+DICT_OPERATOR(rx_uint8);	
+DICT_OPERATOR(rx_uint16);	
+DICT_OPERATOR(rx_uint32);	
+DICT_OPERATOR(rx_uint64);	
 
 Dictionary::operator bool() {
 	switch(type) {
@@ -545,64 +545,64 @@ Dictionary::operator string() {
 
 // Retrieve as forced type
 //------------------------------------------------------------------------------
-uint8_t Dictionary::getAsUInt8() {
-	uint8_t val;
+rx_uint8 Dictionary::getAsUInt8() {
+	rx_uint8 val;
 	string as_str =(string)(*this);
 	istringstream is(as_str);
 	is >> val;
 	return val;
 }
 
-uint16_t Dictionary::getAsUInt16() {
-	uint16_t val;
+rx_uint16 Dictionary::getAsUInt16() {
+	rx_uint16 val;
 	string as_str =(string)(*this);
 	istringstream is(as_str);
 	is >> val;
 	return val;
 }
 
-uint32_t Dictionary::getAsUInt32() {
-	uint32_t val;
+rx_uint32 Dictionary::getAsUInt32() {
+	rx_uint32 val;
 	string as_str =(string)(*this);
 	istringstream is(as_str);
 	is >> val;
 	return val;
 }
 
-uint64_t Dictionary::getAsUint64() {
-	uint64_t val;
+rx_uint64 Dictionary::getAsUint64() {
+	rx_uint64 val;
 	string as_str =(string)(*this);
 	istringstream is(as_str);
 	is >> val;
 	return val;
 }
 
-int8_t Dictionary::getAsInt8() {
-	int8_t val;
+rx_int8 Dictionary::getAsInt8() {
+	rx_int8 val;
 	string as_str =(string)(*this);
 	istringstream is(as_str);
 	is >> val;
 	return val;
 }
 
-int16_t Dictionary::getAsInt16() {
-	int16_t val;
+rx_int16 Dictionary::getAsInt16() {
+	rx_int16 val;
 	string as_str =(string)(*this);
 	istringstream is(as_str);
 	is >> val;
 	return val;
 }
 
-int32_t  Dictionary::getAsInt32() {
-	int32_t val;
+rx_int32  Dictionary::getAsInt32() {
+	rx_int32 val;
 	string as_str = (string)(*this);
 	istringstream is(as_str);
 	is >> val;
 	return val;
 }
 
-int64_t  Dictionary::getAsInt64() {
-	int64_t val;
+rx_int64  Dictionary::getAsInt64() {
+	rx_int64 val;
 	string as_str =(string)(*this);
 	istringstream is(as_str);
 	is >> val;
@@ -641,7 +641,7 @@ bool Dictionary::jsonSerialize(string &result) {
 		case D_INT16:
 		case D_INT32:
 		case D_INT64: {
-			int64_t val = (int64_t)(*this);
+			rx_int64 val = (rx_int64)(*this);
 			stringstream ss;
 			ss << val;
 			result += ss.str();
@@ -719,7 +719,7 @@ bool Dictionary::toBinary(IOBuffer& buffer) {
 			break;
 		}
 		case D_BOOL: {
-			buffer.storeByte((uint8_t)value.b);
+			buffer.storeByte((rx_uint8)value.b);
 			return true;
 			break;
 		}
@@ -777,7 +777,7 @@ bool Dictionary::toBinary(IOBuffer& buffer) {
 			bool is_array = isArray();
 			buffer.storeByte(is_array);
 			
-			uint32_t length = getMapSize();
+			rx_uint32 length = getMapSize();
 			buffer.storeUI32BE(length);
 			
 			Dictionary::iterator it = begin();
@@ -810,7 +810,7 @@ bool Dictionary::fromBinary(IOBuffer& buffer) {
 }
 
 bool Dictionary::binaryDeserialize(IOBuffer& buffer, Dictionary& result) {
-	uint8_t stored_type = buffer.consumeByte();
+	rx_uint8 stored_type = buffer.consumeByte();
 	switch(stored_type) {
 		case D_NULL: {
 			result.reset(false);
@@ -825,31 +825,31 @@ bool Dictionary::binaryDeserialize(IOBuffer& buffer, Dictionary& result) {
 			return true;
 		}
 		case D_INT8: {
-			result = (int8_t)buffer.consumeByte();
+			result = (rx_int8)buffer.consumeByte();
 			return true;
 		}
 		case D_INT16: {
-			result = (int16_t)buffer.consumeI16BE();
+			result = (rx_int16)buffer.consumeI16BE();
 			return true;
 		}
 		case D_INT32: {
-			result = (int32_t)buffer.consumeI32BE();
+			result = (rx_int32)buffer.consumeI32BE();
 			return true;
 		}
 		case D_UINT8: {
-			result = (uint8_t)buffer.consumeByte();
+			result = (rx_uint8)buffer.consumeByte();
 			return true;
 		}
 		case D_UINT16: {
-			result = (uint16_t)buffer.consumeUI16BE();
+			result = (rx_uint16)buffer.consumeUI16BE();
 			return true;
 		}
 		case D_UINT32: {
-			result = (uint32_t)buffer.consumeUI32BE();
+			result = (rx_uint32)buffer.consumeUI32BE();
 			return true;
 		}
 		case D_UINT64: {
-			result = (uint64_t)buffer.consumeUI64BE();
+			result = (rx_uint64)buffer.consumeUI64BE();
 			return true;
 		}
 		case D_DOUBLE: {
@@ -863,8 +863,8 @@ bool Dictionary::binaryDeserialize(IOBuffer& buffer, Dictionary& result) {
 		case D_MAP: {
 			bool is_array = (bool)buffer.consumeByte();
 			result.isArray(is_array);
-			uint32_t length = buffer.consumeUI32BE();
-			for(uint32_t i = 0; i < length; i++) {
+			rx_uint32 length = buffer.consumeUI32BE();
+			for(rx_uint32 i = 0; i < length; i++) {
 				string key = buffer.consumeStringWithSizeBE();
 				if(!Dictionary::binaryDeserialize(buffer, result[key])) {
 					printf("Dictionary.fromBinary: cannot deserialize map for key: %s\n", key.c_str());
@@ -931,7 +931,7 @@ string Dictionary::stringToLower(string value) {
 	return result;
 }
 
-bool Dictionary::jsonReadWhiteSpace(string& raw, uint32_t& start) {
+bool Dictionary::jsonReadWhiteSpace(string& raw, rx_uint32& start) {
 	for(; start < raw.length(); ++start){ 
 		if((raw[start] != ' '
 			&& raw[start] != '\t'
@@ -945,7 +945,7 @@ bool Dictionary::jsonReadWhiteSpace(string& raw, uint32_t& start) {
 	return true;
 }
 
-bool Dictionary::jsonReadDelimiter(string& raw, uint32_t& start, char& c) {
+bool Dictionary::jsonReadDelimiter(string& raw, rx_uint32& start, char& c) {
 	if(!jsonReadWhiteSpace(raw, start)) {
 		printf("jsonReadDelimiter: invalid object\n");
 		return false;
@@ -960,7 +960,7 @@ bool Dictionary::jsonReadDelimiter(string& raw, uint32_t& start, char& c) {
 	return true;
 }
 
-bool Dictionary::jsonReadString(string& raw, Dictionary& result, uint32_t& start) {
+bool Dictionary::jsonReadString(string& raw, Dictionary& result, rx_uint32& start) {
 	if((raw.size() - start) < 2) {
 		printf("jsonReadString: invalid string");
 		return false;
@@ -993,7 +993,7 @@ bool Dictionary::jsonReadString(string& raw, Dictionary& result, uint32_t& start
 	return false;
 }
 
-bool Dictionary::jsonReadNumber(string& raw, Dictionary& result, uint32_t& start) {
+bool Dictionary::jsonReadNumber(string& raw, Dictionary& result, rx_uint32& start) {
 	string str = "";
 	for(; start < raw.length(); ++start) {
 		if((raw[start] < '0') || (raw[start] > '9')) {
@@ -1006,11 +1006,11 @@ bool Dictionary::jsonReadNumber(string& raw, Dictionary& result, uint32_t& start
 		return false;
 	}
 // @todo make this work on windows...
-//	result = (int64_t)atoll(str.c_str());
+//	result = (rx_int64)atoll(str.c_str());
 	return true;
 }
 
-bool Dictionary::jsonReadObject(string& raw, Dictionary& result, uint32_t& start) {
+bool Dictionary::jsonReadObject(string& raw, Dictionary& result, rx_uint32& start) {
 	result.reset();
 	result.isArray(false);
 	if((raw.size() - start) < 2) {
@@ -1073,7 +1073,7 @@ bool Dictionary::jsonReadObject(string& raw, Dictionary& result, uint32_t& start
 	return false;
 }
 
-bool Dictionary::jsonReadArray(string& raw, Dictionary& result, uint32_t& start) {
+bool Dictionary::jsonReadArray(string& raw, Dictionary& result, rx_uint32& start) {
 	result.reset();
 	result.isArray(true);
 	if((raw.size() - start) < 2) {
@@ -1118,7 +1118,7 @@ bool Dictionary::jsonReadArray(string& raw, Dictionary& result, uint32_t& start)
 	return false;
 }
 
-bool Dictionary::jsonReadBool(string& raw, Dictionary& result, uint32_t& start, string wanted) {
+bool Dictionary::jsonReadBool(string& raw, Dictionary& result, rx_uint32& start, string wanted) {
 	if((raw.size() - start) < wanted.size()) {
 		printf("jsonReadBool: invald json bool\n");
 		return false;
@@ -1133,7 +1133,7 @@ bool Dictionary::jsonReadBool(string& raw, Dictionary& result, uint32_t& start, 
 	return true;
 }
 
-bool Dictionary::jsonReadNull(string& raw, Dictionary& result, uint32_t& start) {
+bool Dictionary::jsonReadNull(string& raw, Dictionary& result, rx_uint32& start) {
 	if((raw.size() - start) < 4) {
 		printf("jsonReadNull: invalid json null.\n");
 		return false;
@@ -1149,11 +1149,11 @@ bool Dictionary::jsonReadNull(string& raw, Dictionary& result, uint32_t& start) 
 }
 
 bool Dictionary::fromJSON(string json) {
-	uint32_t start = 0;
+	rx_uint32 start = 0;
 	return jsonDeserialize(json, *this, start);
 }
 
-bool Dictionary::jsonDeserialize(string& raw, Dictionary& result, uint32_t& start) {
+bool Dictionary::jsonDeserialize(string& raw, Dictionary& result, rx_uint32& start) {
 	result.reset();
 	if(start >= raw.size()) {
 		return false;
@@ -1207,7 +1207,7 @@ bool Dictionary::jsonDeserialize(string& raw, Dictionary& result, uint32_t& star
 }
 
 
-string Dictionary::toString(string name, uint32_t indent) {
+string Dictionary::toString(string name, rx_uint32 indent) {
 	string result = "";
 	string str_indent = string(indent*4, ' ');
 	switch(type) {
@@ -1347,7 +1347,7 @@ bool Dictionary::isByteArray() {
 	return type == D_BYTEARRAY;
 }
 
-uint32_t Dictionary::getMapSize() {
+rx_uint32 Dictionary::getMapSize() {
 	if(type == D_NULL || type == D_UNDEFINED) {
 		return 0;
 	}
@@ -1355,14 +1355,14 @@ uint32_t Dictionary::getMapSize() {
 		printf("cannot get map size, we are not a map\n");
 		return 0;
 	}
-	return (uint32_t) value.m->children.size();
+	return (rx_uint32) value.m->children.size();
 
 }
 
 // size of 'none' name=value pairs (so total number of alements which 
-// are indexed by a uint32_t. Internally these are stored using a 
+// are indexed by a rx_uint32. Internally these are stored using a 
 // special marker key. See the  "VAR_INDEX_VALUE" define. 
-uint32_t Dictionary::getMapDenseSize() {
+rx_uint32 Dictionary::getMapDenseSize() {
 	if(type == D_NULL || type == D_UNDEFINED) {
 		return 0;
 	}
@@ -1370,8 +1370,8 @@ uint32_t Dictionary::getMapDenseSize() {
 		printf("cannot get map dense size, we are not a map\n");
 		return 0;
 	}
-	uint32_t count = 0;
-	uint32_t s = getMapSize();
+	rx_uint32 count = 0;
+	rx_uint32 s = getMapSize();
 	for(count = 0; count < s; ++count) {
 		stringstream ss;
 		ss << VAR_INDEX_VALUE << count;
@@ -1389,7 +1389,7 @@ void Dictionary::pushToArray(Dictionary dict) {
 		return;
 	}
 	isArray(true);
-	(*this)[(uint32_t)this->getMapDenseSize()] = dict;
+	(*this)[(rx_uint32)this->getMapDenseSize()] = dict;
 }
 
 void Dictionary::removeKey(const string& key) {
@@ -1400,7 +1400,7 @@ void Dictionary::removeKey(const string& key) {
 	value.m->children.erase(key);
 }
 
-void Dictionary::removeAt(const uint32_t index) {
+void Dictionary::removeAt(const rx_uint32 index) {
 	if(type != D_MAP) {
 		printf("cannot removeAt(), we are not a map.\n");
 		return;
