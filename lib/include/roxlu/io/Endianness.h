@@ -5,20 +5,21 @@
 //--------------
 #define ROXLU_LITTLE_ENDIAN 
 
+#include <roxlu/core/platform/Platform.h>
 
 // apache license, thanks to: http://www.google.com/codesearch#wZuuyuB8jKQ/chromium/src/third_party/sfntly/src/sfntly/port/endian.h
-static inline uint16_t EndianSwap16(uint16_t value) {
-  return (uint16_t)((value >> 8) | (value << 8));
+static inline rx_uint16 EndianSwap16(rx_uint16 value) {
+  return (rx_uint16)((value >> 8) | (value << 8));
 }
 
-static inline int32_t EndianSwap32(int32_t value) {
+static inline rx_int32 EndianSwap32(rx_int32 value) {
   return (((value & 0x000000ff) << 24) |
           ((value & 0x0000ff00) <<  8) |
           ((value & 0x00ff0000) >>  8) |
           ((value & 0xff000000) >> 24));
 }
 
-static inline uint64_t EndianSwap64(uint64_t value) {
+static inline rx_uint64 EndianSwap64(rx_uint64 value) {
   return (((value & 0x00000000000000ffLL) << 56) |
           ((value & 0x000000000000ff00LL) << 40) |
           ((value & 0x0000000000ff0000LL) << 24) |

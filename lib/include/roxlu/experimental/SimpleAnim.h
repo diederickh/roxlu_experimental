@@ -8,6 +8,7 @@
 #include <string>
 
 #include <roxlu/experimental/Timer.h>
+#include <roxlu/core/platform/Platform.h>
 
 using std::string;
 using std::map;
@@ -81,11 +82,11 @@ public:
 	void update();
 	void getPosition(const string& group, float* dest);
 	bool hasGroup(const string& group);
-	uint64_t now();
+	rx_uint64 now();
 	
-	int64_t millis_per_frame;
-	uint64_t last_step;
-	uint64_t next_frame;
+	rx_int64 millis_per_frame;
+	rx_uint64 last_step;
+	rx_uint64 next_frame;
 	float perc;
 	int total_frames;
 	int mode;
@@ -94,7 +95,7 @@ public:
 };
 
 
-inline uint64_t SimpleAnim::now() {
+inline rx_uint64 SimpleAnim::now() {
 	return Timer::now();
 	/*
 	timeval time;

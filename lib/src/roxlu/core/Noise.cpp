@@ -361,7 +361,7 @@ float fbm(const Vec2& v) {
 	float amp = 0.5f;
 	float x = v.x;
 	float y = v.y;
-	for(uint8_t i = 0; i < 4; ++i) {
+	for(rx_uint8 i = 0; i < 4; ++i) {
 		result += noise2(x,y) * amp;
 		x *= 2.0f;
 		y *= 2.0f;

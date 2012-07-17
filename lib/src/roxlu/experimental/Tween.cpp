@@ -13,7 +13,7 @@ Tween::~Tween() {
 	printf("~Tween\n");
 }
 
-void Tween::start(float fromValue, float toValue, uint64_t millis, uint64_t delayMillis) {
+void Tween::start(float fromValue, float toValue, rx_uint64 millis, rx_uint64 delayMillis) {
 	value = fromValue;
 	ready = false;
 	delay = delayMillis;
@@ -33,7 +33,7 @@ void Tween::update() {
 		return;
 	}
 	
-	uint64_t n = now();
+	rx_uint64 n = now();
 	if(n >= ends_on) {
 		value = b+c;
 		ready = true;

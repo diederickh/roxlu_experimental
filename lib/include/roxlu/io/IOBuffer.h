@@ -2,7 +2,6 @@
 #define ROXLU_IOBUFFERH
                            
 #include <roxlu/core/platform/Platform.h>
-//#include <cstdint>
 #include <string>
 #include <algorithm>
 #include <fstream>

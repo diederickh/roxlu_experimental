@@ -21,8 +21,8 @@ TGA::~TGA() {
 bool TGA::save(const string& filepath, unsigned char* rgb, int w, int h) {
 	TGAHeader header;
 	int color_mode;
-	uint8_t color_swap;
-	uint64_t image_size;
+	rx_uint8 color_swap;
+	rx_uint64 image_size;
 	
 	std::ofstream ofs(filepath.c_str(), std::ios::out | std::ios::binary);
 	if(!ofs.is_open()) {
@@ -71,7 +71,7 @@ bool TGA::load(const string& filepath) {
 	ifs.read((char*)&bpp, sizeof(unsigned char));
 	ifs.read((char*)&id, sizeof(unsigned char));
 	
-	num_bytes = (uint32_t)width * height * bpp;	
+	num_bytes = (rx_uint32)width * height * bpp;	
 	if(pixels != NULL) {
 		delete[] pixels;
 	}

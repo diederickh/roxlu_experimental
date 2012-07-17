@@ -28,17 +28,17 @@ public:
 	}
 	
 	// returns millis since first call.
-	static uint64_t millis() {             
-		static uint64_t t = Timer::now();
+	static rx_uint64 millis() {             
+		static rx_uint64 t = Timer::now();
 		return Timer::now() - t;
 	}	
 				
 	// now in millis
-	static uint64_t now() {
+	static rx_uint64 now() {
 		#if ROXLU_PLATFORM == ROXLU_APPLE
 			timeval time;
 			gettimeofday(&time, NULL);
-			uint64_t n = time.tv_usec;
+			rx_uint64 n = time.tv_usec;
 			n /= 1000; // convert seconds to millis
 			n += (time.tv_sec * 1000); // convert micros to millis
 			return n;

@@ -66,8 +66,8 @@ void SimpleAnim::play() {
 void SimpleAnim::update() {
 	switch(mode) {
 		case ANIM_PLAY: {
-			int64_t millis_now = now();
-			int64_t millis_dif = next_frame - millis_now;
+			rx_int64 millis_now = now();
+			rx_int64 millis_dif = next_frame - millis_now;
 			millis_dif *= millis_dif;
 			millis_dif = sqrtf(float(millis_dif));
 			perc = float(millis_dif)/millis_per_frame;
