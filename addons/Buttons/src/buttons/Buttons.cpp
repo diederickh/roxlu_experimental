@@ -681,7 +681,6 @@ void Buttons::setLock(bool yn) {
 }
 
 void Buttons::setColor(const float r, const float g, const float b, float a) {
-	printf("Set color: %f, %f, %f\n", r,g,b);
 	for(vector<Element*>::iterator it = elements.begin(); it != elements.end(); ++it) {
 		Element& el = **it;
 		el.setColor(r,g,b,a);

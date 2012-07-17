@@ -1,5 +1,7 @@
 #include <polytri/PolyTri.h>
 
+// TODO: cleanup when destroyed! it's leaking now
+
 PolyTri::PolyTri() 
 	:cdt(NULL)
 	,is_triangulated(false)
