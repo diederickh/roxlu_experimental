@@ -34,6 +34,7 @@ Buttons::Buttons(const string& title, int w)
 	,dynamic_text(NULL)
 	,allocated_bytes(0)
 	,is_open(true)
+	,name(title)
 {
 
 	if(!shaders_initialized) {
@@ -63,7 +64,7 @@ Buttons::Buttons(const string& title, int w)
 	BSET_COLOR(shadow_color, 0.1, 0.1, 0.1, 0.1);
 	
 	title_dx = static_text->add(x+5, y+2, title);
-	
+	name = createCleanName(title);
 }
 
 Buttons::~Buttons() {
@@ -148,6 +149,7 @@ void Buttons::update() {
 		updateDynamicTexts(); // need to update everything when a element i.e. get bigger
 		updateStaticTextPositions();
 		generateVertices();
+		notifyListeners(BEVENT_BUTTONS_REDRAW);
 	}
 	if(needs_text_update) {
 		updateDynamicTexts();
@@ -626,6 +628,11 @@ void Buttons::setPosition(int xx, int yy) {
 	flagChanged();
 }
 
+void Buttons::getPosition(int& xx, int& yy) {
+	xx = x;
+	yy = y;
+}
+
 void Buttons::updateStaticTextPositions() {
 	vector<Element*>::iterator it = elements.begin();
 	while(it != elements.end()) {
@@ -680,12 +687,34 @@ void Buttons::setLock(bool yn) {
 	is_locked = yn;
 }
 
-void Buttons::setColor(const float r, const float g, const float b, float a) {
+bool Buttons::isOpen() {
+	return is_open;
+}
+
+void Buttons::setColor(const float hue, float a) {
 	for(vector<Element*>::iterator it = elements.begin(); it != elements.end(); ++it) {
 		Element& el = **it;
-		el.setColor(r,g,b,a);
+		el.setColor(hue,a);
 	}
 }
+
+void Buttons::addListener(ButtonsListener* listener) {
+	listeners.push_back(listener);
+}
+
+void Buttons::notifyListeners(int aboutWhat) {
+	switch(aboutWhat) {
+		case BEVENT_BUTTONS_REDRAW: {
+			for(vector<ButtonsListener*>::iterator it = listeners.begin(); it != listeners.end(); ++it) {
+				(*it)->onRedraw(*this);
+			}
+			break;
+		}
+		default:break;
+	}
+}
+
+
 
 
 } // namespace buttons

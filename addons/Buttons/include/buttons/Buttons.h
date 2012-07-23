@@ -47,6 +47,7 @@ because this makes testing for mouseenter/leave (etc) faster.
 #include <roxlu/opengl/Error.h>
 #include <roxlu/graphics/Color.h>
 
+#include <buttons/Panel.h>
 #include <buttons/Types.h>
 #include <buttons/Element.h>
 #include <buttons/Slider.h>
@@ -173,13 +174,19 @@ public:
 		
 	bool isMouseInsidePanel();
 	void setPosition(int x, int y);
+	void getPosition(int& x, int& y);
 	friend class Storage; 
 	Element* getElement(const string& name);
 	
 	void setLock(bool yn);
 	void close();
 	void open();
-	void setColor(const float r, const float g, const float b, float a = 1.0);
+	bool isOpen();
+	void setColor(const float hue, float a = 1.0);
+	string getName();
+	
+	void addListener(ButtonsListener* listener);
+	void notifyListeners(int aboutWhat);
 	
 private:
 	void addElement(Element* el, const string& label);
@@ -199,6 +206,7 @@ private:
 	string createCleanName(const string& ugly);
 	
 	vector<Element*> elements;
+	vector<ButtonsListener*> listeners;
 		
 	int x; // TODO: do we create a generic "interactive object" ? 
 	int y;
@@ -222,6 +230,7 @@ private:
 	int pmx; // prev mouse x
 	int pmy; // prev mouse y;
 	string title;
+	string name; // name based on title (cleaned)
 	int title_dx; // static text index
 	ButtonVertices vd;
 	int num_panel_vertices; // number of vertices used by the panel itself
@@ -278,6 +287,10 @@ inline void Buttons::open() {
 		el.show();
 	}
 	flagChanged();
+}
+
+inline string Buttons::getName() {
+	return name;
 }
 
 } // buttons

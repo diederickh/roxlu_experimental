@@ -36,13 +36,14 @@ public:
 	
 	~Button() {
 	}
-	
-	Button& setColor(const float hue, const float sat, const float bright, float a = 1.0f) {
+	Button& setColor(const float hue, float a = 1.0f) {
+	//Button& setColor(const float hue, const float sat, const float bright, float a = 1.0f) {
 //		Element::setColor(hue, sat, bright, a);
-		Element::setColor(hue, sat, bright, a);
-		HSL_to_RGB(hue, sat, bright - 0.2,  &button_bg_color[0], &button_bg_color[1], &button_bg_color[2]);
-		HSL_to_RGB(hue, sat, bright - 0.2,  &toggle_off_color[0], &toggle_off_color[1], &toggle_off_color[2]);
-		HSL_to_RGB(hue, sat, bright + 0.2,  &toggle_on_color[0], &toggle_on_color[1], &toggle_on_color[2]);
+		//Element::setColor(hue, sat, bright, a);
+		Element::setColor(hue, a);
+		HSL_to_RGB(col_hue, col_sat, col_bright - 0.2,  &button_bg_color[0], &button_bg_color[1], &button_bg_color[2]);
+		HSL_to_RGB(col_hue, col_sat, col_bright - 0.2,  &toggle_off_color[0], &toggle_off_color[1], &toggle_off_color[2]);
+		HSL_to_RGB(col_hue, col_sat, col_bright + 0.2,  &toggle_on_color[0], &toggle_on_color[1], &toggle_on_color[2]);
 		toggle_on_color[3] = a;
 		toggle_off_color[3] = a;
 		return *this;

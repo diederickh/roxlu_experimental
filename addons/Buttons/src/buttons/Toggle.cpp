@@ -9,10 +9,6 @@ Toggle::Toggle(bool& val, const string& name)
 	,label_dx(0)
 {
 	h = 20;
-//	BSET_COLOR(bg_top_color, 0.0, 0.17, 0.21, 1.0);
-//	BSET_COLOR(bg_bottom_color, 0.0, 0.17, 0.21, 1.0);
-//	BSET_COLOR(toggle_on_color, 0.0,0.8,0.4,1.0);
-//	BSET_COLOR(toggle_off_color, 0.0,0.8,0.2,0.1);
 }
 
 Toggle::~Toggle() {
@@ -33,7 +29,7 @@ void Toggle::generateVertices(ButtonVertices& vd) {
 		c = toggle_on_color;
 	}
 	
-	buttons::createRect(vd, x+5, y+4, 10, 10, c, toggle_off_color);
+	buttons::createRect(vd, x+5, y+5, 10, 10, c, c);
 }
 
 void Toggle::onMouseDown(int mx, int my) {
@@ -87,20 +83,13 @@ void Toggle::show() {
 	static_text->setTextVisible(label_dx, true);
 }
 
-Toggle& Toggle::setColor(const float hue, const float sat, const float bright, float a) {
-	Element::setColor(hue, sat, bright, a);
-	
-	
-	HSL_to_RGB(hue, sat, bright - 0.2,  &toggle_off_color[0], &toggle_off_color[1], &toggle_off_color[2]);
-	HSL_to_RGB(hue, sat, bright + 0.2,  &toggle_on_color[0], &toggle_on_color[1], &toggle_on_color[2]);
+Toggle& Toggle::setColor(const float hue, float a) {
+	Element::setColor(hue,a);
+	HSL_to_RGB(col_hue, col_sat, col_bright - 0.1,  &toggle_off_color[0], &toggle_off_color[1], &toggle_off_color[2]);
+	HSL_to_RGB(col_hue, col_sat, col_bright + 0.4,  &toggle_on_color[0], &toggle_on_color[1], &toggle_on_color[2]);
 	toggle_on_color[3] = a;
 	toggle_off_color[3] = a;
-//	BSET_COLOR(bg_top_color, 0.0, 0.17, 0.21, 1.0);
-//	BSET_COLOR(bg_bottom_color, 0.0, 0.17, 0.21, 1.0);
-//	BSET_COLOR(toggle_on_color, 0.0,0.8,0.4,1.0);
-//	BSET_COLOR(toggle_off_color, 0.0,0.8,0.2,0.1);
 	return *this;
-	
 }
 
 } // namespace buttons

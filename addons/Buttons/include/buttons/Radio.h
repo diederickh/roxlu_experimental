@@ -41,8 +41,6 @@ public:
 	
 	bool updateSelected();
 
-	//float bg_top_color[4];
-	//float bg_bottom_color[4];
 	int label_dx;
 	const vector<string>& options;
 	T* cb;
@@ -67,7 +65,6 @@ Radio<T>::Radio(int id, const vector<string>& options, int& selected, const stri
 	BSET_COLOR(bg_top_color, 0.0, 0.17, 0.21, 1.0);
 	BSET_COLOR(bg_bottom_color, 0.0, 0.17, 0.21, 1.0);
 	values = new bool[options.size()];
-	
 }
 
 template<class T>
@@ -116,7 +113,6 @@ bool Radio<T>::updateSelected() {
 		if(toggle.is_mouse_inside && was_inside == false) {
 			was_inside = true;
 			selected = i;
-			printf("selected: %d\n", selected);
 		}
 	}
 	

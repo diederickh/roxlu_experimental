@@ -17,6 +17,8 @@ using roxlu::Vec2;
 
 namespace buttons {
 
+class Buttons; 
+
 enum ElementTypes {
 	 BTYPE_SLIDER 	= 0
 	,BTYPE_TOGGLE 	= 1
@@ -36,6 +38,15 @@ enum ElementValueTypes {
 	 BVALUE_NONE
 	,BVALUE_INT
 	,BVALUE_FLOAT
+};
+
+enum ButtonsEventTypes {
+	BEVENT_BUTTONS_REDRAW	= 0
+};
+
+class ButtonsListener {
+public:
+	virtual void onRedraw(Buttons& buttons) = 0;
 };
 
 class ButtonVertex {

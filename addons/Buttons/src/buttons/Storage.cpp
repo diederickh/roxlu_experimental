@@ -16,6 +16,9 @@ bool Storage::save(const string& file, Buttons* buttons) {
 	ofs.write((char *)&b.y, sizeof(int));
 	ofs.write((char *)&b.w, sizeof(int));
 	
+	int is_open = b.isOpen() ? 1 : 0;
+	ofs.write((char*)&is_open, sizeof(int));
+	
 	// Write number of elements.
 	size_t num_els = b.elements.size();
 	ofs.write((char*)&num_els, sizeof(size_t));
@@ -44,6 +47,7 @@ bool Storage::save(const string& file, Buttons* buttons) {
 	ofs.close();
 	return true;
 }
+
 // @todo make this work when one adds/removes elements to gui! 
 // crashes on windows when you save with 10 elements en load 
 // with 8 for example.
@@ -62,6 +66,12 @@ bool Storage::load(const string& file, Buttons* buttons) {
 	ifs.read((char*)&y, sizeof(int));
 	ifs.read((char*)&w, sizeof(int));
 	b.setPosition(x,y);
+
+	int is_open = 0;
+	ifs.read((char*)&is_open, sizeof(int));
+	if(is_open == 0) {
+		b.close();
+	}
 
 	// Number of elements.
 	size_t num_els = 0;

@@ -25,7 +25,7 @@ public:
 	void load(std::ifstream& ifs);
 	bool canSave();
 	
-	Toggle& setColor(const float hue, const float sat, const float bright, const float a = 1.0);
+	Toggle& setColor(const float hue, float a = 1.0);
 	void hide();
 	void show();
 	

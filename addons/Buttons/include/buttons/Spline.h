@@ -80,7 +80,7 @@ public:
 	void hide();
 	void show();
 	
-	SplineEditor<S, V>& setColor(const float r, const float g, const float b, const float a = 1.0f);
+	SplineEditor<S, V>& setColor(const float hue, float a = 1.0f);
 	
 	int selected_handle_dx;
 	float selected_handle_col[4];
@@ -106,35 +106,20 @@ SplineEditor<S,V>::SplineEditor(const string& name, S& spline)
 	this->h = 75;	
 	BSET_COLOR(selected_handle_col, 1.0, 0.7,0.0,1.0);
 	default_handle_col = col_text;
-	setColor(col_bg_default[0], col_bg_default[1], col_bg_default[2]);
 }
 
 template<class S, class V> 
-SplineEditor<S, V>& SplineEditor<S,V>::setColor(const float hue, const float sat, const float bright, const float a) {
-	Element::setColor(hue,sat,bright,a);
+SplineEditor<S, V>& SplineEditor<S,V>::setColor(const float hue, float a) {
+	Element::setColor(hue,a);
 	
 	// bar_empty_color: saturated default color
 	editor_bg_top_col[3] = a;
 	editor_spline_col[3] = a;
 	default_handle_col[3] = a;
 
-
-/*
-		HSL_to_RGB(hue, sat, bright - 0.2, &bar_empty_color[0], &bar_empty_color[1], &bar_empty_color[2]);
-		HSL_to_RGB(hue, sat, bright + 0.2, &bar_filled_color[0], &bar_filled_color[1], &bar_filled_color[2]);
-		HSL_to_RGB(hue, sat, bright - 0.1, &bar_filled_bottom[0], &bar_filled_bottom[1], &bar_filled_bottom[2]);
-
-*/
-
-	HSL_to_RGB(hue, sat, bright - 0.1,  &editor_bg_top_col[0], &editor_bg_top_col[1], &editor_bg_top_col[2]);
+	HSL_to_RGB(col_hue, col_sat, col_bright - 0.1,  &editor_bg_top_col[0], &editor_bg_top_col[1], &editor_bg_top_col[2]);
 	BSET_COLOR(editor_bg_bottom_col, editor_bg_top_col[0], editor_bg_top_col[1], editor_bg_top_col[2], a);
-	HSL_to_RGB(hue, sat, bright + 0.5,  &editor_spline_col[0], &editor_spline_col[1], &editor_spline_col[2]);
-
-
-
-//	HSL_to_RGB(hue, sat * 0.5,bright,  &editor_bg_top_col[0], &editor_bg_top_col[1], &editor_bg_top_col[2]);
-//	BSET_COLOR(editor_bg_bottom_col, editor_bg_top_col[0], editor_bg_top_col[1], editor_bg_top_col[2], 1.0f);
-//	HSL_to_RGB(hue, sat * 2.5, bright * 2.7,  &editor_spline_col[0], &editor_spline_col[1], &editor_spline_col[2]);
+	HSL_to_RGB(col_hue, col_sat, col_bright + 0.5,  &editor_spline_col[0], &editor_spline_col[1], &editor_spline_col[2]);
  	return *this;
 }
 

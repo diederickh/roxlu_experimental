@@ -27,7 +27,6 @@ public:
 		,value_type(valueType)
 
 	{
-		setColor(col_bg_default[0], col_bg_default[1], col_bg_default[2]);
 		h = 22;
 	}
 	
@@ -44,15 +43,16 @@ public:
 		return *this;
 	}
 	
-	Slider& setColor(const float hue, const float sat, const float bright, const float a = 1.0) {
-		Element::setColor(hue,sat,bright,a);
+	Slider& setColor(const float hue, float a = 1.0) {
+		Element::setColor(hue,a);
+		
 		bar_empty_color[3] = a;
 		bar_filled_color[3] = a;
 		bar_filled_bottom[3] = a;
 		
-		HSL_to_RGB(hue, sat, bright - 0.2, &bar_empty_color[0], &bar_empty_color[1], &bar_empty_color[2]);
-		HSL_to_RGB(hue, sat, bright + 0.2, &bar_filled_color[0], &bar_filled_color[1], &bar_filled_color[2]);
-		HSL_to_RGB(hue, sat, bright - 0.1, &bar_filled_bottom[0], &bar_filled_bottom[1], &bar_filled_bottom[2]);
+		HSL_to_RGB(col_hue, col_sat, col_bright - 0.1, &bar_empty_color[0], &bar_empty_color[1], &bar_empty_color[2]);
+		HSL_to_RGB(col_hue, col_sat, col_bright + 0.4, &bar_filled_color[0], &bar_filled_color[1], &bar_filled_color[2]);
+		HSL_to_RGB(col_hue, col_sat, col_bright - 0.1, &bar_filled_bottom[0], &bar_filled_bottom[1], &bar_filled_bottom[2]);
 		return *this;
 	}
 

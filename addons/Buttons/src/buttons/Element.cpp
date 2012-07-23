@@ -21,15 +21,13 @@ Element::Element(int type, const string& name)
 	,label("")
 	,static_text(NULL)
 	,dynamic_text(NULL)
+	,col_sat(0.2)
+	,col_bright(0.27)
+	,col_hue(0.5)
 {
-	BSET_COLOR(col_bg_bottom_hover, 0.6, 0.17, 0.21, 1.0);
-	BSET_COLOR(col_bg_top_hover, 0.6, 0.17, 0.21, 1.0);
-	BSET_COLOR(col_bg_default, 0.6, 0.17, 0.21, 1.0);
-	BSET_COLOR(col_text, 0.9,0.9,0.9,0.9);
-	setColor(0.13, 0.5, 0.3);
+	setColor(0.13);
 	bg_top_color = col_bg_default;
 	bg_bottom_color = col_bg_default;
-	setColor(col_bg_default[0], col_bg_default[1], col_bg_default[2]);
 }
 
 Element::~Element() {
