@@ -46,6 +46,11 @@ struct AVContext {
 	int16_t* atest_samples;
 	int atest_frame_size;
 	int atest_time;
+	
+	// testing
+	int vcounter; // video frame counter
+	int acounter; // audio sample counter
+	int64_t vpts; 
 };
 
 class AV {

@@ -37,6 +37,8 @@ AVContext::AVContext()
 	,atest_samples(NULL)
 	,atest_frame_size(0)
 	,atest_time(0)
+	,vcounter(0)
+	,acounter(0)
 {
 }
 
@@ -100,34 +102,24 @@ bool AV::addVideoFrame(unsigned char* pixels) {
 		,ct.vframe->linesize
 	);
 
-
 	// create packet to encode
 	AVPacket packet;
 	av_init_packet(&packet);
 	
-	if(ct.vs->codec->coded_frame->pts != AV_NOPTS_VALUE) {
-	    packet.pts = av_rescale_q(
-						 ct.vs->codec->coded_frame->pts
-						,ct.vs->codec->time_base
-						,ct.vs->time_base
-		);
-	}
-
-	
-	if(ct.vs->codec->coded_frame->key_frame) {
-		packet.flags |= AV_PKT_FLAG_KEY;
-	}
 	
 	packet.stream_index = ct.vs->index;
 	packet.data = ct.vbuf;
 	packet.size = ct.vsize;
 	
-	// TEST-----------: 
-	// when using this, movie is really slow, but does not crash!!
-	//packet.pts += t; 
-	//t += tincr;
-	// TEST------------
 
+	int64_t now = av_gettime();
+	AVRational stream_time_base = ct.vs->time_base; // stream time base
+	AVRational codec_time_base = ct.vs->codec->time_base; // codec time base
+	AVRational my_time_base = (AVRational){1,1e6};
+	int64_t now_frame_pts = av_rescale_q(now, my_time_base, codec_time_base);
+
+	ct.vframe->pts = ct.vcounter; // frame counter
+	ct.vcounter++;
 	
 	int result = 0;
 	int encode_result = avcodec_encode_video2(ct.vs->codec, &packet, ct.vframe, &result);
@@ -136,47 +128,45 @@ bool AV::addVideoFrame(unsigned char* pixels) {
 		return false;
 	}
 	
-	// +++++++ RESCALE TO MUXER TIMEBASE +++++++++++++
-	/* @elenril (#libav) you need to rescale AVPacket values from encoder 
-		timebase to the muxer timebase manually
-		info: http://libav-users.943685.n4.nabble.com/H264-encoding-and-RTP-muxing-calculating-pts-and-dts-td2319740.html
-	*/
-	int64_t now = av_gettime();
-	AVRational stream_time_base = ct.vs->time_base; // stream time base
-	AVRational codec_time_base = ct.vs->codec->time_base; // codec time base
-	int64_t stream_based_now = av_rescale_q(now, codec_time_base, stream_time_base);
-	packet.pts = stream_based_now;
+	if(ct.vs->codec->coded_frame->key_frame) {
+		packet.flags |= AV_PKT_FLAG_KEY;
+	}
+	
+	
+	// RESCALE PTS
+	int64_t stream_based_now = av_rescale_q(packet.pts, codec_time_base, stream_time_base);
 
+	if(ct.vs->codec->coded_frame->pts != AV_NOPTS_VALUE) {
+	    packet.pts = av_rescale_q(
+						packet.pts
+						,ct.vs->codec->time_base
+						,ct.vs->time_base
+		);
+	}
+	
+	packet.dts = av_rescale_q(
+					 packet.dts
+					,ct.vs->codec->time_base
+					,ct.vs->time_base
+	);
+	
+	
+	printf("Video: stream: %d\n", packet.stream_index);
+	printf("Video. ct.vcounter: %d\n",ct.vcounter);
+	printf("Video: packet.duration: %d\n", packet.duration);
 	printf("Video: Codec.time_base, num=%d, den=%d\n", codec_time_base.num, codec_time_base.den);
 	printf("Video: Stream timebase, num = %d, den = %d\n", stream_time_base.num, stream_time_base.den);
 	printf("Video: time now: %lld, stream based: %lld\n", now, stream_based_now);
 	printf("Video: video pts: %lld\n", ct.vs->codec->coded_frame->pts);
 	printf("------------------------\n");
-	// +++++++ RESCALE TO MUXER TIMEBASE +++++++++++++
-	
-	
-	//if(av_write_frame(ct.c, &packet) != 0) {
+
+
 	if(av_interleaved_write_frame(ct.c, &packet) != 0) {
 		printf("Error while writing out a frame.\n");
 		return false;
 	}
-	
-	//printf("out_h: %d\n", out_h);
 	return true;
 }
-
-	/*
-	int avcodec_fill_audio_frame	(	
-	
-	AVFrame * 	frame,
-	int 	nb_channels,
-	enum AVSampleFormat 	sample_fmt,
-	const uint8_t * 	buf,
-	int 	buf_size,
-	int 	align	 
-)	
-	*/
-
 
 /**
  *
@@ -192,7 +182,6 @@ bool AV::addAudioFrame(unsigned char* buffer, int nsamples, int nchannels) {
 	AVPacket packet = {0}; // data and size must be '0' (allocation is done for you :> )
 	AVFrame* frame = avcodec_alloc_frame(); 
 	int got_packet = 0;
-	
 	
 	// BUFFER HANDLING
 	int samples_stored = av_audio_fifo_write(ct.afifo, (void**)&buffer, nsamples);
@@ -237,9 +226,17 @@ bool AV::addAudioFrame(unsigned char* buffer, int nsamples, int nchannels) {
 		return false;
 	}
 
-	// setting the pts here does not work...
-	
 	// ENCODE
+	int64_t now = av_gettime();
+	AVRational my_time_base = (AVRational){1,1e6};
+	AVRational stream_time_base = ct.as->time_base; // stream time base
+	AVRational codec_time_base = ct.as->codec->time_base; // codec time base
+	int64_t now_frame_pts = av_rescale_q(now, my_time_base, codec_time_base);
+	
+	
+	frame->pts = ct.acounter;
+	ct.acounter += use_nsamples;
+			
 	int enc_result = avcodec_encode_audio2(c, &packet, frame, &got_packet);
 	packet.stream_index = ct.as->index;
 	if(!got_packet) {
@@ -252,30 +249,23 @@ bool AV::addAudioFrame(unsigned char* buffer, int nsamples, int nchannels) {
 		printf("av error: %s\n",buf);
 	}
 
+	// CORRECT THE PTS, FROM VIDEO_CODEC.time_base TO STREAM.time_base
+	packet.pts = av_rescale_q(packet.pts, codec_time_base, stream_time_base);
+	packet.dts = av_rescale_q(packet.dts, codec_time_base, stream_time_base);
+	packet.duration = av_rescale_q(packet.duration, codec_time_base, stream_time_base);
 	
-	//packet.pts =  ct.vs->codec->coded_frame->pts;
-	//printf("pts: %lld\n", frame->pts);
-	//printf("In audio: %lld\n", ct.vs->codec->coded_frame->pts);
-
-	int64_t now = av_gettime();
-	AVRational stream_time_base = ct.as->time_base; // stream time base
-	AVRational codec_time_base = ct.as->codec->time_base; // codec time base
-	int64_t stream_based_now = av_rescale_q(now, codec_time_base, stream_time_base);
-	packet.pts = stream_based_now;
+	//packet.dts = packet.pts;  // just a wild guess
+	//packet.duration = 0;
+	printf("Audio: stream: %d\n", packet.stream_index);
+	printf("Audio: ct.acounter: %d\n", ct.acounter);
+	printf("Audio: packet.duration: %d\n", packet.duration);
 	printf("Audio: stream.time_base, num=%d, den=%d\n", stream_time_base.num, stream_time_base.den);
 	printf("Audio: codec.time_base, num=%d, den=%d\n", codec_time_base.num, codec_time_base.den);
-	printf("Audio: now: %lld, rescaled: %lld\n", now, stream_based_now);
 	printf("Audio: coded_frame.pts: %lld\n", ct.as->codec->coded_frame->pts);
+	printf("Audio: packet.pts: %lld\n" ,packet.pts);
 	printf("-------------------\n");
-	
-	// TEST-----------
-	//packet.pts += t;
-	//t += tincr;
-	
-	// TEST------------
 
 	// WRITE
-	//if(av_write_frame(ct.c, &packet) != 0) {
 	if(av_interleaved_write_frame(ct.c, &packet) != 0) {
 		printf("Cannot write audio frame.\n");
 		av_free(my_buffer);
@@ -309,15 +299,29 @@ bool AV::addTestAudioFrame() {
 	);
 	
 	avcodec_encode_audio2(c, &packet, frame, &got_packet);
-	printf("%d\n", packet.size);
 	if(!got_packet) {
 		return false;
 	}
 	
+	AVRational stream_time_base = ct.as->time_base; // stream time base
+	AVRational codec_time_base = ct.as->codec->time_base; // codec time base
+	
 	packet.stream_index = ct.as->index;
+	packet.pts = av_rescale_q(packet.pts, codec_time_base, stream_time_base);
+	packet.dts = av_rescale_q(packet.dts, codec_time_base, stream_time_base);
+	packet.duration  = av_rescale_q(packet.duration, codec_time_base, stream_time_base);
+	
+	printf("Audio (test): stream: %d\n", packet.stream_index);
+	printf("Audio (test): ct.acounter: %d\n", ct.acounter);
+	printf("Audio (test): packet.duration: %d\n", packet.duration);
+	printf("Audio (test): stream.time_base, num=%d, den=%d\n", stream_time_base.num, stream_time_base.den);
+	printf("Audio (test): codec.time_base, num=%d, den=%d\n", codec_time_base.num, codec_time_base.den);
+	printf("Audio (test): coded_frame.pts: %lld\n", ct.as->codec->coded_frame->pts);
+	printf("Audio (test): packet.pts: %lld\n" ,packet.pts);
+	printf("-------------------\n");
+
 
 	if(av_interleaved_write_frame(ct.c, &packet) != 0) {
-	//if(av_write_frame(ct.c, &packet) != 0) {
 		printf("Cannot write frame.\n");
 		return false;
 	}
@@ -361,27 +365,17 @@ bool AV::setupSWS() {
 	return true;
 }
 
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// TESING WITH INTERRUPT HANDLING
-static int interrupt_cb(void *ctx) 
-{ 
-    AVFormatContext* formatContext = reinterpret_cast<AVFormatContext*>(ctx);
-	printf("interrupt cb.\n");
-    return 0;
-}
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 // setup libAV related structs.
 bool AV::setupAV() {
-	// Create output format 
+
 	ct.of = av_guess_format(NULL, "roxlu.flv", NULL);
 	if(!ct.of) {
 		printf("Cannot create flv AVOutputFormat\n");
 		return false;
 	}
 	
-	// Create the main libav context.
 	ct.c = avformat_alloc_context();
 	if(!ct.c) {
 		printf("Cannot allocate the AVFormatContext\n");
@@ -389,34 +383,23 @@ bool AV::setupAV() {
 	}
 	
 	ct.c->debug = 3;
-	
-	// Tell our main context what format to use.
 	ct.c->oformat = ct.of;
-	
-	// Set the output type for our main context.
-	const char* output_filename = "tcp://127.0.0.1:6666";
-//	const char* output_filename = "test.flv";
-	snprintf(ct.c->filename, sizeof(ct.c->filename), "%s", output_filename);
-	
 
-	
-	// add the video stream.
+	const char* output_filename = "tcp://127.0.0.1:6666";
+	snprintf(ct.c->filename, sizeof(ct.c->filename), "%s", output_filename);
 	ct.vs = addVideoStream(ct, ct.of->video_codec);
 	if(!ct.vs) {
 		printf("Cannot create video stream: %d.\n", ct.of->video_codec);
 		return false;
 	}
 	
-	// open the video stream and init encoder
 	if(!openVideo(ct)) {
 		printf("Cannot open video stream.\n");
 		return false;
 	}
 	
-	// set the metadata for the stream: @todo make this a variable
 	av_dict_set(&ct.c->metadata, "streamName", "video_test", 0);
 	
-	// add audio stream
 	bool use_mp3 = true;
 	if(!use_mp3) {
 		ct.asample_fmt = AV_SAMPLE_FMT_S16;
@@ -426,7 +409,7 @@ bool AV::setupAV() {
 	}
 	else {
 		ct.asample_fmt = AV_SAMPLE_FMT_S16;
-		ct.abit_rate = 5000;
+		ct.abit_rate = 64000;
 		ct.asample_rate = 44100;
 		ct.as = addAudioStream(ct, CODEC_ID_MP3);
 	}
@@ -441,29 +424,14 @@ bool AV::setupAV() {
 		return false;
 	}
 	
-	// tmp testing with debug
-	// ++++++++++++++++++++++++++
-		ct.c->interrupt_callback.callback = interrupt_cb;
-		ct.c->interrupt_callback.opaque = ct.c;
-		//AVFormatContext* formatContext = libffmpeg::avformat_alloc_context( );
-		//formatContext->interrupt_callback.callback = interrupt_cb;
-		//formatContext->interrupt_callback.opaque = formatContext;
-	// ++++++++++++++++++++++++++++
-	// end temp testing with debug
-	
-	
-	// show some info
 	av_dump_format(ct.c, 0, output_filename, 1);
 	
-	// open the output file if needed
 	if(!(ct.of->flags & AVFMT_NOFILE)) {
 		if(avio_open(&ct.c->pb, output_filename, AVIO_FLAG_WRITE) < 0) {
 			printf("Cannot open: %s\n", output_filename);
 			return false;
 		}
 	}
-	
-	// write header.
 	avformat_write_header(ct.c, NULL);
 	
 	return true;
@@ -495,10 +463,6 @@ AVStream* AV::addAudioStream(AVContext& context, enum CodecID codecID) {
 	c->sample_rate = context.asample_rate;
 	c->time_base.den = c->sample_rate; 
 	c->time_base.num = 1;
-	//c->time_base.den = 1/1e6;
-
-	//c->bit_rate = 16000;
-	//c->sample_rate = 8000;
 	c->channels = 2;
 	c->bit_rate_tolerance = 1; // http://libav-users.943685.n4.nabble.com/avcodec-open-fail-in-some-system-td3320470.html
 	c->channel_layout = 0; // http://libav-users.943685.n4.nabble.com/avcodec-open-fail-in-some-system-td3320470.html  
@@ -513,12 +477,8 @@ AVStream* AV::addAudioStream(AVContext& context, enum CodecID codecID) {
 	}
 
 	// Experimental: http://libav-users.943685.n4.nabble.com/Libav-user-FFmpeg-x264-settings-for-zero-delay-encoding-td4655209.html
-	av_opt_set(c->priv_data, "preset", "ultrafast", 0);
-	av_opt_set(c->priv_data, "tune", "zerolatency", 0);
-	//> av_opt_set(codecContex->priv_data, "preset", "ultrafast", 0); 
-	//> av_opt_set(codecContex->priv_data, "tune", "zerolatency", 0); 
-	
-
+	//av_opt_set(c->priv_data, "preset", "ultrafast", 0);
+	//av_opt_set(c->priv_data, "tune", "zerolatency", 0);
 	return st;
 }
 
@@ -531,17 +491,12 @@ bool AV::openAudio(AVContext& context) {
 		return false;
 	}
 	
-
-	printf("Creating a buffer: %d\n", c->frame_size);
 	context.afifo = av_audio_fifo_alloc(c->sample_fmt, c->channels, c->frame_size); // c->frame_size is only set after avcodec_open2 is called
 	if(!context.afifo) {
 		printf("Cannot create audio buffer.\n");
 		return false;
 	}
 
-	
-	// create test samples
-	// +++++++++++++++++++++++++++++++
 	t = 0;
 	tincr = 2 * M_PI * 710.0 / c->sample_rate;
 	tincr2 = 2 * M_PI * 710.0 / c->sample_rate / c->sample_rate;
@@ -553,30 +508,12 @@ bool AV::openAudio(AVContext& context) {
 	else {
 		context.atest_frame_size = c->frame_size;
 	}
-	printf("Audio frame_size = %d\n", context.atest_frame_size);
-	printf("Audio sizeof samples: %d\n", context.atest_frame_size * av_get_bytes_per_sample(c->sample_fmt) * c->channels); 
-	printf("Audio time_base.num = %d, time_base.den = %d\n", c->time_base.num, c->time_base.den);
+
 	context.atest_samples = (int16_t*) av_malloc(
 		context.atest_frame_size 
 		* av_get_bytes_per_sample(c->sample_fmt) 
 		* c->channels
 	);
-	// +++++++++++++++++++++++++++++++	
-	
-	//int asize =  c->frame_size * av_get_bytes_per_sample(c->sample_fmt) * c->channels; ;
-	/*
-	int aalloc = 0;
-	int asize = c->frame_size;
-	while(aalloc < asize) {
-		aalloc = std::max<int>(2 * aalloc, 1024);
-		printf("A: %d\n", aalloc); 
-	}
-	ct.asize = aalloc;
-	ct.abuf = (int16_t*)av_malloc(ct.asize);
-	*/
-
-	
-		
 	return true;
 }
 
@@ -602,7 +539,6 @@ AVStream* AV::addVideoStream(AVContext& context, enum CodecID codecID) {
 		return NULL;
 	}
 	
-	// sample params
 	stream->codec->bit_rate = 400000;
 	stream->codec->width = src_w; //  @todo change this to output width
 	stream->codec->height = src_h; //  @todo change this to output height
@@ -614,7 +550,6 @@ AVStream* AV::addVideoStream(AVContext& context, enum CodecID codecID) {
 	stream->codec->pix_fmt = PIX_FMT_YUV420P;
 	stream->codec->max_b_frames = 0; //  @todo testing.
 	
-	//if(stream->codec->codec_id == CODEC_ID_MPEG2VIDEO
 	if(codecID == CODEC_ID_MPEG2VIDEO) {
 		stream->codec->max_b_frames = 2;
 	}
@@ -623,7 +558,6 @@ AVStream* AV::addVideoStream(AVContext& context, enum CodecID codecID) {
 		stream->codec->mb_decision = 2;
 	}
 	
-	// separate stream headers? for output muxer
 	if(context.c->oformat->flags & AVFMT_GLOBALHEADER) {
 		stream->codec->flags |= CODEC_FLAG_GLOBAL_HEADER;
 	}
@@ -632,28 +566,21 @@ AVStream* AV::addVideoStream(AVContext& context, enum CodecID codecID) {
 }
 
 bool AV::openVideo(AVContext& context) {
-	// open the encoder.
 	if(avcodec_open2(context.vs->codec, NULL, NULL) < 0) {
 		printf("Cannot open the encoder.\n");
 		return false;
 	}
 	
 	context.vbuf = NULL;
-	//if(!(context.c->oformat->flags & AVFMT_RAWPICTURE)) {
-	//	printf("Allocating video buffer when it's not a raw picture (?)\n");
-		context.vsize = 200000;
-		context.vbuf = (uint8_t*) av_malloc(context.vsize);
-	//}
+	context.vsize = 200000;
+	context.vbuf = (uint8_t*) av_malloc(context.vsize);
 	
-	// allocate encoded raw image.
 	context.vframe = allocFrame(context.vs->codec->pix_fmt, context.vs->codec->width, context.vs->codec->height); // we could use "w" and "h", this seems more versatile
 	if(!context.vframe) {
 		printf("Cannot allocate memory for vframe.\n");
 		return false;
 	}
 	
-	// allocate RGB image (used for conversion)
-	//  context.vs->codec->width, context.vs->codec->height); // we could use "w" and "h", this seems more versatile
 	context.tmp_vframe = allocFrame(PIX_FMT_RGB24, src_w, src_h);
 	if(!context.tmp_vframe) {
 		printf("Cannot allocate memory for tmp_vframe we need for conversion.\n");
@@ -688,10 +615,21 @@ AVFrame* AV::allocFrame(enum PixelFormat pixFormat, int width, int height) {
 	// @BBB-work on #libav-devel says "yes libav frees it as you close the decoder"
 	size = avpicture_get_size(pixFormat, width, height);
 	buf = (uint8_t*) av_malloc(size); // memory leak here? who owns this?
-	
 	avpicture_fill((AVPicture*)pic, buf, pixFormat, width, height);
-	
 	return pic;
 }
 
 
+
+static int interrupt_cb(void *ctx) { 
+    AVFormatContext* formatContext = reinterpret_cast<AVFormatContext*>(ctx);
+	printf("interrupt cb.\n");
+    return 0;
+}
+
+
+// +++++++ RESCALE TO MUXER TIMEBASE +++++++++++++
+	/* @elenril (#libav) you need to rescale AVPacket values from encoder 
+		timebase to the muxer timebase manually
+		info: http://libav-users.943685.n4.nabble.com/H264-encoding-and-RTP-muxing-calculating-pts-and-dts-td2319740.html
+	*/
