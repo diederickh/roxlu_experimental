@@ -18,8 +18,9 @@ for dirname, dirnames, filenames in os.walk('.'):
 # For each dylib check what other dylibs it uses
 for dylib in local_files:
 	result = commands.getoutput("otool -L " +dylib)
-	commands.getoutput("install_name_tool -id @executable_path/../Frameworks/OpenNI.framework/Versions/Current/Libraries/" +dylib +" " +dylib)
+	commands.getoutput("install_name_tool -id @executable_path/" +dylib +" " +dylib)
 	for line in result.split("\n"):
+		print line
 		for other_dylib in local_files:
 			if re.search(other_dylib, line) and dylib != other_dylib:
 				print "Found other: " +other_dylib +" in  " +dylib
