@@ -122,9 +122,10 @@ bool AV::addVideoFrame(unsigned char* pixels) {
 	packet.data = ct.vbuf;
 	packet.size = ct.vsize;
 	
-	// TEST-----------
-	packet.pts += t;
-	t += tincr;
+	// TEST-----------: 
+	// when using this, movie is really slow, but does not crash!!
+	//packet.pts += t; 
+	//t += tincr;
 	// TEST------------
 
 	
@@ -135,9 +136,27 @@ bool AV::addVideoFrame(unsigned char* pixels) {
 		return false;
 	}
 	
-	printf("Encoded video pts: %lld\n", ct.vs->codec->coded_frame->pts);
-	if(av_write_frame(ct.c, &packet) != 0) {
-	//if(av_interleaved_write_frame(ct.c, &packet) != 0) {
+	// +++++++ RESCALE TO MUXER TIMEBASE +++++++++++++
+	/* @elenril (#libav) you need to rescale AVPacket values from encoder 
+		timebase to the muxer timebase manually
+		info: http://libav-users.943685.n4.nabble.com/H264-encoding-and-RTP-muxing-calculating-pts-and-dts-td2319740.html
+	*/
+	int64_t now = av_gettime();
+	AVRational stream_time_base = ct.vs->time_base; // stream time base
+	AVRational codec_time_base = ct.vs->codec->time_base; // codec time base
+	int64_t stream_based_now = av_rescale_q(now, codec_time_base, stream_time_base);
+	packet.pts = stream_based_now;
+
+	printf("Video: Codec.time_base, num=%d, den=%d\n", codec_time_base.num, codec_time_base.den);
+	printf("Video: Stream timebase, num = %d, den = %d\n", stream_time_base.num, stream_time_base.den);
+	printf("Video: time now: %lld, stream based: %lld\n", now, stream_based_now);
+	printf("Video: video pts: %lld\n", ct.vs->codec->coded_frame->pts);
+	printf("------------------------\n");
+	// +++++++ RESCALE TO MUXER TIMEBASE +++++++++++++
+	
+	
+	//if(av_write_frame(ct.c, &packet) != 0) {
+	if(av_interleaved_write_frame(ct.c, &packet) != 0) {
 		printf("Error while writing out a frame.\n");
 		return false;
 	}
@@ -157,42 +176,6 @@ bool AV::addVideoFrame(unsigned char* pixels) {
 	int 	align	 
 )	
 	*/
-
-bool AV::addTestAudioFrame() {
-	AVCodecContext* c = ct.as->codec;
-	AVPacket packet = {0}; // data and size must be '0' (allocation is done for you :> )
-	AVFrame* frame = avcodec_alloc_frame(); 
-	int got_packet = 0;
-	
-	av_init_packet(&packet);
-	get_audio_frame(ct.atest_samples, ct.atest_frame_size);
-	
-	frame->nb_samples = ct.atest_frame_size;
-	
-	avcodec_fill_audio_frame(
-			frame
-			,c->channels
-			,c->sample_fmt
-			,(uint8_t*)ct.atest_samples
-			,ct.atest_frame_size * av_get_bytes_per_sample(c->sample_fmt) * c->channels
-			,1
-	);
-	
-	avcodec_encode_audio2(c, &packet, frame, &got_packet);
-	printf("%d\n", packet.size);
-	if(!got_packet) {
-		return false;
-	}
-	
-	packet.stream_index = ct.as->index;
-
-	//if(av_interleaved_write_frame(ct.c, &packet) != 0) {
-	if(av_write_frame(ct.c, &packet) != 0) {
-		printf("Cannot write frame.\n");
-		return false;
-	}
-	return true;
-}
 
 
 /**
@@ -254,6 +237,8 @@ bool AV::addAudioFrame(unsigned char* buffer, int nsamples, int nchannels) {
 		return false;
 	}
 
+	// setting the pts here does not work...
+	
 	// ENCODE
 	int enc_result = avcodec_encode_audio2(c, &packet, frame, &got_packet);
 	packet.stream_index = ct.as->index;
@@ -268,22 +253,74 @@ bool AV::addAudioFrame(unsigned char* buffer, int nsamples, int nchannels) {
 	}
 
 	
+	//packet.pts =  ct.vs->codec->coded_frame->pts;
+	//printf("pts: %lld\n", frame->pts);
+	//printf("In audio: %lld\n", ct.vs->codec->coded_frame->pts);
+
+	int64_t now = av_gettime();
+	AVRational stream_time_base = ct.as->time_base; // stream time base
+	AVRational codec_time_base = ct.as->codec->time_base; // codec time base
+	int64_t stream_based_now = av_rescale_q(now, codec_time_base, stream_time_base);
+	packet.pts = stream_based_now;
+	printf("Audio: stream.time_base, num=%d, den=%d\n", stream_time_base.num, stream_time_base.den);
+	printf("Audio: codec.time_base, num=%d, den=%d\n", codec_time_base.num, codec_time_base.den);
+	printf("Audio: now: %lld, rescaled: %lld\n", now, stream_based_now);
+	printf("Audio: coded_frame.pts: %lld\n", ct.as->codec->coded_frame->pts);
+	printf("-------------------\n");
+	
 	// TEST-----------
 	//packet.pts += t;
 	//t += tincr;
-	packet.pts =  ct.vs->codec->coded_frame->pts;
-	printf("In audio: %lld\n", ct.vs->codec->coded_frame->pts);
+	
 	// TEST------------
 
 	// WRITE
-	if(av_write_frame(ct.c, &packet) != 0) {
-	//if(av_interleaved_write_frame(ct.c, &packet) != 0) {
+	//if(av_write_frame(ct.c, &packet) != 0) {
+	if(av_interleaved_write_frame(ct.c, &packet) != 0) {
 		printf("Cannot write audio frame.\n");
 		av_free(my_buffer);
 		return false;
 	}
 
 	av_free(my_buffer);
+	return true;
+}
+
+
+
+bool AV::addTestAudioFrame() {
+	AVCodecContext* c = ct.as->codec;
+	AVPacket packet = {0}; // data and size must be '0' (allocation is done for you :> )
+	AVFrame* frame = avcodec_alloc_frame(); 
+	int got_packet = 0;
+	
+	av_init_packet(&packet);
+	get_audio_frame(ct.atest_samples, ct.atest_frame_size);
+	
+	frame->nb_samples = ct.atest_frame_size;
+	
+	avcodec_fill_audio_frame(
+			frame
+			,c->channels
+			,c->sample_fmt
+			,(uint8_t*)ct.atest_samples
+			,ct.atest_frame_size * av_get_bytes_per_sample(c->sample_fmt) * c->channels
+			,1
+	);
+	
+	avcodec_encode_audio2(c, &packet, frame, &got_packet);
+	printf("%d\n", packet.size);
+	if(!got_packet) {
+		return false;
+	}
+	
+	packet.stream_index = ct.as->index;
+
+	if(av_interleaved_write_frame(ct.c, &packet) != 0) {
+	//if(av_write_frame(ct.c, &packet) != 0) {
+		printf("Cannot write frame.\n");
+		return false;
+	}
 	return true;
 }
 
@@ -456,6 +493,10 @@ AVStream* AV::addAudioStream(AVContext& context, enum CodecID codecID) {
 	c->sample_fmt = context.asample_fmt; // @todo make a setter
 	c->bit_rate = context.abit_rate;
 	c->sample_rate = context.asample_rate;
+	c->time_base.den = c->sample_rate; 
+	c->time_base.num = 1;
+	//c->time_base.den = 1/1e6;
+
 	//c->bit_rate = 16000;
 	//c->sample_rate = 8000;
 	c->channels = 2;
@@ -514,7 +555,7 @@ bool AV::openAudio(AVContext& context) {
 	}
 	printf("Audio frame_size = %d\n", context.atest_frame_size);
 	printf("Audio sizeof samples: %d\n", context.atest_frame_size * av_get_bytes_per_sample(c->sample_fmt) * c->channels); 
-
+	printf("Audio time_base.num = %d, time_base.den = %d\n", c->time_base.num, c->time_base.den);
 	context.atest_samples = (int16_t*) av_malloc(
 		context.atest_frame_size 
 		* av_get_bytes_per_sample(c->sample_fmt) 
@@ -618,6 +659,9 @@ bool AV::openVideo(AVContext& context) {
 		printf("Cannot allocate memory for tmp_vframe we need for conversion.\n");
 		return false;
 	}	
+	
+	AVCodecContext* c = context.vs->codec;
+	printf("Video time_base.num = %d, time_base.den = %d\n", c->time_base.num, c->time_base.den);
 	return true;
 }
 
