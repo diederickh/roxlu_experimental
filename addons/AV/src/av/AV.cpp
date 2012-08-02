@@ -47,6 +47,7 @@ AV::AV()
 	:src_w(0)
 	,src_h(0)
 	,can_add_frames(false)
+	,use_audio(false)
 	
 {
 	av_register_all();
@@ -63,9 +64,10 @@ AV::~AV() {
  * @param 	int srcW		Source width (size of input image)
  * @param	int srcH		Source height
  */
-bool AV::open(const int srcW, const int srcH) {
+bool AV::open(const int srcW, const int srcH, bool useAudio) {
 	src_w = srcW;
 	src_h = srcH;
+	use_audio = useAudio;
 	
 	// setup libav internals.
 	if(!setupAV()) {
@@ -150,16 +152,15 @@ bool AV::addVideoFrame(unsigned char* pixels) {
 					,ct.vs->time_base
 	);
 	
-	
+	/*
 	printf("Video: stream: %d\n", packet.stream_index);
 	printf("Video. ct.vcounter: %d\n",ct.vcounter);
 	printf("Video: packet.duration: %d\n", packet.duration);
 	printf("Video: Codec.time_base, num=%d, den=%d\n", codec_time_base.num, codec_time_base.den);
 	printf("Video: Stream timebase, num = %d, den = %d\n", stream_time_base.num, stream_time_base.den);
-	printf("Video: time now: %lld, stream based: %lld\n", now, stream_based_now);
-	printf("Video: video pts: %lld\n", ct.vs->codec->coded_frame->pts);
+	printf("Video: Video coded_frame.pts: %lld\n", ct.vs->codec->coded_frame->pts);
 	printf("------------------------\n");
-
+	*/
 
 	if(av_interleaved_write_frame(ct.c, &packet) != 0) {
 		printf("Error while writing out a frame.\n");
@@ -177,11 +178,12 @@ bool AV::addVideoFrame(unsigned char* pixels) {
  *
  */
 bool AV::addAudioFrame(unsigned char* buffer, int nsamples, int nchannels) {
+	if(!use_audio) {
+		printf("Cannot add audio stream, we're not using audio.\n");
+		return false;
+	}
 	
 	AVCodecContext* c = ct.as->codec;
-	AVPacket packet = {0}; // data and size must be '0' (allocation is done for you :> )
-	AVFrame* frame = avcodec_alloc_frame(); 
-	int got_packet = 0;
 	
 	// BUFFER HANDLING
 	int samples_stored = av_audio_fifo_write(ct.afifo, (void**)&buffer, nsamples);
@@ -193,7 +195,16 @@ bool AV::addAudioFrame(unsigned char* buffer, int nsamples, int nchannels) {
 		return false;
 	}
 
+	
+	AVPacket packet = {0}; // data and size must be '0' (allocation is done for you :> )
+	AVFrame* frame = avcodec_alloc_frame(); 
+	int got_packet = 0;
+	
+
 	av_init_packet(&packet);
+	packet.data = NULL;
+	packet.size = 0;
+
 	int use_nsamples = c->frame_size; 
 	frame->nb_samples = use_nsamples; // <-- important, must be set  before avcodec_fill_audio_frame
 	
@@ -234,8 +245,11 @@ bool AV::addAudioFrame(unsigned char* buffer, int nsamples, int nchannels) {
 	int64_t now_frame_pts = av_rescale_q(now, my_time_base, codec_time_base);
 	
 	
-	frame->pts = ct.acounter;
-	ct.acounter += use_nsamples;
+	if(frame->pts == AV_NOPTS_VALUE) { 
+		frame->pts = ct.acounter;
+	}
+	ct.acounter = frame->pts + use_nsamples;
+	printf("frame->nb_samples: %d, counter: %d\n", frame->nb_samples, ct.acounter);
 			
 	int enc_result = avcodec_encode_audio2(c, &packet, frame, &got_packet);
 	packet.stream_index = ct.as->index;
@@ -252,10 +266,11 @@ bool AV::addAudioFrame(unsigned char* buffer, int nsamples, int nchannels) {
 	// CORRECT THE PTS, FROM VIDEO_CODEC.time_base TO STREAM.time_base
 	packet.pts = av_rescale_q(packet.pts, codec_time_base, stream_time_base);
 	packet.dts = av_rescale_q(packet.dts, codec_time_base, stream_time_base);
-	packet.duration = av_rescale_q(packet.duration, codec_time_base, stream_time_base);
+	//packet.duration = av_rescale_q(packet.duration, codec_time_base, stream_time_base);
 	
 	//packet.dts = packet.pts;  // just a wild guess
-	//packet.duration = 0;
+	packet.duration = 0;
+	/*
 	printf("Audio: stream: %d\n", packet.stream_index);
 	printf("Audio: ct.acounter: %d\n", ct.acounter);
 	printf("Audio: packet.duration: %d\n", packet.duration);
@@ -264,7 +279,7 @@ bool AV::addAudioFrame(unsigned char* buffer, int nsamples, int nchannels) {
 	printf("Audio: coded_frame.pts: %lld\n", ct.as->codec->coded_frame->pts);
 	printf("Audio: packet.pts: %lld\n" ,packet.pts);
 	printf("-------------------\n");
-
+	*/
 	// WRITE
 	if(av_interleaved_write_frame(ct.c, &packet) != 0) {
 		printf("Cannot write audio frame.\n");
@@ -279,6 +294,10 @@ bool AV::addAudioFrame(unsigned char* buffer, int nsamples, int nchannels) {
 
 
 bool AV::addTestAudioFrame() {
+	if(!use_audio) {
+		printf("Cannot add audio stream, we're not using audio.\n");
+		return false;
+	}
 	AVCodecContext* c = ct.as->codec;
 	AVPacket packet = {0}; // data and size must be '0' (allocation is done for you :> )
 	AVFrame* frame = avcodec_alloc_frame(); 
@@ -381,12 +400,19 @@ bool AV::setupAV() {
 		printf("Cannot allocate the AVFormatContext\n");
 		return false;
 	}
-	
+	ct.c->video_codec_id = CODEC_ID_H264;
 	ct.c->debug = 3;
 	ct.c->oformat = ct.of;
 
-	const char* output_filename = "tcp://127.0.0.1:6666";
+//	const char* output_filename = "tcp://127.0.0.1:6665";
+//	const char* output_filename = "rtmp://gethinlewis.rtmphost.com";
+	const char* output_filename = "rtmp://gethinlewis.rtmphost.com/event/_definst_";
+//	const char* output_filename = "test.flv";
 	snprintf(ct.c->filename, sizeof(ct.c->filename), "%s", output_filename);
+	//ct.vs = addVideoStream(ct, ct.of->video_codec);
+
+	printf("%d -- %d \n", CODEC_ID_H264, ct.of->video_codec);
+	ct.of->video_codec = CODEC_ID_H264;
 	ct.vs = addVideoStream(ct, ct.of->video_codec);
 	if(!ct.vs) {
 		printf("Cannot create video stream: %d.\n", ct.of->video_codec);
@@ -398,30 +424,33 @@ bool AV::setupAV() {
 		return false;
 	}
 	
-	av_dict_set(&ct.c->metadata, "streamName", "video_test", 0);
+	//av_dict_set(&ct.c->metadata, "streamName", "video_test", 0);
+	av_dict_set(&ct.c->metadata, "streamName", "livefeed", 0);
 	
-	bool use_mp3 = true;
-	if(!use_mp3) {
-		ct.asample_fmt = AV_SAMPLE_FMT_S16;
-		ct.abit_rate = 64000;
-		ct.asample_rate = 8000;
-		ct.as = addAudioStream(ct, CODEC_ID_SPEEX);
-	}
-	else {
-		ct.asample_fmt = AV_SAMPLE_FMT_S16;
-		ct.abit_rate = 64000;
-		ct.asample_rate = 44100;
-		ct.as = addAudioStream(ct, CODEC_ID_MP3);
-	}
-	
-	if(!ct.as) {
-		printf("Cannot create audio stream.\n");
-		return false;
-	}
-	
-	if(!openAudio(ct)) {
-		printf("Cannot open audio stream.\n");
-		return false;
+	if(use_audio) {
+		bool use_mp3 = true;
+		if(!use_mp3) {
+			ct.asample_fmt = AV_SAMPLE_FMT_S16;
+			ct.abit_rate = 64000;
+			ct.asample_rate = 8000;
+			ct.as = addAudioStream(ct, CODEC_ID_SPEEX);
+		}
+		else {
+			ct.asample_fmt = AV_SAMPLE_FMT_S16;
+			ct.abit_rate = 64000;
+			ct.asample_rate = 44100;
+			ct.as = addAudioStream(ct, CODEC_ID_MP3);
+		}
+		
+		if(!ct.as) {
+			printf("Cannot create audio stream.\n");
+			return false;
+		}
+		
+		if(!openAudio(ct)) {
+			printf("Cannot open audio stream.\n");
+			return false;
+		}
 	}
 	
 	av_dump_format(ct.c, 0, output_filename, 1);
@@ -441,6 +470,10 @@ bool AV::setupAV() {
 /**  								A U D I O 								  */
 /******************************************************************************/
 AVStream* AV::addAudioStream(AVContext& context, enum CodecID codecID) {
+	if(!use_audio) {
+		printf("Cannot add audio stream, we're not using audio.\n");
+		return NULL;
+	}
 	AVCodec* codec = NULL;
 	AVStream* st = NULL;
 	AVCodecContext* c = NULL;
@@ -483,6 +516,10 @@ AVStream* AV::addAudioStream(AVContext& context, enum CodecID codecID) {
 }
 
 bool AV::openAudio(AVContext& context) {
+	if(!use_audio) {
+		printf("Cannot open audio stream, we're not using audio.\n");
+		return false;
+	}
 	AVCodecContext* c = NULL;
 	c = context.as->codec;
 	
@@ -529,7 +566,7 @@ AVStream* AV::addVideoStream(AVContext& context, enum CodecID codecID) {
 	
 	codec = avcodec_find_encoder(codecID);
 	if(!codec) {
-		printf("Cannot find codec with ID: %d\n", codecID);
+		printf("Cannot find video codec with ID: %d\n", codecID);
 		return NULL;
 	}
 	

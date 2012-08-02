@@ -58,7 +58,7 @@ public:
 	AV();
 	~AV();
 	
-	bool open(const int srcW, const int srcH);
+	bool open(const int srcW, const int srcH, bool useAudio = true);
 	bool addVideoFrame(unsigned char* pixels);
 	bool addTestAudioFrame();
 	bool addAudioFrame(unsigned char* buffer, int nsamples, int nchannels);
@@ -79,6 +79,7 @@ private:
 	int src_w;
 	int src_h;
 	AVContext ct; 	
+	bool use_audio;
 };
 
 #endif

@@ -426,7 +426,13 @@ rx_uint16 IOBuffer::consumeUI16() {
 	memcpy(&val, buffer+consumed, 2);
 	consumed += 2;
 	return val;
+}
 
+rx_uint32 IOBuffer::consumeUI24() {
+	rx_uint32 out = 0;
+	out = (buffer[consumed] << 16) | (buffer[consumed+1] << 8) | buffer[consumed+2];
+	consumed += 3;
+	return out;
 }
 
 rx_uint32 IOBuffer::consumeUI32() {
@@ -455,6 +461,14 @@ rx_int16 IOBuffer::consumeI16() {
 	memcpy(&val, buffer+consumed, 2);
 	consumed += 2;
 	return val;
+}
+
+// experimental
+rx_int32 IOBuffer::consumeI24() {
+	rx_int32 out = 0;
+	out = (buffer[consumed] << 16) | (buffer[consumed+1] << 8) | buffer[consumed+2];
+	consumed += 3;
+	return out;
 }
 
 rx_int32 IOBuffer::consumeI32() {
@@ -493,6 +507,20 @@ rx_uint16 IOBuffer::consumeUI16BE() {
 	consumed += 2;
 	val = FromBE16(val);
 	return val;
+}
+
+// experimental
+rx_uint32 IOBuffer::consumeUI24BE() {
+	rx_uint32 out = 0;
+
+	#ifdef ROXLU_LITTLE_ENDIAN
+		out = (buffer[consumed] << 16) | (buffer[consumed+1] << 8) | buffer[consumed+2];
+		consumed += 3;
+		return out;
+	#else
+	return out;
+	#endif
+	
 }
 
 rx_uint32 IOBuffer::consumeUI32BE() {
