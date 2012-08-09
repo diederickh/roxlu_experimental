@@ -1,6 +1,8 @@
 #ifndef ROXLU_PLATFORM_OSXH
 #define ROXLU_PLATFORM_OSXH
 
+// See libebml, libbml_t.h for platform specific types
+
 #include <sys/time.h>
 #include <stdint.h>
 

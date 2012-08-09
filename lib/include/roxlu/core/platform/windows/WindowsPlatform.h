@@ -1,6 +1,8 @@
 #ifndef ROXLU_PLATFORM_WINDOWSH
 #define ROXLU_PLATFORM_WINDOWSH
 
+// See libebml, libbml_t.h for platform specific types
+
 
 //#define WINVER 0x0502
 //#define _WIN32_WINNT 0x0502
