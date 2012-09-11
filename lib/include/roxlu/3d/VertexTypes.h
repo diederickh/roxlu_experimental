@@ -103,7 +103,13 @@ struct VertexPT : public Vertex  {
 	{
 	
 	}
-	
+	VertexPT(const Vec3& pos, const float u, const float v)
+		:pos(pos)
+		,tex(u,v)
+	{
+		
+	}
+
 	VertexPT(const float& x, const float& y, const float& z, const float& u, const float& v) 
 		:pos(x,y,z)
 		,tex(u,v)
@@ -112,13 +118,17 @@ struct VertexPT : public Vertex  {
 		pos.set(x,y,z);
 		tex.set(u,v);
 	}
-		
-	VertexPT& setPos(const float& x, const float& y, const float& z) {
+
+	void setPos(Vec3 p) {
+		pos = p;
+	}
+
+	void setPos(const float& x, const float& y, const float& z) {
 		pos.set(x,y,z);
 		return *this;
 	}
 	
-	VertexPT& setTex(const float& u, const float& v) {
+	void setTex(const float& u, const float& v) {
 		tex.set(u,v);
 		return *this;
 	}
