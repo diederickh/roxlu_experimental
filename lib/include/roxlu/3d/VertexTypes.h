@@ -125,12 +125,10 @@ struct VertexPT : public Vertex  {
 
 	void setPos(const float& x, const float& y, const float& z) {
 		pos.set(x,y,z);
-		return *this;
 	}
 	
 	void setTex(const float& u, const float& v) {
 		tex.set(u,v);
-		return *this;
 	}
 	
 	void set(const float& x, const float& y, const float& z, const float& u, const float& v) {
