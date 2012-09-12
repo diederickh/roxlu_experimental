@@ -58,8 +58,8 @@ bool Shader::create(const std::string& vertexSource, const std::string& fragment
 	const char* vss_ptr = vertexSource.c_str();
 	const char* fss_ptr = fragmentSource.c_str();
 	
-//	std::cout << vertexSource << std::endl;
-//	std::cout << fragmentSource << std::endl;
+	std::cout << vertexSource << std::endl;
+	std::cout << fragmentSource << std::endl;
 	
 	// create shader.
 	vert_id = glCreateShader(GL_VERTEX_SHADER); eglGetError();
