@@ -497,6 +497,10 @@ struct Vertices_Template {
 		verts.resize(newSize);
 	}
 	
+	T& back() {
+		return verts.back();
+	}
+
 	vector<T> verts;
 };
 
