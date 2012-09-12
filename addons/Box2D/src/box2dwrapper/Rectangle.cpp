@@ -37,6 +37,7 @@ void Rectangle::make(b2World& w) {
 	fixture_def.friction = friction;
 	fixture_def.restitution = restitution;
 	body->CreateFixture(&shape, 0.0f);
+	//printf("Create rect with ficture: %f\n", friction);
 }
 
 }} // roxlu::box2d

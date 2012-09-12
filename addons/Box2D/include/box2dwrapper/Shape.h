@@ -24,6 +24,7 @@ public:
 	virtual void setPosition(const float& x, const float& y);
 	virtual void setAllowSleep(const bool& allow);
 	virtual void setAwake(const bool& awake);
+	virtual void setFixedRotation(const bool fixed);
 	virtual void setDamping(const float& v);
 	virtual void setBodyType(b2BodyType type);
 	virtual void addForce(const float& x, const float& y);
@@ -78,6 +79,10 @@ inline void Shape::setAwake(const bool& awake) {
 // use something between 0.1 and 0.0
 inline void Shape::setDamping(const float& v) {
 	body_def.linearDamping = v;
+}
+
+inline void Shape::setFixedRotation(bool f) {
+	body_def.fixedRotation = f;
 }
 
 inline Vec2 Shape::getPosition() {
