@@ -21,6 +21,20 @@ void Mutex::unlock() {
 }
 
 #elif _WIN32
+// CreateMutex, WaitForSingleObject (lock), RelaseMutex, CloseHandle
+Mutex::Mutex() {
+	::InitializeCriticalSection(&handle);
+}
+Mutex::~Mutex() {
+	::DeleteCriticalSection(&handle);
+}
+void Mutex::lock() {
+	::EnterCriticalSection(&handle);
+}
+void Mutex::unlock() {
+	::LeaveCriticalSection(&handle);
+}
+
 #endif
 
 // --------------------------------------------------- 
@@ -35,6 +49,7 @@ Thread::~Thread() {
 void* Thread::threadFunction(void* arg) {
    Runnable* r = static_cast<Runnable*>(arg);
 	r->run();
+	return NULL;
 }
 
 void Thread::create(Runnable& run) {
@@ -42,6 +57,35 @@ void Thread::create(Runnable& run) {
 }
 
 #elif _WIN32
+
+DWORD WINAPI Thread::threadFunction(LPVOID arg) {
+	Runnable* r = static_cast<Runnable*>(arg);
+	r->run();
+	return 0;
+}
+
+void Thread::create(Runnable& run) {
+	handle = CreateThread(
+		NULL
+		,0
+		,Thread::threadFunction
+		,&run
+		,0
+		,&id
+		);
+	if(handle == NULL) {
+	//	printf("Error creating thread.\n");
+	}
+		/*
+	 CreateThread( 
+            NULL,                   // default security attributes
+            0,                      // use default stack size  
+            MyThreadFunction,       // thread function name
+            pDataArray[i],          // argument to thread function 
+            0,                      // use default creation flags 
+            &dwThreadIdArray[i]);  
+			*/
+}
 #endif
 
 } // roxlu

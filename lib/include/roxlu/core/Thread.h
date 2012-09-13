@@ -1,14 +1,17 @@
 #ifndef ROXLU_THREADH
 #define ROXLU_THREADH
 
+#ifdef __APPLE__
+#include <pthread.h>
+#elif _WIN32
+#include <Windows.h>
+#endif
 
 namespace roxlu {
 
 class Thread;
 
 #ifdef __APPLE__
-
-#include <pthread.h>
 
 struct Mutex {
 	Mutex();
@@ -19,6 +22,15 @@ struct Mutex {
 	pthread_mutex_t handle;
 };
 #elif _WIN32
+
+
+struct Mutex {
+	Mutex();
+	~Mutex();
+	void lock();
+	void unlock();
+	CRITICAL_SECTION handle; // we're using critical sections; windows has "mutexes" to for IPC
+};
 
 #endif
 
@@ -37,6 +49,9 @@ public:
 	static void* threadFunction(void* arg);
 	pthread_t handle;
 #elif _WIN32
+	static DWORD WINAPI threadFunction(LPVOID param);	
+	HANDLE handle;
+	DWORD id;
 #endif
 };
 
