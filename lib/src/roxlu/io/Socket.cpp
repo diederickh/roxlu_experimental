@@ -1,5 +1,6 @@
 #include <roxlu/io/Socket.h>
 
+namespace roxlu {
 Socket::Socket() {  
 #ifdef _WIN32
 	int result = WSAStartup(MAKEWORD(2,2), &wsa_data);
@@ -38,7 +39,7 @@ bool Socket::connect(const char* ip, unsigned short int port) {
 #elif __APPLE__
 	sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if(sock == -1) {
-		printf("Cannot create socket.\n");
+		printf("Error: cannot create socket.\n");
 		return false;
 	}
 
@@ -76,14 +77,14 @@ int Socket::read(char* buf, int count) {
 #elif __APPLE__
 	int status = ::read(sock, buf, count);
 	if(status < 0) {
-		printf("Socket: error: %d\n", status);
+		printf("Error: cannot read from socket. Probably disconnected. %d\n", status);
 	}
 	return status;
 #endif
 }
 
 // returns -1 on error, else the number of bytes sent.
-int Socket::send(char* buf, int count) {
+int Socket::send(const char* buf, int count) {
 #ifdef _WIN32
 	int status = ::send(sock, buf, count, 0);
 	if(status == SOCKET_ERROR) {
@@ -95,7 +96,7 @@ int Socket::send(char* buf, int count) {
 #elif __APPLE__
 	int status = ::write(sock, buf, count);
 	if(status < 0) {
-		printf("Socket error: %d\n", status);
+		printf("Error: cannot write on socket. Probably disconnected. %d\n", status);
 		return -1;
 	}
 	return status;
@@ -109,3 +110,5 @@ void Socket::close() {
 	::close(sock);
 #endif
 }
+
+} // roxlu

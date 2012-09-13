@@ -62,6 +62,7 @@ struct Mat4 {
 	void setX(const float& x);
 	void setY(const float& y);
 	void setZ(const float& z);
+	void setScale(const float x, const float y, const float z);
 	float getX();
 	float getY();
 	float getZ();

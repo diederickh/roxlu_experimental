@@ -1,5 +1,5 @@
-#ifndef ROXLU_SOCKETH
-#define ROXLU_SOCKETH
+#ifndef ROXLU_IO_SOCKETH
+#define ROXLU_IO_SOCKETH
 
 #ifdef _WIN32 
 
@@ -18,13 +18,15 @@
 #include <arpa/inet.h>
 #endif
 
+namespace roxlu {
+
 class Socket {
 public:
 	Socket();
 	~Socket();
 	bool connect(const char* ip, unsigned short int port);
 	int read(char* buf, int count);
-	int send(char* buf, int count);
+	int send(const char* buf, int count);
 	void close();
 private:
 #ifdef _WIN32
@@ -36,5 +38,7 @@ private:
 	struct sockaddr_in addr_in;
 #endif
 };
+
+} // roxlu
 
 #endif

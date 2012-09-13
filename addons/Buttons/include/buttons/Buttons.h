@@ -47,7 +47,7 @@ because this makes testing for mouseenter/leave (etc) faster.
 #include <roxlu/opengl/Error.h>
 #include <roxlu/graphics/Color.h>
 
-#include <buttons/Panel.h>
+//#include <buttons/Panel.h>
 #include <buttons/Types.h>
 #include <buttons/Element.h>
 #include <buttons/Slider.h>

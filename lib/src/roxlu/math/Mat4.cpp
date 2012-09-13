@@ -1,4 +1,3 @@
-
 #include <roxlu/math/Vec3.h>
 #include <roxlu/math/Mat3.h>
 #include <roxlu/math/Mat4.h>
@@ -769,6 +768,12 @@ Mat4 Mat4::scaling(float x, float y, float z) {
 	mat.m[15] = 1.0f;
 	
 	return mat;
+}
+
+void Mat4::setScale(const float x, const float y, const float z) {
+	m[0] = x;
+	m[5] = y;
+	m[10] = z;
 }
 
 void Mat4::scale(float s) {

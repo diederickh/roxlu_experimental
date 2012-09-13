@@ -19,7 +19,9 @@ public:
 	~StringParts();
 	string join(string sep);
 	StringParts& pop();
-	inline void addPart(string part);	
+	void addPart(string part);	
+	size_t size();
+	string& operator[](const unsigned int dx);
 private:
 	vector<string> parts;
 };
@@ -28,6 +30,13 @@ inline void StringParts::addPart(string part) {
 	parts.push_back(part);
 }
 
+inline size_t StringParts::size() {
+	return parts.size();
+}
+
+inline string& StringParts::operator[](const unsigned int dx) {
+	return parts.at(dx);
+}
 
 class StringUtil {
 public:

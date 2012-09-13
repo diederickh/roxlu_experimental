@@ -89,6 +89,11 @@ ColorPicker& Panel::addColor(const string& label, float* value) {
 	return active_gui->addColor(label, value);
 }
 
+Toggle& Panel::addBool(const string& label, bool& value) {
+	assert(active_gui != NULL);
+	return active_gui->addBool(label, value);
+}
+
 // get a Buttons
 Buttons& Panel::getButtons(const string& name) {
 	vector<Buttons*>::iterator it = std::find_if(guis.begin(), guis.end(), ButtonsFindByName(name));

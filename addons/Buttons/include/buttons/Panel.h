@@ -16,6 +16,7 @@
 #include <buttons/Spline.h>
 #include <buttons/Color.h>
 #include <buttons/Storage.h>
+#include <buttons/Buttons.h>
 
 using std::string;
 using std::vector;
@@ -33,9 +34,16 @@ public:
 	void update();
 	void draw();
 	
+	Toggle& addBool(const string& label, bool& value);
 	Sliderf& addFloat(const string& label, float& value);
 	ColorPicker& addColor(const string& label, float* value); 
 	
+	// Button
+	template<class T>
+	Button<T>& addButton(const std::string& label, int id, T* cb) {
+		return active_gui->addButton<T>(label, id, cb);
+	}
+
 	Buttons& addButtons(const string& title);
 	
 	void save();

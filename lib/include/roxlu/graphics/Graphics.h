@@ -1,7 +1,7 @@
 #ifndef ROXLU_GRAPHICS_INCLUDEDH
 #define ROXLU_GRAPHICS_INCLUDEDH
 
-	#include <roxlu/graphics/Color.h>
+#include <roxlu/graphics/Color.h>
 
 #endif
 
