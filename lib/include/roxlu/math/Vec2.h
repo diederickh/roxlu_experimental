@@ -67,15 +67,16 @@ struct Vec2 {
 	Vec2& operator=(const Vec2& v);  // v1 = v2
 	Vec2& operator+=(const Vec2& v); // v1 += v2
 	Vec2& operator-=(const Vec2& v); // v1 -= v2
+	
 	Vec2& operator*=(const float s); // v1 *= s
 	Vec2& operator/=(const float s); // v1 /= s
+	Vec2& operator+=(const float s); // v1 += s
 
 	
 	// Other Operators
 	Vec2 operator-(); // -v1		
 	Vec2 operator-(const Vec2& v) const; // v1 - v2
-	Vec2 operator+(const Vec2& v) const; // v1 + v2
-	Vec2 operator*(const Vec2& v) const;
+	Vec2 operator+(const Vec2& v) const; // v1 + v2	Vec2 operator*(const Vec2& v) const;
 	Vec2 operator*(const float s) const; // v * 3.0
 	Vec2 operator/(const float s) const; // v / 3.0
 			
@@ -145,15 +146,18 @@ inline Vec2& Vec2::operator+=(const Vec2& v) {
 	return *this;
 }
 
+
 inline Vec2& Vec2::operator*=(const float s) {
 	x *= s;
 	y *= s;
 	return *this;
 }
 
+/*
 inline Vec2 Vec2::operator*(const Vec2& v) const {
 	return Vec2(v.x * x, v.y * y);
 }
+*/
 
 inline Vec2& Vec2::operator/=(const float s) {
 	float inv = 1.0f/s;
@@ -170,6 +174,12 @@ inline bool Vec2::operator!=(const Vec2& v) const {
 	return x != v.x || y != v.y;
 }
 
+inline Vec2& Vec2::operator+=(const float s) {
+	x += s;
+	y += s;
+	return *this;
+}
+
 // -----------------------------------------------------------------------------
 inline Vec2 Vec2::operator-() {
 	return Vec2(-x, -y);
@@ -183,9 +193,11 @@ inline Vec2 Vec2::operator+(const Vec2& v) const {
 	return Vec2(x+v.x, y+v.y);
 }
 
+
 inline Vec2 Vec2::operator*(const float s) const {
 	return Vec2(x*s, y*s);
 }
+
 
 
 inline Vec2 Vec2::operator/(const float s) const {
