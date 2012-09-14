@@ -1,6 +1,23 @@
 #ifndef ROXLU_SIMULATION2D
 #define ROXLU_SIMULATION2D
 
+/*
+Experimental wrapper around box2d
+----------------------------------
+Rectangle* rect = sim.createRectangle(0, ofGetWidth(), ofGetHeight()-20, ofGetHeight()-10);
+rect->make(sim.getWorld());
+cam.orthoTopLeft(ofGetWidth(), ofGetHeight(), 0.1f, 10.0f);
+cam.setPosition(0.0f, 0.0f, 0.5f);
+
+void testApp::update(){
+	sim.update();
+}
+
+void testApp::draw(){
+	sim.debugDraw(cam.vm().getPtr(), cam.pm().getPtr());
+}
+*/
+
 #include <Box2D/Box2D.h>
 #include <vector>
 #include <roxlu/Roxlu.h>
@@ -27,7 +44,8 @@ public:
 	Circle* createCircle(float x, float y, float r);
 	Polygon* createPolygon();
 	Chain* createChain(); 
-	
+
+	b2World& getWorld();
 	void destroyShape(Shape* shape);
 	
 //	void setPixelsPerMeter(const float& ppm);
@@ -47,6 +65,11 @@ public:
 //inline void Simulation2D::setPixelsPerMeter(const float& ppm) {
 //	pixels_per_meter = ppm;
 //}
+
+
+inline b2World& Simulation2D::getWorld() {
+	return world;
+}
 
 }} // namespace roxlu::box2d
 #endif

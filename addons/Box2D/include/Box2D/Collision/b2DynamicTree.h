@@ -118,11 +118,6 @@ public:
 	/// Build an optimal tree. Very expensive. For testing.
 	void RebuildBottomUp();
 
-	/// Shift the world origin. Useful for large worlds.
-	/// The shift formula is: position -= newOrigin
-	/// @param newOrigin the new origin with respect to the old origin
-	void ShiftOrigin(const b2Vec2& newOrigin);
-
 private:
 
 	int32 AllocateNode();

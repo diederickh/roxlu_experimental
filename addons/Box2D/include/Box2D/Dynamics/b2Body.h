@@ -184,7 +184,7 @@ public:
 
 	/// Get the linear velocity of the center of mass.
 	/// @return the linear velocity of the center of mass.
-	const b2Vec2& GetLinearVelocity() const;
+	b2Vec2 GetLinearVelocity() const;
 
 	/// Set the angular velocity.
 	/// @param omega the new angular velocity in radians/second.
@@ -315,7 +315,7 @@ public:
 
 	/// Set the sleep state of the body. A sleeping body has very
 	/// low CPU cost.
-	/// @param flag set to true to wake the body, false to put it to sleep.
+	/// @param flag set to true to put body to sleep, false to wake it.
 	void SetAwake(bool flag);
 
 	/// Get the sleeping state of this body.
@@ -387,16 +387,15 @@ private:
 	friend class b2Contact;
 	
 	friend class b2DistanceJoint;
-	friend class b2FrictionJoint;
 	friend class b2GearJoint;
-	friend class b2MotorJoint;
+	friend class b2WheelJoint;
 	friend class b2MouseJoint;
 	friend class b2PrismaticJoint;
 	friend class b2PulleyJoint;
 	friend class b2RevoluteJoint;
-	friend class b2RopeJoint;
 	friend class b2WeldJoint;
-	friend class b2WheelJoint;
+	friend class b2FrictionJoint;
+	friend class b2RopeJoint;
 
 	// m_flags
 	enum
@@ -506,7 +505,7 @@ inline void b2Body::SetLinearVelocity(const b2Vec2& v)
 	m_linearVelocity = v;
 }
 
-inline const b2Vec2& b2Body::GetLinearVelocity() const
+inline b2Vec2 b2Body::GetLinearVelocity() const
 {
 	return m_linearVelocity;
 }
@@ -654,6 +653,20 @@ inline bool b2Body::IsAwake() const
 inline bool b2Body::IsActive() const
 {
 	return (m_flags & e_activeFlag) == e_activeFlag;
+}
+
+inline void b2Body::SetFixedRotation(bool flag)
+{
+	if (flag)
+	{
+		m_flags |= e_fixedRotationFlag;
+	}
+	else
+	{
+		m_flags &= ~e_fixedRotationFlag;
+	}
+
+	ResetMassData();
 }
 
 inline bool b2Body::IsFixedRotation() const
