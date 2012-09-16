@@ -1,5 +1,18 @@
 #include <roxlu/io/Socket.h>
 
+/*
+@todo  The windows version closes() the socket but 
+maybe we need to let the user close it. See read().
+Also check what happens if all WSACleanup() routes
+are executed. This might give problems when you want
+to reconnect again.
+
+@todo Make sure the use cases on mac and windows 
+is the same, so returning -1 from read(), means 
+e.g. client disconnected.
+
+*/
+
 namespace roxlu {
 Socket::Socket() 
 	:is_blocking(true) // by default
