@@ -13,7 +13,7 @@
 #include <roxlu/math/Vec3.h>
 
 // see here: https://github.com/evanw/gl4/blob/master/gl4.cpp
-
+// 2012.09, rotation is in RADIANS! (was in degrees)
 using std::ostream;
 
 namespace roxlu {
@@ -63,6 +63,7 @@ struct Mat4 {
 	void setY(const float& y);
 	void setZ(const float& z);
 	void setScale(const float x, const float y, const float z);
+	void setScale(const float s);
 	float getX();
 	float getY();
 	float getZ();

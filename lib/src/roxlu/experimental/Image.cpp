@@ -5,6 +5,7 @@ Image::Image()
 	:width(0)
 	,height(0)
 	,pixels(NULL)
+	,bpp(0)
 {
 
 }

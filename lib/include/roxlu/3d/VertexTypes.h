@@ -11,6 +11,8 @@ using std::vector;
 
 namespace roxlu {
 
+// @todo templatize the whole thing! See VerticesT below
+
 // Good read: http://www.opengl.org/wiki/Tutorial1:_Rendering_shapes_with_glDrawRangeElements,_VAO,_VBO,_shaders_%28C%2B%2B_/_freeGLUT%29
 	
 // Here we define a couple of different vertex types; 

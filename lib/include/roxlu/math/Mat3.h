@@ -84,7 +84,7 @@ struct Mat3 {
 	void identity();
 	Mat3& inverse();
 	Mat3& transpose();
-	static Mat3 rotation(float angleX, float angleY, float angleZ);
+	static Mat3 rotation(float angleX, float angleY, float angleZ); // 2012.09, angles in radians (was in degrees)
 	static Mat3 rotation(float angle, float x, float y, float z);
 	static Mat3 rotationX(float angle);
 	static Mat3 rotationY(float angle);

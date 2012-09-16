@@ -1,11 +1,16 @@
-//#include "Tween.h"
-
 #include <roxlu/experimental/Tween.h>
 
 namespace roxlu {
 	
 Tween::Tween(int type)
 	:type(type)
+	,value(0.0f)
+	,ready(true)
+	,delay(0)
+	,ends_on(0)
+	,c(0.0f)
+	,d(0.0f)
+	,b(0.0f)
 {
 }
 

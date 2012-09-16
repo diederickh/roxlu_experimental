@@ -97,7 +97,6 @@ public:
 	
 	int type;
 	bool ready;
-	float* result;
 };
 
 inline Tween& Tween::setType(int t) {
@@ -107,14 +106,6 @@ inline Tween& Tween::setType(int t) {
 
 inline rx_uint64 Tween::now() {
 	return Timer::now();
-	/*
-	timeval time;
-	gettimeofday(&time, NULL);
-	uint64_t n = time.tv_usec;
-	n /= 1000;
-	n += (time.tv_sec * 1000);
-	return n;
-	*/
 }
 
 } // roxlu

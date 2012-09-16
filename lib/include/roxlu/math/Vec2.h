@@ -32,12 +32,12 @@ namespace roxlu {
 struct Vec3;
 
 struct Vec2 {
-
-	Vec2(const float xx = 0.0f, const float yy = 0.0f);
+	Vec2();
+	Vec2(const float xx, const float yy);
 	Vec2(const float n);
 	Vec2(const Vec2& v);
 	Vec2(const Vec3& v);
-	Vec2(const Vec3& v, int dropAxis);
+	//Vec2(const Vec3& v, int dropAxis); // makes an Vec2(int,int) ambiguous and we never use this
 	
 	
 	// Basic vector math.

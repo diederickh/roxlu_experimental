@@ -168,9 +168,9 @@ Mat3& Mat3::inverse() {
 // Set Euler rotation
 Mat3 Mat3::rotation(float rotX, float rotY, float rotZ) {
 	Mat3 mat;
-	rotX = rotX * DEG_TO_RAD;
-	rotY = rotY * DEG_TO_RAD;
-	rotZ = rotZ * DEG_TO_RAD;
+	//rotX = rotX * DEG_TO_RAD;
+	//rotY = rotY * DEG_TO_RAD;
+	//rotZ = rotZ * DEG_TO_RAD;
 	
 	float cx = cosf(rotX);
 	float sx = sinf(rotX);
@@ -196,7 +196,7 @@ Mat3 Mat3::rotation(float rotX, float rotY, float rotZ) {
 // rotate around given axis
 Mat3 Mat3::rotation(float a, float x, float y, float z) {
 	Mat3 mat;
-	a = a * DEG_TO_RAD;
+	//	a = a * DEG_TO_RAD;
 	float c = cosf(a);
 	float s = sinf(a);
 	float t = 1.0f - c;
@@ -232,7 +232,7 @@ Mat3 Mat3::rotation(float a, float x, float y, float z) {
 
 Mat3 Mat3::rotationX(float a) {
 	Mat3 mat;
-	a = a * DEG_TO_RAD;
+	//	a = a * DEG_TO_RAD;
 	float s = sinf(a);
 	float c = cosf(a);
 	mat.m[0] = 1.0f;
@@ -252,7 +252,7 @@ Mat3 Mat3::rotationX(float a) {
 
 Mat3 Mat3::rotationY(float a) {
 	Mat3 mat;
-	a = a * DEG_TO_RAD;
+	//a = a * DEG_TO_RAD;
 	float s = sinf(a);
 	float c = cosf(a);
 	mat.m[0] = c;
@@ -272,7 +272,7 @@ Mat3 Mat3::rotationY(float a) {
 
 Mat3 Mat3::rotationZ(float a) {
 	Mat3 mat;
-	a = a * DEG_TO_RAD;
+	//	a = a * DEG_TO_RAD;
 	float s = sinf(a);
 	float c = cosf(a);
 	mat.m[0] = c;

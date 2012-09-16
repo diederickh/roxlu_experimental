@@ -7,6 +7,12 @@
 
 namespace roxlu {
 
+Vec2::Vec2()
+	:x(0.0f)
+	,y(0.0f)
+{
+}
+
 Vec2::Vec2(float xx, float yy)
 	:x(xx)
 	,y(yy)
@@ -31,12 +37,5 @@ Vec2::Vec2(const Vec3& v)
 {
 }
 
-Vec2::Vec2(const Vec3& v, int dropAxis) {
-	switch(dropAxis) {
-		case 0: x = v.y; y = v.z; break;
-		case 1: y = v.x; y = v.z; break;
-		default: x = v.x; y = v.y; break;
-	}
-}
 
 }; // roxlu

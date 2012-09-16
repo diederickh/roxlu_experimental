@@ -1,19 +1,12 @@
 #ifndef ROXLU_PBDH
 #define ROXLU_PBDH
 
-/*
-#include "Roxlu.h"
-#include "Particles.h"
-#include "Particle.h"
-#include "Flocking.h"
-#include "Cloth.h"
-*/
-
 #include <roxlu/Roxlu.h>
 #include <pbd/Particles.h>
 #include <pbd/Particle.h>
 #include <pbd/Flocking.h>
 #include <pbd/Cloth.h>
+#include <pbd/Emitter.h>
 
 using namespace roxlu;
 
@@ -25,6 +18,7 @@ typedef Particles<Vec2, Particle<Vec2>, Spring<Vec2> > Particles2;
 typedef Particles<Vec3, Particle<Vec3>, Spring<Vec3> > Particles3;
 typedef Flocking<Vec3, Particle<Vec3>, FlockingForceAdder<Vec3, Particle<Vec3> > > Flocking3;
 
+typedef Emitter<Particle2, Particles2, Vec2, EmitterHelper> Emitter2;
 
 inline void drawVertex(Vec3 p) {
 	glVertex3fv(p.getPtr());

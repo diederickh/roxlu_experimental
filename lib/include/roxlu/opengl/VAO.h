@@ -28,9 +28,14 @@ public:
 	void create();
 	void bind();
 	static void unbind();
+	int getID();
 private:
 	GLuint vao_id;
 };
+
+inline int VAO::getID() {
+	return vao_id;
+}
 
 } // roxlu
 #endif

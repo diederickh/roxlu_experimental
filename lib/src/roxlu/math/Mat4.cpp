@@ -570,9 +570,9 @@ Mat4 Mat4::rotation(const Mat3& o) {
 // from euler angles.
 Mat4 Mat4::rotation(float angleX, float angleY, float angleZ) {
 	Mat4 mat;
-	angleX *= DEG_TO_RAD;
-	angleY *= DEG_TO_RAD;
-	angleZ *= DEG_TO_RAD;
+	//	angleX *= DEG_TO_RAD;
+	//	angleY *= DEG_TO_RAD;
+	//	angleZ *= DEG_TO_RAD;
 	
 	float cx = cosf(angleX);
 	float sx = sinf(angleX);
@@ -605,9 +605,9 @@ Mat4 Mat4::rotation(float angleX, float angleY, float angleZ) {
 }
 
 Mat4 Mat4::rotation(float a, float x, float y, float z) {
-	printf("Mat4 rotation is broken!\n");
+	//printf("Mat4 rotation is broken!\n"); // fixed! we used: a = DEG_TO_RAD, not: a = a * DEG_TO_RAD
 	Mat4 mat;
-	a = DEG_TO_RAD;
+	//	a = a * DEG_TO_RAD;
 	float c = cosf(a);
 	float s = sinf(a);
 
@@ -658,7 +658,7 @@ void Mat4::rotate(float angle, float x, float y, float z) {
 
 Mat4 Mat4::rotationX(float a) {
 	Mat4 mat;
-	a = DEG_TO_RAD;
+	//	a = a * DEG_TO_RAD;
 	float c = cosf(a);
 	float s = sinf(a);
 	
@@ -687,7 +687,8 @@ Mat4 Mat4::rotationX(float a) {
 
 Mat4 Mat4::rotationY(float a) {
 	Mat4 mat;
-	a = DEG_TO_RAD;
+	//a = DEG_TO_RAD;
+	//a = a * DEG_TO_RAD;
 	float c = cosf(a);
 	float s = sinf(a);
 	
@@ -717,7 +718,7 @@ Mat4 Mat4::rotationY(float a) {
 
 Mat4 Mat4::rotationZ(float a) {
 	Mat4 mat;
-	a = DEG_TO_RAD;
+	//	a = a * DEG_TO_RAD;
 	float c = cosf(a);
 	float s = sinf(a);
 	
@@ -774,6 +775,12 @@ void Mat4::setScale(const float x, const float y, const float z) {
 	m[0] = x;
 	m[5] = y;
 	m[10] = z;
+}
+
+void Mat4::setScale(const float s) {
+	m[0] = s;
+	m[5] = s;
+	m[10] = s;
 }
 
 void Mat4::scale(float s) {
