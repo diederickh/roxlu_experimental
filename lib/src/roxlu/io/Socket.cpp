@@ -4,6 +4,18 @@ namespace roxlu {
 Socket::Socket() 
 	:is_blocking(true) // by default
 {  
+#ifdef _WIN32
+	int result = WSAStartup(MAKEWORD(2,2), &wsa_data);
+	if(result != 0) {
+		printf("Error: cannot initialize WinSock.\n");
+		WSACleanup();
+	}
+	else {
+		create();
+	}
+#elif __APPLE__
+	create();
+#endif
 }
 
 Socket::~Socket() {
@@ -11,24 +23,26 @@ Socket::~Socket() {
 
 bool Socket::create() {
 #ifdef _WIN32
-	int result = WSAStartup(MAKEWORD(2,2), &wsa_data);
-	if(result != 0) {
-		printf("Error: cannot initialize WinSock.\n");
-		WSACleanup();
-		return false;
-	}
+	printf("Creating socking...\n");
 	sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if(sock == INVALID_SOCKET) {
 		printf("Error: cannot create socket, error code: %d\n", WSAGetLastError());
 		WSACleanup();
 		return false;
 	}
+	// When the socket is closed and reopened, we need to reset state.
+	setBlocking(is_blocking);
+	
 #elif __APPLE__
+	printf("@todo, when the socket is closed and reopened we need to reset the blocking state. \n");
+
 	sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if(sock == -1) {
 		printf("Error: cannot create socket.\n");
 		return false;
 	}
+	printf("@todo test is reseting blocking state works\n");
+	setBlocking(is_blocking); 
 #endif
 
 	return true;
@@ -37,32 +51,88 @@ bool Socket::create() {
 bool Socket::isValid() {
 	int so_type;
 	socklen_t len = sizeof(so_type);
+#ifdef _WIN32
+	int ret = getsockopt(sock, SOL_SOCKET, SO_TYPE, (char*)&so_type, &len);
+#elif __APPLE__
 	int ret = getsockopt(sock, SOL_SOCKET, SO_TYPE, (void*)&so_type, &len);
-	printf("RET: %d\n", ret);
+#endif
+
 	return ret == 0;
 }
 
 bool Socket::connect(const char* ip, unsigned short int port, int timeout) {
-
-
+	
 #ifdef _WIN32
 	if(!isValid()) {
 	   if(!create()) {
         	printf("Error: cannot create a valid socket.\n");
 			return false;
       }
-   }
+	}
+	bool was_blocking = is_blocking;
+	if(timeout > 0 && is_blocking) {
+		setBlocking(false);
+	}
+	
 	memset(&addr_in, 0, sizeof(addr_in));
 	addr_in.sin_addr.s_addr = inet_addr(ip);
 	addr_in.sin_family = AF_INET;
 	addr_in.sin_port = htons(port);
 
 	int result = ::connect(sock, (SOCKADDR*)&addr_in, sizeof(addr_in));
-	if(result == SOCKET_ERROR) {
-		printf("Error: cannot connect to server.\n");
-		WSACleanup();
-		close();
-		return false;
+	if(timeout > 0 ) {
+		if(result == SOCKET_ERROR) {
+			int err = WSAGetLastError();
+			if(err == WSAEWOULDBLOCK) {
+				fd_set write_set, err_set;
+				FD_ZERO(&write_set);
+				FD_ZERO(&err_set);
+				FD_SET(sock, &write_set);
+				FD_SET(sock, &err_set);
+
+				TIMEVAL tv;
+				tv.tv_sec = timeout;
+				tv.tv_usec = 0;
+
+				result = select(0, NULL, &write_set, &err_set, &tv);
+
+				// Go back into blocking mode if needed
+				if(was_blocking && !is_blocking) {
+					setBlocking(true);
+				}
+				
+				if(result == 0) {
+					printf("Socket: connect(), Connect timeout.\n");
+					return false;
+				}
+				else {
+					if(FD_ISSET(sock, &write_set)) {
+						printf("Socket: conntect() connected!\n");
+					}
+					else {
+						printf("Socket: connect() unhandled situation...\n");
+					}
+				}
+			}
+			else {
+				if(err == WSAEISCONN) {
+					return true;
+				}
+				printf("Error: connect() failed to connect. (%d)\n", err);
+				//WSACleanup();
+				//close();
+				return false;
+			}
+		}
+	}
+	else {
+		// Connecting in blocking mode
+		if(result == SOCKET_ERROR) {
+			printf("Error: cannot connect to server.\n");
+			WSACleanup();
+			close();
+			return false;
+		}
 	}
 
 #elif __APPLE__
@@ -95,7 +165,7 @@ bool Socket::connect(const char* ip, unsigned short int port, int timeout) {
 		int result = select(sock+1, NULL, &fdset, NULL, &tv);
 
 		// Reset back to blocking state if necessary
-		if(was_blocking && !is_blocking && timeout > 0 ) {
+		if(was_blocking && !is_blocking) {
 			setBlocking(true);
 		}
 
@@ -136,21 +206,91 @@ bool Socket::connect(const char* ip, unsigned short int port, int timeout) {
 int Socket::read(char* buf, int count, int timeout) {
 	bool was_blocking = is_blocking;
 	if(timeout > 0 && is_blocking) {
-		printf("READ ---------- set non blocking\n");
 		setBlocking(false);
 	}
 
 #ifdef _WIN32
-	int result = recv(sock, buf, count, 0);
-	if(result == 0) {
-		printf("Error: trying to read but socket is closed (@todo maybe add a member to keep track of connection state).\n");
-		return 0;
+	if(timeout > 0) {
+		fd_set fdset;
+		FD_ZERO(&fdset);
+		FD_SET(sock, &fdset);
+		TIMEVAL tv;
+		tv.tv_sec = timeout;
+		tv.tv_usec = 0;
+		int result = select(0, &fdset, NULL, NULL, &tv);
+
+		if(result == SOCKET_ERROR) {
+			printf("Error: read(), error with select: %d\n", WSAGetLastError());
+			return -1;
+		}
+		
+		// reset blocking state.
+		if(was_blocking && !is_blocking) {
+			setBlocking(true);
+		}
+
+		if(result == -1) {
+			printf("Error: error with select(), cannot read().\n");
+			return result;
+		}
+		else if(result == 0) {
+			printf("Error: timeout while trying to read.\n");
+			return 0;
+		}
+		else {
+			int result = recv(sock, buf, count, 0);
+			if(result == SOCKET_ERROR) {
+				int err = WSAGetLastError();
+				if(err == WSAEWOULDBLOCK) {
+					return 0;
+				}
+				else {
+					printf("Error: read(), error while reading, got error code: %d\n", err);
+					return -1;
+				}
+			}
+			else if(result > 0) {
+				return result;
+			}
+			else {
+				int err = WSAGetLastError();
+				printf("Error: trying to read but it looks like the socket is closed (@todo maybe add a member to keep track of connection state). %d \n", err);
+				return -1;
+			}
+		}
 	}
-	else if(result < 0) {
-		printf("Error: cannot read from socket, error: %d\n",WSAGetLastError()); 
-		return result;
+	else {
+		// receive w/o timeut
+		int result = recv(sock, buf, count, 0);
+		if(result == SOCKET_ERROR) {
+			int err = WSAGetLastError();
+			if(err == WSAEWOULDBLOCK) {
+				return 0;
+			}
+			else if(err == WSAECONNRESET) {
+				printf("Error: read(), connected closed by remote host. %d.\n", err);
+				close();
+				return -2; // on Windows -2 means that the client was disconnected!
+			}
+			else if(err == WSAENOTCONN) {
+				printf("Error: read(), socket is not connected. %d\n", err);
+				return -2;
+			}
+			else {
+				printf("Error: read(), error while reading, got error code: %d\n", err);
+				return -1;
+			}
+		}
+		else if(result > 0) {
+			return result;
+		}
+		else {
+			int err = WSAGetLastError();
+			printf("Error: trying to read but it looks like the socket is closed (@todo maybe add a member to keep track of connection state). %d \n", err);
+			return -1;
+		}
 	}
-	return result;
+	
 #elif __APPLE__
 
 	if(timeout > 0) {
@@ -205,6 +345,7 @@ int Socket::send(const char* buf, int count) {
 #ifdef _WIN32
 	int status = ::send(sock, buf, count, 0);
 	if(status == SOCKET_ERROR) {
+		printf("Error while sending... @todo check the error, and probably remove WSACleanup(), errcode: %d\n", WSAGetLastError());
 		close();
 		WSACleanup();
 		return -1; 
@@ -223,8 +364,17 @@ int Socket::send(const char* buf, int count) {
 bool Socket::setBlocking(bool mustBlock) {
   
 #ifdef _WIN32
-	printf("Error: setBlocking not implemented for win.\n");
-	return false;
+	
+	u_long flags = (mustBlock) ? 0 : 1;
+	int result = ioctlsocket(sock, FIONBIO, &flags);
+
+	if(result != 0) {
+		int err = WSAGetLastError();
+		printf("Error: cannot set the socket into non-blocking mode, error: %d.\n", err);
+		return false;
+	}
+	is_blocking = mustBlock;
+	return true;
 #elif __APPLE__
 	int flags = fcntl(sock, F_GETFL, 0);
 	if(flags < 0) {

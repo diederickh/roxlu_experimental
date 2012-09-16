@@ -26,12 +26,12 @@ public:
 	Socket();
 	~Socket();
 	bool connect(const char* ip, unsigned short int port, int timeout = -1);
-	int read(char* buf, int count, int timeout = -1); // -1 = error while reading, 0 = got timeout (when timeout is used), 0 > = number of bytes read
+	int read(char* buf, int count, int timeout = -1); // -2 = client disconnected (if possible to detect, else -1),  -1 = error while reading, 0 = got timeout (when timeout is used), 0 > = number of bytes read
 	int send(const char* buf, int count); 
 	void close();
 	bool setBlocking(bool flag);
 	bool setNoDelay(); // on linux small packets are send in groups by default.
-
+	bool isBlocking();
 private:
 	bool is_blocking;
 	bool isValid();
@@ -46,6 +46,10 @@ private:
 	struct sockaddr_in addr_in;
 #endif
 };
+
+inline bool Socket::isBlocking() {
+	return is_blocking;
+}
 
 } // roxlu
 
