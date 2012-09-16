@@ -16,6 +16,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <netinet/tcp.h>
 #endif
 
 namespace roxlu {
@@ -24,11 +25,18 @@ class Socket {
 public:
 	Socket();
 	~Socket();
-	bool connect(const char* ip, unsigned short int port);
-	int read(char* buf, int count);
-	int send(const char* buf, int count);
+	bool connect(const char* ip, unsigned short int port, int timeout = -1);
+	int read(char* buf, int count, int timeout = -1); // -1 = error while reading, 0 = got timeout (when timeout is used), 0 > = number of bytes read
+	int send(const char* buf, int count); 
 	void close();
+	bool setBlocking(bool flag);
+	bool setNoDelay(); // on linux small packets are send in groups by default.
+
 private:
+	bool is_blocking;
+	bool isValid();
+	bool create();
+
 #ifdef _WIN32
 	WSADATA wsa_data;
 	SOCKET sock;
