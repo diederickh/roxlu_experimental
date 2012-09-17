@@ -84,6 +84,12 @@ Sliderf& Panel::addFloat(const string& label, float& value) {
 	return active_gui->addFloat(label, value);
 }
 
+Slideri& Panel::addInt(const string& label, int& value) {
+	assert(active_gui != NULL);
+	return active_gui->addInt(label, value);
+}
+
+
 ColorPicker& Panel::addColor(const string& label, float* value) {
 	assert(active_gui != NULL);
 	return active_gui->addColor(label, value);

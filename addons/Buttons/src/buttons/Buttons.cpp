@@ -38,6 +38,7 @@ Buttons::Buttons(const string& title, int w)
 {
 
 	if(!shaders_initialized) {
+		printf("CREATING BUTTONS, CHECK IF THIS IS EXECUTED ONLY ONCE.\n");
 		vao.create();
 		bmf = new BitmapFont();
 		gui_shader.create(BUTTONS_VS, BUTTONS_FS);
@@ -46,6 +47,7 @@ Buttons::Buttons(const string& title, int w)
 		gui_shader.addUniform("projection_matrix");
 		gui_shader.addAttribute("pos");
 		gui_shader.addAttribute("col");
+		shaders_initialized = true;
 	}
 	
 	static_text = new Text(*bmf);	
@@ -53,8 +55,8 @@ Buttons::Buttons(const string& title, int w)
 	vao.bind();
 	glGenBuffers(1, &vbo); eglGetError();
 	glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
-	
-	vao.unbind();
+	printf("Buttons vao id: %d\n", vao.getID());
+	//vao.unbind();
 	glBindBuffer(GL_ARRAY_BUFFER, 0); eglGetError();
 	createOrtho(ofGetWidth(), ofGetHeight()); // @todo remove call to getwidth/height @todo windows
 	
@@ -168,19 +170,21 @@ void Buttons::update() {
 		glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
 		glBufferData(GL_ARRAY_BUFFER, allocated_bytes, NULL, GL_DYNAMIC_DRAW); eglGetError();
 		
+
 		glEnableVertexAttribArray(gui_shader.getAttribute("pos")); eglGetError();
 		glEnableVertexAttribArray(gui_shader.getAttribute("col")); eglGetError();
 		glVertexAttribPointer(gui_shader.getAttribute("pos"), 2, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), (GLvoid*)offsetof(ButtonVertex,pos));
 		glVertexAttribPointer(gui_shader.getAttribute("col"), 4, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), (GLvoid*)offsetof(ButtonVertex,col));
 	
-		vao.unbind();
-		glBindBuffer(GL_ARRAY_BUFFER, 0);	
+		//vao.unbind(); // roxlu
+		//glBindBuffer(GL_ARRAY_BUFFER, 0);	 // roxlu
 	}
 	
 	// And update the vbo.
-	glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
+	vao.bind(); // roxlu (added)
+	// glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError(); // roxlu
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(ButtonVertex)*vd.size(), (GLvoid*)vd.getPtr()); eglGetError();
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//glBindBuffer(GL_ARRAY_BUFFER, 0); // roxlu
 
 /*
 	if(first_run) {

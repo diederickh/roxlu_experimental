@@ -22,28 +22,16 @@ public:
 		,label_dx(0)
 	{
 		h = 20;
-		/*
-		BSET_COLOR(bg_top_color, 0.0, 0.17, 0.21, 1.0);
-		BSET_COLOR(bg_bottom_color, 0.0, 0.17, 0.21, 1.0);
-		BSET_COLOR(toggle_on_color, 0.0,0.8,0.4,1.0);
-		BSET_COLOR(toggle_off_color, 0.0,0.5,0.2,0.8);
-		BSET_COLOR(button_bg_color, 0.04,0.04,0.04,0.9);
-		*/
-		
-	
-		
 	}
 	
 	~Button() {
 	}
 	Button& setColor(const float hue, float a = 1.0f) {
-	//Button& setColor(const float hue, const float sat, const float bright, float a = 1.0f) {
-//		Element::setColor(hue, sat, bright, a);
-		//Element::setColor(hue, sat, bright, a);
 		Element::setColor(hue, a);
 		HSL_to_RGB(col_hue, col_sat, col_bright - 0.2,  &button_bg_color[0], &button_bg_color[1], &button_bg_color[2]);
 		HSL_to_RGB(col_hue, col_sat, col_bright - 0.2,  &toggle_off_color[0], &toggle_off_color[1], &toggle_off_color[2]);
 		HSL_to_RGB(col_hue, col_sat, col_bright + 0.2,  &toggle_on_color[0], &toggle_on_color[1], &toggle_on_color[2]);
+		BSET_COLOR(button_bg_color, 0.0f, 0.0f, 0.0f, 0.24f);
 		toggle_on_color[3] = a;
 		toggle_off_color[3] = a;
 		return *this;
@@ -55,7 +43,6 @@ public:
 	void updateTextPosition() {
 		static_text->setTextPosition(label_dx, x+4, y+2);
 	}
-	
 	
 	void generateVertices(ButtonVertices& vd) {
 		int bt_size = 10;
@@ -85,16 +72,12 @@ public:
 	void onMouseEnter(int mx, int my) {
 		bg_top_color = col_bg_top_hover;
 		bg_bottom_color = col_bg_bottom_hover;
-		//BSET_COLOR(bg_top_color, 0.0, 0.41, 0.39, 1.0);
-		//BSET_COLOR(bg_bottom_color, 0.0, 0.17, 0.21, 1.0);
 		needsRedraw();
 	}
 	
 	void onMouseLeave(int mx, int my) {
 		bg_top_color = col_bg_default;
 		bg_bottom_color = col_bg_default;
-		//BSET_COLOR(bg_top_color, 0.0, 0.17, 0.21, 1.0);
-		//BSET_COLOR(bg_bottom_color, 0.0, 0.17, 0.21, 1.0);
 		needsRedraw();
 	}
 	
@@ -116,16 +99,11 @@ public:
 		is_visible = true;
 		static_text->setTextVisible(label_dx, true);
 	}
-	
 
 	int label_dx;
-	//float bg_top_color[4];
-	//float bg_bottom_color[4];
 	float toggle_on_color[4];
 	float toggle_off_color[4];
 	float button_bg_color[4];	
-	
-
 	int id;
 	T* cb;
 };

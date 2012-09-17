@@ -23,6 +23,12 @@ You can se the following emitter params:
 - max_particle_lifetime:   The maximum particle lifetime
 - min_particle_mass:       The minimum mass of a particle
 - max_particle_mass:       The maximum mass of a particle
+- min_particle_random_x_vel: The minimum random x velocity
+- max_particle_random_x_vel: The maximum random x velocity
+- min_particle_random_y_vel: The minimum random y velocity
+- max_particle_random_y_vel: The maximum random y velocity
+- min_particle_random_z_vel: The minumum random z velocity
+- max_particle_random_z_vel: The maximum random z velocity
 - particle_x_vel:          The X-velocity of a particle when created
 - particle_y_vel:          The Y-velocity of a particle when created
 - particle_z_vel:          The Z-velocity of a particle when created
@@ -150,27 +156,29 @@ void Emitter<P, C, V, H>::update() {
  */
 class EmitterHelper {
 public:
-	EmitterHelper(const float minX, const float maxX, const float minY, const float maxY);
+	EmitterHelper(const float x, const float width, const float minY, const float maxY);
 	Vec2 getPosition();
 	Vec2 getVelocity(const float velX, const float velY, const float velZ);
 	Vec2 getRandomVelocity(const float minx, const float maxx, const float miny, const float maxy, const float minz, const float maxz);
 	void update();
-	float min_x;
-	float max_x;
 	float min_y;
 	float max_y;
+	float emit_width;
+	float emit_x;
+	float emit_half_width;
 };
 
-inline EmitterHelper::EmitterHelper(const float minX, const float maxX, const float minY, const float maxY)
-	:min_x(minX)
-	,max_x(maxX)
-	,min_y(minY)
+inline EmitterHelper::EmitterHelper(const float x, const float width, const float minY, const float maxY)
+	:min_y(minY)
 	,max_y(maxY)
+	,emit_width(width)
+	,emit_x(0)
+	,emit_half_width(emit_width * 0.5)
 {
 }
 
 inline Vec2 EmitterHelper::getPosition() {
-	return Vec2(random(min_x, max_x), random(min_y, max_y));
+	return Vec2(random(emit_x-emit_half_width, emit_x+emit_half_width), random(min_y,max_y));
 }
 
 inline Vec2 EmitterHelper::getVelocity(const float vx, const float vy, const float vz) {

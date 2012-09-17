@@ -35,6 +35,7 @@ public:
 	void draw();
 	
 	Toggle& addBool(const string& label, bool& value);
+	Slideri& addInt(const string& label, int& value);
 	Sliderf& addFloat(const string& label, float& value);
 	ColorPicker& addColor(const string& label, float* value); 
 	
