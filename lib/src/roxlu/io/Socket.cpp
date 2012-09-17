@@ -40,7 +40,7 @@ bool Socket::create() {
 	sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if(sock == INVALID_SOCKET) {
 		printf("Error: cannot create socket, error code: %d\n", WSAGetLastError());
-		WSACleanup();
+		//WSACleanup();
 		return false;
 	}
 	// When the socket is closed and reopened, we need to reset state.
@@ -152,7 +152,7 @@ bool Socket::connect(const char* ip, unsigned short int port, int timeout) {
 		// Connecting in blocking mode
 		if(result == SOCKET_ERROR) {
 			printf("Error: cannot connect to server.\n");
-			WSACleanup();
+			//WSACleanup();
 			close();
 			return false;
 		}
@@ -392,7 +392,7 @@ int Socket::send(const char* buf, int count) {
 	if(status == SOCKET_ERROR) {
 		printf("Error while sending... @todo check the error, and probably remove WSACleanup(), errcode: %d\n", WSAGetLastError());
 		close();
-		WSACleanup();
+		//WSACleanup();
 		return -1; 
 	}
 	return status;

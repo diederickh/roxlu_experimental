@@ -1,10 +1,21 @@
 #ifndef ROXLU_IO_SOCKETH
 #define ROXLU_IO_SOCKETH
 
-#ifdef _WIN32 
+/**
+ * Cross platform, simple socket wrapper.
+ *
+ *
+ * WINDOWS 
+ * --------
+ * On windows you could get "redefinition" errors. If so this means that 
+ * you've included windows.h before this Socket.h file. A solution is to 
+ * add "_WINSOCKAPI_" in your "C/C++ > Preprocessor" settings.
+ */
 
-#include <WinSock2.h>
-#include <WS2tcpip.h>
+#ifdef _WIN32 
+ 
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #include <stdlib.h>
 #include <stdio.h>
 
