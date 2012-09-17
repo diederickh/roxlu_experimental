@@ -31,10 +31,11 @@ public:
 	void close();
 	bool setBlocking(bool flag);
 	bool setNoDelay(); // on linux small packets are send in groups by default.
+	bool setKeepAlive(); // http://tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO/#whatis, set this if you want be notified by network disconnections
 	bool isBlocking();
+	bool isValid();
 private:
 	bool is_blocking;
-	bool isValid();
 	bool create();
 
 #ifdef _WIN32

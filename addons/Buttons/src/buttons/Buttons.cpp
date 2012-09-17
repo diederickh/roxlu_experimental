@@ -57,7 +57,7 @@ Buttons::Buttons(const string& title, int w)
 	glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
 	printf("Buttons vao id: %d\n", vao.getID());
 	//vao.unbind();
-	glBindBuffer(GL_ARRAY_BUFFER, 0); eglGetError();
+	//glBindBuffer(GL_ARRAY_BUFFER, 0); eglGetError();
 	createOrtho(ofGetWidth(), ofGetHeight()); // @todo remove call to getwidth/height @todo windows
 	
 	// top draggable handle
@@ -182,7 +182,7 @@ void Buttons::update() {
 	
 	// And update the vbo.
 	vao.bind(); // roxlu (added)
-	// glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError(); // roxlu
+	glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError(); // roxlu
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(ButtonVertex)*vd.size(), (GLvoid*)vd.getPtr()); eglGetError();
 	//glBindBuffer(GL_ARRAY_BUFFER, 0); // roxlu
 

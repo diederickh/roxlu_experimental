@@ -47,14 +47,11 @@ bool Socket::create() {
 	setBlocking(is_blocking);
 	
 #elif __APPLE__
-	printf("@todo, when the socket is closed and reopened we need to reset the blocking state. \n");
-
 	sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if(sock == -1) {
 		printf("Error: cannot create socket.\n");
 		return false;
 	}
-	printf("@todo test is reseting blocking state works\n");
 	setBlocking(is_blocking); 
 #endif
 
@@ -73,6 +70,19 @@ bool Socket::isValid() {
 	return ret == 0;
 }
 
+/**
+ * Connect to an ip address.
+ * 
+ * @param const char* ip       The IP of the remote: "192.168.0.103"
+ * @param short port           The port to connect to 
+ * @param int timeout          When given, we go into nonblocking mode and use 
+ *                             select() with a time out. Then we reset the blocking
+ *                             state if necessary. 
+ * 
+ * @return boolean   true:     We're connected
+ *                   false:    Disconnected/not able to connect
+ * 
+ */
 bool Socket::connect(const char* ip, unsigned short int port, int timeout) {
 	
 #ifdef _WIN32
@@ -195,6 +205,11 @@ bool Socket::connect(const char* ip, unsigned short int port, int timeout) {
 				return false;
 			}
 		}
+		else if(result == EINPROGRESS) {
+			// This is correct, a non-blocking socket returns EINPROGRESS until it can connect
+			printf("Warning: got EINPROGRESS... waiting for other side to come alive.\n");
+			return false;
+		}
 		else {
 			printf("Error: Cannot select, error: %d, %s.\n", errno, strerror(errno));
 			close();
@@ -215,7 +230,24 @@ bool Socket::connect(const char* ip, unsigned short int port, int timeout) {
 	return true;
 }
 
-// 0: disconnect,  < 0 error, > 0 number of bytes read.
+/**
+ * Read data from socket (w or w/o timeout)
+ *
+ * @return integer         Return values are slightly different per mode:
+ *
+ *                         With timeout
+ *                         ------------
+ *                         0   = we timed out
+ *                         < 0 = error
+ *                         > 0 = number of bytes rececied
+ *
+ *                         W/o timeout
+ *                         -----------
+ *                         0 >= : number of bytes received. When we're in non-blocking
+ *                                mode we will return lots of 0s when there is no data
+ *                                on the socket
+ *                         < 0  : error
+ */ 
 int Socket::read(char* buf, int count, int timeout) {
 	bool was_blocking = is_blocking;
 	if(timeout > 0 && is_blocking) {
@@ -247,7 +279,7 @@ int Socket::read(char* buf, int count, int timeout) {
 			return result;
 		}
 		else if(result == 0) {
-			printf("Error: timeout while trying to read.\n");
+			printf("Notice: timeout while trying to read.\n");
 			return 0;
 		}
 		else {
@@ -321,11 +353,11 @@ int Socket::read(char* buf, int count, int timeout) {
 		}
 
 		if(result == -1) {
-			printf("Error: cannot read. %d\n", result);
+			printf("Error: cannot read, error returned by select() %d\n", result);
 			return result;
 		}
 		else if(result == 0) {
-			printf("Error: timed out while trying to read.\n");
+			printf("Notice: timed out while trying to read.\n");
 			return 0;
 		}
 		else {
@@ -339,7 +371,7 @@ int Socket::read(char* buf, int count, int timeout) {
 			return status;
 		}
 		else if(is_blocking && status < 0) {
-			printf("Error: cannot read from socket. Probably disconnected. %d, errno:%d, errms: %s\n", status, strerror(errno));
+			printf("Error: cannot read from socket. Probably disconnected. %d, errno:%d, errms: %s\n", status, errno, strerror(errno));
 		}
 		else if(!is_blocking && status == -1) { // non-blocking mode this means "EWOULDBLOCK"
 			return 0;
@@ -366,6 +398,7 @@ int Socket::send(const char* buf, int count) {
 	return status;
 #elif __APPLE__
 	int status = ::write(sock, buf, count);
+	//printf("SEND status: %d\n", status);
 	if(status < 0) {
 		printf("Error: cannot write on socket. Probably disconnected. %d\n", status);
 		return -1;
@@ -410,6 +443,12 @@ bool Socket::setNoDelay() {
 	int result = setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (void*)&nodelay, sizeof(int));
 	return result == 0;
 #endif
+}
+
+bool Socket::setKeepAlive() {
+	// http://stackoverflow.com/questions/3173583/how-to-set-keepalive-on-windows-server-2008
+	printf("@todo, we need to implement setKeepAlive\n");
+	return false;
 }
 
 void Socket::close() {
