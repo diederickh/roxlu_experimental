@@ -139,11 +139,14 @@ void Emitter<P, C, V, H>::update() {
 											  ,min_particle_random_z_vel
 											  ,max_particle_random_z_vel
 											  ); 
-	P* p = particles.createParticle(pos, mass);
-	p->lifespan = lifetime;
-	p->size = size;
-	p->velocity = vel;
-	particles.addParticle(p);
+
+	P* p = helper.createParticle(pos, mass);
+	if(p != NULL) {
+		p->lifespan = lifetime;
+		p->size = size;
+		p->velocity = vel;
+		particles.addParticle(p);
+	}
 }
 
 
@@ -157,6 +160,7 @@ void Emitter<P, C, V, H>::update() {
 class EmitterHelper {
 public:
 	EmitterHelper(const float x, const float width, const float minY, const float maxY);
+	Particle<Vec2>* createParticle(Vec2 pos, float mass);
 	Vec2 getPosition();
 	Vec2 getVelocity(const float velX, const float velY, const float velZ);
 	Vec2 getRandomVelocity(const float minx, const float maxx, const float miny, const float maxy, const float minz, const float maxz);
@@ -189,7 +193,12 @@ inline Vec2 EmitterHelper::getRandomVelocity(const float minx, const float maxx,
 	return Vec2(random(minx, maxx), random(miny, maxy));
 }
 
+inline Particle<Vec2>* EmitterHelper::createParticle(Vec2 pos, float mass) {
+	return new Particle<Vec2>(pos, mass);
+}
+
 inline void EmitterHelper::update() {
+
 
 }
 // -----------------------------------------------------------
