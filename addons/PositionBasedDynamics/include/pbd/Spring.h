@@ -4,9 +4,6 @@
 #include <roxlu/Roxlu.h>
 #include <pbd/Particle.h>
 
-//#include "Roxlu.h"
-//#include "Particle.h"
-
 template<class T>
 class Spring {
 public:
