@@ -150,6 +150,12 @@ void Emitter<P, C, V, H>::update() {
 }
 
 
+template<class P, class C, class V, class H> 
+inline void Emitter<P, C, V, H>::setParticleSize(const float mins, const float maxs) {
+	min_particle_size = mins;
+	max_particle_size = maxs;
+}
+
 // --------------------------------------------------------------------
 /**
  * The emitter class takes care of:
