@@ -132,6 +132,10 @@ struct VertexPT : public Vertex  {
 		tex.set(u,v);
 	}
 	
+	void setTex(Vec2 t) {
+		tex = t;
+	}
+	
 	void set(const float x, const float y, const float z, const float u, const float v) {
 		pos.set(x,y,z);
 		tex.set(u,v);
