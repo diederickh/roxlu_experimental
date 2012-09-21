@@ -25,6 +25,7 @@ Element::Element(int type, const string& name)
 	,col_bright(0.27)
 	,col_hue(0.5)
 {
+
 	setColor(0.13);
 	bg_top_color = col_bg_default;
 	bg_bottom_color = col_bg_default;
@@ -33,4 +34,4 @@ Element::Element(int type, const string& name)
 Element::~Element() {
 }
 
-} // namespace buttons
+} // namespace buttonsprint n

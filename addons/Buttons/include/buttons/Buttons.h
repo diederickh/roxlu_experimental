@@ -32,7 +32,7 @@ TODO:
 - All elements use absolute coordinates now. Instead of using absolute vertices
 we need to check out if it isn't faster to change to a "modelview" approach
 where all vertices are translated on GPU. We're using absolute coordinates 
-because this makes testing for mouseenter/leave (etc) faster.
+obecause this makes testing for mouseenter/leave (etc) faster.
 
 */
 
@@ -56,6 +56,7 @@ because this makes testing for mouseenter/leave (etc) faster.
 #include <buttons/Radio.h>
 #include <buttons/Spline.h>
 #include <buttons/Color.h>
+#include <buttons/Pad.h>
 #include <buttons/Storage.h>
 
 
@@ -129,6 +130,8 @@ public:
 	Slideri& addInt(const string& label, int& value);
 	Toggle& addBool(const string& label, bool& value);
 	ColorPicker& addColor(const string& label, float* value); 
+	Pad<int>& addInt2(const string& label, int* value);
+
 		
 	// Spline
 	template<class S, class V>

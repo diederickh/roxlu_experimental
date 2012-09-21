@@ -20,12 +20,13 @@ namespace buttons {
 class Buttons; 
 
 enum ElementTypes {
-	 BTYPE_SLIDER 	= 0
-	,BTYPE_TOGGLE 	= 1
-	,BTYPE_BUTTON 	= 2
-	,BTYPE_RADIO  	= 3
-	,BTYPE_SPLINE 	= 4
-	,BTYPE_COLOR	= 5
+	BTYPE_SLIDER = 0
+	,BTYPE_TOGGLE = 1
+	,BTYPE_BUTTON = 2
+	,BTYPE_RADIO = 3
+	,BTYPE_SPLINE = 4
+	,BTYPE_COLOR = 5
+	,BTYPE_PAD = 6
 };
 
 enum ElementStates {

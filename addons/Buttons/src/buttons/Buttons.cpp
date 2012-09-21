@@ -353,6 +353,12 @@ Slideri& Buttons::addInt(const string& label, int& value) {
 	return *el;
 }
 
+Pad<int>& Buttons::addInt2(const string& label, int* value) {
+	buttons::Pad<int>* el = new Pad<int>(value, label);
+	addElement(el, label);
+	return *el;
+}
+
 Toggle& Buttons::addBool(const string& label, bool& value) {
 	buttons::Toggle* el = new Toggle(value, createCleanName(label));
 	addElement(el, label);

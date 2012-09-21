@@ -50,12 +50,15 @@ class Emitter {
 public:
 	Emitter(C& particles, H& helper);
 	void setParticleSize(const float min, const float max);
-	void setParticleLifeTime(const float min, const float max);
-	void setEmission(const float min, const float max);
+	void setParticleLifeTime(const int min, const int max);
+	void setParticleVelocity(const float x, const float y, const float z);
+	void setParticleMass(const float minMass, const float maxMass);
+	void setEmission(const int min, const int max);
 	void enable();
 	void disable();
-
 	void update();
+
+	H& getHelper();
 
 	C& particles;
 	H& helper;
@@ -157,6 +160,10 @@ void Emitter<P, C, V, H>::update() {
 	}
 }
 
+template<class P, class C, class V, class H> 
+inline H& Emitter<P, C, V, H>::getHelper() {
+	return helper;
+}
 
 template<class P, class C, class V, class H> 
 inline void Emitter<P, C, V, H>::enable() {
@@ -174,6 +181,33 @@ inline void Emitter<P, C, V, H>::setParticleSize(const float mins, const float m
 	max_particle_size = maxs;
 }
 
+template<class P, class C, class V, class H> 
+inline void Emitter<P, C, V, H>::setParticleVelocity(const float vx, const float vy, const float vz) {
+	particle_x_vel = vx;
+	particle_y_vel = vy;
+	particle_z_vel = vz;
+}
+
+template<class P, class C, class V, class H> 
+inline void Emitter<P, C, V, H>::setParticleMass(const float minMass, const float maxMass) {
+	min_particle_mass = minMass;
+	max_particle_mass = maxMass;
+}
+
+template<class P, class C, class V, class H> 
+inline void Emitter<P, C, V, H>::setParticleLifeTime(const int minlt, const int maxlt) {
+	min_particle_lifetime = minlt;
+	max_particle_lifetime = maxlt;
+}
+
+template<class P, class C, class V, class H> 
+inline void Emitter<P, C, V, H>::setEmission(const int mine, const int maxe) {
+	min_emission = mine;
+	max_emission = maxe;
+	emit_time = 1000/(max_emission - min_emission);
+}
+
+
 // --------------------------------------------------------------------
 /**
  * The emitter class takes care of:
@@ -188,6 +222,7 @@ public:
 	Vec2 getPosition();
 	Vec2 getVelocity(const float velX, const float velY, const float velZ);
 	Vec2 getRandomVelocity(const float minx, const float maxx, const float miny, const float maxy, const float minz, const float maxz);
+	void setPosition(const float x, const float y); // if you want to emit from one point
 	void update();
 	float min_y;
 	float max_y;
@@ -207,6 +242,13 @@ inline EmitterHelper::EmitterHelper(const float x, const float width, const floa
 
 inline Vec2 EmitterHelper::getPosition() {
 	return Vec2(random(emit_x-emit_half_width, emit_x+emit_half_width), random(min_y,max_y));
+}
+
+inline void EmitterHelper::setPosition(const float x, const float y) {
+	emit_x = x;
+	emit_half_width = 0.0f;
+	min_y = y; 
+	max_y = y;
 }
 
 inline Vec2 EmitterHelper::getVelocity(const float vx, const float vy, const float vz) {
