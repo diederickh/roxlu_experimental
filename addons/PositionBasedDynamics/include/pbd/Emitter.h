@@ -52,6 +52,8 @@ public:
 	void setParticleSize(const float min, const float max);
 	void setParticleLifeTime(const float min, const float max);
 	void setEmission(const float min, const float max);
+	void enable();
+	void disable();
 
 	void update();
 
@@ -59,6 +61,7 @@ public:
 	H& helper;
 	rx_uint64 time_to_emit;
 	rx_uint64 emit_time;
+	bool enabled;
 
 	// Particle settings:
 	float min_particle_size; 
@@ -88,11 +91,11 @@ Emitter<P, C, V, H>::Emitter(C& particles, H& helper)
 	,min_particle_size(0.1f)
 	,max_particle_size(2.0f)
 	,min_particle_lifetime(60)
-	,max_particle_lifetime(2 * 60)
+	,max_particle_lifetime(5 * 60)
 	,min_particle_mass(0.1f)
 	,max_particle_mass(3.0f)
 	,min_particle_random_x_vel(-2.0f)
-	,max_particle_random_x_vel(2.0f)
+	,max_particle_random_x_vel(6.0f)
 	,min_particle_random_y_vel(0.0f)
 	,max_particle_random_y_vel(-4.0f)
 	,min_particle_random_z_vel(0.0f)
@@ -100,6 +103,7 @@ Emitter<P, C, V, H>::Emitter(C& particles, H& helper)
 	,min_emission(100)
 	,max_emission(200)
 	,time_to_emit(0)
+	,enabled(true)
 	,particle_x_vel(0.0f)
 	,particle_y_vel(-2.8f)
 	,particle_z_vel(0.0f)
@@ -110,6 +114,10 @@ Emitter<P, C, V, H>::Emitter(C& particles, H& helper)
 
 template<class P, class C, class V, class H>
 void Emitter<P, C, V, H>::update() {
+	if(!enabled) {
+		return;
+	}
+
    helper.update();
 	particles.removeDeadParticles();
 
@@ -149,6 +157,16 @@ void Emitter<P, C, V, H>::update() {
 	}
 }
 
+
+template<class P, class C, class V, class H> 
+inline void Emitter<P, C, V, H>::enable() {
+	enabled = true;
+}
+
+template<class P, class C, class V, class H> 
+inline void Emitter<P, C, V, H>::disable() {
+	enabled = false;
+}
 
 template<class P, class C, class V, class H> 
 inline void Emitter<P, C, V, H>::setParticleSize(const float mins, const float maxs) {
