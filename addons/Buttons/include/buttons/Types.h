@@ -11,6 +11,7 @@
 #define BINSIDE_HEADER(ptr, mx, my)  BMOUSE_INSIDE(mx, my, ptr->x, ptr->y, ptr->w, ptr->header_h)
 #define BSET_COLOR(col, r, g, b, a) col[0] = r; col[1] = g; col[2] = b; col[3] = a;
 #define BSET_MAT_POS(mat, x, y, z) mat[11] = x; mat[12] = y; mat[13] = z;
+#define BLIMIT_FLOAT(v,minv, maxv) std::max<float>((minv), std::min<float>((maxv), (v)))
 
 using std::vector;
 using roxlu::Vec2;
