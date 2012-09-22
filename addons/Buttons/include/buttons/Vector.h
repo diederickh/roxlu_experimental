@@ -29,10 +29,6 @@ public:
 	bool canSave();
 	
 	Vector<T>& setColor(const float hue, float a = 1.0);
-	/*
-	Vector<T>& setX(const float min, const float max); // set min/max x
-	Vector<T>& setY(const float min, const float max); // set min/max y
-	*/
 	void hide();
 	void show();
 	
@@ -42,20 +38,16 @@ private:
 	float circle_bg_col[4];
 	float rect_bg_top_col[4];
 	float rect_bg_bottom_col[4];
+	float arrow_fill_col[4];
+
 	float* arrow_col;
 	float radius; 
 	float cx;
 	float cy;
 	float angle;
+	float cos_a;
+	float sin_a; 
 	bool is_rotating;
-	float test_col[4];
-	/*
-	float calculatePercentage(float value, float min, float maxv);
-
-	bool near_tl;
-	bool near_br;
-	bool inside_rect;
-	*/
 
 public:
 	
@@ -112,8 +104,11 @@ public:
 		buttons::createCircle(vd, cx, cy, radius, circle_bg_col);
 
 		// Arrow
-		float end_x = cx + cos(angle) * (radius * 0.8);
-		float end_y = cy + sin(angle) * (radius * 0.8);
+		//		float end_x = cx + cos(angle) * (radius * 0.7);
+		//float end_y = cy + sin(angle) * (radius * 0.7);
+		float end_x = cx + cos_a * (radius * 0.7);
+		float end_y = cy + sin_a * (radius * 0.7);
+
 		
 		float dir_x = end_x - cx;
 		float dir_y = end_y - cy;
@@ -123,7 +118,7 @@ public:
 
 		dir_y /= len;
 		dir_x /= len;
-				printf("l: %f\n", len);
+
 		float perp_x = -dir_y;
 		float perp_y = dir_x;
 		
@@ -137,15 +132,6 @@ public:
 		// e = left arrow point
 		// f = right arrow point
 		// g = top arrow point 
-		/*
-		float a[2] = {cx - (perp_x * arrow_w), cy - (perp_y * arrow_w)};
-		float b[2] = {cx + (perp_x * arrow_w), cy + (perp_y * arrow_w)};
-		float c[2] = {end_x - (perp_x * arrow_w), end_y - (perp_y * arrow_w)};
-		float d[2] = {end_x + (perp_x * arrow_w), end_y + (perp_y * arrow_w)};
-		float e[2] = {end_x - (perp_x * point_w), end_y - (perp_y * point_w)};
-		float f[2] = {end_x + (perp_x * point_w), end_y + (perp_y * point_w)};
-		float g[2] = {cx + (dir_x * len * 1.4), cy + (dir_y * len * 1.4)};
-		*/
 		ButtonVertex v_a(cx - (perp_x * arrow_w), cy - (perp_y * arrow_w), arrow_col);
 		ButtonVertex v_b(cx + (perp_x * arrow_w), cy + (perp_y * arrow_w), arrow_col);
 		ButtonVertex v_c(end_x - (perp_x * arrow_w), end_y - (perp_y * arrow_w), arrow_col);
@@ -165,18 +151,6 @@ public:
 		verts.push_back(v_g);
 		verts.push_back(v_e);
 		vd.add(verts, GL_TRIANGLES);
-		
-		//		arrow_verts.push_back(
-		/*
-		buttons::createCircle(vd, end_x, end_y, 3.0f, circle_bg_col);
-		buttons::createCircle(vd, a[0], a[1], 3.0f, test_col);
-		buttons::createCircle(vd, b[0], b[1], 3.0f, test_col);
-		buttons::createCircle(vd, c[0], c[1], 3.0f, test_col);
-		buttons::createCircle(vd, d[0], d[1], 3.0f, test_col);
-		buttons::createCircle(vd, e[0], e[1], 3.0f, test_col);
-		buttons::createCircle(vd, f[0], f[1], 3.0f, test_col);
-		buttons::createCircle(vd, g[0], g[1], 3.0f, test_col);
-		*/
 	}
 
 	template<class T>
@@ -195,14 +169,16 @@ public:
 			else {
 				angle = atan_angle;
 			}
+			cos_a = cos(angle);
+			sin_a = sin(angle);
+			*value = cos_a;
+			*(value+1) = sin_a;
 			needsRedraw();
-			//printf("is rotating: %f.\n", angle * (180.0f/3.14));
 		}
 	}
 
 	template<class T>
 	void Vector<T>::onMouseDragged(int mx, int my, int dx, int dy) {
-
 	}
 
 	template<class T>
@@ -215,15 +191,6 @@ public:
 		cx = bg_x + (bg_w * 0.5f);
 		cy = bg_y + (bg_h * 0.5f);
 	}
-
-	/*
-	template<class T>
-	float Vector<T>::calculatePercentage(float value, float minv, float maxv) {
-		float p = 1.0f/(maxv-minv) * value - (minv/(maxv-minv)); 
-		p = BLIMIT_FLOAT(p, 0.0f, 1.0f);
-		return p;
-	}
-	*/
 
 	template<class T>
 	void Vector<T>::onMouseDown(int mx, int my) {
@@ -248,28 +215,22 @@ public:
 
 	template<class T>
 	void Vector<T>::save(std::ofstream& ofs) {
-		/*
-		size_t data_size = sizeof(T) * 4; // 4 items (top left x/y and bottom right x/y
+		size_t data_size = sizeof(T) * 2; // 4 items (top left x/y and bottom right x/y
 		ofs.write((char*)&data_size, sizeof(size_t)); // necessary !! (used to skip data when we remove an element)
-		ofs.write((char*)value, sizeof(T) * 4);
-		*/
+		ofs.write((char*)value, sizeof(T) * 2);
 	}
 
 	template<class T>
 	void Vector<T>::load(std::ifstream& ifs) {
-		/*
-		ifs.read((char*)value, sizeof(T) * 4);
-		perc_top_left[0] = calculatePercentage(*(value), min_x_value, max_x_value);
-		perc_top_left[1] = calculatePercentage(*(value+1), min_y_value, max_y_value);
-		perc_bottom_right[0] = calculatePercentage(*(value+2), min_x_value, max_x_value);
-		perc_bottom_right[1] = calculatePercentage(*(value+3), min_y_value, max_y_value);
+		ifs.read((char*)value, sizeof(T) * 2);
+		cos_a = *value;
+		sin_a = *(value+1);
 		needsRedraw();
-		*/
 	}
 
 	template<class T>
 	bool Vector<T>::canSave() {
-		return false;
+		return true;
 	}
 
 	template<class T>
@@ -281,16 +242,8 @@ public:
 		HSL_to_RGB(col_hue, col_sat, col_bright - 0.1, rect_bg_top_col, rect_bg_top_col+1, rect_bg_top_col+2);
 		HSL_to_RGB(col_hue, col_sat, col_bright - 0.2, rect_bg_bottom_col, rect_bg_bottom_col+1, rect_bg_bottom_col+2);
 		BSET_COLOR(circle_bg_col, 1.0f, 1.0f, 1.0f, 0.05);
-		BSET_COLOR(test_col, 1.0f, 0.0f, 0.0f ,1.0f);
-		arrow_col = circle_bg_col;
-		/*
-		HSL_to_RGB(col_hue, col_sat, col_bright + 0.2, rect_line_col, rect_line_col+1, rect_line_col+2);
-		BSET_COLOR(rect_line_col, 1.0f, 1.0f, 1.0f, 0.3f);
-
-		BSET_COLOR(rect_handle_active_col, 1.0f, 1.0f, 1.0f, 1.0f);
-		BSET_COLOR(rect_handle_inactive_col, 1.0f, 1.0f, 1.0f, 0.5f);
-		BSET_COLOR(rect_drag_col, 1.0f, 1.0f, 1.0f, 0.05f);
-		*/
+		BSET_COLOR(arrow_fill_col, 1.0f, 1.0f, 1.0f, 1.0f);
+		arrow_col = arrow_fill_col;
 		return *this;
 	}
 
