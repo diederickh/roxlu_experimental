@@ -26,6 +26,7 @@ public:
 	void save(std::ofstream& ofs);
 	void load(std::ifstream& ifs);
 	bool canSave();
+	float calculatePercentage(float value, float minv, float maxv); 
 	
 	Pad<T>& setColor(const float hue, float a = 1.0);
 	Pad<T>& setX(const float min, const float max);
@@ -155,6 +156,13 @@ public:
 	}
 
 	template<class T>
+	float Pad<T>::calculatePercentage(float value, float minv, float maxv) {
+		float p = 1.0f/(maxv-minv) * value - (minv/(maxv-minv)); 
+		p = BLIMIT_FLOAT(p, 0.0f, 1.0f);
+		return p;
+	}
+
+	template<class T>
 	void Pad<T>::save(std::ofstream& ofs) {
 		size_t data_size = sizeof(T) * 2;
 		ofs.write((char*)&data_size, sizeof(size_t)); // necessary !! (used to skip data when we remove an element)
@@ -164,8 +172,10 @@ public:
 	template<class T>
 	void Pad<T>::load(std::ifstream& ifs) {
 		ifs.read((char*)value, sizeof(T) * 2);
-		px = float(*(value)) / (max_x_value - min_x_value);
-		py = float(*(value+1)) / (max_y_value - min_y_value);
+		//	px = float(*(value)) / (max_x_value - min_x_value);
+		// py = float(*(value+1)) / (max_y_value - min_y_value);
+		px = calculatePercentage(float(*(value)), min_x_value, max_x_value);
+		py = calculatePercentage(float(*(value+1)), min_y_value, max_y_value);
 		needsRedraw();
 	}
 

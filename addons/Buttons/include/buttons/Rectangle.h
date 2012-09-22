@@ -36,6 +36,7 @@ public:
 	
 private:
 	void calculateCoordinates();
+	float calculatePercentage(float value, float min, float maxv);
 	bool near_tl;
 	bool near_br;
 	bool inside_rect;
@@ -46,7 +47,6 @@ public:
 	T* value;
 	
 	// calcs
-
 	T min_x_value;
 	T max_x_value;
 	T min_y_value;
@@ -61,18 +61,10 @@ public:
 	float br_x;
 	float br_y; 
 
-	/*
-	float px; // percentage x
-	float py; // percentage y
-	float point_x; 
-	float point_y; 
-	*/
-
 	// colors
 	float rect_bg_top_col[4];
 	float rect_bg_bottom_col[4];
 	float rect_line_col[4];
-	float rect_dot_col[4]; // @todo remove if not used
 	float rect_handle_active_col[4];
 	float rect_handle_inactive_col[4]; 
 	float rect_drag_col[4];
@@ -102,13 +94,13 @@ public:
 		,max_x_value(0)
 		,min_y_value(0)
 		,max_y_value(0)
-		 /*
-		,px(0.5f)
-		,py(0.5f)
-		 */
 		,value(value)
 		,rect_tl_col(NULL)
 		,rect_br_col(NULL)
+		,tl_x(0)
+		,tl_y(0)
+		,br_x(0)
+		,br_y(0)
 	{
 		this->h = 120;
 		perc_top_left[0] = perc_top_left[1] = 0.1f;
@@ -135,13 +127,8 @@ public:
 	template<class T>
 	void Rectangle<T>::generateVertices(ButtonVertices& vd) {
 		calculateCoordinates();
-		printf("..\n");
-		/*
-	  point_x = pad_x + px * pad_w;
-		point_y = pad_y + py * pad_h;
-		*/
 
-
+		// Background + pad area
 		buttons::createRect(vd, this->x, this->y, this->w, this->h, this->bg_top_color, this->bg_bottom_color); // background
 		buttons::createRect(vd, bg_x, bg_y, bg_w, bg_h, this->rect_bg_top_col, this->rect_bg_bottom_col); // positioning area
 
@@ -162,7 +149,7 @@ public:
 			buttons::createRect(vd, tl_x, tl_y, (br_x - tl_x), (br_y - tl_y), rect_drag_col, rect_drag_col);
 		}
 
-		// Highlight the corner
+		// Highlight the two corners
 		{
 			float handle_rect_thickness = 4;
 			float handle_rect_size = 10;
@@ -175,30 +162,11 @@ public:
 			buttons::createRect(vd, br_x - 2, br_y - (handle_rect_size-2), handle_rect_thickness, handle_rect_size, rect_br_col, rect_br_col);
 			buttons::createRect(vd, br_x - (handle_rect_size-2), br_y - 2, handle_rect_size,handle_rect_thickness,  rect_br_col, rect_br_col);
 		}
-
-
-
-		// Lines towards the point.
-		/*
-		vector<ButtonVertex> line_verts;
-		line_verts.push_back(ButtonVertex(this->pad_x, this->point_y, pad_line_col));
-		line_verts.push_back(ButtonVertex(this->pad_x+pad_w, this->point_y, pad_line_col));
-		line_verts.push_back(ButtonVertex(this->point_x, this->pad_y, pad_line_col));
-		line_verts.push_back(ButtonVertex(this->point_x, this->pad_y +this->pad_h, pad_line_col));
-		vd.add(line_verts, GL_LINES);
-		*/
-
-		// The point
-		//buttons::createCircle(vd, point_x, point_y, 3.0f, pad_dot_col);
 	}
 
 	template<class T>
 	void Rectangle<T>::onMouseMoved(int mx, int my) {
-		//			rect_tl_col = rect_handle_inactive_col;
-		//		rect_br_col = rect_handle_inactive_col;
-		//		rect_selected_line_col = rect_handle_inactive_col;
 		if(drag_inside && !near_tl && !near_br) {
-			printf("DRAG INSIDE!\n");
 			// Get the closest handle
 			float min_dist = 15;
 			min_dist *= min_dist;
@@ -225,14 +193,9 @@ public:
 			}
 			else if(BMOUSE_INSIDE(mx,my,tl_x, tl_y, (br_x - tl_x), (br_y - tl_y))) {
 				inside_rect = true;
-
 			}
-			
-
-			
 		}
-
-		// --
+		
 		if(!near_tl &&  !near_br && !inside_rect) {
 			return;
 		}
@@ -247,23 +210,21 @@ public:
 		local_y = std::max<float>(0.0f, std::min<float>(bg_h, local_y));
 
 		if(near_tl || near_br) {
-
-				float local_xp = local_x / bg_w;
-				float local_yp = local_y / bg_h;
-				if(near_tl) {
-					perc_top_left[0] = local_xp;
-					perc_top_left[1] = local_yp;
-				}
-				else {
-					perc_bottom_right[0] = local_xp;
-					perc_bottom_right[1] = local_yp;
-				}
+			float local_xp = local_x / bg_w;
+			float local_yp = local_y / bg_h;
+			if(near_tl) {
+				perc_top_left[0] = local_xp;
+				perc_top_left[1] = local_yp;
+			}
+			else {
+				perc_bottom_right[0] = local_xp;
+				perc_bottom_right[1] = local_yp;
+			}
 		}
 		else {
 			// inside rectangular area, calc displacement to make center of rect the mouse position
 			float area_w = br_x - tl_x;
 			float area_h = br_y - tl_y;
-			printf("W: %f, H: %f\n", area_w, area_h);
 			float new_tl_x = local_x - (area_w * 0.5);
 			float new_tl_y = local_y - (area_h * 0.5);
 			float new_br_x = new_tl_x + area_w;
@@ -272,63 +233,14 @@ public:
 			perc_top_left[1] = new_tl_y / bg_h;
 			perc_bottom_right[0] = new_br_x / bg_w;
 			perc_bottom_right[1] = new_br_y / bg_h;
-			//			printf("tl_x: %f, tl_y: %f, br_x: %f, br_y: %f, top_left_x: %f\n", perc_top_left[0], perc_top_left[1], perc_bottom_right[0], perc_bottom_right[1], new_tl_x);
-			//			return;
-			//		perc_top_left[
-			//float new_tl_px = (new_tl_x / bg_w);
-			//float new_tl_py = (new_tl_y / bg_h);
-			
-			
 		}
-				calculateCoordinates();
-				needsRedraw();
+		calculateCoordinates();
+		needsRedraw();
 
 	}
 
 	template<class T>
 	void Rectangle<T>::onMouseDragged(int mx, int my, int dx, int dy) {
-		/*
-		if(drag_inside && !near_tl && !near_br) {
-			printf("DRAG INSIDE!\n");
-			// Get the closest handle
-			float min_dist = 15;
-			min_dist *= min_dist;
-
-			float dx = (tl_x - mx);
-			float dy = (tl_y - my);
-			float tl_sq = (dx * dx) + (dy * dy);
-
-			dx = (br_x - mx);
-			dy = (br_y - my);
-			float br_sq = (dx * dx) + (dy * dy);
-
-			near_tl = false;
-			near_br = false;
-			if(tl_sq < min_dist) {
-				near_tl = true;
-				rect_tl_col = rect_handle_active_col;
-				rect_br_col = rect_handle_inactive_col;
-			}
-			else if(br_sq < min_dist) {
-				near_br = true;
-				rect_tl_col = rect_handle_inactive_col;
-				rect_br_col = rect_handle_active_col;
-			}
-			else if(BMOUSE_INSIDE(mx,my,tl_x, tl_y, (br_x - tl_x), (br_y - tl_y))) {
-				inside_rect = true;
-				rect_tl_col = rect_handle_inactive_col;
-				rect_br_col = rect_handle_inactive_col;
-
-			}
-
-
-
-			// Get local position
-			if(near_tl || near_br) {
-			}
-			
-		}
-		*/
 	}
 
 	// Based on the perc_top_left and perc_bottom_right values we 
@@ -341,7 +253,6 @@ public:
 		bg_x = this->x + (this->w - bg_w) / 2;
 		bg_y = this->y + 20;
 
-		//perc_top_left[0] = std::max<float>(0.0f, std::min<float>(1.0f, perc_top_left[0]));
 		perc_top_left[0] = BLIMIT_FLOAT(perc_top_left[0], 0.0f, 1.0f);
 		perc_top_left[1] = BLIMIT_FLOAT(perc_top_left[1], 0.0f, 1.0f);
 		perc_bottom_right[0] = BLIMIT_FLOAT(perc_bottom_right[0], 0.0f, 1.0f);
@@ -351,6 +262,20 @@ public:
 		tl_y = bg_y + perc_top_left[1] * bg_h;
 		br_x = bg_x + perc_bottom_right[0] * bg_w;
 		br_y = bg_y + perc_bottom_right[1] * bg_h;
+
+		float yrange = max_y_value - min_y_value;
+		float xrange = max_x_value - min_x_value;
+		*(value) = min_x_value + perc_top_left[0] * xrange;
+		*(value+1) = min_y_value + perc_top_left[1] * yrange;
+		*(value+2) = min_x_value + perc_bottom_right[0] * xrange;
+		*(value+3) = min_y_value + perc_bottom_right[1] * yrange;
+	}
+
+	template<class T>
+	float Rectangle<T>::calculatePercentage(float value, float minv, float maxv) {
+		float p = 1.0f/(maxv-minv) * value - (minv/(maxv-minv)); 
+		p = BLIMIT_FLOAT(p, 0.0f, 1.0f);
+		return p;
 	}
 
 	template<class T>
@@ -374,8 +299,6 @@ public:
 
 	template<class T>
 	void Rectangle<T>::onMouseLeave(int mx, int my) {
-		//	near_tl = false;
-		//	near_br = false;
 	}
 
 	template<class T>
@@ -384,27 +307,24 @@ public:
 
 	template<class T>
 	void Rectangle<T>::save(std::ofstream& ofs) {
-		/*
-		size_t data_size = sizeof(T) * 2;
+		size_t data_size = sizeof(T) * 4; // 4 items (top left x/y and bottom right x/y
 		ofs.write((char*)&data_size, sizeof(size_t)); // necessary !! (used to skip data when we remove an element)
-		ofs.write((char*)value, sizeof(T) * 2);
-		*/
+		ofs.write((char*)value, sizeof(T) * 4);
 	}
 
 	template<class T>
 	void Rectangle<T>::load(std::ifstream& ifs) {
-		/*
-		ifs.read((char*)value, sizeof(T) * 2);
-		px = float(*(value)) / (max_x_value - min_x_value);
-		py = float(*(value+1)) / (max_y_value - min_y_value);
+		ifs.read((char*)value, sizeof(T) * 4);
+		perc_top_left[0] = calculatePercentage(*(value), min_x_value, max_x_value);
+		perc_top_left[1] = calculatePercentage(*(value+1), min_y_value, max_y_value);
+		perc_bottom_right[0] = calculatePercentage(*(value+2), min_x_value, max_x_value);
+		perc_bottom_right[1] = calculatePercentage(*(value+3), min_y_value, max_y_value);
 		needsRedraw();
-		*/
 	}
 
 	template<class T>
 	bool Rectangle<T>::canSave() {
-		return false;
-		//return true;
+		return true;
 	}
 
 	template<class T>
@@ -417,15 +337,10 @@ public:
 		HSL_to_RGB(col_hue, col_sat, col_bright - 0.2, rect_bg_bottom_col, rect_bg_bottom_col+1, rect_bg_bottom_col+2);
 		HSL_to_RGB(col_hue, col_sat, col_bright + 0.2, rect_line_col, rect_line_col+1, rect_line_col+2);
 		BSET_COLOR(rect_line_col, 1.0f, 1.0f, 1.0f, 0.3f);
-		BSET_COLOR(rect_dot_col, 1.0f, 1.0f, 1.0f, 1.0f);
 
-		//HSL_to_RGB(col_hue, col_sat, col_bright + 0.2, rect_handle_active_col, rect_handle_active_col+1, rect_handle_active_col+2);
-		//HSL_to_RGB(col_hue, col_sat, col_bright - 0.1, rect_handle_inactive_col, rect_handle_inactive_col+1, rect_handle_inactive_col+2);
 		BSET_COLOR(rect_handle_active_col, 1.0f, 1.0f, 1.0f, 1.0f);
 		BSET_COLOR(rect_handle_inactive_col, 1.0f, 1.0f, 1.0f, 0.5f);
 		BSET_COLOR(rect_drag_col, 1.0f, 1.0f, 1.0f, 0.05f);
-		//rect_handle_active_col[3] = a;
-		//rect_handle_inactive_col[3] = a;
 		return *this;
 	}
 
@@ -454,7 +369,6 @@ public:
 		max_y_value = max;
 		return *this;
 	}
-
 
 } // namespace buttons
 

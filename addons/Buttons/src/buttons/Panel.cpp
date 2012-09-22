@@ -34,7 +34,6 @@ Panel::~Panel() {
 	}
 }
 
-
 void Panel::update() {
 	for(vector<Buttons*>::iterator it = guis.begin(); it != guis.end(); ++it) {
 		(*it)->update();
@@ -92,6 +91,21 @@ Slideri& Panel::addInt(const string& label, int& value) {
 Pad<int>& Panel::addInt2(const string& label, int* value) {
 	assert(active_gui != NULL);
 	return active_gui->addInt2(label, value);
+}
+
+Pad<float>& Panel::addFloat2(const string& label, float* value) {
+	assert(active_gui != NULL);
+	return active_gui->addFloat2(label, value);
+}
+
+Rectangle<int>& Panel::addRectanglei(const string& label, int* value) {
+	assert(active_gui != NULL);
+	return active_gui->addRectanglei(label, value);
+}
+
+Rectangle<float>& Panel::addRectanglef(const string& label, float* value) {
+	assert(active_gui != NULL);
+	return active_gui->addRectanglef(label, value);
 }
 
 ColorPicker& Panel::addColor(const string& label, float* value) {

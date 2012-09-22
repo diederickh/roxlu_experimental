@@ -16,6 +16,7 @@
 #include <buttons/Spline.h>
 #include <buttons/Color.h>
 #include <buttons/Pad.h>
+#include <buttons/Rectangle.h>
 #include <buttons/Storage.h>
 #include <buttons/Buttons.h>
 
@@ -38,8 +39,11 @@ public:
 	Toggle& addBool(const string& label, bool& value);
 	Slideri& addInt(const string& label, int& value);
 	Sliderf& addFloat(const string& label, float& value);
-	ColorPicker& addColor(const string& label, float* value); 
-	Pad<int>& addInt2(const string& label, int* value);
+	ColorPicker& addColor(const string& label, float* value); // pointer to arary with 4 values
+	Pad<int>& addInt2(const string& label, int* value); // pointer to array with 2 values
+	Pad<float>& addFloat2(const string& label, float* value); // pointer to array with 2 values
+	Rectangle<int>& addRectanglei(const string& label, int* value); // pointer to array with 4 entries (topleft, bottomright)
+	Rectangle<float>& addRectanglef(const string& label, float* value); // pointer to array with 4 entries (topleft, bottomright)
 
 	// Button
 	template<class T>

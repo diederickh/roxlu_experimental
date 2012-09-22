@@ -295,15 +295,6 @@ void Buttons::draw() {
 	glUseProgram(0);
 
 	// Allow custom drawing.
-	/*
-	it = elements.begin();
-	while(it != elements.end()) {
-		el = (*it);
-		el->draw(gui_shader, ortho);
-		++it;
-	}
-	*/
-	
 	if(cull_enabled) {
 		glEnable(GL_CULL_FACE);
 	}
@@ -318,27 +309,6 @@ void Buttons::debugDraw() {
 	gui_shader.disable();
 	vao.unbind();
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	// @todo draw using the subarrays of ButtonVertices
-	/*
-	int start = 0;
-	int end = 0;
-	Element* el;
-	vector<Element*>::iterator it = elements.begin();
-	while(it != elements.end()) {
-		el = (*it);
-		end = start + el->num_vertices;
-	
-		glBegin(GL_TRIANGLES);
-		for(int i = start; i < end; ++i) {
-			ButtonVertex& rv = vd[i];
-			glVertex2f(rv.pos[0], rv.pos[1]);
-		}
-		glEnd();
-		
-		start += el->num_vertices;
-		++it;
-	}
-	*/
 }
 
 Sliderf& Buttons::addFloat(const string& label, float& value) {
@@ -359,8 +329,20 @@ Pad<int>& Buttons::addInt2(const string& label, int* value) {
 	return *el;
 }
 
+Pad<float>& Buttons::addFloat2(const string& label, float* value) {
+	buttons::Pad<float>* el = new Pad<float>(value, label);
+	addElement(el, label);
+	return *el;
+}
+
 Rectangle<int>& Buttons::addRectanglei(const string& label, int* value) {
 	buttons::Rectangle<int>* el = new Rectangle<int>(value, label);
+	addElement(el, label);
+	return *el;
+}
+
+Rectangle<float>& Buttons::addRectanglef(const string& label, float* value) {
+	buttons::Rectangle<float>* el = new Rectangle<float>(value, label);
 	addElement(el, label);
 	return *el;
 }

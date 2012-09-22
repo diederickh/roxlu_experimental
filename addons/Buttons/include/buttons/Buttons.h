@@ -130,7 +130,9 @@ public:
 	Toggle& addBool(const string& label, bool& value);
 	ColorPicker& addColor(const string& label, float* value); 
 	Pad<int>& addInt2(const string& label, int* value);
+	Pad<float>& addFloat2(const string& label, float* value);
 	Rectangle<int>& addRectanglei(const string& label, int* value);
+	Rectangle<float>& addRectanglef(const string& label, float* value);
 		
 	// Spline
 	template<class S, class V>
