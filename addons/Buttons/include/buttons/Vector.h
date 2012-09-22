@@ -42,6 +42,7 @@ private:
 	float circle_bg_col[4];
 	float rect_bg_top_col[4];
 	float rect_bg_bottom_col[4];
+	float* arrow_col;
 	float radius; 
 	float cx;
 	float cy;
@@ -82,6 +83,7 @@ public:
 		,cy(0)
 		,angle(0)
 		,is_rotating(false)
+		,arrow_col(NULL)
 	{
 		this->h = 120;
 	}
@@ -127,6 +129,15 @@ public:
 		
 		float point_w = 9.0f;
 		float arrow_w = 2.5f;
+
+		// a = bottom left corner
+		// b = bottom right corner
+		// c = top left corner
+		// d = top right corner
+		// e = left arrow point
+		// f = right arrow point
+		// g = top arrow point 
+		/*
 		float a[2] = {cx - (perp_x * arrow_w), cy - (perp_y * arrow_w)};
 		float b[2] = {cx + (perp_x * arrow_w), cy + (perp_y * arrow_w)};
 		float c[2] = {end_x - (perp_x * arrow_w), end_y - (perp_y * arrow_w)};
@@ -134,6 +145,29 @@ public:
 		float e[2] = {end_x - (perp_x * point_w), end_y - (perp_y * point_w)};
 		float f[2] = {end_x + (perp_x * point_w), end_y + (perp_y * point_w)};
 		float g[2] = {cx + (dir_x * len * 1.4), cy + (dir_y * len * 1.4)};
+		*/
+		ButtonVertex v_a(cx - (perp_x * arrow_w), cy - (perp_y * arrow_w), arrow_col);
+		ButtonVertex v_b(cx + (perp_x * arrow_w), cy + (perp_y * arrow_w), arrow_col);
+		ButtonVertex v_c(end_x - (perp_x * arrow_w), end_y - (perp_y * arrow_w), arrow_col);
+		ButtonVertex v_d(end_x + (perp_x * arrow_w), end_y + (perp_y * arrow_w), arrow_col);
+		ButtonVertex v_e(end_x - (perp_x * point_w), end_y - (perp_y * point_w), arrow_col);
+		ButtonVertex v_f(end_x + (perp_x * point_w), end_y + (perp_y * point_w), arrow_col);
+		ButtonVertex v_g(cx + (dir_x * len * 1.4), cy + (dir_y * len * 1.4), arrow_col);
+
+		vector<ButtonVertex> verts;
+		verts.push_back(v_a);
+		verts.push_back(v_b);
+		verts.push_back(v_d);
+		verts.push_back(v_a);
+		verts.push_back(v_d);
+		verts.push_back(v_c);
+		verts.push_back(v_f);
+		verts.push_back(v_g);
+		verts.push_back(v_e);
+		vd.add(verts, GL_TRIANGLES);
+		
+		//		arrow_verts.push_back(
+		/*
 		buttons::createCircle(vd, end_x, end_y, 3.0f, circle_bg_col);
 		buttons::createCircle(vd, a[0], a[1], 3.0f, test_col);
 		buttons::createCircle(vd, b[0], b[1], 3.0f, test_col);
@@ -142,6 +176,7 @@ public:
 		buttons::createCircle(vd, e[0], e[1], 3.0f, test_col);
 		buttons::createCircle(vd, f[0], f[1], 3.0f, test_col);
 		buttons::createCircle(vd, g[0], g[1], 3.0f, test_col);
+		*/
 	}
 
 	template<class T>
@@ -247,6 +282,7 @@ public:
 		HSL_to_RGB(col_hue, col_sat, col_bright - 0.2, rect_bg_bottom_col, rect_bg_bottom_col+1, rect_bg_bottom_col+2);
 		BSET_COLOR(circle_bg_col, 1.0f, 1.0f, 1.0f, 0.05);
 		BSET_COLOR(test_col, 1.0f, 0.0f, 0.0f ,1.0f);
+		arrow_col = circle_bg_col;
 		/*
 		HSL_to_RGB(col_hue, col_sat, col_bright + 0.2, rect_line_col, rect_line_col+1, rect_line_col+2);
 		BSET_COLOR(rect_line_col, 1.0f, 1.0f, 1.0f, 0.3f);
