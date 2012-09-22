@@ -57,6 +57,7 @@ obecause this makes testing for mouseenter/leave (etc) faster.
 #include <buttons/Color.h>
 #include <buttons/Pad.h>
 #include <buttons/Rectangle.h>
+#include <buttons/Vector.h>
 #include <buttons/Storage.h>
 
 using std::vector;
@@ -133,6 +134,8 @@ public:
 	Pad<float>& addFloat2(const string& label, float* value);
 	Rectangle<int>& addRectanglei(const string& label, int* value);
 	Rectangle<float>& addRectanglef(const string& label, float* value);
+	Vector<float>& addVec2f(const string& label, float* value);
+
 		
 	// Spline
 	template<class S, class V>

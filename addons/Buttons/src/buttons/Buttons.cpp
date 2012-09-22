@@ -335,6 +335,12 @@ Pad<float>& Buttons::addFloat2(const string& label, float* value) {
 	return *el;
 }
 
+Vector<float>& Buttons::addVec2f(const string& label, float* value) {
+	buttons::Vector<float>* el = new Vector<float>(value, label);
+	addElement(el, label);
+	return *el;
+}
+
 Rectangle<int>& Buttons::addRectanglei(const string& label, int* value) {
 	buttons::Rectangle<int>* el = new Rectangle<int>(value, label);
 	addElement(el, label);

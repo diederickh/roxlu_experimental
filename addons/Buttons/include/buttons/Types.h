@@ -29,6 +29,7 @@ enum ElementTypes {
 	,BTYPE_COLOR = 5
 	,BTYPE_PAD = 6
 	,BTYPE_RECTANGLE = 7
+	,BTYPE_VECTOR = 8
 };
 
 enum ElementStates {
@@ -149,11 +150,11 @@ static int createRect(ButtonVertices& vd, int x, int y, int w, int h, float* top
 }
 
 static int createCircle(ButtonVertices& vd, const float x, const float y, const float r, float* col) {
-	static int num = 7;
+	static int num = 20;
 	static vector<ButtonVertex> res;
 	if(!res.size()) {
 		float def_col[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-		float pip = float(num) / 6.283185307;
+		float pip = 6.283185307 / float(num);
 		for(int i = 0; i <= num; ++i) {
 			float a = pip * i;
 			res.push_back(ButtonVertex(cos(a),sin(a), def_col));
