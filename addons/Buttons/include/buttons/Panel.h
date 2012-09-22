@@ -15,6 +15,7 @@
 #include <buttons/Radio.h>
 #include <buttons/Spline.h>
 #include <buttons/Color.h>
+#include <buttons/Pad.h>
 #include <buttons/Storage.h>
 #include <buttons/Buttons.h>
 
@@ -38,7 +39,8 @@ public:
 	Slideri& addInt(const string& label, int& value);
 	Sliderf& addFloat(const string& label, float& value);
 	ColorPicker& addColor(const string& label, float* value); 
-	
+	Pad<int>& addInt2(const string& label, int* value);
+
 	// Button
 	template<class T>
 	Button<T>& addButton(const std::string& label, int id, T* cb) {

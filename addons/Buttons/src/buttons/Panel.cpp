@@ -89,6 +89,10 @@ Slideri& Panel::addInt(const string& label, int& value) {
 	return active_gui->addInt(label, value);
 }
 
+Pad<int>& Panel::addInt2(const string& label, int* value) {
+	assert(active_gui != NULL);
+	return active_gui->addInt2(label, value);
+}
 
 ColorPicker& Panel::addColor(const string& label, float* value) {
 	assert(active_gui != NULL);
