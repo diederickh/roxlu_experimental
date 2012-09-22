@@ -47,7 +47,6 @@ obecause this makes testing for mouseenter/leave (etc) faster.
 #include <roxlu/opengl/Error.h>
 #include <roxlu/graphics/Color.h>
 
-//#include <buttons/Panel.h>
 #include <buttons/Types.h>
 #include <buttons/Element.h>
 #include <buttons/Slider.h>
@@ -57,8 +56,8 @@ obecause this makes testing for mouseenter/leave (etc) faster.
 #include <buttons/Spline.h>
 #include <buttons/Color.h>
 #include <buttons/Pad.h>
+#include <buttons/Rectangle.h>
 #include <buttons/Storage.h>
-
 
 using std::vector;
 using namespace roxlu;
@@ -131,7 +130,7 @@ public:
 	Toggle& addBool(const string& label, bool& value);
 	ColorPicker& addColor(const string& label, float* value); 
 	Pad<int>& addInt2(const string& label, int* value);
-
+	Rectangle<int>& addRectanglei(const string& label, int* value);
 		
 	// Spline
 	template<class S, class V>

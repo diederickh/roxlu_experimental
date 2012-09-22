@@ -27,6 +27,7 @@ enum ElementTypes {
 	,BTYPE_SPLINE = 4
 	,BTYPE_COLOR = 5
 	,BTYPE_PAD = 6
+	,BTYPE_RECTANGLE = 7
 };
 
 enum ElementStates {

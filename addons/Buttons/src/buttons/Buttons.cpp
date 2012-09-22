@@ -359,6 +359,12 @@ Pad<int>& Buttons::addInt2(const string& label, int* value) {
 	return *el;
 }
 
+Rectangle<int>& Buttons::addRectanglei(const string& label, int* value) {
+	buttons::Rectangle<int>* el = new Rectangle<int>(value, label);
+	addElement(el, label);
+	return *el;
+}
+
 Toggle& Buttons::addBool(const string& label, bool& value) {
 	buttons::Toggle* el = new Toggle(value, createCleanName(label));
 	addElement(el, label);
