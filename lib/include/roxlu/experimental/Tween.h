@@ -90,6 +90,8 @@ public:
 	float d;
 	float b;
 	float value;
+	float from_value;
+	float to_value;
 
 	rx_uint64 delay;
 	rx_uint64 t;

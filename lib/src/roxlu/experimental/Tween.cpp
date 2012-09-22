@@ -11,6 +11,8 @@ Tween::Tween(int type)
 	,c(0.0f)
 	,d(0.0f)
 	,b(0.0f)
+	,to_value(0.0f)
+	,from_value(0.0f)
 {
 }
 
@@ -23,7 +25,8 @@ void Tween::start(float fromValue, float toValue, rx_uint64 millis, rx_uint64 de
 	ready = false;
 	delay = delayMillis;
 	ends_on = now() + millis + delay;
-
+	to_value = toValue;
+	from_value = fromValue;
 	
 	c = toValue - fromValue;
 	b = fromValue;
