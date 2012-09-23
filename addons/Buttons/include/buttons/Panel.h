@@ -44,6 +44,7 @@ public:
 	Pad<float>& addFloat2(const string& label, float* value); // pointer to array with 2 values
 	Rectangle<int>& addRectanglei(const string& label, int* value); // pointer to array with 4 entries (topleft, bottomright)
 	Rectangle<float>& addRectanglef(const string& label, float* value); // pointer to array with 4 entries (topleft, bottomright)
+	Vector<float>& addVec2f(const string& label, float* value);
 
 	// Button
 	template<class T>

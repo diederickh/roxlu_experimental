@@ -217,39 +217,42 @@ inline void Emitter<P, C, V, H>::setEmission(const int mine, const int maxe) {
  */
 class EmitterHelper {
 public:
-	EmitterHelper(const float x, const float width, const float minY, const float maxY);
+	//EmitterHelper(const float x, const float width, const float minY, const float maxY);
+	EmitterHelper(const float x0, const float y0, const float x1, const float y1); // top left and bottom right
 	Particle<Vec2>* createParticle(Vec2 pos, float mass);
 	Vec2 getPosition();
 	Vec2 getVelocity(const float velX, const float velY, const float velZ);
 	Vec2 getRandomVelocity(const float minx, const float maxx, const float miny, const float maxy, const float minz, const float maxz);
 	void setPosition(const float x, const float y); // if you want to emit from one point
 	void update();
-	float min_y;
-	float max_y;
-	float emit_width;
-	float emit_x;
-	float emit_half_width;
+	float area[4];
 };
 
-inline EmitterHelper::EmitterHelper(const float x, const float width, const float minY, const float maxY)
-	:min_y(minY)
-	,max_y(maxY)
-	,emit_width(width)
-	,emit_x(0)
-	,emit_half_width(emit_width * 0.5)
-{
+inline EmitterHelper::EmitterHelper(const float x0, const float y0, const float x1, const float y1) {
+	area[0] = x0;
+	area[1] = y0;
+	area[2] = x1;
+	area[3] = y1;
 }
 
 inline Vec2 EmitterHelper::getPosition() {
-	return Vec2(random(emit_x-emit_half_width, emit_x+emit_half_width), random(min_y,max_y));
+	return Vec2(random(area[0], area[2]), random(area[1], area[3]));
 }
 
+
 inline void EmitterHelper::setPosition(const float x, const float y) {
+	/*
 	emit_x = x;
 	emit_half_width = 0.0f;
 	min_y = y; 
 	max_y = y;
+	*/
+	area[0] = x;
+	area[1] = y;
+	area[2] = x;
+	area[3] = y;
 }
+
 
 inline Vec2 EmitterHelper::getVelocity(const float vx, const float vy, const float vz) {
 	return Vec2(vx, vy);

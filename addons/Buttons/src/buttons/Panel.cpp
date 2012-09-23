@@ -98,6 +98,11 @@ Pad<float>& Panel::addFloat2(const string& label, float* value) {
 	return active_gui->addFloat2(label, value);
 }
 
+Vector<float>& Panel::addVec2f(const string& label, float* value) {
+	assert(active_gui != NULL);
+	return active_gui->addVec2f(label, value);
+}
+
 Rectangle<int>& Panel::addRectanglei(const string& label, int* value) {
 	assert(active_gui != NULL);
 	return active_gui->addRectanglei(label, value);

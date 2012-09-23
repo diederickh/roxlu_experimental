@@ -168,7 +168,7 @@ public:
 	void Rectangle<T>::onMouseMoved(int mx, int my) {
 		if(drag_inside && !near_tl && !near_br) {
 			// Get the closest handle
-			float min_dist = 15;
+			float min_dist = 5;
 			min_dist *= min_dist;
 
 			float dx = (tl_x - mx);
