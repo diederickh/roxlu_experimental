@@ -63,7 +63,7 @@ public:
 	C& particles;
 	H& helper;
 	rx_uint64 time_to_emit;
-	rx_uint64 emit_time;
+	int emit_time;
 	bool enabled;
 
 	// Particle settings:
@@ -117,10 +117,24 @@ Emitter<P, C, V, H>::Emitter(C& particles, H& helper)
 
 template<class P, class C, class V, class H>
 void Emitter<P, C, V, H>::update() {
+	
 	if(!enabled) {
 		return;
 	}
 
+	// how often do we need to emit (values can change during runtime)
+	int emission_range = 0;
+	if(max_emission == min_emission) {
+		emission_range = max_emission;
+	}
+	else {
+		emission_range = (max_emission - min_emission);
+	}
+	if(emission_range == 0) {
+		return;
+	}
+	emit_time = 1000/emission_range;
+	
    helper.update();
 	particles.removeDeadParticles();
 
@@ -136,6 +150,7 @@ void Emitter<P, C, V, H>::update() {
 		return;
 	}
 	
+
 	time_to_emit = now + emit_time;
 
 	float	size = random(min_particle_size, max_particle_size);
