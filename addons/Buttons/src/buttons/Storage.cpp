@@ -52,13 +52,12 @@ bool Storage::save(const string& file, Buttons* buttons) {
 // crashes on windows when you save with 10 elements en load 
 // with 8 for example.
 bool Storage::load(const string& file, Buttons* buttons) {
-	
 	std::ifstream ifs(file.c_str(), std::ios::out | std::ios::binary);
 	if(!ifs.is_open()) {
 		printf("Cannot load: %s\n", file.c_str());
 		return false;
 	}
-	
+
 	// Panel specific settings.
 	Buttons& b = *buttons;
 	int x, y, w;
@@ -75,15 +74,18 @@ bool Storage::load(const string& file, Buttons* buttons) {
 
 	// Number of elements.
 	size_t num_els = 0;
-	ifs.read((char*)&num_els, sizeof(size_t));
-	
+	ifs.read((char*)&num_els, sizeof(size_t));	
+
 	// Load elements.
 	char name_buf[1024];
-	
 	for(int i = 0; i < num_els; ++i) {
 		int type = 0;
 		ifs.read((char*)&type, sizeof(int));
-		
+		if(!ifs) {
+			printf("ERROR: Error while reading from gui settings file.\n");
+			continue;
+		}
+
 		// retrieve name.
 		size_t name_size;
 		ifs.read((char*)&name_size, sizeof(size_t));
@@ -93,7 +95,6 @@ bool Storage::load(const string& file, Buttons* buttons) {
 
 		size_t data_size;
 		ifs.read((char*)&data_size, sizeof(size_t));
-		
 		if(el == NULL) {
 			printf("%s not found, forgetting about value...\n", name_buf);
 			ifs.seekg(data_size, ios_base::cur);
@@ -101,6 +102,7 @@ bool Storage::load(const string& file, Buttons* buttons) {
 		else {
 			el->load(ifs);
 		}
+
 	}
 	ifs.close();
 	return true;
