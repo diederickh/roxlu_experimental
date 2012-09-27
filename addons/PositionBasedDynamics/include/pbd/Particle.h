@@ -22,6 +22,7 @@ public:
 	void disable();
 	void addSpring(Spring<T>* s); 
 	void setColor(const float r, const float g, const float b, float a = 1.0f);
+	void setMass(const float m);
 		
 	T position;
 	T forces;
@@ -59,20 +60,20 @@ Particle<T>::Particle(const T& pos, float mass)
 	,agep(0.0f)
 {
 	color[0] = color[1] = color[2] = color[3] = 1.0f;
-	if(mass < 0.01) {
+	setMass(mass);
+}
+
+template<class T>
+inline void Particle<T>::setMass(const float m) {
+	if(m < 0.01) {
 		mass = 0.0f;
 		inv_mass = 0.0f;
 	}
 	else {
-		inv_mass = 1.0f / mass;
+		inv_mass = 1.0f / m;
+		mass = m;
 	}
 }
-
-/*
-template<class T>
-virtual Particle<T>::~Particle() {
-}
-*/
 
 template<class T>
 inline void Particle<T>::addSpring(Spring<T>* s) {
