@@ -52,6 +52,7 @@ public:
 	void setParticleSize(const float min, const float max);
 	void setParticleLifeTime(const int min, const int max);
 	void setParticleVelocity(const float x, const float y, const float z);
+	void setParticleRandomVelocity(const float minx, const float maxx, const float miny, const float maxy, const float minz, const float maxz);
 	void setParticleMass(const float minMass, const float maxMass);
 	void setEmission(const int min, const int max);
 	void enable();
@@ -207,6 +208,24 @@ template<class P, class C, class V, class H>
 inline void Emitter<P, C, V, H>::setParticleMass(const float minMass, const float maxMass) {
 	min_particle_mass = minMass;
 	max_particle_mass = maxMass;
+}
+
+template<class P, class C, class V, class H>
+inline void Emitter<P, C, V, H>::setParticleRandomVelocity(
+												  const float minx
+												  ,const float maxx
+												  ,const float miny
+												  ,const float maxy
+												  ,const float minz
+												  ,const float maxz
+)
+{
+	max_particle_random_x_vel = minx;
+	max_particle_random_x_vel = maxx;
+	min_particle_random_y_vel = miny;
+	max_particle_random_y_vel = maxy;
+	min_particle_random_z_vel = minz;
+	max_particle_random_z_vel = maxz;
 }
 
 template<class P, class C, class V, class H> 
