@@ -265,6 +265,7 @@ public:
 	
 	Slider& setStep(const T s) {
 		stepv = s;
+		return *this;
 	}
 
 	Slider& setMin(const T& m) {

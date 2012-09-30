@@ -168,7 +168,11 @@ void Text::updateBuffer() {
 		t.end_dx = t.vertices.size();
 		++it;			
 	}
-	
+
+	if(vertices.size() == 0) {
+		return;
+	}
+
 	// do we need to resize the vbo
 	if(vertices.numBytes() > buffer_size) {
 		vao.bind();

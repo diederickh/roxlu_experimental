@@ -70,14 +70,17 @@ public:
 		,bg_h(0)
 		,bg_w(0)
 		,value(value)
-		,radius(10)
+		,radius(1.0f)
 		,cx(0)
 		,cy(0)
 		,angle(0)
 		,is_rotating(false)
 		,arrow_col(NULL)
+		,cos_a(0.0f)
+		,sin_a(0.0f)
 	{
 		this->h = 120;
+		setColor(1.0f, 1.0f);
 	}
 
 	template<class T>
@@ -104,7 +107,7 @@ public:
 		buttons::createCircle(vd, cx, cy, radius, circle_bg_col);
 
 		// Arrow
-		//		float end_x = cx + cos(angle) * (radius * 0.7);
+		//float end_x = cx + cos(angle) * (radius * 0.7);
 		//float end_y = cy + sin(angle) * (radius * 0.7);
 		float end_x = cx + cos_a * (radius * 0.7);
 		float end_y = cy + sin_a * (radius * 0.7);
