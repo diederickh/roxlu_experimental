@@ -25,8 +25,16 @@ extern uint32_t gl_string_id(const char * data, int len);
 
 // as suggested: http://stackoverflow.com/questions/4100657/problem-with-my-clamp-macro
 template <typename T> 
-inline T clamp(T value, T low, T high) {
+inline T rx_clamp(T value, T low, T high) {
     return (value < low) ? low : ((value > high) ? high : value);
 }
+
+
+template<typename T>
+inline T rx_map(T value, T minIn, T maxIn, T minOut, T maxOut) {
+	T range = ((value - minIn) / (maxIn - minIn) * (maxOut - minOut) + minOut);
+	return range;
+}
+
 
 #endif
