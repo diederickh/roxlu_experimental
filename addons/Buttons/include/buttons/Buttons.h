@@ -59,6 +59,8 @@ obecause this makes testing for mouseenter/leave (etc) faster.
 #include <buttons/Rectangle.h>
 #include <buttons/Vector.h>
 #include <buttons/Storage.h>
+#include <buttons/Server.h>
+#include <buttons/Client.h>
 
 using std::vector;
 using namespace roxlu;
@@ -193,7 +195,7 @@ public:
 	string getName();
 	
 	void addListener(ButtonsListener* listener);
-	void notifyListeners(int aboutWhat);
+	void notifyListeners(ButtonsEventType aboutWhat, const Element* target);
 	
 private:
 	void addElement(Element* el, const string& label);
@@ -212,6 +214,7 @@ private:
 	
 	string createCleanName(const string& ugly);
 	
+public: 
 	vector<Element*> elements;
 	vector<ButtonsListener*> listeners;
 		

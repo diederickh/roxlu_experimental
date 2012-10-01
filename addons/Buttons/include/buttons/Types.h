@@ -18,6 +18,7 @@ using roxlu::Vec2;
 
 namespace buttons {
 
+class Element;
 class Buttons; 
 
 enum ElementTypes {
@@ -44,13 +45,32 @@ enum ElementValueTypes {
 	,BVALUE_FLOAT
 };
 
-enum ButtonsEventTypes {
-	BEVENT_BUTTONS_REDRAW	= 0
+
+enum ButtonsEventType {
+	BEVENT_BUTTONS_REDRAW = 0 // fired when color, size, value etc.. changes.
+	,BEVENT_VALUE_CHANGED = 1  // fired when a value of a widged is changed
+};
+
+enum ButtonServerCommandName {
+	BSERVER_COMMAND_TEST
+	,BSERVER_SCHEME
+	,BSERVER_VALUE_CHANGED
+};
+
+
+// Used by client/server to specify how a remote gui looks like
+// The scheme also uses the ElementTypes to describe the elements 
+// of the gui.
+enum ButtonsScheme {
+	 BSCHEME_GUI   // element is a gui
+	 ,BSCHEME_PANEL  // element is a panel 
+	 //	 ,BSCHEME_POSITION // followed by two ui32  x/y indicating the position of a buttons/panel
+	 //	 ,BSCHEME_SIZE // followed by tw ui32 w/h
 };
 
 class ButtonsListener {
 public:
-	virtual void onRedraw(Buttons& buttons) = 0;
+	virtual void onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target) = 0;
 };
 
 class ButtonVertex {
@@ -169,6 +189,150 @@ static int createCircle(ButtonVertices& vd, const float x, const float y, const 
 	
 	return new_verts.size();
 }
+
+// Hash function used by client/server
+inline unsigned int buttons_hash(const char *key, size_t len) {
+	unsigned int hash, i;
+	for(hash = i = 0; i < len; ++i) {
+		hash += key[i];
+		hash += (hash << 10);
+		hash ^= (hash >> 6);
+	}
+	hash += (hash << 3);
+	hash ^= (hash >> 11);
+	hash += (hash << 15);
+	return hash;
+}
+
+// Super simple buffer used by client/server
+struct ButtonsBuffer {
+	ButtonsBuffer(){}
+	void clear() {	
+		data.clear();
+		//	read_dx = 0;
+	}
+
+	size_t size() { 
+		return data.size();
+	}
+
+	size_t getNumBytes() { 
+		return size() * sizeof(char); 
+	}
+	/*
+	size_t getNumBytesToRead() {
+		return size() - read_dx;
+	}
+	*/
+	char* getPtr() { 
+		return &data[0]; 
+	}
+	void addByte(char b) { 
+		data.push_back(b);	
+	}
+
+	void addUI32(unsigned int num) {	
+		addBytes((char*)&num, 4);
+	}
+
+	void addUI16(unsigned short num) { 
+		addBytes((char*)&num, 2); 
+	}
+
+	void addFloat(float num) {
+		printf("Add a float... : %f\n", num);
+		addBytes((char*)&num, sizeof(num));
+	}
+
+	void addBytes(char* buffer, int num) { 
+		for(int i = 0; i < num; ++i) { 
+			data.push_back(buffer[i]);
+		} 
+	}
+
+	void addString(std::string str) {
+		unsigned short size = str.size();
+		addUI16(size);
+		addBytes((char*)str.c_str(), size);
+	}
+
+	void rewrite(int start, int num, char* buffer) { 
+		for(int i = start, j = 0; i < (start+num); ++i, ++j) { 
+			data[i] = buffer[j]; 
+		} 
+	}
+
+	char consumeByte() {
+		char c = data[0];
+	   flush(1);
+			return c;
+	}
+
+	std::string consumeString() {
+		unsigned short size = consumeUI16();
+		std::string str;
+		for(int i = 0; i < size; ++i) {
+			str.push_back((char)data[i]);
+		}
+		flush(size);
+		return str;
+	}
+	
+	unsigned short int consumeUI16() {
+		unsigned short int v = getUI16();
+		flush(2);
+		return v;
+	}
+
+	unsigned int consumeUI32() {
+		unsigned int v = getUI32();
+		flush(4);
+		return v;
+	}
+	
+	float consumeFloat() {
+		float f = getFloat();
+		flush(sizeof(float));
+		return f;
+	}
+
+	unsigned short int getUI16(int dx = 0) {
+		unsigned short int v;
+		memcpy((char*)&v, (char*)&data[dx], sizeof(v));
+		return v;
+	} 
+
+	unsigned int getUI32(int dx = 0) { 
+		unsigned int v; 
+		memcpy((char*)&v, (char*)&data[dx], sizeof(v));
+		return v;
+	}
+
+	float getFloat() {
+		float f = 0.0f;
+		memcpy((char*)&f, (char*)&data[0], sizeof(float));
+		return f;
+	}
+
+	void flush() {
+		flush(size());
+	}
+
+	void flush(int numBytes) {
+		data.erase(data.begin(), data.begin() + numBytes);
+		//read_dx += numBytes;
+	}
+
+	void reset() {
+		//	read_dx = 0;
+	}
+
+
+	char& operator[](const unsigned int dx) { return data[dx]; } 
+
+	std::vector<char> data;
+	// int read_dx;
+};
 
 } // namespace buttons
 

@@ -127,7 +127,7 @@ void Buttons::update() {
 			++it;
 		}
 		
-		// check if we need to update the vertices.
+		// check if we need to update the vertices or if a value is changed.
 		it = elements.begin();
 		if(!is_changed) { // is this panel self changed.
 			while(it != elements.end()) {
@@ -136,6 +136,10 @@ void Buttons::update() {
 				} 
 				if((*it)->needs_text_update) {
 					needs_text_update = true;
+				}
+				if((*it)->value_changed) {
+					notifyListeners(BEVENT_VALUE_CHANGED, (*it));
+					(*it)->value_changed = false;
 				}
 				++it;
 			}
@@ -151,7 +155,7 @@ void Buttons::update() {
 		updateDynamicTexts(); // need to update everything when a element i.e. get bigger
 		updateStaticTextPositions();
 		generateVertices();
-		notifyListeners(BEVENT_BUTTONS_REDRAW);
+		notifyListeners(BEVENT_BUTTONS_REDRAW, NULL);
 	}
 	if(needs_text_update) {
 		updateDynamicTexts();
@@ -706,7 +710,12 @@ void Buttons::addListener(ButtonsListener* listener) {
 	listeners.push_back(listener);
 }
 
-void Buttons::notifyListeners(int aboutWhat) {
+void Buttons::notifyListeners(ButtonsEventType aboutWhat, const Element* target) {
+	for(vector<ButtonsListener*>::iterator it = listeners.begin(); it != listeners.end(); ++it) {
+		(*it)->onEvent(aboutWhat, *this, target);
+	}
+	
+	/*
 	switch(aboutWhat) {
 		case BEVENT_BUTTONS_REDRAW: {
 			for(vector<ButtonsListener*>::iterator it = listeners.begin(); it != listeners.end(); ++it) {
@@ -716,6 +725,7 @@ void Buttons::notifyListeners(int aboutWhat) {
 		}
 		default:break;
 	}
+	*/
 }
 
 

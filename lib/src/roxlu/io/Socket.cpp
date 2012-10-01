@@ -70,6 +70,58 @@ bool Socket::isValid() {
 	return ret == 0;
 }
 
+bool Socket::bind(const char* ip, unsigned short int port) {
+#ifdef _WIN32
+#elif __APPLE__
+	if(!isValid()) {
+		if(!create()) {
+			printf("Error: cannot create valid socket to bind.\n");
+			return false;
+		}
+	}
+	memset(&addr_in, 0, sizeof(addr_in));
+	addr_in.sin_family = AF_INET;
+	addr_in.sin_addr.s_addr = htonl(INADDR_ANY);  // bind to any network card
+	addr_in.sin_port = htons(port);
+	int result = ::bind(sock, (struct sockaddr*)&addr_in, sizeof(addr_in));
+
+	if(result != 0) {
+		printf("Error: could not bind socket on %s:%d, error: %s (%d)\n", ip, port, strerror(errno), errno);
+		close();
+		return false;
+	}
+	return true;
+#endif
+}
+
+bool Socket::listen(int maxQueue) {
+#ifdef _WIN32
+#elif __APPLE__
+	int result = ::listen(sock, maxQueue);
+	if(result == -1) {
+		printf("Error: cannot start to listen.\n");
+		close();
+		return false;
+	}
+	return true;
+#endif
+}
+
+bool Socket::accept(Socket& client) {
+#ifdef _WIN32
+#elif __APPLE__
+	Socket client_sock;
+	memset(&client.addr_in, 0, sizeof(client.addr_in));
+	socklen_t len = sizeof(client.addr_in);
+	client.sock = ::accept(sock, (struct sockaddr*)&client.addr_in, &len);
+	if(client.sock == -1) {
+		printf("Error: cannot create client socket.\n");
+		return false;
+	}
+	return true;
+#endif
+}
+
 /**
  * Connect to an ip address.
  * 
@@ -211,7 +263,7 @@ bool Socket::connect(const char* ip, unsigned short int port, int timeout) {
 			return false;
 		}
 		else {
-			printf("Error: Cannot select, error: %d, %s.\n", errno, strerror(errno));
+ 			printf("Error: Cannot select, error: %d, %s.\n", errno, strerror(errno));
 			close();
 			return false;
 		}
@@ -441,6 +493,26 @@ bool Socket::setNoDelay() {
 #elif __APPLE__
 	int nodelay = 1;
 	int result = setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (void*)&nodelay, sizeof(int));
+	return result == 0;
+#endif
+}
+
+bool Socket::setNoSigPipe() {
+#ifdef _WIN32
+	printf("@todo implmenet setNoSigPipe on windows\n");
+#elif __APPLE__
+	int set = 1;
+	int result = setsockopt(sock, SOL_SOCKET, SO_NOSIGPIPE, (void *)&set, sizeof(int));
+	return result == 0;
+#endif
+}
+
+bool Socket::setReUseAddress() {
+#ifdef _WIN32
+	printf("@todo Implement setReUseAddress() on windows.\n");
+#elif __APPLE__
+	int set = 1;
+	int result = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &set, sizeof(set));
 	return result == 0;
 #endif
 }

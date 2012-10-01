@@ -191,7 +191,7 @@ void Panel::load() {
 
 // Event handling
 // -----------------------------------------------------------------------------
-void Panel::onRedraw(Buttons& bt) {
+void Panel::onEvent(ButtonsEventType event, const Buttons& bt, const Element* target) {
 	// position change?
 	int xx = 0;
 	int yy = 0;

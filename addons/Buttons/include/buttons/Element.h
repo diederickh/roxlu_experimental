@@ -54,6 +54,7 @@ public:
 		
  	void needsRedraw();
 	void needsTextUpdate(); // when you want to change the dynamic text
+	void flagValueChanged();
 	
 	int x;
 	int y; 
@@ -71,6 +72,7 @@ public:
 	bool is_visible; 
 	bool needs_redraw;	
 	bool needs_text_update;
+	bool value_changed;
 	bool drag_inside; // did the drag started from inside the element.
 	
 	float* bg_top_color;
@@ -87,6 +89,10 @@ public:
 	Text* dynamic_text;
 
 };
+
+inline void Element::flagValueChanged() {
+	value_changed = true;
+}
 
 inline void Element::needsRedraw() {
 	needs_redraw = true;

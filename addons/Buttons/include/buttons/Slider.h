@@ -191,7 +191,6 @@ public:
 				setValue(value - stepv);
 				needsRedraw();
 			}
-			//			bt_mouse_down = -1;
 		}
 		bt_frames_down = 0;
 		bt_mouse_down = -1;
@@ -218,6 +217,7 @@ public:
 			value = minv + (p * (maxv-minv));
 			needsRedraw();
 			needsTextUpdate();
+			flagValueChanged();
 		}
 	}
 
@@ -270,7 +270,6 @@ public:
 
 	Slider& setMin(const T& m) {
 		minv = m; 
-		printf("test");
 		return *this;
 	}
 	

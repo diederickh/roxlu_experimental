@@ -67,7 +67,7 @@ public:
 	void select(const string& name);
 	void setColor(const float hue, float a = 1.0);
 		
-	void onRedraw(Buttons& bt);
+	void onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target);
 	
 	int getContentHeight();
 	void position();

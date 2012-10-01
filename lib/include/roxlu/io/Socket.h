@@ -36,18 +36,25 @@ class Socket {
 public:
 	Socket();
 	~Socket();
+	bool create(); // only call when you need to setup some socket options e.g. before binding
 	bool connect(const char* ip, unsigned short int port, int timeout = -1);
+	bool bind(const char* ip, unsigned short int port);
+	bool listen(int maxQueue);
+	bool accept(Socket& client);
 	int read(char* buf, int count, int timeout = -1); // -2 = client disconnected (if possible to detect, else -1),  -1 = error while reading, 0 = got timeout (when timeout is used), 0 > = number of bytes read
 	int send(const char* buf, int count); 
 	void close();
 	bool setBlocking(bool flag);
 	bool setNoDelay(); // on linux small packets are send in groups by default.
 	bool setKeepAlive(); // http://tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO/#whatis, set this if you want be notified by network disconnections
+	bool setNoSigPipe();
+	bool setReUseAddress();
 	bool isBlocking();
 	bool isValid();
+
 private:
 	bool is_blocking;
-	bool create();
+
 
 #ifdef _WIN32
 	WSADATA wsa_data;
