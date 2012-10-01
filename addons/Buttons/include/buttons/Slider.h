@@ -270,7 +270,6 @@ public:
 
 	Slider& setMin(const T& m) {
 		minv = m; 
-		printf("test");
 		return *this;
 	}
 	
