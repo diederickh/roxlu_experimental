@@ -3,6 +3,7 @@
 
 #include <buttons/Types.h>
 #include <buttons/Element.h>
+#include <buttons/Server.h>
 
 #include <string>
 #include <vector>
@@ -14,8 +15,10 @@ namespace buttons {
 
 	enum ClientTaskName {
 		 BCLIENT_PARSE_SCHEME
+		 ,BCLIENT_SEND_TO_SERVER
 		 ,BCLIENT_VALUE_CHANGED_SLIDERI
 		 ,BCLIENT_VALUE_CHANGED_SLIDERF
+		 ,BCLIENT_VALUE_CHANGED
 	};
 
 	struct ClientTask {
@@ -38,8 +41,16 @@ namespace buttons {
 		float sliderf_value;
 		int slideri_value;
 	};
-
-	class Client : public roxlu::Runnable {
+	/*	
+	class ClientConnection : public roxlu::Runnable {
+	public:
+		void addTask(ClientTask task);
+		void run();
+	private:
+		std::vector<ClientTask> out_tasks; // used for Client --> Server communication
+	};
+	*/
+	class Client : public roxlu::Runnable, public ButtonsListener {
 	public:
 		Client(const std::string ip, int port);
 		~Client();
@@ -47,13 +58,23 @@ namespace buttons {
 		void run();
 		void update();
 		void draw();
+
+		void onMouseDown(int x, int y);
+		void onMouseUp(int x, int y);
+		void onMouseMoved(int x, int y);
+
+		void onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target);
+
 	private:
 		void parseBuffer();
 		void parseCommandScheme();
 		void parseCommandTest();
 		void parseCommandValueChanged();
 		void parseTaskScheme(ClientTask& task);
-		void addTask(ClientTask task); // name, ButtonsBuffer buffer);
+		void addInTask(ClientTask task); // name, ButtonsBuffer buffer);
+		void addOutTask(ClientTask task);
+		void addSendToServerTask(ClientTaskName name, ButtonsBuffer buffer); // adds a new task to the server; sending is done in a separate thread
+		void send(const char* buffer, size_t len); // send data to server
 	private:
 		Socket sock;
 		roxlu::Thread thread;
@@ -61,12 +82,14 @@ namespace buttons {
 		int port;
 		std::string ip;
 		ButtonsBuffer buffer;
-		std::vector<ClientTask> tasks;
-		//std::vector<buttons::Buttons*> buttons;
+		ClientServerUtils utils;
+		std::vector<ClientTask> in_tasks; // ussed for Server --> Client comunication
+		std::vector<ClientTask> out_tasks; // used for Client --> Server communication
 		std::map<unsigned int, buttons::Buttons*> buttons; 
 		std::map<unsigned int, std::map<unsigned int, buttons::Element*> > elements;
 		// used on guis
 		std::vector<float*> value_floats;
+
 	};
 
 } // buttons

@@ -18,19 +18,57 @@ namespace buttons {
 
 	// RUN IN SEPARATE THREAD
 	void Client::run() {
+		printf("running?\n");
 		if(!sock.connect(ip.c_str(), port)) {
 			printf("Error: cannot sonnect to %s:%d\n", ip.c_str(), port);
 			return;
 		}
 		
 		std::vector<char> tmp(2048);
+		sock.setBlocking(false);
 		while(true) {
 			int bytes_read = sock.read(&tmp[0], tmp.size());
 			if(bytes_read) {
 				buffer.addBytes((char*)&tmp[0], bytes_read);
 				parseBuffer();
 			}
+			// Check if there are tasks that we need to handle
+			mutex.lock();
+			{
+				for(std::vector<ClientTask>::iterator it = out_tasks.begin(); it != out_tasks.end(); ++it) {
+					ClientTask& task = *it;
+					send(task.buffer.getPtr(), task.buffer.getNumBytes());
+					/*
+					switch(task.name) {
+					case BCLIENT_SEND_TO_SERVER: {
+
+						break;
+					}
+					default: {
+						break;
+					}}
+					*/
+				}
+				out_tasks.clear();
+			}
+			mutex.unlock();
 		}
+	}
+	void Client::send(const char* buffer, size_t len) {
+		size_t bytes_left = len;
+		sock.setBlocking(true);
+		while(bytes_left) {
+			int done = sock.send(buffer, len);
+			if(done < 0) {
+				printf("Error: handle this error... \n");
+				break;
+			}
+			else {
+				bytes_left -= done;
+				printf("Left to send: %zu\n", bytes_left);
+			}
+		}
+		sock.setBlocking(false);
 	}
 
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++	
@@ -59,7 +97,7 @@ namespace buttons {
 	// GET SCHEME BUFFER
 	void Client::parseCommandScheme() {
 		// DID WE RECEIVE ENOUGH DATA?
-		if(buffer.size() < 5 || buffer[0] != BSERVER_SCHEME) {
+		if(buffer.size() < 5 || (buffer.size() > 0 &&  buffer[0] != BSERVER_SCHEME)) {
 			printf("Error: cannot parse scheme; incorrect data.\n");
 			return;
 		}
@@ -74,7 +112,7 @@ namespace buttons {
 		task_buffer.addBytes(buffer.getPtr(), buffer.getNumBytes());
 		ClientTask task(BCLIENT_PARSE_SCHEME);
 		task.buffer = task_buffer;
-		addTask(task);
+		addInTask(task);
 		buffer.flush(task_buffer.size());
 	}
 
@@ -106,7 +144,7 @@ namespace buttons {
 				ctask.element = el;
 				ctask.sliderf = sliderf;   // @todo figure out if this might lead to threading problems..
 				ctask.sliderf_value = element_value;
-				addTask(ctask);
+				addInTask(ctask);
 			}
 			break;
 		}
@@ -114,11 +152,21 @@ namespace buttons {
 		}
 		printf("Bytes left: %zu\n", buffer.size());
 	}
-	
-	void Client::addTask(ClientTask task) {
+
+	// We received data from the server; add it to the "in task" list. (e.g. changing values(
+	void Client::addInTask(ClientTask task) {
 		mutex.lock();
 		{
-			tasks.push_back(task);
+			in_tasks.push_back(task);
+		}
+		mutex.unlock();
+	}
+
+	// We changed the gui/values so update the remote server (out task)
+	void Client::addOutTask(ClientTask task) {
+		mutex.lock();
+		{
+			out_tasks.push_back(task);
 		}
 		mutex.unlock();
 	}
@@ -128,8 +176,8 @@ namespace buttons {
 		mutex.lock();
 		{
 			// Parse new tasks.
-			std::vector<ClientTask>::iterator it = tasks.begin(); 
-			while(it != tasks.end()) {
+			std::vector<ClientTask>::iterator it = in_tasks.begin(); 
+			while(it != in_tasks.end()) {
 				ClientTask& task = *it;
 				switch(task.name) {
 				case BCLIENT_VALUE_CHANGED_SLIDERF: {
@@ -145,7 +193,7 @@ namespace buttons {
 					printf("Error: Unhandled task.\n"); break;
 					break;
 				}}
-				it = tasks.erase(it);
+				it = in_tasks.erase(it);
 			}
 		}
 		mutex.unlock();
@@ -159,7 +207,27 @@ namespace buttons {
 			it->second->draw();
 		}
 	}
-		
+
+	void Client::onMouseMoved(int x, int y) {
+		for(std::map<unsigned int, buttons::Buttons*>::iterator it = buttons.begin(); it != buttons.end(); ++it) {
+			it->second->onMouseMoved(x,y);
+		}
+	}
+
+	void Client::onMouseUp(int x, int y) {
+		for(std::map<unsigned int, buttons::Buttons*>::iterator it = buttons.begin(); it != buttons.end(); ++it) {
+			it->second->onMouseUp(x,y);
+		}
+	}
+
+	void Client::onMouseDown(int x, int y) {
+		for(std::map<unsigned int, buttons::Buttons*>::iterator it = buttons.begin(); it != buttons.end(); ++it) {
+			it->second->onMouseDown(x,y);
+		}
+	}
+	
+	
+	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	// CREATES THE BUTTONS/PANELS FROM THE REMOTE SCHEME
 	void Client::parseTaskScheme(ClientTask& task) {
 		while(true) {
@@ -175,6 +243,7 @@ namespace buttons {
 				
 				// STORE AT ID
 				buttons::Buttons* gui = new Buttons(title, w);
+				gui->addListener(this);
 				unsigned int buttons_id = buttons_hash(title.c_str(), title.size());
 				buttons[buttons_id] = gui;
 
@@ -221,7 +290,28 @@ namespace buttons {
 			}
 			break;
 		}
+	}
 
+	// From Client > Server
+	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	void Client::addSendToServerTask(ClientTaskName name, ButtonsBuffer buffer) {
+		ClientTask task(name);
+		task.buffer.addByte(name);
+		task.buffer.addUI32(buffer.getNumBytes());
+		task.buffer.addBytes(buffer.getPtr(), buffer.getNumBytes());
+		addOutTask(task);
+	}
+
+	void Client::onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target) {
+		// @todo some duplicate code here, see Server::onEvent; maybe move this to the ClientServerUtils
+		if(event == BEVENT_VALUE_CHANGED) {
+			ButtonsBuffer buffer;
+			if(utils.serializeOnValueChanged(buttons, target, buffer)) {
+				printf("Created a buffer: %zu\n", buffer.size());
+				addSendToServerTask(BCLIENT_VALUE_CHANGED, buffer);
+				//connections.sendToAll(cmd);
+			}
+		}
 	}
 
 } // buttons

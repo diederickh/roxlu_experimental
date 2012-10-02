@@ -3,11 +3,80 @@
 
 namespace buttons {
 
+	// CLIENT <--> SERVER BUFFER UTILS
+	// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	ClientServerUtils::ClientServerUtils() {
+	}
+
+	ClientServerUtils::~ClientServerUtils() {
+	}
+	
+	// Serializes data into a buffer after receiving a value changed event.
+	bool ClientServerUtils::serializeOnValueChanged(const Buttons& buttons, const Element* target, ButtonsBuffer& result) {
+		unsigned int buttons_id = buttons_hash(buttons.title.c_str(), buttons.title.size());
+		unsigned int element_id = buttons_hash(target->label.c_str(), target->label.size());
+		bool ret = true;
+
+		// Serialize for each type.
+		switch(target->type) {
+		case BTYPE_SLIDER: {
+			const Sliderf* sliderf = static_cast<const Sliderf*>(target);
+			if(sliderf->value_type == Slider<float>::SLIDER_FLOAT) {
+				result.addUI32(buttons_id);
+				result.addUI32(element_id);
+				result.addFloat(sliderf->value);
+			};
+			break;
+		}
+		default: {
+			printf("Error: unhandled sync type: %d\n", target->type); 
+			ret = false;
+			break;
+		}};
+
+		return ret;
+	}
+
+	bool ClientServerUtils::deserializeOnValueChanged(
+																	  ButtonsBuffer& buffer
+																	  ,CommandData& result
+																	  ,std::map<unsigned int, std::map<unsigned int, buttons::Element*> >& elements
+																	  ) 
+	{
+		int command_name = buffer.consumeByte();		
+
+
+		switch(command_name) {
+		case BCLIENT_VALUE_CHANGED: {
+			unsigned int command_size = buffer.consumeUI32();
+			result.buttons_id = buffer.consumeUI32();
+			result.element_id = buffer.consumeUI32();
+			result.element = elements[result.buttons_id][result.element_id];
+
+			Sliderf* sliderf = static_cast<Sliderf*>(result.element);
+			if(sliderf->value_type == Slider<float>::SLIDER_FLOAT) {
+				result.sliderf = sliderf;
+				result.sliderf_value = buffer.consumeFloat();
+				result.name = BDATA_SLIDERF;
+				//printf("Bytes left in buffer: %zu, value: %f\n", buffer.size(), result.sliderf_value);
+				return true;
+			}
+			
+			break;
+		}
+		default: {
+			return false;
+			break;
+		}};
+		return false;
+	}
+
 	// SERVER CONNECTION
 	// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	ServerConnection::ServerConnection(ServerConnections& connections, Socket clientSocket)
+	ServerConnection::ServerConnection(Server& server, ServerConnections& connections, Socket clientSocket)
 		:connections(connections)
 		,client(clientSocket)
+		,server(server)
 	{
 
 	}
@@ -45,6 +114,45 @@ namespace buttons {
 		}
 	}
 
+	void ServerConnection::read() {
+		client.setBlocking(false);
+		std::vector<char> tmp(2048);
+		int bytes_read = client.read(&tmp[0], tmp.size());
+		if(bytes_read) {
+			read_buffer.addBytes((char*)&tmp[0], bytes_read);
+			parseReadBuffer();
+		}
+		client.setBlocking(true);
+	}
+
+	// PARSE INCOMING COMMANDS
+	void ServerConnection::parseReadBuffer() {
+		printf("Recieved data, we have %zu bytes in buffer.\n", read_buffer.size());
+		do {
+			if(read_buffer.size() < 5) { // minimum size of a command
+				return;
+			}
+
+			unsigned int command_size = read_buffer.getUI32(1);
+			if(read_buffer.size() < command_size) {
+				printf("Buffer has only %zu bytes, and the command consists of: %u bytes.\n", read_buffer.size(), command_size);
+				return;
+			}
+
+			// when we arrive at this point we received a complete command
+			CommandData deserialized;
+			if(util.deserializeOnValueChanged(read_buffer, deserialized, server.elements)) {
+				printf("Correctly deserialized.\n");
+				server.addTask(deserialized);
+			}
+
+			printf("Command size: %u\n", command_size);
+			
+		} while(read_buffer.size() > 0);
+		printf("Ready parsing read buffer.\n");
+
+	}
+
 	// SERVER CONNECTIONS
 	// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	ServerConnections::ServerConnections(Server& server)
@@ -62,8 +170,10 @@ namespace buttons {
 
 	void ServerConnections::run() {
 		while(true) {
+			
 			mutex.lock();
 			{
+				// SEND DATA TO CLIENTS OF NECESSARY
 				for(std::deque<ServerCommand>::iterator it = commands.begin(); it != commands.end(); ++it) {
 					for(std::vector<ServerConnection*>::iterator sit = connections.begin(); sit != connections.end(); ++sit) {
 						(*sit)->send((*it));
@@ -80,8 +190,19 @@ namespace buttons {
 					remove_list.clear();
 				}
 				commands.clear();
+
+				// RECEIVE DATA FROM CLIENTS
+				for(std::vector<ServerConnection*>::iterator sit = connections.begin(); sit != connections.end(); ++sit) {
+					(*sit)->read();
+				}
+				
 			}
+
+
 			mutex.unlock();
+			
+
+
 		}
 	}
 
@@ -154,22 +275,71 @@ namespace buttons {
 			Socket client;
 			if(server_socket.accept(client)) {
 				client.setNoSigPipe();
-				ServerConnection* con = new ServerConnection(connections, client);
+				ServerConnection* con = new ServerConnection(*this, connections, client);
 				connections.addConnection(con);
 				sendScheme(con);
 			}
 		}
 	}
 	
+
+	void Server::addTask(CommandData cmd) {
+		mutex.lock();
+		{
+			tasks.push_back(cmd);
+		}
+		mutex.unlock();
+	}
+
+	void Server::update() {
+		mutex.lock();
+		for(std::vector<CommandData>::iterator it = tasks.begin(); it != tasks.end(); ++it) {
+			CommandData& cmd = *it;
+			switch(cmd.name) {
+			case BDATA_SLIDERF: {
+				if(cmd.sliderf != NULL) {
+					cmd.sliderf->setValue(cmd.sliderf_value);
+					cmd.sliderf->needsRedraw();
+				}
+				break;
+			};
+			case BDATA_SLIDERI: {
+				break;
+			}
+			default: printf("Error: Server received an Unhandled client task.\n"); break;
+			}
+		}
+		mutex.unlock();
+
+		// and remove all handled tasks.
+		tasks.clear();
+	}
+
 	void Server::syncButtons(Buttons& buttons) {
 		buttons.addListener(this);
 		buttons_to_sync.push_back(&buttons);
+
+		// Keep track of all elements for this gui (used when decoding messages from clients)
+		unsigned int buttons_id = buttons_hash(buttons.title.c_str(), buttons.title.size());
+		for(std::vector<Element*>::iterator it = buttons.elements.begin(); it != buttons.elements.end(); ++it) {
+			Element& el = **it;
+			unsigned int element_id = buttons_hash(el.label.c_str(), el.label.size());
+			elements[buttons_id][element_id] = *it;
+		}
+
+		// (Re)create the buttons cheme
 		createButtonsScheme();
 	}
 
 	void Server::onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target) {
 		printf("onEvent: %d = %d\n", event, BEVENT_VALUE_CHANGED);
 		if(event == BEVENT_VALUE_CHANGED) {
+			ServerCommand cmd(BSERVER_VALUE_CHANGED);
+			if(utils.serializeOnValueChanged(buttons, target, cmd.buffer)) {
+				connections.sendToAll(cmd);
+			}
+
+			/*
 			unsigned int buttons_id = buttons_hash(buttons.title.c_str(), buttons.title.size());
 			unsigned int element_id = buttons_hash(target->label.c_str(), target->label.size());
 			switch(target->type) {
@@ -187,6 +357,7 @@ namespace buttons {
 			}
 			default: printf("Error: unhandled sync type: %d\n", target->type); break;
 			};
+			*/
 		}
 	}
 	

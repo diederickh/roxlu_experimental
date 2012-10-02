@@ -450,9 +450,10 @@ int Socket::send(const char* buf, int count) {
 	return status;
 #elif __APPLE__
 	int status = ::write(sock, buf, count);
+	//int status = ::send(sock, buf, count, 0);
 	//printf("SEND status: %d\n", status);
 	if(status < 0) {
-		printf("Error: cannot write on socket. Probably disconnected. %d\n", status);
+		printf("Error: cannot write on socket. Probably disconnected. %s (%d), socket: %d, status: %d\n", strerror(errno), errno, sock, status);
 		return -1;
 	}
 	return status;

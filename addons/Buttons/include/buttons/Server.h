@@ -3,6 +3,7 @@
 
 #include <buttons/Types.h>
 #include <buttons/Element.h>
+#include <buttons/Slider.h>
 
 #include <string>
 #include <vector>
@@ -12,8 +13,43 @@
 namespace buttons {
 	class Server;
 	class ServerConnections;
-
 	
+	// Structure which is used to hold deserialized data for gui types
+	enum CommandDataName {
+		BDATA_SLIDERF // contains slider float
+		,BDATA_SLIDERI  // contains slider integer
+	};
+
+	struct CommandData {
+		CommandData() 
+			:element(NULL)
+			,buttons(NULL)
+			,sliderf(NULL)
+			,sliderf_value(0.0f)
+			,slideri_value(0)
+			,buttons_id(0)
+			,element_id(0)
+		{
+		}
+		ButtonsBuffer buffer;
+		CommandDataName name;
+		Element* element;
+		Buttons* buttons;
+		Sliderf* sliderf;
+		float sliderf_value;
+		int slideri_value;
+		unsigned int buttons_id;
+		unsigned int element_id;
+	};
+
+	// Utils for creating buffers which are send from client <--> server
+	class ClientServerUtils {
+	public:
+		ClientServerUtils();
+		~ClientServerUtils();
+		bool serializeOnValueChanged(const Buttons& buttons, const Element* target, ButtonsBuffer& result);
+		bool deserializeOnValueChanged(ButtonsBuffer& buffer, CommandData& data, std::map<unsigned int, std::map<unsigned int, Element*> >& elements);
+	};
 
 	struct ServerCommand {
 		ServerCommand(char name):name(name) {
@@ -29,13 +65,19 @@ namespace buttons {
 
 	class ServerConnection {
 	public:
-		ServerConnection(ServerConnections& connections, Socket clientSocket);
+		ServerConnection(Server& server, ServerConnections& connections, Socket clientSocket);
 		~ServerConnection();
 		void send(ServerCommand& cmd);
 		bool send(const char* data, size_t len);
+		void read();
+		void parseReadBuffer();
+	public:
+		Server& server; // we use server.elements when parsing client data; could be thread buggy
 	private:
 		ServerConnections& connections;
+		ButtonsBuffer read_buffer;
 		Socket client;
+		ClientServerUtils util;
 	};
 
 	class ServerConnections : public roxlu::Runnable {
@@ -56,6 +98,7 @@ namespace buttons {
 		std::vector<ServerConnection*> connections;
 		std::deque<ServerCommand> commands;
 		std::vector<ServerConnection*> remove_list;
+
 	};
 
 	class Server : public roxlu::Runnable, public ButtonsListener {
@@ -64,9 +107,11 @@ namespace buttons {
 		~Server();
 		void start();
 		void run();
+		void update();
 		void syncButtons(Buttons& buttons);
 		void onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target);
 		void testSend();
+		void addTask(CommandData cmd);
 	private:
 		void createButtonsScheme();
 		void sendScheme(ServerConnection* con); // sends all information about the guis to the client so the client can rebuild it.
@@ -80,6 +125,10 @@ namespace buttons {
 		std::string ip;
 		std::vector<Buttons*> buttons_to_sync;
 		ButtonsBuffer scheme; // description used to recreate the panels + buttons on the client side
+		ClientServerUtils utils; // helper for client/server to generate buffers
+		std::vector<CommandData> tasks; // list of received and parsed commands we need to handle (e.g. change gui values)
+	public:
+		std::map<unsigned int, std::map<unsigned int, buttons::Element*> > elements; // indexed by buttons-hash and element hash
 	};
 
 } // buttons
