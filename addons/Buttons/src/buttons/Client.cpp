@@ -35,21 +35,19 @@ namespace buttons {
 			// Check if there are tasks that we need to handle
 			mutex.lock();
 			{
-				for(std::vector<ClientTask>::iterator it = out_tasks.begin(); it != out_tasks.end(); ++it) {
-					ClientTask& task = *it;
+				for(std::vector<CommandData>::iterator it = out_commands.begin(); it != out_commands.end(); ++it) {
+					CommandData& cmd = *it;
+					send(cmd.buffer.getPtr(), cmd.buffer.getNumBytes());
+				}
+				out_commands.clear();
+				
+				/* @todo fix out ! 
+				for(std::vector<CommandData>::iterator it = out_tasks.begin(); it != out_tasks.end(); ++it) {
+					CommandData& task = *it;
 					send(task.buffer.getPtr(), task.buffer.getNumBytes());
-					/*
-					switch(task.name) {
-					case BCLIENT_SEND_TO_SERVER: {
-
-						break;
-					}
-					default: {
-						break;
-					}}
-					*/
 				}
 				out_tasks.clear();
+				*/
 			}
 			mutex.unlock();
 		}
@@ -73,18 +71,37 @@ namespace buttons {
 
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++	
 	void Client::parseBuffer() {
+			do {
+			if(buffer.size() < 5) { // for now each command must contain an ID (1 byte) + size (4 bytes)
+				return;
+			}
+			
+			unsigned int command_size = buffer.getUI32(1); // peek for the command size
+			if(buffer.size() < command_size) {
+				printf("Buffer is not big enough yet.., should be %u and it is %zu\n", command_size, buffer.size());
+				return;
+			}
+			printf("Deserialize...\n");
+			CommandData deserialized;
+			if(util.deserializeOnValueChanged(buffer, deserialized, elements)) {
+				printf("Client: parsed! %f\n", deserialized.sliderf_value);
+				printf("Client: left in buffer: %zu\n", buffer.size());
+				addInCommand(deserialized);
+			}
+		} while(buffer.size() > 0);
+
+		/*
 		if(!buffer.size()) {
 			return;
 		}
 		int command_name = buffer[0];
 	
 		switch(command_name) {
-		case BSERVER_SCHEME: parseCommandScheme(); break;
-		case BSERVER_COMMAND_TEST: parseCommandTest(); break;
-		case BSERVER_VALUE_CHANGED: parseCommandValueChanged(); break;
+		case BDATA_SCHEME: parseCommandScheme(); break;
+		case BDATA_CHANGED: parseCommandValueChanged(); break;
 		default: break;
 		};
-
+		*/
 	}
 	
 	void Client::parseCommandTest() {
@@ -95,9 +112,11 @@ namespace buttons {
 	}
 
 	// GET SCHEME BUFFER
+		/*
 	void Client::parseCommandScheme() {
+
 		// DID WE RECEIVE ENOUGH DATA?
-		if(buffer.size() < 5 || (buffer.size() > 0 &&  buffer[0] != BSERVER_SCHEME)) {
+		if(buffer.size() < 5 || (buffer.size() > 0 &&  buffer[0] != BDATA_SCHEME)) { // @todo replce with BDATA_SCHEME
 			printf("Error: cannot parse scheme; incorrect data.\n");
 			return;
 		}
@@ -107,6 +126,7 @@ namespace buttons {
 		}
 
 		// CREATE TASK TO PARSE THE SCHEME IN MAIN THREAD
+
 		ButtonsBuffer task_buffer;
 		buffer.flush(5);
 		task_buffer.addBytes(buffer.getPtr(), buffer.getNumBytes());
@@ -114,9 +134,30 @@ namespace buttons {
 		task.buffer = task_buffer;
 		addInTask(task);
 		buffer.flush(task_buffer.size());
-	}
 
+	}
+		*/
 	void Client::parseCommandValueChanged() {
+		printf("Recieved data, we have %zu bytes in (client) buffer.\n", buffer.size());
+		do {
+			if(buffer.size() < 5) { // for now each command must contain an ID (1 byte) + size (4 bytes)
+				return;
+			}
+			
+			unsigned int command_size = buffer.getUI32(1); // peek for the command size
+			if(buffer.size() < command_size) {
+				printf("Buffer is not big enough yet..\n");
+				return;
+			}
+			printf("Deserialize...\n");
+			CommandData deserialized;
+			if(util.deserializeOnValueChanged(buffer, deserialized, elements)) {
+				printf("Client: parsed! %f\n", deserialized.sliderf_value);
+				printf("Client: left in buffer: %zu\n", buffer.size());
+				addInCommand(deserialized);
+			}
+		} while(buffer.size() > 0);
+		/*
 		// DID WE GET ENOUGH DATA?
 		if(buffer.size() < 5 || buffer[0] != BSERVER_VALUE_CHANGED) {
 			return;
@@ -151,9 +192,29 @@ namespace buttons {
 		default: printf("Error: unhandled sync type: %d\n", el->type); break;
 		}
 		printf("Bytes left: %zu\n", buffer.size());
+		*/
 	}
 
+	void Client::addInCommand(CommandData cmd) {
+		mutex.lock();
+		in_commands.push_back(cmd);
+		mutex.unlock();
+	}
+	void Client::addOutCommand(CommandData cmd) {
+		mutex.lock();
+		out_commands.push_back(cmd);
+		mutex.unlock();
+	}
+	/*
+	void Client::addTask(CommandData task) {
+		mutex.lock();
+		tasks.push_back(task);
+		mutex.unlock();
+	}
+
+	*/
 	// We received data from the server; add it to the "in task" list. (e.g. changing values(
+	/*
 	void Client::addInTask(ClientTask task) {
 		mutex.lock();
 		{
@@ -163,19 +224,37 @@ namespace buttons {
 	}
 
 	// We changed the gui/values so update the remote server (out task)
-	void Client::addOutTask(ClientTask task) {
+	void Client::addOutTask(CommandData task) {
 		mutex.lock();
 		{
 			out_tasks.push_back(task);
 		}
 		mutex.unlock();
 	}
-
+	*/
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	void Client::update() {
 		mutex.lock();
 		{
+			std::vector<CommandData>::iterator it = in_commands.begin();
+			while(it != in_commands.end()) {
+				CommandData& cmd = *it;
+				switch(cmd.name) {
+				case BDATA_SCHEME: {
+					parseScheme(cmd); 
+					break;
+				}
+				case BDATA_SLIDERF: {
+					cmd.sliderf->setValue(cmd.sliderf_value);
+					cmd.sliderf->needsRedraw();			  
+					break;
+				}
+				default: printf("Error: Unhandled in command.\n"); break;
+				};
+				it = in_commands.erase(it);
+			}
 			// Parse new tasks.
+			/* @todo replace with in_commands 
 			std::vector<ClientTask>::iterator it = in_tasks.begin(); 
 			while(it != in_tasks.end()) {
 				ClientTask& task = *it;
@@ -195,6 +274,7 @@ namespace buttons {
 				}}
 				it = in_tasks.erase(it);
 			}
+			*/
 		}
 		mutex.unlock();
 		for(std::map<unsigned int, buttons::Buttons*>::iterator it = buttons.begin(); it != buttons.end(); ++it) {
@@ -229,11 +309,11 @@ namespace buttons {
 	
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	// CREATES THE BUTTONS/PANELS FROM THE REMOTE SCHEME
-	void Client::parseTaskScheme(ClientTask& task) {
+	void Client::parseScheme(CommandData& task) {
 		while(true) {
 			char scheme_cmd = task.buffer.consumeByte();
 			switch(scheme_cmd) {
-			case BSCHEME_GUI: {
+			case BDATA_GUI: {
 				unsigned int x = task.buffer.consumeUI32();
 				unsigned int y = task.buffer.consumeUI32();
 				unsigned int w = task.buffer.consumeUI32();
@@ -294,21 +374,36 @@ namespace buttons {
 
 	// From Client > Server
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	void Client::addSendToServerTask(ClientTaskName name, ButtonsBuffer buffer) {
+	//void Client::addSendToServerTask(CommandDataName name, ButtonsBuffer buffer) { // @todo addSendToServerCommand
+	//	void Client::add
+		/*
 		ClientTask task(name);
 		task.buffer.addByte(name);
 		task.buffer.addUI32(buffer.getNumBytes());
 		task.buffer.addBytes(buffer.getPtr(), buffer.getNumBytes());
 		addOutTask(task);
+		*/
+	/*
+	 	CommandData data;
+		data.name = name;
+		data.buffer.addUI32(buffer.getNumBytes());
+		data.buffer.addBytes(buffer.getPtr(), buffer.getNumBytes());
+		addOutCommand(data);
 	}
-
+	*/
 	void Client::onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target) {
 		// @todo some duplicate code here, see Server::onEvent; maybe move this to the ClientServerUtils
 		if(event == BEVENT_VALUE_CHANGED) {
 			ButtonsBuffer buffer;
-			if(utils.serializeOnValueChanged(buttons, target, buffer)) {
+			if(util.serializeOnValueChanged(buttons, target, buffer)) {
 				printf("Created a buffer: %zu\n", buffer.size());
-				addSendToServerTask(BCLIENT_VALUE_CHANGED, buffer);
+					CommandData data;
+					data.name = BDATA_CHANGED;
+					data.buffer.addByte(data.name);
+					data.buffer.addUI32(buffer.getNumBytes());
+					data.buffer.addBytes(buffer.getPtr(), buffer.getNumBytes());
+					addOutCommand(data);
+				//addSendToServerTask(BDATA_CHANGED, buffer); // @todo rename with "addSendToServerCommand"
 				//connections.sendToAll(cmd);
 			}
 		}

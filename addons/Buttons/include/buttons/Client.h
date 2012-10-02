@@ -18,7 +18,7 @@ namespace buttons {
 		 ,BCLIENT_SEND_TO_SERVER
 		 ,BCLIENT_VALUE_CHANGED_SLIDERI
 		 ,BCLIENT_VALUE_CHANGED_SLIDERF
-		 ,BCLIENT_VALUE_CHANGED
+		 //		 ,BCLIENT_VALUE_CHANGED
 	};
 
 	struct ClientTask {
@@ -67,13 +67,17 @@ namespace buttons {
 
 	private:
 		void parseBuffer();
-		void parseCommandScheme();
+		//		void parseCommandScheme();
+		void parseScheme(CommandData& cmd);
 		void parseCommandTest();
 		void parseCommandValueChanged();
-		void parseTaskScheme(ClientTask& task);
-		void addInTask(ClientTask task); // name, ButtonsBuffer buffer);
-		void addOutTask(ClientTask task);
-		void addSendToServerTask(ClientTaskName name, ButtonsBuffer buffer); // adds a new task to the server; sending is done in a separate thread
+		//		void parseTaskScheme(ClientTask& task);
+		//void addInTask(ClientTask task); // name, ButtonsBuffer buffer);
+		//void addOutTask(CommandData data);
+
+		void addInCommand(CommandData task);
+		void addOutCommand(CommandData task); // will be name: addSendTask or something.
+		void addSendToServerTask(CommandDataName name, ButtonsBuffer buffer); // adds a new task to the server; sending is done in a separate thread
 		void send(const char* buffer, size_t len); // send data to server
 	private:
 		Socket sock;
@@ -82,9 +86,11 @@ namespace buttons {
 		int port;
 		std::string ip;
 		ButtonsBuffer buffer;
-		ClientServerUtils utils;
-		std::vector<ClientTask> in_tasks; // ussed for Server --> Client comunication
-		std::vector<ClientTask> out_tasks; // used for Client --> Server communication
+		ClientServerUtils util;
+		//std::vector<CommandData> tasks;
+		//std::vector<ClientTask> in_tasks; // ussed for Server --> Client comunication
+		std::vector<CommandData> out_commands; // used for Client --> Server communication
+		std::vector<CommandData> in_commands; // must be handle in own thread
 		std::map<unsigned int, buttons::Buttons*> buttons; 
 		std::map<unsigned int, std::map<unsigned int, buttons::Element*> > elements;
 		// used on guis

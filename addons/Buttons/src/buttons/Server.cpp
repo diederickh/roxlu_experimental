@@ -47,7 +47,7 @@ namespace buttons {
 
 
 		switch(command_name) {
-		case BCLIENT_VALUE_CHANGED: {
+		case BDATA_CHANGED: {
 			unsigned int command_size = buffer.consumeUI32();
 			result.buttons_id = buffer.consumeUI32();
 			result.element_id = buffer.consumeUI32();
@@ -61,7 +61,16 @@ namespace buttons {
 				//printf("Bytes left in buffer: %zu, value: %f\n", buffer.size(), result.sliderf_value);
 				return true;
 			}
-			
+			break;
+		}
+		case BDATA_SCHEME: {
+			printf("WE GOT SCHEME DATA!\n");
+			unsigned int command_size = buffer.consumeUI32();
+			result.name = BDATA_SCHEME;
+			result.buffer.addBytes(buffer.getPtr(), buffer.getNumBytes());
+			printf("SCHEME: we want to flush: %u bytes but buffer has: %zu bytes.\n", command_size, buffer.getNumBytes());
+			buffer.flush(command_size);
+			return true;
 			break;
 		}
 		default: {
@@ -334,7 +343,7 @@ namespace buttons {
 	void Server::onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target) {
 		printf("onEvent: %d = %d\n", event, BEVENT_VALUE_CHANGED);
 		if(event == BEVENT_VALUE_CHANGED) {
-			ServerCommand cmd(BSERVER_VALUE_CHANGED);
+			ServerCommand cmd(BDATA_CHANGED);
 			if(utils.serializeOnValueChanged(buttons, target, cmd.buffer)) {
 				connections.sendToAll(cmd);
 			}
@@ -364,7 +373,7 @@ namespace buttons {
 	// Create the scheme which is used to recreate the buttons gui on the other side.
 	void Server::createButtonsScheme() {
 		scheme.clear();
-		scheme.addByte(BSERVER_SCHEME);
+		scheme.addByte(BDATA_SCHEME);
 
 		// Reserve space for the size of the scheme
 		unsigned int scheme_size = 0;
@@ -375,7 +384,7 @@ namespace buttons {
 		for(std::vector<Buttons*>::iterator it = buttons_to_sync.begin(); it != buttons_to_sync.end(); ++it) {
 			Buttons& b = **it;
 			// >> general info
-			scheme.addByte(BSCHEME_GUI);
+			scheme.addByte(BDATA_GUI);
 			scheme.addUI32(b.x);
 			scheme.addUI32(b.y);
 			scheme.addUI32(b.w);
@@ -413,7 +422,8 @@ namespace buttons {
 
 		// rewrite the size of the scheme
 		int end = scheme.size();
-		int num_bytes = end - start;
+		int num_bytes = (end - start) - 4;
+
 		scheme.rewrite(start, 4, (char*)&num_bytes);
 
 		printf("Num bytes of scheme: %d, in buffer: %zu\n", num_bytes, scheme.size());
@@ -425,8 +435,8 @@ namespace buttons {
 	}
 	
 	void Server::testSend() {
-		std::string test_data = "hello world.\n";
-		connections.sendToAll(BSERVER_COMMAND_TEST, test_data.c_str(), test_data.size()); 
+		//	std::string test_data = "hello world.\n";
+		//	connections.sendToAll(BSERVER_COMMAND_TEST, test_data.c_str(), test_data.size()); 
 	}
 
 	

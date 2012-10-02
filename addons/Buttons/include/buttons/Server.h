@@ -16,7 +16,10 @@ namespace buttons {
 	
 	// Structure which is used to hold deserialized data for gui types
 	enum CommandDataName {
-		BDATA_SLIDERF // contains slider float
+		BDATA_SCHEME // scheme: following data contains gui definitions
+		,BDATA_GUI // scheme: flag there comes a gui definition
+		,BDATA_CHANGED // value change on client or server
+		,BDATA_SLIDERF // contains slider float
 		,BDATA_SLIDERI  // contains slider integer
 	};
 

@@ -52,9 +52,9 @@ enum ButtonsEventType {
 };
 
 enum ButtonServerCommandName {
-	BSERVER_COMMAND_TEST
-	,BSERVER_SCHEME
-	,BSERVER_VALUE_CHANGED
+	//BSaERVER_COMMAND_TEST
+	//	,BSERVER_SCHEME
+	
 };
 
 
