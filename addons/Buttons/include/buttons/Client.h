@@ -41,15 +41,7 @@ namespace buttons {
 		float sliderf_value;
 		int slideri_value;
 	};
-	/*	
-	class ClientConnection : public roxlu::Runnable {
-	public:
-		void addTask(ClientTask task);
-		void run();
-	private:
-		std::vector<ClientTask> out_tasks; // used for Client --> Server communication
-	};
-	*/
+
 	class Client : public roxlu::Runnable, public ButtonsListener {
 	public:
 		Client(const std::string ip, int port);
@@ -67,17 +59,11 @@ namespace buttons {
 
 	private:
 		void parseBuffer();
-		//		void parseCommandScheme();
 		void parseScheme(CommandData& cmd);
-		void parseCommandTest();
-		void parseCommandValueChanged();
-		//		void parseTaskScheme(ClientTask& task);
-		//void addInTask(ClientTask task); // name, ButtonsBuffer buffer);
-		//void addOutTask(CommandData data);
 
 		void addInCommand(CommandData task);
 		void addOutCommand(CommandData task); // will be name: addSendTask or something.
-		void addSendToServerTask(CommandDataName name, ButtonsBuffer buffer); // adds a new task to the server; sending is done in a separate thread
+
 		void send(const char* buffer, size_t len); // send data to server
 	private:
 		Socket sock;
@@ -87,14 +73,14 @@ namespace buttons {
 		std::string ip;
 		ButtonsBuffer buffer;
 		ClientServerUtils util;
-		//std::vector<CommandData> tasks;
-		//std::vector<ClientTask> in_tasks; // ussed for Server --> Client comunication
 		std::vector<CommandData> out_commands; // used for Client --> Server communication
 		std::vector<CommandData> in_commands; // must be handle in own thread
 		std::map<unsigned int, buttons::Buttons*> buttons; 
 		std::map<unsigned int, std::map<unsigned int, buttons::Element*> > elements;
-		// used on guis
+
+		// used on guis @todo when destrying deallocate thse
 		std::vector<float*> value_floats;
+		std::vector<int*> value_ints;
 
 	};
 

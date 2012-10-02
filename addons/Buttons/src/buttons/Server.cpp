@@ -12,7 +12,7 @@ namespace buttons {
 	}
 	
 	// Serializes data into a buffer after receiving a value changed event.
-	bool ClientServerUtils::serializeOnValueChanged(const Buttons& buttons, const Element* target, ButtonsBuffer& result) {
+	bool ClientServerUtils::serialize(const Buttons& buttons, const Element* target, ButtonsBuffer& result) {
 		unsigned int buttons_id = buttons_hash(buttons.title.c_str(), buttons.title.size());
 		unsigned int element_id = buttons_hash(target->label.c_str(), target->label.size());
 		bool ret = true;
@@ -22,10 +22,18 @@ namespace buttons {
 		case BTYPE_SLIDER: {
 			const Sliderf* sliderf = static_cast<const Sliderf*>(target);
 			if(sliderf->value_type == Slider<float>::SLIDER_FLOAT) {
+				// float slider
 				result.addUI32(buttons_id);
 				result.addUI32(element_id);
 				result.addFloat(sliderf->value);
-			};
+			}
+			else {
+				// int slider
+				const Slideri* slideri = static_cast<const Slideri*>(target);
+				result.addUI32(buttons_id);
+				result.addUI32(element_id);
+				result.addI32(slideri->value);
+			}
 			break;
 		}
 		default: {
@@ -37,11 +45,11 @@ namespace buttons {
 		return ret;
 	}
 
-	bool ClientServerUtils::deserializeOnValueChanged(
-																	  ButtonsBuffer& buffer
-																	  ,CommandData& result
-																	  ,std::map<unsigned int, std::map<unsigned int, buttons::Element*> >& elements
-																	  ) 
+	bool ClientServerUtils::deserialize(
+													ButtonsBuffer& buffer
+													,CommandData& result
+													,std::map<unsigned int, std::map<unsigned int, buttons::Element*> >& elements
+													) 
 	{
 		int command_name = buffer.consumeByte();		
 
@@ -55,20 +63,26 @@ namespace buttons {
 
 			Sliderf* sliderf = static_cast<Sliderf*>(result.element);
 			if(sliderf->value_type == Slider<float>::SLIDER_FLOAT) {
+				// float flider
 				result.sliderf = sliderf;
 				result.sliderf_value = buffer.consumeFloat();
 				result.name = BDATA_SLIDERF;
-				//printf("Bytes left in buffer: %zu, value: %f\n", buffer.size(), result.sliderf_value);
+				return true;
+			}
+			else {
+				// int slider
+				Slideri* slideri = static_cast<Slideri*>(result.element);
+				result.slideri = slideri;
+				result.slideri_value = buffer.consumeI32();
+				result.name = BDATA_SLIDERI;
 				return true;
 			}
 			break;
 		}
 		case BDATA_SCHEME: {
-			printf("WE GOT SCHEME DATA!\n");
 			unsigned int command_size = buffer.consumeUI32();
 			result.name = BDATA_SCHEME;
 			result.buffer.addBytes(buffer.getPtr(), buffer.getNumBytes());
-			printf("SCHEME: we want to flush: %u bytes but buffer has: %zu bytes.\n", command_size, buffer.getNumBytes());
 			buffer.flush(command_size);
 			return true;
 			break;
@@ -128,38 +142,35 @@ namespace buttons {
 		std::vector<char> tmp(2048);
 		int bytes_read = client.read(&tmp[0], tmp.size());
 		if(bytes_read) {
-			read_buffer.addBytes((char*)&tmp[0], bytes_read);
-			parseReadBuffer();
+			buffer.addBytes((char*)&tmp[0], bytes_read);
+			parseBuffer();
 		}
 		client.setBlocking(true);
 	}
 
 	// PARSE INCOMING COMMANDS
-	void ServerConnection::parseReadBuffer() {
-		printf("Recieved data, we have %zu bytes in buffer.\n", read_buffer.size());
+	void ServerConnection::parseBuffer() {
 		do {
-			if(read_buffer.size() < 5) { // minimum size of a command
+			if(buffer.size() < 5) { // minimum size of a command
 				return;
 			}
 
-			unsigned int command_size = read_buffer.getUI32(1);
-			if(read_buffer.size() < command_size) {
-				printf("Buffer has only %zu bytes, and the command consists of: %u bytes.\n", read_buffer.size(), command_size);
+			unsigned int command_size = buffer.getUI32(1); // peek
+			if(buffer.size() < command_size) {
+				printf("Buffer has only %zu bytes, and the command consists of: %u bytes.\n", buffer.size(), command_size);
 				return;
 			}
 
 			// when we arrive at this point we received a complete command
 			CommandData deserialized;
-			if(util.deserializeOnValueChanged(read_buffer, deserialized, server.elements)) {
+			if(util.deserialize(buffer, deserialized, server.elements)) {
 				printf("Correctly deserialized.\n");
 				server.addTask(deserialized);
 			}
 
 			printf("Command size: %u\n", command_size);
 			
-		} while(read_buffer.size() > 0);
-		printf("Ready parsing read buffer.\n");
-
+		} while(buffer.size() > 0);
 	}
 
 	// SERVER CONNECTIONS
@@ -204,23 +215,17 @@ namespace buttons {
 				for(std::vector<ServerConnection*>::iterator sit = connections.begin(); sit != connections.end(); ++sit) {
 					(*sit)->read();
 				}
-				
 			}
-
-
 			mutex.unlock();
-			
-
-
 		}
 	}
-
+	/*
 	void ServerConnections::sendToAll(ButtonServerCommandName name, const char* buffer, size_t len) {
 		ServerCommand cmd(name);
 		cmd.setData(buffer, len);
 		addCommand(cmd);
 	}
-
+	*/
 	void ServerConnections::sendToAll(ServerCommand& cmd) {
 		addCommand(cmd);
 	}
@@ -300,6 +305,7 @@ namespace buttons {
 		mutex.unlock();
 	}
 
+	// @todo, this piece of code is kind of similar to the client.. maybe put it in ClientServerUtils (?)
 	void Server::update() {
 		mutex.lock();
 		for(std::vector<CommandData>::iterator it = tasks.begin(); it != tasks.end(); ++it) {
@@ -313,6 +319,10 @@ namespace buttons {
 				break;
 			};
 			case BDATA_SLIDERI: {
+				if(cmd.slideri != NULL) {
+					cmd.slideri->setValue(cmd.slideri_value);
+					cmd.slideri->needsRedraw();
+				}
 				break;
 			}
 			default: printf("Error: Server received an Unhandled client task.\n"); break;
@@ -341,32 +351,11 @@ namespace buttons {
 	}
 
 	void Server::onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target) {
-		printf("onEvent: %d = %d\n", event, BEVENT_VALUE_CHANGED);
 		if(event == BEVENT_VALUE_CHANGED) {
 			ServerCommand cmd(BDATA_CHANGED);
-			if(utils.serializeOnValueChanged(buttons, target, cmd.buffer)) {
+			if(utils.serialize(buttons, target, cmd.buffer)) {
 				connections.sendToAll(cmd);
 			}
-
-			/*
-			unsigned int buttons_id = buttons_hash(buttons.title.c_str(), buttons.title.size());
-			unsigned int element_id = buttons_hash(target->label.c_str(), target->label.size());
-			switch(target->type) {
-			case BTYPE_SLIDER: {
-				const Sliderf* sliderf = static_cast<const Sliderf*>(target);
-				if(sliderf->value_type == Slider<float>::SLIDER_FLOAT) {
-					ServerCommand cmd(BSERVER_VALUE_CHANGED);
-					cmd.buffer.addUI32(buttons_id);
-					cmd.buffer.addUI32(element_id);
-					cmd.buffer.addFloat(sliderf->value);
-					connections.sendToAll(cmd);
-					printf("Send: %u %u \n", buttons_id, element_id);
-				};
-				break;
-			}
-			default: printf("Error: unhandled sync type: %d\n", target->type); break;
-			};
-			*/
 		}
 	}
 	
@@ -406,12 +395,19 @@ namespace buttons {
 					Sliderf* sliderf = static_cast<Sliderf*>(el);
 					scheme.addByte(sliderf->value_type);
 					if(sliderf->value_type == Slider<float>::SLIDER_FLOAT) {
+						// float slider
 						scheme.addFloat(sliderf->value);
 						scheme.addFloat(sliderf->minv);
 						scheme.addFloat(sliderf->maxv);
 						scheme.addFloat(sliderf->stepv);
 					}
 					else {
+						// int-slider
+						Slideri* slideri = static_cast<Slideri*>(el);
+						scheme.addI32(slideri->value);
+						scheme.addI32(slideri->minv);
+						scheme.addI32(slideri->maxv);
+						scheme.addI32(slideri->stepv);
 					}
 					break;
 				}
@@ -423,21 +419,11 @@ namespace buttons {
 		// rewrite the size of the scheme
 		int end = scheme.size();
 		int num_bytes = (end - start) - 4;
-
 		scheme.rewrite(start, 4, (char*)&num_bytes);
-
-		printf("Num bytes of scheme: %d, in buffer: %zu\n", num_bytes, scheme.size());
-		printf("Size of int :%d\n", sizeof(unsigned int));
 	}
 
 	void Server::sendScheme(ServerConnection* con) {
 		con->send(scheme.getPtr(), scheme.getNumBytes());
 	}
-	
-	void Server::testSend() {
-		//	std::string test_data = "hello world.\n";
-		//	connections.sendToAll(BSERVER_COMMAND_TEST, test_data.c_str(), test_data.size()); 
-	}
-
 	
 } // buttons

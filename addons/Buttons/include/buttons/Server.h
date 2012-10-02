@@ -28,6 +28,7 @@ namespace buttons {
 			:element(NULL)
 			,buttons(NULL)
 			,sliderf(NULL)
+			,slideri(NULL)
 			,sliderf_value(0.0f)
 			,slideri_value(0)
 			,buttons_id(0)
@@ -39,6 +40,7 @@ namespace buttons {
 		Element* element;
 		Buttons* buttons;
 		Sliderf* sliderf;
+		Slideri* slideri;
 		float sliderf_value;
 		int slideri_value;
 		unsigned int buttons_id;
@@ -50,8 +52,8 @@ namespace buttons {
 	public:
 		ClientServerUtils();
 		~ClientServerUtils();
-		bool serializeOnValueChanged(const Buttons& buttons, const Element* target, ButtonsBuffer& result);
-		bool deserializeOnValueChanged(ButtonsBuffer& buffer, CommandData& data, std::map<unsigned int, std::map<unsigned int, Element*> >& elements);
+		bool serialize(const Buttons& buttons, const Element* target, ButtonsBuffer& result);
+		bool deserialize(ButtonsBuffer& buffer, CommandData& data, std::map<unsigned int, std::map<unsigned int, Element*> >& elements);
 	};
 
 	struct ServerCommand {
@@ -73,12 +75,12 @@ namespace buttons {
 		void send(ServerCommand& cmd);
 		bool send(const char* data, size_t len);
 		void read();
-		void parseReadBuffer();
+		void parseBuffer();
 	public:
 		Server& server; // we use server.elements when parsing client data; could be thread buggy
 	private:
 		ServerConnections& connections;
-		ButtonsBuffer read_buffer;
+		ButtonsBuffer buffer; // buffer with data from client
 		Socket client;
 		ClientServerUtils util;
 	};
@@ -90,7 +92,6 @@ namespace buttons {
 		void start();
 		void run(); // thread
 		void addConnection(ServerConnection* con);
-		void sendToAll(ButtonServerCommandName name, const char* buffer, size_t len);
 		void sendToAll(ServerCommand& cmd);
 		void addCommand(ServerCommand cmd);
 		void removeConnection(ServerConnection* con);
@@ -113,7 +114,6 @@ namespace buttons {
 		void update();
 		void syncButtons(Buttons& buttons);
 		void onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target);
-		void testSend();
 		void addTask(CommandData cmd);
 	private:
 		void createButtonsScheme();

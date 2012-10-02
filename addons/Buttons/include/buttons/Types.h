@@ -51,13 +51,6 @@ enum ButtonsEventType {
 	,BEVENT_VALUE_CHANGED = 1  // fired when a value of a widged is changed
 };
 
-enum ButtonServerCommandName {
-	//BSaERVER_COMMAND_TEST
-	//	,BSERVER_SCHEME
-	
-};
-
-
 // Used by client/server to specify how a remote gui looks like
 // The scheme also uses the ElementTypes to describe the elements 
 // of the gui.
@@ -231,6 +224,10 @@ struct ButtonsBuffer {
 		data.push_back(b);	
 	}
 
+	void addI32(int num) {
+		addBytes((char*)&num, sizeof(num));
+	}
+	
 	void addUI32(unsigned int num) {	
 		addBytes((char*)&num, 4);
 	}
@@ -286,7 +283,13 @@ struct ButtonsBuffer {
 
 	unsigned int consumeUI32() {
 		unsigned int v = getUI32();
-		flush(4);
+		flush(sizeof(v));
+		return v;
+	}
+
+	int consumeI32() {
+		int v = getI32();
+		flush(sizeof(v));
 		return v;
 	}
 	
@@ -312,6 +315,12 @@ struct ButtonsBuffer {
 		float f = 0.0f;
 		memcpy((char*)&f, (char*)&data[0], sizeof(float));
 		return f;
+	}
+
+	int getI32(int dx = 0) {
+		int v = 0;
+		memcpy((char*)&v, (char*)&data[dx], sizeof(int));
+		return v;
 	}
 
 	void flush() {
