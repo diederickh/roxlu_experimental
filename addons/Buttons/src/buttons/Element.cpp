@@ -25,6 +25,8 @@ Element::Element(int type, const string& name)
 	,col_sat(0.2)
 	,col_bright(0.27)
 	,col_hue(0.5)
+	,event_data(NULL)
+	,parent(NULL)
 {
 
 	setColor(0.13);

@@ -28,13 +28,19 @@ public:
 	Toggle& setColor(const float hue, float a = 1.0);
 	void hide();
 	void show();
-	
+	void setValue(bool v);
+
 	bool& value;
 	
 	float toggle_off_color[4];
 	float toggle_on_color[4];
 	int label_dx;
+	bool is_radio;
 };
+
+inline void Toggle::setValue(bool v) {
+	value = v;
+}
 
 } // namespace buttons
 

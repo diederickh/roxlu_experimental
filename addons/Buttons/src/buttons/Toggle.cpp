@@ -7,6 +7,7 @@ Toggle::Toggle(bool& val, const string& name)
 	:value(val)
 	,Element(BTYPE_TOGGLE, name)
 	,label_dx(0)
+	,is_radio(false) // not used yet... should draw a circle instead!
 {
 	h = 20;
 }
@@ -16,6 +17,7 @@ Toggle::~Toggle() {
 
 void Toggle::generateStaticText() {
 	label_dx = static_text->add(x+20, y+2, label, 0.9, 0.9, 0.9, 0.9);
+	printf("Gen static text: %s\n", label.c_str());
 }
 
 void Toggle::updateTextPosition() {	
@@ -51,8 +53,18 @@ void Toggle::onMouseLeave(int mx, int my) {
 }
 
 void Toggle::onMouseClick(int mx, int my) {
-	value = !value;
-	needsRedraw();
+	if(is_radio) {
+		if(!value) { // only set to true and redraw when we arent already true
+			value = true;
+			needsRedraw();
+			flagValueChanged();
+		}
+	}
+	else {
+		value = !value;
+		needsRedraw();
+		flagValueChanged();
+	}
 }
 
 bool Toggle::canSave() {

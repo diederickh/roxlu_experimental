@@ -63,7 +63,7 @@ enum ButtonsScheme {
 
 class ButtonsListener {
 public:
-	virtual void onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target) = 0;
+	virtual void onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target, void* targetData) = 0;
 };
 
 class ButtonVertex {
@@ -195,6 +195,17 @@ inline unsigned int buttons_hash(const char *key, size_t len) {
 	hash ^= (hash >> 11);
 	hash += (hash << 15);
 	return hash;
+}
+
+// @todo use this everywhere, instead of Buttons::createCleanName
+inline string buttons_create_clean_name(const string& ugly) {
+	string clean_name;
+	for(int i = 0; i < ugly.size(); ++i) {
+		if(isalnum(ugly[i])) {
+			clean_name.push_back(tolower(ugly[i]));
+		}
+	}
+	return clean_name;
 }
 
 // Super simple buffer used by client/server

@@ -27,6 +27,9 @@ public:
 	void updateTextPosition();
 	void generateVertices(ButtonVertices& shapeVertices);
 	
+	void getChildElements(vector<Element*>& elements);
+	void positionChildren();
+
 	void onMouseDown(int mx, int my);
 	void onMouseUp(int mx, int my);
 	void onMouseEnter(int mx, int my);
@@ -39,7 +42,12 @@ public:
 	void load(std::ifstream& ifs);
 	bool canSave();
 	
+	void hide();
+	void show();
+
 	bool updateSelected();
+	void setValue(void* v); // see client/server
+	void setValue(int index); 
 
 	int label_dx;
 	const vector<string>& options;
@@ -49,6 +57,7 @@ public:
 	bool* values; // array of bool for each toggle
 	vector<Toggle*> toggles;
 	int id;
+	int h_default; 
 };
 
 template<class T>
@@ -65,6 +74,14 @@ Radio<T>::Radio(int id, const vector<string>& options, int& selected, const stri
 	BSET_COLOR(bg_top_color, 0.0, 0.17, 0.21, 1.0);
 	BSET_COLOR(bg_bottom_color, 0.0, 0.17, 0.21, 1.0);
 	values = new bool[options.size()];
+	event_data = (void*)&id;
+	h_default = h;
+
+	for(int i = 0; i < options.size(); ++i) {
+		Toggle* t = new Toggle(values[i], buttons_create_clean_name(options[i]));
+		t->label = options[i];
+		addOption(t);
+	}
 }
 
 template<class T>
@@ -74,6 +91,30 @@ Radio<T>::~Radio() {
 template<class T>
 void Radio<T>::addOption(Toggle* toggle) {
 	toggles.push_back(toggle);
+	toggle->is_radio = true;
+	toggle->is_child = true;
+	toggle->needsRedraw();
+}
+
+template<class T> 
+void Radio<T>::getChildElements(vector<Element*>& elements) {
+	for(vector<Toggle*>::iterator it = toggles.begin(); it != toggles.end(); ++it) {
+		elements.push_back((*it));
+	}
+}
+
+template<class T>
+void Radio<T>::positionChildren() {
+	h = h_default;
+	float yy = y + h_default; 
+	for(vector<Toggle*>::iterator it = toggles.begin(); it != toggles.end(); ++it) {
+		Toggle& toggle = **it;
+		toggle.y = yy;
+		toggle.x = x;
+		toggle.w = w;
+		yy += toggle.h;
+		h += toggle.h;
+	}
 }
 
 template<class T>
@@ -107,12 +148,12 @@ void Radio<T>::onMouseDown(int mx, int my) {
 template<class T>
 bool Radio<T>::updateSelected() {
 	bool was_inside = false;
-	
 	for(int i = 0; i < toggles.size(); ++i) {
 		Toggle& toggle = *toggles[i];
 		if(toggle.is_mouse_inside && was_inside == false) {
 			was_inside = true;
 			selected = i;
+			event_data = (void*)&selected;
 		}
 	}
 	
@@ -160,6 +201,28 @@ void Radio<T>::onLoaded() {
 	}
 }
 
+// Implemented for client/server
+template<class T>
+void Radio<T>::setValue(void* v) {
+	int* ip = (int*)v;
+	selected = *ip; 
+	setValue(selected);
+}
+ 
+template<class T>
+void Radio<T>::setValue(int index) {
+	for(int i = 0; i < toggles.size(); ++i) {
+		Toggle& toggle = *toggles[i];
+		toggle.setValue(false);
+		if(i == index) {
+			toggle.setValue(true);
+			toggle.needsRedraw();
+		}
+	}
+	needsRedraw();
+	(*cb)(id);
+}
+
 template<class T>
 void Radio<T>::save(std::ofstream& ofs) {}
 
@@ -168,7 +231,20 @@ void Radio<T>::load(std::ifstream& ifs) { }
 
 template<class T>
 bool Radio<T>::canSave() { 
+	// child element store themselves
 	return false; 
+}
+
+template<class T>
+void Radio<T>::hide() {
+	is_visible = false;
+	static_text->setTextVisible(label_dx, false);
+}
+
+template<class T>
+void Radio<T>::show() {
+	is_visible = true;
+	static_text->setTextVisible(label_dx, true);
 }
 
 } // namespace buttons

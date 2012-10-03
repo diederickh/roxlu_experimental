@@ -55,8 +55,8 @@ namespace buttons {
 		void onMouseUp(int x, int y);
 		void onMouseMoved(int x, int y);
 
-		void onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target);
-
+		void onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target, void* targetData);
+		void operator()(unsigned int dx); // operator for button clicks
 	private:
 		void parseBuffer();
 		void parseScheme(CommandData& cmd);
@@ -81,7 +81,7 @@ namespace buttons {
 		// used on guis @todo when destrying deallocate thse
 		std::vector<float*> value_floats;
 		std::vector<int*> value_ints;
-
+		std::vector<bool*> value_bools;
 	};
 
 } // buttons

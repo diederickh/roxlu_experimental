@@ -15,13 +15,14 @@ class Buttons;
 template<class T>
 class Button : public Element {
 public:
-	Button(int id, T* cb, const string& name) 
+	Button(unsigned int id, T* cb, const string& name) 
 		:Element(BTYPE_BUTTON, name)
 		,id(id)
 		,cb(cb)
 		,label_dx(0)
 	{
-		h = 20;
+		h = 20;		
+		event_data = (void*)&this->id;
 	}
 	
 	~Button() {
@@ -83,6 +84,11 @@ public:
 	
 	void onMouseClick(int mx, int my) {
 		(*cb)(id);
+		flagValueChanged();
+	}
+
+	void setValue(void* v) {
+		(*cb)(id);
 	}
 	
 	void save(std::ofstream& ofs) {	}
@@ -104,7 +110,7 @@ public:
 	float toggle_on_color[4];
 	float toggle_off_color[4];
 	float button_bg_color[4];	
-	int id;
+	unsigned int id;
 	T* cb;
 };
 

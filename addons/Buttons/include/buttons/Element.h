@@ -51,7 +51,8 @@ public:
 	virtual void show();
 		
 	virtual Element& setColor(const float hue, float a = 1.0f);
-		
+	virtual void setValue(void* v) {}  // added this for client/sever model where the value (or template type) can't be known.
+	
  	void needsRedraw();
 	void needsTextUpdate(); // when you want to change the dynamic text
 	void flagValueChanged();
@@ -88,9 +89,14 @@ public:
 	Text* static_text;
 	Text* dynamic_text;
 
+	void* event_data;  // used when issueing flagChanged  (used by Client<>Server, for e..g buttons)
+	Element* parent; // the parent element in case of a child. see Buttons::getChildElements
 };
 
 inline void Element::flagValueChanged() {
+	if(parent != NULL) {
+		parent->value_changed = true;
+	}
 	value_changed = true;
 }
 

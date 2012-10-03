@@ -4,6 +4,9 @@
 #include <buttons/Types.h>
 #include <buttons/Element.h>
 #include <buttons/Slider.h>
+#include <buttons/Toggle.h>
+#include <buttons/Button.h>
+#include <buttons/Radio.h>
 
 #include <string>
 #include <vector>
@@ -21,6 +24,9 @@ namespace buttons {
 		,BDATA_CHANGED // value change on client or server
 		,BDATA_SLIDERF // contains slider float
 		,BDATA_SLIDERI  // contains slider integer
+		,BDATA_TOGGLE // contains toggle boolean value
+		,BDATA_BUTTON // contains button data
+		,BDATA_RADIO // contains the selected index of a radio
 	};
 
 	struct CommandData {
@@ -29,20 +35,33 @@ namespace buttons {
 			,buttons(NULL)
 			,sliderf(NULL)
 			,slideri(NULL)
+			,toggle(NULL)
+
 			,sliderf_value(0.0f)
 			,slideri_value(0)
 			,buttons_id(0)
 			,element_id(0)
+			,toggle_value(false)
+			,button_value(0)
+			,radio_value(0)
 		{
 		}
 		ButtonsBuffer buffer;
 		CommandDataName name;
 		Element* element;
+
 		Buttons* buttons;
 		Sliderf* sliderf;
 		Slideri* slideri;
+		Toggle* toggle;
+		//	Button<Server>* button;
+
+		bool toggle_value;
 		float sliderf_value;
 		int slideri_value;
+		int button_value;
+		int radio_value; // selected index
+
 		unsigned int buttons_id;
 		unsigned int element_id;
 	};
@@ -52,7 +71,7 @@ namespace buttons {
 	public:
 		ClientServerUtils();
 		~ClientServerUtils();
-		bool serialize(const Buttons& buttons, const Element* target, ButtonsBuffer& result);
+		bool serialize(const Buttons& buttons, const Element* target, ButtonsBuffer& result, void* targetData);
 		bool deserialize(ButtonsBuffer& buffer, CommandData& data, std::map<unsigned int, std::map<unsigned int, Element*> >& elements);
 	};
 
@@ -113,7 +132,7 @@ namespace buttons {
 		void run();
 		void update();
 		void syncButtons(Buttons& buttons);
-		void onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target);
+		void onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target, void* targetData);
 		void addTask(CommandData cmd);
 	private:
 		void createButtonsScheme();

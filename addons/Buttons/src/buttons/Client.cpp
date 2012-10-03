@@ -28,6 +28,7 @@ namespace buttons {
 		while(true) {
 			int bytes_read = sock.read(&tmp[0], tmp.size());
 			if(bytes_read) {
+				printf("<< %d bytes read.\n", bytes_read);
 				buffer.addBytes((char*)&tmp[0], bytes_read);
 				parseBuffer();
 			}
@@ -65,6 +66,7 @@ namespace buttons {
 				return;
 			}
 			unsigned int command_size = buffer.getUI32(1); // peek for the command size
+			printf("<< Command has %u number of bytes.\n", command_size);
 			if(buffer.size() < command_size) {
 				printf("Buffer is not big enough yet.., should be %u and it is %zu\n", command_size, buffer.size());
 				return;
@@ -107,6 +109,16 @@ namespace buttons {
 				case BDATA_SLIDERF: {
 					cmd.sliderf->setValue(cmd.sliderf_value);
 					cmd.sliderf->needsRedraw();			  
+					break;
+				}
+				case BDATA_TOGGLE: { 
+					cmd.toggle->setValue(cmd.toggle_value);
+					cmd.toggle->needsRedraw();
+					break;
+				}
+				case BDATA_RADIO: {
+					cmd.element->setValue((void*)&cmd.radio_value);
+					cmd.element->needsRedraw();
 					break;
 				}
 				default: printf("Error: Unhandled in command.\n"); break;
@@ -211,6 +223,47 @@ namespace buttons {
 						}
 						break;
 					}
+					case BTYPE_TOGGLE: {
+						bool value = task.buffer.consumeByte() == 1;
+						bool* dummy_value = new bool;
+						*dummy_value = value;
+						value_bools.push_back(dummy_value);
+						Toggle* toggle = &gui->addBool(label, *dummy_value);
+						gui->setColor(col_hue);
+						elements[buttons_id][element_id] = toggle;
+						break;
+					}
+					case BTYPE_BUTTON: {
+						unsigned int button_id = task.buffer.consumeUI32();
+						Button<Client>* button =  &gui->addButton<Client>(label, button_id, this);
+						elements[buttons_id][element_id] = button;
+						gui->setColor(col_hue);
+						break;
+					}
+					case BTYPE_RADIO: {
+						int* dummy_value = new int;
+						value_ints.push_back(dummy_value);
+						unsigned int button_id = task.buffer.consumeUI32();
+						unsigned int num_options = task.buffer.consumeUI32();
+
+						std::vector<std::string> options;
+						for(int i = 0; i < num_options; ++i) {
+							std::string option_title = task.buffer.consumeString();
+							options.push_back(option_title);
+						}
+
+						// create radio + set selected value
+						Radio<Client>* radio = &gui->addRadio<Client>(label, button_id, this, options, *dummy_value);
+						for(int i = 0; i < num_options; ++i) {
+							char v = task.buffer.consumeByte();
+							if(v == 1) {
+								radio->setValue(v);
+							}
+						}
+						elements[buttons_id][element_id] = radio;
+						gui->setColor(col_hue);
+						break;
+					};
 					default: {
 						printf("Error: Unhandled scheme type: %d\n", el_type);
 						break;
@@ -226,10 +279,12 @@ namespace buttons {
 
 	// From Client > Server
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	void Client::onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target) {
+	void Client::onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target, void* targetData) {
 		if(event == BEVENT_VALUE_CHANGED) {
+
+			printf("Client value changed..\n");
 			ButtonsBuffer buffer;
-			if(util.serialize(buttons, target, buffer)) {
+			if(util.serialize(buttons, target, buffer, targetData)) {
 				CommandData data;
 				data.name = BDATA_CHANGED;
 				data.buffer.addByte(data.name);
@@ -238,6 +293,11 @@ namespace buttons {
 				addOutCommand(data);
 			}
 		}
+	}
+
+
+	void Client::operator()(unsigned int dx) {
+		printf("Button pressed: %u \n", dx);
 	}
 
 } // buttons

@@ -152,13 +152,6 @@ public:
 	Radio<T>& addRadio(const string& label, int id, T* cb, const vector<string>& options, int& value) {
 		buttons::Radio<T>* el = new Radio<T>(id, options, value, createCleanName(label), cb);
 		addElement(el, label);
-		
-		for(int i = 0; i < options.size(); ++i) {
-			Toggle& toggle = addBool(options[i], el->values[i]);
-			el->addOption(&toggle);
-			toggle.value = false;
-			toggle.needsRedraw();
-		}
 		return *el;
 	}
 	
@@ -195,11 +188,14 @@ public:
 	string getName();
 	
 	void addListener(ButtonsListener* listener);
-	void notifyListeners(ButtonsEventType aboutWhat, const Element* target);
+	void notifyListeners(ButtonsEventType aboutWhat, const Element* target, void* targetData);
 	
+	int getNumParents();
+	int getNumChildren();
+
 private:
 	void addElement(Element* el, const string& label);
-	void addChildElements(vector<Element*>& children);
+	void addChildElements(Element* parent, vector<Element*>& children);
 	void onMouseEnter(int x, int y);
 	void onMouseLeave(int x, int y);
 	void onMouseDragged(int dx, int dy);
@@ -256,7 +252,6 @@ public:
 	ButtonsCoords coords;
 	
 	float ortho[16];
-	//float model[16];
 
 	VAO vao;
 	GLuint vbo;
@@ -267,14 +262,9 @@ inline void Buttons::flagChanged() {
 	is_changed = true;
 }
 
+// @todo use buttons_create_clean_name directly and remove this function
 inline string Buttons::createCleanName(const string& ugly) {
-	string clean_name;
-	for(int i = 0; i < ugly.size(); ++i) {
-		if(isalnum(ugly[i])) {
-			clean_name.push_back(tolower(ugly[i]));
-		}
-	}
-	return clean_name;
+	return buttons_create_clean_name(ugly);
 }
 
 inline bool Buttons::isMouseInsidePanel() {
@@ -301,6 +291,20 @@ inline void Buttons::open() {
 
 inline string Buttons::getName() {
 	return name;
+}
+
+inline int Buttons::getNumParents() {
+	return elements.size() - getNumChildren();
+}
+
+inline int Buttons::getNumChildren() {
+	int num_children = 0;
+	for(std::vector<Element*>::iterator it = elements.begin(); it != elements.end(); ++it) {
+		if((*it)->is_child == true) {
+			++num_children;
+		}
+	}
+	return num_children;
 }
 
 } // buttons

@@ -12,7 +12,7 @@ namespace buttons {
 	}
 	
 	// Serializes data into a buffer after receiving a value changed event.
-	bool ClientServerUtils::serialize(const Buttons& buttons, const Element* target, ButtonsBuffer& result) {
+	bool ClientServerUtils::serialize(const Buttons& buttons, const Element* target, ButtonsBuffer& result, void* targetData) {
 		unsigned int buttons_id = buttons_hash(buttons.title.c_str(), buttons.title.size());
 		unsigned int element_id = buttons_hash(target->label.c_str(), target->label.size());
 		bool ret = true;
@@ -34,6 +34,28 @@ namespace buttons {
 				result.addUI32(element_id);
 				result.addI32(slideri->value);
 			}
+			break;
+		}
+		case BTYPE_TOGGLE: {
+			// bool toggle
+			const Toggle* toggle = static_cast<const Toggle*>(target);
+			result.addUI32(buttons_id);
+			result.addUI32(element_id);
+			result.addByte(toggle->value == true ? 1 : 0);
+			break;
+		}
+		case BTYPE_BUTTON: {
+			int* button_id = (int*)targetData;
+			result.addUI32(buttons_id);
+			result.addUI32(element_id);
+			result.addUI32(*button_id);
+			break;
+		}
+		case BTYPE_RADIO: {
+			int* selected = (int*)targetData;
+			result.addUI32(buttons_id);
+			result.addUI32(element_id);
+			result.addUI32(*selected);
 			break;
 		}
 		default: {
@@ -61,21 +83,47 @@ namespace buttons {
 			result.element_id = buffer.consumeUI32();
 			result.element = elements[result.buttons_id][result.element_id];
 
-			Sliderf* sliderf = static_cast<Sliderf*>(result.element);
-			if(sliderf->value_type == Slider<float>::SLIDER_FLOAT) {
-				// float flider
-				result.sliderf = sliderf;
-				result.sliderf_value = buffer.consumeFloat();
-				result.name = BDATA_SLIDERF;
-				return true;
+			switch(result.element->type) {
+			case BTYPE_SLIDER: { 
+				Sliderf* sliderf = static_cast<Sliderf*>(result.element);
+				if(sliderf->value_type == Slider<float>::SLIDER_FLOAT) {
+					// float flider
+					result.sliderf = sliderf;
+					result.sliderf_value = buffer.consumeFloat();
+					result.name = BDATA_SLIDERF;
+					return true;
+				}
+				else {
+						// int slider
+						Slideri* slideri = static_cast<Slideri*>(result.element);
+						result.slideri = slideri;
+						result.slideri_value = buffer.consumeI32();
+						result.name = BDATA_SLIDERI;
+						return true;
+				}
+				break;
 			}
-			else {
-				// int slider
-				Slideri* slideri = static_cast<Slideri*>(result.element);
-				result.slideri = slideri;
-				result.slideri_value = buffer.consumeI32();
-				result.name = BDATA_SLIDERI;
+			case BTYPE_TOGGLE: {
+				// bool toggle
+				Toggle* toggle = static_cast<Toggle*>(result.element);
+				result.toggle = toggle;
+				result.toggle_value = (buffer.consumeByte() == 1);
+				result.name = BDATA_TOGGLE;
 				return true;
+			};
+			case BTYPE_BUTTON: {
+				// button
+				result.button_value = buffer.consumeUI32();
+				result.name = BDATA_BUTTON;
+				return true;
+			};
+			case BTYPE_RADIO: {
+				// radio
+				result.radio_value = buffer.consumeUI32();
+				result.name = BDATA_RADIO;
+				return true;
+			};
+			default:break;
 			}
 			break;
 		}
@@ -219,13 +267,7 @@ namespace buttons {
 			mutex.unlock();
 		}
 	}
-	/*
-	void ServerConnections::sendToAll(ButtonServerCommandName name, const char* buffer, size_t len) {
-		ServerCommand cmd(name);
-		cmd.setData(buffer, len);
-		addCommand(cmd);
-	}
-	*/
+ 
 	void ServerConnections::sendToAll(ServerCommand& cmd) {
 		addCommand(cmd);
 	}
@@ -325,7 +367,20 @@ namespace buttons {
 				}
 				break;
 			}
-			default: printf("Error: Server received an Unhandled client task.\n"); break;
+			case BDATA_TOGGLE: {
+				cmd.toggle->setValue(cmd.toggle_value);
+				cmd.toggle->needsRedraw();
+				break;
+			}
+			case BDATA_BUTTON: {
+				cmd.element->setValue(NULL);
+				break;
+			};
+			case BDATA_RADIO: {
+				cmd.element->setValue((void*)&cmd.radio_value);
+				break;
+			}
+			default: printf("Error: Server received an Unhandled client task. %d \n", cmd.name); break;
 			}
 		}
 		mutex.unlock();
@@ -350,10 +405,11 @@ namespace buttons {
 		createButtonsScheme();
 	}
 
-	void Server::onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target) {
+	void Server::onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target, void* targetData) {
 		if(event == BEVENT_VALUE_CHANGED) {
+			printf(">> Value changed.\n");
 			ServerCommand cmd(BDATA_CHANGED);
-			if(utils.serialize(buttons, target, cmd.buffer)) {
+			if(utils.serialize(buttons, target, cmd.buffer, targetData)) {
 				connections.sendToAll(cmd);
 			}
 		}
@@ -381,9 +437,12 @@ namespace buttons {
 			scheme.addString(b.title);
 			
 			// >> elements
-			scheme.addUI16(b.elements.size());
+			scheme.addUI16(b.getNumParents());
 			for(int i = 0; i < b.elements.size(); ++i) {
 				Element* el = b.elements[i];
+				if(el->is_child) {
+					continue;
+				}
 				scheme.addByte(el->type);
 				scheme.addString(el->label);
 				scheme.addFloat(el->col_hue);
@@ -411,6 +470,29 @@ namespace buttons {
 					}
 					break;
 				}
+				case BTYPE_TOGGLE: {
+					Toggle* toggle = static_cast<Toggle*>(el);
+					scheme.addByte(toggle->value ? 1 : 0);
+					break;
+				}
+				case BTYPE_BUTTON: {
+					int* tmp_val = (int*)el->event_data;
+					scheme.addUI32(*tmp_val);
+					break;
+				};
+				case BTYPE_RADIO: {
+					Radio<Server>* radio = static_cast<Radio<Server>* >(el); 
+					int* tmp_val = (int*)el->event_data;
+					scheme.addUI32(*tmp_val);
+					scheme.addUI32(radio->options.size());
+					for(vector<string>::const_iterator it = radio->options.begin(); it != radio->options.end(); ++it) {
+						scheme.addString(*it);
+					}
+					for(int i = 0; i < radio->options.size(); ++i) {
+						scheme.addByte((radio->values[i]) == true ? 1 : 0);
+					}
+					break;
+				};
 				default:break;
 				};
 			}

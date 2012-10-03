@@ -131,15 +131,16 @@ void Buttons::update() {
 		it = elements.begin();
 		if(!is_changed) { // is this panel self changed.
 			while(it != elements.end()) {
-				if((*it)->needs_redraw) {
+				Element& el = **it;
+				if(el.needs_redraw) {
 					needs_redraw = true;
 				} 
-				if((*it)->needs_text_update) {
+				if(el.needs_text_update) {
 					needs_text_update = true;
 				}
-				if((*it)->value_changed) {
-					notifyListeners(BEVENT_VALUE_CHANGED, (*it));
-					(*it)->value_changed = false;
+				if(el.value_changed && !el.is_child) {
+					notifyListeners(BEVENT_VALUE_CHANGED, *it, el.event_data);
+					el.value_changed = false;
 				}
 				++it;
 			}
@@ -155,7 +156,7 @@ void Buttons::update() {
 		updateDynamicTexts(); // need to update everything when a element i.e. get bigger
 		updateStaticTextPositions();
 		generateVertices();
-		notifyListeners(BEVENT_BUTTONS_REDRAW, NULL);
+		notifyListeners(BEVENT_BUTTONS_REDRAW, NULL, NULL);
 	}
 	if(needs_text_update) {
 		updateDynamicTexts();
@@ -386,11 +387,11 @@ void Buttons::addElement(Element* el, const string& label) {
 	// Add child elements
 	vector<Element*> children;
 	el->getChildElements(children);
-	addChildElements(children);
+	addChildElements(el, children);
 
 }
 
-void Buttons::addChildElements(vector<Element*>& children) {
+void Buttons::addChildElements(Element* parent, vector<Element*>& children) {
 	for(vector<Element*>::iterator it = children.begin(); it != children.end(); ++it) {
 		Element* el = *it;
 		el->setup();
@@ -398,6 +399,7 @@ void Buttons::addChildElements(vector<Element*>& children) {
 		el->is_child = true;
 		el->static_text = static_text;
 		el->dynamic_text = dynamic_text;
+		el->parent = parent;
 		elements.push_back(el);	
 
 		el->generateStaticText();
@@ -710,9 +712,9 @@ void Buttons::addListener(ButtonsListener* listener) {
 	listeners.push_back(listener);
 }
 
-void Buttons::notifyListeners(ButtonsEventType aboutWhat, const Element* target) {
+void Buttons::notifyListeners(ButtonsEventType aboutWhat, const Element* target, void* targetData) {
 	for(vector<ButtonsListener*>::iterator it = listeners.begin(); it != listeners.end(); ++it) {
-		(*it)->onEvent(aboutWhat, *this, target);
+		(*it)->onEvent(aboutWhat, *this, target, targetData);
 	}
 	
 	/*
