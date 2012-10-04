@@ -304,7 +304,40 @@ namespace buttons {
 						gui->setColor(col_hue);
 						break;
 					}
-
+					case BTYPE_PAD: {
+						char value_type = task.buffer.consumeByte();
+						if(value_type == PAD_FLOAT) {
+							float minx = task.buffer.consumeFloat();
+							float maxx = task.buffer.consumeFloat();
+							float miny = task.buffer.consumeFloat();
+							float maxy = task.buffer.consumeFloat();
+							float px = task.buffer.consumeFloat();
+							float py = task.buffer.consumeFloat();
+							float* pad_ptr = new float[2];
+							pad_ptr[0] = px;
+							pad_ptr[1] = py;
+							value_floats.push_back(pad_ptr);
+							Pad<float>* padf = &gui->addFloat2(label, pad_ptr);
+							elements[buttons_id][element_id] = padf;
+							gui->setColor(col_hue);
+						}
+						else if(value_type == PAD_INT) {
+							unsigned int minx = task.buffer.consumeUI32();
+							unsigned int maxx = task.buffer.consumeUI32();
+							unsigned int miny = task.buffer.consumeUI32();
+							unsigned int maxy = task.buffer.consumeUI32();
+							float px = task.buffer.consumeFloat();
+							float py = task.buffer.consumeFloat();
+							int* pad_ptr = new int[2];
+							pad_ptr[0] = px;
+							pad_ptr[1] = py;
+							value_ints.push_back(pad_ptr);
+							Pad<int>* padi = &gui->addInt2(label, pad_ptr);
+							elements[buttons_id][element_id] = padi;
+							gui->setColor(col_hue);
+						}
+						break;
+					}
 					default: {
 						printf("Error: Unhandled scheme type: %d\n", el_type);
 						break;

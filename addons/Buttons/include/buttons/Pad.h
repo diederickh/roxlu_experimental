@@ -6,10 +6,15 @@
 
 namespace buttons {
 
+enum PadValueType {
+	 PAD_INT
+	,PAD_FLOAT
+};
+
 template<class T>
 class Pad : public Element {
 public:	
-	Pad(T* value, const string& name);
+	Pad(T* value, const string& name, PadValueType type);
 	~Pad();
 
 	void generateStaticText();
@@ -27,15 +32,22 @@ public:
 	void load(std::ifstream& ifs);
 	bool canSave();
 	float calculatePercentage(float value, float minv, float maxv); 
-	
+	void calculateValues(); // calculate resluting x/y values;
+
 	Pad<T>& setColor(const float hue, float a = 1.0);
 	Pad<T>& setX(const float min, const float max);
 	Pad<T>& setY(const float min, const float max);
+	Pad<T>& setPercentages(const float percX, const float percY);
+
+	void setValue(void* v); // client <-> server
+	
+
 	void hide();
 	void show();
 	
   	int label_dx;
 	T* value;
+	int value_type;
 	
 	// calcs
 	T min_x_value;
@@ -61,7 +73,7 @@ public:
 };
 
 	template<class T>
-	Pad<T>::Pad(T* value, const string& name)
+	Pad<T>::Pad(T* value, const string& name, PadValueType type)
 		:Element(BTYPE_PAD, name)
 		,label_dx(0)
 		,pad_x(0)
@@ -75,6 +87,7 @@ public:
 		,px(0.5f)
 		,py(0.5f)
 		,value(value)
+		,value_type(type)
 	{
 		this->h = 120;
 	}
@@ -129,11 +142,12 @@ public:
 			float local_yp = local_y / pad_h;
 			px = std::max<float>(0.0f, std::min<float>(1.0f, local_xp));
 			py = std::max<float>(0.0f, std::min<float>(1.0f, local_yp));
-			*value = px * (max_x_value - min_x_value);
-			*(value+1) = py * (max_y_value - min_y_value);
+			calculateValues();
 			needsRedraw();
+			flagValueChanged();
 		}
 	}
+
 
 	template<class T>
 	void Pad<T>::onMouseDown(int mx, int my) {
@@ -156,6 +170,12 @@ public:
 	}
 
 	template<class T>
+	void Pad<T>::calculateValues() {
+		*value = px * (max_x_value - min_x_value);
+		*(value+1) = py * (max_y_value - min_y_value);
+	}
+
+	template<class T>
 	float Pad<T>::calculatePercentage(float value, float minv, float maxv) {
 		float p = 1.0f/(maxv-minv) * value - (minv/(maxv-minv)); 
 		p = BLIMIT_FLOAT(p, 0.0f, 1.0f);
@@ -172,11 +192,25 @@ public:
 	template<class T>
 	void Pad<T>::load(std::ifstream& ifs) {
 		ifs.read((char*)value, sizeof(T) * 2);
-		//	px = float(*(value)) / (max_x_value - min_x_value);
-		// py = float(*(value+1)) / (max_y_value - min_y_value);
 		px = calculatePercentage(float(*(value)), min_x_value, max_x_value);
 		py = calculatePercentage(float(*(value+1)), min_y_value, max_y_value);
 		needsRedraw();
+	}
+
+	// Set value by void*, must be a float*
+	template<class T>
+	void Pad<T>::setValue(void* v) {
+		float* percp = (float*)v;
+		setPercentages(percp[0], percp[1]);
+		calculateValues();
+		needsRedraw();
+	}
+
+	template<class T>
+	Pad<T>& Pad<T>::setPercentages(const float percX, const float percY) {
+		px = percX;
+		py = percY;
+		return *this;
 	}
 
 	template<class T>

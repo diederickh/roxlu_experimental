@@ -340,13 +340,13 @@ Slideri& Buttons::addInt(const string& label, int& value) {
 }
 
 Pad<int>& Buttons::addInt2(const string& label, int* value) {
-	buttons::Pad<int>* el = new Pad<int>(value, label);
+	buttons::Pad<int>* el = new Pad<int>(value, label, PAD_INT);
 	addElement(el, label);
 	return *el;
 }
 
 Pad<float>& Buttons::addFloat2(const string& label, float* value) {
-	buttons::Pad<float>* el = new Pad<float>(value, label);
+	buttons::Pad<float>* el = new Pad<float>(value, label, PAD_FLOAT);
 	addElement(el, label);
 	return *el;
 }

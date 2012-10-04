@@ -7,6 +7,7 @@
 #include <buttons/Toggle.h>
 #include <buttons/Button.h>
 #include <buttons/Radio.h>
+#include <buttons/Pad.h>
 
 #include <string>
 #include <vector>
@@ -29,6 +30,8 @@ namespace buttons {
 		,BDATA_RADIO // contains the selected index of a radio
 		,BDATA_COLOR // color data
 		,BDATA_VECTOR // vector (float 2) data
+		,BDATA_PADF // float pad value (2 floats, x/y percentage)
+		,BDATA_PADI // int pad value (2 floats, x/y percentage)
 	};
 
 	// "All-valude" datatype for handling gui changes.
@@ -50,6 +53,7 @@ namespace buttons {
 		{
 			memset(color_value, 0, 4 * sizeof(unsigned int));
 			memset(vector_value, 0, 2 * sizeof(float));
+			memset(pad_value, 0, 2 * sizeof(float));
 		}
 
 		ButtonsBuffer buffer;
@@ -68,6 +72,7 @@ namespace buttons {
 		int radio_value; // selected index
 		unsigned int color_value[4];
 		float vector_value[2];
+		float pad_value[2]; // x, y percentage
 
 		unsigned int buttons_id;
 		unsigned int element_id;

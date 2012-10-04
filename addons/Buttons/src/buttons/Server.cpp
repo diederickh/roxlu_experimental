@@ -69,16 +69,33 @@ namespace buttons {
 			result.addUI32(col[1]);
 			result.addUI32(col[2]);
 			result.addUI32(col[3]);
-			//printf("# serialize color, hue: %d\n", col[0]);
 			break;
 		}
 		case BTYPE_VECTOR: {
-			printf("serialize vector.\n");
+			// vector
 			float* vec = (float*)targetData;
 			result.addUI32(buttons_id);
 			result.addUI32(element_id);
 			result.addFloat(vec[0]);
 			result.addFloat(vec[1]);
+			break;
+		}
+		case BTYPE_PAD: {
+			result.addUI32(buttons_id);
+			result.addUI32(element_id);
+
+			const Pad<float>* padf = static_cast<const Pad<float>* >(target);
+			if(padf->value_type == PAD_FLOAT) {
+				result.addByte(PAD_FLOAT);
+				result.addFloat(padf->px);
+				result.addFloat(padf->py);
+			}
+			else {
+				const Pad<int>* padi = static_cast<const Pad<int>* >(target);
+				result.addByte(PAD_INT);
+				result.addFloat(padi->px);
+				result.addFloat(padi->py);
+			}
 			break;
 		}
 		default: {
@@ -160,7 +177,19 @@ namespace buttons {
 				result.name = BDATA_VECTOR;
 				result.vector_value[0] = buffer.consumeFloat();
 				result.vector_value[1] = buffer.consumeFloat();
-				printf("Deserialized: %f, %f\n", result.vector_value[0], result.vector_value[1]);
+				return true;
+			}
+			case BTYPE_PAD: {
+				// pad
+ 				char type = buffer.consumeByte();
+				if(type == PAD_FLOAT) {
+					result.name = BDATA_PADF;
+				}
+				else {
+					result.name = BDATA_PADI;
+				}
+				result.pad_value[0] = buffer.consumeFloat();
+				result.pad_value[1] = buffer.consumeFloat();
 				return true;
 			}
 			default:break;
@@ -428,6 +457,11 @@ namespace buttons {
 				cmd.element->setValue((void*)cmd.vector_value);
 				break;
 			}
+			case BDATA_PADI:
+			case BDATA_PADF: {
+				cmd.element->setValue((void*)cmd.pad_value);
+				break;
+			}
 			default: printf("Error: Server received an Unhandled client task. %d \n", cmd.name); break;
 			}
 		}
@@ -552,12 +586,34 @@ namespace buttons {
 				}
 				case BTYPE_VECTOR: {
 					// vector
-					printf("Scheme up vector.\n");
 					Vector<float>* vec = static_cast<Vector<float>* >(el); 
 					scheme.addFloat(vec->value[0]);
 					scheme.addFloat(vec->value[1]);
 					break;
-				};
+				}
+				case BTYPE_PAD: {
+					Pad<float>* padf = static_cast<Pad<float>* >(el);
+					if(padf->value_type == PAD_FLOAT) {
+						scheme.addByte(PAD_FLOAT);
+						scheme.addFloat(padf->min_x_value);
+						scheme.addFloat(padf->max_x_value);
+						scheme.addFloat(padf->min_y_value);
+						scheme.addFloat(padf->max_y_value);
+						scheme.addFloat(padf->px);
+						scheme.addFloat(padf->py);
+					}
+					else {
+						Pad<int>* padi = static_cast<Pad<int>* >(el);
+						scheme.addByte(PAD_INT);
+						scheme.addUI32(padi->min_x_value);
+						scheme.addUI32(padi->max_x_value);
+						scheme.addUI32(padi->min_y_value);
+						scheme.addUI32(padi->max_y_value);
+						scheme.addFloat(padi->px);
+						scheme.addFloat(padi->py);
+					}
+					break;
+				}
 				default:break;
 				};
 			}
