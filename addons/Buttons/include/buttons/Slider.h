@@ -186,11 +186,13 @@ public:
 			if(bt_mouse_down == 0 && BMOUSE_INSIDE(mx,my,bt_inc_x, bt_y, bt_w, bt_h)) {
 				setValue(value + stepv);
 				needsRedraw();
+				needsTextUpdate();
 				flagValueChanged();
 			}
 			else if(bt_mouse_down == 1 && BMOUSE_INSIDE(mx,my,bt_dec_x, bt_y, bt_w, bt_h)) {
 				setValue(value - stepv);
 				needsRedraw();
+				needsTextUpdate();
 				flagValueChanged();
 			}
 		}

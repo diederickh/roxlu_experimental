@@ -27,8 +27,10 @@ namespace buttons {
 		,BDATA_TOGGLE // contains toggle boolean value
 		,BDATA_BUTTON // contains button data
 		,BDATA_RADIO // contains the selected index of a radio
+		,BDATA_COLOR // color data
 	};
 
+	// "All-valude" datatype for handling gui changes.
 	struct CommandData {
 		CommandData() 
 			:element(NULL)
@@ -45,7 +47,9 @@ namespace buttons {
 			,button_value(0)
 			,radio_value(0)
 		{
+			memset(color_value, 0, 4 * sizeof(unsigned int));
 		}
+
 		ButtonsBuffer buffer;
 		CommandDataName name;
 		Element* element;
@@ -54,13 +58,13 @@ namespace buttons {
 		Sliderf* sliderf;
 		Slideri* slideri;
 		Toggle* toggle;
-		//	Button<Server>* button;
 
 		bool toggle_value;
 		float sliderf_value;
 		int slideri_value;
 		int button_value;
 		int radio_value; // selected index
+		unsigned int color_value[4];
 
 		unsigned int buttons_id;
 		unsigned int element_id;

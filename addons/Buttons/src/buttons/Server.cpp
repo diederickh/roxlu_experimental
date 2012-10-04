@@ -45,6 +45,7 @@ namespace buttons {
 			break;
 		}
 		case BTYPE_BUTTON: {
+			// button
 			int* button_id = (int*)targetData;
 			result.addUI32(buttons_id);
 			result.addUI32(element_id);
@@ -52,10 +53,23 @@ namespace buttons {
 			break;
 		}
 		case BTYPE_RADIO: {
+			// radio
 			int* selected = (int*)targetData;
 			result.addUI32(buttons_id);
 			result.addUI32(element_id);
 			result.addUI32(*selected);
+			break;
+		}
+		case BTYPE_COLOR: {
+			// color 
+			unsigned int* col = (unsigned int*)targetData; // H,S,L,A
+			result.addUI32(buttons_id);
+			result.addUI32(element_id);
+			result.addUI32(col[0]);
+			result.addUI32(col[1]);
+			result.addUI32(col[2]);
+			result.addUI32(col[3]);
+			//printf("# serialize color, hue: %d\n", col[0]);
 			break;
 		}
 		default: {
@@ -110,19 +124,28 @@ namespace buttons {
 				result.toggle_value = (buffer.consumeByte() == 1);
 				result.name = BDATA_TOGGLE;
 				return true;
-			};
+			}
 			case BTYPE_BUTTON: {
 				// button
 				result.button_value = buffer.consumeUI32();
 				result.name = BDATA_BUTTON;
 				return true;
-			};
+			}
 			case BTYPE_RADIO: {
 				// radio
 				result.radio_value = buffer.consumeUI32();
 				result.name = BDATA_RADIO;
 				return true;
-			};
+			}
+			case BTYPE_COLOR: {
+				// color
+				result.name = BDATA_COLOR;
+				result.color_value[0] = buffer.consumeUI32();
+				result.color_value[1] = buffer.consumeUI32();
+				result.color_value[2] = buffer.consumeUI32();
+				result.color_value[3] = buffer.consumeUI32();
+				return true;
+			}
 			default:break;
 			}
 			break;
@@ -375,9 +398,13 @@ namespace buttons {
 			case BDATA_BUTTON: {
 				cmd.element->setValue(NULL);
 				break;
-			};
+			}
 			case BDATA_RADIO: {
 				cmd.element->setValue((void*)&cmd.radio_value);
+				break;
+			}
+			case BDATA_COLOR: {
+				cmd.element->setValue((void*)cmd.color_value);
 				break;
 			}
 			default: printf("Error: Server received an Unhandled client task. %d \n", cmd.name); break;
@@ -479,7 +506,7 @@ namespace buttons {
 					int* tmp_val = (int*)el->event_data;
 					scheme.addUI32(*tmp_val);
 					break;
-				};
+				}
 				case BTYPE_RADIO: {
 					Radio<Server>* radio = static_cast<Radio<Server>* >(el); 
 					int* tmp_val = (int*)el->event_data;
@@ -492,7 +519,16 @@ namespace buttons {
 						scheme.addByte((radio->values[i]) == true ? 1 : 0);
 					}
 					break;
-				};
+				}
+				case BTYPE_COLOR: {
+					printf("Serialize color.\n");
+					ColorPicker* picker = static_cast<ColorPicker*>(el);
+					scheme.addUI32(picker->hue_slider.value);
+					scheme.addUI32(picker->sat_slider.value);
+					scheme.addUI32(picker->light_slider.value);
+					scheme.addUI32(picker->alpha_slider.value);
+					break;
+				}
 				default:break;
 				};
 			}

@@ -11,15 +11,18 @@
 #include <map>
 #include <roxlu/Roxlu.h> 
 
-namespace buttons {
+// @todo set nodelay on socket
 
+namespace buttons {
+	/*
 	enum ClientTaskName {
 		 BCLIENT_PARSE_SCHEME
 		 ,BCLIENT_SEND_TO_SERVER
-		 ,BCLIENT_VALUE_CHANGED_SLIDERI
+			 ,BCLIENT_VALUE_CHANGED_SLIDERI
 		 ,BCLIENT_VALUE_CHANGED_SLIDERF
-		 //		 ,BCLIENT_VALUE_CHANGED
+
 	};
+
 
 	struct ClientTask {
 		ClientTask(ClientTaskName name)
@@ -41,7 +44,7 @@ namespace buttons {
 		float sliderf_value;
 		int slideri_value;
 	};
-
+	*/
 	class Client : public roxlu::Runnable, public ButtonsListener {
 	public:
 		Client(const std::string ip, int port);

@@ -121,6 +121,10 @@ namespace buttons {
 					cmd.element->needsRedraw();
 					break;
 				}
+				case BDATA_COLOR: {
+					cmd.element->setValue((void*)cmd.color_value);
+					break;
+				}
 				default: printf("Error: Unhandled in command.\n"); break;
 				};
 				it = in_commands.erase(it);
@@ -264,6 +268,25 @@ namespace buttons {
 						gui->setColor(col_hue);
 						break;
 					};
+					case BTYPE_COLOR: {
+						unsigned int hue = task.buffer.consumeUI32();
+						unsigned int sat = task.buffer.consumeUI32();
+						unsigned int light = task.buffer.consumeUI32();
+						unsigned int alpha = task.buffer.consumeUI32();
+						
+						float* col_ptr = new float[4];
+						value_floats.push_back(col_ptr);
+
+						ColorPicker* picker = &gui->addColor(label, col_ptr);
+						picker->hue_slider.setValue(hue);
+						picker->sat_slider.setValue(sat);
+						picker->light_slider.setValue(light);
+						picker->alpha_slider.setValue(alpha);
+						gui->setColor(col_hue);
+
+						elements[buttons_id][element_id] = picker;
+						break;
+					}
 					default: {
 						printf("Error: Unhandled scheme type: %d\n", el_type);
 						break;

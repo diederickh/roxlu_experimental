@@ -130,6 +130,8 @@ void Buttons::update() {
 		// check if we need to update the vertices or if a value is changed.
 		it = elements.begin();
 		if(!is_changed) { // is this panel self changed.
+			vector<Element*> value_changed_els;
+			bool value_changed = false;
 			while(it != elements.end()) {
 				Element& el = **it;
 				if(el.needs_redraw) {
@@ -138,10 +140,19 @@ void Buttons::update() {
 				if(el.needs_text_update) {
 					needs_text_update = true;
 				}
-				if(el.value_changed && !el.is_child) {
-					notifyListeners(BEVENT_VALUE_CHANGED, *it, el.event_data);
+				if(el.value_changed) {
+					value_changed_els.push_back(&el);
+					if(el.is_child) {
+						el.parent->onChildValueChanged();
+					}
 					el.value_changed = false;
 				}
+				++it;
+			}
+			// notify after all "parents" had their change to update (e..g onChildValueChanged above)
+			it = value_changed_els.begin();
+			while(it != value_changed_els.end()) {
+				notifyListeners(BEVENT_VALUE_CHANGED, *it, (*it)->event_data);
 				++it;
 			}
 		}

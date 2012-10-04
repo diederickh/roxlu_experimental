@@ -31,6 +31,7 @@ public:
 	
 	virtual void getChildElements(vector<Element*>& elements) {}
 	virtual void positionChildren(){}
+	virtual void onChildValueChanged(){} // gets called when the value of a child is change (and has called flagValueChanged())
 				
 	virtual void onMouseMoved(int mx, int my) { } // global  move
 	virtual void onMouseDragged(int mx, int my, int dx, int dy) { } // global drag (check: drag_inside)

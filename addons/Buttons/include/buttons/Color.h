@@ -59,6 +59,7 @@ public:
 	
 	void getChildElements(vector<Element*>& elements);
 	void positionChildren();
+	void onChildValueChanged();
 
 	void onMouseDown(int mx, int my);
 	void onMouseUp(int mx, int my);
@@ -76,10 +77,12 @@ public:
 	void hide();
 	void show();
 
+	void setValue(void* data); // used by e.g. client-server 
+
 	int label_dx;	
 	T* color;
 	
-	int H;  // 0 - 360
+	int H; // 0 - 360
 	int S; // 0 - 100
 	int L; // 0 - 100
 	int A; // 0 - 100, alpha
@@ -93,6 +96,7 @@ public:
 	Slideri alpha_slider; 
 	ColorPickerCoords coords;
 	vector<ColorPickerVertex> circle_vertices; 
+	int event_data_values[4]; // used to send the color values as "event_data"
 };
 
 template<class T>
@@ -123,6 +127,11 @@ ColorT<T>::ColorT(const string& name, T* color)
 	sat_slider.setMin(0).setMax(100);
 	light_slider.setMin(0).setMax(100);
 	alpha_slider.setMin(0).setMax(100);
+	event_data_values[0] = H;
+	event_data_values[1] = S;
+	event_data_values[2] = L;
+	event_data_values[3] = A;
+	event_data = (void*)event_data_values;
 }
 
 
@@ -173,6 +182,14 @@ void ColorT<T>::positionChildren() {
 	coords.preview_y = this->y + 3; 
 }
 
+template<class T> 
+void ColorT<T>::onChildValueChanged() {
+	event_data_values[0] = hue_slider.value;
+	event_data_values[1] = sat_slider.value;
+	event_data_values[2] = light_slider.value;
+	event_data_values[3] = alpha_slider.value;
+	//printf("ColorT, changed value of hue:%u\n", hue_slider.value);
+}
 
 template<class T>
 void ColorT<T>::generateStaticText() {
@@ -240,7 +257,7 @@ void ColorT<T>::generateVertices(ButtonVertices& vd) {
 	//hue_slider.generateVertices(vd);
 	color[3] = float(A)/100.0f;
 	HSL_to_RGB(float(hue_slider.value)/360.0f, float(sat_slider.value)/100.0f, float(light_slider.value)/100.0f, &color[0], &color[1], &color[2]);
-	//printf("Color is: %f, %f, %f, %f\n", color[0], color[1], color[2], color[3]);	
+
 	// create color rect
 	buttons::createRect(vd, coords.preview_x, coords.preview_y, coords.preview_w, coords.preview_h, color, color);
 	
@@ -357,7 +374,6 @@ void ColorT<T>::onMouseDragged(int mx, int my, int dx, int dy) {
 
 		coords.selected_color_dist = sqrt(dist_sq);
 		coords.selected_color_angle = atan2(-dist_y, -dist_x);
-
 	
 		if(coords.selected_color_angle < 0) {
 			H = (coords.selected_color_angle + TWO_PI) * RAD_TO_DEG;
@@ -372,6 +388,13 @@ void ColorT<T>::onMouseDragged(int mx, int my, int dx, int dy) {
 		hue_slider.needsRedraw();
 		sat_slider.needsTextUpdate();
 		hue_slider.needsTextUpdate();
+
+		//printf("Storing: %u %u %u %u\n", H, S, L, A);
+		event_data_values[0] = H;
+		event_data_values[1] = S;
+		event_data_values[2] = L;
+		event_data_values[3] = A;
+		flagValueChanged(); 
 	}	
 }
 
@@ -398,7 +421,6 @@ template<class T>
 void ColorT<T>::hide() {
 	this->is_visible = false;
 	this->static_text->setTextVisible(this->label_dx, false);
-
 }
 
 template<class T>
@@ -408,53 +430,26 @@ void ColorT<T>::show() {
 
 }
 
+template<class T>
+void ColorT<T>::setValue(void* hsla) {
+	unsigned int* col_ptr = (unsigned int*)hsla;
+	hue_slider.setValue(col_ptr[0]);
+	sat_slider.setValue(col_ptr[1]);
+	light_slider.setValue(col_ptr[2]);
+	alpha_slider.setValue(col_ptr[3]);
+
+	//	sat_slider.setValue(S);
+	sat_slider.needsRedraw();
+	hue_slider.needsRedraw();
+	//sat_slider.needsTextUpdate();
+	//hue_slider.needsTextUpdate();
+	//printf("Setting: %u %u %u %u\n", col_ptr[0], col_ptr[1], col_ptr[2], col_ptr[3]);
+	
+	needsRedraw();
+}
+
 typedef ColorT<float> ColorPicker;
 
 } // buttons
-
-
-/*
-template<class S, class V> 
-class SplineEditor : public Element {
-public:	
-	SplineEditor(const string& name, S& spline);
-	~SplineEditor();
-
-	void setup();
-	void draw(Shader& shader, const float* pm);
-	
-	void generateStaticText(Text& txt);
-	void updateTextPosition(Text& staticText, Text& dynamicText);
-	void generateVertices(ButtonVertices& shapeVertices);
-	
-	void onMouseDown(int mx, int my);
-	void onMouseUp(int mx, int my);
-	void onMouseEnter(int mx, int my);
-	void onMouseLeave(int mx, int my);	
-	void onMouseClick(int mx, int my);
-	void onMouseMoved(int mx, int my); // global move, using is_mouse_inside
-	void onMouseDragged(int mx, int my, int dx, int dy);
-	
-	void save(std::ofstream& ofs);
-	void load(std::ifstream& ifs);
-	bool canSave();
-	
-	SplineEditor<S, V>& setColor(const float r, const float g, const float b, const float a = 1.0f);
-	
-	int selected_handle_dx;
-	float selected_handle_col[4];
-	float* default_handle_col; // set to tex col
-	float editor_bg_bottom_col[4];
-	float editor_bg_top_col[4];
-	float editor_spline_col[4];
-	
-	EditorCoords editor_coords;
-	int label_dx;
-	S& spline;
-	vector<V> screen_handles;
-};
-
-*/
-
 
 #endif
