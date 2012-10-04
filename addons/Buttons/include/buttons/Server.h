@@ -28,6 +28,7 @@ namespace buttons {
 		,BDATA_BUTTON // contains button data
 		,BDATA_RADIO // contains the selected index of a radio
 		,BDATA_COLOR // color data
+		,BDATA_VECTOR // vector (float 2) data
 	};
 
 	// "All-valude" datatype for handling gui changes.
@@ -48,6 +49,7 @@ namespace buttons {
 			,radio_value(0)
 		{
 			memset(color_value, 0, 4 * sizeof(unsigned int));
+			memset(vector_value, 0, 2 * sizeof(float));
 		}
 
 		ButtonsBuffer buffer;
@@ -65,6 +67,7 @@ namespace buttons {
 		int button_value;
 		int radio_value; // selected index
 		unsigned int color_value[4];
+		float vector_value[2];
 
 		unsigned int buttons_id;
 		unsigned int element_id;

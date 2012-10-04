@@ -125,6 +125,10 @@ namespace buttons {
 					cmd.element->setValue((void*)cmd.color_value);
 					break;
 				}
+				case BDATA_VECTOR: {
+					cmd.element->setValue((void*)cmd.vector_value);
+					break;
+				}
 				default: printf("Error: Unhandled in command.\n"); break;
 				};
 				it = in_commands.erase(it);
@@ -287,6 +291,20 @@ namespace buttons {
 						elements[buttons_id][element_id] = picker;
 						break;
 					}
+					case BTYPE_VECTOR: {
+						float vx = task.buffer.consumeFloat();
+						float vy = task.buffer.consumeFloat();
+						float* vec_ptr = new float[2];
+						vec_ptr[0] = vx;
+						vec_ptr[1] = vy;
+						value_floats.push_back(vec_ptr);
+						
+						Vector<float>* vec = &gui->addVec2f(label, vec_ptr);
+						elements[buttons_id][element_id] = vec;
+						gui->setColor(col_hue);
+						break;
+					}
+
 					default: {
 						printf("Error: Unhandled scheme type: %d\n", el_type);
 						break;

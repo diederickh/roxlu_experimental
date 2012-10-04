@@ -72,6 +72,15 @@ namespace buttons {
 			//printf("# serialize color, hue: %d\n", col[0]);
 			break;
 		}
+		case BTYPE_VECTOR: {
+			printf("serialize vector.\n");
+			float* vec = (float*)targetData;
+			result.addUI32(buttons_id);
+			result.addUI32(element_id);
+			result.addFloat(vec[0]);
+			result.addFloat(vec[1]);
+			break;
+		}
 		default: {
 			printf("Error: unhandled sync type: %d\n", target->type); 
 			ret = false;
@@ -144,6 +153,14 @@ namespace buttons {
 				result.color_value[1] = buffer.consumeUI32();
 				result.color_value[2] = buffer.consumeUI32();
 				result.color_value[3] = buffer.consumeUI32();
+				return true;
+			}
+			case BTYPE_VECTOR: {
+				// vector
+				result.name = BDATA_VECTOR;
+				result.vector_value[0] = buffer.consumeFloat();
+				result.vector_value[1] = buffer.consumeFloat();
+				printf("Deserialized: %f, %f\n", result.vector_value[0], result.vector_value[1]);
 				return true;
 			}
 			default:break;
@@ -407,6 +424,10 @@ namespace buttons {
 				cmd.element->setValue((void*)cmd.color_value);
 				break;
 			}
+			case BDATA_VECTOR: {
+				cmd.element->setValue((void*)cmd.vector_value);
+				break;
+			}
 			default: printf("Error: Server received an Unhandled client task. %d \n", cmd.name); break;
 			}
 		}
@@ -521,7 +542,7 @@ namespace buttons {
 					break;
 				}
 				case BTYPE_COLOR: {
-					printf("Serialize color.\n");
+					// color
 					ColorPicker* picker = static_cast<ColorPicker*>(el);
 					scheme.addUI32(picker->hue_slider.value);
 					scheme.addUI32(picker->sat_slider.value);
@@ -529,6 +550,14 @@ namespace buttons {
 					scheme.addUI32(picker->alpha_slider.value);
 					break;
 				}
+				case BTYPE_VECTOR: {
+					// vector
+					printf("Scheme up vector.\n");
+					Vector<float>* vec = static_cast<Vector<float>* >(el); 
+					scheme.addFloat(vec->value[0]);
+					scheme.addFloat(vec->value[1]);
+					break;
+				};
 				default:break;
 				};
 			}

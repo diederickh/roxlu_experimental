@@ -28,6 +28,8 @@ public:
 	void load(std::ifstream& ifs);
 	bool canSave();
 	
+	void setValue(void* v); // used by e.g. client<->server
+	
 	Vector<T>& setColor(const float hue, float a = 1.0);
 	void hide();
 	void show();
@@ -63,7 +65,7 @@ public:
 
 	template<class T>
 	Vector<T>::Vector(T* value, const string& name)
-		:Element(BTYPE_RECTANGLE, name)
+		:Element(BTYPE_VECTOR, name)
 		,label_dx(0)
 		,bg_x(0)
 		,bg_y(0)
@@ -81,6 +83,7 @@ public:
 	{
 		this->h = 120;
 		setColor(1.0f, 1.0f);
+		event_data = (void*)&value;
 	}
 
 	template<class T>
@@ -176,7 +179,11 @@ public:
 			sin_a = sin(angle);
 			*value = cos_a;
 			*(value+1) = sin_a;
+			event_data = (void*)value;
+			//			float* f = (float*)event_data;
+			//			printf("value p: %p/%p, value[0]: %f, event_data[0]: %f\n", value, event_data, value[0], *f);
 			needsRedraw();
+			flagValueChanged();
 		}
 	}
 
@@ -248,6 +255,16 @@ public:
 		BSET_COLOR(arrow_fill_col, 1.0f, 1.0f, 1.0f, 1.0f);
 		arrow_col = arrow_fill_col;
 		return *this;
+	}
+
+	template<class T>
+	void Vector<T>::setValue(void* v) {
+		T* vp = (T*)v;
+		*(value) = *vp;
+		*(value+1) = *(vp + 1);
+		cos_a = *(value);
+		sin_a = *(value + 1);
+		needsRedraw();
 	}
 
 	template<class T>
