@@ -149,7 +149,7 @@ public:
 	
 	// Radio
 	template<class T>
-	Radio<T>& addRadio(const string& label, int id, T* cb, const vector<string>& options, int& value) {
+	Radio<T>& addRadio(const string& label, int id, T* cb, vector<string> options, int& value) {
 		buttons::Radio<T>* el = new Radio<T>(id, options, value, createCleanName(label), cb);
 		addElement(el, label);
 		return *el;

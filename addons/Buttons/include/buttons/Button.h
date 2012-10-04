@@ -106,6 +106,11 @@ public:
 		static_text->setTextVisible(label_dx, true);
 	}
 
+	bool serializeScheme(ButtonsBuffer& buffer) {
+		buffer.addUI32(id);
+		return true;
+	}
+
 	int label_dx;
 	float toggle_on_color[4];
 	float toggle_off_color[4];

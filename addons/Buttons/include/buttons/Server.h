@@ -16,11 +16,13 @@
 
 namespace buttons {
 	class Server;
+	class ServerConnection;
 	class ServerConnections;
 	
 	// Structure which is used to hold deserialized data for gui types
 	enum CommandDataName {
 		BDATA_SCHEME // scheme: following data contains gui definitions
+		,BDATA_GET_SCHEME // scheme: when a client connects it asks for the scheme by sending this
 		,BDATA_GUI // scheme: flag there comes a gui definition
 		,BDATA_CHANGED // value change on client or server
 		,BDATA_SLIDERF // contains slider float
@@ -42,6 +44,7 @@ namespace buttons {
 			,sliderf(NULL)
 			,slideri(NULL)
 			,toggle(NULL)
+			,connection(NULL)
 
 			,sliderf_value(0.0f)
 			,slideri_value(0)
@@ -55,6 +58,7 @@ namespace buttons {
 			memset(vector_value, 0, 2 * sizeof(float));
 			memset(pad_value, 0, 2 * sizeof(float));
 		}
+		ServerConnection* connection; // used when client connects and asks for the scheme (see server code)
 
 		ButtonsBuffer buffer;
 		CommandDataName name;
@@ -88,8 +92,7 @@ namespace buttons {
 	};
 
 	struct ServerCommand {
-		ServerCommand(char name):name(name) {
-		}
+		ServerCommand(char name):name(name),con(NULL) {	}
 
 		void setData(const char* data, size_t len) {
 			buffer.addBytes((char*)data,len);
@@ -97,6 +100,7 @@ namespace buttons {
 
 		char name;
 		ButtonsBuffer buffer;
+		ServerConnection* con; // used when we need to send data to one client.
 	};
 
 	class ServerConnection {
@@ -124,14 +128,18 @@ namespace buttons {
 		void run(); // thread
 		void addConnection(ServerConnection* con);
 		void sendToAll(ServerCommand& cmd);
-		void addCommand(ServerCommand cmd);
+		void sendToOne(ServerConnection* con, ServerCommand& cmd);
+		void addToOneCommand(ServerCommand cmd);
+		void addToAllCommand(ServerCommand cmd);
 		void removeConnection(ServerConnection* con);
 	private:
+		void clear();
 		Server& server;
 		roxlu::Thread thread;
 		roxlu::Mutex mutex;
 		std::vector<ServerConnection*> connections;
-		std::deque<ServerCommand> commands;
+		std::deque<ServerCommand> to_all_commands;
+		std::deque<ServerCommand> to_one_commands;
 		std::vector<ServerConnection*> remove_list;
 
 	};
@@ -147,7 +155,7 @@ namespace buttons {
 		void onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target, void* targetData);
 		void addTask(CommandData cmd);
 	private:
-		void createButtonsScheme();
+		void createScheme();
 		void sendScheme(ServerConnection* con); // sends all information about the guis to the client so the client can rebuild it.
 		
 	private:

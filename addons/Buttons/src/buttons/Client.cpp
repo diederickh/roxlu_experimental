@@ -6,37 +6,63 @@ namespace buttons {
 	Client::Client(const std::string ip, int port)
 		:ip(ip)
 		,port(port)
+		,is_connected(false)
 	{
 	}
 
 	Client::~Client() {
+		clear();
 	}
 
 	void Client::start() {
 		thread.create(*this);
 	}
 
+	bool Client::connect() {
+		sock.close();
+		is_connected = sock.connect(ip.c_str(), port, 10);
+		if(!is_connected) {
+			sleep(5);
+		}
+		else {
+			// when connected ask for the scheme.
+			getScheme();
+		}
+		return is_connected;
+	}
+
 	// RUN IN SEPARATE THREAD
 	void Client::run() {
-		if(!sock.connect(ip.c_str(), port)) {
-			printf("Error: cannot sonnect to %s:%d\n", ip.c_str(), port);
-			return;
-		}
 		
 		std::vector<char> tmp(2048);
-		sock.setBlocking(false);
+
 		while(true) {
+			while(!is_connected) {
+				printf("Reconnecting....\n");
+				clear();
+				connect();
+			}
+
+			sock.setBlocking(false);
 			int bytes_read = sock.read(&tmp[0], tmp.size());
-			if(bytes_read) {
+			if(bytes_read > 0) {
 				printf("<< %d bytes read.\n", bytes_read);
 				buffer.addBytes((char*)&tmp[0], bytes_read);
 				parseBuffer();
 			}
+			else if(bytes_read < 0) {
+				// disconnected.
+				is_connected = false;
+				clear();
+				continue;
+			}
+
 			// Check if there are tasks that we need to handle
 			mutex.lock();
 			{
 				for(std::vector<CommandData>::iterator it = out_commands.begin(); it != out_commands.end(); ++it) {
 					CommandData& cmd = *it;
+					printf("Sending ... from client ..\n");
 					send(cmd.buffer.getPtr(), cmd.buffer.getNumBytes());
 				}
 				out_commands.clear();
@@ -98,6 +124,7 @@ namespace buttons {
 				CommandData& cmd = *it;
 				switch(cmd.name) {
 				case BDATA_SCHEME: {
+					printf("GOT THE SCHEME!\n");
 					parseScheme(cmd); 
 					break;
 				}
@@ -127,6 +154,11 @@ namespace buttons {
 				}
 				case BDATA_VECTOR: {
 					cmd.element->setValue((void*)cmd.vector_value);
+					break;
+				}
+				case BDATA_PADI:
+				case BDATA_PADF: {
+					cmd.element->setValue((void*)cmd.pad_value);
 					break;
 				}
 				default: printf("Error: Unhandled in command.\n"); break;
@@ -170,8 +202,10 @@ namespace buttons {
 	void Client::parseScheme(CommandData& task) {
 		while(true) {
 			char scheme_cmd = task.buffer.consumeByte();
+			printf("scheme cmd...: %d == %d\n", scheme_cmd, BDATA_GUI);
 			switch(scheme_cmd) {
 			case BDATA_GUI: {
+				printf("yep create gui:\n");
 				unsigned int x = task.buffer.consumeUI32();
 				unsigned int y = task.buffer.consumeUI32();
 				unsigned int w = task.buffer.consumeUI32();
@@ -252,8 +286,11 @@ namespace buttons {
 						int* dummy_value = new int;
 						value_ints.push_back(dummy_value);
 						unsigned int button_id = task.buffer.consumeUI32();
+						unsigned int selected_value = task.buffer.consumeUI32();
 						unsigned int num_options = task.buffer.consumeUI32();
+						*dummy_value = selected_value;
 
+						//printf("Creating radio, num options: %d, button-id: %d, selected index: %d\n", num_options, button_id, selected_value);
 						std::vector<std::string> options;
 						for(int i = 0; i < num_options; ++i) {
 							std::string option_title = task.buffer.consumeString();
@@ -262,12 +299,6 @@ namespace buttons {
 
 						// create radio + set selected value
 						Radio<Client>* radio = &gui->addRadio<Client>(label, button_id, this, options, *dummy_value);
-						for(int i = 0; i < num_options; ++i) {
-							char v = task.buffer.consumeByte();
-							if(v == 1) {
-								radio->setValue(v);
-							}
-						}
 						elements[buttons_id][element_id] = radio;
 						gui->setColor(col_hue);
 						break;
@@ -279,7 +310,7 @@ namespace buttons {
 						unsigned int alpha = task.buffer.consumeUI32();
 						
 						float* col_ptr = new float[4];
-						value_floats.push_back(col_ptr);
+						value_float_arrays.push_back(col_ptr);
 
 						ColorPicker* picker = &gui->addColor(label, col_ptr);
 						picker->hue_slider.setValue(hue);
@@ -297,9 +328,9 @@ namespace buttons {
 						float* vec_ptr = new float[2];
 						vec_ptr[0] = vx;
 						vec_ptr[1] = vy;
-						value_floats.push_back(vec_ptr);
-						
+						value_float_arrays.push_back(vec_ptr);
 						Vector<float>* vec = &gui->addVec2f(label, vec_ptr);
+						vec->setValue((void*)vec_ptr);
 						elements[buttons_id][element_id] = vec;
 						gui->setColor(col_hue);
 						break;
@@ -316,9 +347,10 @@ namespace buttons {
 							float* pad_ptr = new float[2];
 							pad_ptr[0] = px;
 							pad_ptr[1] = py;
-							value_floats.push_back(pad_ptr);
+							value_float_arrays.push_back(pad_ptr);
 							Pad<float>* padf = &gui->addFloat2(label, pad_ptr);
 							elements[buttons_id][element_id] = padf;
+							padf->setPercentages(px, py);
 							gui->setColor(col_hue);
 						}
 						else if(value_type == PAD_INT) {
@@ -331,9 +363,10 @@ namespace buttons {
 							int* pad_ptr = new int[2];
 							pad_ptr[0] = px;
 							pad_ptr[1] = py;
-							value_ints.push_back(pad_ptr);
+							value_int_arrays.push_back(pad_ptr);
 							Pad<int>* padi = &gui->addInt2(label, pad_ptr);
 							elements[buttons_id][element_id] = padi;
+							padi->setPercentages(px, py);
 							gui->setColor(col_hue);
 						}
 						break;
@@ -349,6 +382,30 @@ namespace buttons {
 			}
 			break;
 		}
+		printf("Bytes left after parsing scheme.: %zu\n", task.buffer.size());
+	}
+
+
+	void Client::clear() {
+		for(std::vector<float*>::iterator it = value_floats.begin(); it != value_floats.end(); ++it) {	delete *it;  }
+		value_floats.clear();
+
+		for(std::vector<int*>::iterator it = value_ints.begin(); it != value_ints.end(); ++it) {	delete *it;  }
+		value_ints.clear();
+
+		for(std::vector<bool*>::iterator it = value_bools.begin(); it != value_bools.end(); ++it) {	delete *it;  }
+		value_bools.clear();
+
+		for(std::vector<float*>::iterator it = value_float_arrays.begin(); it != value_float_arrays.end(); ++it) {	delete[] *it;  }
+		value_float_arrays.clear();
+
+		for(std::vector<int*>::iterator it = value_int_arrays.begin(); it != value_int_arrays.end(); ++it) {	delete[] *it;  }
+		value_int_arrays.clear();
+
+		for(std::map<unsigned int, buttons::Buttons*>::iterator it = buttons.begin(); it != buttons.end(); ++it) {
+			delete it->second; // buttons delete all elements
+		}
+		buttons.clear();
 	}
 
 	// From Client > Server
@@ -369,6 +426,15 @@ namespace buttons {
 		}
 	}
 
+	// Asks the server for the scheme.
+	void Client::getScheme() {
+		printf("<< Add the get scheme command.\n");
+		CommandData data;
+		data.name = BDATA_GET_SCHEME;
+		data.buffer.addByte(BDATA_GET_SCHEME);
+		data.buffer.addUI32(0);
+		addOutCommand(data);
+	}
 
 	void Client::operator()(unsigned int dx) {
 		printf("Button pressed: %u \n", dx);

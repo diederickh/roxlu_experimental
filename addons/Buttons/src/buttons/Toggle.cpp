@@ -104,4 +104,9 @@ Toggle& Toggle::setColor(const float hue, float a) {
 	return *this;
 }
 
+bool Toggle::serializeScheme(ButtonsBuffer& buffer) {
+	buffer.addByte(value ? 1 : 0);
+	return true;
+}
+
 } // namespace buttons

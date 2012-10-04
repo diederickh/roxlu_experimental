@@ -141,9 +141,11 @@ void Buttons::update() {
 					needs_text_update = true;
 				}
 				if(el.value_changed) {
-					value_changed_els.push_back(&el);
 					if(el.is_child) {
 						el.parent->onChildValueChanged();
+					}
+					else {
+						value_changed_els.push_back(&el);
 					}
 					el.value_changed = false;
 				}

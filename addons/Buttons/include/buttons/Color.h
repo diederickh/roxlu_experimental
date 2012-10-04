@@ -73,6 +73,7 @@ public:
 	void load(std::ifstream& ifs);
 	void onLoaded();
 	bool canSave();
+	bool serializeScheme(ButtonsBuffer& buffer);
 	
 	void hide();
 	void show();
@@ -437,15 +438,19 @@ void ColorT<T>::setValue(void* hsla) {
 	sat_slider.setValue(col_ptr[1]);
 	light_slider.setValue(col_ptr[2]);
 	alpha_slider.setValue(col_ptr[3]);
-
-	//	sat_slider.setValue(S);
 	sat_slider.needsRedraw();
 	hue_slider.needsRedraw();
-	//sat_slider.needsTextUpdate();
-	//hue_slider.needsTextUpdate();
-	//printf("Setting: %u %u %u %u\n", col_ptr[0], col_ptr[1], col_ptr[2], col_ptr[3]);
-	
 	needsRedraw();
+}
+
+  
+template<class T>
+bool ColorT<T>::serializeScheme(ButtonsBuffer& buffer) {
+	buffer.addUI32(hue_slider.value);
+	buffer.addUI32(sat_slider.value);
+	buffer.addUI32(light_slider.value);
+	buffer.addUI32(alpha_slider.value);
+	return true;
 }
 
 typedef ColorT<float> ColorPicker;

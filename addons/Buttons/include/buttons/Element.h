@@ -47,12 +47,15 @@ public:
 	
 	virtual void onSaved(){}  // gets called once all data has been saved
 	virtual void onLoaded(){}  // gets called once all data has been loaded 
+	virtual bool serializeScheme(ButtonsBuffer& buffer){}; // serialize all data necessasry to "rebuild" this widget. client<->server
 	
 	virtual void hide();
 	virtual void show();
 		
 	virtual Element& setColor(const float hue, float a = 1.0f);
 	virtual void setValue(void* v) {}  // added this for client/sever model where the value (or template type) can't be known.
+
+  
 	
  	void needsRedraw();
 	void needsTextUpdate(); // when you want to change the dynamic text

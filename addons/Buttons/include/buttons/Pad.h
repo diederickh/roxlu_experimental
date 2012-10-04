@@ -40,7 +40,7 @@ public:
 	Pad<T>& setPercentages(const float percX, const float percY);
 
 	void setValue(void* v); // client <-> server
-	
+	bool serializeScheme(ButtonsBuffer& buffer);
 
 	void hide();
 	void show();
@@ -210,6 +210,7 @@ public:
 	Pad<T>& Pad<T>::setPercentages(const float percX, const float percY) {
 		px = percX;
 		py = percY;
+		printf("set percentages: %f, %f\n", px, py);
 		return *this;
 	}
 
@@ -256,6 +257,27 @@ public:
 		min_y_value = min;
 		max_y_value = max;
 		return *this;
+	}
+
+	template<class T>
+	bool Pad<T>::serializeScheme(ButtonsBuffer& buffer) {
+		if(value_type == PAD_FLOAT) {
+			buffer.addByte(PAD_FLOAT);
+			buffer.addFloat(min_x_value);
+			buffer.addFloat(max_x_value);
+			buffer.addFloat(min_y_value);
+			buffer.addFloat(max_y_value);
+		}
+		else {
+			buffer.addByte(PAD_INT);
+			buffer.addUI32(min_x_value);
+			buffer.addUI32(max_x_value);
+			buffer.addUI32(min_y_value);
+			buffer.addUI32(max_y_value);
+		}
+		buffer.addFloat(px);
+		buffer.addFloat(py);
+		return true;
 	}
 
 

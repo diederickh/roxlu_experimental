@@ -17,7 +17,7 @@ template<class T>
 
 class Radio : public Element {
 public:	
-	Radio(int id, const vector<string>& options, int& selected, const string& name, T* cb); 
+	Radio(int id, vector<string> options, int& selected, const string& name, T* cb); 
 	~Radio();
 
 	void addOption(Toggle* toggle);
@@ -41,6 +41,7 @@ public:
 	void save(std::ofstream& ofs);
 	void load(std::ifstream& ifs);
 	bool canSave();
+	bool serializeScheme(ButtonsBuffer& buffer);
 	
 	void hide();
 	void show();
@@ -50,7 +51,7 @@ public:
 	void setValue(int index); 
 
 	int label_dx;
-	const vector<string>& options;
+	vector<string> options;
 	T* cb;
 
 	int& selected;
@@ -61,7 +62,7 @@ public:
 };
 
 template<class T>
-Radio<T>::Radio(int id, const vector<string>& options, int& selected, const string& name, T* cb) 
+Radio<T>::Radio(int id, vector<string> options, int& selected, const string& name, T* cb) 
 	:Element(BTYPE_RADIO, name)
 	,options(options)
 	,cb(cb)
@@ -82,6 +83,8 @@ Radio<T>::Radio(int id, const vector<string>& options, int& selected, const stri
 		t->label = options[i];
 		addOption(t);
 	}
+	printf("Selected value: %d\n", selected);
+	setValue(selected);
 }
 
 template<class T>
@@ -100,6 +103,7 @@ template<class T>
 void Radio<T>::getChildElements(vector<Element*>& elements) {
 	for(vector<Toggle*>::iterator it = toggles.begin(); it != toggles.end(); ++it) {
 		elements.push_back((*it));
+		printf("Get child elements in radio!\n");
 	}
 }
 
@@ -196,6 +200,7 @@ void Radio<T>::onLoaded() {
 		Toggle& toggle = *toggles[i];
 		if(toggle.value) {
 			selected = i;
+			printf("Loaded radio. selected is: %d\n", selected);
 			break;
 		}
 	}
@@ -210,17 +215,18 @@ void Radio<T>::setValue(void* v) {
 }
  
 template<class T>
-void Radio<T>::setValue(int index) {
+void Radio<T>::setValue(int selectedIndex) {
 	for(int i = 0; i < toggles.size(); ++i) {
 		Toggle& toggle = *toggles[i];
 		toggle.setValue(false);
-		if(i == index) {
+		if(i == selectedIndex) {
 			toggle.setValue(true);
 			toggle.needsRedraw();
+			printf("ok set %d to true, %d\n", i, selectedIndex);
 		}
 	}
 	needsRedraw();
-	(*cb)(id);
+	//	(*cb)(id);
 }
 
 template<class T>
@@ -246,6 +252,34 @@ void Radio<T>::show() {
 	is_visible = true;
 	static_text->setTextVisible(label_dx, true);
 }
+
+	template<class T>
+	bool Radio<T>::serializeScheme(ButtonsBuffer& buffer) {
+		buffer.addUI32(id);
+		buffer.addUI32(selected);
+		buffer.addUI32(options.size());
+		for(int i = 0; i < options.size(); ++i) {
+			buffer.addString(options[i]);
+		}
+		for(int i = 0; i < options.size(); ++i) {
+			//			buffer.addByte((values[i] == true) ? 1 : 0);
+		}
+		/*					Radio<Server>* radio = static_cast<Radio<Server>* >(el); 
+					int* tmp_val = (int*)el->event_data;
+					scheme.addUI32(*tmp_val);
+					scheme.addUI32(radio->options.size());
+					printf("OPTINS: %zu\n", radio->options.size());
+					for(vector<string>::const_iterator it = radio->options.begin(); it != radio->options.end(); ++it) {
+						scheme.addString(*it);
+					}
+					for(int i = 0; i < radio->options.size(); ++i) {
+						scheme.addByte((radio->values[i]) == true ? 1 : 0);
+					}
+					*/
+
+		return true;
+
+	}
 
 } // namespace buttons
 

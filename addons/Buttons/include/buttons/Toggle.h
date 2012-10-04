@@ -24,6 +24,7 @@ public:
 	void save(std::ofstream& ofs);
 	void load(std::ifstream& ifs);
 	bool canSave();
+	bool serializeScheme(ButtonsBuffer& buffer);
 	
 	Toggle& setColor(const float hue, float a = 1.0);
 	void hide();

@@ -29,6 +29,7 @@ public:
 	bool canSave();
 	
 	void setValue(void* v); // used by e.g. client<->server
+	bool serializeScheme(ButtonsBuffer& buffer);
 	
 	Vector<T>& setColor(const float hue, float a = 1.0);
 	void hide();
@@ -114,7 +115,6 @@ public:
 		//float end_y = cy + sin(angle) * (radius * 0.7);
 		float end_x = cx + cos_a * (radius * 0.7);
 		float end_y = cy + sin_a * (radius * 0.7);
-
 		
 		float dir_x = end_x - cx;
 		float dir_y = end_y - cy;
@@ -260,10 +260,10 @@ public:
 	template<class T>
 	void Vector<T>::setValue(void* v) {
 		T* vp = (T*)v;
-		*(value) = *vp;
-		*(value+1) = *(vp + 1);
-		cos_a = *(value);
-		sin_a = *(value + 1);
+		value[0] = vp[0];
+		value[1] = vp[1];
+		cos_a = value[0];
+		sin_a = value[1];
 		needsRedraw();
 	}
 
@@ -278,6 +278,14 @@ public:
 		this->is_visible = true;
 		this->static_text->setTextVisible(label_dx, true);
 	}
+
+	template<class T>
+	bool Vector<T>::serializeScheme(ButtonsBuffer& buffer) {
+		buffer.addFloat(cos_a);
+		buffer.addFloat(sin_a);
+		return true;
+	}
+
 } // namespace buttons
 
 #endif

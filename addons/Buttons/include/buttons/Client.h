@@ -51,6 +51,7 @@ namespace buttons {
 		~Client();
 		void start();
 		void run();
+
 		void update();
 		void draw();
 
@@ -61,7 +62,10 @@ namespace buttons {
 		void onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target, void* targetData);
 		void operator()(unsigned int dx); // operator for button clicks
 	private:
+		void clear(); // deletes all allocated guis and widgets and references
+		bool connect();
 		void parseBuffer();
+		void getScheme(); // sends the command to retrieve the scheme
 		void parseScheme(CommandData& cmd);
 
 		void addInCommand(CommandData task);
@@ -69,6 +73,7 @@ namespace buttons {
 
 		void send(const char* buffer, size_t len); // send data to server
 	private:
+		bool is_connected;
 		Socket sock;
 		roxlu::Thread thread;
 		roxlu::Mutex mutex;
@@ -85,6 +90,8 @@ namespace buttons {
 		std::vector<float*> value_floats;
 		std::vector<int*> value_ints;
 		std::vector<bool*> value_bools;
+		std::vector<float*> value_float_arrays;
+		std::vector<int*> value_int_arrays;
 	};
 
 } // buttons

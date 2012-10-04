@@ -122,7 +122,7 @@ namespace buttons {
 			result.buttons_id = buffer.consumeUI32();
 			result.element_id = buffer.consumeUI32();
 			result.element = elements[result.buttons_id][result.element_id];
-
+			printf("Deserialize: buttonsid: %u, elementsid: %u, el ptr: %p\n", result.buttons_id, result.element_id, result.element);
 			switch(result.element->type) {
 			case BTYPE_SLIDER: { 
 				Sliderf* sliderf = static_cast<Sliderf*>(result.element);
@@ -196,13 +196,18 @@ namespace buttons {
 			}
 			break;
 		}
+		case BDATA_GET_SCHEME: {
+			printf("Client wants to get the scheme.\n");
+			result.name = BDATA_GET_SCHEME;
+			buffer.consumeUI32(); // contains an "empty" 
+			return true;
+		}
 		case BDATA_SCHEME: {
 			unsigned int command_size = buffer.consumeUI32();
 			result.name = BDATA_SCHEME;
 			result.buffer.addBytes(buffer.getPtr(), buffer.getNumBytes());
 			buffer.flush(command_size);
 			return true;
-			break;
 		}
 		default: {
 			return false;
@@ -244,7 +249,7 @@ namespace buttons {
 		}
 
 		unsigned int size = cmd.buffer.size() * sizeof(char);
-		printf(">> Sending to client: %zu\n", size);
+		printf(">> Sending to client: %zu bytes\n", size);
 		if(!send((const char*)&size, sizeof(size))) {
 			return;
 		}
@@ -258,10 +263,18 @@ namespace buttons {
 		client.setBlocking(false);
 		std::vector<char> tmp(2048);
 		int bytes_read = client.read(&tmp[0], tmp.size());
-		if(bytes_read) {
+
+		if(bytes_read > 0) {
+			printf("Read: %d\n", bytes_read);
 			buffer.addBytes((char*)&tmp[0], bytes_read);
 			parseBuffer();
 		}
+		else if(bytes_read < 0) {
+			// disconnected
+			connections.removeConnection(this);
+			return ; 
+		}
+	
 		client.setBlocking(true);
 	}
 
@@ -269,9 +282,10 @@ namespace buttons {
 	void ServerConnection::parseBuffer() {
 		do {
 			if(buffer.size() < 5) { // minimum size of a command
+				printf("Too small buffer: %zu\n", buffer.size());
 				return;
 			}
-
+			
 			unsigned int command_size = buffer.getUI32(1); // peek
 			if(buffer.size() < command_size) {
 				printf("Buffer has only %zu bytes, and the command consists of: %u bytes.\n", buffer.size(), command_size);
@@ -282,6 +296,7 @@ namespace buttons {
 			CommandData deserialized;
 			if(util.deserialize(buffer, deserialized, server.elements)) {
 				printf("Correctly deserialized.\n");
+			   deserialized.connection = this;
 				server.addTask(deserialized);
 			}
 
@@ -298,11 +313,31 @@ namespace buttons {
 	}
 
 	ServerConnections::~ServerConnections() {
-		printf("~ServerConnections: @todo close client sockets!\n");
+		mutex.lock();
+		clear();
+		for(std::vector<ServerConnection*>::iterator it = connections.begin(); it != connections.end(); ++it) {
+			delete *it;
+		}
+		connections.clear();
+		mutex.unlock();
 	}
 
 	void ServerConnections::start() {
 		thread.create(*this);
+	}
+
+	void ServerConnections::clear() {
+		std::vector<ServerConnection*>::iterator rit = remove_list.begin();
+		while(rit != remove_list.end()) {
+			std::vector<ServerConnection*>::iterator fit = std::find(connections.begin(), connections.end(), (*rit));
+			if(fit != connections.end()) {
+				delete (*fit);
+				connections.erase(fit);
+			}
+			++rit;
+		}
+
+		remove_list.clear();
 	}
 
 	void ServerConnections::run() {
@@ -310,23 +345,23 @@ namespace buttons {
 			
 			mutex.lock();
 			{
-				// SEND DATA TO CLIENTS OF NECESSARY
-				for(std::deque<ServerCommand>::iterator it = commands.begin(); it != commands.end(); ++it) {
+				// SEND DATA TO ALL CLIENTS OF NECESSARY
+				for(std::deque<ServerCommand>::iterator it = to_all_commands.begin(); it != to_all_commands.end(); ++it) {
 					for(std::vector<ServerConnection*>::iterator sit = connections.begin(); sit != connections.end(); ++sit) {
 						(*sit)->send((*it));
 					}
-					std::vector<ServerConnection*>::iterator rit = remove_list.begin();
-					while(rit != remove_list.end()) {
-						std::vector<ServerConnection*>::iterator fit = std::find(connections.begin(), connections.end(), (*rit));
-						if(fit != connections.end()) {
-							delete (*fit);
-							connections.erase(fit);
-						}
-						++rit;
-					}
-					remove_list.clear();
 				}
-				commands.clear();
+				to_all_commands.clear();
+				
+				// REMOVE ALL DISCONNECTED CLIENTS
+				clear();
+
+				// SEND DATA TO SPECIFIC CLIENTS
+				for(std::deque<ServerCommand>::iterator it = to_one_commands.begin(); it != to_one_commands.end(); ++it) {
+					ServerCommand& cmd = *it;
+					cmd.con->send(cmd);
+				}
+				to_one_commands.clear();
 
 				// RECEIVE DATA FROM CLIENTS
 				for(std::vector<ServerConnection*>::iterator sit = connections.begin(); sit != connections.end(); ++sit) {
@@ -338,27 +373,33 @@ namespace buttons {
 	}
  
 	void ServerConnections::sendToAll(ServerCommand& cmd) {
-		addCommand(cmd);
+		addToAllCommand(cmd);
+	}
+	
+	void ServerConnections::sendToOne(ServerConnection* con, ServerCommand& cmd) {
+		cmd.con = con;
+		addToOneCommand(cmd);
 	}
 
 	void ServerConnections::addConnection(ServerConnection* conn) {
 		mutex.lock();
-		{
-			connections.push_back(conn);
-		}
+		connections.push_back(conn);
 		mutex.unlock();
 	}
 	
-	void ServerConnections::addCommand(ServerCommand cmd) {
+	void ServerConnections::addToAllCommand(ServerCommand cmd) {
 		mutex.lock();
-		{
-			commands.push_back(cmd);
-		}
+		to_all_commands.push_back(cmd);
+		mutex.unlock();
+	}
+
+	void ServerConnections::addToOneCommand(ServerCommand cmd) {
+		mutex.lock();
+		to_one_commands.push_back(cmd);
 		mutex.unlock();
 	}
 
 	void ServerConnections::removeConnection(ServerConnection* conn) {
-		// @todo this is indirectly called by "send()
 		remove_list.push_back(conn);
 	}
 
@@ -402,7 +443,6 @@ namespace buttons {
 				client.setNoSigPipe();
 				ServerConnection* con = new ServerConnection(*this, connections, client);
 				connections.addConnection(con);
-				sendScheme(con);
 			}
 		}
 	}
@@ -422,6 +462,13 @@ namespace buttons {
 		for(std::vector<CommandData>::iterator it = tasks.begin(); it != tasks.end(); ++it) {
 			CommandData& cmd = *it;
 			switch(cmd.name) {
+			case BDATA_GET_SCHEME: {
+				// Client is connected and asked for the scheme.
+				printf("Create and send scheme.\n");
+				createScheme(); 
+				sendScheme(cmd.connection);
+				break;
+			}
 			case BDATA_SLIDERF: {
 				if(cmd.sliderf != NULL) {
 					cmd.sliderf->setValue(cmd.sliderf_value);
@@ -482,14 +529,11 @@ namespace buttons {
 			unsigned int element_id = buttons_hash(el.label.c_str(), el.label.size());
 			elements[buttons_id][element_id] = *it;
 		}
-
-		// (Re)create the buttons cheme
-		createButtonsScheme();
 	}
 
 	void Server::onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target, void* targetData) {
 		if(event == BEVENT_VALUE_CHANGED) {
-			printf(">> Value changed.\n");
+			printf(">> Value changed (%p).\n", target);
 			ServerCommand cmd(BDATA_CHANGED);
 			if(utils.serialize(buttons, target, cmd.buffer, targetData)) {
 				connections.sendToAll(cmd);
@@ -498,14 +542,8 @@ namespace buttons {
 	}
 	
 	// Create the scheme which is used to recreate the buttons gui on the other side.
-	void Server::createButtonsScheme() {
+	void Server::createScheme() {
 		scheme.clear();
-		scheme.addByte(BDATA_SCHEME);
-
-		// Reserve space for the size of the scheme
-		unsigned int scheme_size = 0;
-		int start = scheme.size();
-		scheme.addUI32(scheme_size);
 
 		// first all buttons which are not part of a panel
 		for(std::vector<Buttons*>::iterator it = buttons_to_sync.begin(); it != buttons_to_sync.end(); ++it) {
@@ -532,101 +570,23 @@ namespace buttons {
 				scheme.addFloat(el->col_bright);
 
 				switch(el->type) {
-				case BTYPE_SLIDER: {
-					Sliderf* sliderf = static_cast<Sliderf*>(el);
-					scheme.addByte(sliderf->value_type);
-					if(sliderf->value_type == Slider<float>::SLIDER_FLOAT) {
-						// float slider
-						scheme.addFloat(sliderf->value);
-						scheme.addFloat(sliderf->minv);
-						scheme.addFloat(sliderf->maxv);
-						scheme.addFloat(sliderf->stepv);
-					}
-					else {
-						// int-slider
-						Slideri* slideri = static_cast<Slideri*>(el);
-						scheme.addI32(slideri->value);
-						scheme.addI32(slideri->minv);
-						scheme.addI32(slideri->maxv);
-						scheme.addI32(slideri->stepv);
-					}
-					break;
-				}
-				case BTYPE_TOGGLE: {
-					Toggle* toggle = static_cast<Toggle*>(el);
-					scheme.addByte(toggle->value ? 1 : 0);
-					break;
-				}
-				case BTYPE_BUTTON: {
-					int* tmp_val = (int*)el->event_data;
-					scheme.addUI32(*tmp_val);
-					break;
-				}
-				case BTYPE_RADIO: {
-					Radio<Server>* radio = static_cast<Radio<Server>* >(el); 
-					int* tmp_val = (int*)el->event_data;
-					scheme.addUI32(*tmp_val);
-					scheme.addUI32(radio->options.size());
-					for(vector<string>::const_iterator it = radio->options.begin(); it != radio->options.end(); ++it) {
-						scheme.addString(*it);
-					}
-					for(int i = 0; i < radio->options.size(); ++i) {
-						scheme.addByte((radio->values[i]) == true ? 1 : 0);
-					}
-					break;
-				}
-				case BTYPE_COLOR: {
-					// color
-					ColorPicker* picker = static_cast<ColorPicker*>(el);
-					scheme.addUI32(picker->hue_slider.value);
-					scheme.addUI32(picker->sat_slider.value);
-					scheme.addUI32(picker->light_slider.value);
-					scheme.addUI32(picker->alpha_slider.value);
-					break;
-				}
-				case BTYPE_VECTOR: {
-					// vector
-					Vector<float>* vec = static_cast<Vector<float>* >(el); 
-					scheme.addFloat(vec->value[0]);
-					scheme.addFloat(vec->value[1]);
-					break;
-				}
-				case BTYPE_PAD: {
-					Pad<float>* padf = static_cast<Pad<float>* >(el);
-					if(padf->value_type == PAD_FLOAT) {
-						scheme.addByte(PAD_FLOAT);
-						scheme.addFloat(padf->min_x_value);
-						scheme.addFloat(padf->max_x_value);
-						scheme.addFloat(padf->min_y_value);
-						scheme.addFloat(padf->max_y_value);
-						scheme.addFloat(padf->px);
-						scheme.addFloat(padf->py);
-					}
-					else {
-						Pad<int>* padi = static_cast<Pad<int>* >(el);
-						scheme.addByte(PAD_INT);
-						scheme.addUI32(padi->min_x_value);
-						scheme.addUI32(padi->max_x_value);
-						scheme.addUI32(padi->min_y_value);
-						scheme.addUI32(padi->max_y_value);
-						scheme.addFloat(padi->px);
-						scheme.addFloat(padi->py);
-					}
-					break;
-				}
+				case BTYPE_SLIDER: { 		el->serializeScheme(scheme);		break;			}
+				case BTYPE_TOGGLE: {			el->serializeScheme(scheme);		break;			}
+				case BTYPE_BUTTON: {			el->serializeScheme(scheme);		break;			}
+				case BTYPE_RADIO: {			el->serializeScheme(scheme);		break;			}
+				case BTYPE_COLOR: {			el->serializeScheme(scheme);		break;			}
+				case BTYPE_VECTOR: {			el->serializeScheme(scheme);		break;			}
+				case BTYPE_PAD: {				el->serializeScheme(scheme);		break;			}
 				default:break;
 				};
 			}
 		}
-
-		// rewrite the size of the scheme
-		int end = scheme.size();
-		int num_bytes = (end - start) - 4;
-		scheme.rewrite(start, 4, (char*)&num_bytes);
 	}
 
 	void Server::sendScheme(ServerConnection* con) {
-		con->send(scheme.getPtr(), scheme.getNumBytes());
+		ServerCommand cmd(BDATA_SCHEME);
+		cmd.setData(scheme.getPtr(), scheme.getNumBytes());
+		connections.sendToOne(con, cmd);
 	}
 	
 } // buttons

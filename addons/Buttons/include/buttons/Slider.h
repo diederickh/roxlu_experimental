@@ -315,6 +315,23 @@ public:
 		dynamic_text->setTextVisible(txtval_dx, true);
 		updateTextPosition();
 	}
+
+	bool serializeScheme(ButtonsBuffer& buffer) {
+		buffer.addByte(value_type);
+		if(value_type == SLIDER_FLOAT) {
+			buffer.addFloat(value);
+			buffer.addFloat(minv);
+			buffer.addFloat(maxv);
+			buffer.addFloat(stepv);
+		}
+		else {
+			buffer.addI32(value);
+			buffer.addI32(minv);
+			buffer.addI32(maxv);
+			buffer.addI32(stepv);
+		}
+		return true;
+	}
 		
 
 	T& value;
