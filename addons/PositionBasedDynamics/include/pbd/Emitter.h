@@ -129,7 +129,7 @@ void Emitter<P, C, V, H>::update() {
 		emission_range = max_emission;
 	}
 	else {
-		emission_range = (max_emission - min_emission);
+		emission_range = std::max<int>(1.0f, (max_emission - min_emission));
 	}
 	if(emission_range == 0) {
 		return;
@@ -238,7 +238,7 @@ template<class P, class C, class V, class H>
 inline void Emitter<P, C, V, H>::setEmission(const int mine, const int maxe) {
 	min_emission = mine;
 	max_emission = maxe;
-	emit_time = 1000/(max_emission - min_emission);
+	emit_time = 1000/(std::max<int>(1.0f, max_emission - min_emission));
 }
 
 
