@@ -15,7 +15,11 @@
 // read: http://developer.apple.com/library/mac/#documentation/GraphicsImaging/Conceptual/OpenGL-MacProgGuide/opengl_texturedata/opengl_texturedata.html#//apple_ref/doc/uid/TP40001987-CH407-SW1
 class PBO {
 public:
+#if ROXLU_GL_MODE == ROXLU_GL_STRICT
+	PBO(GLuint nTarget = 0);
+#else 
 	PBO(GLuint nTarget = GL_PIXEL_UNPACK_BUFFER);
+#endif	
 	PBO& setup(int nWidth, int nHeight, GLenum nColorType = GL_RGBA);
 	PBO& setPixels(unsigned char* pRGBA);
 	PBO& bind(); // for reading from pbo

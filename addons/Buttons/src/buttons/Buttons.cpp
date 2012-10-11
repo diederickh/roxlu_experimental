@@ -58,7 +58,8 @@ Buttons::Buttons(const string& title, int w)
 	printf("Buttons vao id: %d\n", vao.getID());
 	//vao.unbind();
 	//glBindBuffer(GL_ARRAY_BUFFER, 0); eglGetError();
-	createOrtho(ofGetWidth(), ofGetHeight()); // @todo remove call to getwidth/height @todo windows
+	//createOrtho(ofGetWidth(), ofGetHeight()); // @todo remove call to getwidth/height @todo windows
+	createOrtho(768, 1024);
 	
 	// top draggable handle
 	BSET_COLOR(header_color_top, 0.07,0.07,0.07,1.0);
@@ -179,7 +180,7 @@ void Buttons::update() {
 	size_t size_needed = vd.size() * sizeof(ButtonVertex);
 	if(size_needed > allocated_bytes) {
 		while(allocated_bytes < size_needed) {
-			allocated_bytes = std::max<size_t>(allocated_bytes * 2, 4096);
+			allocated_bytes = std::max<size_t>(allocated_bytes * 2, 256);
 		}
 		printf("To allocate: %zu\n", allocated_bytes);
 		
@@ -714,10 +715,11 @@ bool Buttons::isOpen() {
 	return is_open;
 }
 
-void Buttons::setColor(const float hue, float a) {
+
+void Buttons::setColor(const float hue, float sat, float bright, float a) {
 	for(vector<Element*>::iterator it = elements.begin(); it != elements.end(); ++it) {
 		Element& el = **it;
-		el.setColor(hue,a);
+		el.setColor(hue, sat, bright, a);
 	}
 }
 

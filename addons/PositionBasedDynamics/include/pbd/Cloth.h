@@ -2,8 +2,6 @@
 #define ROXLU_PBD_CLOTH
 
 
-//#include "Roxlu.h"
-//#include "PBD.h"
 #include <roxlu/math/Vec3.h>
 #include <roxlu/math/Vec2.h>
 #include <roxlu/3d/Triangle.h>
@@ -19,8 +17,8 @@ void createCloth(
 	 Particles<T, P, S>& ps
 	,int cols
 	,int rows
-	,int width
-	,int height
+	,const float width
+	,const float height
 	,vector<Triangle>& triangles
 	,float k = 1.0f
 )
@@ -35,8 +33,8 @@ void createCloth(
 	
 	for(int i = 0; i <= cols; ++i) {
 		for(int j = 0; j <= rows; ++j) {
-			float x = 100+ i * w;
-			float y = 100+j * h;
+			float x = i * w;
+			float y = j * h;
 			int dx = CLOTH_DX(i,j);
 			T ppos(x,y);
 			P* particle = ps.createParticle(ppos);
@@ -75,11 +73,14 @@ void createCloth(
 	}
 } 
 
-inline void createCloth3(Particles<Vec3, Particle<Vec3>, Spring<Vec3> >& ps, int rows, int cols, int width, int height, vector<Triangle>& triangles, float k = 1.0f) {
+
+// e.g. createCloth3(ps, cols, rows, 0.41, 0.1, tris, 0.9);
+// USE ps.update(0.1f) with 60fp
+inline void createCloth3(Particles<Vec3, Particle<Vec3>, Spring<Vec3> >& ps, int rows, int cols, const float width, const float height, vector<Triangle>& triangles, float k = 1.0f) {
 	createCloth<Vec3, Particle<Vec3>, Spring<Vec3> >(ps, rows, cols, width, height, triangles, k);
 }
 
-inline void createCloth2(Particles<Vec2, Particle<Vec2>, Spring<Vec2> >& ps, int rows, int cols, int width, int height, vector<Triangle>& triangles, float k = 1.0f) {
+inline void createCloth2(Particles<Vec2, Particle<Vec2>, Spring<Vec2> >& ps, int rows, int cols, const float width, const float height, vector<Triangle>& triangles, float k = 1.0f) {
 	createCloth<Vec2, Particle<Vec2>, Spring<Vec2> >(ps, rows, cols, width, height, triangles, k);
 }
 #endif

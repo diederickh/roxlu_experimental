@@ -31,7 +31,7 @@ public:
 	void setValue(void* v); // used by e.g. client<->server
 	bool serializeScheme(ButtonsBuffer& buffer);
 	
-	Vector<T>& setColor(const float hue, float a = 1.0);
+	Vector<T>& setColor(const float hue, float sat = 0.2f , float bright = 0.27f, float a = 1.0);
 	void hide();
 	void show();
 	
@@ -83,7 +83,7 @@ public:
 		,sin_a(0.0f)
 	{
 		this->h = 120;
-		setColor(1.0f, 1.0f);
+		setColor(1.0f); 
 		event_data = (void*)&value;
 	}
 
@@ -103,6 +103,7 @@ public:
 
 	template<class T>
 	void Vector<T>::generateVertices(ButtonVertices& vd) {
+
 		calculateCoordinates();
 
 		// Background + pad area
@@ -244,9 +245,8 @@ public:
 	}
 
 	template<class T>
-	Vector<T>& Vector<T>::setColor(const float hue, float a) {
-		Element::setColor(hue, a);
-
+	Vector<T>& Vector<T>::setColor(const float hue, float sat, float bright, float a) {
+		Element::setColor(hue, sat, bright, a);
 		rect_bg_top_col[3] = a;
 		rect_bg_bottom_col[3] = a;
 		HSL_to_RGB(col_hue, col_sat, col_bright - 0.1, rect_bg_top_col, rect_bg_top_col+1, rect_bg_top_col+2);
@@ -259,6 +259,7 @@ public:
 
 	template<class T>
 	void Vector<T>::setValue(void* v) {
+
 		T* vp = (T*)v;
 		value[0] = vp[0];
 		value[1] = vp[1];

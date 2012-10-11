@@ -200,7 +200,7 @@ namespace buttons {
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	// CREATES THE BUTTONS/PANELS FROM THE REMOTE SCHEME
 	void Client::parseScheme(CommandData& task) {
-		while(true) {
+		while(task.buffer.size() > 0) {
 			char scheme_cmd = task.buffer.consumeByte();
 			printf("scheme cmd...: %d == %d\n", scheme_cmd, BDATA_GUI);
 			switch(scheme_cmd) {
@@ -216,6 +216,7 @@ namespace buttons {
 				// STORE AT ID
 				buttons::Buttons* gui = new Buttons(title, w);
 				gui->addListener(this);
+				gui->setPosition(x,y);
 				unsigned int buttons_id = buttons_hash(title.c_str(), title.size());
 				buttons[buttons_id] = gui;
 
@@ -380,9 +381,10 @@ namespace buttons {
 			}
 			default:break;
 			}
-			break;
+			printf("Bytes left after parsing scheme.: %zu\n", task.buffer.size());
+			//break;
 		}
-		printf("Bytes left after parsing scheme.: %zu\n", task.buffer.size());
+		//		printf("Bytes left after parsing scheme.: %zu\n", task.buffer.size());
 	}
 
 

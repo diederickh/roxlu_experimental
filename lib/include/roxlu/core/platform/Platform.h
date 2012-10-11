@@ -13,7 +13,12 @@
 #elif defined(_WIN32)
 	#define ROXLU_PLATFORM	ROXLU_WINDOWS
 #elif defined(__APPLE__)
-	#define ROXLU_PLATFORM	ROXLU_APPLE
+  #if TARGET_OS_IPHONE    
+     #define ROXLU_PLATFORM  ROXLU_IOS
+  #else
+     #define ROXLU_PLATFORM  ROXLU_APPLE
+  #endif
+
 #else
 	#error Unsupported operating system
 #endif
@@ -22,7 +27,7 @@
 // Include platform specifics
 #if ROXLU_PLATFORM == ROXLU_WINDOWS
 	#include <roxlu/core/platform/windows/WindowsPlatform.h>
-#elif ROXLU_PLATFORM == ROXLU_APPLE
+#elif ROXLU_PLATFORM == ROXLU_APPLE || ROXLU_PLATFORM == ROXLU_IOS
 	#include <roxlu/core/platform/osx/OSXPlatform.h>
 #endif
 

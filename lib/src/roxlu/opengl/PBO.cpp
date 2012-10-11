@@ -1,5 +1,6 @@
 //#include "PBO.h"
 
+// @todo remove pbo from core... 
 #include <roxlu/opengl/PBO.h>
 
 PBO::PBO(GLuint nTarget)
@@ -20,8 +21,8 @@ PBO& PBO::setup(int nWidth, int nHeight, GLenum nColorType) {
 	unbind(); // see note in header.
 	glBindTexture(GL_TEXTURE_2D, texture_id); eglGetError();
 	glEnable(GL_TEXTURE_2D); eglGetError();
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP); eglGetError();
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP); eglGetError();
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); eglGetError();
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); eglGetError();
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); eglGetError();
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); eglGetError();
 	glTexImage2D(
@@ -34,6 +35,7 @@ PBO& PBO::setup(int nWidth, int nHeight, GLenum nColorType) {
 }
 
 PBO& PBO::setPixels(unsigned char* pRGBA) {
+#if ROXLU_GL_MODE != ROXLU_GL_STRICT
 	if(buffer_size == 0) {
 		printf("PBO: buffer size is zero. Did you call setup()?");
 		return *this;
@@ -64,6 +66,7 @@ PBO& PBO::setPixels(unsigned char* pRGBA) {
 		,color_type, GL_UNSIGNED_BYTE, (char*)0
 	); eglGetError();
 	//unbind();
+#endif	
 	return *this;
 }
 

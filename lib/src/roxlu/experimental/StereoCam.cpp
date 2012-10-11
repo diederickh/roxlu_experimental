@@ -55,6 +55,7 @@ void StereoCam::updateViewMatrix() {
 }
 
 void StereoCam::placeLeft() {
+#if ROXLU_GL_MODE != ROXLU_GL_STRICT
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glLoadMatrixf(pml().getPtr());
@@ -62,7 +63,7 @@ void StereoCam::placeLeft() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glLoadMatrixf(vm().getPtr());
-	
+#endif	
 	setupLeft();
 }
 
@@ -77,6 +78,7 @@ void StereoCam::setupRight() {
 }
 
 void StereoCam::placeRight() {
+#if ROXLU_GL_MODE != ROXLU_GL_STRICT
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glLoadMatrixf(pmr().getPtr());
@@ -84,7 +86,7 @@ void StereoCam::placeRight() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glLoadMatrixf(vm().getPtr());
-	
+#endif	
 	setupRight();
 }
 	

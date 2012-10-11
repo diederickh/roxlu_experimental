@@ -94,6 +94,8 @@ inline size_t VerticesBuffer<C, T>::allocate() {
 }
 
 typedef VerticesBuffer<VerticesPT, VertexPT> VerticesBufferPT;
+typedef VerticesBuffer<VerticesP, VertexP> VerticesBufferP;
+typedef VerticesBuffer<VerticesPN, VertexPN> VerticesBufferPN;
 
 } // roxlu
 #endif

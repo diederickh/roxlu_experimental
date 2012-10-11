@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <roxlu/core/platform/Platform.h>
 
-#if ROXLU_PLATFORM == ROXLU_APPLE
+#if ROXLU_PLATFORM == ROXLU_APPLE || ROXLU_PLATFORM == ROXLU_IOS
 	#include <TargetConditionals.h>
 	#include <mach-o/dyld.h>
 #elif ROXLU_PLATFORM == ROXLU_WINDOWS
@@ -63,6 +63,8 @@ public:
 	static string toDataPath(const char* file) {
 		#if ROXLU_PLATFORM == ROXLU_APPLE
 			return getCWD() +"/../../../data/" +file;	
+		#elif ROXLU_PLATFORM == ROXLU_IOS
+			return getCWD() +file;
 		#elif ROXLU_PLATFORM == ROXLU_WINDOWS
 			return getCWD() +"\\data\\" +file;
 		#else	
@@ -79,7 +81,7 @@ public:
 	}
 	
 	static string getCWD() {
-		#if ROXLU_PLATFORM == ROXLU_APPLE
+		#if ROXLU_PLATFORM == ROXLU_APPLE  || ROXLU_PLATFORM == ROXLU_IOS
 			// hackedyhack
 			char path[1024];
 			uint32_t size = sizeof(path);
@@ -97,7 +99,6 @@ public:
 				}
 			}
 			return clean;
-		
 		#elif ROXLU_PLATFORM == ROXLU_WINDOWS
 			 char buffer[MAX_PATH];
 			 GetModuleFileNameA( NULL, buffer, MAX_PATH );

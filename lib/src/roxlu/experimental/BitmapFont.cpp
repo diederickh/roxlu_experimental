@@ -159,18 +159,18 @@ bool BitmapFont::generate(const unsigned char* src, int imgW, int imgH) {
 		cw[c] = cw[undef]/2.0f;
 	}
 
-	glEnable(GL_TEXTURE_2D); eglGetError();
+	//glEnable(GL_TEXTURE_2D); eglGetError();
 	glGenTextures(1, &tex); eglGetError();
 	glBindTexture(GL_TEXTURE_2D, tex); eglGetError();
 	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP); eglGetError(); 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP); eglGetError();
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); eglGetError(); 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); eglGetError(); // @todo while making this compatible with OpenGL ES I had to change GL_CLAMP to GL_CLAMP_TO_EDGE
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); eglGetError();
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); eglGetError();
 	glTexImage2D(
 		 GL_TEXTURE_2D
 		,0
-		,GL_LUMINANCE8
+		,GL_LUMINANCE // @todo replaced from GL_LUMINANCE8
 		,tw
 		,th
 		,0

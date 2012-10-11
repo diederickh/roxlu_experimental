@@ -30,12 +30,14 @@ FBO& FBO::addTexture(int nAttachmentPoint) {
 	GLuint tex_id;
 	glGenTextures(1, &tex_id); eglGetError();
 	glBindTexture(GL_TEXTURE_2D, tex_id); eglGetError();
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP); eglGetError();
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP); eglGetError();
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); eglGetError(); // @todo from GL_CLAMP to GL_CLAMP_TO_EDGE while porting to ios
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); eglGetError(); // @todo from GL_CLAMP to GL_CLAMP_TO_EDGE while porting to ios
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); eglGetError();
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); eglGetError();
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width , height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); eglGetError();
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width , height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); eglGetError(); // @todo commented while porting to openpgl es
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width , height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); eglGetError(); // @todo opengl es -> http://stackoverflow.com/questions/4064706/ios-using-gl-rgba8
+	
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 +nAttachmentPoint, GL_TEXTURE_2D, tex_id, 0); eglGetError();
 	eglCheckFramebufferStatus();
 	glBindTexture(GL_TEXTURE_2D,0); // unbind texture
@@ -53,7 +55,9 @@ GLuint FBO::getTextureID(int nAttachmentPoint) {
 }
 void FBO::begin() {
 	bind();
+#if ROXLU_GL_MODE != ROXLU_GL_STRICT	
 	glPushAttrib(GL_VIEWPORT_BIT); eglGetError();
+#endif	
 	glViewport(0,0, width, height); eglGetError();
 	 // clear buffer and fill it with the currently set glClearColor
 //	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -61,7 +65,9 @@ void FBO::begin() {
 }
 
 void FBO::end() {
+#if ROXLU_GL_MODE != ROXLU_GL_STRICT	
 	glPopAttrib(); eglGetError();
+#endif	
 	unbind();
 }
 

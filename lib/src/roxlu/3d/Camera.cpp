@@ -81,12 +81,13 @@ void Camera::orthoBottomLeft(float nWidth, float nHeight, float nNear, float nFa
 // Moving around.
 // -----------------------------------------------------------------------------
 void Camera::place() {
+#if ROXLU_GL_MODE != ROXLU_GL_STRICT
 	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixf(projection_matrix.getPtr());
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(view_matrix.getPtr());
-	
+#endif	
 }
 
 void Camera::translate(float nX, float nY, float nZ) {
@@ -271,20 +272,9 @@ Mat4 Camera::getInverseViewProjectionMatrix() {
 }
 
 void Camera::getBillboardVectors(Vec3& right, Vec3& up) {
-//	const Mat4 rot_matrix = rotation.getMat4();
-	// transpose
+	// transpose, inverse rotation from the camera
 	right.set(view_matrix[0], view_matrix[4], view_matrix[8]);
 	up.set(view_matrix[1], view_matrix[5], view_matrix[9]);
-	
-//	right.set(rot_matrix[0], rot_matrix[4], rot_matrix[8]);
-//	up.set(rot_matrix[1], rot_matrix[5], rot_matrix[9]);
-	//right.set(view_matrix[0], view_matrix[1], view_matrix[2]);
-	//up.set(view_matrix[4], view_matrix[5], view_matrix[6]);
 }
-
-//} // roxlu
-	//right.set(view_matrix[0], view_matrix[1], view_matrix[2]);
-	//up.set(view_matrix[4], view_matrix[5], view_matrix[6]);
-//}
 
 } // roxlu

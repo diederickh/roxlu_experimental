@@ -1,20 +1,6 @@
 #ifndef ROXLU_ARCBALLH
 #define ROXLU_ARCBALLH
-/*
-#include "OpenGL.h"
-#include "Camera.h"
-#include "Quat.h"
-#include "UVSphere.h"
-*/
 
-/*
-#include <roxlu/opengl/OpenGL.h>
-#include <roxlu/3d/Camera.h>
-#include <roxlu/3d/shapes/UVSphere.h>
-#include <roxlu/math/Quat.h>
-*/
-
-#include <roxlu/3d/shapes/UVSphere.h>
 #include <roxlu/math/Quat.h>
 #include <roxlu/3d/Camera.h>
 #include <roxlu/opengl/OpenGLInit.h>
@@ -37,7 +23,6 @@ namespace roxlu {
 class ArcBall {
 public:
 	ArcBall();
-	void debugDraw();
 	void setCamera(Camera& rCam);
 	void setScreenSize(float w, float h);
 	void onMouseDown(float nX, float nY);
@@ -53,8 +38,6 @@ protected:
 	Vec3 	mouse_curr;
 	Vec3 	axis;
 	Camera* camera;
-	VertexData sphere_vertices;
-	bool sphere_created;
 };
 
 } // roxlu

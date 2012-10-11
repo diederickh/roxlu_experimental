@@ -656,6 +656,16 @@ void Mat4::rotate(float angle, float x, float y, float z) {
 	*this *= rot;
 }
 
+void Mat4::setZRotation(const float angle)  {
+	float ca = cos(angle);
+	float sa = sin(angle);
+	m[0] = ca;
+	m[1] = sa;
+	m[4] = -sa;
+	m[5] = ca;
+}
+
+
 Mat4 Mat4::rotationX(float a) {
 	Mat4 mat;
 	//	a = a * DEG_TO_RAD;

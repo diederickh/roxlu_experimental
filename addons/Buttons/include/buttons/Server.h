@@ -146,7 +146,7 @@ namespace buttons {
 
 	class Server : public roxlu::Runnable, public ButtonsListener {
 	public:
-		Server(const std::string ip, int port);
+		Server(const std::string title, int port, int portBroadcaster, const char* ip = NULL);
 		~Server();
 		void start();
 		void run();
@@ -159,12 +159,19 @@ namespace buttons {
 		void sendScheme(ServerConnection* con); // sends all information about the guis to the client so the client can rebuild it.
 		
 	private:
+		Socket broadcast_info; // only used for address to broadcast on
+		Socket broadcast_socket;
+		rx_uint64 broadcast_on;
+		int broadcast_port;
+		std::string broadcast_message;
+
 		Socket server_socket;
 		roxlu::Thread thread;
 		roxlu::Mutex mutex;
 		ServerConnections connections;
 		int port;
 		std::string ip;
+		std::string title; // will be broadcasted on udp 
 		std::vector<Buttons*> buttons_to_sync;
 		ButtonsBuffer scheme; // description used to recreate the panels + buttons on the client side
 		ClientServerUtils utils; // helper for client/server to generate buffers

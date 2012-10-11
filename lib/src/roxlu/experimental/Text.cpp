@@ -179,7 +179,7 @@ void Text::updateBuffer() {
 	
 		glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
 		buffer_size = vertices.numBytes(); // * 2; // why did we have * 2 here??
-		glBufferData(GL_ARRAY_BUFFER, buffer_size, vertices.getPtr(), GL_STREAM_COPY); eglGetError();
+		glBufferData(GL_ARRAY_BUFFER, buffer_size, vertices.getPtr(), GL_STREAM_DRAW); eglGetError();
 		setVertexAttributes();
 		
 	}
@@ -190,12 +190,13 @@ void Text::updateBuffer() {
 }
 
 void Text::debugDraw() {
+#if ROXLU_GL_MODE != ROXlU_GL_STRICT
 	if(is_changed) {
 		is_changed = false;
 		updateBuffer();
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArrayAPPLE(0);
+	glBindVertexArrayAPPLE(0); // @todo commented but one isn't supposed to call this anyway
 	glUseProgram(0);
 	
 	glMatrixMode(GL_TEXTURE);
@@ -233,7 +234,7 @@ void Text::debugDraw() {
 		h += bmfont.ch;
 		++it;
 	}
-	
+#endif	
 }
 
 void Text::draw() {
@@ -260,8 +261,8 @@ void Text::draw() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glColor4f(1,1,1,1);
-	glEnable(GL_TEXTURE_2D); eglGetError();
+//	glColor4f(1,1,1,1); // @todo commented when porting to opengl es
+//	glEnable(GL_TEXTURE_2D); eglGetError(); // @todo commented... for ES
 	shader.uniform1i("font_texture", 0);
 	glActiveTexture(GL_TEXTURE0); eglGetError();
 	bmfont.bind();
@@ -285,7 +286,7 @@ void Text::draw() {
 		glDrawArrays(GL_TRIANGLES, texts[i].start_dx, texts[i].end_dx); eglGetError();
 	}
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // @todo commented while porting to opengl es 
 }
 
 void Text::setPosition(const int xx, const int yy) {

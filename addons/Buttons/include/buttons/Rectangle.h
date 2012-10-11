@@ -28,7 +28,7 @@ public:
 	void load(std::ifstream& ifs);
 	bool canSave();
 	
-	Rectangle<T>& setColor(const float hue, float a = 1.0);
+	Rectangle<T>& setColor(const float hue, float sat = 0.2f, float bright = 0.27f, float a = 1.0);
 	Rectangle<T>& setX(const float min, const float max); // set min/max x
 	Rectangle<T>& setY(const float min, const float max); // set min/max y
 	void hide();
@@ -328,8 +328,8 @@ public:
 	}
 
 	template<class T>
-	Rectangle<T>& Rectangle<T>::setColor(const float hue, float a) {
-		Element::setColor(hue, a);
+	Rectangle<T>& Rectangle<T>::setColor(const float hue, float sat, float bright, float a) {
+		Element::setColor(hue, sat, bright, a);
 
 		rect_bg_top_col[3] = a;
 		rect_bg_bottom_col[3] = a;

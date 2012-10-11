@@ -5,11 +5,12 @@
 namespace roxlu {
 
 Axis::Axis() 
-	:vd("axis")
+	//:vd("axis")
 {
 }
 
 void Axis::setup(int nSize) {
+/*
 	int mod = nSize % 2;
 	nSize += mod;
 	float spacing = (float)nSize*0.05;
@@ -51,16 +52,19 @@ void Axis::setup(int nSize) {
 	vd.addVertex(0,full_size, 0);	
 	num_vertices = vd.getNumVertices();
 	vbo.setVertexData(vd);
+	*/
 }
 
 void Axis::draw() {
 #ifdef _WIN32
 	printf("@todo Axis::draw() - this crashes on Windows. needs to be fixed.\n");
 #else 
+/*
 	glLineWidth(1.0);
 	glDisable(GL_TEXTURE_2D); eglGetError();
 	vbo.drawArrays(GL_LINES, 0, num_vertices); eglGetError();
 	//glEnable(GL_TEXTURE_2D); eglGetError();
+	*/
 #endif
 }
 

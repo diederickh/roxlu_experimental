@@ -52,9 +52,8 @@ public:
 	virtual void hide();
 	virtual void show();
 		
-	virtual Element& setColor(const float hue, float a = 1.0f);
+	virtual Element& setColor(const float hue, float sat = 0.2, float bright = 0.27, float a = 1.0f);
 	virtual void setValue(void* v) {}  // added this for client/sever model where the value (or template type) can't be known.
-
   
 	
  	void needsRedraw();
@@ -114,8 +113,12 @@ inline void Element::needsTextUpdate() {
 
 
 //, const float sat, const float bright, float a) {
-inline Element& Element::setColor(const float hue, float a) {
+
+inline Element& Element::setColor(const float hue, float sat, float bright, float a) {
 	col_hue = hue;
+	col_sat = sat;
+	col_bright = bright;
+
 	float rr,gg,bb;
 	HSL_to_RGB(col_hue, col_sat, col_bright, &rr, &gg, &bb);
 	BSET_COLOR(col_bg_default, rr, gg, bb, a);

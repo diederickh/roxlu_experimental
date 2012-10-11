@@ -19,6 +19,7 @@ typedef Particles<Vec3, Particle<Vec3>, Spring<Vec3> > Particles3;
 typedef Flocking<Vec3, Particle<Vec3>, FlockingForceAdder<Vec3, Particle<Vec3> > > Flocking3;
 
 typedef Emitter<Particle2, Particles2, Vec2, EmitterHelper> Emitter2;
+typedef Emitter<Particle3, Particles3, Vec3, EmitterHelper3> Emitter3;
 
 inline void drawVertex(Vec3 p) {
 	glVertex3fv(p.getPtr());

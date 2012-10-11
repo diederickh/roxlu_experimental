@@ -95,8 +95,8 @@ void Toggle::show() {
 	static_text->setTextVisible(label_dx, true);
 }
 
-Toggle& Toggle::setColor(const float hue, float a) {
-	Element::setColor(hue,a);
+Toggle& Toggle::setColor(const float hue, float sat, float bright, float a) {
+	Element::setColor(hue, sat, bright, a);
 	HSL_to_RGB(col_hue, col_sat, col_bright - 0.1,  &toggle_off_color[0], &toggle_off_color[1], &toggle_off_color[2]);
 	HSL_to_RGB(col_hue, col_sat, col_bright + 0.4,  &toggle_on_color[0], &toggle_on_color[1], &toggle_on_color[2]);
 	toggle_on_color[3] = a;

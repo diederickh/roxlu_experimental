@@ -21,7 +21,7 @@ public:
 				
 	// now in millis
 	static rx_uint64 now() {
-		#if ROXLU_PLATFORM == ROXLU_APPLE
+		#if ROXLU_PLATFORM == ROXLU_APPLE || ROXLU_PLATFORM == ROXLU_IOS
 			timeval time;
 			gettimeofday(&time, NULL);
 			//return (time.tv_sec) * 1000 + (time.tv_usec) / 1000;

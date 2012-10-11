@@ -135,9 +135,9 @@ void Panel::select(const string& name) {
 	active_gui = &getButtons(name);
 }
 
-void Panel::setColor(const float hue, float a) {
+void Panel::setColor(const float hue, float sat, float bright, float a) {
 	assert(active_gui != NULL);
-	active_gui->setColor(hue, a);
+	active_gui->setColor(hue, sat, bright, a);
 }
 
 // Resize / positioning / open-close
@@ -191,7 +191,7 @@ void Panel::load() {
 
 // Event handling
 // -----------------------------------------------------------------------------
-void Panel::onEvent(ButtonsEventType event, const Buttons& bt, const Element* target) {
+void Panel::onEvent(ButtonsEventType event, const Buttons& bt, const Element* target, void* targetData) {
 	// position change?
 	int xx = 0;
 	int yy = 0;

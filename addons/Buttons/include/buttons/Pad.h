@@ -34,7 +34,7 @@ public:
 	float calculatePercentage(float value, float minv, float maxv); 
 	void calculateValues(); // calculate resluting x/y values;
 
-	Pad<T>& setColor(const float hue, float a = 1.0);
+	Pad<T>& setColor(const float hue, float sat = 0.2f, float bright = 0.27f, float a = 1.0);
 	Pad<T>& setX(const float min, const float max);
 	Pad<T>& setY(const float min, const float max);
 	Pad<T>& setPercentages(const float percX, const float percY);
@@ -220,8 +220,8 @@ public:
 	}
 
 	template<class T>
-	Pad<T>& Pad<T>::setColor(const float hue, float a) {
-		Element::setColor(hue, a);
+	Pad<T>& Pad<T>::setColor(const float hue, float sat, float bright, float a) {
+		Element::setColor(hue, sat, bright, a);
 
 		pad_bg_top_col[3] = a;
 		pad_bg_bottom_col[3] = a;

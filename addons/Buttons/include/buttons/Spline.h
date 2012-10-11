@@ -80,7 +80,7 @@ public:
 	void hide();
 	void show();
 	
-	SplineEditor<S, V>& setColor(const float hue, float a = 1.0f);
+	SplineEditor<S, V>& setColor(const float hue, float sat = 0.2f, float bright = 0.27f, float a = 1.0f);
 	
 	int selected_handle_dx;
 	float selected_handle_col[4];
@@ -109,8 +109,8 @@ SplineEditor<S,V>::SplineEditor(const string& name, S& spline)
 }
 
 template<class S, class V> 
-SplineEditor<S, V>& SplineEditor<S,V>::setColor(const float hue, float a) {
-	Element::setColor(hue,a);
+SplineEditor<S, V>& SplineEditor<S,V>::setColor(const float hue, float sat, float bright, float a) {
+	Element::setColor(hue, sat, bright, a);
 	
 	// bar_empty_color: saturated default color
 	editor_bg_top_col[3] = a;

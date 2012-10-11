@@ -1,7 +1,7 @@
 //#include "SimpleAnim.h"
 
 #include <roxlu/experimental/SimpleAnim.h>
-
+#include <math.h>
 namespace roxlu {
 	
 SimpleAnim::SimpleAnim()

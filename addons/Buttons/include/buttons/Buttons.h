@@ -38,7 +38,7 @@ obecause this makes testing for mouseenter/leave (etc) faster.
 
 #include <vector>
 
-#include "ofMain.h" // @todo remove, needed in c'tor for ofGetWidth()/ofGetHeight()
+//#include "ofMain.h" // @todo remove, needed in c'tor for ofGetWidth()/ofGetHeight()
 
 #include <roxlu/opengl/Shader.h>
 #include <roxlu/experimental/BitmapFont.h>
@@ -77,12 +77,26 @@ const string BUTTONS_VS = " \
 ";
 
 
+#if ROXLU_GL_VARIANT == ROXLU_OPENGLES
+
+const string BUTTONS_FS = "  \
+	varying highp vec4 vcol; \
+	void main() { \
+		gl_FragColor = vcol; \
+	}\
+";
+
+#else 
+
 const string BUTTONS_FS = "  \
 	varying vec4 vcol; \
 	void main() { \
 		gl_FragColor = vcol; \
 	}\
 ";
+
+#endif 
+
 
 
 namespace buttons {
@@ -184,7 +198,7 @@ public:
 	void close();
 	void open();
 	bool isOpen();
-	void setColor(const float hue, float a = 1.0);
+	void setColor(const float hue, float sat = 0.2f, float bright = 0.27f, float a = 1.0f);
 	string getName();
 	
 	void addListener(ButtonsListener* listener);

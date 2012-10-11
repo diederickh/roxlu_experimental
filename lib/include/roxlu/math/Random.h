@@ -13,7 +13,7 @@
 //#include <sys/time.h>
 
 static void initRandom() {
-	#if ROXLU_PLATFORM == ROXLU_APPLE
+	#if ROXLU_PLATFORM == ROXLU_APPLE || ROXLU_PLATFORM == ROXLU_IOS
 		struct timeval tv;
 		gettimeofday(&tv, 0);
 		long int n = (tv.tv_sec ^ tv.tv_usec) ^ getpid();

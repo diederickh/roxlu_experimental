@@ -1,12 +1,6 @@
 #ifndef ROXLU_EASYCAMH
 #define ROXLU_EASYCAMH
 
-/*
-#include "Camera.h"
-#include "ArcBall.h"
-#include "Vec2.h"
-*/
-
 #include <roxlu/3d/Camera.h>
 #include <roxlu/3d/ArcBall.h>
 #include <roxlu/math/Vec2.h>
@@ -16,7 +10,6 @@ namespace roxlu {
 class EasyCam : public Camera {
 public:
 	EasyCam();
-	inline void debugDraw();
 	void setup(float screenWidth, float screenHeight);
 	void onMouseDown(float x, float y);
 	void onMouseDragged(float x, float y, bool translate = false);
@@ -30,9 +23,7 @@ private:
 	
 };
 
-inline void EasyCam::debugDraw() {
-	arcball.debugDraw();
-}
+
 
 } // roxlu
 #endif

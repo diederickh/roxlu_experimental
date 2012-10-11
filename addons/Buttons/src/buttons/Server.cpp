@@ -1,5 +1,6 @@
 #include <buttons/Server.h>
 #include <buttons/Buttons.h>
+#include <sstream>
 
 namespace buttons {
 
@@ -405,21 +406,39 @@ namespace buttons {
 
 	// SERVER 
 	// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	Server::Server(const std::string ip, int port)
-		:ip(ip)
-		,port(port)
+	Server::Server(const string serverTitle, int port, int portBroadcaster, const char* ip)
+		:port(port)
 		,connections(*this)
+		,title(serverTitle)
+		,broadcast_port(portBroadcaster)
+		,broadcast_socket(SOCK_DGRAM, 0)
 	{
+		if(ip != NULL) {
+			this->ip.append(ip, strlen(ip)+1);
+		}
 	}
 
 	Server::~Server() {
 	}
 
 	void Server::start() {
+		// initialize broadcaster.
+		broadcast_on = Timer::now() + 5000; 
+		broadcast_socket.create();
+		broadcast_socket.setBroadcast();
+		broadcast_info.setIP("192.168.0.255"); // @todo get this info from sockaddr
+		broadcast_info.setPort(broadcast_port);
+	
+		std::stringstream ss;
+		ss << title << ":" << "192.168.0.195" << ":" << port;
+		broadcast_message = ss.str();
+	  
+		// start thread.
 		thread.create(*this);
 	}
 
 	void Server::run() {
+		// initialize tcp
 		if(!server_socket.create()) {
 			printf("Error: cannot create socket.\n");
 			::exit(0);
@@ -428,7 +447,7 @@ namespace buttons {
 			printf("Error: cannot set the reuse socket option.\n");
 			::exit(0);
 		}
-		if(!server_socket.bind(ip.c_str(), port)) {
+		if(!server_socket.bind((ip.size() > 0) ? ip.c_str() : NULL, port)) {
 			::exit(0);
 		}
 		if(!server_socket.listen(5)) {
@@ -458,6 +477,13 @@ namespace buttons {
 
 	// @todo, this piece of code is kind of similar to the client.. maybe put it in ClientServerUtils (?)
 	void Server::update() {
+		// check if we need to broadcast our IP+port
+		if(Timer::now() > broadcast_on) {
+			printf("Sending: %s\n", broadcast_message.c_str());
+			broadcast_on = Timer::now() + 1000;
+			broadcast_socket.sendTo(broadcast_info, broadcast_message.c_str(), broadcast_message.size());
+		}
+		
 		mutex.lock();
 		for(std::vector<CommandData>::iterator it = tasks.begin(); it != tasks.end(); ++it) {
 			CommandData& cmd = *it;

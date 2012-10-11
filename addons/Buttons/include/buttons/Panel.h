@@ -65,9 +65,9 @@ public:
 
 	void step(); // open/close gui one by one	
 	void select(const string& name);
-	void setColor(const float hue, float a = 1.0);
+	void setColor(const float hue, float sat = 0.2f, float bright = 0.27f, float a = 1.0f);
 		
-	void onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target);
+	void onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target, void* targetData);
 	
 	int getContentHeight();
 	void position();

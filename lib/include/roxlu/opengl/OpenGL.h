@@ -10,7 +10,6 @@
 	#include <roxlu/opengl/Shader.h>
 	#include <roxlu/opengl/Texture.h>
 	#include <roxlu/opengl/VAO.h>
-	#include <roxlu/opengl/VBO.h>
 
 	
 #endif

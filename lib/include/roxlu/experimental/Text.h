@@ -54,6 +54,32 @@ struct TextEntry {
 }; 
 
 
+#if ROXLU_GL_VARIANT == ROXLU_OPENGLES
+
+const string TEXT_VS = "  \
+	uniform mat4 projection_matrix; \
+	uniform mat4 model_matrix; \
+	attribute highp vec4 pos; \
+	attribute highp vec2 tex; \
+	varying highp vec2 texcoord; \
+	void main() { \
+		texcoord = tex; \
+		gl_Position = projection_matrix * model_matrix * pos; \
+	}\
+";
+
+const string TEXT_FS =  " \
+	uniform sampler2D font_texture; \
+	uniform highp vec4 txtcol; \
+	varying highp vec2 texcoord; \
+	void main() { \
+		highp vec4 col = texture2D(font_texture, texcoord); \
+		gl_FragColor.rgb = txtcol.rgb;	 \
+		gl_FragColor.a = col.r * txtcol.a; \
+	} \
+";
+
+#else 
 
 const string TEXT_VS = "  \
 	uniform mat4 projection_matrix; \
@@ -77,6 +103,10 @@ const string TEXT_FS =  " \
 		gl_FragColor.a = col.r * txtcol.a; \
 	} \
 ";
+
+
+#endif 
+
 
 class Text {
 public:

@@ -26,7 +26,7 @@ public:
 	bool canSave();
 	bool serializeScheme(ButtonsBuffer& buffer);
 	
-	Toggle& setColor(const float hue, float a = 1.0);
+	Toggle& setColor(const float hue, float sat = 0.2f, float bright = 0.27f, float a = 1.0);
 	void hide();
 	void show();
 	void setValue(bool v);

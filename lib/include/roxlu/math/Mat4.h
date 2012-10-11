@@ -54,6 +54,7 @@ struct Mat4 {
 	void translate(const Vec3& v);
 	void translate(float x, float y, float z);
 	void rotate(float angle, float x, float y, float z);
+
 	void scale(float s);
 	void scale(float x, float y, float z);
 	
@@ -64,6 +65,8 @@ struct Mat4 {
 	void setZ(const float& z);
 	void setScale(const float x, const float y, const float z);
 	void setScale(const float s);
+	void setZRotation(const float angle);
+
 	float getX();
 	float getY();
 	float getZ();
@@ -340,12 +343,10 @@ inline void Mat4::setZAxis(const float* ax) {
 	m[10] = ax[2];
 }
 
-// create billboard matrix (z-axis is calculated)
+// set the billboard vectors (you can retrieve the right and up by using the inverse rotation of the view matrix, see Camera.h)
 inline void Mat4::setBillboard(const Vec3& right, const Vec3& up) {
-//	Vec3 z = cross(right, up);
 	setXAxis(right);
 	setYAxis(up);
-//	setZAxis(z); // do we need this?
 }
 
 inline void Mat4::setBillboard(const float* right, const float* up) {

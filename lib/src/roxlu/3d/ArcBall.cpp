@@ -5,40 +5,9 @@ namespace roxlu {
 ArcBall::ArcBall()
 :mouse_start(0,0,0)
 ,mouse_curr(0,0,0)
-,sphere_vertices("arcball_sphere")
-,sphere_created(false)
 {
 }
 
-// debug.
-void ArcBall::debugDraw() {
-	if(!sphere_created) {
-		UVSphere tmp_sphere;
-		tmp_sphere.create(1.0f, 40,20, sphere_vertices);
-		sphere_created = true;
-	}
-	vector<Vec3>& verts = sphere_vertices.vertices;
-	vector<Quad>& quads = sphere_vertices.quads;
-	glColor3f(1,1,1);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glBegin(GL_QUADS);
-	for(int i = 0; i < quads.size(); ++i) {
-		glVertex3fv(verts[quads[i].a].getPtr());
-		glVertex3fv(verts[quads[i].b].getPtr());
-		glVertex3fv(verts[quads[i].c].getPtr());
-		glVertex3fv(verts[quads[i].d].getPtr());
-	}
-	glEnd();
-
-	glBegin(GL_LINES);
-		glColor3f(1,1,0);
-		glVertex3f(0,0,0);
-		glVertex3fv(&mouse_start.x);
-		glColor3f(0,1,1);
-		glVertex3f(0,0,0);
-		glVertex3fv(&mouse_curr.x);
-	glEnd();
-}
 
 void ArcBall::setScreenSize(float w, float h) {
 	screen_width = w;

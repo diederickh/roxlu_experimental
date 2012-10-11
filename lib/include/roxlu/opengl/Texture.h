@@ -22,7 +22,7 @@ public:
 	void setInternalFormat(GLint internalFormat);
 	void setParams();
 	void setPixels(const unsigned char* pixels, int width, int height, GLenum format = GL_RGB);
-
+	
 	void bind();
 	void unbind();
 	GLuint getID();

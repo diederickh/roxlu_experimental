@@ -1,10 +1,10 @@
 //#include "VAO.h"
-
+// @todo make a portable opengl include header which defined base gl function names
 #include <roxlu/opengl/VAO.h>
 #include <roxlu/core/platform/Platform.h>
 
 namespace roxlu {
-#if ROXLU_PLATFORM == ROXLU_APPLE
+#if ROXLU_GL_VARIANT == ROXLU_COCOA
 	
 	VAO::VAO() 
 		:vao_id(-1)
@@ -24,6 +24,26 @@ namespace roxlu {
 	
 	void VAO::unbind() {
 		glBindVertexArrayAPPLE(0); eglGetError();
+	}
+#elif ROXLU_GL_VARIANT == ROXLU_OPENGLES
+	VAO::VAO() 
+		:vao_id(-1)
+	{
+	}
+
+	void VAO::create() {
+		glGenVertexArraysOES(1, &vao_id); eglGetError();
+	}
+	
+	void VAO::bind() {											
+		if(vao_id == -1) {
+			create();
+		}
+		glBindVertexArrayOES(vao_id); eglGetError();
+	}
+	
+	void VAO::unbind() {
+		glBindVertexArrayOES(0); eglGetError();
 	}
 
 #elif ROXLU_PLATFORM == ROXLU_WINDOWS

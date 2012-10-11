@@ -27,8 +27,9 @@ public:
 	
 	~Button() {
 	}
-	Button& setColor(const float hue, float a = 1.0f) {
-		Element::setColor(hue, a);
+
+	Button& setColor(const float hue, float sat = 0.2f, float bright = 0.27f, float a = 1.0f) {
+		Element::setColor(hue, sat, bright, a);
 		HSL_to_RGB(col_hue, col_sat, col_bright - 0.2,  &button_bg_color[0], &button_bg_color[1], &button_bg_color[2]);
 		HSL_to_RGB(col_hue, col_sat, col_bright - 0.2,  &toggle_off_color[0], &toggle_off_color[1], &toggle_off_color[2]);
 		HSL_to_RGB(col_hue, col_sat, col_bright + 0.2,  &toggle_on_color[0], &toggle_on_color[1], &toggle_on_color[2]);

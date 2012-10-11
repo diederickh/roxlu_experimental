@@ -220,7 +220,7 @@ inline void Emitter<P, C, V, H>::setParticleRandomVelocity(
 												  ,const float maxz
 )
 {
-	max_particle_random_x_vel = minx;
+	min_particle_random_x_vel = minx;
 	max_particle_random_x_vel = maxx;
 	min_particle_random_y_vel = miny;
 	max_particle_random_y_vel = maxy;
@@ -275,12 +275,6 @@ inline Vec2 EmitterHelper::getPosition() {
 
 
 inline void EmitterHelper::setPosition(const float x, const float y) {
-	/*
-	emit_x = x;
-	emit_half_width = 0.0f;
-	min_y = y; 
-	max_y = y;
-	*/
 	area[0] = x;
 	area[1] = y;
 	area[2] = x;
@@ -305,6 +299,51 @@ inline void EmitterHelper::update() {
 
 }
 // -----------------------------------------------------------
+
+// --------------------------------------------------------------------
+/**
+ * The emitter class takes care of:
+ * - calculating the position where to spawn new particles (getPosition)
+ * - calculating the start velocity (getVelocity)
+ * - applying random forces if necessary
+ */
+class EmitterHelper3 {
+public:
+	//EmitterHelper(const float x, const float width, const float minY, const float maxY);
+	EmitterHelper3(const float x0, const float y0, const float x1, const float y1); // top left and bottom right
+	Particle<Vec3>* createParticle(Vec3 pos, float mass);
+	Vec3 getPosition();
+	Vec3 getVelocity(const float velX, const float velY, const float velZ);
+	Vec3 getRandomVelocity(const float minx, const float maxx, const float miny, const float maxy, const float minz, const float maxz);
+	void update();
+	float area[4];
+};
+
+inline EmitterHelper3::EmitterHelper3(const float x0, const float y0, const float x1, const float y1) {
+	area[0] = x0;
+	area[1] = y0;
+	area[2] = x1;
+	area[3] = y1;
+}
+
+inline Vec3 EmitterHelper3::getPosition() {
+	return Vec3(random(area[0], area[2]), random(area[1], area[3]), 0.0f);
+}
+
+inline Vec3 EmitterHelper3::getVelocity(const float vx, const float vy, const float vz) {
+	return Vec3(vx, vy, vz);
+}
+
+inline Vec3 EmitterHelper3::getRandomVelocity(const float minx, const float maxx, const float miny, const float maxy, const float minz, const float maxz) {
+	return Vec3(random(minx, maxx), random(miny, maxy), random(minz, maxz));
+}
+
+inline Particle<Vec3>* EmitterHelper3::createParticle(Vec3 pos, float mass) {
+	return new Particle<Vec3>(pos, mass);
+}
+
+inline void EmitterHelper3::update() {
+}
 
 
 #endif

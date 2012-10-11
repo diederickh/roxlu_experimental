@@ -82,6 +82,10 @@ struct VertexP : public Vertex {
 	{
 	}
 	
+	void set(const Vec3 p) {
+		pos = p;
+	}
+
 	void setPos(const float& x, const float& y, const float& z) {
 		pos.set(x,y,z);
 	}
@@ -118,6 +122,11 @@ struct VertexPT : public Vertex  {
 	{
 		pos.set(x,y,z);
 		tex.set(u,v);
+	}
+
+	void set(Vec3 p, Vec2 t) {
+		pos = p;
+		tex = t;
 	}
 
 	void setPos(Vec3 p) {

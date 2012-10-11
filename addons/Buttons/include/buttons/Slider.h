@@ -66,8 +66,8 @@ public:
 		return *this;
 	}
 	
-	Slider& setColor(const float hue, float a = 1.0) {
-		Element::setColor(hue,a);
+	Slider& setColor(const float hue, float sat, float bright, float a = 1.0) {
+		Element::setColor(hue,sat, bright, a);
 		
 		bar_empty_color[3] = a;
 		bar_filled_color[3] = a;

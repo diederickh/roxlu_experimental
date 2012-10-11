@@ -1,5 +1,8 @@
 #include <roxlu/io/Socket.h>
-
+#include <iostream>
+#include <errno.h>
+#include <fcntl.h>
+ 
 /*
 @todo  The windows version closes() the socket but 
 maybe we need to let the user close it. See read().
@@ -14,8 +17,54 @@ e.g. client disconnected.
 */
 
 namespace roxlu {
-Socket::Socket() 
+
+
+bool rx_get_broadcast_address(char* ip, char* netmask, char* buffer, size_t len) {
+	struct in_addr addr, nm;
+	unsigned long hostmask, broadcast, network, mask;
+	int maskbits;
+
+	if(!inet_aton(ip, &addr)) {
+		printf("Error: cannot convert address.\n");
+		return false;
+	}
+
+	if(!inet_aton(netmask, &nm)) {
+		printf("Error: cannot convert netmask.\n");
+		return false;
+	}
+
+	mask = ntohl(nm.s_addr);
+	for ( maskbits=32 ; (mask & (1L<<(32-maskbits))) == 0 ; maskbits-- ) {}
+
+	mask = 0;
+	for(int i = 0; i < maskbits; ++i) {
+		mask |= 1<<(31-i);
+	}
+	if(mask != ntohl(nm.s_addr)) {
+		printf("Error: invalid netmask.\n");
+		return false;
+	}
+
+	network = ntohl(addr.s_addr) & ntohl(nm.s_addr);
+	hostmask = ~ntohl(nm.s_addr);
+	broadcast = network | hostmask;
+
+	struct in_addr conv;
+	conv.s_addr = htonl(broadcast);
+	int l = snprintf(buffer, len, "%s", inet_ntoa(conv));
+	if(l > len) {
+		printf("Error: truncated broadcast address; use larger buffer.\n");
+		return false;
+	}
+	return true;
+}
+	
+
+Socket::Socket(int socketType, int socketProto) 
 	:is_blocking(true) // by default
+	,socket_type(socketType)
+	,socket_proto(socketProto)
 {  
 #ifdef _WIN32
 	int result = WSAStartup(MAKEWORD(2,2), &wsa_data);
@@ -37,7 +86,7 @@ Socket::~Socket() {
 bool Socket::create() {
 #ifdef _WIN32
 	printf("Creating socking...\n");
-	sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	sock = socket(AF_INET, socket_type, socket_proto); 
 	if(sock == INVALID_SOCKET) {
 		printf("Error: cannot create socket, error code: %d\n", WSAGetLastError());
 		//WSACleanup();
@@ -47,7 +96,7 @@ bool Socket::create() {
 	setBlocking(is_blocking);
 	
 #elif __APPLE__
-	sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	sock = socket(AF_INET, socket_type, socket_proto); 
 	if(sock == -1) {
 		printf("Error: cannot create socket.\n");
 		return false;
@@ -70,6 +119,24 @@ bool Socket::isValid() {
 	return ret == 0;
 }
 
+/**
+ * Bind the socket. 
+ * 
+ * @param const char*,  The IP address to bind on (or NULL to bind on all inet cards)
+ * @param short int port, Bind on this port. You need to use this bind() too for UDP
+ *                        clients but you can pass 0 so the OS will use a random port.
+ * 
+ * TCP: 
+ * bind("192.168.1.10", 100);
+ * bind(NULL, 100)
+ *
+ * UDP Server:
+ * bind(NULL, 100);
+ * 
+ * UDP Client:
+ * bind(NULL, 0);
+ *
+ */
 bool Socket::bind(const char* ip, unsigned short int port) {
 #ifdef _WIN32
 #elif __APPLE__
@@ -81,7 +148,13 @@ bool Socket::bind(const char* ip, unsigned short int port) {
 	}
 	memset(&addr_in, 0, sizeof(addr_in));
 	addr_in.sin_family = AF_INET;
-	addr_in.sin_addr.s_addr = htonl(INADDR_ANY);  // bind to any network card
+	if(ip == NULL) {
+		printf("any!\n");
+		addr_in.sin_addr.s_addr = htonl(INADDR_ANY);  // bind to any network card
+	}
+	else {
+		addr_in.sin_addr.s_addr = inet_addr(ip);
+	}
 	addr_in.sin_port = htons(port);
 	int result = ::bind(sock, (struct sockaddr*)&addr_in, sizeof(addr_in));
 
@@ -283,7 +356,7 @@ bool Socket::connect(const char* ip, unsigned short int port, int timeout) {
 }
 
 /**
- * Read data from socket (w or w/o timeout)
+ * Read data from socket (w or w/o timeout) (tcp)
  *
  * @return integer         Return values are slightly different per mode:
  *
@@ -437,6 +510,45 @@ int Socket::read(char* buf, int count, int timeout) {
 	
 }
 
+
+// Receive data from a UDP socket. "client" will hold the information of the 
+// client which sends something to the server.
+int Socket::receiveFrom(Socket& client, char* buffer, size_t len) {
+#ifdef _WIN32
+
+#elif __APPLE__
+	int addr_len = sizeof(client.addr_in);
+	int result = recvfrom(sock, buffer, len, 0, (struct sockaddr*)&client.addr_in, (socklen_t*)&addr_len);
+	printf("Result: %d\n", result);
+	if(result == -1) {
+		printf("Error: cannot recevieFrom(), returned code %d\n", errno);
+		return -1;
+	}
+	else {
+		printf("Received: %d bytes == %s\n", result, buffer);
+		return result;
+	}
+#else 
+	#error "ReceiveFrom not yet implemented for this OS"
+#endif
+}
+
+int Socket::sendTo(Socket& client, const char* buffer, size_t size) {
+#ifdef _WIN32
+#error "sendTo not implemented yet.\n";
+#elif __APPLE__
+	int result = sendto(sock, buffer, size, 0, (struct sockaddr*)&client.addr_in, sizeof(client.addr_in));
+	if(result == -1) {
+		printf("Error: cannot sendTo socket (udp)\n");
+		return -1;
+	}
+	return result;
+#else 
+#error "sendTo not implemented yet.\n";
+#endif
+
+}
+
 // returns -1 on error, else the number of bytes sent.
 int Socket::send(const char* buf, int count) {
 #ifdef _WIN32
@@ -518,10 +630,39 @@ bool Socket::setReUseAddress() {
 #endif
 }
 
+bool Socket::setBroadcast() {
+#ifdef _WIN32
+	#error "setBroadcast not implemented for win yet."
+#elif __APPLE__
+	int set = 1;
+	int result = setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &set, sizeof(set));
+	if(result != 0) {
+		printf("Error: cannot set socket to broadcast.\n");
+	}
+	printf("Result: %d\n", result);
+	return result == 0;
+#endif
+}
+
 bool Socket::setKeepAlive() {
 	// http://stackoverflow.com/questions/3173583/how-to-set-keepalive-on-windows-server-2008
 	printf("@todo, we need to implement setKeepAlive\n");
 	return false;
+}
+
+void Socket::setPort(unsigned short int port) {
+	addr_in.sin_family = AF_INET; 
+	addr_in.sin_port = htons(port);
+}
+
+void Socket::setIP(const char* ip) {
+	addr_in.sin_family = AF_INET; 
+	addr_in.sin_addr.s_addr = inet_addr(ip);
+}
+
+void Socket::setBroadcastIP() {
+	addr_in.sin_family = AF_INET; 
+	addr_in.sin_addr.s_addr = htonl(-1);
 }
 
 void Socket::close() {

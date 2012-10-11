@@ -198,8 +198,8 @@ inline unsigned int buttons_hash(const char *key, size_t len) {
 }
 
 // @todo use this everywhere, instead of Buttons::createCleanName
-inline string buttons_create_clean_name(const string& ugly) {
-	string clean_name;
+inline std::string buttons_create_clean_name(const std::string& ugly) {
+	std::string clean_name;
 	for(int i = 0; i < ugly.size(); ++i) {
 		if(isalnum(ugly[i])) {
 			clean_name.push_back(tolower(ugly[i]));

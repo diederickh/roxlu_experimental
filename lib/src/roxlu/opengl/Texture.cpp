@@ -9,11 +9,12 @@
 namespace roxlu {
 
 Texture::Texture() 
-	:wrap_s(GL_CLAMP_TO_EDGE)
-	,wrap_t(GL_CLAMP_TO_EDGE)
+	:wrap_s(GL_CLAMP) // GL_CLAMP_TO_EDGE (gl es)
+	,wrap_t(GL_CLAMP)
 	,min_filter(GL_LINEAR)
 	,mag_filter(GL_LINEAR)
 	,internal_format(GL_RGBA)
+
 {
 	glGenTextures(1, &texture_id); eglGetError();
 }
@@ -23,7 +24,7 @@ Texture::~Texture() {
 
 void Texture::setParams() {
 	bind();
-		glEnable(GL_TEXTURE_2D); eglGetError();
+		//glEnable(GL_TEXTURE_2D); eglGetError();
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_s); eglGetError(); // or GL_CLAMP (=> clamp give artifacts with uvsphere) ?
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_t); eglGetError();
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter); eglGetError();
