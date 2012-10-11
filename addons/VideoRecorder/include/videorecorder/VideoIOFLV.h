@@ -8,11 +8,12 @@
 class VideoIOFLV : public VideoIO {
 public:
 	// X264
-	int writeInitializeX264();
-	int writeTagHeaderX264(x264_nal_t* nal);
-	int writeMetaDataX264(x264_param_t* param);
-	int writeFrameX264(rx_uint8* naldata, size_t size, x264_picture_t* pic);
-	int writeShutdownX264();
+	int writeOpenFileX264();
+	int writeParamsX264(x264_param_t* p);
+	int writeHeadersX264(x264_nal_t* nal);
+	int writeFrameX264(x264_nal_t* nal, size_t size, x264_picture_t* pic);
+	int writeCloseFile264();
+
 private:
 	FLV flv;
 };

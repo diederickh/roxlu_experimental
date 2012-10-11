@@ -11,11 +11,12 @@ extern "C" {
 class VideoIO {
 public:
 	// X264
-	virtual int writeInitializeX264() = 0;
-	virtual int writeTagHeaderX264(x264_nal_t* nal) = 0;
-	virtual int writeMetaDataX264(x264_param_t* param) = 0;
-	virtual int writeFrameX264(rx_uint8* naldata, size_t size, x264_picture_t* pic) = 0;
-	virtual int writeShutdownX264() = 0;
+	virtual int writeOpenFileX264() = 0;
+	virtual int writeParamsX264(x264_param_t* p) = 0;
+	virtual int writeHeadersX264(x264_nal_t* nal) = 0;
+	virtual int writeFrameX264(x264_nal_t* nal, size_t size, x264_picture_t* pic) = 0;
+	virtual int writeCloseFile264() = 0;
+
 };
 
 #endif

@@ -41,6 +41,9 @@ void VideoRecorder::initEncoder() {
 		::exit(1);
 	}
 	x264_encoder_parameters(encoder, &params);
+	if(io) {
+		io->writeParamsX264(&params);
+	}
 
 	// allocate picture / sws
 	x264_picture_alloc(&pic_in, X264_CSP_I420, out_width, out_height);
@@ -51,6 +54,10 @@ sws = sws_getContext(in_width, in_height, PIX_FMT_RGB24, out_width, out_height, 
 
 	int nheader;
 	x264_encoder_headers(encoder, &nals, &nheader);
+	if(io) {
+		io->writeHeadersX264(nals);
+	}
+	printf("NHEADER: %d\n", nheader);
 }
 
 void VideoRecorder::setParams() {
@@ -85,6 +92,10 @@ bool VideoRecorder::openFile(const char* filepath) {
 		return false;
 	}
 
+	if(io) {
+		io->writeOpenFileX264();
+	}
+
 	initEncoder();
 
 	int r = writeHeaders();
@@ -100,10 +111,6 @@ int VideoRecorder::writeHeaders() {
 	x264_nal_t* n = nals;
 	int size = n[0].i_payload + n[1].i_payload + n[2].i_payload;
 	if(fwrite(n[0].p_payload, size, 1, fp)) {
-		if(io) {
-			io->writeInitializeX264();
-			io->writeMetaDataX264(&params);
-		}
 		return size;
 	}
 	return -1;
@@ -139,6 +146,9 @@ int VideoRecorder::addFrame(unsigned char* pixels) {
 	}
 	else {
 		if(fwrite(nals[0].p_payload, frame_size, 1, fp)) {
+			if(io) {
+				io->writeFrameX264(nals, frame_size, &pic_out);
+			}
 			return frame_size;
 		}
 	}
@@ -151,7 +161,7 @@ void VideoRecorder::closeFile() {
 		fp = NULL;
 	}
 	if(io) {
-		io->writeShutdownX264();
+		io->writeCloseFile264();
 	}
 }
 
