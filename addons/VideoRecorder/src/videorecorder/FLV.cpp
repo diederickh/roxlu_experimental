@@ -163,9 +163,9 @@ int FLV::writeParamsX264(x264_param_t* p) {
 	buffer.putU8(AMF0_TYPE_ECMA_ARRAY);
 	buffer.putBigEndianU32(7); // we have 7 elements in the buffer
 	amf.putStringAMF0(buffer, AMFString("width", false));
-	amf.putNumberAMF0(buffer, AMFNumber(1024));
+	amf.putNumberAMF0(buffer, AMFNumber(320));
 	amf.putStringAMF0(buffer, AMFString("height", false));
-	amf.putNumberAMF0(buffer, AMFNumber(768));
+	amf.putNumberAMF0(buffer, AMFNumber(240));
 
 	amf.putStringAMF0(buffer, AMFString("framerate", false));
 	if(p->b_vfr_input) {

@@ -13,7 +13,7 @@ public:
 	int writeHeadersX264(x264_nal_t* nal);
 	int writeFrameX264(x264_nal_t* nal, size_t size, x264_picture_t* pic);
 	int writeCloseFile264();
-
+	virtual void flush(Buffer& buffer); // for VideoIOFLVSocket
 private:
 	FLV flv;
 };

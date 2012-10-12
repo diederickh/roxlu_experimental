@@ -38,6 +38,7 @@ public:
 	// io
 	void loadFile(const char* filepath);
 	void saveFile(const char* filepath);
+	Buffer& getBuffer();
 
 	// debug
 	void printType(rx_uint8 t);
@@ -64,6 +65,11 @@ private:
 	rx_uint8* sei; // sei is copied and write is deferred after first frame
 	int sei_len;
 };
+
+inline Buffer& FLV::getBuffer() {
+	return buffer;
+}
+
 #endif
 
 

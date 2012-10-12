@@ -25,12 +25,14 @@ VideoRecorder::VideoRecorder(int inW, int inH, int fps)
 	,vfr_input(false)
 
 	// timeing
+	/*
 	,last_dts(0)
 	,prev_dts(0)
 	,first_dts(0)
 	,largest_pts(-1)
 	,second_largest_pts(-1)
 	,duration(0)
+	*/
 {
 
 }

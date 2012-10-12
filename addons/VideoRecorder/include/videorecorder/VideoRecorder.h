@@ -18,6 +18,7 @@ extern "C" {
 
 #include <videorecorder/VideoIO.h>
 #include <videorecorder/VideoIOFLV.h>
+#include <videorecorder/VideoIOFLVSocket.h>
 
 class VideoRecorder {
 public:
@@ -54,12 +55,14 @@ private:
 	int num_nals;
 
 	// timeing
+	/*
 	rx_int64 last_dts;
 	rx_int64 prev_dts;
 	rx_int64 first_dts;
 	rx_int64 largest_pts;
 	rx_int64 second_largest_pts;
 	double duration;
+	*/
 
 #if RGB_CONVERTER == CONVERTER_SWSCALE
 	struct SwsContext* sws;

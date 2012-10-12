@@ -2,17 +2,23 @@
 
 int VideoIOFLV::writeOpenFileX264() {
 	printf("% writeOpenFileX264()\n");
-	return flv.writeHeader(true, false);
+	int s =  flv.writeHeader(true, false);
+	flush(flv.getBuffer());
+	return s;
 }
 
 int VideoIOFLV::writeParamsX264(x264_param_t* p) {
 	printf("% writeParamsX264()\n");
-	return flv.writeParamsX264(p);
+	int s = flv.writeParamsX264(p);
+	flush(flv.getBuffer());
+	return s;
 }
 
 int VideoIOFLV::writeHeadersX264(x264_nal_t* nal) {
 	printf("% writeHeaderX264()\n");
-	return flv.writeHeadersX264(nal);
+	int s = flv.writeHeadersX264(nal);
+	flush(flv.getBuffer());
+	return s;
 }
 
 /*
@@ -24,11 +30,15 @@ int VideoIOFLV::writeMetaDataX264(x264_param_t* param) {
 
 int VideoIOFLV::writeFrameX264(x264_nal_t* nal, size_t size, x264_picture_t* pic) {
 	printf("% writeFrameX264()\n");
-	flv.writeVideoFrameX264(nal, size, pic);
-	return -1;
+	int s = flv.writeVideoFrameX264(nal, size, pic);
+	flush(flv.getBuffer());
+	return s;
 }
 
 int VideoIOFLV::writeCloseFile264() {
 	flv.saveFile("data/particles_flv.flv");
 	return 1;
+}
+
+void VideoIOFLV::flush(Buffer& buffer) {
 }
