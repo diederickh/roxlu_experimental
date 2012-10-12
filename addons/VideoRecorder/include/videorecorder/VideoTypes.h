@@ -61,8 +61,18 @@ struct VideoParams {
 		:x264_param(NULL)
 		,x264_nal(NULL)
 		,x264_pic(NULL)
+		,x264_frame_size(0)
 		,video_width(0)
 		,video_height(0)
+		,video_codec_id(0)
+		,audio_codec_id(0)
+		,spx_buffer(NULL)
+		,spx_num_bytes(0)
+		,audio_encoded_samples(0)
+		,audio_dts(0)
+		,audio_frame_size(0)
+		,audio_sample_rate(0)
+		,audio_timebase(0)
 	{
 	}
 
@@ -71,6 +81,13 @@ struct VideoParams {
 	int video_height;
 	
 	int audio_codec_id;
+	char* spx_buffer;
+	int spx_num_bytes;
+	int audio_encoded_samples;
+	int audio_dts;
+	int audio_frame_size;
+	int audio_sample_rate;
+	double audio_timebase;
 
 	size_t x264_frame_size;
 	x264_param_t* x264_param;

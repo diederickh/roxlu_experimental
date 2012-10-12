@@ -8,21 +8,14 @@ extern "C" {
 #include <x264.h>
 }
 
-
 class VideoIO {
 public:
-	// Production: VideoParams contains all info we need
+	virtual int writeOpenFile(VideoParams* p) = 0;
 	virtual int writeParams(VideoParams* p) = 0;
 	virtual int writeHeaders(VideoParams* p) = 0;
 	virtual int writeVideoFrame(VideoParams* p) = 0;
-
-	// X264 (while testing we use codec specific info)
-	virtual int writeOpenFileX264() = 0;
-	virtual int writeParamsX264(x264_param_t* p) = 0;
-	virtual int writeHeadersX264(x264_nal_t* nal) = 0;
-	virtual int writeFrameX264(x264_nal_t* nal, size_t size, x264_picture_t* pic) = 0;
-	virtual int writeCloseFile264() = 0;
-
+	virtual int writeAudioFrame(VideoParams* p) = 0;
+	virtual int writeCloseFile(VideoParams* p) = 0;
 };
 
 #endif

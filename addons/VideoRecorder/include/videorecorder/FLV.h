@@ -30,16 +30,12 @@ public:
 	int readTag(); 
 
 	// writing: production
+	int writeHeader(bool hasVideo = true, bool hasAudio = true);
 	int writeParams(VideoParams* p);
 	int writeHeaders(VideoParams* p);
 	int writeVideoFrame(VideoParams* p);
+	int writeAudioFrame(VideoParams* p);
 
-	// writing, x264 specific, created while developing.
-	int writeHeader(bool hasVideo = true, bool hasAudio = true);
-	int writeParamsX264(x264_param_t* p);
-	int writeHeadersX264(x264_nal_t* nal);
-	int writeVideoFrameX264(x264_nal_t* nal, size_t size, x264_picture_t* pic);
-	
 	// io
 	void loadFile(const char* filepath);
 	void saveFile(const char* filepath);

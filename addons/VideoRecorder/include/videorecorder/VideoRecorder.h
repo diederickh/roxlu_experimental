@@ -14,6 +14,7 @@ extern "C" {
 #endif
 
 #include <x264.h>
+#include <speex/speex.h>
 }
 
 #include <videorecorder/VideoTypes.h>
@@ -30,11 +31,14 @@ public:
 #endif
 	~VideoRecorder();
 	bool openFile(const char* filepath);
-	int addFrame(unsigned char* pixels);
+	int addVideoFrame(unsigned char* pixels);
+	int addAudioFrame(short int* data, int size);
 	void closeFile();
 	void setIO(VideoIO* io);
 private:
-	void initEncoder();
+	void initEncoders();
+	void initVideoEncoder();
+	void initAudioEncoder();
 	void setParams();
 	int writeHeaders();
 
@@ -54,6 +58,10 @@ private:
 	x264_picture_t pic_out;
 	x264_nal_t* nals;
 	int num_nals;
+
+	SpeexBits spx_bits;
+	void* spx_enc;
+	char spx_buffer[1024];
 
 	VideoParams rec_params;
 	

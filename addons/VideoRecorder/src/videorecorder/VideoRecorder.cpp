@@ -23,6 +23,7 @@ VideoRecorder::VideoRecorder(int inW, int inH, int fps)
 	,io(NULL)
 	,num_frames(0)
 	,vfr_input(false)
+	,spx_enc(NULL)
 	// timeing
 	/*
 	,last_dts(0)
@@ -46,8 +47,33 @@ VideoRecorder::~VideoRecorder() {
 	closeFile();
 }
 
+void VideoRecorder::initEncoders() {
+	initVideoEncoder();
+	initAudioEncoder();
+	if(io) {
+		io->writeParams(&rec_params);
+		io->writeHeaders(&rec_params);
+	}
+}
 
-void VideoRecorder::initEncoder() {
+void VideoRecorder::initAudioEncoder() {
+	int quality = 4;
+	speex_bits_init(&spx_bits);
+	spx_enc = speex_encoder_init(&speex_wb_mode); // wideband, 16khz
+	speex_encoder_ctl(spx_enc, SPEEX_SET_QUALITY, &quality);
+	speex_encoder_ctl(spx_enc, SPEEX_GET_FRAME_SIZE, &rec_params.audio_frame_size);
+
+	rec_params.audio_sample_rate = 8000;
+	rec_params.audio_timebase = 1.0 / rec_params.audio_sample_rate;
+	rec_params.audio_codec_id = FLV_SOUNDFORMAT_SPEEX;
+
+	printf("> Audio sample rate: %d\n", rec_params.audio_sample_rate);
+	printf("> Audio timebase: %f\n", rec_params.audio_timebase);
+	printf("> Audio frame size: %d\n", rec_params.audio_frame_size);
+
+}
+
+void VideoRecorder::initVideoEncoder() {
 	setParams();
 
 	// create the encoder
@@ -57,9 +83,9 @@ void VideoRecorder::initEncoder() {
 		::exit(1);
 	}
 	x264_encoder_parameters(encoder, &params);
+
 	if(io) {
-		io->writeParams(&rec_params);
-		//	io->writeParamsX264(&params);
+		//		io->writeParams(&rec_params);
 	}
 
 	// allocate picture / sws
@@ -71,12 +97,11 @@ sws = sws_getContext(in_width, in_height, PIX_FMT_RGB24, out_width, out_height, 
 
 	int nheader;
 	x264_encoder_headers(encoder, &nals, &nheader);
+	rec_params.x264_nal = nals;
 	if(io) {
-		rec_params.x264_nal = nals;
-		io->writeHeaders(&rec_params);
-		//io->writeHeadersX264(nals);
+		//		io->writeHeaders(&rec_params);
 	}
-	printf("NHEADER: %d\n", nheader);
+
 }
 
 void VideoRecorder::setParams() {
@@ -112,10 +137,10 @@ bool VideoRecorder::openFile(const char* filepath) {
 	}
 
 	if(io) {
-		io->writeOpenFileX264();
+		io->writeOpenFile(&rec_params);
 	}
 
-	initEncoder();
+	initEncoders();
 
 	int r = writeHeaders();
 	if(r < 0) {
@@ -135,8 +160,24 @@ int VideoRecorder::writeHeaders() {
 	return -1;
 }
 
+// encode raw pcm 16bit signed data
+int VideoRecorder::addAudioFrame(short int* data, int size) {
 
-int VideoRecorder::addFrame(unsigned char* pixels) {
+	speex_bits_reset(&spx_bits);
+	speex_encode_int(spx_enc, data, &spx_bits);
+	int written = speex_bits_write(&spx_bits, spx_buffer, sizeof(spx_buffer));
+
+	rec_params.spx_num_bytes = written;
+	rec_params.spx_buffer = spx_buffer;
+	if(io) {
+		io->writeAudioFrame(&rec_params);
+	}
+	printf("@ Audio frame size: %d\n", written);
+	
+	return written;
+}
+
+int VideoRecorder::addVideoFrame(unsigned char* pixels) {
 #if RGB_CONVERTER == CONVERTER_SWSCALE
 	int h = sws_scale(sws
 							,(const  uint8_t* const*)&pixels 
@@ -169,7 +210,6 @@ int VideoRecorder::addFrame(unsigned char* pixels) {
 			rec_params.x264_frame_size = frame_size;
 			rec_params.x264_pic = &pic_out;
 			io->writeVideoFrame(&rec_params);
-			//io->writeFrameX264(nals, frame_size, &pic_out);
 		}
 		if(fwrite(nals[0].p_payload, frame_size, 1, fp)) {
 			return frame_size;
@@ -184,7 +224,7 @@ void VideoRecorder::closeFile() {
 		fp = NULL;
 	}
 	if(io) {
-		io->writeCloseFile264();
+		io->writeCloseFile(&rec_params);
 	}
 }
 
