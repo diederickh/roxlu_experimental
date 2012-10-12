@@ -16,6 +16,7 @@ extern "C" {
 #include <x264.h>
 }
 
+#include <videorecorder/VideoTypes.h>
 #include <videorecorder/VideoIO.h>
 #include <videorecorder/VideoIOFLV.h>
 #include <videorecorder/VideoIOFLVSocket.h>
@@ -54,16 +55,8 @@ private:
 	x264_nal_t* nals;
 	int num_nals;
 
-	// timeing
-	/*
-	rx_int64 last_dts;
-	rx_int64 prev_dts;
-	rx_int64 first_dts;
-	rx_int64 largest_pts;
-	rx_int64 second_largest_pts;
-	double duration;
-	*/
-
+	VideoParams rec_params;
+	
 #if RGB_CONVERTER == CONVERTER_SWSCALE
 	struct SwsContext* sws;
 #endif

@@ -23,7 +23,6 @@ VideoRecorder::VideoRecorder(int inW, int inH, int fps)
 	,io(NULL)
 	,num_frames(0)
 	,vfr_input(false)
-
 	// timeing
 	/*
 	,last_dts(0)
@@ -34,7 +33,13 @@ VideoRecorder::VideoRecorder(int inW, int inH, int fps)
 	,duration(0)
 	*/
 {
-
+	rec_params.video_width = out_width;
+	rec_params.video_height = out_height;
+	rec_params.video_codec_id = FLV_VIDEOCODEC_AVC;
+	rec_params.audio_codec_id = FLV_SOUNDFORMAT_SPEEX;
+	rec_params.x264_param = &params;
+	rec_params.x264_nal = nals;
+	rec_params.x264_pic = &pic_out;
 }
 
 VideoRecorder::~VideoRecorder() {
@@ -53,7 +58,8 @@ void VideoRecorder::initEncoder() {
 	}
 	x264_encoder_parameters(encoder, &params);
 	if(io) {
-		io->writeParamsX264(&params);
+		io->writeParams(&rec_params);
+		//	io->writeParamsX264(&params);
 	}
 
 	// allocate picture / sws
@@ -66,7 +72,9 @@ sws = sws_getContext(in_width, in_height, PIX_FMT_RGB24, out_width, out_height, 
 	int nheader;
 	x264_encoder_headers(encoder, &nals, &nheader);
 	if(io) {
-		io->writeHeadersX264(nals);
+		rec_params.x264_nal = nals;
+		io->writeHeaders(&rec_params);
+		//io->writeHeadersX264(nals);
 	}
 	printf("NHEADER: %d\n", nheader);
 }
@@ -157,7 +165,11 @@ int VideoRecorder::addFrame(unsigned char* pixels) {
 	}
 	else {
 		if(io) {
-			io->writeFrameX264(nals, frame_size, &pic_out);
+			rec_params.x264_nal = nals;
+			rec_params.x264_frame_size = frame_size;
+			rec_params.x264_pic = &pic_out;
+			io->writeVideoFrame(&rec_params);
+			//io->writeFrameX264(nals, frame_size, &pic_out);
 		}
 		if(fwrite(nals[0].p_payload, frame_size, 1, fp)) {
 			return frame_size;

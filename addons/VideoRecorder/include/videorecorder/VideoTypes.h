@@ -1,10 +1,12 @@
-#ifndef ROXLU_FLV_TYPES_H
-#define ROXLU_FLV_TYPES_H
+#ifndef ROXLU_VIDEORECORDER_VIDEOTYPES_H
+#define ROXLU_VIDEORECORDER_VIDEOTYPES_H
 
-/*
-#include <vector>
-//#include <inttypes.h>
-//#include "AMFTypes.h"
+#include <roxlu/Roxlu.h>
+
+extern "C" {
+#include <x264.h>
+}
+
 
 #define FLV_TAG_NONE 0x00
 #define FLV_TAG_AUDIO 8
@@ -12,7 +14,7 @@
 #define FLV_TAG_SCRIPT_DATA 18
 
 enum FLVSoundCodec {
-	FLV_SOUNDFORMAT_LINEAR_PCM_NE = 0 // native endan
+	 FLV_SOUNDFORMAT_LINEAR_PCM_NE = 0 // native endan
 	,FLV_SOUNDFORMAT_ADPCM = 1
 	,FLV_SOUNDFORMAT_MP3 = 2
 	,FLV_SOUNDFORMAT_LINEAR_PCM_LE = 3 // little endian
@@ -28,7 +30,7 @@ enum FLVSoundCodec {
 };
 
 enum FLVVideoCodec {
-	 FLV_VIDEOCODEC_SORENSON = 2
+	  FLV_VIDEOCODEC_SORENSON = 2
 	 ,FLV_VIDEOCODEC_SCREEN_VIDEO = 3
 	 ,FLV_VIDEOCODEC_ON2_VP6 = 4 // h263
 	 ,FLV_VIDEOCODEC_ON2_VP6_ALPHA = 5
@@ -49,9 +51,35 @@ enum FLVAudioBitDepth {
 };
 
 enum FLVSoundType {
-	 FLV_SOUNDTYPE_MONO = 0
+	  FLV_SOUNDTYPE_MONO = 0
 	 ,FLV_SOUNDTYPE_STEREO = 1
 };
 
-*/
+
+struct VideoParams {
+	VideoParams() 
+		:x264_param(NULL)
+		,x264_nal(NULL)
+		,x264_pic(NULL)
+		,video_width(0)
+		,video_height(0)
+	{
+	}
+
+	int video_codec_id;
+	int video_width;
+	int video_height;
+	
+	int audio_codec_id;
+
+	size_t x264_frame_size;
+	x264_param_t* x264_param;
+	x264_nal_t* x264_nal;
+	x264_picture_t* x264_pic;
+};
+
 #endif
+
+
+
+

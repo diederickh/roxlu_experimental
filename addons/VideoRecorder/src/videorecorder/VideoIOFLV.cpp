@@ -7,7 +7,28 @@ int VideoIOFLV::writeOpenFileX264() {
 	return s;
 }
 
+int VideoIOFLV::writeParams(VideoParams* p) {
+	int s = flv.writeParams(p);
+	flush(flv.getBuffer());
+	return s;
+}
+
+int VideoIOFLV::writeHeaders(VideoParams* p) {
+	int s = flv.writeHeaders(p);
+	flush(flv.getBuffer());
+	return s;
+}
+
+int VideoIOFLV::writeVideoFrame(VideoParams* p) {
+	int s = flv.writeVideoFrame(p);
+	flush(flv.getBuffer());
+	return s;
+}
+
+// =====================================================
+
 int VideoIOFLV::writeParamsX264(x264_param_t* p) {
+//int VideoIOFLV::writeParamsX264(VideoParams* p) {
 	printf("% writeParamsX264()\n");
 	int s = flv.writeParamsX264(p);
 	flush(flv.getBuffer());

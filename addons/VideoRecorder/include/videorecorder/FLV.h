@@ -2,7 +2,8 @@
 #define ROXLU_VIDEORECORDER_FLVH
 
 #include <roxlu/Roxlu.h>
-#include <videorecorder/FLVTypes.h>
+//#include <videorecorder/FLVTypes.h>
+#include <videorecorder/VideoTypes.h>
 #include <videorecorder/AMF.h>
 
 extern "C" {
@@ -28,11 +29,15 @@ public:
 	int readHeader();
 	int readTag(); 
 
-	// writing
+	// writing: production
+	int writeParams(VideoParams* p);
+	int writeHeaders(VideoParams* p);
+	int writeVideoFrame(VideoParams* p);
+
+	// writing, x264 specific, created while developing.
 	int writeHeader(bool hasVideo = true, bool hasAudio = true);
 	int writeParamsX264(x264_param_t* p);
 	int writeHeadersX264(x264_nal_t* nal);
-
 	int writeVideoFrameX264(x264_nal_t* nal, size_t size, x264_picture_t* pic);
 	
 	// io

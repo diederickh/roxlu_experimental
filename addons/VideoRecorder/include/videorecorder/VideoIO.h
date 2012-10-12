@@ -2,6 +2,7 @@
 #define ROXLU_VIDEORECORDER_VIDEO_IOH
 
 #include <roxlu/Roxlu.h>
+#include <videorecorder/VideoTypes.h>
 
 extern "C" {
 #include <x264.h>
@@ -10,7 +11,12 @@ extern "C" {
 
 class VideoIO {
 public:
-	// X264
+	// Production: VideoParams contains all info we need
+	virtual int writeParams(VideoParams* p) = 0;
+	virtual int writeHeaders(VideoParams* p) = 0;
+	virtual int writeVideoFrame(VideoParams* p) = 0;
+
+	// X264 (while testing we use codec specific info)
 	virtual int writeOpenFileX264() = 0;
 	virtual int writeParamsX264(x264_param_t* p) = 0;
 	virtual int writeHeadersX264(x264_nal_t* nal) = 0;
