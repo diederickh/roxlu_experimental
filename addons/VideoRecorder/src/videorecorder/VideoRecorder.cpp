@@ -22,6 +22,15 @@ VideoRecorder::VideoRecorder(int inW, int inH, int fps)
 	,fp(NULL)
 	,io(NULL)
 	,num_frames(0)
+	,vfr_input(false)
+
+	// timeing
+	,last_dts(0)
+	,prev_dts(0)
+	,first_dts(0)
+	,largest_pts(-1)
+	,second_largest_pts(-1)
+	,duration(0)
 {
 
 }
@@ -79,8 +88,8 @@ void VideoRecorder::setParams() {
 	p->rc.f_rf_constant_max = 35;
 
 	// streaming
-	p->b_repeat_headers = 1;
-	p->b_annexb = 1;
+	p->b_repeat_headers = 0; // 1 for streaming, for now this only works with '0'
+	p->b_annexb = 0; // 1 for streaming, for now this only works with '0'
 
 	x264_param_apply_profile(p, "baseline");
 }
@@ -145,10 +154,10 @@ int VideoRecorder::addFrame(unsigned char* pixels) {
 		return 0;
 	}
 	else {
+		if(io) {
+			io->writeFrameX264(nals, frame_size, &pic_out);
+		}
 		if(fwrite(nals[0].p_payload, frame_size, 1, fp)) {
-			if(io) {
-				io->writeFrameX264(nals, frame_size, &pic_out);
-			}
 			return frame_size;
 		}
 	}

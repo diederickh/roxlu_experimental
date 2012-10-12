@@ -44,6 +44,7 @@ private:
 	int in_stride;
 	int fps;
 	int num_frames;
+	bool vfr_input; // variable frame rate
 
 	x264_param_t params;
 	x264_t* encoder;
@@ -51,6 +52,15 @@ private:
 	x264_picture_t pic_out;
 	x264_nal_t* nals;
 	int num_nals;
+
+	// timeing
+	rx_int64 last_dts;
+	rx_int64 prev_dts;
+	rx_int64 first_dts;
+	rx_int64 largest_pts;
+	rx_int64 second_largest_pts;
+	double duration;
+
 #if RGB_CONVERTER == CONVERTER_SWSCALE
 	struct SwsContext* sws;
 #endif

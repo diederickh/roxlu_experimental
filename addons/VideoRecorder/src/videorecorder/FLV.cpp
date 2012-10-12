@@ -2,8 +2,10 @@
 
 FLV::FLV()
 	:pos_file_size(0)
+	,pos_duration(0)
+	,pos_datarate(0)
 	,time_start(0)
-	,vfr_input(0)
+	,vfr_input(false)
 	,prev_dts(0)
 	,prev_cts(0)
 	,delay_time(0)
@@ -11,6 +13,8 @@ FLV::FLV()
 	,delay_frames(0)
 	,fps_num(0)
 	,fps_den(0)
+	,framenum(0)
+	,dts_compress(false)
 	,sei(NULL)
 {
 }
@@ -27,11 +31,13 @@ void FLV::loadFile(const char* filepath) {
 
 
 void FLV::saveFile(const char* filepath) {
-	buffer.print();
+
 	// rewrite the file size.
 	Buffer tmp;
 	amf.putNumberAMF0(tmp, AMFNumber(buffer.size()));
 	buffer.putBytes(tmp.getPtr(), tmp.size(), pos_file_size);
+
+	// rewrite 
 
 	// save the buffer
 	buffer.saveFile(filepath);
@@ -156,14 +162,10 @@ int FLV::writeParamsX264(x264_param_t* p) {
 
 	buffer.putU8(AMF0_TYPE_ECMA_ARRAY);
 	buffer.putBigEndianU32(7); // we have 7 elements in the buffer
-	amf.putStringAMF0(buffer, AMFString("duration", false));
-	amf.putNumberAMF0(buffer, AMFNumber(0));
 	amf.putStringAMF0(buffer, AMFString("width", false));
 	amf.putNumberAMF0(buffer, AMFNumber(1024));
 	amf.putStringAMF0(buffer, AMFString("height", false));
 	amf.putNumberAMF0(buffer, AMFNumber(768));
-	amf.putStringAMF0(buffer, AMFString("videodatarate", false));
-	amf.putNumberAMF0(buffer, AMFNumber(0));
 
 	amf.putStringAMF0(buffer, AMFString("framerate", false));
 	if(p->b_vfr_input) {
@@ -177,6 +179,11 @@ int FLV::writeParamsX264(x264_param_t* p) {
 
 	amf.putStringAMF0(buffer, AMFString("videocodecid", false));
 	amf.putNumberAMF0(buffer, AMFNumber(FLV_VIDEOCODEC_AVC));
+
+	amf.putStringAMF0(buffer, AMFString("duration", false));
+	pos_duration = buffer.size();
+	amf.putNumberAMF0(buffer, AMFNumber(0));
+
 	amf.putStringAMF0(buffer, AMFString("encoder", false));
 	amf.putStringAMF0(buffer, AMFString("Lavf54.12.0", true)); 
 
@@ -184,6 +191,12 @@ int FLV::writeParamsX264(x264_param_t* p) {
 	pos_file_size = buffer.size();
 	amf.putNumberAMF0(buffer, AMFNumber(0));
 	char* str = "";
+
+
+	amf.putStringAMF0(buffer, AMFString("videodatarate", false));
+	pos_datarate = buffer.size();
+	amf.putNumberAMF0(buffer, AMFNumber(0));
+
 
 	amf.putStringAMF0(buffer, AMFString("", false));
 	buffer.putU8(AMF0_TYPE_OBJECT_END);
@@ -268,9 +281,90 @@ int FLV::writeHeadersX264(x264_nal_t* nal) {
 }
 
 
+#define convert_timebase_ms(timestamp, timebase) (rx_int64)((timestamp) * (timebase) * 1000 + 0.5)
+
 int FLV::writeVideoFrameX264(x264_nal_t* nal, size_t size, x264_picture_t* pic) {
-	int start_size = buffer.size();
+	int now = buffer.size();
+
+	// get the delay time for the first frame.
+	if(framenum == 0) {
+		delay_time = pic->i_dts * -1;
+		if(!dts_compress && delay_time) {
+			printf("> Frame: initial delay: %d ms\n", convert_timebase_ms(pic->i_pts + delay_time, timebase));
+		}
+		printf("> Frame: delay time: %d\n", delay_time);
+	}
+
+	rx_int64 dts;
+	rx_int64 cts;
+	rx_int64 offset;
+
+	if(dts_compress) {
+		printf("> Frame: ERROR we do not support compressed dts.\n");
+	}
+	else {
+		dts = convert_timebase_ms(pic->i_dts + delay_time, timebase);
+		cts = convert_timebase_ms(pic->i_pts + delay_time, timebase);
+	}
+	offset = cts - dts;
+
+	// for all but first frame
+	if(framenum > 0) {
+		if(prev_dts == dts) {
+			printf("> Frame: WARNING: duplicate dts: %d\n", dts);
+		}
+		if(prev_cts == cts) {
+			printf("> Frame: WARNING: duplicate cts: %d\n", cts);
+		}
+	}
+
+	prev_dts = dts;
+	prev_cts = cts;
+
+	// tag info
+	//==========
+	buffer.putU8(FLV_TAG_VIDEO);
+	int size_pos = buffer.size(); 
+	buffer.putBigEndianU24(0); // data size (rewrite later)
+	buffer.putBigEndianU24(dts);  // timestamp
+	buffer.putU8(dts >> 24); // timestamp extended
+	buffer.putBigEndianU24(0); // stream id
+	printf("> Frame: dts >> 24: %d\n", ((dts >> 24)));
+	printf("> Frame: dts: %d, cts: %d, offset: %d\n", dts, cts, offset);
+
+
+	// video data / avcvideopacket
+	// ===========================
+	int start_data = buffer.size();
+	rx_uint8 frame_type = (pic->b_keyframe) ? (1 << 4 | 7) : (2 << 4 | 7);
+	buffer.putU8(frame_type); // frame type + codec id
+	buffer.putU8(1); // AVC NALU
+	buffer.putBigEndianU24(offset); // composition time offset (when we have AVC NALU)
+
+	if(sei) { // only once after we got the first frame
+		printf("> Frame, put SEI (%d bytes)\n", sei_len);
+		buffer.putBytes(sei, sei_len);
+		delete[] sei;
+		sei = NULL;
+	}
 	
+	// the nal units (avcvideopacket)
+	buffer.putBytes(nal[0].p_payload, size);
+
+	// rewrite data size
+	int data_size = buffer.size() - start_data;
+	buffer.putBigEndianU24(data_size, size_pos);
+	printf("> Frame data size: %d\n", data_size);
+
+	// previous tag size:
+	rx_uint32 tag_size = buffer.size() - now;
+	buffer.putBigEndianU32(tag_size);
+	printf("> Frame tag size: %d\n", tag_size);
+	printf("--\n");
+
+	framenum++;
+	// ---------------------------------
+	/*
 	// tag info
 	// ===================================================
 	buffer.putU8(FLV_TAG_VIDEO);
@@ -301,6 +395,7 @@ int FLV::writeVideoFrameX264(x264_nal_t* nal, size_t size, x264_picture_t* pic) 
 	if(!time_start) {
 		time_start = Timer::millis();
 	}
+	*/
 	return -1;
 }
 

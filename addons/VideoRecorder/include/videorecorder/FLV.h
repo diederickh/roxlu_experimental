@@ -45,17 +45,21 @@ private:
 	Buffer buffer;
 	AMF amf;
 	int pos_file_size;
+	int pos_datarate;
+	int pos_duration;
 	rx_uint64 time_start;
 
 	double timebase;
-	int vfr_input;
+	bool vfr_input;
 	rx_int64 prev_dts;
 	rx_int64 prev_cts;
 	rx_int64 delay_time;
 	rx_int64 init_delta;
 	rx_int64 fps_num;
 	rx_int64 fps_den;
+	rx_int64 framenum;
 	int delay_frames;
+	bool dts_compress;
 
 	rx_uint8* sei; // sei is copied and write is deferred after first frame
 	int sei_len;
