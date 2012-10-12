@@ -41,6 +41,7 @@ private:
 	void initAudioEncoder();
 	void setParams();
 	int writeHeaders();
+	void writePackets();
 
 private:
 	int out_width;
@@ -64,6 +65,10 @@ private:
 	char spx_buffer[1024];
 
 	VideoParams rec_params;
+	std::vector<VideoPacket*> video_packets;
+	std::vector<AudioPacket*> audio_packets;
+	std::vector<AVInfoPacket> info_packets;
+	
 	
 #if RGB_CONVERTER == CONVERTER_SWSCALE
 	struct SwsContext* sws;

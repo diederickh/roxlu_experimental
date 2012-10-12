@@ -14,6 +14,11 @@ public:
 	int writeVideoFrame(VideoParams* p);
 	int writeAudioFrame(VideoParams* p);
 	int writeCloseFile(VideoParams* p);
+	
+	// --------
+	int writeVideoPacket(VideoPacket* p);
+	int writeAudioPacket(AudioPacket* p);
+	// --------
 
 	virtual void flush(Buffer& buffer); // for VideoIOFLVSocket
 private:

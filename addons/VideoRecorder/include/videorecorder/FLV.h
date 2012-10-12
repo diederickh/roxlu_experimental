@@ -36,6 +36,11 @@ public:
 	int writeVideoFrame(VideoParams* p);
 	int writeAudioFrame(VideoParams* p);
 
+	// --------------------------
+	int writeVideoPacket(VideoPacket* pkt);
+	int writeAudioPacket(AudioPacket* pkt);
+	// --------------------------
+
 	// io
 	void loadFile(const char* filepath);
 	void saveFile(const char* filepath);

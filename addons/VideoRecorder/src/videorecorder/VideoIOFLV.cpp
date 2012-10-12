@@ -2,7 +2,7 @@
 
 
 int VideoIOFLV::writeOpenFile(VideoParams* p) {
-	int s = flv.writeHeader(true, false);
+	int s = flv.writeHeader(true, true);
 	flush(flv.getBuffer());
 	return s;
 }
@@ -24,6 +24,19 @@ int VideoIOFLV::writeVideoFrame(VideoParams* p) {
 	flush(flv.getBuffer());
 	return s;
 }
+
+int VideoIOFLV::writeVideoPacket(VideoPacket* pkt) {
+	int s = flv.writeVideoPacket(pkt);
+	flush(flv.getBuffer());
+	return s;
+}
+
+int VideoIOFLV::writeAudioPacket(AudioPacket* pkt) {
+	int s = flv.writeAudioPacket(pkt);
+	flush(flv.getBuffer());
+	return s;
+}
+
 
 int VideoIOFLV::writeAudioFrame(VideoParams* p) {
 	int s = flv.writeAudioFrame(p);

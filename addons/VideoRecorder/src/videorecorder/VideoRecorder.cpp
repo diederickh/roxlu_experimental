@@ -63,7 +63,7 @@ void VideoRecorder::initAudioEncoder() {
 	speex_encoder_ctl(spx_enc, SPEEX_SET_QUALITY, &quality);
 	speex_encoder_ctl(spx_enc, SPEEX_GET_FRAME_SIZE, &rec_params.audio_frame_size);
 
-	rec_params.audio_sample_rate = 8000;
+	rec_params.audio_sample_rate = 16000;
 	rec_params.audio_timebase = 1.0 / rec_params.audio_sample_rate;
 	rec_params.audio_codec_id = FLV_SOUNDFORMAT_SPEEX;
 
@@ -169,15 +169,29 @@ int VideoRecorder::addAudioFrame(short int* data, int size) {
 
 	rec_params.spx_num_bytes = written;
 	rec_params.spx_buffer = spx_buffer;
+	rec_params.audio_num_encoded_samples += rec_params.audio_frame_size;
+
 	if(io) {
-		io->writeAudioFrame(&rec_params);
+		//	io->writeAudioFrame(&rec_params);
 	}
-	printf("@ Audio frame size: %d\n", written);
-	
+	printf("@ Audio frame size: %d, encoded samples: %d\n", written, rec_params.audio_num_encoded_samples);
+	AudioPacket* pkt = new AudioPacket();
+	pkt->data = new rx_uint8[written];
+	pkt->data_size = written;
+	memcpy(pkt->data, spx_buffer, written);
+	pkt->dts = (rec_params.audio_num_encoded_samples * rec_params.audio_timebase) * 1000; 
+	audio_packets.push_back(pkt);
+
+	AVInfoPacket info_pkt;
+	info_pkt.av_type = AV_AUDIO;
+	info_pkt.dts = pkt->dts;
+	info_pkt.dx = audio_packets.size() - 1;
+	info_packets.push_back(info_pkt);
 	return written;
 }
 
 int VideoRecorder::addVideoFrame(unsigned char* pixels) {
+
 #if RGB_CONVERTER == CONVERTER_SWSCALE
 	int h = sws_scale(sws
 							,(const  uint8_t* const*)&pixels 
@@ -206,10 +220,29 @@ int VideoRecorder::addVideoFrame(unsigned char* pixels) {
 	}
 	else {
 		if(io) {
+			// store a new video packet.
+		
+			VideoPacket* pkt = new VideoPacket();;
+			pkt->dts = pic_out.i_dts;
+			pkt->pts = pic_out.i_pts;
+			pkt->data = new rx_uint8[frame_size];
+			memcpy(pkt->data, nals[0].p_payload, frame_size);
+			pkt->data_size = frame_size;
+			pkt->is_keyframe = pic_out.b_keyframe;
+			video_packets.push_back(pkt);
+
+			AVInfoPacket info_pkt;
+			info_pkt.dx = video_packets.size() - 1;
+			info_pkt.av_type = AV_VIDEO;
+			info_pkt.dts = (pic_out.i_dts * (1.0f/30.0f)) * 1000 + 0.5;
+			info_packets.push_back(info_pkt);
+			//io->writeVideoPacket(pkt);
+			//delete pkt;
+						
 			rec_params.x264_nal = nals;
 			rec_params.x264_frame_size = frame_size;
 			rec_params.x264_pic = &pic_out;
-			io->writeVideoFrame(&rec_params);
+			//io->writeVideoFrame(&rec_params);
 		}
 		if(fwrite(nals[0].p_payload, frame_size, 1, fp)) {
 			return frame_size;
@@ -219,6 +252,7 @@ int VideoRecorder::addVideoFrame(unsigned char* pixels) {
 }
 
 void VideoRecorder::closeFile() {
+	writePackets();
 	if(fp) {
 		fclose(fp);
 		fp = NULL;
@@ -229,7 +263,24 @@ void VideoRecorder::closeFile() {
 }
 
 
-
+/*
+  This function handles all logic related to muxing. We interleave the 
+  packets based on their dts (decompression timestamp)
+ */
+void VideoRecorder::writePackets() {
+	std::sort(info_packets.begin(), info_packets.end(), AVInfoPacketSorter());
+	for(int i = 0; i < info_packets.size(); ++i) {
+		AVInfoPacket& info_pkt = info_packets[i];
+		if(info_pkt.av_type == AV_AUDIO) {
+			io->writeAudioPacket(audio_packets[info_pkt.dx]);
+		}
+		else {
+			io->writeVideoPacket(video_packets[info_pkt.dx]);
+		}
+		printf("InfoPacket: %d, Type: %c, DTS: %d\n", i, info_pkt.av_type == AV_VIDEO ? 'V' : 'A', info_pkt.dts);
+		//io->writeVideoPacket(video_packets[i]);
+	}
+}
 
 
 

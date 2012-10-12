@@ -16,6 +16,10 @@ public:
 	virtual int writeVideoFrame(VideoParams* p) = 0;
 	virtual int writeAudioFrame(VideoParams* p) = 0;
 	virtual int writeCloseFile(VideoParams* p) = 0;
+
+
+	virtual int writeVideoPacket(VideoPacket* pkt) = 0;
+	virtual int writeAudioPacket(AudioPacket* pkt) = 0;
 };
 
 #endif

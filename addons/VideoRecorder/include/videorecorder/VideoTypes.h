@@ -55,6 +55,65 @@ enum FLVSoundType {
 	 ,FLV_SOUNDTYPE_STEREO = 1
 };
 
+enum AVType {
+	AV_VIDEO
+	,AV_AUDIO
+	,AV_NONE
+};
+
+// used while muxing
+struct AVInfoPacket {
+	AVInfoPacket():dts(0),av_type(AV_NONE),dx(0) {}
+	rx_int64 dts; // decompression timestamp
+	int av_type;  // AVType
+	int dx; // refers to the index of video_packets or audio_packets in Recorder
+};
+
+struct AVInfoPacketSorter {
+	bool operator()(const AVInfoPacket& a, const AVInfoPacket& b) {
+		return a.dts < b.dts;
+	}
+};
+
+struct VideoPacket {
+	VideoPacket() 
+		:dts(0)
+		,pts(0)
+		,is_keyframe(false)
+		,data(NULL)
+		,data_size(0)
+	{
+	}
+	~VideoPacket() {
+		if(data) {
+			printf("~ delete data\n");
+			delete[] data;
+		}
+	}
+
+	rx_int64 dts;
+	rx_int64 pts;
+	bool is_keyframe;
+	rx_uint8* data;
+	rx_uint32 data_size;
+};
+
+struct AudioPacket {
+	AudioPacket()
+		:dts(0)
+		,data(NULL)
+		,data_size(0)
+	{
+	}
+	~AudioPacket() {
+		if(data) {
+			delete[] data;
+		}
+	}
+	rx_int64 dts;
+	rx_uint8* data;
+	rx_uint32 data_size;
+};
 
 struct VideoParams {
 	VideoParams() 
@@ -68,7 +127,7 @@ struct VideoParams {
 		,audio_codec_id(0)
 		,spx_buffer(NULL)
 		,spx_num_bytes(0)
-		,audio_encoded_samples(0)
+		,audio_num_encoded_samples(0)
 		,audio_dts(0)
 		,audio_frame_size(0)
 		,audio_sample_rate(0)
@@ -83,7 +142,7 @@ struct VideoParams {
 	int audio_codec_id;
 	char* spx_buffer;
 	int spx_num_bytes;
-	int audio_encoded_samples;
+	int audio_num_encoded_samples;
 	int audio_dts;
 	int audio_frame_size;
 	int audio_sample_rate;
