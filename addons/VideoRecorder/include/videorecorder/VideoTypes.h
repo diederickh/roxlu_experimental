@@ -90,7 +90,8 @@ struct VideoPacket {
 			delete[] data;
 		}
 	}
-
+	rx_int64 time_dts;
+	rx_int64 time_pts;
 	rx_int64 dts;
 	rx_int64 pts;
 	bool is_keyframe;
@@ -110,6 +111,8 @@ struct AudioPacket {
 			delete[] data;
 		}
 	}
+	rx_int64 time_dts;
+
 	rx_int64 dts;
 	rx_uint8* data;
 	rx_uint32 data_size;

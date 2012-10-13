@@ -35,6 +35,8 @@ public:
 	int addAudioFrame(short int* data, int size);
 	void closeFile();
 	void setIO(VideoIO* io);
+	void setFPS(int fps);
+	void writeIOHeaders(); // tmp testing
 private:
 	void initEncoders();
 	void initVideoEncoder();
@@ -42,7 +44,6 @@ private:
 	void setParams();
 	int writeHeaders();
 	void writePackets();
-
 private:
 	int out_width;
 	int out_height;
@@ -52,6 +53,7 @@ private:
 	int fps;
 	int num_frames;
 	bool vfr_input; // variable frame rate
+	rx_uint64 start_time;
 
 	x264_param_t params;
 	x264_t* encoder;
@@ -81,6 +83,11 @@ private:
 inline void VideoRecorder::setIO(VideoIO* io) {
 	this->io = io;
 }
+
+inline void VideoRecorder::setFPS(int f) {
+	fps = f;
+}
+
 #endif
 
 

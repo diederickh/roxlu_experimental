@@ -188,6 +188,10 @@ int FLV::writeParams(VideoParams* params) {
 	amf.putStringAMF0(buffer, AMFString("encoder", false));
 	amf.putStringAMF0(buffer, AMFString("Lavf54.12.0", true)); 
 
+	amf.putStringAMF0(buffer, AMFString("streamName", false));
+	amf.putStringAMF0(buffer, AMFString("test", true)); 
+
+
 	amf.putStringAMF0(buffer, AMFString("filesize", false));
 	pos_file_size = buffer.size();
 	amf.putNumberAMF0(buffer, AMFNumber(0));
@@ -309,7 +313,7 @@ int FLV::writeVideoPacket(VideoPacket* pkt) {
 	}
 	else {
 		dts = convert_timebase_ms(pkt->dts + delay_time, timebase);
-		cts = convert_timebase_ms(pkt->pts + delay_time, timebase);
+		cts = convert_timebase_ms(pkt->pts + delay_time, timebase); 
 	}
 	offset = cts - dts;
 
@@ -331,8 +335,10 @@ int FLV::writeVideoPacket(VideoPacket* pkt) {
 	buffer.putU8(FLV_TAG_VIDEO);
 	int size_pos = buffer.size(); 
 	buffer.putBigEndianU24(0); // data size (rewrite later)
-	buffer.putBigEndianU24(dts);  // timestamp
-	buffer.putU8(dts >> 24); // timestamp extended
+	buffer.putBigEndianU24(pkt->time_dts); // timestamp; based on system time
+	buffer.putU8(pkt->time_dts >> 24);  // timestamp extended; based on system time
+	//buffer.putBigEndianU24(dts);  // timestamp, based on x264_picture_t.i_dts
+	//buffer.putU8(dts >> 24); // timestamp extended
 	buffer.putBigEndianU24(0); // stream id
 	printf("> Frame: dts >> 24: %d\n", ((dts >> 24)));
 	printf("> Frame: dts: %d, cts: %d, offset: %d\n", dts, cts, offset);
@@ -373,7 +379,7 @@ int FLV::writeVideoPacket(VideoPacket* pkt) {
 
 
 int FLV::writeVideoFrame(VideoParams* p) {
-	
+	/*	
 	size_t size = p->x264_frame_size;
 	x264_picture_t* pic = p->x264_pic;
 	x264_nal_t* nal = p->x264_nal;
@@ -458,19 +464,14 @@ int FLV::writeVideoFrame(VideoParams* p) {
 
 	framenum++;
 	return tag_size;
-	
-	//return -1;
+	*/
+	return -1;
 }
 
 
+// We only support speex now.
 int FLV::writeAudioPacket(AudioPacket* p) {
 	printf("> Frame: audio.\n");
-	/*
-	if(p->audio_codec_id != FLV_SOUNDFORMAT_SPEEX) {
-		printf("> ERROR: we only support speex audio codec for FLV.\n");
-		return -1;
-	}
-	*/
 
 	// tag info
 	// ========
@@ -478,7 +479,8 @@ int FLV::writeAudioPacket(AudioPacket* p) {
 	buffer.putU8(FLV_TAG_AUDIO);
 	int size_pos = buffer.size();
 	buffer.putBigEndianU24(0); // data size (rewrite later)
-	buffer.putBigEndianU24(p->dts); // timestamp 
+	//buffer.putBigEndianU24(p->dts); // timestamp 
+	buffer.putBigEndianU24(p->time_dts); // time_dts is a timestamp which is calculatd based on system time
 	buffer.putU8(0); // timestamp extended
 	buffer.putBigEndianU24(0); // stream id, always 0
 
@@ -501,6 +503,7 @@ int FLV::writeAudioPacket(AudioPacket* p) {
 }
 
 int FLV::writeAudioFrame(VideoParams* p) {
+	/*
 	printf("> Frame: audio.\n");
 	if(p->audio_codec_id != FLV_SOUNDFORMAT_SPEEX) {
 		printf("> ERROR: we only support speex audio codec for FLV.\n");
@@ -523,6 +526,7 @@ int FLV::writeAudioFrame(VideoParams* p) {
 	buffer.putU8(format);
 	buffer.putBytes(p->spx_buffer, p->spx_num_bytes);
 	printf("%02X\n", format);
+	*/
 	return -1;
 }
 
