@@ -1,4 +1,4 @@
-#include <RingBuffer.h>
+#include <roxlu/io/RingBuffer.h>
 #include <algorithm>
 
 RingBuffer::RingBuffer(size_t capacity) 
@@ -65,6 +65,29 @@ size_t RingBuffer::read(char* data, size_t bytes) {
 		memcpy(data, buffer + read_index, size1);
 		size_t size2 = to_read - size1;
 		memcpy(data + size1, buffer, size2);
+		read_index = size2;
+	}
+	bytes_stored -= to_read;
+	return to_read;
+}
+
+// Drains some bytes w/o copying read bytes to another buffer.
+size_t RingBuffer::drain(size_t bytes) {
+	if(bytes == 0) {
+		return 0;
+	}
+	size_t cap = capacity;
+	size_t to_read = std::min<size_t>(bytes, bytes_stored);
+
+	if(to_read <= cap - read_index) {
+		read_index += to_read;
+		if(read_index == cap) {
+			read_index = 0;
+		}
+	}
+	else {
+		size_t size1 = cap - read_index;
+		size_t size2 = to_read - size1;
 		read_index = size2;
 	}
 	bytes_stored -= to_read;

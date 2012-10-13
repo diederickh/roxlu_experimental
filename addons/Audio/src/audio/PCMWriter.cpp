@@ -1,5 +1,6 @@
+#include <audio/PCMWriter.h>
 
-#include "PCMWriter.h"
+// Just added this as an test.... might be removed
 
 PCMWriter::PCMWriter() 
 	:ring_buffer(1024 * 100)
@@ -12,23 +13,11 @@ PCMWriter::PCMWriter()
 }
 
 PCMWriter::~PCMWriter() {
-	printf("Buffer size: %zu\n", ring_buffer.size());
 	size_t written = fwrite(ring_buffer.getReadPtr(), sizeof(char), ring_buffer.size(), fp);
 	printf("Written to file: %zu\n", written);
 	fclose(fp);
 }
 
 void PCMWriter::onAudioIn(const void* input, unsigned long numFrames) {
-	printf(">  %lu\n", numFrames);
 	ring_buffer.write((char*)input, numFrames * sizeof(short int));
-	/*
-	const short int* data = (const short int*)(input);
-	const float* fdata = (const float*)(input);
-	for(int i = 0; i < numFrames; ++i) {
-		short int d = data[i];
-		float f = fdata[i];
-		printf("%d - %f\n", d, f);
-	}
-	printf("\n");
-	*/
 }

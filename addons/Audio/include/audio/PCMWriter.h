@@ -3,7 +3,6 @@
 
 #include <audio/AudioListener.h>
 #include <roxlu/Roxlu.h>
-#include "RingBuffer.h"
 
 class PCMWriter : public AudioListener {
 public:

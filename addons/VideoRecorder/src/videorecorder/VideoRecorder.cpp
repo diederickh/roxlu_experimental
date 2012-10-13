@@ -271,13 +271,14 @@ void VideoRecorder::writePackets() {
 	std::sort(info_packets.begin(), info_packets.end(), AVInfoPacketSorter());
 	for(int i = 0; i < info_packets.size(); ++i) {
 		AVInfoPacket& info_pkt = info_packets[i];
+		printf("InfoPacket: %d, Type: %c, DTS: %d\n", i, info_pkt.av_type == AV_VIDEO ? 'V' : 'A', info_pkt.dts);
 		if(info_pkt.av_type == AV_AUDIO) {
 			io->writeAudioPacket(audio_packets[info_pkt.dx]);
 		}
 		else {
 			io->writeVideoPacket(video_packets[info_pkt.dx]);
 		}
-		printf("InfoPacket: %d, Type: %c, DTS: %d\n", i, info_pkt.av_type == AV_VIDEO ? 'V' : 'A', info_pkt.dts);
+		printf("==============\n\n");
 		//io->writeVideoPacket(video_packets[i]);
 	}
 }
