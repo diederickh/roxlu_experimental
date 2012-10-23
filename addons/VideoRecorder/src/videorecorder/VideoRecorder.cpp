@@ -120,12 +120,16 @@ void VideoRecorder::setParams() {
 
 	// intra refresh
 	p->i_keyint_max = fps;
+	p->i_keyint_max = 1; // for streaming we need to 
 	p->b_intra_refresh = 1;
+
 
 	// rate control
 	p->rc.i_rc_method = X264_RC_CRF;
 	p->rc.f_rf_constant = 25;
 	p->rc.f_rf_constant_max = 35;
+	p->rc.i_qp_min = 1; // @todo adjust for correct streaming quality
+	p->rc.i_qp_max = 10;
 
 
 	// streaming
@@ -241,7 +245,6 @@ int VideoRecorder::addVideoFrame(unsigned char* pixels) {
 			pkt->dts = pic_out.i_dts;
 			pkt->pts = pic_out.i_pts;
 			pkt->time_dts = (Timer::now() - start_time);
-			printf("--> %lld\n", pkt->time_dts);
 			//pkt->dts = (pic_out.i_dts * (1.0f/fps) * 1000 + 0.5f);
 			//pkt->pts = (pic_out.i_pts * (1.0f/fps) * 1000 + 0.5f);
 
@@ -258,7 +261,7 @@ int VideoRecorder::addVideoFrame(unsigned char* pixels) {
 			//info_pkt.dts = (pic_out.i_dts * (1.0f/fps)) * 1000 + 0.5; // working
 			info_pkt.dts = pkt->time_dts;
 			
-			printf("Info_pkt.dts: %d, VideoPacket.dts: %d, VideoPacket.pts: %d\n", info_pkt.dts, pkt->dts, pkt->pts);
+			//printf("Info_pkt.dts: %d, VideoPacket.dts: %d, VideoPacket.pts: %d\n", info_pkt.dts, pkt->dts, pkt->pts);
 			info_packets.push_back(info_pkt);
 			//io->writeVideoPacket(pkt);
 			//delete pkt;

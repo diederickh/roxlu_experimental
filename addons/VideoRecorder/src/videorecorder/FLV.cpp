@@ -289,10 +289,6 @@ int FLV::writeHeaders(VideoParams* p) {
 #define convert_timebase_ms(timestamp, timebase) (rx_int64)((timestamp) * (timebase) * 1000 + 0.5)
 
 int FLV::writeVideoPacket(VideoPacket* pkt) {
-	//size_t size = p->x264_frame_size;
-	//x264_picture_t* pic = p->x264_pic;
-	//x264_nal_t* nal = p->x264_nal;
-
 	int now = buffer.size();
 
 	// get the delay time for the first frame.
@@ -378,97 +374,6 @@ int FLV::writeVideoPacket(VideoPacket* pkt) {
 }
 
 
-int FLV::writeVideoFrame(VideoParams* p) {
-	/*	
-	size_t size = p->x264_frame_size;
-	x264_picture_t* pic = p->x264_pic;
-	x264_nal_t* nal = p->x264_nal;
-
-	int now = buffer.size();
-
-	// get the delay time for the first frame.
-	if(framenum == 0) {
-		delay_time = pic->i_dts * -1;
-		if(!dts_compress && delay_time) {
-			printf("> Frame: initial delay: %d ms\n", convert_timebase_ms(pic->i_pts + delay_time, timebase));
-		}
-		printf("> Frame: delay time: %d\n", delay_time);
-	}
-
-	rx_int64 dts;
-	rx_int64 cts;
-	rx_int64 offset;
-
-	if(dts_compress) {
-		printf("> Frame: ERROR we do not support compressed dts.\n");
-	}
-	else {
-		dts = convert_timebase_ms(pic->i_dts + delay_time, timebase);
-		cts = convert_timebase_ms(pic->i_pts + delay_time, timebase);
-	}
-	offset = cts - dts;
-
-	// for all but first frame
-	if(framenum > 0) {
-		if(prev_dts == dts) {
-			printf("> Frame: WARNING: duplicate dts: %d\n", dts);
-		}
-		if(prev_cts == cts) {
-			printf("> Frame: WARNING: duplicate cts: %d\n", cts);
-		}
-	}
-
-	prev_dts = dts;
-	prev_cts = cts;
-
-	// tag info
-	//==========
-	buffer.putU8(FLV_TAG_VIDEO);
-	int size_pos = buffer.size(); 
-	buffer.putBigEndianU24(0); // data size (rewrite later)
-	buffer.putBigEndianU24(dts);  // timestamp
-	buffer.putU8(dts >> 24); // timestamp extended
-	buffer.putBigEndianU24(0); // stream id
-	printf("> Frame: dts >> 24: %d\n", ((dts >> 24)));
-	printf("> Frame: dts: %d, cts: %d, offset: %d\n", dts, cts, offset);
-
-
-	// video data / avcvideopacket
-	// ===========================
-	int start_data = buffer.size();
-	rx_uint8 frame_type = (pic->b_keyframe) ? (1 << 4 | 7) : (2 << 4 | 7);
-	buffer.putU8(frame_type); // frame type + codec id
-	buffer.putU8(1); // AVC NALU
-	buffer.putBigEndianU24(offset); // composition time offset (when we have AVC NALU)
-
-	if(sei) { // only once after we got the first frame
-		printf("> Frame, put SEI (%d bytes)\n", sei_len);
-		buffer.putBytes(sei, sei_len);
-		delete[] sei;
-		sei = NULL;
-	}
-	
-	// the nal units (avcvideopacket)
-	buffer.putBytes(nal[0].p_payload, size);
-
-	// rewrite data size
-	int data_size = buffer.size() - start_data;
-	buffer.putBigEndianU24(data_size, size_pos);
-	printf("> Frame data size: %d\n", data_size);
-
-	// previous tag size:
-	rx_uint32 tag_size = buffer.size() - now;
-	buffer.putBigEndianU32(tag_size);
-	printf("> Frame tag size: %d\n", tag_size);
-	printf("--\n");
-
-	framenum++;
-	return tag_size;
-	*/
-	return -1;
-}
-
-
 // We only support speex now.
 int FLV::writeAudioPacket(AudioPacket* p) {
 	printf("> Frame: audio.\n");
@@ -499,34 +404,6 @@ int FLV::writeAudioPacket(AudioPacket* p) {
 	rx_uint32 tag_size = buffer.size() - now;
 	buffer.putBigEndianU32(tag_size);
 	printf("> Frame audio was %d bytes.\n--\n", tag_size);
-	return -1;
-}
-
-int FLV::writeAudioFrame(VideoParams* p) {
-	/*
-	printf("> Frame: audio.\n");
-	if(p->audio_codec_id != FLV_SOUNDFORMAT_SPEEX) {
-		printf("> ERROR: we only support speex audio codec for FLV.\n");
-		return -1;
-	}
-
-	// tag info
-	// ========
-	int now = buffer.size();
-	buffer.putU8(FLV_TAG_AUDIO);
-	int size_pos = buffer.size();
-	buffer.putBigEndianU24(0); // data size (rewrite later)
-	buffer.putBigEndianU24(0); // timestamp 
-	buffer.putU8(0); // timestamp extended
-	buffer.putBigEndianU24(0); // stream id, always 0
-
-	// audio tag header
-	// ================
-	int format = (p->audio_codec_id << 4) | 1 << 1 | 0x00; // speex: format = 11, soundrate = 0, soundsize = 1, soundtype = 0 
-	buffer.putU8(format);
-	buffer.putBytes(p->spx_buffer, p->spx_num_bytes);
-	printf("%02X\n", format);
-	*/
 	return -1;
 }
 

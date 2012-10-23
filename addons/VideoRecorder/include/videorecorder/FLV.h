@@ -33,8 +33,6 @@ public:
 	int writeHeader(bool hasVideo = true, bool hasAudio = true);
 	int writeParams(VideoParams* p);
 	int writeHeaders(VideoParams* p);
-	int writeVideoFrame(VideoParams* p);
-	int writeAudioFrame(VideoParams* p);
 
 	// --------------------------
 	int writeVideoPacket(VideoPacket* pkt);

@@ -19,10 +19,12 @@ int VideoIOFLV::writeHeaders(VideoParams* p) {
 	return s;
 }
 
+// we use writeVideoPacket(), remove this one
 int VideoIOFLV::writeVideoFrame(VideoParams* p) {
-	int s = flv.writeVideoFrame(p);
-	flush(flv.getBuffer());
-	return s;
+	//	int s = flv.writeVideoFrame(p);
+	//flush(flv.getBuffer());
+	//return s;
+	return -1;
 }
 
 int VideoIOFLV::writeVideoPacket(VideoPacket* pkt) {
@@ -38,10 +40,12 @@ int VideoIOFLV::writeAudioPacket(AudioPacket* pkt) {
 }
 
 
+// we use writeAudioPacket (remove this one)
 int VideoIOFLV::writeAudioFrame(VideoParams* p) {
-	int s = flv.writeAudioFrame(p);
-	flush(flv.getBuffer());
-	return s;
+	//	int s = flv.writeAudioFrame(p);
+//	flush(flv.getBuffer());
+//	return s;
+	return -1;
 }
 
 int VideoIOFLV::writeCloseFile(VideoParams* p) {
