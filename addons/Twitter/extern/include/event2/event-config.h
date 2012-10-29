@@ -147,7 +147,7 @@
 #define _EVENT_HAVE_NETINET_IN_H 1
 
 /* Define if the system has openssl */
-/* #undef _EVENT_HAVE_OPENSSL */
+#define _EVENT_HAVE_OPENSSL 1
 
 /* Define to 1 if you have the <openssl/bio.h> header file. */
 #define _EVENT_HAVE_OPENSSL_BIO_H 1

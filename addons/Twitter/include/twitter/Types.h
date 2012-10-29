@@ -73,4 +73,16 @@ inline void split(const std::string& str, const std::string& delim, std::vector<
   }
 }
 
+inline std::string join(const std::vector<std::string>& words, std::string delim) {
+  size_t s = words.size();
+  std::string result;
+  for(size_t i = 0; i < s; ++i) {
+    result += words[i];
+    if(i != s-1) {
+      result += delim;
+    }
+  }
+  return result;
+}
+
 #endif

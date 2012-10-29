@@ -13,6 +13,10 @@ extern "C" {
 #include <event2/bufferevent.h>
 #include <event2/buffer.h>
 #include <event2/listener.h>
+#include <event2/bufferevent_ssl.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#include <openssl/rand.h>
 }
 
 #include <twitter/HTTP.h>
@@ -47,6 +51,12 @@ struct TwitterStatusesUpdate {
   std::string status;
 };
 
+struct TwitterStatusesFilter {
+  TwitterStatusesFilter(const std::string& track);
+  std::string getCommaSeparatedTrackList() const;
+  std::vector<std::string> track;
+};
+
 // TWITTER CALLBACKS
 typedef void(*cb_request_token_received)(std::string token, std::string tokenSecret, std::string redirectURL, void* data);
 typedef void(*cb_access_token_received)(TwitterTokenInfo info, void* data);
@@ -70,9 +80,11 @@ public:
                                           ,void* data
                                           ); 
   void update();
-  void makeAPICall(const std::string endpoint, HTTPParameters params);
+  void makeAPICall(const std::string endpoint, HTTPParameters params, std::string host="api.twitter.com", bool secure = false);
+  void apiStatusesFilter(const TwitterStatusesFilter& param);
   void apiStatusesUpdate(const TwitterStatusesUpdate& param);
   void setAPICallback(cb_api cb, void* data);
+  void setSSLContext(SSL_CTX* ctx);
   static void onHTTPRead(HTTPConnection* c, void* ctx);
   static void onHTTPClose(HTTPConnection* c, void* ctx);
   static void callbackRead(bufferevent* bev, void* ctx);
@@ -89,6 +101,7 @@ private:
   void* api_callback_data;
   OAuth auth;
   HTTP http; 
+  SSL_CTX* ssl_ctx;
 };
 
 #endif

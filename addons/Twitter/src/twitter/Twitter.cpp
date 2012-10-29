@@ -9,6 +9,7 @@ Twitter::Twitter()
   ,access_token_received_callback_data(NULL)
   ,api_callback(NULL)
   ,api_callback_data(NULL)
+  ,ssl_ctx(NULL)
 {
 }
 
@@ -45,9 +46,12 @@ void Twitter::setAPICallback(cb_api cb, void* apiData) {
 }
 
 void Twitter::onHTTPRead(HTTPConnection* c, void* ctx) {
+  printf("onHTTPRead()\n");
+
 }
 
 void Twitter::onHTTPClose(HTTPConnection* c, void* ctx) {
+  printf("onHTTPClose()\n");
   Twitter* t = static_cast<Twitter*>(ctx);
   
   switch(c->state) {
@@ -119,16 +123,29 @@ void Twitter::exchangeRequestTokenForAccessToken(
   c->state = TCS_EXCHANGE_REQUEST_TOKEN_OPEN;
 }
 
-void Twitter::makeAPICall(const std::string endpoint, HTTPParameters params) {
+void Twitter::makeAPICall(const std::string endpoint, HTTPParameters params, std::string host, bool secure) {
   auth.reset();
-
+  
   HTTPRequest req;
-  req.setURL(HTTPURL("http", "api.twitter.com", endpoint));
-  req.addHeader(HTTPHeader("User-Agent", "twitter-client"));
+  //req.setURL(HTTPURL((secure) ? "https" : "http", "gist.github.com", "/"));
+  req.setURL(HTTPURL((secure) ? "https" : "http", host, endpoint));
+  req.addHeader(HTTPHeader("User-Agent", "twitter-client/1.0"));
+  //req.addHeader(HTTPHeader("User-Agent", "curl/7.19.7 (universal-apple-darwin10.0) libcurl/7.19.7 OpenSSL/0.9.8r zlib/1.2.3"));
+  req.addHeader(HTTPHeader("Accept", "*/*"));
+
   req.copyContentParameters(params);
   req.setMethod(REQUEST_POST);
+  //req.setMethod(REQUEST_GET);
+  req.setVersion(HTTP11);
   auth.addAuthorizationHeadersToRequest(req);
-  HTTPConnection* c = http.sendRequest(req, NULL, NULL, Twitter::onHTTPClose, this);
+  HTTPConnection* c = NULL;
+
+  if(secure) {
+    c = http.sendSecureRequest(ssl_ctx, req, Twitter::onHTTPRead, this, Twitter::onHTTPClose, this);
+  }
+  else {
+    c = http.sendRequest(req, Twitter::onHTTPRead, this, Twitter::onHTTPClose, this);
+  }
   c->state = TCS_API_REQUEST_OPEN;
 }
 
@@ -207,11 +224,34 @@ void Twitter::parseBuffer(HTTPConnection* c) {
   }
 };
 
+void Twitter::setSSLContext(SSL_CTX* ctx) {
+  ssl_ctx = ctx;
+}
+
+// API SPECIFIC PARAMETER TYPES
+// ----------------------------
+TwitterStatusesFilter::TwitterStatusesFilter(const std::string& track) {
+  this->track.push_back(track);
+}
+
+std::string TwitterStatusesFilter::getCommaSeparatedTrackList() const {
+  return join(track, ",");
+}
 
 // API IMPLEMENTATION
 // -----------------------------------------------------------------
 void Twitter::apiStatusesUpdate(const TwitterStatusesUpdate& param) {
   HTTPParameters p;
   p.add("status", param.status);
-  makeAPICall("/1.1/statuses/update.json", p);
+  makeAPICall("/1.1/statuses/update.json", p, "api.twitter.com", true);
+}
+
+
+void Twitter::apiStatusesFilter(const TwitterStatusesFilter& param) {
+  HTTPParameters p;
+  printf("%s\n", param.getCommaSeparatedTrackList().c_str());;
+  //p.add("track", param.getCommaSeparatedTrackList());
+  p.add("track", "twitter");
+  makeAPICall("/1.1/statuses/filter.json", p, "stream.twitter.com", true);
+  //makeAPICall("/chunked.php", p, "test.localhost");
 }

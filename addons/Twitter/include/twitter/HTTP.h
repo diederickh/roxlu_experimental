@@ -13,7 +13,12 @@ extern "C" {
 #include <event2/bufferevent.h>
 #include <event2/buffer.h>
 #include <event2/listener.h>
+#include <event2/bufferevent_ssl.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#include <openssl/rand.h>
 }
+
 
 #include <twitter/Buffer.h>
 #include <twitter/PercentEncode.h>
@@ -76,14 +81,16 @@ struct HTTPParameters {
 // -------------
 struct HTTPHeader {
   HTTPHeader();
-  HTTPHeader(const std::string name, const std::string val);
+  //  HTTPHeader(const std::string name, const std::string val);
 
   template<class T>
-  HTTPHeader(const std::string n, const T val) {
+  HTTPHeader(const std::string n,  T val) {
     std::stringstream ss;
     ss << val;
-    ss >> value;
+    //ss >> value;
+    value = ss.str();
     name = n;
+    //printf("%s\n", ss.str().c_str());
   }
 
   std::string name;
@@ -121,6 +128,7 @@ public:
 
   void setURL(HTTPURL url);
   void setMethod(int method);
+  void setVersion(int version);
   bool parseResponse(Buffer& b);
   std::string getBody(Buffer& b);
 
@@ -130,9 +138,9 @@ public:
   HTTPParameters getContentParameters();
   int getMethod();
 
-  void addHeader(const HTTPHeader h);
-  void addContentParameter(const HTTPParameter p);
-  void addQueryStringParameter(const HTTPParameter p);
+  void addHeader(HTTPHeader h);
+  void addContentParameter(HTTPParameter p);
+  void addQueryStringParameter(HTTPParameter p);
   void copyContentParameters(const HTTPParameters& p);
 
   std::string makeHTTPString();
@@ -156,6 +164,10 @@ inline void HTTPRequest::setURL(HTTPURL u) {
 
 inline void HTTPRequest::setMethod(int m) {
   method = m;
+}
+
+inline void HTTPRequest::setVersion(int v) {
+  version = v;
 }
 
 inline HTTPURL HTTPRequest::getURL() {
@@ -203,6 +215,9 @@ struct HTTPConnection {
   void* close_callback_data;
   void* error_callback_data;
   void* read_callback_data;
+#ifdef USE_OPENSSL
+  SSL* ssl;
+#endif
 };
 
 // HTTP CONTEXT
@@ -211,6 +226,7 @@ public:
   HTTP();
   ~HTTP();
   void update();
+  HTTPConnection* testSecure(SSL_CTX* sslContext);
   HTTPConnection* sendRequest(
                    HTTPRequest& r
                    ,http_cb_on_read readCB = NULL
@@ -221,8 +237,29 @@ public:
                    ,void* errorData = NULL
                    );
 
+  HTTPConnection* sendSecureRequest(
+                                    SSL_CTX* ctx
+                                    ,HTTPRequest& r
+                                    ,http_cb_on_read readCB = NULL
+                                    ,void* readData = NULL
+                                    ,http_cb_on_close closeCB = NULL
+                                    ,void* closeData = NULL
+                                    ,http_cb_on_error errorCB = NULL
+                                    ,void* errorData = NULL
+                                    );
+  HTTPConnection* newConnection(    
+                                http_cb_on_read readCB = NULL
+                                ,void* readData = NULL
+                                ,http_cb_on_close closeCB = NULL
+                                ,void* closeData = NULL
+                                ,http_cb_on_error errorCB = NULL
+                                ,void* errorData = NULL
+                                );
+
+  //  static void callbackError(bufferevent* bev, short what, void* ctx);
   static void callbackRead(bufferevent* bev, void* ctx);
   static void callbackEvent(bufferevent* bev, short events, void* ctx);
+  static void callbackLog(int severity, const char* msg);
 private:
   void removeConnection(HTTPConnection* c);
   void removeAllConnections();

@@ -24,6 +24,7 @@ std::string HTTPRequest::makeHTTPString() {
 }
 
 std::string HTTPRequest::makeRequestString() {
+
   // BODY
   std::string body;
   if(method == REQUEST_POST) {
@@ -46,7 +47,7 @@ std::string HTTPRequest::makeRequestString() {
   req += body;
 
   printf("%s\n", req.c_str());
-
+  
   return req;
 }
 
@@ -287,11 +288,14 @@ std::string HTTPURL::getString() {
 HTTPHeader::HTTPHeader() {
 }
 
+/*
 HTTPHeader::HTTPHeader(std::string name, std::string value)
   :name(name)
   ,value(value)
 {
+  printf("HEADER: VALUE: %s\n", value.c_str());
 }
+*/
 
 // HTTP HEADERS
 // -------------
@@ -309,6 +313,7 @@ std::string HTTPHeaders::join(std::string nameValueSep, std::string lineEnd) {
   for(std::map<std::string, HTTPHeader>::iterator it = entries.begin(); it != entries.end(); ++it) {
     HTTPHeader& h = it->second;
     result += h.name +nameValueSep +h.value +lineEnd;
+    printf("JOINING HEADERS: %s - %s\n", h.name.c_str(), h.value.c_str());
   }
   return result;
 }
@@ -346,8 +351,10 @@ HTTP::HTTP()
   :evbase(NULL)
   ,dnsbase(NULL)
 {
+  event_enable_debug_mode();
   evbase = event_base_new();
   dnsbase = evdns_base_new(evbase, 1);
+  event_set_log_callback(HTTP::callbackLog);
 }
 
 HTTP::~HTTP() {
@@ -368,6 +375,108 @@ HTTPConnection* HTTP::sendRequest(
                        ,void* errorData
 )
 {
+  HTTPConnection* c = newConnection(readCB, readData, closeCB, closeData, errorCB, errorData);
+  c->bev = bufferevent_socket_new(evbase, -1, BEV_OPT_CLOSE_ON_FREE);
+
+  bufferevent_setcb(c->bev, HTTP::callbackRead, NULL, HTTP::callbackEvent, c);
+  bufferevent_enable(c->bev, EV_READ | EV_WRITE);
+  bufferevent_socket_connect_hostname(c->bev, dnsbase, AF_INET, r.getURL().host.c_str(), 80);
+
+  c->addToOutputBuffer(r.makeRequestString());
+  connections.push_back(c);
+  printf("HTTP::sendRequest()\n");
+  printf("\t%s\n", r.getURL().host.c_str());
+  return c;
+}
+
+
+
+// TESTING WITH HTTPS
+HTTPConnection* HTTP::sendSecureRequest(
+                                        SSL_CTX* ctx
+                                        ,HTTPRequest& r
+                                        ,http_cb_on_read readCB
+                                        ,void* readData 
+                                        ,http_cb_on_close closeCB
+                                        ,void* closeData 
+                                        ,http_cb_on_error errorCB 
+                                        ,void* errorData 
+                                        )
+{
+  //return sendRequest(r, readCB, readData, closeCB, closeData, errorCB, errorData);
+
+  HTTPConnection* c = newConnection(readCB, readData, closeCB, closeData, errorCB, errorData);
+  SSL* ssl = SSL_new(ctx);
+  c->bev = bufferevent_openssl_socket_new(evbase, -1, ssl, BUFFEREVENT_SSL_CONNECTING, BEV_OPT_CLOSE_ON_FREE);
+
+  bufferevent_setcb(c->bev, HTTP::callbackRead, NULL, HTTP::callbackEvent, c);
+
+  int rc = bufferevent_socket_connect_hostname(c->bev, dnsbase, AF_INET, r.getURL().host.c_str(), 443);
+  bufferevent_enable(c->bev, EV_READ | EV_WRITE);
+  c->addToOutputBuffer(r.makeRequestString());
+  connections.push_back(c);
+}
+
+
+HTTPConnection* HTTP::testSecure(SSL_CTX* sslContext) {
+  printf("testSecure()\n");
+  printf("---------------------\n");
+
+  //https://www.ssllabs.com/ssltest/
+  HTTPRequest r;
+  //  r.setURL(HTTPURL("https", "www.ssllabs.com", "/ssltest/"));
+  r.setURL(HTTPURL("https", "developer.mozilla.org", "/en-US/"));
+  
+
+  SSL* ssl = SSL_new(sslContext);
+  HTTPConnection* c = new HTTPConnection(this);
+  c->bev = bufferevent_openssl_socket_new(evbase, -1, ssl, BUFFEREVENT_SSL_CONNECTING, BEV_OPT_CLOSE_ON_FREE);
+
+  bufferevent_setcb(c->bev, HTTP::callbackRead, NULL, HTTP::callbackEvent, c);
+
+  //  int rc = bufferevent_socket_connect_hostname(c->bev, dnsbase, AF_INET, "stream.twitter.com", 443);
+  int rc = bufferevent_socket_connect_hostname(c->bev, dnsbase, AF_INET, r.getURL().host.c_str(), 443);
+  if(rc < 0) {
+    printf("Cannot connect .. : %s\n", evutil_socket_error_to_string(EVUTIL_SOCKET_ERROR()));
+  }
+  c->addToOutputBuffer(r.makeRequestString());
+  bufferevent_enable(c->bev, EV_READ | EV_WRITE);
+}
+
+// - END TEST
+/*
+void HTTP::callbackError(bufferevent* bev, short what, void* ctx) {
+  printf("HTTP::callbackError()\n");
+  if(what & BEV_EVENT_EOF) {
+    printf("\tBEV_EVENT_EOF\n");
+  }
+  if(what & BEV_EVENT_ERROR) {
+    printf("\tBEV_EVENT_ERROR\n");
+  }
+  if(what & BEV_EVENT_TIMEOUT) {
+    printf("\tBEV_EVENT_TIMEOUT\n");
+  }
+  if(what & BEV_EVENT_CONNECTED) {
+    printf("\tBEV_EVENT_CONNECTED\n");
+  }
+  if(what & BEV_EVENT_READING) {
+    printf("\tBEV_EVENT_READING\n");
+  }
+  if(what & BEV_EVENT_WRITING) {
+    printf("\tBEV_EVENT_WRITING\n");
+  }
+}
+*/
+
+HTTPConnection* HTTP::newConnection(    
+                                    http_cb_on_read readCB
+                                    ,void* readData 
+                                    ,http_cb_on_close closeCB 
+                                    ,void* closeData
+                                    ,http_cb_on_error errorCB
+                                    ,void* errorData 
+                                   )
+{
   HTTPConnection* c = new HTTPConnection(this);
   c->close_callback = closeCB;
   c->close_callback_data = closeData;
@@ -375,18 +484,20 @@ HTTPConnection* HTTP::sendRequest(
   c->error_callback_data = errorData;
   c->read_callback = readCB;
   c->read_callback_data = readData;
-  c->bev = bufferevent_socket_new(evbase, -1, BEV_OPT_CLOSE_ON_FREE);
-
-  bufferevent_setcb(c->bev, HTTP::callbackRead, NULL, HTTP::callbackEvent, c);
-  bufferevent_enable(c->bev, EV_READ | EV_WRITE);
-  bufferevent_socket_connect_hostname(c->bev, dnsbase, AF_INET, r.getURL().host.c_str(), 80);
-  c->addToOutputBuffer(r.makeRequestString());
-  connections.push_back(c);
   return c;
 }
 
-
 void HTTP::callbackRead(bufferevent* bev, void* ctx) {
+  printf("HTTP::callbackRead()\n");
+  SSL* ssl = bufferevent_openssl_get_ssl(bev);
+  if(!ssl) {
+    printf("NO SSL!\n");
+  }
+  else {
+    printf("\t SSL: %p\n", ssl);
+    printf("\t SSL State: %s\n", SSL_state_string(ssl));
+    printf("\t SSL State Long: %s\n", SSL_state_string_long(ssl));
+  }
   HTTPConnection* c = static_cast<HTTPConnection*>(ctx);
   char tmp[1024];
   int n;
@@ -394,7 +505,7 @@ void HTTP::callbackRead(bufferevent* bev, void* ctx) {
   while ((n = evbuffer_remove(input, tmp, sizeof(tmp))) > 0) {
     c->buffer.addBytes(tmp, n);
   }
-
+  c->buffer.print();
   c->response.parseResponse(c->buffer);
 
   if(c->read_callback) {
@@ -403,13 +514,17 @@ void HTTP::callbackRead(bufferevent* bev, void* ctx) {
 }
 
 void HTTP::callbackEvent(bufferevent* bev, short events, void* ctx) {
+  printf("HTTP::callbackEvent()\n");
+
   // CONNECTED
   if(events & BEV_EVENT_CONNECTED) {
+    printf("\t>BEV_EVENT_CONNECTED\n");
   }
   // ERROR
   else if(events & BEV_EVENT_ERROR) {
     HTTPConnection* c = static_cast<HTTPConnection*>(ctx);
     int err = bufferevent_socket_get_dns_error(bev);
+    printf("\t>BEV_EVENT_ERROR = %d\n", err);
     if(err) {
       printf("# ERROR: DNS: %s\n", evutil_gai_strerror(err));
     }
@@ -422,6 +537,7 @@ void HTTP::callbackEvent(bufferevent* bev, short events, void* ctx) {
   }
   // DISCONNECTED
   else if(events & BEV_EVENT_EOF) {
+    printf("\t>BEV_EVENT_EOF\n");
     HTTPConnection* c = static_cast<HTTPConnection*>(ctx);
     if(c->close_callback) {
       c->close_callback(c, c->close_callback_data);
@@ -430,6 +546,10 @@ void HTTP::callbackEvent(bufferevent* bev, short events, void* ctx) {
     c->bev = NULL;
     c->http->removeConnection(c);
   }
+}
+
+void HTTP::callbackLog(int severity, const char* msg) {
+  printf("LOG: %d, %s\n", severity, msg);
 }
 
 void HTTP::removeAllConnections() {
