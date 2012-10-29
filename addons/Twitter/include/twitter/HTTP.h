@@ -8,21 +8,28 @@
 #include <algorithm>
 
 extern "C" {
+#ifndef USE_LIBUV
+#error "WAT"
 #include <event2/dns.h>
 #include <event2/event.h>
 #include <event2/bufferevent.h>
 #include <event2/buffer.h>
 #include <event2/listener.h>
 #include <event2/bufferevent_ssl.h>
+#else 
+#include <uv.h>
+#endif
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
 }
 
-
 #include <twitter/Buffer.h>
 #include <twitter/PercentEncode.h>
 #include <twitter/Types.h>
+
+
+
 
 // TYPES
 // -------
@@ -204,8 +211,10 @@ struct HTTPConnection {
   ~HTTPConnection();
   void addToOutputBuffer(const std::string str);
   void addToOutputBuffer(const char* data, size_t size);
+#ifndef USE_LIBUV
   bufferevent* bev;
-  Buffer buffer;
+#endif
+  Buffer buffer_in; // input buffer
   HTTPRequest response;
   int state; // used by "caller"
   HTTP* http;
@@ -217,6 +226,17 @@ struct HTTPConnection {
   void* read_callback_data;
 #ifdef USE_OPENSSL
   SSL* ssl;
+#endif
+
+#ifdef USE_LIBUV
+  // https://gist.github.com/1195428
+  uv_connect_t uconnect;
+  uv_tcp_t usocket;
+  uv_write_t uwrite;
+  uv_getaddrinfo_t uresolver;
+  //uv_buf_t ubuffer_out; 
+  Buffer buffer_out;
+
 #endif
 };
 
@@ -257,15 +277,28 @@ public:
                                 );
 
   //  static void callbackError(bufferevent* bev, short what, void* ctx);
+#ifndef USE_LIBUV
   static void callbackRead(bufferevent* bev, void* ctx);
   static void callbackEvent(bufferevent* bev, short events, void* ctx);
   static void callbackLog(int severity, const char* msg);
+#else 
+  static uv_buf_t callbackOnAlloc(uv_handle_t* con, size_t size);
+  static void callbackOnResolved(uv_getaddrinfo_t* resolver, int status, struct addrinfo* res);
+  static void callbackOnConnect(uv_connect_t* con, int status);
+  static void callbackOnRead(uv_stream_t* tcp, ssize_t nread, uv_buf_t buf);
+  static void callbackOnWritten(uv_write_t* req, int status);
+#endif
+
 private:
   void removeConnection(HTTPConnection* c);
   void removeAllConnections();
 private:
+#ifndef USE_LIBUV
   event_base* evbase;
   evdns_base* dnsbase;
+#else
+  uv_loop_t* uloop;
+#endif
   std::vector<HTTPConnection*> connections;
 };
 #endif

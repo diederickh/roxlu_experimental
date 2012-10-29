@@ -8,12 +8,14 @@
 #include <time.h>
 
 extern "C" {
+#ifndef USE_LIBUV
 #include <event2/dns.h>
 #include <event2/event.h>
 #include <event2/bufferevent.h>
 #include <event2/buffer.h>
 #include <event2/listener.h>
 #include <event2/bufferevent_ssl.h>
+#endif
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
@@ -87,8 +89,10 @@ public:
   void setSSLContext(SSL_CTX* ctx);
   static void onHTTPRead(HTTPConnection* c, void* ctx);
   static void onHTTPClose(HTTPConnection* c, void* ctx);
+#ifndef USE_LIBUV
   static void callbackRead(bufferevent* bev, void* ctx);
   static void callbackEvent(bufferevent* bev, short events, void* ctx);
+#endif
 private:
   void parseBuffer(HTTPConnection* c);
   bool hasConsumerKeyAndSecret();

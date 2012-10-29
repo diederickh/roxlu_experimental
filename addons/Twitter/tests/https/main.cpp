@@ -79,9 +79,10 @@ int main() {
   tw.setSSLContext(ssl_ctx);
 #include "twitter_tokens.h"
 
-  TwitterStatusesFilter tsf("twitter,love,sex,friend");
-  tw.apiStatusesFilter(tsf);
-  //tw.apiStatusesUpdate(TwitterStatusesUpdate("TEST123"));
+  //  TwitterStatusesFilter tsf("twitter,love,sex,friend");
+  //tw.apiStatusesFilter(tsf);
+  tw.apiStatusesUpdate(TwitterStatusesUpdate("TEST123"));
+
   while(true) {
     tw.update();
   }

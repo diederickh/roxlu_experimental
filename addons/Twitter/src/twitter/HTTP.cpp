@@ -313,7 +313,6 @@ std::string HTTPHeaders::join(std::string nameValueSep, std::string lineEnd) {
   for(std::map<std::string, HTTPHeader>::iterator it = entries.begin(); it != entries.end(); ++it) {
     HTTPHeader& h = it->second;
     result += h.name +nameValueSep +h.value +lineEnd;
-    printf("JOINING HEADERS: %s - %s\n", h.name.c_str(), h.value.c_str());
   }
   return result;
 }
@@ -322,7 +321,9 @@ std::string HTTPHeaders::join(std::string nameValueSep, std::string lineEnd) {
 // HTTP CONNECTION
 HTTPConnection::HTTPConnection(HTTP* h)
   :state(0)
+#ifndef USE_LIBUV
   ,bev(NULL)
+#endif
   ,http(h)
   ,close_callback(NULL)
   ,close_callback_data(NULL)
@@ -331,6 +332,11 @@ HTTPConnection::HTTPConnection(HTTP* h)
   ,read_callback(NULL)
   ,read_callback_data(NULL)
 {
+#ifdef USE_LIBUV
+  uresolver.data = this;
+  uconnect.data = this;
+  usocket.data = this;
+#endif
 }
 
 HTTPConnection::~HTTPConnection() {
@@ -338,7 +344,21 @@ HTTPConnection::~HTTPConnection() {
 }
 
 void HTTPConnection::addToOutputBuffer(const char* data, size_t len) {
+#ifndef USE_LIBUV
   evbuffer_add(bufferevent_get_output(bev), data, len);
+#else 
+  printf("HTTPConnection::addToOutputBuffer() - @todo addToOutputBuffer() implement for libuv\n");
+
+  printf("\t%zu\n", len);
+  printf("\t%s\n\n", data);
+  uv_buf_t buf;
+  buf.base = (char*)data;
+  buf.len = len;
+  int result = uv_write(&uwrite, (uv_stream_t*)&usocket, &buf, 1, HTTP::callbackOnWritten);
+  printf("\tuv_write result: %d\n", result);
+
+ 
+#endif
 }
 
 void HTTPConnection::addToOutputBuffer(const std::string str) {
@@ -348,13 +368,23 @@ void HTTPConnection::addToOutputBuffer(const std::string str) {
 // HTTP CONTEXT
 // ------------
 HTTP::HTTP() 
+#ifndef USE_LIBUV
   :evbase(NULL)
   ,dnsbase(NULL)
+#else
+   :uloop(NULL)
+#endif
 {
+
+#ifndef USE_LIBUV
   event_enable_debug_mode();
   evbase = event_base_new();
   dnsbase = evdns_base_new(evbase, 1);
   event_set_log_callback(HTTP::callbackLog);
+#else
+  uloop = uv_loop_new();
+  uloop->data = this;
+#endif
 }
 
 HTTP::~HTTP() {
@@ -362,7 +392,11 @@ HTTP::~HTTP() {
 }
 
 void HTTP::update() {
+#ifndef USE_LIBUV
   event_base_loop(evbase, EVLOOP_NONBLOCK);
+#else 
+   uv_run_once(uloop);
+#endif
 }
 
 HTTPConnection* HTTP::sendRequest(
@@ -375,6 +409,7 @@ HTTPConnection* HTTP::sendRequest(
                        ,void* errorData
 )
 {
+#ifndef USE_LIBUV
   HTTPConnection* c = newConnection(readCB, readData, closeCB, closeData, errorCB, errorData);
   c->bev = bufferevent_socket_new(evbase, -1, BEV_OPT_CLOSE_ON_FREE);
 
@@ -387,6 +422,27 @@ HTTPConnection* HTTP::sendRequest(
   printf("HTTP::sendRequest()\n");
   printf("\t%s\n", r.getURL().host.c_str());
   return c;
+#else
+  HTTPConnection* c = newConnection(readCB, readData, closeCB, closeData, errorCB, errorData);
+  std::string http_req = r.makeRequestString();
+  c->buffer_out.addBytes(http_req.c_str(), http_req.size());
+
+  connections.push_back(c);
+
+  struct addrinfo hints;
+  hints.ai_family = AF_INET;
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_protocol = IPPROTO_TCP;
+  hints.ai_flags = 0;
+  //  uv_getaddrinfo_t resolver; // @todo check if this needs to be created on the heap
+  printf("uloop: %p\n", uloop);
+  int result = uv_getaddrinfo(uloop, &c->uresolver, HTTP::callbackOnResolved, r.getURL().host.c_str(), "80", &hints);
+  if(result) {
+    printf("ERROR: HTTP::sendRequest(), error uv_getaddrinfo: %s\n", uv_err_name(uv_last_error(uloop)));
+    return NULL;
+  }
+  return c;
+#endif
 }
 
 
@@ -403,8 +459,7 @@ HTTPConnection* HTTP::sendSecureRequest(
                                         ,void* errorData 
                                         )
 {
-  //return sendRequest(r, readCB, readData, closeCB, closeData, errorCB, errorData);
-
+#ifndef USE_LIBUV
   HTTPConnection* c = newConnection(readCB, readData, closeCB, closeData, errorCB, errorData);
   SSL* ssl = SSL_new(ctx);
   c->bev = bufferevent_openssl_socket_new(evbase, -1, ssl, BUFFEREVENT_SSL_CONNECTING, BEV_OPT_CLOSE_ON_FREE);
@@ -415,10 +470,15 @@ HTTPConnection* HTTP::sendSecureRequest(
   bufferevent_enable(c->bev, EV_READ | EV_WRITE);
   c->addToOutputBuffer(r.makeRequestString());
   connections.push_back(c);
+#else 
+  printf("@todo HTTP::sendSecureRequest() for libuv\n");
+  return NULL;
+#endif
 }
 
 
 HTTPConnection* HTTP::testSecure(SSL_CTX* sslContext) {
+#ifndef USE_LIBUV
   printf("testSecure()\n");
   printf("---------------------\n");
 
@@ -441,32 +501,8 @@ HTTPConnection* HTTP::testSecure(SSL_CTX* sslContext) {
   }
   c->addToOutputBuffer(r.makeRequestString());
   bufferevent_enable(c->bev, EV_READ | EV_WRITE);
+#endif
 }
-
-// - END TEST
-/*
-void HTTP::callbackError(bufferevent* bev, short what, void* ctx) {
-  printf("HTTP::callbackError()\n");
-  if(what & BEV_EVENT_EOF) {
-    printf("\tBEV_EVENT_EOF\n");
-  }
-  if(what & BEV_EVENT_ERROR) {
-    printf("\tBEV_EVENT_ERROR\n");
-  }
-  if(what & BEV_EVENT_TIMEOUT) {
-    printf("\tBEV_EVENT_TIMEOUT\n");
-  }
-  if(what & BEV_EVENT_CONNECTED) {
-    printf("\tBEV_EVENT_CONNECTED\n");
-  }
-  if(what & BEV_EVENT_READING) {
-    printf("\tBEV_EVENT_READING\n");
-  }
-  if(what & BEV_EVENT_WRITING) {
-    printf("\tBEV_EVENT_WRITING\n");
-  }
-}
-*/
 
 HTTPConnection* HTTP::newConnection(    
                                     http_cb_on_read readCB
@@ -487,6 +523,62 @@ HTTPConnection* HTTP::newConnection(
   return c;
 }
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// USING LIBUV
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#ifdef USE_LIBUV
+void HTTP::callbackOnResolved(uv_getaddrinfo_t* resolver, int status, struct addrinfo* res) {
+  printf("HTTP::callbackOnResolved()\n");
+  if(status == -1) {
+    printf("ERROR: callbackOnResolved(). @todo remove from connections.\n");
+    return;
+  }
+
+  char addr[17] = {'\0'};
+  uv_ip4_name((struct sockaddr_in*)res->ai_addr, addr, 16);
+  printf("HTTP::callbackOnResolved(), connected to %s\n", addr);
+  HTTPConnection* c = static_cast<HTTPConnection*>(resolver->data);
+  uv_tcp_init(resolver->loop, &c->usocket);
+  uv_tcp_connect(&c->uconnect, &c->usocket, *(struct sockaddr_in*)res->ai_addr, HTTP::callbackOnConnect);
+}
+
+void HTTP::callbackOnConnect(uv_connect_t* con, int status) {
+  printf("HTTP::callbackOnConnect()\n");
+  if(status == -1) {
+    printf("ERROR: callbackOnConnect(). @todo remove from connections\n");
+    return;
+  }
+  
+  HTTPConnection* c = static_cast<HTTPConnection*>(con->data);
+
+  int result = uv_read_start((uv_stream_t*)&c->usocket, HTTP::callbackOnAlloc, HTTP::callbackOnRead);
+  printf("\tuv_read_start: %d\n", result);
+  c->addToOutputBuffer(c->buffer_out.getPtr(), c->buffer_out.getSize());
+  // c->buffer_out.addBytes(http_req.c_str(), http_req.size());
+}
+
+uv_buf_t HTTP::callbackOnAlloc(uv_handle_t* con, size_t size) {
+  printf("HTTP::callbackAlloc(), size: %zu\n", size);
+  uv_buf_t buf;
+  buf.base = (char*)malloc(size); // @todo there is probably a better way to deal with memory.. and where is this freed?
+  buf.len = size;
+  return buf;
+}
+
+void HTTP::callbackOnRead(uv_stream_t* tcp, ssize_t nread, uv_buf_t buf) {
+  printf("HTTP::callbackOnRead()\n");
+  free(buf.base);
+}
+
+void HTTP::callbackOnWritten(uv_write_t* req, int status) {
+  printf("HTTP::callbackOnWritten()\n");
+}
+#endif
+
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// USING LIBEVENT
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#ifndef USE_LIBUV
 void HTTP::callbackRead(bufferevent* bev, void* ctx) {
   printf("HTTP::callbackRead()\n");
   SSL* ssl = bufferevent_openssl_get_ssl(bev);
@@ -503,16 +595,21 @@ void HTTP::callbackRead(bufferevent* bev, void* ctx) {
   int n;
   struct evbuffer *input = bufferevent_get_input(c->bev);
   while ((n = evbuffer_remove(input, tmp, sizeof(tmp))) > 0) {
-    c->buffer.addBytes(tmp, n);
+    c->buffer_in.addBytes(tmp, n);
   }
-  c->buffer.print();
-  c->response.parseResponse(c->buffer);
+  c->buffer_in.print();
+  c->response.parseResponse(c->buffer_in);
 
   if(c->read_callback) {
     c->read_callback(c, c->read_callback_data);
   }
 }
+#endif
 
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// USING LIBEVENT
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#ifndef USE_LIBUV
 void HTTP::callbackEvent(bufferevent* bev, short events, void* ctx) {
   printf("HTTP::callbackEvent()\n");
 
@@ -547,18 +644,26 @@ void HTTP::callbackEvent(bufferevent* bev, short events, void* ctx) {
     c->http->removeConnection(c);
   }
 }
+#endif
 
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// USING LIBEVENT
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#ifndef USE_LIBUV
 void HTTP::callbackLog(int severity, const char* msg) {
   printf("LOG: %d, %s\n", severity, msg);
 }
+#endif
 
 void HTTP::removeAllConnections() {
    for(std::vector<HTTPConnection*>::iterator it = connections.begin(); it != connections.end(); ++it) {
      HTTPConnection* c = *it;
+#ifndef USE_LIBUV
      if(c->bev != NULL) {
        bufferevent_free(c->bev);
        c->bev = NULL;
      }
+#endif
      delete c;
    }
    connections.clear();

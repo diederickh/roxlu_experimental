@@ -2,10 +2,14 @@ cmake_minimum_required(VERSION 2.6)
 
 option(USE_OPENSSL "Use openSSL" ON)
 
+add_definitions(-DUSE_LIBUV)
+
 if(USE_OPENSSL)
   add_definitions(-DUSE_OPENSSL)
 endif(USE_OPENSSL)
 
+
+set(CMAKE_EXE_LINKER_FLAGS "-framework CoreFoundation -framework CoreServices")
 set(CMAKE_OSX_ARCHITECTURES "i386")
 set(CMAKE_BUILD_TYPE Debug)
 set(BASE ${CMAKE_SOURCE_DIR}/../)
@@ -37,6 +41,7 @@ set(libs
   ${CMAKE_SOURCE_DIR}/../lib/libevent_openssl.a
   ${CMAKE_SOURCE_DIR}/../lib/libssl.a
   ${CMAKE_SOURCE_DIR}/../lib/libcrypto.a
+  ${CMAKE_SOURCE_DIR}/../lib/libuv.a
 )
 
 add_subdirectory(https)

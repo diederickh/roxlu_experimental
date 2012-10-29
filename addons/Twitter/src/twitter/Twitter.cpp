@@ -127,15 +127,16 @@ void Twitter::makeAPICall(const std::string endpoint, HTTPParameters params, std
   auth.reset();
   
   HTTPRequest req;
+  req.setURL(HTTPURL("http", "test.localhost", "/"));
   //req.setURL(HTTPURL((secure) ? "https" : "http", "gist.github.com", "/"));
-  req.setURL(HTTPURL((secure) ? "https" : "http", host, endpoint));
+  //req.setURL(HTTPURL((secure) ? "https" : "http", host, endpoint));
   req.addHeader(HTTPHeader("User-Agent", "twitter-client/1.0"));
   //req.addHeader(HTTPHeader("User-Agent", "curl/7.19.7 (universal-apple-darwin10.0) libcurl/7.19.7 OpenSSL/0.9.8r zlib/1.2.3"));
   req.addHeader(HTTPHeader("Accept", "*/*"));
 
   req.copyContentParameters(params);
-  req.setMethod(REQUEST_POST);
-  //req.setMethod(REQUEST_GET);
+  //req.setMethod(REQUEST_POST);
+  req.setMethod(REQUEST_GET);
   req.setVersion(HTTP11);
   auth.addAuthorizationHeadersToRequest(req);
   HTTPConnection* c = NULL;
@@ -146,6 +147,11 @@ void Twitter::makeAPICall(const std::string endpoint, HTTPParameters params, std
   else {
     c = http.sendRequest(req, Twitter::onHTTPRead, this, Twitter::onHTTPClose, this);
   }
+  if(c == NULL) {
+    printf("ERROR: send(Secure)Request does not return a valid HTTPConnection.\n");
+    return;
+  }
+
   c->state = TCS_API_REQUEST_OPEN;
 }
 
@@ -163,7 +169,7 @@ void Twitter::parseBuffer(HTTPConnection* c) {
   }
 
   case TCS_REQUEST_TOKEN_CLOSED: {
-    std::string body = c->response.getBody(c->buffer);
+    std::string body = c->response.getBody(c->buffer_in);
     HTTPParameters parameters;
     size_t found = parameters.createFromVariableString(body);
     if(found > 0
@@ -189,7 +195,7 @@ void Twitter::parseBuffer(HTTPConnection* c) {
 
 
   case TCS_EXCHANGE_REQUEST_TOKEN_CLOSED: {
-    std::string body = c->response.getBody(c->buffer);
+    std::string body = c->response.getBody(c->buffer_in);
     HTTPParameters p;
     size_t found = p.createFromVariableString(body);
     if(found > 0
@@ -213,7 +219,7 @@ void Twitter::parseBuffer(HTTPConnection* c) {
   }
 
   case TCS_API_REQUEST_CLOSED: {
-    std::string body = c->response.getBody(c->buffer);
+    std::string body = c->response.getBody(c->buffer_in);
     if(api_callback) {
       api_callback(body, api_callback_data);
     }
@@ -243,7 +249,8 @@ std::string TwitterStatusesFilter::getCommaSeparatedTrackList() const {
 void Twitter::apiStatusesUpdate(const TwitterStatusesUpdate& param) {
   HTTPParameters p;
   p.add("status", param.status);
-  makeAPICall("/1.1/statuses/update.json", p, "api.twitter.com", true);
+  //  makeAPICall("/1.1/statuses/update.json", p, "api.twitter.com", true);
+  makeAPICall("/1.1/statuses/update.json", p);
 }
 
 

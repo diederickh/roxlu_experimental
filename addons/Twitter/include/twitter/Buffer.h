@@ -10,6 +10,7 @@ class Buffer {
 public:
   Buffer();
   void addBytes(const char* data, size_t len);
+  void ensureSize(size_t size);
   const char* getPtr();
   size_t getSize();
   size_t findNextByte(size_t start, char byte);
@@ -42,4 +43,5 @@ inline size_t Buffer::findNextByte(size_t start, char byte) {
   }
   return vpos;
 }
+
 #endif
