@@ -45,6 +45,8 @@ set(libs
 )
 
 add_subdirectory(https)
+add_subdirectory(openssl)
+add_subdirectory(libuv_openssl)
 
 
 

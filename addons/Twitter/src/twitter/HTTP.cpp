@@ -331,11 +331,17 @@ HTTPConnection::HTTPConnection(HTTP* h)
   ,error_callback_data(NULL)
   ,read_callback(NULL)
   ,read_callback_data(NULL)
+#ifdef USE_OPENSSL
+  ,ssl(NULL)
+  ,rbio(NULL)
+  ,wbio(NULL)
+#endif
 {
 #ifdef USE_LIBUV
   uresolver.data = this;
   uconnect.data = this;
   usocket.data = this;
+  uwrite.data = this;
 #endif
 }
 
@@ -347,17 +353,12 @@ void HTTPConnection::addToOutputBuffer(const char* data, size_t len) {
 #ifndef USE_LIBUV
   evbuffer_add(bufferevent_get_output(bev), data, len);
 #else 
-  printf("HTTPConnection::addToOutputBuffer() - @todo addToOutputBuffer() implement for libuv\n");
-
-  printf("\t%zu\n", len);
-  printf("\t%s\n\n", data);
+  printf("\nHTTPConnection::addToOutputBuffer()\n");
   uv_buf_t buf;
   buf.base = (char*)data;
   buf.len = len;
   int result = uv_write(&uwrite, (uv_stream_t*)&usocket, &buf, 1, HTTP::callbackOnWritten);
-  printf("\tuv_write result: %d\n", result);
-
- 
+  printf("\t uv_write result: %d\n", result);
 #endif
 }
 
@@ -471,9 +472,250 @@ HTTPConnection* HTTP::sendSecureRequest(
   c->addToOutputBuffer(r.makeRequestString());
   connections.push_back(c);
 #else 
-  printf("@todo HTTP::sendSecureRequest() for libuv\n");
-  return NULL;
+  printf("---------------  HTTP::sendSecureRequest() -------------------- \n");
+
+  //--
+  HTTPConnection* c = newConnection(readCB, readData, closeCB, closeData, errorCB, errorData);
+  std::string http_req = r.makeRequestString();
+  c->buffer_out.addBytes(http_req.c_str(), http_req.size());
+  c->ssl = SSL_new(ctx);
+  c->rbio = BIO_new(BIO_s_mem());
+  c->wbio = BIO_new(BIO_s_mem());
+  BIO_set_nbio(c->rbio, 1); // 1 = non blocking, 0 = blocking
+  BIO_set_nbio(c->wbio, 1); // 1 = non blocking , 0 = blocking
+  SSL_set_bio(c->ssl, c->rbio, c->wbio);
+
+  connections.push_back(c);
+
+  struct addrinfo hints;
+  hints.ai_family = AF_INET;
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_protocol = IPPROTO_TCP;
+  hints.ai_flags = 0;
+  //  uv_getaddrinfo_t resolver; // @todo check if this needs to be created on the heap
+  printf("> Starting up DNS resolve: %p\n", uloop);
+  int result = uv_getaddrinfo(uloop, &c->uresolver, HTTP::callbackOnResolved, r.getURL().host.c_str(), "443", &hints);
+  if(result) {
+    printf("ERROR: HTTP::sendRequest(), error uv_getaddrinfo: %s\n", uv_err_name(uv_last_error(uloop)));
+    return NULL;
+  }
+  return c;
 #endif
+}
+
+
+
+HTTPConnection* HTTP::newConnection(    
+                                    http_cb_on_read readCB
+                                    ,void* readData 
+                                    ,http_cb_on_close closeCB 
+                                    ,void* closeData
+                                    ,http_cb_on_error errorCB
+                                    ,void* errorData 
+                                   )
+{
+  HTTPConnection* c = new HTTPConnection(this);
+  c->close_callback = closeCB;
+  c->close_callback_data = closeData;
+  c->error_callback = errorCB;
+  c->error_callback_data = errorData;
+  c->read_callback = readCB;
+  c->read_callback_data = readData;
+  return c;
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// USING LIBUV
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#ifdef USE_LIBUV
+void HTTP::callbackOnResolved(uv_getaddrinfo_t* resolver, int status, struct addrinfo* res) {
+  if(status == -1) {
+    printf("ERROR: callbackOnResolved(). @todo remove from connections.\n");
+    return;
+  }
+
+  char addr[17] = {'\0'};
+  uv_ip4_name((struct sockaddr_in*)res->ai_addr, addr, 16);
+  HTTPConnection* c = static_cast<HTTPConnection*>(resolver->data);
+  uv_tcp_init(resolver->loop, &c->usocket);
+  uv_tcp_connect(&c->uconnect, &c->usocket, *(struct sockaddr_in*)res->ai_addr, HTTP::callbackOnConnect);
+}
+
+// ON ALLOC
+// ----------
+uv_buf_t HTTP::callbackOnAlloc(uv_handle_t* con, size_t size) {
+  uv_buf_t buf;
+  buf.base = (char*)malloc(size); // @todo there is probably a better way to deal with memory.. and where is this freed?
+  buf.len = size;
+  return buf;
+}
+
+
+// ON CONNECT
+// ----------
+void HTTP::callbackOnConnect(uv_connect_t* con, int status) {
+  if(status == -1) {
+    printf("ERROR: callbackOnConnect(). @todo remove from connections\n");
+    return;
+  }
+  
+  HTTPConnection* c = static_cast<HTTPConnection*>(con->data);
+  int result = uv_read_start((uv_stream_t*)&c->usocket, HTTP::callbackOnAlloc, HTTP::callbackOnRead);
+
+  if(!c->ssl) {
+    c->addToOutputBuffer(c->buffer_out.getPtr(), c->buffer_out.getSize());
+  }
+  else {
+    int rr = 0;
+    SSL_set_connect_state(c->ssl);
+    //SSL_set_mode(c->ssl, SSL_MODE_ENABLE_PARTIAL_WRITE);
+    rr = SSL_do_handshake(c->ssl); // err returns SSL_ERROR_WANT_READ
+    int err = SSL_get_error(c->ssl, rr);
+    if(err == SSL_ERROR_WANT_READ) {
+      c->ssl_state = SS_CONNECT_1;
+      c->http->sendPendingHandshakeData(c);
+    }
+  }
+}
+
+// SEND PENDING SSL DATA
+// ----------------------
+void HTTP::sendPendingHandshakeData(HTTPConnection* c) {
+  printf("HTTP::sendPendingHandshakeData()\n");
+  int pending;
+  char tmp[1024];
+  while(pending = BIO_ctrl_pending(c->wbio)) {
+    printf("\t PENDING: %d\n", pending);
+    int len = BIO_read(c->wbio, tmp, sizeof(tmp));
+    if(len > 0) { 
+      printf("\t WRITE: %d\n", len);
+      c->addToOutputBuffer(tmp, len); // write to socket
+    }
+  }
+}
+
+// ON READ
+// ---------
+void HTTP::callbackOnRead(uv_stream_t* tcp, ssize_t nread, uv_buf_t buf) {
+  // NOTHING?
+  if(nread == 0) {
+    return;
+  }
+
+  // CONNECTION CLOSED
+  if(nread < 0) {
+    uv_err_t err = uv_last_error(tcp->loop);
+    if(err.code == UV_EOF) {
+      HTTPConnection* c = static_cast<HTTPConnection*>(tcp->data);
+      c->buffer_in.print();
+      if(c->close_callback) {
+        c->close_callback(c, c->close_callback_data);
+      }
+    }
+    printf("\t ERROR: error while reading, err: %s.\n", uv_strerror(err));
+    return;
+  }
+
+  // HANDLE INCOMING DATA
+  HTTPConnection* c = static_cast<HTTPConnection*>(tcp->data);
+  if(c->ssl) {
+
+    if(c->ssl_state == SS_CONNECT_1) {
+      c->buffer_in.addBytes(buf.base, nread);
+      printf("\n\n---------------------------------------------------------\n");
+      c->buffer_in.print();
+      printf("---------------------------------------------------------\n\n");
+
+      printf("@@ SS_CONNECT_1 (%zu bytes received)\n", nread);
+      //c->ssl_state = SS_CONNECT_2;
+      int code = BIO_write(c->rbio, buf.base, nread);
+
+      //char bb[1024];
+      //int read_code = BIO_read(c->wbio, bb, 1024);
+      //printf("@@ CODE: %d, READ_CODE:\n", code);
+      //int err = SSL_get_error(c->ssl, code);
+      //int pending = BIO_ctrl_pending(c->wbio);
+      //printf("@@ PENDING %d\n", pending);
+      //if(err == SSL_ERROR_WANT_READ) {
+      //  printf("WANTS READ!\n");
+      //}
+      c->http->sendPendingHandshakeData(c);
+
+    }
+    else if(c->ssl_state == SS_CONNECT_2) {
+      printf("@@ SS_CONNECT_2\n");
+    }
+    /*
+    int written = BIO_write(c->rbio, buf.base, nread);
+    printf("> Written to mem bio: %d must have: %d\n", written, nread); 
+    int must_receive = BIO_ctrl_get_read_request(c->wbio);
+    printf("\t MUST RECEIVE: %d\n", must_receive);
+    c->http->sendPendingHandshakeData(c);
+    int read_plain = 0;
+    char tmp_buf[1024];
+    while(read_plain = SSL_read(c->ssl, tmp_buf, sizeof(tmp_buf)) > 0) {
+      printf("\t READ: %d\n", read_plain);
+      c->buffer_in.addBytes(tmp_buf, read_plain);
+    }
+    */
+    /*
+    switch(c->ssl_state) {
+      // WE'RE DOING THE HANDSAKE, ROUNDTRIP:1
+    case SS_CONNECT_1: {
+      if(SSL_is_init_finished(c->ssl)) {
+        printf("> NOT finished.\n");
+      }
+      else {
+        printf(">> YES finished.\n");
+      }
+      // write pending handshake data
+      //int handshake_pending = BIO_ctrl_pending(c->bio_out);
+      //printf("\t Handshake pending: %d\n", handshake_pending);
+  
+      // if(SSL_want_read(c->ssl)) {
+      //   char tmp[1024 * 5];
+      //   int written = BIO_read(c->bio_in, tmp, 1024 * 5);
+      //   c->ssl_state = SS_CONNECT_2;
+      //   c->addToOutputBuffer(tmp, written);
+      // }
+  
+      break;
+    }
+    case SS_CONNECT_2: {
+      ::exit(0);
+      break;
+    }
+    default: printf("\t WARNING: Unhandled SSL state in callbackOnRead()\n");
+    };
+*/
+  }
+  else {
+    c->buffer_in.addBytes(buf.base, nread);
+    c->response.parseResponse(c->buffer_in);
+    if(c->read_callback) {
+      c->read_callback(c, c->read_callback_data);
+    }
+  }
+  free(buf.base);
+
+}
+
+
+void HTTP::callbackOnWritten(uv_write_t* req, int status) {
+  HTTPConnection* c = static_cast<HTTPConnection*>(req->data);
+  printf("WRITTEN: %d\n", status);
+  /*
+  if(c->ssl) {
+    switch(c->ssl_state) {
+    case SS_CONNECT_1: {
+      printf("\t SS_CONNECT_1\n");
+      break;
+    }
+    default:printf("\t WARNING: unhandled SSL state.\n");
+    }
+    printf("\t SSL state: %d\n", c->ssl_state);
+  }
+  */
 }
 
 
@@ -504,76 +746,30 @@ HTTPConnection* HTTP::testSecure(SSL_CTX* sslContext) {
 #endif
 }
 
-HTTPConnection* HTTP::newConnection(    
-                                    http_cb_on_read readCB
-                                    ,void* readData 
-                                    ,http_cb_on_close closeCB 
-                                    ,void* closeData
-                                    ,http_cb_on_error errorCB
-                                    ,void* errorData 
-                                   )
-{
-  HTTPConnection* c = new HTTPConnection(this);
-  c->close_callback = closeCB;
-  c->close_callback_data = closeData;
-  c->error_callback = errorCB;
-  c->error_callback_data = errorData;
-  c->read_callback = readCB;
-  c->read_callback_data = readData;
-  return c;
-}
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// USING LIBUV
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#ifdef USE_LIBUV
-void HTTP::callbackOnResolved(uv_getaddrinfo_t* resolver, int status, struct addrinfo* res) {
-  printf("HTTP::callbackOnResolved()\n");
-  if(status == -1) {
-    printf("ERROR: callbackOnResolved(). @todo remove from connections.\n");
-    return;
-  }
 
-  char addr[17] = {'\0'};
-  uv_ip4_name((struct sockaddr_in*)res->ai_addr, addr, 16);
-  printf("HTTP::callbackOnResolved(), connected to %s\n", addr);
-  HTTPConnection* c = static_cast<HTTPConnection*>(resolver->data);
-  uv_tcp_init(resolver->loop, &c->usocket);
-  uv_tcp_connect(&c->uconnect, &c->usocket, *(struct sockaddr_in*)res->ai_addr, HTTP::callbackOnConnect);
-}
-
-void HTTP::callbackOnConnect(uv_connect_t* con, int status) {
-  printf("HTTP::callbackOnConnect()\n");
-  if(status == -1) {
-    printf("ERROR: callbackOnConnect(). @todo remove from connections\n");
-    return;
-  }
-  
-  HTTPConnection* c = static_cast<HTTPConnection*>(con->data);
-
-  int result = uv_read_start((uv_stream_t*)&c->usocket, HTTP::callbackOnAlloc, HTTP::callbackOnRead);
-  printf("\tuv_read_start: %d\n", result);
-  c->addToOutputBuffer(c->buffer_out.getPtr(), c->buffer_out.getSize());
-  // c->buffer_out.addBytes(http_req.c_str(), http_req.size());
-}
-
-uv_buf_t HTTP::callbackOnAlloc(uv_handle_t* con, size_t size) {
-  printf("HTTP::callbackAlloc(), size: %zu\n", size);
-  uv_buf_t buf;
-  buf.base = (char*)malloc(size); // @todo there is probably a better way to deal with memory.. and where is this freed?
-  buf.len = size;
-  return buf;
-}
-
-void HTTP::callbackOnRead(uv_stream_t* tcp, ssize_t nread, uv_buf_t buf) {
-  printf("HTTP::callbackOnRead()\n");
-  free(buf.base);
-}
-
-void HTTP::callbackOnWritten(uv_write_t* req, int status) {
-  printf("HTTP::callbackOnWritten()\n");
-}
 #endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// -------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // USING LIBEVENT
@@ -594,7 +790,7 @@ void HTTP::callbackRead(bufferevent* bev, void* ctx) {
   char tmp[1024];
   int n;
   struct evbuffer *input = bufferevent_get_input(c->bev);
-  while ((n = evbuffer_remove(input, tmp, sizeof(tmp))) > 0) {
+  while ((n = evbuffer_remodve(input, tmp, sizeof(tmp))) > 0) {
     c->buffer_in.addBytes(tmp, n);
   }
   c->buffer_in.print();
@@ -605,6 +801,9 @@ void HTTP::callbackRead(bufferevent* bev, void* ctx) {
   }
 }
 #endif
+
+
+
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // USING LIBEVENT

@@ -1,6 +1,8 @@
 #ifndef ROXLU_IO_RINGBUFFERH
 #define ROXLU_IO_RINGBUFFERH
 
+#include <cstddef>
+
 class RingBuffer {
 public:
 	RingBuffer(size_t capacity);

@@ -1,0 +1,2 @@
+/usr/bin/ar cr RoxluMultiTouch.a  CMakeFiles/RoxluMultiTouch.dir/src/RoxluMultiTouch.mm.o
+/usr/bin/ranlib RoxluMultiTouch.a

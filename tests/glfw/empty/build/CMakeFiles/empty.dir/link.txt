@@ -1,0 +1,1 @@
+/usr/bin/c++    -arch i386 -isysroot /Developer/SDKs/MacOSX10.6.sdk -Wl,-search_paths_first -headerpad_max_install_names -framework CoreFoundation -framework OpenGL -framework Cocoa -framework IOKit CMakeFiles/empty.dir/src/main.cpp.o  -o empty  ../..//libglfw.a 

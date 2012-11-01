@@ -197,6 +197,13 @@ inline HTTPParameters HTTPRequest::getQueryStringParameters() {
   return querystring;
 }
 
+#ifdef USE_OPENSSL
+// SSL STATES
+enum HTTPOpenSSLState {
+  SS_CONNECT_1 // connection just started
+  ,SS_CONNECT_2 // 
+};
+#endif
 
 // HTTP CALLBACKS
 struct HTTPConnection;
@@ -226,6 +233,9 @@ struct HTTPConnection {
   void* read_callback_data;
 #ifdef USE_OPENSSL
   SSL* ssl;
+  BIO* rbio;
+  BIO* wbio;
+  int ssl_state;
 #endif
 
 #ifdef USE_LIBUV
@@ -282,6 +292,8 @@ public:
   static void callbackEvent(bufferevent* bev, short events, void* ctx);
   static void callbackLog(int severity, const char* msg);
 #else 
+  void sendPendingHandshakeData(HTTPConnection* c); // test can be removed if necessary
+
   static uv_buf_t callbackOnAlloc(uv_handle_t* con, size_t size);
   static void callbackOnResolved(uv_getaddrinfo_t* resolver, int status, struct addrinfo* res);
   static void callbackOnConnect(uv_connect_t* con, int status);

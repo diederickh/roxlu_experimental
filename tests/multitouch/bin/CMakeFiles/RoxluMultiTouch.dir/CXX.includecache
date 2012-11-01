@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/diederickhuijbers/c++/__PLAYGROUND__/multitouch/src/RoxluMultiTouch.h
+Foundation/NSObject.h
+-
+Cocoa/Cocoa.h
+-
+
+/Users/diederickhuijbers/c++/__PLAYGROUND__/multitouch/src/RoxluMultiTouch.mm
+RoxluMultiTouch.h
+/Users/diederickhuijbers/c++/__PLAYGROUND__/multitouch/src/RoxluMultiTouch.h
+

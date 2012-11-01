@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../../include/GL/glfw.h
+OpenGL/gl3.h
+-
+OpenGL/gl.h
+-
+OpenGL/glu.h
+-
+GL3/gl3.h
+-
+GL/gl.h
+-
+GL/glu.h
+-
+
+/Users/diederickhuijbers/of/addons_diederick/roxlu/tests/glfw/empty/src/main.cpp
+iostream
+-
+GL/glfw.h
+-
+
