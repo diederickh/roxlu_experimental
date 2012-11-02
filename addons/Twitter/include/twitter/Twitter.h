@@ -37,8 +37,8 @@ enum Twittertates {
   ,TCS_REQUEST_TOKEN_CLOSED
   ,TCS_EXCHANGE_REQUEST_TOKEN_OPEN
   ,TCS_EXCHANGE_REQUEST_TOKEN_CLOSED
-  ,TCS_API_REQUEST_OPEN
-  ,TCS_API_REQUEST_CLOSED
+  //  ,TCS_API_REQUEST_OPEN
+  //,TCS_API_REQUEST_CLOSED
 };
 
 // After exchanging a token request we get this info:
@@ -49,6 +49,7 @@ struct TwitterTokenInfo {
   std::string screen_name;
 };
 
+// -----------------------------------
 struct TwitterStatusesUpdate {
   TwitterStatusesUpdate(const std::string status):status(status){}
   std::string status;
@@ -59,6 +60,18 @@ struct TwitterStatusesFilter {
   std::string getCommaSeparatedTrackList() const;
   std::vector<std::string> track;
 };
+
+struct TwitterCallParams {
+  TwitterCallParams():cb(NULL),data(NULL) {}
+  std::string endpoint; 
+  std::string host;
+  HTTPParameters params;
+  bool secure;
+  cb_request_read_body cb; 
+  void* data;
+};
+// -----------------------------------
+
 
 // TWITTER CALLBACKS
 typedef void(*cb_request_token_received)(std::string token, std::string tokenSecret, std::string redirectURL, void* data);
@@ -75,7 +88,7 @@ public:
   void setConsumerSecret(const char* consumerSecret);
   void setToken(const char* token);
   void setTokenSecret(const char* tokenSecret);
-  void requestToken(cb_request_token_received receivedCB, void* receivedData);
+  void requestToken(cb_request_token_received receivedCB, void* receivedData = NULL);
   void exchangeRequestTokenForAccessToken(
                                           std::string requestToken
                                           ,std::string verifier
@@ -83,27 +96,19 @@ public:
                                           ,void* data
                                           ); 
   void update();
-  void makeAPICall(const std::string endpoint, HTTPParameters params, std::string host="api.twitter.com", bool secure = false);
-  void apiStatusesFilter(const TwitterStatusesFilter& param);
-  void apiStatusesUpdate(const TwitterStatusesUpdate& param);
-  void setAPICallback(cb_api cb, void* data);
+  void makeAPICall(TwitterCallParams& p);
+  void apiStatusesFilter(const TwitterStatusesFilter& param, cb_request_read_body bodyCB = NULL, void* bodyData = NULL);
+  void apiStatusesUpdate(const TwitterStatusesUpdate& param, cb_request_read_body bodyCB = NULL, void* bodyData = NULL);
   void setSSLContext(SSL_CTX* ctx);
-  static void onHTTPRead(HTTPConnection* c, void* ctx);
-  static void onHTTPClose(HTTPConnection* c, void* ctx);
-#ifndef USE_LIBUV
-  static void callbackRead(bufferevent* bev, void* ctx);
-  static void callbackEvent(bufferevent* bev, short events, void* ctx);
-#endif
 private:
-  void parseBuffer(HTTPConnection* c);
   bool hasConsumerKeyAndSecret();
+  static void requestTokenCallback(const char* data, size_t len, void* twitter);
+  static void exchangeRequestTokenForAccessTokenCallback(const char* data, size_t len, void* twitter);
 private:
   cb_request_token_received request_token_received_callback;
   cb_access_token_received access_token_received_callback;
-  cb_api api_callback;
   void* request_token_received_callback_data;
   void* access_token_received_callback_data;
-  void* api_callback_data;
   OAuth auth;
   HTTP http; 
   SSL_CTX* ssl_ctx;

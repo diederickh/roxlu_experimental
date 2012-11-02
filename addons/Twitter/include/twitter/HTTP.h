@@ -8,16 +8,8 @@
 #include <algorithm>
 
 extern "C" {
-#ifndef USE_LIBUV
-#include <event2/dns.h>
-#include <event2/event.h>
-#include <event2/bufferevent.h>
-#include <event2/buffer.h>
-#include <event2/listener.h>
-#include <event2/bufferevent_ssl.h>
-#else 
 #include <uv.h>
-#endif
+#include <http_parser/http_parser.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
@@ -40,12 +32,6 @@ enum HTTPTypes {
 
 enum HTTPConnectionStates {
   HS_NONE
-};
-
-enum HTTPParseStates {
-  HPS_METHOD
-  ,HPS_HEADERS
-  ,HPS_BODY
 };
 
 // HTTP PARAMETER
@@ -85,7 +71,6 @@ struct HTTPParameters {
 // -------------
 struct HTTPHeader {
   HTTPHeader();
-  //  HTTPHeader(const std::string name, const std::string val);
 
   template<class T>
   HTTPHeader(const std::string n,  T val) {
@@ -119,6 +104,8 @@ struct HTTPURL {
 
 // HTTP REQUEST
 // -------------
+typedef void(*cb_request_read_body)(const char* body, size_t len, void* userdata);
+
 class HTTPRequest {
 public:
   HTTPRequest(int method = REQUEST_GET);
@@ -127,9 +114,9 @@ public:
   void setURL(HTTPURL url);
   void setMethod(int method);
   void setVersion(int version);
-  bool parseResponse(Buffer& b);
-  std::string getBody(Buffer& b);
-
+  void addToInputBuffer(const char* b, size_t len);
+  bool parseInputBuffer(); // Response(); // Buffer& b); // const char* data, size_t len);
+  void setReadBodyCallback(cb_request_read_body readCB, void* readData);
   HTTPURL getURL();
   std::string getQueryString();
   HTTPParameters getQueryStringParameters();
@@ -140,19 +127,31 @@ public:
   void addContentParameter(HTTPParameter p);
   void addQueryStringParameter(HTTPParameter p);
   void copyContentParameters(const HTTPParameters& p);
-
   std::string makeHTTPString();
   std::string makeRequestString();
+
+private:
+  static int parserCallbackOnMessageBegin(http_parser* p);
+  static int parserCallbackOnURL(http_parser* p, const char* at, size_t len);
+  static int parserCallbackOnHeaderField(http_parser* p, const char* at, size_t len);
+  static int parserCallbackOnHeaderValue(http_parser* p, const char* at, size_t len);
+  static int parserCallbackOnHeadersComplete(http_parser* p);
+  static int parserCallbackOnBody(http_parser* p, const char* at, size_t len);
+  static int parserCallbackOnMessageComplete(http_parser* p);
+
 public:
-  int parse_state;
+  http_parser parser;
+  http_parser_settings parser_settings;
   int method;
   int version;
-  int response_code;
-  size_t body_start_dx;
   HTTPURL url;
   HTTPHeaders headers;
   HTTPParameters parameters;
   HTTPParameters querystring;
+  Buffer buffer_in;
+private:
+  cb_request_read_body callback_read_body;
+  void* callback_read_body_data;
 };
 
 
@@ -198,7 +197,7 @@ enum HTTPOpenSSLState {
 
 // HTTP CALLBACKS
 struct HTTPConnection;
-typedef void(*http_cb_on_read)(HTTPConnection* c, void* ctx);
+//typedef void(*http_cb_on_read)(HTTPConnection* c, void* ctx);
 typedef void(*http_cb_on_close)(HTTPConnection* c, void* ctx);
 typedef void(*http_cb_on_error)(HTTPConnection* c, void* ctx);
 
@@ -208,31 +207,27 @@ struct HTTPConnection {
   HTTPConnection(HTTP* http);
   ~HTTPConnection();
   void addToOutputBuffer(const std::string str);
-  void addToOutputBuffer(const char* data, size_t size);
-#ifndef USE_LIBUV
-  bufferevent* bev;
-#endif
-  Buffer buffer_in; // input buffer
+  void addToOutputBuffer(const char* data, size_t len);
+  void send(const char* data, size_t len);
+
+  Buffer buffer_out;
   HTTPRequest response;
   int state; // used by "caller"
   HTTP* http;
   http_cb_on_close close_callback;
   http_cb_on_error error_callback;
-  http_cb_on_read read_callback;
+  //http_cb_on_read read_callback;
   void* close_callback_data;
   void* error_callback_data;
-  void* read_callback_data;
+  //void* read_callback_data;
 #ifdef USE_OPENSSL
   SSL* ssl;
   SSLBuffer ssl_buffer;
 #endif
-
-#ifdef USE_LIBUV
   uv_connect_t connect_req;
   uv_tcp_t socket;
   uv_write_t write_req;
   uv_getaddrinfo_t resolver_req;
-#endif
 };
 
 // HTTP CONTEXT
@@ -244,7 +239,7 @@ public:
 
   HTTPConnection* sendRequest(
                    HTTPRequest& r
-                   ,http_cb_on_read readCB = NULL
+                   ,cb_request_read_body readCB = NULL
                    ,void* readData = NULL
                    ,http_cb_on_close closeCB = NULL
                    ,void* closeData = NULL
@@ -255,7 +250,7 @@ public:
   HTTPConnection* sendSecureRequest(
                                     SSL_CTX* ctx
                                     ,HTTPRequest& r
-                                    ,http_cb_on_read readCB = NULL
+                                    ,cb_request_read_body readCB = NULL
                                     ,void* readData = NULL
                                     ,http_cb_on_close closeCB = NULL
                                     ,void* closeData = NULL
@@ -263,7 +258,7 @@ public:
                                     ,void* errorData = NULL
                                     );
   HTTPConnection* newConnection(    
-                                http_cb_on_read readCB = NULL
+                                cb_request_read_body readCB = NULL
                                 ,void* readData = NULL
                                 ,http_cb_on_close closeCB = NULL
                                 ,void* closeData = NULL
@@ -271,27 +266,19 @@ public:
                                 ,void* errorData = NULL
                                 );
 
-  //  static void callbackError(bufferevent* bev, short what, void* ctx);
-
-  void sendPendingHandshakeData(HTTPConnection* c); // test can be removed if necessary
-  static uv_buf_t callbackOnAlloc(uv_handle_t* con, size_t size);
+  static uv_buf_t callbackOnAlloc(uv_handle_t* con, size_t len);
   static void callbackOnResolved(uv_getaddrinfo_t* resolver, int status, struct addrinfo* res);
   static void callbackOnConnect(uv_connect_t* con, int status);
   static void callbackOnRead(uv_stream_t* tcp, ssize_t nread, uv_buf_t buf);
-  static void callbackOnWritten(uv_write_t* req, int status);
+  //  static void callbackOnWritten(uv_write_t* req, int status);
   static void callbackSSLMustWriteToSocket(const char* data, size_t len, void* con);
   static void callbackSSLReadDecryptedData(const char* data, size_t len, void* con);
 private:
   void writeToSocket(const char* data, size_t len);
   void removeConnection(HTTPConnection* c);
   void removeAllConnections();
-private:
-#ifndef USE_LIBUV
-  event_base* evbase;
-  evdns_base* dnsbase;
-#else
+public:
   uv_loop_t* loop;
-#endif
   std::vector<HTTPConnection*> connections;
 };
 #endif

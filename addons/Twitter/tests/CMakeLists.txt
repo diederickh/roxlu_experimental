@@ -28,6 +28,7 @@ set(files
   ${SRC}/twitter/Buffer.cpp 
   ${SRC}/twitter/SSLBuffer.cpp 
   ${SRC}/twitter/PercentEncode.cpp
+  ${BASE}/extern/src/http_parser/http_parser.c
   ${BASE}/extern/src/formats/hmac_sha1.c
   ${BASE}/extern/src/formats/json.c
   ${BASE}/extern/src/formats/Base64Encoder.cpp

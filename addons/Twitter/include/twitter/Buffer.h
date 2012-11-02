@@ -10,10 +10,12 @@ class Buffer {
 public:
   Buffer();
   void addBytes(const char* data, size_t len);
-  void ensureSize(size_t size);
   const char* getPtr();
+  const char* getReadPtr();
   size_t getSize();
+  size_t getNumBytesToRead();
   size_t findNextByte(size_t start, char byte);
+  void flushReadBytes();
   void print();
 
   char& operator[](const unsigned int dx);
@@ -28,6 +30,10 @@ inline size_t Buffer::getSize() {
 
 inline const char* Buffer::getPtr() {
   return &buffer[0];
+}
+
+inline const char* Buffer::getReadPtr() {
+  return getPtr() + dx;
 }
 
 inline char& Buffer::operator[](const unsigned int dx) {

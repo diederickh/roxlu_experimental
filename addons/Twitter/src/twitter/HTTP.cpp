@@ -3,9 +3,18 @@
 HTTPRequest::HTTPRequest(int method)
   :method(method)
   ,version(HTTP10)
-  ,parse_state(HPS_METHOD)
-  ,body_start_dx(0)
+  ,callback_read_body(NULL)
+  ,callback_read_body_data(NULL)
 {
+  parser_settings.on_url = HTTPRequest::parserCallbackOnURL;
+  parser_settings.on_message_begin = HTTPRequest::parserCallbackOnMessageBegin;
+  parser_settings.on_header_field = HTTPRequest::parserCallbackOnHeaderField;
+  parser_settings.on_header_value = HTTPRequest::parserCallbackOnHeaderValue;
+  parser_settings.on_headers_complete = HTTPRequest::parserCallbackOnHeadersComplete;
+  parser_settings.on_body = HTTPRequest::parserCallbackOnBody;
+  parser_settings.on_message_complete = HTTPRequest::parserCallbackOnMessageComplete;
+  http_parser_init(&parser, HTTP_RESPONSE);
+  parser.data = this;
 }
 
 HTTPRequest::~HTTPRequest() {
@@ -24,15 +33,12 @@ std::string HTTPRequest::makeHTTPString() {
 }
 
 std::string HTTPRequest::makeRequestString() {
-
-  // BODY
   std::string body;
   if(method == REQUEST_POST) {
     parameters.percentEncode(); 
     body = parameters.getQueryString();
   }
 
-  // HEADERS
   std::string req = makeHTTPString();
   addHeader(HTTPHeader("Host", url.host));
   addHeader(HTTPHeader("Content-Length",body.size()));
@@ -40,14 +46,12 @@ std::string HTTPRequest::makeRequestString() {
   if(method == REQUEST_POST) {
     addHeader(HTTPHeader("Content-Type","application/x-www-form-urlencoded"));
   }
-  
-  // COMBINE HEADER + BODY
+
   req += headers.join();
-  req +="\r\n"; // end of headers
+  req +="\r\n"; 
   req += body;
 
-  printf("%s\n", req.c_str());
-  
+  //printf("%s\n", req.c_str());
   return req;
 }
 
@@ -67,106 +71,62 @@ void HTTPRequest::copyContentParameters(const HTTPParameters& p) {
   parameters.copy(p);
 }
 
-bool HTTPRequest::parseResponse(Buffer& b) {
-  // We only parse till the body
-  if(parse_state == HPS_BODY) {
+void HTTPRequest::addToInputBuffer(const char* data, size_t len) { 
+  buffer_in.addBytes(data, len);
+}
+
+bool HTTPRequest::parseInputBuffer() {  // Response(Buffer& b) { // const char* data, size_t len) { // Buffer& b) {
+  size_t len = buffer_in.getNumBytesToRead();
+  if(len <= 0) {
     return true;
   }
 
-  while(true) {
-    size_t size = b.getSize();
-    switch(parse_state) {
-      
-      // EXTRACT VERSION + RESPONSE CODE
-    case HPS_METHOD: {
-      if(size < 8) {
-        return false;
-      }
-      if((b[0] == 'H' || b[0] == 'h') 
-          && (b[1] == 'T' || b[1] == 't') 
-          && (b[2] == 'T' || b[2] == 't')
-          && (b[3] == 'P' || b[3] == 'p')  )
-        {
-          version = (b[7] == 1) ? HTTP11 : HTTP10;
-          size_t vpos = b.findNextByte(9, ' ');
-          response_code = atoi(std::string(&b[9], vpos).c_str());
-          parse_state = HPS_HEADERS; // continue with headers.
-          for(size_t i = (9+vpos); i < size-1; ++i) {
-            if(b[i] == '\r' && b[i+1] == '\n') {
-              b.dx = i+2;
-              break;
-            }
-          }
-          continue;
-        }
-      break;
-    }
-      
-      // EXTRACT HEADERS
-    case HPS_HEADERS: {
-      HTTPHeader header;
-      std::string value;
-      std::string name;
-      int n = 0;
-      for(size_t i = b.dx; i < size; ++i) {
-        if(i < size-4 && b[i] == '\r' && b[i+1] == '\n' && b[i+2] == '\r' && b[i+3] == '\n') { // all headers done
-          parse_state = HPS_BODY;
-          b.dx = i+4;
-          body_start_dx = b.dx;
-          return true; // after finding the body we don't parse the buffer anymore
-        }
-        if(b[i] == '\r' && ((i+1) < size) && b[i+1] == '\n') {
-          std::transform(header.name.begin(), header.name.end(), header.name.begin(), ::tolower);
-          addHeader(header);
-          header.name.clear();
-          header.value.clear();
-          n = 0;
-          i = i + 1;
-        }
-        else {
-          if(n == 0 && b[i] == ':') {
-            n = 1; 
-            i++;
-            continue;
-          }
-          if(n == 0) {
-            header.name.push_back(b[i]);
-          }
-          else {
-            header.value.push_back(b[i]);
-          }
-        }
-      }
-      break;
-    };
-
-      // WE ARE AT THE BODY.. DON'T DO ANYTHING MORE
-    case HPS_BODY:{
-       return true;
-    }
-
-    default:printf("ERROR: Unhandled http parse state.\n"); break;
-    }
+  int nparsed = http_parser_execute(&parser, &parser_settings, buffer_in.getReadPtr(), len);
+  if(nparsed < 0) {
+    return false;
   }
-  return false; 
+
+  buffer_in.dx += nparsed;
+  return true;
 }
 
-std::string HTTPRequest::getBody(Buffer& b) {
-  std::string body;
-  for(size_t i = b.dx; i < b.getSize(); ++i) {
-    body.push_back(b[i]);
-    b.dx = i;
+int HTTPRequest::parserCallbackOnMessageBegin(http_parser* p) {
+  return 0;
+}
+
+int HTTPRequest::parserCallbackOnURL(http_parser* p, const char* at, size_t len) {
+  return 0;
+}
+
+int HTTPRequest::parserCallbackOnHeaderField(http_parser* p, const char* at, size_t len) { 
+  return 0;
+}
+
+int HTTPRequest::parserCallbackOnHeaderValue(http_parser* p, const char* at, size_t len) {
+  return 0;
+}
+
+int HTTPRequest::parserCallbackOnHeadersComplete(http_parser* p) {
+  return 0;
+}
+
+int HTTPRequest::parserCallbackOnBody(http_parser* p, const char* at, size_t len) {
+  HTTPRequest* r = static_cast<HTTPRequest*>(p->data);
+  if(r->callback_read_body) {
+    r->callback_read_body(at, len, r->callback_read_body_data);
   }
-  return body;
+  r->buffer_in.flushReadBytes();
+  return 0;
 }
 
-/*
-bool HTTPRequest::hasCompleteBody(Buffer& b) {
-  size_t body_len = b.getSize() - body_start_dx;
-  print("We have: %zu bytes as body len; header tells us: %s\n", 
-        return true;
+int HTTPRequest::parserCallbackOnMessageComplete(http_parser* p) { 
+  return 0;
 }
-*/
+
+void HTTPRequest::setReadBodyCallback(cb_request_read_body readCB, void* readData) {
+  callback_read_body = readCB;
+  callback_read_body_data = readData;
+}
 
 // HTTP PARAMETER
 // --------------
@@ -182,7 +142,6 @@ HTTPParameter::HTTPParameter(const std::string name, const std::string value)
 void HTTPParameter::print() {
   printf("%s = %s\n", name.c_str(), value.c_str());
 }
-
 
 // HTTP PARAMETERS
 // ---------------
@@ -286,15 +245,6 @@ std::string HTTPURL::getString() {
 HTTPHeader::HTTPHeader() {
 }
 
-/*
-HTTPHeader::HTTPHeader(std::string name, std::string value)
-  :name(name)
-  ,value(value)
-{
-  printf("HEADER: VALUE: %s\n", value.c_str());
-}
-*/
-
 // HTTP HEADERS
 // -------------
 void HTTPHeaders::add(const std::string name, const std::string value) {
@@ -315,30 +265,20 @@ std::string HTTPHeaders::join(std::string nameValueSep, std::string lineEnd) {
   return result;
 }
 
-
 // HTTP CONNECTION
 HTTPConnection::HTTPConnection(HTTP* h)
   :state(0)
-#ifndef USE_LIBUV
-  ,bev(NULL)
-#endif
   ,http(h)
   ,close_callback(NULL)
   ,close_callback_data(NULL)
   ,error_callback(NULL)
   ,error_callback_data(NULL)
-  ,read_callback(NULL)
-  ,read_callback_data(NULL)
-#ifdef USE_OPENSSL
   ,ssl(NULL)
-#endif
 {
-#ifdef USE_LIBUV
   resolver_req.data = this;
   connect_req.data = this;
   socket.data = this;
   write_req.data = this;
-#endif
 }
 
 HTTPConnection::~HTTPConnection() {
@@ -346,15 +286,26 @@ HTTPConnection::~HTTPConnection() {
 }
 
 void HTTPConnection::addToOutputBuffer(const char* data, size_t len) {
-  printf("\nHTTPConnection::addToOutputBuffer()\n");
-  uv_buf_t buf;
-  buf.base = (char*)data;
-  buf.len = len;
-  int result = uv_write(&write_req, (uv_stream_t*)&socket, &buf, 1, HTTP::callbackOnWritten);
+  buffer_out.addBytes(data, len);
 }
 
 void HTTPConnection::addToOutputBuffer(const std::string str) {
   addToOutputBuffer(str.c_str(), str.size());
+}
+
+void HTTPConnection::send(const char* data, size_t len) {
+  if(len <= 0) {
+    return;
+  }
+
+  uv_buf_t buf;
+  buf.base = (char*)data;
+  buf.len = len;
+
+  int r = uv_write(&write_req, (uv_stream_t*)&socket, &buf, 1, NULL); // HTTP::callbackOnWritten);
+  if(r < 0) {
+    printf("ERROR: callbackSSLMustWriteToSocket() error: %s\n", uv_err_name(uv_last_error(http->loop)));
+  }
 }
 
 // HTTP CONTEXT
@@ -371,16 +322,12 @@ HTTP::~HTTP() {
 }
 
 void HTTP::update() {
-#ifndef USE_LIBUV
-  event_base_loop(evbase, EVLOOP_NONBLOCK);
-#else 
    uv_run_once(loop);
-#endif
 }
 
 HTTPConnection* HTTP::sendRequest(
                        HTTPRequest& r
-                       ,http_cb_on_read readCB 
+                       ,cb_request_read_body readCB 
                        ,void* readData 
                        ,http_cb_on_close closeCB
                        ,void* closeData
@@ -388,11 +335,9 @@ HTTPConnection* HTTP::sendRequest(
                        ,void* errorData
 )
 {
-  /*
+  
   HTTPConnection* c = newConnection(readCB, readData, closeCB, closeData, errorCB, errorData);
-  std::string http_req = r.makeRequestString();
-  c->buffer_out.addBytes(http_req.c_str(), http_req.size());
-
+  c->addToOutputBuffer(r.makeRequestString());
   connections.push_back(c);
 
   struct addrinfo hints;
@@ -400,23 +345,21 @@ HTTPConnection* HTTP::sendRequest(
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_protocol = IPPROTO_TCP;
   hints.ai_flags = 0;
-  //  uv_getaddrinfo_t resolver; // @todo check if this needs to be created on the heap
-  printf("uloop: %p\n", loop);
+  
   int result = uv_getaddrinfo(loop, &c->resolver_req, HTTP::callbackOnResolved, r.getURL().host.c_str(), "80", &hints);
   if(result) {
     printf("ERROR: HTTP::sendRequest(), error uv_getaddrinfo: %s\n", uv_err_name(uv_last_error(loop)));
     return NULL;
   }
   return c;
-  */
 }
 
 
-// TESTING WITH HTTPS
+// HTTPS
 HTTPConnection* HTTP::sendSecureRequest(
                                         SSL_CTX* ctx
                                         ,HTTPRequest& r
-                                        ,http_cb_on_read readCB
+                                        ,cb_request_read_body readCB
                                         ,void* readData 
                                         ,http_cb_on_close closeCB
                                         ,void* closeData 
@@ -425,6 +368,7 @@ HTTPConnection* HTTP::sendSecureRequest(
                                         )
 {
   HTTPConnection* c = newConnection(readCB, readData, closeCB, closeData, errorCB, errorData);
+  connections.push_back(c);
   std::string http_req = r.makeRequestString();
   c->ssl_buffer.addApplicationData(http_req);
   c->ssl = SSL_new(ctx);
@@ -435,18 +379,24 @@ HTTPConnection* HTTP::sendSecureRequest(
   hints.ai_protocol = IPPROTO_TCP;
   hints.ai_flags = 0;
 
-  printf("> Starting up DNS resolve: %p\n", loop);
-  int result = uv_getaddrinfo(loop, &c->resolver_req, HTTP::callbackOnResolved, r.getURL().host.c_str(), "443", &hints);
+  int result = uv_getaddrinfo(
+                              loop, 
+                              &c->resolver_req, 
+                              HTTP::callbackOnResolved, 
+                              r.getURL().host.c_str(), 
+                              "443",
+                              &hints
+                              );
   if(result) {
     printf("ERROR: HTTP::sendRequest(), error uv_getaddrinfo: %s\n", uv_err_name(uv_last_error(loop)));
     return NULL;
   }
-  connections.push_back(c);
+
   return c;
 }
 
 HTTPConnection* HTTP::newConnection(    
-                                    http_cb_on_read readCB
+                                    cb_request_read_body readCB
                                     ,void* readData 
                                     ,http_cb_on_close closeCB 
                                     ,void* closeData
@@ -459,27 +409,26 @@ HTTPConnection* HTTP::newConnection(
   c->close_callback_data = closeData;
   c->error_callback = errorCB;
   c->error_callback_data = errorData;
-  c->read_callback = readCB;
-  c->read_callback_data = readData;
+  c->response.setReadBodyCallback(readCB, readData);
   return c;
 }
 
 // ON RESOLVED
-// ----------
+// -----------
 void HTTP::callbackOnResolved(uv_getaddrinfo_t* resolver, int status, struct addrinfo* res) {
   if(status == -1) {
     printf("ERROR: callbackOnResolved(). @todo remove from connections.\n");
     return;
   }
 
-  char addr[17] = {'\0'};
-  uv_ip4_name((struct sockaddr_in*)res->ai_addr, addr, 16);
-  printf("Address: %s\n", addr);
-
   HTTPConnection* c = static_cast<HTTPConnection*>(resolver->data);
   uv_tcp_init(resolver->loop, &c->socket);
-  uv_tcp_connect(&c->connect_req, &c->socket, *(struct sockaddr_in*)res->ai_addr, HTTP::callbackOnConnect);
-  // @todo call uv_freeaddrinfo(res) here?
+  uv_tcp_connect(
+                 &c->connect_req, 
+                 &c->socket, 
+                 *(struct sockaddr_in*)res->ai_addr, 
+                 HTTP::callbackOnConnect
+                 );
   uv_freeaddrinfo(res);
 }
 
@@ -492,38 +441,38 @@ void HTTP::callbackOnConnect(uv_connect_t* con, int status) {
   }
 
   HTTPConnection* c = static_cast<HTTPConnection*>(con->data);
-  int result = uv_read_start((uv_stream_t*)&c->socket, HTTP::callbackOnAlloc, HTTP::callbackOnRead);
+  int result = uv_read_start(
+                             (uv_stream_t*)&c->socket, 
+                             HTTP::callbackOnAlloc, 
+                             HTTP::callbackOnRead
+                             );
 
   if(!c->ssl) {
-    printf("ADD NORMAL HTTP CONNECTION!\n");
-    //c->addToOutputBuffer(c->buffer_out.getPtr(), c->buffer_out.getSize());
+    c->send(c->buffer_out.getPtr(), c->buffer_out.getSize());
   }
   else {
     SSL_set_connect_state(c->ssl);
     SSL_do_handshake(c->ssl);
-    c->ssl_buffer.init(c->ssl, HTTP::callbackSSLMustWriteToSocket, c, HTTP::callbackSSLReadDecryptedData, c);
+    c->ssl_buffer.init(
+                       c->ssl, 
+                       HTTP::callbackSSLMustWriteToSocket, 
+                       c, 
+                       HTTP::callbackSSLReadDecryptedData, 
+                       c
+                       );
     c->ssl_buffer.update();
   }
 }
 
 void HTTP::callbackSSLMustWriteToSocket(const char* data, size_t len, void* con) {
-  if(len <= 0) {
-    return;
-  }
   HTTPConnection* c = static_cast<HTTPConnection*>(con);
-  uv_buf_t buf;
-  buf.base = (char*)data;
-  buf.len = len;
-  int r = uv_write(&c->write_req, (uv_stream_t*)&c->socket, &buf, 1, NULL);
-  if(r < 0) {
-    printf("ERROR: callbackSSLMustWriteToSocket() error: %s\n", uv_err_name(uv_last_error(c->http->loop)));
-  }
+  c->send(data, len);
 }
  
 void HTTP::callbackSSLReadDecryptedData(const char* data, size_t len, void* con) {
   HTTPConnection* c = static_cast<HTTPConnection*>(con);
-  printf("Read decrypted data: %zu bytes\n", len);
-  std::copy(data, data+len, std::ostream_iterator<char>(std::cout, ""));
+  c->response.addToInputBuffer(data, len);
+  c->response.parseInputBuffer();
 }
 
 // ON READ
@@ -536,55 +485,30 @@ void HTTP::callbackOnRead(uv_stream_t* tcp, ssize_t nread, uv_buf_t buf) {
     uv_err_t err = uv_last_error(tcp->loop);
     if(err.code == UV_EOF) {
       HTTPConnection* c = static_cast<HTTPConnection*>(tcp->data);
-      c->buffer_in.print();
       if(c->close_callback) {
         c->close_callback(c, c->close_callback_data);
       }
+      c->http->removeConnection(c);
     }
-    printf("\t ERROR: error while reading, err: %s.\n", uv_strerror(err));
+    else {
+      printf("\t ERROR: error while reading, err: %s.\n", uv_strerror(err));
+    }
     return;
   }
   else {
     HTTPConnection* c = static_cast<HTTPConnection*>(tcp->data);
-    c->ssl_buffer.addEncryptedData(buf.base, nread);
-    c->ssl_buffer.update();
-  }
-
-
-  /*
-  // NOTHING?
-  if(nread == 0) {
-    return;
-  }
-
-  // CONNECTION CLOSED
-  if(nread < 0) {
-    uv_err_t err = uv_last_error(tcp->loop);
-    if(err.code == UV_EOF) {
-      HTTPConnection* c = static_cast<HTTPConnection*>(tcp->data);
-      c->buffer_in.print();
-      if(c->close_callback) {
-        c->close_callback(c, c->close_callback_data);
-      }
+    if(c->ssl) {
+      printf("add encrypted data");      
+      c->ssl_buffer.addEncryptedData(buf.base, nread);
+      c->ssl_buffer.update();
+      printf("@todo, does free(buf.base) cause segfaults?\n");
+      free(buf.base);
     }
-    printf("\t ERROR: error while reading, err: %s.\n", uv_strerror(err));
-    return;
-  }
-
-  // HANDLE INCOMING DATA
-  HTTPConnection* c = static_cast<HTTPConnection*>(tcp->data);
-  if(c->ssl) {
-
-  }
-  else {
-    c->buffer_in.addBytes(buf.base, nread);
-    c->response.parseResponse(c->buffer_in);
-    if(c->read_callback) {
-      c->read_callback(c, c->read_callback_data);
+    else {
+      c->response.addToInputBuffer(buf.base, nread);
+      c->response.parseInputBuffer();
     }
   }
-  free(buf.base);
-  */
 }
  
 
@@ -597,29 +521,12 @@ uv_buf_t HTTP::callbackOnAlloc(uv_handle_t* con, size_t size) {
   return buf;
 }
 
-void HTTP::callbackOnWritten(uv_write_t* req, int status) {
-  HTTPConnection* c = static_cast<HTTPConnection*>(req->data);
-  printf("WRITTEN: %d\n", status);
-}
-
-
-
-
 void HTTP::removeAllConnections() {
-  printf("@todo HTTP::removeAllConnections()\n");
-  /*
-   for(std::vector<HTTPConnection*>::iterator it = connections.begin(); it != connections.end(); ++it) {
-     HTTPConnection* c = *it;
-#ifndef USE_LIBUV
-     if(c->bev != NULL) {
-       bufferevent_free(c->bev);
-       c->bev = NULL;
-     }
-#endif
-     delete c;
-   }
-   connections.clear();
-  */
+  for(std::vector<HTTPConnection*>::iterator it = connections.begin(); it != connections.end(); ++it) {
+    HTTPConnection* c = *it;
+    delete c;
+  }
+  connections.clear();
 }
 
 void HTTP::removeConnection(HTTPConnection* c) {
