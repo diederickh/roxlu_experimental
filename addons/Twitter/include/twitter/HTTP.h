@@ -9,7 +9,6 @@
 
 extern "C" {
 #ifndef USE_LIBUV
-#error "WAT"
 #include <event2/dns.h>
 #include <event2/event.h>
 #include <event2/bufferevent.h>
@@ -27,9 +26,7 @@ extern "C" {
 #include <twitter/Buffer.h>
 #include <twitter/PercentEncode.h>
 #include <twitter/Types.h>
-
-
-
+#include <twitter/SSLBuffer.h>
 
 // TYPES
 // -------
@@ -94,10 +91,8 @@ struct HTTPHeader {
   HTTPHeader(const std::string n,  T val) {
     std::stringstream ss;
     ss << val;
-    //ss >> value;
     value = ss.str();
     name = n;
-    //printf("%s\n", ss.str().c_str());
   }
 
   std::string name;
@@ -121,10 +116,6 @@ struct HTTPURL {
   std::string path;
 };
 
-// HTTP CONNECTION
-//struct HTTPConnection {
-//bufferevent* bev;
-//};
 
 // HTTP REQUEST
 // -------------
@@ -200,8 +191,8 @@ inline HTTPParameters HTTPRequest::getQueryStringParameters() {
 #ifdef USE_OPENSSL
 // SSL STATES
 enum HTTPOpenSSLState {
-  SS_CONNECT_1 // connection just started
-  ,SS_CONNECT_2 // 
+  SS_CONNECT_1 // connection just started (used while testing should be removed)
+  ,SS_CONNECT_2 // used while testing, should be removed
 };
 #endif
 
@@ -233,20 +224,14 @@ struct HTTPConnection {
   void* read_callback_data;
 #ifdef USE_OPENSSL
   SSL* ssl;
-  BIO* rbio;
-  BIO* wbio;
-  int ssl_state;
+  SSLBuffer ssl_buffer;
 #endif
 
 #ifdef USE_LIBUV
-  // https://gist.github.com/1195428
-  uv_connect_t uconnect;
-  uv_tcp_t usocket;
-  uv_write_t uwrite;
-  uv_getaddrinfo_t uresolver;
-  //uv_buf_t ubuffer_out; 
-  Buffer buffer_out;
-
+  uv_connect_t connect_req;
+  uv_tcp_t socket;
+  uv_write_t write_req;
+  uv_getaddrinfo_t resolver_req;
 #endif
 };
 
@@ -256,7 +241,7 @@ public:
   HTTP();
   ~HTTP();
   void update();
-  HTTPConnection* testSecure(SSL_CTX* sslContext);
+
   HTTPConnection* sendRequest(
                    HTTPRequest& r
                    ,http_cb_on_read readCB = NULL
@@ -287,21 +272,17 @@ public:
                                 );
 
   //  static void callbackError(bufferevent* bev, short what, void* ctx);
-#ifndef USE_LIBUV
-  static void callbackRead(bufferevent* bev, void* ctx);
-  static void callbackEvent(bufferevent* bev, short events, void* ctx);
-  static void callbackLog(int severity, const char* msg);
-#else 
-  void sendPendingHandshakeData(HTTPConnection* c); // test can be removed if necessary
 
+  void sendPendingHandshakeData(HTTPConnection* c); // test can be removed if necessary
   static uv_buf_t callbackOnAlloc(uv_handle_t* con, size_t size);
   static void callbackOnResolved(uv_getaddrinfo_t* resolver, int status, struct addrinfo* res);
   static void callbackOnConnect(uv_connect_t* con, int status);
   static void callbackOnRead(uv_stream_t* tcp, ssize_t nread, uv_buf_t buf);
   static void callbackOnWritten(uv_write_t* req, int status);
-#endif
-
+  static void callbackSSLMustWriteToSocket(const char* data, size_t len, void* con);
+  static void callbackSSLReadDecryptedData(const char* data, size_t len, void* con);
 private:
+  void writeToSocket(const char* data, size_t len);
   void removeConnection(HTTPConnection* c);
   void removeAllConnections();
 private:
@@ -309,7 +290,7 @@ private:
   event_base* evbase;
   evdns_base* dnsbase;
 #else
-  uv_loop_t* uloop;
+  uv_loop_t* loop;
 #endif
   std::vector<HTTPConnection*> connections;
 };

@@ -26,6 +26,7 @@ set(files
   ${SRC}/twitter/HTTP.cpp 
   ${SRC}/twitter/Twitter.cpp 
   ${SRC}/twitter/Buffer.cpp 
+  ${SRC}/twitter/SSLBuffer.cpp 
   ${SRC}/twitter/PercentEncode.cpp
   ${BASE}/extern/src/formats/hmac_sha1.c
   ${BASE}/extern/src/formats/json.c
@@ -45,8 +46,10 @@ set(libs
 )
 
 add_subdirectory(https)
-add_subdirectory(openssl)
-add_subdirectory(libuv_openssl)
+#add_subdirectory(openssl)
+#add_subdirectory(libuv_openssl1)
+#add_subdirectory(libuv_openssl2)
+#add_subdirectory(libuv_openssl3_cpp)
 
 
 

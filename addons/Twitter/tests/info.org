@@ -1,0 +1,41 @@
+* SSL INFO
+** General SSL info
+*** API
+    - SSL_do_handshake() is almost identical to SSL_connect but you use SSL_connect for a client, SSL_do_handshake can be used for client/server
+    - Once you've started the "flow" by calling SSL_do_handshake, you need to check for data in the BIOs 
+    - Pseude code when receiving data from socket: 
+
+     BIO_write(ssl_read_bio, ...)
+     if(SSL_is_init_finished(ssl)) {
+        SSL_read(); 
+     }
+     else {
+        SSL_connect();
+     } 
+     check_your_buffers();
+
+    - node code, https://github.com/joyent/node/blob/master/src/node_crypto.cc
+    - GOOD CODE: https://github.com/luvit/luvit/blob/master/src/luv_tls_conn.c
+*** renegotiation
+    - How to test if server supports renegotiation: http://scottlinux.com/2011/11/03/how-to-check-for-ssl-renegotiation/
+    - Stackoverflow, auto retry mode: http://stackoverflow.com/questions/11011747/ssl-renegotiation-in-openssl-using-blocking-sockets
+** Links
+    - _*GREAT INFO IN SSL_READ/SSL_WRITE RETURN VALUES*_ : http://stackoverflow.com/questions/3952104/how-to-handle-openssl-ssl-error-want-read-want-write-on-non-blocking-sockets?rq=1
+    - _*ASYNC ARTICLE*_: http://www.serverframework.com/asynchronousevents/2010/10/using-openssl-with-asynchronous-sockets.html
+    - Apache 2 + SSL, overview of SSL (timeline):  http://www.symantec.com/connect/articles/apache-2-ssltls-step-step-part-1
+    - SSL, handshake + memory BIOs flow: http://www.mail-archive.com/openssl-users@openssl.org/msg39512.html
+    - High level description on mem bio: http://stackoverflow.com/questions/4403816/io-completion-ports-and-openssl
+    - SSL 3.0 RFC: http://tools.ietf.org/html/draft-ietf-tls-ssl-version3-00
+    - Nice clean tutorial + flow example: http://www.ee.up.ac.za/main/_media/en/undergrad/subjects/ehn410/ehn410_prac1_guide_2012.pdf
+    - Using openSSL nice clean with code: http://blog.davidwolinsky.com/2009/10/memory-bios-and-openssl.html
+    - Using openSSL in applications: http://zzz.zggg.com/2005/05/05/how-to-programmatically-create-self-signed-cert-key-pair-windows-sspi/
+    - Creating client certificates: http://drumcoder.co.uk/blog/2011/oct/19/client-side-certificates-web-apps/
+    - LibEvent + SSLL http://www.wangafu.net/~nickm/libevent-book/Ref6a_advanced_bufferevents.html
+    - MySQL info, used in example above: http://dev.mysql.com/doc/refman/5.1/en/creating-ssl-certs.html
+    - Client SSL Certs: http://itpro.comptia.org/security_1/b/weblog1/archive/2012/01/06/creating-certificate-authorities-and-client-certificates.aspx
+    - Exmample SSL + libevent https: http://www.provos.org/index.php?/archives/79-OpenSSL-Client-Certificates-and-Libevent-2.0.3-alpha.html
+    - Apache SSL flow: http://httpd.apache.org/docs/2.2/ssl/ssl_intro.html
+    - Certificates for SSL Applications: http://h71000.www7.hp.com/doc/83final/ba554_90007/ch04s02.html
+    - Negotiation is started after calling SSL_write(): http://stackoverflow.com/questions/3855413/validating-openssl-connections-when-using-transparent-negotiation?rq=1
+
+      

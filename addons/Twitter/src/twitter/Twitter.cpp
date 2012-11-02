@@ -124,31 +124,28 @@ void Twitter::exchangeRequestTokenForAccessToken(
 }
 
 void Twitter::makeAPICall(const std::string endpoint, HTTPParameters params, std::string host, bool secure) {
-  int test = 1; // 0 = no test, 1 = secure test, 2 = normal http test
-
-
+  int test = 2; // 0 = no test, 1 = secure test, 2 = test with gist server, 3 = normal http test
   auth.reset();
-  
   HTTPRequest req;
-  //req.setURL(HTTPURL("http", "test.localhost", "/"));
-  //req.setURL(HTTPURL((secure) ? "https" : "http", "gist.github.com", "/"));
+
   if(test == 0) {
     req.setURL(HTTPURL((secure) ? "https" : "http", host, endpoint));
     req.setMethod(REQUEST_POST);
   } 
   else if(test == 1) {
     secure = true;
-    printf("TO GIST\n");
-    //    req.setURL(HTTPURL("https", host, endpoint));
+    req.setURL(HTTPURL("https", "test.localhost", "/chunked.php"));
+    req.setMethod(REQUEST_GET);
+  }
+  else if(test == 2) {
+    secure = true;
     req.setURL(HTTPURL("https", "gist.github.com", "/"));
-    req.setMethod(REQUEST_POST);
+    req.setMethod(REQUEST_GET);
   }
    
   req.addHeader(HTTPHeader("User-Agent", "twitter-client/1.0"));
   req.addHeader(HTTPHeader("Accept", "*/*"));
   req.copyContentParameters(params);
-
-  //req.setMethod(REQUEST_GET);
   req.setVersion(HTTP11);
   auth.addAuthorizationHeadersToRequest(req);
   HTTPConnection* c = NULL;

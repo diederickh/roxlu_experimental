@@ -25,6 +25,7 @@ extern "C" {
 #include <twitter/Buffer.h>
 #include <twitter/OAuth.h>
 #include <twitter/Types.h>
+#include <twitter/SSLBuffer.h>
 
 class Twitter;
 
