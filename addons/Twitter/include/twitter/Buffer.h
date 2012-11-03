@@ -5,6 +5,8 @@
 #include <vector>
 #include <iterator>
 #include <algorithm>
+namespace roxlu { 
+  namespace twitter {
 
 class Buffer {
 public:
@@ -49,5 +51,6 @@ inline size_t Buffer::findNextByte(size_t start, char byte) {
   }
   return vpos;
 }
-
+  } // roxlu
+} // twitter
 #endif

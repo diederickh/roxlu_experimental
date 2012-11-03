@@ -7,6 +7,11 @@
 #define ROXLU_WINDOWS 	1
 #define ROXLU_APPLE	2
 
+// Creative libs/GL-helpers, used for e.g. data paths
+#define ROXLU_GLFW 1
+#define ROXLU_OPENFRAMEWORKS 2
+#define ROXLU_CINDER 3
+
 // Detect system
 #ifdef _MSC_VER  
 	#define ROXLU_PLATFORM	ROXLU_WINDOWS
@@ -29,6 +34,11 @@
 	#include <roxlu/core/platform/windows/WindowsPlatform.h>
 #elif ROXLU_PLATFORM == ROXLU_APPLE || ROXLU_PLATFORM == ROXLU_IOS
 	#include <roxlu/core/platform/osx/OSXPlatform.h>
+#endif
+
+// Set creative lib specifics
+#ifndef ROXLU_GL_WRAPPER
+#define ROXLU_GL_WRAPPER ROXLU_OPENFRAMEWORKS
 #endif
 
 

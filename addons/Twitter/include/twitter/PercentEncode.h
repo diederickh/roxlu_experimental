@@ -4,7 +4,8 @@
 #include <iostream>
 #include <string>
 #include <ctype.h>
-
+namespace roxlu {
+  namespace twitter {
 class PercentEncode {
 public:
   PercentEncode();
@@ -12,5 +13,6 @@ public:
 private:
   char rfc3986[256];
 };
-
+  } // roxlu
+} // twitter
 #endif

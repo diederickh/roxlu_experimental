@@ -1,0 +1,4 @@
+* Compile mongo C driver
+ - clone https://github.com/mongodb/mongo-c-driver
+ - user revision: aee9ff2778d39a86fcca70e09752ea45d44c1e68
+ - compile with -DMONGO_USE_LONG_LONG_INT
