@@ -10,12 +10,3 @@ if [ "$1" = "ssl" ] ; then
     make
     make install
 fi
-
-if [ "$1" = "libevent" ] ; then 
-    cd libevent
-    export CFLAGS="-Os -m32 -I${d}/build/include/"
-    export LDFLAGS="-m32 -L${d}/build/lib/"
-    ./configure --prefix=${d}/build
-    make
-    make install
-fi

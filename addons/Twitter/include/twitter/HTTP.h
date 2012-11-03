@@ -187,13 +187,13 @@ inline HTTPParameters HTTPRequest::getQueryStringParameters() {
   return querystring;
 }
 
-#ifdef USE_OPENSSL
 // SSL STATES
+/*
 enum HTTPOpenSSLState {
   SS_CONNECT_1 // connection just started (used while testing should be removed)
   ,SS_CONNECT_2 // used while testing, should be removed
 };
-#endif
+*/
 
 // HTTP CALLBACKS
 struct HTTPConnection;
@@ -220,10 +220,10 @@ struct HTTPConnection {
   void* close_callback_data;
   void* error_callback_data;
   //void* read_callback_data;
-#ifdef USE_OPENSSL
+
   SSL* ssl;
   SSLBuffer ssl_buffer;
-#endif
+
   uv_connect_t connect_req;
   uv_tcp_t socket;
   uv_write_t write_req;

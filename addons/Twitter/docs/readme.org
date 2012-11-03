@@ -1,0 +1,38 @@
+* Twitter
+  Standalone minimal twitter library for C++ using the fast libuv library and openssl. 
+  This library only has two dependencies for which static libraries are included.
+  - OpenSSL 1.01
+  - libuv, hash: 149b16f1232d8fdcf5436534d6ade6f9877e1b8f 
+
+** How to use this library
+
+*** Step 1: Create a SSL private key
+    - First you need to create a private key for SSL, follow these steps (self signed certificate):
+    1. Create a key for the Certificate Authority certificate (CA-certificate)
+      $ openssl genrsa 2048 > ca-key.pem 
+
+    2. Create a certificate with this key, you can leave all fields empty (just press enter) (nodes = no password):
+      $ openssl req -new -x509 -nodes -days 36000 -key ca-key.pem -out ca-cert.pem
+
+    3. Create client certificate, remove passphrase and sign it with the CA certificate
+      $ openssl req -newkey rsa:2048 -days 36000 -nodes -keyout client-key.pem -out client-req.pem
+      $ openssl rsa -in client-key.pem -out client-key.pem
+      $ openssl x509 -req -in client-req.pem -days 36000 -CA ca-cert.pem -CAkey ca-key.pem -set_serial 01 -out client-cert.pem
+
+    _You now have the following files_
+    - client-cert.pem = public key
+    - client-key.pem = private key
+
+*** Step 2: Get a access token:
+    - See the example application: examples/twitter_get_tokens/ 
+    - Make sure you've created a ssl key and use this in you application 
+    - When you have received the tokens you should save them somewhere on disk
+      and use them in your application.
+
+*** Step 3: Use your access tokens to make API calls
+    - Once you've got an access token you can start using the library and 
+      make API calls. You can see two example API calls in the Twitter class, see
+      apiStatusesUpdate() and apiStatusesFilter()
+    - This library does not parse the API responses
+
+

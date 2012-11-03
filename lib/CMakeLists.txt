@@ -1,8 +1,10 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
+option(ROXLU_32BIT "Build 32bit version" ON)
 
-set(roxlu_base_dir ${CMAKE_CURRENT_SOURCE_DIR}/)
-set(roxlu_src_dir ${roxlu_base_dir}src/roxlu/)
-set(roxlu_include_dir ${roxlu_base_dir}include/)
+set(roxlu_base_dir ${CMAKE_CURRENT_LIST_DIR}/../)
+set(roxlu_src_dir ${roxlu_base_dir}lib/src/roxlu/)
+set(roxlu_include_dir ${roxlu_base_dir}lib/include/)
+set(roxlu_addons_dir ${roxlu_base_dir}/addons/)
 
 # get roxlu sources
 file(GLOB_RECURSE roxlu_3d_sources ${roxlu_src_dir}/3d/*.cpp)
@@ -31,5 +33,17 @@ set(roxlu_include_dirs
 include_directories(${roxlu_include_dirs})
 
 # make static library
-add_library(roxlu STATIC ${roxlu_source_files})
+# add_library(roxlu STATIC ${roxlu_source_files})
 
+# global variables that can be used by addons
+if(ROXLU_32BIT)
+  set(roxlu_bits "32")
+endif(ROXLU_32BIT)
+
+if(${APPLE})
+  set(roxlu_platform "mac") 
+endif(${APPLE})
+
+if(ROXLU_32BIT)
+  set(CMAKE_OSX_ARCHITECTURES "i386")
+endif(ROXLU_32BIT)

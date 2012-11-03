@@ -9,6 +9,12 @@ Twitter::Twitter()
   ,access_token_received_callback_data(NULL)
   ,ssl_ctx(NULL)
 {
+  RAND_poll(); 
+  SSL_library_init();
+  SSL_load_error_strings();
+  ssl_ctx = SSL_CTX_new(SSLv23_client_method());
+  SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_SSLv2);
+  SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, Twitter::verifySSLCallback);
 }
 
 Twitter::~Twitter() {
@@ -180,8 +186,17 @@ void Twitter::update() {
   http.update();
 }
 
-void Twitter::setSSLContext(SSL_CTX* ctx) {
-  ssl_ctx = ctx;
+
+int Twitter::verifySSLCallback(int ok, X509_STORE_CTX* store) {
+  return 1; 
+}
+
+void Twitter::setSSLPrivateKey(const char* filepath) {
+  int rc = SSL_CTX_use_PrivateKey_file(ssl_ctx, filepath, SSL_FILETYPE_PEM);
+  if(!rc) {
+    printf("ERROR: Could not load client key file.\n");
+    ::exit(1);
+  }
 }
 
 // API SPECIFIC PARAMETER TYPES

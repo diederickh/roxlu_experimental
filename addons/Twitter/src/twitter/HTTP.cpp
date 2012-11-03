@@ -498,10 +498,8 @@ void HTTP::callbackOnRead(uv_stream_t* tcp, ssize_t nread, uv_buf_t buf) {
   else {
     HTTPConnection* c = static_cast<HTTPConnection*>(tcp->data);
     if(c->ssl) {
-      printf("add encrypted data");      
       c->ssl_buffer.addEncryptedData(buf.base, nread);
       c->ssl_buffer.update();
-      printf("@todo, does free(buf.base) cause segfaults?\n");
       free(buf.base);
     }
     else {

@@ -8,14 +8,6 @@
 #include <time.h>
 
 extern "C" {
-#ifndef USE_LIBUV
-#include <event2/dns.h>
-#include <event2/event.h>
-#include <event2/bufferevent.h>
-#include <event2/buffer.h>
-#include <event2/listener.h>
-#include <event2/bufferevent_ssl.h>
-#endif
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
@@ -31,15 +23,15 @@ class Twitter;
 
 // TYPES
 // ------
+/*
 enum Twittertates {
   TCS_NONE
   ,TCS_REQUEST_TOKEN_OPEN
   ,TCS_REQUEST_TOKEN_CLOSED
   ,TCS_EXCHANGE_REQUEST_TOKEN_OPEN
   ,TCS_EXCHANGE_REQUEST_TOKEN_CLOSED
-  //  ,TCS_API_REQUEST_OPEN
-  //,TCS_API_REQUEST_CLOSED
 };
+*/
 
 // After exchanging a token request we get this info:
 struct TwitterTokenInfo {
@@ -95,15 +87,16 @@ public:
                                           ,cb_access_token_received accessCB
                                           ,void* data
                                           ); 
+  void setSSLPrivateKey(const char* filepath);
   void update();
   void makeAPICall(TwitterCallParams& p);
   void apiStatusesFilter(const TwitterStatusesFilter& param, cb_request_read_body bodyCB = NULL, void* bodyData = NULL);
   void apiStatusesUpdate(const TwitterStatusesUpdate& param, cb_request_read_body bodyCB = NULL, void* bodyData = NULL);
-  void setSSLContext(SSL_CTX* ctx);
 private:
   bool hasConsumerKeyAndSecret();
   static void requestTokenCallback(const char* data, size_t len, void* twitter);
   static void exchangeRequestTokenForAccessTokenCallback(const char* data, size_t len, void* twitter);
+  static int verifySSLCallback(int ok, X509_STORE_CTX* store);
 private:
   cb_request_token_received request_token_received_callback;
   cb_access_token_received access_token_received_callback;

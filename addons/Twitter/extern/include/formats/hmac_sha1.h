@@ -48,11 +48,7 @@
  * Or you can use Steve Reid's public domain SHA1 implementation:
  */
 
-#ifdef USE_OPENSSL
 #include <openssl/sha.h>
-#else
-#include <formats/sha.h>
-#endif
 
 #ifdef  __cplusplus
 extern "C" {
