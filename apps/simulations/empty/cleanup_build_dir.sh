@@ -5,4 +5,4 @@ fi
 
 cd build 
 rm -rf *
-rm -rf .*
+

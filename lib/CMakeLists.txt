@@ -1,3 +1,9 @@
+# There are a couple of global variables that can be used in 
+# addon or simulatin/example CMakelists.txt files:
+# - roxlu_addon_sources (addons should append their sources to this list, see Twitter addon)
+# - roxlu_addon_libs (addons should append their libs to this list, see Twitter addon)
+# - roxlu_linker_flags (frameworks, libs, etc.. which must be linked with for your application, see simulation cmake files)
+
 cmake_minimum_required(VERSION 2.8)
 option(ROXLU_32BIT "Build 32bit version" ON)
 
@@ -15,7 +21,7 @@ file(GLOB_RECURSE roxlu_io_sources ${roxlu_src_dir}/io/*.cpp)
 file(GLOB_RECURSE roxlu_math_sources ${roxlu_src_dir}/math/*.cpp)
 file(GLOB_RECURSE roxlu_opengl_sources ${roxlu_src_dir}/opengl/*.cpp)
 
-set(roxlu_source_files 
+set(roxlu_sources
   ${roxlu_3d_sources}
   ${roxlu_core_sources}
   ${roxlu_experimental_sources}
@@ -27,13 +33,11 @@ set(roxlu_source_files
 
 # get roxlu include dir
 set(roxlu_include_dirs 
+  ${roxlu_include_dirs}
   ${roxlu_include_dir}
 )
 
 include_directories(${roxlu_include_dirs})
-
-# make static library
-# add_library(roxlu STATIC ${roxlu_source_files})
 
 # global variables that can be used by addons
 if(ROXLU_32BIT)
@@ -47,3 +51,6 @@ endif(${APPLE})
 if(ROXLU_32BIT)
   set(CMAKE_OSX_ARCHITECTURES "i386")
 endif(ROXLU_32BIT)
+
+
+

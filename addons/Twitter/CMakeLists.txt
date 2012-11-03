@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 include(${CMAKE_CURRENT_LIST_DIR}/../../lib/CMakeLists.txt)
 
-set(CMAKE_EXE_LINKER_FLAGS "-framework CoreFoundation -framework CoreServices")
+set(roxlu_linker_flags ${roxlu_linker_flags} " -framework CoreFoundation -framework CoreServices ")
 
 set(twitter_base_dir ${CMAKE_CURRENT_LIST_DIR})
 set(twitter_src_dir ${twitter_base_dir}/src)

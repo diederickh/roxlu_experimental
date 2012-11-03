@@ -1,34 +1,33 @@
-cmake_minimum_required(VERSION 2.6)
+# buttons addon cmakelists.txt
+cmake_minimum_required(VERSION 2.8)
 
-# roxlu dirs
-set(roxlu_base_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../lib/)
-message(${roxlu_base_dir})
-set(roxlu_src_dir ${roxlu_base_dir}src/roxlu/)
-set(roxlu_include_dir ${roxlu_base_dir}include/)
+include(${CMAKE_CURRENT_LIST_DIR}/../../lib/CMakeLists.txt) # roxlu cmake
 
-# addon dirs
-set(addon_src_dir ${CMAKE_CURRENT_SOURCE_DIR}/src/)
-set(addon_include_dir ${CMAKE_CURRENT_SOURCE_DIR}/include/})
+set(buttons_base_dir ${CMAKE_CURRENT_LIST_DIR})
+set(buttons_include_dir ${buttons_base_dir}/include)
+set(buttons_src_dir ${buttons_base_dir}/src)
 
-# get addon sources
-file(GLOB_RECURSE addon_sources ${addon_src_dir}/*.cpp)
 
-set(addon_source_files 
-  ${addon_sources}
+file(GLOB_RECURSE buttons_source_files ${buttons_src_dir}/*.cpp)
+
+set(roxlu_addon_sources
+  ${roxlu_addon_sources}
+  ${buttons_addon_sources}
 )
 
-# get roxlu include dir
 set(roxlu_include_dirs 
-  ${roxlu_include_dir}
+  ${roxlu_include_dirs}
+  ${buttons_include_dir}
 )
 
 include_directories(
-  ${roxlu_include_dirs}
-  ${addon_include_dir}
+  ${buttons_include_dir}
 )
 
-get_filename_component(addon_name ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+set(roxlu_addon_libs
+  ${roxlu_addon_libs}
+  buttons  #important to add your lib to the rest of the include libs
+)
 
-# make static library
-add_library(${addon_name} STATIC ${addon_source_files})
+add_library(buttons STATIC ${buttons_source_files})
 
