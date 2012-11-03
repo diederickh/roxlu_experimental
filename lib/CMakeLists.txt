@@ -5,7 +5,9 @@
 # - roxlu_linker_flags (frameworks, libs, etc.. which must be linked with for your application, see simulation cmake files)
 
 cmake_minimum_required(VERSION 2.8)
-option(ROXLU_32BIT "Build 32bit version" ON)
+
+option(ROXLU_32BIT "Build 32bit version" OFF)
+option(ROXLU_64BIT "Build 64bit version" ON)
 
 set(roxlu_base_dir ${CMAKE_CURRENT_LIST_DIR}/../)
 set(roxlu_src_dir ${roxlu_base_dir}lib/src/roxlu/)
@@ -44,13 +46,25 @@ if(ROXLU_32BIT)
   set(roxlu_bits "32")
 endif(ROXLU_32BIT)
 
-if(${APPLE})
+if(ROXLU_64BIT)
+  set(roxlu_bits "64")
+endif(ROXLU_64BIT)
+
+if(APPLE)
   set(roxlu_platform "mac") 
-endif(${APPLE})
+endif(APPLE)
+
+if(UNIX)
+  set(roxlu_platform "linux")
+endif(UNIX)
 
 if(ROXLU_32BIT)
   set(CMAKE_OSX_ARCHITECTURES "i386")
 endif(ROXLU_32BIT)
+
+if(ROXLU_64BIT)
+  set(CMAKE_OSX_ARCHITECTURES "x86_64")
+endif(ROXLU_64BIT)
 
 
 

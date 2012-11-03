@@ -4,15 +4,18 @@
 #include <iostream>
 #include <string>
 #include <ctype.h>
+#include <stdio.h>
+#include <string.h>
+
 namespace roxlu {
   namespace twitter {
-class PercentEncode {
-public:
-  PercentEncode();
-  std::string encode(std::string input);
-private:
-  char rfc3986[256];
-};
+    class PercentEncode {
+    public:
+      PercentEncode();
+      std::string encode(std::string input);
+    private:
+      char rfc3986[256];
+    };
   } // roxlu
 } // twitter
 #endif

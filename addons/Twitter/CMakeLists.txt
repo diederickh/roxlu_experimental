@@ -3,11 +3,13 @@ cmake_minimum_required(VERSION 2.8)
 
 include(${CMAKE_CURRENT_LIST_DIR}/../../lib/CMakeLists.txt)
 
+if(APPLE)
 set(roxlu_linker_flags 
-  ${roxlu_linker_flags} 
-  " -framework CoreFoundation -framework CoreServices "
-)
-message(${roxlu_linker_flags})
+   ${roxlu_linker_flags} 
+   " -framework CoreFoundation -framework CoreServices "
+)	    
+endif(APPLE)
+
 set(twitter_base_dir ${CMAKE_CURRENT_LIST_DIR})
 set(twitter_src_dir ${twitter_base_dir}/src)
 set(twitter_include_dir ${twitter_base_dir}/include)
@@ -38,12 +40,14 @@ set(roxlu_addon_sources
 )
 
 set(twitter_libs
-  ${twitter_lib_dir}/libevent.a
-  ${twitter_lib_dir}/libevent_openssl.a
   ${twitter_lib_dir}/libssl.a
   ${twitter_lib_dir}/libcrypto.a
   ${twitter_lib_dir}/libuv.a
 )
+
+if(UNIX) 
+  set(twitter_libs ${twitter_libs}  dl pthread rt)
+endif(UNIX)
 
 set(roxlu_addon_libs
   ${roxlu_addon_libs}

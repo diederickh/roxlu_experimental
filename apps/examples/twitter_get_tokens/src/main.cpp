@@ -1,8 +1,9 @@
 #include <iostream>
 #include <twitter/Twitter.h>
+#include <unistd.h>
 
 // Our callbacks
-void on_access_token_received_callback(TwitterTokenInfo info, void* data);
+void on_access_token_received_callback(roxlu::twitter::TwitterTokenInfo info, void* data);
 void on_request_token_callback(std::string token, std::string tokenSecret, std::string redirectURL, void* data);
 
 int main() {
@@ -16,7 +17,7 @@ int main() {
   sprintf(key_file, "%s/%s", dir, "data/client-key.pem");
 
   // Get a request-token, then exchange this token for a aouth token (see callback);
-  Twitter tw;
+  roxlu::twitter::Twitter tw;
   tw.setConsumer("q8mQUYq7AEjGX4qD8lxSKw"); // Get this from your apps settings
   tw.setConsumerSecret("Uy3toRg4OXZqwuNTk9HYTaQLX977DenO0FG8rT5v6A"); // Get this from your apps settings
   tw.requestToken(on_request_token_callback, &tw);
@@ -30,7 +31,7 @@ int main() {
 
 // When we received the request-token, we can exchange this for a real token.
 void on_request_token_callback(std::string token, std::string tokenSecret, std::string redirectURL, void* data) {
-  Twitter* t = static_cast<Twitter*>(data);
+  roxlu::twitter::Twitter* t = static_cast<roxlu::twitter::Twitter*>(data);
   printf("Request token: %s, token_secret: %s\n", token.c_str(), tokenSecret.c_str());
   std::string pin;
   printf("Open this URL: %s\npin:", redirectURL.c_str());
@@ -42,7 +43,7 @@ void on_request_token_callback(std::string token, std::string tokenSecret, std::
 
 // This is called when we exchanged the request-token for access token. Make sure to save this values
 // somewhere on disk and use them for 'setToken()' and 'setTokenSecret'
-void on_access_token_received_callback(TwitterTokenInfo info, void* data) {
+void on_access_token_received_callback(roxlu::twitter::TwitterTokenInfo info, void* data) {
   printf("Store the following token and secret somewhere safe:\n");
   printf("\n+++++++++++++++++++++++++++++++++++++++++++++++++\n");
   printf("OAuth token: %s\n", info.oauth_token.c_str());

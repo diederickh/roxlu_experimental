@@ -341,8 +341,9 @@ namespace roxlu {
   
       HTTPConnection* c = newConnection(readCB, readData, closeCB, closeData, errorCB, errorData);
       c->addToOutputBuffer(r.makeRequestString());
-      connections.push_back(c);
 
+      connections.push_back(c);
+      
       struct addrinfo hints;
       hints.ai_family = AF_INET;
       hints.ai_socktype = SOCK_STREAM;
