@@ -5,6 +5,7 @@
 #include <roxlu/math/Vec2.h>
 #include <iterator>
 #include <vector>
+#include <cstring> // memcpy
 										//((x>=i)   && (x <=(i +w)) && (y >= j) && y <= (j+h))
 #define BMOUSE_INSIDE(mx,my,ex,ey,w,h) 	(mx>=ex && mx<=(ex+w) && my >= ey && my <= (ey+h))
 #define BINSIDE_ELEMENT(ptr, mx, my)  BMOUSE_INSIDE(mx, my, ptr->x, ptr->y, ptr->w, ptr->h)

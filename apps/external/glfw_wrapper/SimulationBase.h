@@ -1,5 +1,5 @@
 #include <iostream>
-#include <GL/glfw.h>
+#include <GL/glfw3.h>
 
 class SimulationBase {
 public:

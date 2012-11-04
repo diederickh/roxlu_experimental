@@ -1,7 +1,7 @@
 #ifndef ROXLU_THREADH
 #define ROXLU_THREADH
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__linux__)
 #include <pthread.h>
 #elif _WIN32
 #include <Windows.h>
@@ -11,7 +11,7 @@ namespace roxlu {
 
 class Thread;
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__linux__)
 
 struct Mutex {
 	Mutex();
@@ -21,8 +21,8 @@ struct Mutex {
 
 	pthread_mutex_t handle;
 };
-#elif _WIN32
 
+#elif _WIN32
 
 struct Mutex {
 	Mutex();
@@ -45,7 +45,7 @@ public:
 	Thread();
 	~Thread();
 	void create(Runnable& run);
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__linux__)
 	static void* threadFunction(void* arg);
 	pthread_t handle;
 #elif _WIN32

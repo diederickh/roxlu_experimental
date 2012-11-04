@@ -1,5 +1,5 @@
 #include <buttons/Panel.h>
-#include <Buttons/Buttons.h>
+#include <buttons/Buttons.h>
 #include <algorithm>
 
 namespace buttons {
@@ -12,7 +12,6 @@ struct ButtonsFindByName {
 	}
 	string n;
 };
-
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++	
 

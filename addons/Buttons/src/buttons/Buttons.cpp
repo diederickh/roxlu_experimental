@@ -38,7 +38,6 @@ Buttons::Buttons(const string& title, int w)
 {
 
 	if(!shaders_initialized) {
-		printf("CREATING BUTTONS, CHECK IF THIS IS EXECUTED ONLY ONCE.\n");
 		vao.create();
 		bmf = new BitmapFont();
 		gui_shader.create(BUTTONS_VS, BUTTONS_FS);

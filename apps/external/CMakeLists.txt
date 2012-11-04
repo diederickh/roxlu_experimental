@@ -12,8 +12,8 @@ if(APPLE)
 endif(APPLE)
 
 
-
-add_definitions("-DROXLU_GL_WRAPPER=1")
+# 1 = GLFW, 2 = OPENFRAMEWORKS, 3 = CINDER, 4 = COCOA
+add_definitions("-DROXLU_GL_WRAPPER=1") 
 
 set(glfw_base_dir ${CMAKE_CURRENT_LIST_DIR}/)
 set(glfw_include_dir ${glfw_base_dir}/glfw/include/)

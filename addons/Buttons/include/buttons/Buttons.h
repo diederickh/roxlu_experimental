@@ -38,11 +38,10 @@ obecause this makes testing for mouseenter/leave (etc) faster.
 
 #include <vector>
 
-//#include "ofMain.h" // @todo remove, needed in c'tor for ofGetWidth()/ofGetHeight()
-
 #include <roxlu/opengl/Shader.h>
 #include <roxlu/experimental/BitmapFont.h>
 #include <roxlu/experimental/Text.h>
+#include <roxlu/opengl/OpenGLInit.h>
 #include <roxlu/opengl/VAO.h>
 #include <roxlu/opengl/Error.h>
 #include <roxlu/graphics/Color.h>

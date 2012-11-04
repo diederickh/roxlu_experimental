@@ -11,6 +11,8 @@
 #include <mach-o/dyld.h>
 #elif ROXLU_PLATFORM == ROXLU_WINDOWS
 #include <windows.h>
+#elif ROXLU_PLATFORM == ROXLU_LINUX
+#include <unistd.h> // getcwd
 #endif
 
 using std::string;

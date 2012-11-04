@@ -3,12 +3,8 @@
 
 #include <iostream>
 #include <iomanip>
-
-/*
-#include "Vec3.h"
-#include "Vec4.h"
-*/
-
+#include <cstring> // memcpy
+#include <stdio.h>
 #include <roxlu/math/Vec4.h>
 #include <roxlu/math/Vec3.h>
 
