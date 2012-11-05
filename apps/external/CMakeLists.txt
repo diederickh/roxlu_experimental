@@ -19,7 +19,19 @@ set(glfw_base_dir ${CMAKE_CURRENT_LIST_DIR}/)
 set(glfw_include_dir ${glfw_base_dir}/glfw/include/)
 set(glfw_lib_dir ${glfw_base_dir}/glfw/lib/${roxlu_platform}/${roxlu_bits})
 set(glfw_wrapper_sources ${glfw_base_dir}/glfw_wrapper/SimulationBase.cpp)
-set(glfw_libs ${glfw_lib_dir}/libglfw3.a)
+set(glfw_libs 
+  ${glfw_lib_dir}/libglfw3.a
+
+)
+
+if(UNIX) 
+set(glfw_libs
+  ${glfw_libs}
+  GL
+  X11
+  Xxf86vm
+)
+endif(UNIX)
 
 set(roxlu_include_dirs
   ${roxlu_include_dirs}

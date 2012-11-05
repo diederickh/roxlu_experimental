@@ -7,6 +7,7 @@ SimulationBase::SimulationBase()
   ,prev_mouse_x(0)
   ,prev_mouse_y(0)
   ,pressed_mouse_button(0)
+  ,window(NULL)
 {
 }
 
@@ -38,7 +39,7 @@ void SimulationBase::onKeyUp(char key) {
 }
 
 void SimulationBase::setWindowTitle(const char* title) {
-  glfwSetWindowTitle(title);
+  glfwSetWindowTitle(*window, title);
 }
 
 void SimulationBase::onWindowResize(int w, int h) {

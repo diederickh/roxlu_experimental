@@ -4,7 +4,7 @@
 // Based on: http://robertpenner.com/easing/penner_easing_as2.zip
 #include <iostream>
 #include <math.h>
-
+#include <stdio.h>
 #include <roxlu/core/platform/Platform.h>
 #include <roxlu/experimental/Timer.h>
 

@@ -2,6 +2,8 @@
 #define ROXLU_IO_RINGBUFFERH
 
 #include <cstddef>
+#include <stdio.h>
+#include <cstring>
 
 class RingBuffer {
 public:

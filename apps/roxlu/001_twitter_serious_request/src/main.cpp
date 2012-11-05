@@ -5,13 +5,14 @@ Simulation* sim_ptr;
 
 // CALLBACKS
 // ---------
-static void GLFWCALL window_size_callback(int w, int h);
-int  GLFWCALL window_close_callback();
-void GLFWCALL mouse_button_callback(int button, int action);
-void GLFWCALL mouse_position_callback(int x, int y);
-void GLFWCALL mouse_wheel_callback(int position);
-void GLFWCALL key_callback(int key, int action);
-void GLFWCALL char_callback(int chr, int action);
+void window_size_callback(GLFWwindow window, int w, int h);
+int window_close_callback(GLFWwindow window);
+void mouse_button_callback(GLFWwindow window, int button, int action);
+void cursor_callback(GLFWwindow window, int x, int y);
+void scroll_callback(GLFWwindow window, double x, double y);
+void key_callback(GLFWwindow window, int key, int action);
+void error_callback(int err, const char* msg);
+//void char_callback(GLFWwindow window, int chr, int action);
 
 
 // APPLICATION ENTRY
@@ -23,27 +24,35 @@ int main() {
 
 
   // init
-  glfwInit();
-
-  glfwOpenWindowHint(GLFW_FSAA_SAMPLES, 4); // anti aliasing
-  glfwOpenWindowHint(GLFW_REFRESH_RATE, 0); // 0 = system default
-
-
-  if(!glfwOpenWindow(width, height, 8, 8, 8, 8,32,8, GLFW_WINDOW)) {
-    glfwTerminate();
+  glfwSetErrorCallback(error_callback);
+  if(!glfwInit()) {
+    printf("ERROR: cannot initialize GLFW.\n");
     exit(EXIT_FAILURE);
   }
 
-  glfwSetWindowSizeCallback(window_size_callback);
-  glfwSetWindowCloseCallback(window_close_callback);
-  glfwSetMouseButtonCallback(mouse_button_callback);
-  glfwSetMousePosCallback(mouse_position_callback);
-  glfwSetMouseWheelCallback(mouse_wheel_callback);
-  glfwSetKeyCallback(key_callback);
-  glfwSetCharCallback(char_callback);
+  //glfwOpenWindowHint(GLFW_FSAA_SAMPLES, 4); // anti aliasing
+  //glfwOpenWindowHint(GLFW_REFRESH_RATE, 0); // 0 = system default
+
+
+  //if(!glfwOpenWindow(width, height, 8, 8, 8, 8,32,8, GLFW_WINDOW)) {
+  GLFWwindow window = glfwCreateWindow(width, height, GLFW_WINDOWED, "Simulation", NULL);
+  if(!window) {
+    printf("ERROR: cannot open window.\n");
+    exit(EXIT_FAILURE);
+  }
+  
+  glfwSetWindowSizeCallback(window, window_size_callback);
+  glfwSetWindowCloseCallback(window, window_close_callback);
+  glfwSetMouseButtonCallback(window, mouse_button_callback);
+  glfwSetCursorPosCallback(window, cursor_callback);
+  glfwSetScrollCallback(window, scroll_callback);
+  glfwSetKeyCallback(window, key_callback);
+  //glfwSetCharCallback(window, char_callback);
+
 
   Simulation sim;
   sim_ptr = &sim;
+  sim.window = &window;
   sim.setup();
   
   bool running = true;
@@ -53,8 +62,8 @@ int main() {
     sim.update();
     sim.draw();
 
-    glfwSwapBuffers();
-    running = !(glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED));
+    glfwSwapBuffers(window);
+    running = !(glfwGetKey(window, GLFW_KEY_ESC));
   }
   
   glfwTerminate();
@@ -63,20 +72,20 @@ int main() {
 
 // CALLBACK DEFS
 // --------------
-void GLFWCALL window_size_callback(int w, int h) {
+void window_size_callback(GLFWwindow window, int w, int h) {
   if(sim_ptr) {
     sim_ptr->onWindowResize(w,h);
   }
 }
 
-int GLFWCALL window_close_callback() {
+int window_close_callback(GLFWwindow window) {
   if(sim_ptr) {
     sim_ptr->onWindowClose();
   }
-  return 1;
+  return GL_TRUE;
 }
 
-void GLFWCALL mouse_button_callback(int button, int action) {
+void mouse_button_callback(GLFWwindow window, int button, int action) {
   if(!sim_ptr) {
     return;
   }
@@ -88,7 +97,7 @@ void GLFWCALL mouse_button_callback(int button, int action) {
   }
 }
 
-void GLFWCALL mouse_position_callback(int x, int y) {
+void cursor_callback(GLFWwindow window, int x, int y) {
   if(!sim_ptr) {
     return;
   }
@@ -99,20 +108,32 @@ void GLFWCALL mouse_position_callback(int x, int y) {
   sim_ptr->onMouseMove(x,y);
 }
 
-void GLFWCALL mouse_wheel_callback(int position) {
+void scroll_callback(GLFWwindow window, double x, double y) {
   if(!sim_ptr) {
     return;
   }
 
 }
 
-void GLFWCALL key_callback(int key, int action) {
+void key_callback(GLFWwindow window, int key, int action) {
   if(!sim_ptr) {
     return;
   }
+  if(action == GLFW_PRESS) {
+    sim_ptr->onKeyDown(key);
+  }
+  else {
+    sim_ptr->onKeyUp(key);
+  }
+
 }
 
-void GLFWCALL char_callback(int chr, int action) {
+void error_callback(int err, const char* msg) {
+  printf("ERROR: %s, %d\n", msg, err);
+}
+
+/*
+void char_callback(GLFWwindow window, int chr, int action) {
   if(!sim_ptr) {
     return;
   }
@@ -123,3 +144,4 @@ void GLFWCALL char_callback(int chr, int action) {
     sim_ptr->onKeyUp(chr);
   }
 }
+*/

@@ -75,7 +75,7 @@ Socket::Socket(int socketType, int socketProto)
 	else {
 		create();
 	}
-#elif __APPLE__
+#elif defined(__APPLE__) || defined(__linux__) 
 	create();
 #endif
 }
@@ -94,8 +94,7 @@ bool Socket::create() {
 	}
 	// When the socket is closed and reopened, we need to reset state.
 	setBlocking(is_blocking);
-	
-#elif __APPLE__
+#elif defined(__APPLE__) || defined(__linux__) 	
 	sock = socket(AF_INET, socket_type, socket_proto); 
 	if(sock == -1) {
 		printf("Error: cannot create socket.\n");
@@ -112,7 +111,7 @@ bool Socket::isValid() {
 	socklen_t len = sizeof(so_type);
 #ifdef _WIN32
 	int ret = getsockopt(sock, SOL_SOCKET, SO_TYPE, (char*)&so_type, &len);
-#elif __APPLE__
+#elif defined(__APPLE__) || defined(__linux__) 
 	int ret = getsockopt(sock, SOL_SOCKET, SO_TYPE, (void*)&so_type, &len);
 #endif
 
@@ -139,7 +138,7 @@ bool Socket::isValid() {
  */
 bool Socket::bind(const char* ip, unsigned short int port) {
 #ifdef _WIN32
-#elif __APPLE__
+#elif defined(__APPLE__) || defined(__linux__) 
 	if(!isValid()) {
 		if(!create()) {
 			printf("Error: cannot create valid socket to bind.\n");
@@ -169,7 +168,7 @@ bool Socket::bind(const char* ip, unsigned short int port) {
 
 bool Socket::listen(int maxQueue) {
 #ifdef _WIN32
-#elif __APPLE__
+#elif defined(__APPLE__) || defined(__linux__) 
 	int result = ::listen(sock, maxQueue);
 	if(result == -1) {
 		printf("Error: cannot start to listen.\n");
@@ -182,7 +181,7 @@ bool Socket::listen(int maxQueue) {
 
 bool Socket::accept(Socket& client) {
 #ifdef _WIN32
-#elif __APPLE__
+#elif defined(__APPLE__) || defined(__linux__) 
 	Socket client_sock;
 	memset(&client.addr_in, 0, sizeof(client.addr_in));
 	socklen_t len = sizeof(client.addr_in);
@@ -283,7 +282,7 @@ bool Socket::connect(const char* ip, unsigned short int port, int timeout) {
 		}
 	}
 
-#elif __APPLE__
+#elif defined(__APPLE__) || defined(__linux__) 
 	if(!isValid()) {
 		if(!create()) {
 			printf("Error: cannot create a valid socket.\n");
@@ -461,7 +460,7 @@ int Socket::read(char* buf, int count, int timeout) {
 		}
 	}
 	
-#elif __APPLE__
+#elif defined(__APPLE__) || defined(__linux__) 
 
 	if(timeout > 0) {
 		fd_set fdset;
@@ -516,7 +515,7 @@ int Socket::read(char* buf, int count, int timeout) {
 int Socket::receiveFrom(Socket& client, char* buffer, size_t len) {
 #ifdef _WIN32
 
-#elif __APPLE__
+#elif defined(__APPLE__) || defined(__linux__) 
 	int addr_len = sizeof(client.addr_in);
 	int result = recvfrom(sock, buffer, len, 0, (struct sockaddr*)&client.addr_in, (socklen_t*)&addr_len);
 	printf("Result: %d\n", result);
@@ -536,7 +535,7 @@ int Socket::receiveFrom(Socket& client, char* buffer, size_t len) {
 int Socket::sendTo(Socket& client, const char* buffer, size_t size) {
 #ifdef _WIN32
 #error "sendTo not implemented yet.\n";
-#elif __APPLE__
+#elif defined(__APPLE__) || defined(__linux__) 
 	int result = sendto(sock, buffer, size, 0, (struct sockaddr*)&client.addr_in, sizeof(client.addr_in));
 	if(result == -1) {
 		printf("Error: cannot sendTo socket (udp)\n");
@@ -560,7 +559,7 @@ int Socket::send(const char* buf, int count) {
 		return -1; 
 	}
 	return status;
-#elif __APPLE__
+#elif defined(__APPLE__) || defined(__linux__) 
 	int status = ::write(sock, buf, count);
 	//int status = ::send(sock, buf, count, 0);
 	//printf("SEND status: %d\n", status);
@@ -586,7 +585,7 @@ bool Socket::setBlocking(bool mustBlock) {
 	}
 	is_blocking = mustBlock;
 	return true;
-#elif __APPLE__
+#elif defined(__APPLE__) || defined(__linux__) 
 	int flags = fcntl(sock, F_GETFL, 0);
 	if(flags < 0) {
 		printf("Error: cannot get the current options for the socket when trying to change blocking.\n");
@@ -603,7 +602,7 @@ bool Socket::setNoDelay() {
 #ifdef _WIN32
 	printf("Error: setNoDelay is not implemented for win!\n");
 	return false;
-#elif __APPLE__
+#elif defined(__APPLE__) || defined(__linux__) 
 	int nodelay = 1;
 	int result = setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (void*)&nodelay, sizeof(int));
 	return result == 0;
@@ -617,13 +616,15 @@ bool Socket::setNoSigPipe() {
 	int set = 1;
 	int result = setsockopt(sock, SOL_SOCKET, SO_NOSIGPIPE, (void *)&set, sizeof(int));
 	return result == 0;
+#elif __linux__
+        printf("@todo setNoSigPipe called on linux, see http://daniel.haxx.se/projects/portability/ ");
 #endif
 }
 
 bool Socket::setReUseAddress() {
 #ifdef _WIN32
 	printf("@todo Implement setReUseAddress() on windows.\n");
-#elif __APPLE__
+#elif defined(__APPLE__) || defined(__linux__) 
 	int set = 1;
 	int result = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &set, sizeof(set));
 	return result == 0;
@@ -633,7 +634,7 @@ bool Socket::setReUseAddress() {
 bool Socket::setBroadcast() {
 #ifdef _WIN32
 	#error "setBroadcast not implemented for win yet."
-#elif __APPLE__
+#elif defined(__APPLE__) || defined(__linux__) 
 	int set = 1;
 	int result = setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &set, sizeof(set));
 	if(result != 0) {
@@ -668,7 +669,7 @@ void Socket::setBroadcastIP() {
 void Socket::close() {
 #ifdef _WIN32
 	closesocket(sock);
-#elif __APPLE__
+#elif defined(__APPLE__) || defined(__linux__) 
 	::close(sock);
 #endif
 }

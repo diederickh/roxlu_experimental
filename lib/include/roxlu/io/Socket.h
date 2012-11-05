@@ -38,10 +38,16 @@
 #pragma comment (lib, "AdvApi32.lib")
 
 #else
+#include <cstring>
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/tcp.h>
+#endif
+
+#ifdef __linux__
+#include <unistd.h>
 #endif
 
 namespace roxlu {

@@ -23,4 +23,5 @@ public:
   int prev_mouse_y;
   int pressed_mouse_button;
   bool is_mouse_down;
+  GLFWwindow* window;
 };

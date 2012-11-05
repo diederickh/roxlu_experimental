@@ -4,7 +4,7 @@
 #include <roxlu/core/platform/Platform.h>
 
 namespace roxlu {
-#if ROXLU_GL_VARIANT == ROXLU_COCOA
+#if ROXLU_PLATFORM == ROXLU_APPLE
 	
 	VAO::VAO() 
 		:vao_id(-1)
@@ -25,7 +25,7 @@ namespace roxlu {
 	void VAO::unbind() {
 		glBindVertexArrayAPPLE(0); eglGetError();
 	}
-#elif ROXLU_GL_VARIANT == ROXLU_OPENGLES
+#elif ROXLU_PLATFORM == ROXLU_IOS
 	VAO::VAO() 
 		:vao_id(-1)
 	{
@@ -46,7 +46,7 @@ namespace roxlu {
 		glBindVertexArrayOES(0); eglGetError();
 	}
 
-#elif ROXLU_PLATFORM == ROXLU_WINDOWS
+#elif ROXLU_PLATFORM == ROXLU_WINDOWS || ROXLU_PLATFORM == ROXLU_LINUX
 		
 	VAO::VAO()
 		:vao_id(-1)
