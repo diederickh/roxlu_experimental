@@ -1,10 +1,10 @@
 #ifndef ROXLU_FBOH
 #define ROXLU_FBOH
 
-//#include "OpenGL.h"
 #include <roxlu/opengl/OpenGLInit.h>
 #include <map>
 #include <utility>
+#include <stdio.h>
 
 using std::map;
 

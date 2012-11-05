@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string> 
 #include <roxlu/core/platform/Platform.h>
+#include <cstring>
 
 using std::string;
 

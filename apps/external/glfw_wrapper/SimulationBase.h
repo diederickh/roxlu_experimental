@@ -1,5 +1,5 @@
 #include <iostream>
-#include <GL/glfw.h>
+#include <GL/glfw3.h>
 
 class SimulationBase {
 public:
@@ -23,4 +23,5 @@ public:
   int prev_mouse_y;
   int pressed_mouse_button;
   bool is_mouse_down;
+  GLFWwindow* window;
 };

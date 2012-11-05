@@ -5,6 +5,8 @@
 #include <vector>
 #include <iterator>
 #include <algorithm>
+#include <stdio.h>
+
 namespace roxlu { 
   namespace twitter {
 

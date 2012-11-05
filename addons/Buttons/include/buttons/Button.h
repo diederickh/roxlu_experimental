@@ -1,10 +1,6 @@
 #ifndef ROXLU_BUTTONS_BUTTONH
 #define ROXLU_BUTTONS_BUTTONH
 
-/*
-#include "Types.h"
-#include "Element.h"
-*/
 #include <buttons/Types.h>
 #include <buttons/Element.h>
 

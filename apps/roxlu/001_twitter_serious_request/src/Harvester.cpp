@@ -27,6 +27,7 @@ void Harvester::setup() {
   */
 
   std::string key_file = File::toDataPath("client-key.pem");
+  printf("%s\n", key_file.c_str());
   tw.setSSLPrivateKey(key_file.c_str());
   #include "Tokens.h"
   roxlu::twitter::TwitterStatusesFilter tsf("twitter,love,sex");

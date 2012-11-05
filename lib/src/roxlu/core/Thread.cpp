@@ -2,7 +2,7 @@
 
 namespace roxlu {
 // ---------------------------------------------------
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__linux__)
 
 Mutex::Mutex() {
 	pthread_mutex_init(&handle, NULL);
@@ -45,7 +45,7 @@ Thread::~Thread() {
 }
 
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__linux__)
 void* Thread::threadFunction(void* arg) {
    Runnable* r = static_cast<Runnable*>(arg);
 	r->run();

@@ -109,7 +109,6 @@ namespace roxlu {
 
     std::string OAuth::createSignatureSignKey() {
       PercentEncode encoder;
-      //  std::string sign_key = encoder.encode(consumer_secret) +"&" +encoder.encode(token);
       std::string sign_key = encoder.encode(consumer_secret) +"&" +encoder.encode(token_secret);
       return sign_key;
     }
@@ -157,8 +156,9 @@ namespace roxlu {
       const char alphanum[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
       std::string nonce;
       for(int i = 0; i <= 16; ++i) {
-        int dx = (rand() % sizeof(alphanum)-1);
-        nonce += alphanum[dx];
+	int dx = (char) (rand() % 62);
+	char c  = alphanum[dx];
+	nonce.push_back(c);
       }
       return nonce;
     }

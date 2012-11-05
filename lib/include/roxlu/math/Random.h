@@ -2,18 +2,14 @@
 #define ROXLU_RANDOMH
 
 // random: source openFrameworks + stackoverflow
-/*
-#include "Vec3.h"
-#include "Vec2.h"
-*/
 #include <roxlu/math/Vec3.h>
 #include <roxlu/math/Vec2.h>
 #include <roxlu/core/platform/Platform.h>
 #include "float.h"
-//#include <sys/time.h>
+
 
 static void initRandom() {
-	#if ROXLU_PLATFORM == ROXLU_APPLE || ROXLU_PLATFORM == ROXLU_IOS
+	#if ROXLU_PLATFORM == ROXLU_APPLE || ROXLU_PLATFORM == ROXLU_IOS || ROXLU_PLATFORM == ROXLU_LINUX
 		struct timeval tv;
 		gettimeofday(&tv, 0);
 		long int n = (tv.tv_sec ^ tv.tv_usec) ^ getpid();

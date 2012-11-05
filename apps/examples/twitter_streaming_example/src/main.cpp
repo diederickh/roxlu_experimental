@@ -1,6 +1,7 @@
 #include <iostream>
 #include <twitter/Twitter.h>
 #include <formats/json.h>
+#include <unistd.h> // getpwd on linux
 
 // Our callbacks
 void on_filter_update_callback(const char* data, size_t len, void* user);
@@ -16,7 +17,7 @@ int main() {
   sprintf(key_file, "%s/%s", dir, "data/client-key.pem");
 
   // Get a request-token, then exchange this token for a aouth token (see callback);
-  Twitter tw;
+  roxlu::twitter::Twitter tw;
   tw.setSSLPrivateKey(key_file);
   tw.setConsumer("q8mQUYq7AEjGX4qD8lxSKw"); // Get this from your apps settings
   tw.setConsumerSecret("Uy3toRg4OXZqwuNTk9HYTaQLX977DenO0FG8rT5v6A"); // Get this from your apps settings
@@ -28,7 +29,7 @@ tw.setTokenSecret("SOME_TOKEN_SECRET");
    */
 #include "twitter_tokens.h" 
 
-  TwitterStatusesFilter tsf("twitter,love,sex,friend");
+  roxlu::twitter::TwitterStatusesFilter tsf("twitter,love,sex,friend");
   tw.apiStatusesFilter(tsf, on_filter_update_callback);
 
   while(true) {

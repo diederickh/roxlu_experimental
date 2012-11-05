@@ -1,20 +1,15 @@
 #ifndef ROXLU_BITMAP_FONTH
 #define ROXLU_BITMAP_FONTH
 
-/*
-#include "OpenGL.h"
-#include "Vec2.h"
-#include "Error.h"
-*/
-
 #include <roxlu/opengl/OpenGLInit.h>
 #include <roxlu/opengl/Error.h>
 
 #include <string>
 #include <vector>
 #include <iterator>  // for std::back_inserter on MSVC
-
-//using namespace roxlu;
+#include <stdio.h>
+#include <cstring> // memset
+#include <limits.h> // INT_MAX...
 
 // Small font
 const int small_font_w = 211;

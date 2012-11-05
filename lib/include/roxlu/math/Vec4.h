@@ -3,9 +3,7 @@
 
 #include <iostream>
 #include <iomanip>
-
-//#include "Vec3.h"
-
+#include <stdio.h>
 #include <roxlu/math/Vec3.h>
 
 using std::setw;

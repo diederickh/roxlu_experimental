@@ -11,6 +11,8 @@
 #include <mach-o/dyld.h>
 #elif ROXLU_PLATFORM == ROXLU_WINDOWS
 #include <windows.h>
+#elif ROXLU_PLATFORM == ROXLU_LINUX
+#include <unistd.h> // getcwd
 #endif
 
 using std::string;
@@ -73,6 +75,8 @@ namespace roxlu {
       return getCWD() +file;
 #elif ROXLU_PLATFORM == ROXLU_WINDOWS
       return getCWD() +"\\data\\" +file;
+#elif ROXLU_PLATFORM == ROXLU_LINUX
+      return getCWD() +"/data/" +file;
 #else	
       return getCWD() +"/" +file;
 #endif
