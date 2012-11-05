@@ -20,7 +20,7 @@ int main() {
   tw.setConsumer("q8mQUYq7AEjGX4qD8lxSKw"); // Get this from your apps settings
   tw.setConsumerSecret("Uy3toRg4OXZqwuNTk9HYTaQLX977DenO0FG8rT5v6A"); // Get this from your apps settings
   tw.requestToken(on_request_token_callback, &tw);
-
+  
   while(true) {
     tw.update();
   }
