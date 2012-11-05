@@ -6,11 +6,14 @@
 // @todo need to get a bit more into cross platform GL :)  
 
 #if ROXLU_GL_WRAPPER == ROXLU_GLFW
-#if ROXLU_PLATFORM == ROXLU_LINUX
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-#include <GL/glext.h>
-#endif
+ #if ROXLU_PLATFORM == ROXLU_LINUX
+   #define GL_GLEXT_PROTOTYPES
+   #include <GL/gl.h>
+   #include <GL/glext.h>
+ #elif ROXLU_PLATFORM == ROXLU_APPLE
+   #include <OpenGL/gl.h>
+ #endif
+
 #elif ROXLU_GL_WRAPPER == ROXLU_OPENFRAMEWORKS
 #include "ofMain.h"
 #elif ROXLU_GL_WRAPPER == ROXLU_IOS

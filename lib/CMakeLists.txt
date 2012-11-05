@@ -52,11 +52,13 @@ endif(ROXLU_64BIT)
 
 if(APPLE)
   set(roxlu_platform "mac") 
+  set(ROXLU_PLATFORM_MAC TRUE)
 endif(APPLE)
 
-if(UNIX)
+if(UNIX AND NOT APPLE)
   set(roxlu_platform "linux")
-endif(UNIX)
+  set(ROXLU_PLATFORM_LINUX TRUE)
+endif(UNIX AND NOT APPLE)
 
 if(ROXLU_32BIT)
   set(CMAKE_OSX_ARCHITECTURES "i386")
