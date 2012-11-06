@@ -1,0 +1,2 @@
+/usr/bin/ar cr libroxlu_curl.a  CMakeFiles/roxlu_curl.dir/src/kurl/Kurl.cpp.o
+/usr/bin/ranlib libroxlu_curl.a

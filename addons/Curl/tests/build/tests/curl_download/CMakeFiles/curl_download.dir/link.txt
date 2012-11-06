@@ -1,0 +1,1 @@
+/usr/bin/c++    -arch x86_64 -isysroot /Developer/SDKs/MacOSX10.6.sdk -Wl,-search_paths_first -headerpad_max_install_names  CMakeFiles/curl_download.dir/main.cpp.o CMakeFiles/curl_download.dir/__/__/src/kurl/Kurl.cpp.o  -o curl_download  ../../../../lib/mac/64/libcurl.a -lz 

@@ -1,0 +1,2 @@
+/Users/diederickhuijbers/of/addons_diederick/roxlu/addons/Curl/tests/build/tests/curl_download/CMakeFiles/curl_download.dir
+/Users/diederickhuijbers/of/addons_diederick/roxlu/addons/Curl/tests/build/CMakeFiles/roxlu_curl.dir

@@ -1,0 +1,43 @@
+<html>
+    <head>
+        <title>Live!</title>
+    </head>
+    <body>
+        <script type='text/javascript' src='swfobject/swfobject.js'></script>
+        <div id='container'>The player will be placed here</div>
+		<script type="text/javascript">
+		//file:'test2', // <-- using the name of the livestream which is shown in the crtmpserver logs\
+		//file:'127.0.0.1_57718',
+		  var flashvars = {
+		  	  
+		  	  	file:'test',
+		  	  	streamer:'rtmp://home.roxlu.com/flvplayback/'
+		//	streamer:'rtmp://127.0.0.1/flvplayback/'
+		  };
+		
+		  swfobject.embedSWF('player.swf','container','320','240','9.0.115','false', flashvars,
+		
+		   {allowfullscreen:'true',allowscriptaccess:'always'},
+		   {id:'jwplayer',name:'jwplayer'}
+		
+		  );
+		</script>
+        
+      
+		  <div id='container_influxis'>The player will be placed here</div>
+		<script type="text/javascript">
+		  var flashvars = {
+			  file:'_definst_',
+			  streamer:'rtmp://gethinlewis.rtmphost.com/event/'
+		  };
+		
+		  swfobject.embedSWF('player.swf','container_influxis','480','270','9.0.115','false', flashvars,
+		
+		   {allowfullscreen:'true',allowscriptaccess:'always'},
+		   {id:'jwplayer',name:'jwplayer'}
+		
+		  );
+		</script>
+		
+    </body>
+</html>
