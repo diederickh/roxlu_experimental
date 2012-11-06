@@ -1,6 +1,9 @@
 #include <Harvester.h>
 
-Harvester::Harvester() {
+
+Harvester::Harvester() 
+  :num(0)
+{
 }
 
 Harvester::~Harvester() {
@@ -16,6 +19,14 @@ void Harvester::setup() {
     ::exit(0);
   }
 
+  // follow these tags (lowercase)
+  tags.push_back("3fm");
+  tags.push_back("3fmsr");
+  tags.push_back("sr12");
+  tags.push_back("twitter");
+  tags.push_back("love");
+  tags.push_back("sex");
+
   // query tweets
   /*
   mongo_cursor cursor;
@@ -30,12 +41,15 @@ void Harvester::setup() {
   printf("%s\n", key_file.c_str());
   tw.setSSLPrivateKey(key_file.c_str());
   #include "Tokens.h"
+
   roxlu::twitter::TwitterStatusesFilter tsf("twitter,love,sex");
+  //roxlu::twitter::TwitterStatusesFilter tsf("3fm,3fmsr,sr12");
   tw.apiStatusesFilter(tsf, Harvester::onTweet, this);
 }
 
 void Harvester::update() {
   tw.update();
+  kurl.update();
 }
 
 void Harvester::onTweet(const char* data, size_t len, void* harv) {
@@ -45,72 +59,217 @@ void Harvester::onTweet(const char* data, size_t len, void* harv) {
   char* d = (char*)data;
   d[len] = '\0';
 
-  // Create a new bson obj we store.
+ // Create a new bson obj we store.
   bson o;
   bson_init(&o);
   bson_append_new_oid(&o, "_id");
   bson_append_string(&o, "raw", d);
 
-  json_value* jv = json_parse(d);
-  if(jv->type == json_object) {
-    for(int i = 0; i < jv->u.object.length; ++i) {
-      if(jv->u.object.values[i].value->type == json_null) {
-        continue;
-      }
-      json_value* v = jv->u.object.values[i].value;
-      const char* name = jv->u.object.values[i].name;
-      const char* value = jv->u.object.values[i].value->u.string.ptr;
-      int len = jv->u.object.values[i].value->u.string.length;
-      if(len == 0) {
-        continue;
-      }
+  // Parse the json
+  json_t* root;
+  json_error_t error;
+  root = json_loads(d, 0, &error);
+  if(!root) {
+    printf("ERROR: cannot parse json\n");
+    return;
+  }
 
-      if(strcmp(name, "text") == 0) {
-        bson_append_string(&o, "text", value);
-        printf("> %s\n", value);
-      }
-      else if(strcmp(name, "id_str") == 0) {
-        bson_append_string(&o, "id_str", value);
-      }
-      else if(strcmp(name, "created_at") == 0) {
-        bson_append_string(&o, "created_at", value);
-      }
-      else if(strcmp(name, "in_reply_to_status_id_str") == 0) {
-        bson_append_string(&o, "in_reply_to_status_id_str", value);
-      }
-      else if(strcmp(name, "in_reply_to_user_id_str") == 0) {
-        bson_append_string(&o, "in_reply_to_user_id_str", value);
-      }
-      else if(strcmp(name, "geo") == 0) {
-          if(v->type == json_object) {
-            json_value* coord = v->u.object.values[0].value;
-            if(coord->type == json_array && coord->u.array.length == 2) {
-              json_value* lat = coord->u.array.values[0];
-              json_value* lng = coord->u.array.values[1];
-              if(lat->type == json_double && lng->type == json_double) {
-                bson_append_start_array(&o, "geo");
-                bson_append_double(&o, "0", lat->u.dbl);
-                bson_append_double(&o, "1", lng->u.dbl);
-                bson_append_finish_array(&o);
-              }
+  if(!json_is_object(root)) {
+    printf("ERROR: cannot find root of tweet.\n");
+    return;
+  }
+
+  json_t* val;
+
+  // id_str
+  val = json_object_get(root, "id_str");
+  std::string id_str;
+  if(json_is_string(val)) {
+    bson_append_string(&o, "id_str", json_string_value(val));
+  }
+  else {
+    printf("HUGE ERROR: CANNOT FIND ID_STR; MUST BE INCORRECT JSON\n");
+    return;
+  }
+  
+  // Get images + hashtags
+  json_t* ents = json_object_get(root, "entities");
+  if(json_is_object(ents)) {
+    // hashtags
+    json_t* hashtags = json_object_get(ents, "hashtags");
+    if(json_is_array(hashtags) && json_array_size(hashtags) > 0) {
+      size_t num_tags = json_array_size(hashtags);
+      for(int k = 0; k < num_tags; ++k) {
+        json_t* tag_obj = json_array_get(hashtags, k);
+
+        if(json_is_object(tag_obj)) {
+          json_t* tag_txt = json_object_get(tag_obj, "text");
+          if(json_is_string(tag_txt)) {
+            std::string tag(json_string_value(tag_txt));
+            std::transform(tag.begin(), tag.end(), tag.begin(), ::tolower);
+            std::vector<std::string>::iterator it = std::find(h->tags.begin(), h->tags.end(), tag);
+            if(it != h->tags.end()) {
+              printf("YES FOUND A TAG! %s\n", tag.c_str());
             }
-          }
-      }
-      else if(strcmp(name, "coordinate") == 0) {
-        // bson_append_string(&o, "coordinate", value);
-      }
-      else if(strcmp(name, "retweet_count") == 0) {
-        // bson_append_string(&o, "retweet_count", value);
-      }
-      else if(strcmp(name, "retweeted") == 0) {
-        if(jv->u.object.values[i].value->type == json_boolean) {
-          // bson_append_bool(&o, "retweeted", jv->u.object.values[i].value->u.boolean);
+          } 
         }
       }
     }
-  }  
+    // media
+    json_t* medias = json_object_get(ents, "media");
+    if(json_is_array(medias)) {
+      size_t nels = json_array_size(medias);
+
+      for(int i = 0; i < nels; ++i) {
+        json_t* media_obj = json_array_get(medias, i);
+        if(!json_is_object(media_obj)) {
+          continue;
+        }
+
+        // media id str
+        json_t* media_id_str_obj = json_object_get(media_obj, "id_str");
+        std::string media_id_str;
+        if(json_is_string(media_id_str_obj)) {
+          media_id_str = json_string_value(media_id_str_obj);
+        }
+
+        json_t* media_url = json_object_get(media_obj, "media_url");
+        if(json_is_string(media_url)) {
+          const char* url = json_string_value(media_url);
+          http_parser_url u;
+          int r = http_parser_parse_url(url, strlen(url)+1, 0, &u);
+
+          char filename[512];
+          memcpy(filename, url+u.field_data[UF_PATH].off+1, u.field_data[UF_PATH].len);
+          //printf(">>>>>>>>>> (%d), %s <%s>\n",r, json_string_value(media_url), filename);
+
+
+          // Download the media file
+          /*
+          HarvestEntry* he = new HarvestEntry();
+          h->entries.push_back(he);
+          he->type = HT_TWEET;
+          he->media_id_str = media_id_str;
+          he->h = h;
+          h->entries.push_back(he);
+          h->kurl.download(url, filename, Harvester::onTweetImageDownloadComplete, he);
+          */
+        } 
+
+      }
+    }
+    
+  }
+
+  
+  // text
+  val = json_object_get(root, "text");
+  if(json_is_string(val)) {
+    bson_append_string(&o, "text", json_string_value(val));
+    printf("> %05d =  %s\n", h->num, json_string_value(val));
+    ++h->num;
+  }
+  
+  // created_at
+  val = json_object_get(root, "created_at");
+  if(json_is_string(val)) {
+    bson_append_string(&o, "created_at", json_string_value(val));
+  }
+
+  // in_reply_to_status_id_str
+  val = json_object_get(root, "in_reply_to_status_id_str");
+  if(json_is_string(val)) {
+    bson_append_string(&o, "in_reply_to_status_id_str", json_string_value(val));
+  }
+
+  // in_reply_to_user_id_str
+  val = json_object_get(root, "in_reply_to_user_id_str");
+  if(json_is_string(val)) {
+    bson_append_string(&o, "in_reply_to_user_id_str", json_string_value(val));
+  }
+
+  // user
+  val = json_object_get(root, "user");
+  if(json_is_object(val)) {
+
+    // id_str
+    json_t* subval = json_object_get(val, "id_str");
+    if(json_is_string(subval)) {
+      bson_append_string(&o, "user_id_str", json_string_value(subval));
+    }
+
+    // screen_name
+    subval = json_object_get(val, "screen_name");
+    if(json_is_string(subval)) {
+      bson_append_string(&o, "user_screen_name", json_string_value(subval));
+    }
+
+    // location
+    subval = json_object_get(val, "location");
+    if(json_is_string(subval)) {
+      bson_append_string(&o, "user_location", json_string_value(subval));
+    }
+
+    // lang
+    subval = json_object_get(val, "lang");
+    if(json_is_string(subval)) {
+      bson_append_string(&o, "user_lang", json_string_value(subval));
+    }
+
+    // statuses_count
+    subval = json_object_get(val, "statuses_count");
+    if(json_is_integer(subval)) {
+      bson_append_int(&o, "user_statuses_count", json_integer_value(subval));
+    }
+
+    // friends count
+    subval = json_object_get(val, "friends_count");
+    if(json_is_integer(subval)) {
+      bson_append_int(&o, "user_friends_count", json_integer_value(subval));
+    }
+
+    // followers count
+    subval = json_object_get(val, "followers_count");
+    if(json_is_integer(subval)) {
+      bson_append_int(&o, "user_followers_count", json_integer_value(subval));
+    }
+  }
+
+  // retweeted
+  val = json_object_get(root, "retweeted");
+  if(json_is_boolean(val)) {
+    bson_append_bool(&o, "", json_is_true(val));
+  }
+
+  // https://groups.google.com/forum/?fromgroups=#!topic/twitter-api-announce/5_wG5KjLcVA
+  // - geo will be deprecated 
+  // - coordinates: new, [long,lat]
+  // - place 
+  val = json_object_get(root, "coordinates");
+  if(json_is_object(val)) {
+    json_t* subval = json_object_get(val, "coordinates");
+    if(json_is_array(subval) && json_array_size(subval) == 2) {
+      double longitude = json_number_value(json_array_get(subval, 0));
+      double latitude = json_number_value(json_array_get(subval, 1));
+      bson_append_double(&o, "coordinates_long", longitude);
+      bson_append_double(&o, "coordinates_lat", latitude);
+    }
+  }
+
   bson_finish(&o);
   mongo_insert(&h->mcon, "tweet.messages", &o, NULL);
   //  bson_print(&o);
   bson_destroy(&o);
+
+  return;
+}
+
+void Harvester::onTweetImageDownloadComplete(KurlConnection* c, void* userdata) {
+  HarvestEntry* he = static_cast<HarvestEntry*>(userdata);
+  printf("Harvester complete!: %s\n", he->media_id_str.c_str());
+  std::vector<HarvestEntry*>::iterator it = std::find(he->h->entries.begin(), he->h->entries.end(), he);
+  if(it != he->h->entries.end()) {
+    delete he;
+    he->h->entries.erase(it);
+  }
 }

@@ -26,8 +26,8 @@ include_directories(
 
 set(roxlu_addon_libs
   ${roxlu_addon_libs}
-  buttons  #important to add your lib to the rest of the include libs
+  roxlu_buttons  #important to add your lib to the rest of the include libs
 )
 
-add_library(buttons STATIC ${buttons_source_files})
+add_library(roxlu_buttons STATIC ${buttons_source_files})
 

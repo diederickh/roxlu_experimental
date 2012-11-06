@@ -55,4 +55,4 @@ set(roxlu_addon_libs
   ${twitter_libs}
 )
 
-add_library(twitter STATIC ${twitter_source_files})
+add_library(roxlu_twitter STATIC ${twitter_source_files})

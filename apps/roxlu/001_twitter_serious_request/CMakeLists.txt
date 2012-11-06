@@ -5,6 +5,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/../../../lib/CMakeLists.txt) # roxlu cmake
 include(${roxlu_base_dir}/apps/external/CMakeLists.txt) # External (glfw)
 include(${roxlu_addons_dir}/Buttons/CMakeLists.txt) # Buttons addon
 include(${roxlu_addons_dir}/Twitter/CMakeLists.txt) # Twitter addon
+include(${roxlu_addons_dir}/Curl/CMakeLists.txt) # Curg addon
 
 set(simulation_base ${CMAKE_CURRENT_LIST_DIR}/)
 set(simulation_install_dir ${simulation_base}bin/)
@@ -20,6 +21,7 @@ set(simulation_libs
   ${glfw_libs}
   ${simulation_base}/src/mongo/lib/${roxlu_platform}/${roxlu_bits}/libmongoc.a
   ${simulation_base}/src/mongo/lib/${roxlu_platform}/${roxlu_bits}/libbson.a
+  ${simulation_base}/src/jansson/lib/${roxlu_platform}/${roxlu_bits}/libjansson.a
 )
 
 get_filename_component(simulation_name ${CMAKE_CURRENT_SOURCE_DIR} NAME)
@@ -39,6 +41,7 @@ include_directories(
   ${simulation_include_dir}
   ${roxlu_include_dirs}
   ${simulation_include_dir}/mongo/include/
+  ${simulation_include_dir}/jansson/include/
 )
 
 add_definitions(
