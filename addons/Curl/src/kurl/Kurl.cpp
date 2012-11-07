@@ -1,20 +1,16 @@
 #include <kurl/Kurl.h>
 
-
 size_t kurl_callback_write_function(char* data, size_t size, size_t nmemb, void* userdata) {
-  //  printf("> %zu\n", nmemb);
   if(nmemb > 0) {
-    KurlConnection* kc = static_cast<KurlConnection*>(userdata);
-    kc->ofs.write(data, nmemb);
+        KurlConnection* kc = static_cast<KurlConnection*>(userdata);
+    if(kc->write_callback) {
+      kc->write_callback(kc, data, size, nmemb, kc->write_data);
+    }
+    else {
+      kc->ofs.write(data, nmemb);
+    }
   }
   return size * nmemb;
-}
-
-void kurl_callback_close_function(void* userdata, curl_socket_t sock) {
-  KurlConnection* kc = static_cast<KurlConnection*>(userdata);
-  if(kc->type == KURL_FILE_DOWNLOAD) {
-    kc->ofs.close();
-  }
 }
 
 // -----------------------------------
@@ -79,7 +75,9 @@ bool Kurl::download(
                     const char* url, 
                     const char* filename, 
                     kurl_cb_on_complete completeCB, 
-                    void* completeData
+                    void* completeData,
+                    kurl_cb_on_write writeCB, // when given you need to store the data yourself!
+                    void* writeData
                     ) 
 {
   KurlConnection* c = new KurlConnection();
@@ -89,21 +87,25 @@ bool Kurl::download(
     printf("ERROR: cannot curl_easy_init()\n");
     return false;
   }
-
-  c->ofs.open(filename, std::ios::out | std::ios::binary);
-  if(!c->ofs.is_open()) {
-    printf("ERROR: Kurl::download, ofs.is_open() failed\n");
-    return false;
+  
+  // Only open a file when now writeCB is given
+  if(writeCB != NULL) {
+    c->ofs.open(filename, std::ios::out | std::ios::binary);
+    if(!c->ofs.is_open()) {
+      printf("ERROR: Kurl::download, ofs.is_open() failed\n");
+      return false;
+    }
   }
+
   c->type = KURL_FILE_DOWNLOAD;
   c->complete_data = completeData;
   c->complete_callback = completeCB;
+  c->write_callback = writeCB;
+  c->write_data = writeData;
 
   curl_easy_setopt(c->handle, CURLOPT_URL, url);
   curl_easy_setopt(c->handle, CURLOPT_WRITEDATA, c);
   curl_easy_setopt(c->handle, CURLOPT_WRITEFUNCTION, kurl_callback_write_function);
-  curl_easy_setopt(c->handle, CURLOPT_CLOSESOCKETFUNCTION, kurl_callback_close_function);
-  curl_easy_setopt(c->handle, CURLOPT_CLOSESOCKETDATA, c);
   curl_easy_setopt(c->handle, CURLOPT_FOLLOWLOCATION, 1);
   
   curl_multi_add_handle(handle, c->handle);

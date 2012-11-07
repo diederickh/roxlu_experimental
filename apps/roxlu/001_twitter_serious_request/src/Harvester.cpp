@@ -1,8 +1,51 @@
 #include <Harvester.h>
 
+void HarvesterThread::setup() {
+  thread.create(*this);
+}
 
+void HarvesterThread::run() {
+  printf("START THE THREAD\n");
+  harvester.setup();
+  while(true) {
+    harvester.update();
+  }
+}
+
+bool HarvesterThread::getSliceCounts(uint64_t& numTweets, uint64_t& numImages) {
+  mutex.lock();
+  bool r = harvester.isSliceFinished();
+  if(r) {
+    numTweets = harvester.slice_tweet_count;
+    numImages = harvester.slice_image_count;
+  }
+  mutex.unlock();
+  return r;
+}
+
+void HarvesterThread::resetSliceCounts() {
+  mutex.lock();
+  harvester.resetSliceCounts();
+  mutex.unlock();
+}
+
+// --------------------
+HarvestEntry::HarvestEntry() {
+  h = NULL;
+}
+
+HarvestEntry::~HarvestEntry() {
+  //printf("~HarvestEntry()\n");
+}
+
+// -------------------
+// slice: a time slice in which we count number of tweets.
 Harvester::Harvester() 
   :num(0)
+  ,slice_tweet_count(0) // how many tweets did we receive during the last slice
+  ,slice_image_count(0) // how many images did we receive during the last slice
+  ,slice_ends_on(0) // next time we reset the slice count
+  ,slice_duration(1000) // measure every X-millis
 {
 }
 
@@ -11,11 +54,32 @@ Harvester::~Harvester() {
 }
 
 void Harvester::setup() {
+  /*
+    // Test with parsing a url
+  char* test_url = "http://p.twimg.com/A7BYjQsCUAAdYc6.jpg";
+  URLInfo u;
+  bool parse_result = parseURL(test_url, u);
+  printf("proto: %s\n", u.proto.c_str());
+  printf("host: %s\n", u.host.c_str());
+  printf("filename: %s\n", u.filename.c_str());
+  printf("file_ext: %s\n", u.file_ext.c_str());
+  printf("parse result: %d\n", parse_result);
+  return;
+  */
+
+  // setup mongo connections
   mongo_init(&mcon);
   mongo_set_op_timeout(&mcon, 1000);
   int r = mongo_connect(&mcon, "127.0.0.1", 27017);
   if(r != MONGO_OK) {
     printf("ERROR: Cannot connect to mongo.\n");
+    ::exit(0);
+  }
+
+  // create filesystem
+  r = gridfs_init(&mcon, "tweet", "images", gfs);
+  if(r != MONGO_OK) {
+    printf("ERROR: Cannot initialize file system.\n");
     ::exit(0);
   }
 
@@ -51,6 +115,7 @@ void Harvester::update() {
   tw.update();
   kurl.update();
 }
+
 
 void Harvester::onTweet(const char* data, size_t len, void* harv) {
   Harvester* h = static_cast<Harvester*>(harv);
@@ -88,7 +153,8 @@ void Harvester::onTweet(const char* data, size_t len, void* harv) {
     bson_append_string(&o, "id_str", json_string_value(val));
   }
   else {
-    printf("HUGE ERROR: CANNOT FIND ID_STR; MUST BE INCORRECT JSON\n");
+    printf("ERROR: CANNOT FIND ID_STR; MUST BE INCORRECT JSON\n");
+    printf("\n\n%s\n\n", d);
     return;
   }
   
@@ -109,7 +175,7 @@ void Harvester::onTweet(const char* data, size_t len, void* harv) {
             std::transform(tag.begin(), tag.end(), tag.begin(), ::tolower);
             std::vector<std::string>::iterator it = std::find(h->tags.begin(), h->tags.end(), tag);
             if(it != h->tags.end()) {
-              printf("YES FOUND A TAG! %s\n", tag.c_str());
+
             }
           } 
         }
@@ -136,29 +202,56 @@ void Harvester::onTweet(const char* data, size_t len, void* harv) {
         json_t* media_url = json_object_get(media_obj, "media_url");
         if(json_is_string(media_url)) {
           const char* url = json_string_value(media_url);
+          URLInfo u;
+
+          if(parseURL(url, u)) {
+            std::string grid_filename = u.filename +"." +u.file_ext;;
+            std::string grid_mime = "unknown";
+            if(u.file_ext == "jpg") {
+              grid_mime = "image/jpeg";
+            }
+            else if(u.file_ext == "png") {
+              grid_mime = "image/png";
+            }
+
+            // Download the media file
+            HarvestEntry* he = new HarvestEntry();
+            h->entries.push_back(he);
+            he->type = HT_TWEET;
+            he->media_id_str = media_id_str;
+            he->h = h;
+            gridfile_writer_init(he->gfile, h->gfs, grid_filename.c_str(), grid_mime.c_str());
+            h->entries.push_back(he);
+            
+            //h->kurl.download(url, filename, Harvester::onTweetImageDownloadComplete, he);
+            h->kurl.download(
+                             url, 
+                             grid_filename.c_str(), 
+                             Harvester::onTweetImageDownloadComplete, 
+                             he, 
+                             Harvester::onTweetImageWriteChunk, 
+                             he
+                             );
+            //  gridfile_writer_done(gfile);
+            // gridfile_write_buffer(gfile, buf, bytes_read);
+
+          }
+          else {
+            printf("\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nCannot parse: %s\n!!!!!!!!!!!!!!!!!!!!!!\n\n", url);
+          }
+
+          /* 
+             // ue http_parser_url to get pahtname
           http_parser_url u;
           int r = http_parser_parse_url(url, strlen(url)+1, 0, &u);
-
           char filename[512];
           memcpy(filename, url+u.field_data[UF_PATH].off+1, u.field_data[UF_PATH].len);
+          */
           //printf(">>>>>>>>>> (%d), %s <%s>\n",r, json_string_value(media_url), filename);
 
-
-          // Download the media file
-          /*
-          HarvestEntry* he = new HarvestEntry();
-          h->entries.push_back(he);
-          he->type = HT_TWEET;
-          he->media_id_str = media_id_str;
-          he->h = h;
-          h->entries.push_back(he);
-          h->kurl.download(url, filename, Harvester::onTweetImageDownloadComplete, he);
-          */
         } 
-
       }
     }
-    
   }
 
   
@@ -166,7 +259,7 @@ void Harvester::onTweet(const char* data, size_t len, void* harv) {
   val = json_object_get(root, "text");
   if(json_is_string(val)) {
     bson_append_string(&o, "text", json_string_value(val));
-    printf("> %05d =  %s\n", h->num, json_string_value(val));
+    //   printf("> %05lld =  %s\n", h->num, json_string_value(val));
     ++h->num;
   }
   
@@ -261,15 +354,47 @@ void Harvester::onTweet(const char* data, size_t len, void* harv) {
   //  bson_print(&o);
   bson_destroy(&o);
 
+  h->slice_tweet_count++;
   return;
 }
 
 void Harvester::onTweetImageDownloadComplete(KurlConnection* c, void* userdata) {
   HarvestEntry* he = static_cast<HarvestEntry*>(userdata);
-  printf("Harvester complete!: %s\n", he->media_id_str.c_str());
+
+  he->h->slice_image_count++;
+
   std::vector<HarvestEntry*>::iterator it = std::find(he->h->entries.begin(), he->h->entries.end(), he);
   if(it != he->h->entries.end()) {
+    int r = gridfile_writer_done(he->gfile);
+    if(r != MONGO_OK) {
+      printf("ERROR: Cannot close writer.\n");
+    }
     delete he;
     he->h->entries.erase(it);
   }
 }
+
+void Harvester::onTweetImageWriteChunk(
+                                       KurlConnection* c,
+                                       char* data,
+                                       size_t count,
+                                       size_t nmemb,
+                                       void* userdata
+                                       )
+{
+  //printf("Count: %zu, num_bytes: %zu\n", count, nmemb);
+  HarvestEntry* he = static_cast<HarvestEntry*>(userdata);
+  gridfile_write_buffer(he->gfile, data, count * nmemb);
+}
+                                       
+void Harvester::resetSliceCounts() {
+  slice_tweet_count = 0;
+  slice_image_count = 0;
+  slice_ends_on = Timer::now() + slice_duration;
+}
+
+bool Harvester::isSliceFinished() {
+  return slice_ends_on < Timer::now();
+}
+
+

@@ -76,7 +76,7 @@ const string BUTTONS_VS = " \
 ";
 
 
-#if ROXLU_GL_VARIANT == ROXLU_OPENGLES
+#if ROXLU_GL_WRAPPER == ROXLU_IOS
 
 const string BUTTONS_FS = "  \
 	varying highp vec4 vcol; \

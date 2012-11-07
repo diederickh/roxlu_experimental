@@ -17,6 +17,8 @@ public:
   void onKeyUp(char key);
 private:
   buttons::Buttons gui;
-  Harvester harvester;
+  HarvesterThread harvester_thread;
+
+  //  Harvester harvester;
   Camera cam;
 };

@@ -54,8 +54,7 @@ struct TextEntry {
 }; 
 
 
-#if ROXLU_GL_VARIANT == ROXLU_OPENGLES
-
+#if ROXLU_GL_WRAPPER == ROXLU_IOS
 const string TEXT_VS = "  \
 	uniform mat4 projection_matrix; \
 	uniform mat4 model_matrix; \
@@ -106,7 +105,6 @@ const string TEXT_FS =  " \
 
 
 #endif 
-
 
 class Text {
 public:

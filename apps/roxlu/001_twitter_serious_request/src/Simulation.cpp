@@ -8,14 +8,24 @@ Simulation::Simulation()
 
 void Simulation::setup() {
   setWindowTitle("Example simulation");
-  harvester.setup();
+
+  // harvester_thread.setup();
+
   cam.perspective(60.0f, 4.0f/3.0f, 0.1f, 10.0f);
   cam.setPosition(0.0f, 0.0f, -1.0f);
 }
 
 void Simulation::update() {
   //gui.update();
-  harvester.update();
+  //harvester.update();
+  /*
+  uint64_t new_tweet_count = 0;
+  uint64_t new_image_count = 0;
+  if(harvester_thread.getSliceCounts(new_tweet_count, new_image_count)) {
+    printf("Tweets: %lld, Images: %lld\n", new_tweet_count, new_image_count);
+    harvester_thread.resetSliceCounts();
+  }
+  */
 }
 
 void Simulation::draw() {
