@@ -49,6 +49,7 @@ int main() {
   glfwSetKeyCallback(window, key_callback);
   //glfwSetCharCallback(window, char_callback);
 
+  glfwMakeContextCurrent(window);
 
   Simulation sim;
   sim_ptr = &sim;

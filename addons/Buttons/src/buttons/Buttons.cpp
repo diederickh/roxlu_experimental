@@ -54,10 +54,7 @@ Buttons::Buttons(const string& title, int w)
 	vao.bind();
 	glGenBuffers(1, &vbo); eglGetError();
 	glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
-	printf("Buttons vao id: %d\n", vao.getID());
-	//vao.unbind();
-	//glBindBuffer(GL_ARRAY_BUFFER, 0); eglGetError();
-	//createOrtho(ofGetWidth(), ofGetHeight()); // @todo remove call to getwidth/height @todo windows
+
 	createOrtho(768, 1024);
 	
 	// top draggable handle
@@ -181,8 +178,6 @@ void Buttons::update() {
 		while(allocated_bytes < size_needed) {
 			allocated_bytes = std::max<size_t>(allocated_bytes * 2, 256);
 		}
-		printf("To allocate: %zu\n", allocated_bytes);
-		
 		first_run = false; // we don't need this one anymore @todo cleanup
 		vao.bind();
 		glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();

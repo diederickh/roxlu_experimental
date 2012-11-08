@@ -87,8 +87,6 @@ struct Mat4 {
 	static Mat4 rotationZ(float a); // rotate around z-axis
 	static Mat4 scaling(float x, float y, float z);
 	
-	
-	
 	Mat4& frustum(float l, float r, float b, float t, float n, float f);
 	Mat4& frustumCenter(float w, float h, float n, float f);
 	Mat4& perspective(float fov, float aspect, float near, float far);
