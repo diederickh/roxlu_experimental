@@ -39,9 +39,11 @@ namespace roxlu {
     };
 
     struct TwitterStatusesFilter {
-      TwitterStatusesFilter(const std::string& track);
+      TwitterStatusesFilter(const std::string track = "", const std::string follow = "");
       std::string getCommaSeparatedTrackList() const;
+      std::string getCommaSeparatedFollowList() const;
       std::vector<std::string> track;
+      std::vector<std::string> follow;
     };
 
     struct TwitterCallParams {

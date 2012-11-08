@@ -201,12 +201,22 @@ namespace roxlu {
 
     // API SPECIFIC PARAMETER TYPES
     // ----------------------------
-    TwitterStatusesFilter::TwitterStatusesFilter(const std::string& track) {
-      this->track.push_back(track);
+    TwitterStatusesFilter::TwitterStatusesFilter(const std::string track, const std::string follow) {
+      printf("ctro");
+      if(track.size()) {
+        this->track.push_back(track);
+      }
+      if(follow.size()) {
+        this->follow.push_back(follow);
+      }
+      printf("2");
     }
 
     std::string TwitterStatusesFilter::getCommaSeparatedTrackList() const {
       return join(track, ",");
+    }
+    std::string TwitterStatusesFilter::getCommaSeparatedFollowList() const {
+      return join(follow, ",");
     }
 
     // API IMPLEMENTATION
@@ -227,8 +237,16 @@ namespace roxlu {
 
     void Twitter::apiStatusesFilter(const TwitterStatusesFilter& param, cb_request_read_body bodyCB, void* bodyData) {
       HTTPParameters p;
-      p.add("track", param.getCommaSeparatedTrackList());
+      printf("3");
+      if(param.track.size() > 0) {
+        p.add("track", param.getCommaSeparatedTrackList());
+      }
+      printf("4");
+      if(param.follow.size() > 0) {
+        p.add("follow", param.getCommaSeparatedFollowList());
+      }
 
+      printf("5");
       TwitterCallParams cp;
       cp.endpoint = "/1.1/statuses/filter.json";
       cp.host = "stream.twitter.com";
