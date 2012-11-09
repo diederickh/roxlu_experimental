@@ -36,5 +36,16 @@ inline T rx_map(T value, T minIn, T maxIn, T minOut, T maxOut) {
 	return range;
 }
 
+// as described in: "From Quaternion to Matrix and Back", J.M.P. van Waveren, 27th feb. 2005, id software
+static float rx_fast_sqrt(float x) {
+    long i; 
+    float y, r; 
+    y = x * 0.5f; 
+    i = *(long *)( &x ); 
+    i = 0x5f3759df - ( i >> 1 ); 
+    r = *(float *)( &i ); 
+    r = r * ( 1.5f - r * r * y ); 
+    return r; 
+}
 
 #endif

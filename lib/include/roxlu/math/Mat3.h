@@ -60,6 +60,8 @@ namespace roxlu {
 	
     inline float& operator()(unsigned int row, unsigned int col);
     inline float operator()(unsigned int row, unsigned int col) const;
+    float& operator[](const unsigned int dx);
+
     //inline float* getPtr();
 	
     float* getPtr() { return &m[0]; }
@@ -195,6 +197,10 @@ namespace roxlu {
     m[7] = t;
 	
     return *this;
+  }
+
+  inline float& Mat3::operator[](const unsigned int dx) {      
+    return m[dx];
   }
 
   inline Vec3 Mat3::operator*(const Vec3& v) const {

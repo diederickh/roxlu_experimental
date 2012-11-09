@@ -118,7 +118,8 @@ void Billboard::draw(const Vec3& position, const float scale, const float rotati
 
 	if(rotationDegrees > 0) {
 		Quat q;
-		q.rotate(rotationDegrees * DEG_TO_RAD,0,0,1);
+		//q.rotate(rotationDegrees * DEG_TO_RAD,0,0,1);
+                q.fromAngleAxis(rotationDegrees * DEG_TO_RAD,0,0,1); // @todo test new quat implementation
 		mm = mm * q.getMat4();
 	}
 	
