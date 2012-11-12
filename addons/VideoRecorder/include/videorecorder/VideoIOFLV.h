@@ -16,8 +16,8 @@ public:
 	int writeCloseFile(VideoParams* p);
 	
 	// --------
-	int writeVideoPacket(VideoPacket* p);
-	int writeAudioPacket(AudioPacket* p);
+	int writeVideoPacket(VideoPacket* p); // @todo to be removed
+	int writeAudioPacket(AudioPacket* p); // @todo to be removed
 	// --------
 
 	virtual void flush(Buffer& buffer); // for VideoIOFLVSocket

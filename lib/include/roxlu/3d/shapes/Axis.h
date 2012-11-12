@@ -1,20 +1,43 @@
 #ifndef ROXLU_AXISH
 #define ROXLU_AXISH
 
-#include <roxlu/math/Vec3.h>
+#include <string>
+#include <roxlu/Roxlu.h>
 
 namespace roxlu {
 
-class Axis {
-public:
-	Axis();
-	void setup(int nSize);
-	void draw();
-private:
-	//VBO vbo;
-	//VertexData vd;
-//	int num_vertices;
-};
+  const std::string AXIS_VS = " \
+  uniform mat4 u_projection_matrix; \
+  uniform mat4 u_view_matrix; \
+  attribute vec4 a_pos; \
+  attribute vec3 a_col; \
+  varying vec3 v_col; \
+  \
+  void main() { \
+    gl_Position = u_projection_matrix * u_view_matrix * a_pos; \
+    v_col = a_col; \
+   } \
+  ";
+
+  const std::string AXIS_FS = " \
+  varying vec3 v_col; \
+  void main() { \
+    gl_FragColor.a = 1.0; \
+    gl_FragColor.rgb = v_col; \
+  }\
+  ";
+
+  class Axis {
+  public:
+    Axis();
+    void setup(int size);
+    void draw(const float* pm, const float* vm);
+  private:
+    GLuint vbo;
+    VAO vao;
+    Shader shader;
+    size_t nvertices;
+  };
 
 } // roxlu
 #endif

@@ -41,7 +41,9 @@ namespace roxlu {
     bool isIdentity();
     void clean();
     void identity();
-    void copy(float* f);
+    void copyTo(float* f);
+    void copyFrom(float* f);
+
 		
     // @todo maybe we should not return anything here (?)	
     void affineInverse();	 
@@ -66,6 +68,7 @@ namespace roxlu {
     float getX();
     float getY();
     float getZ();
+    Vec3 getPosition();
 	
     void setBillboard(const Vec3& right, const Vec3& up); // create billboard matrix (z-axis is calculated)
     void setBillboard(const float* right, const float* up);
@@ -273,8 +276,17 @@ namespace roxlu {
     return m[dx];
   }
 
-  inline void Mat4::copy(float* f) {
+  inline void Mat4::copyTo(float* f) {
     memcpy(f,m,16*sizeof(float));
+  }
+
+  inline void Mat4::copyFrom(float* f) {
+    memcpy(m,f, 16*sizeof(float));
+  }
+
+  inline Vec3 Mat4::getPosition() {
+    Vec3 v(m[12], m[13], m[14]);
+    return v;
   }
 
   inline void Mat4::setX(const float& x) {

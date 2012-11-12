@@ -9,13 +9,17 @@
 
 
 /* 
+
 Quaternion class, handy tool for 3D rotations.
 ----------------------------------------------
 - When using quaternions for rotations you need to use 
   unit quaternions! This is super importants as some functions
   are optimized for this!
+- Slerp should not exceed PI!, PI * 0.99 works, PI not. And slerp should 
+  be used to interpolate small values 
 
-Resources:
+Resources
+---------:
 [0]   Intel, http://software.intel.com/sites/default/files/m/d/4/1/d/8/293748.pdf
       "From Quaternion to Matrix and Back", J.M.P. van Waveren, 27th feb. 2005, id software
 [1]   Irrlicht: http://irrlicht.sourceforge.net/
@@ -25,10 +29,13 @@ Resources:
 [5]   Essential mathematics for games and interactive applications, Bishop
 [6]   Slerping Clock Cycles, J.M.P van Waveren,  http://software.intel.com/sites/default/files/m/d/4/1/d/8/293747_293747.pdf
 [7]   Slerp from GamePlay, https://raw.github.com/blackberry/GamePlay/master/gameplay/src/Quaternion.cpp
+
 */
 
 
 namespace roxlu {
+  static float sin_zero_half_pi(float a);
+  static float atan_positive(float y, float x);
   
   class Quat {
   public:	
@@ -42,7 +49,7 @@ namespace roxlu {
     Quat(Mat3& m);
     Quat(const Quat& q);
 
-    void set(Vec3 axis, float radians);
+    void set(const float xx, const float yy, const float zz, const float ww);
     void normalize();
     float length();
     float lengthSquared();
@@ -56,17 +63,14 @@ namespace roxlu {
     void fromMat4(Mat4& m);
     void fromMat3(Mat3& m);
     void fromAngleAxis(const float radians, const float xx, const float yy, const float zz); 
+    void fromEuler(const float radiansX, const float radiansY, const float radiansZ);
     void multiply(const Quat& q);
     void multiply(const Quat& q1, const Quat& q1, Quat* dst);
     Vec3 transform(const Vec3& v) const;
     void lerp(const Quat& q1, const Quat& q1, float t, Quat* dst);
-    void slerp(const Quat& q1, const Quat& q2, float t, Quat* dst);
-    void slerp(float q1x, float q1y, float q1z, 
-               float q1w, float q2x, float q2y, 
-               float q2z, float q2w, 
-               float t, 
-               float* dstx, float* dsty, float* dstz, float* dstw
-               );
+    static void slerp(const Quat& from, const Quat& to, float t, Quat& result);
+    void print();
+
     Vec3 operator*(const Vec3& v) const;
     Quat operator*(const Quat& other) const;
     Quat& operator*=(const Quat& other);
@@ -89,22 +93,16 @@ namespace roxlu {
     
   }
 
-  inline void Quat::set(Vec3 axis, float radians) {
-    float a = radians * 0.5;
-    float s = sin(a);
-
-    axis.normalize();
-
-    x = axis.x * s;
-    y = axis.y * s;
-    z = axis.z * s;
-    w = cos(a);
+  inline void Quat::set(const float xx, const float yy, const float zz, const float ww) {
+    x = xx;
+    y = yy; 
+    z = zz;
+    w = ww;
   }
 
   inline void Quat::normalize() {
     float n = x * x + y * y + z * z + w * w;
     if(n == 1.0f) {
-      printf("Quat::normalize(), no need to normalize!\n");
       return;
     }
     
@@ -328,6 +326,21 @@ namespace roxlu {
     z = s * zz;
   }
 
+  inline void Quat::fromEuler(const float radiansX, const float radiansY, const float radiansZ) {
+
+    // Assuming the angles are in radians.
+    float c1 = cos(radiansY);
+    float s1 = sin(radiansY);
+    float c2 = cos(radiansZ);
+    float s2 = sin(radiansZ);
+    float c3 = cos(radiansX);
+    float s3 = sin(radiansX);
+    w = sqrt(1.0 + c1 * c2 + c1*c3 - s1 * s2 * s3 + c2*c3) / 2.0;
+    float w4 = (4.0 * w);
+    x = (c2 * s3 + c1 * s3 + s1 * s2 * c3) / w4 ;
+    y = (s1 * c2 + s1 * c3 + c1 * s2 * s3) / w4 ;
+    z = (-s1 * s3 + c1 * s2 * c3 +s2) / w4 ;
+  }
 
   inline void Quat::multiply(const Quat& q) {
     multiply(*this, q, this);
@@ -359,11 +372,11 @@ namespace roxlu {
 
   inline void Quat::lerp(const Quat& q1, const Quat& q2, float t, Quat* dst) {
     if(t == 0.0f) {
-      memcpy(&dst->x, &q1, sizeof(float) * 4);
+      memcpy(&dst->x, &q1.x, sizeof(float) * 4);
       return;
     }
     else if(t == 1.0f) {
-      memcpy(&dst->x, &q2, sizeof(float) * 4);
+      memcpy(&dst->x, &q2.x, sizeof(float) * 4);
       return;
     }
 
@@ -374,108 +387,85 @@ namespace roxlu {
     dst->w = t1 * q1.w + t * q2.w;
   }
 
-  inline void Quat::slerp(const Quat& q1, const Quat& q2, float t, Quat* dst) {
-    slerp(q1.x, q1.y, q1.z, q1.w, q2.x, q2.y, q2.z, q2.w, t, &dst->x, &dst->y, &dst->z, &dst->w);
+  float sin_zero_half_pi(float a) {
+    float s, t; 
+    s = a * a; 
+    t = -2.39e-08f; 
+    t *= s; 
+    t += 2.7526e-06f; 
+    t *= s; 
+    t += -1.98409e-04f; 
+    t *= s; 
+    t += 8.3333315e-03f; 
+    t *= s; 
+    t += -1.666666664e-01f; 
+    t *= s; 
+    t += 1.0f; 
+    t *= a; 
+    return t; 
   }
 
-  // @see [7]
-  inline void Quat::slerp(float q1x, float q1y, float q1z, 
-                          float q1w, float q2x, float q2y, 
-                          float q2z, float q2w, 
-                          float t, 
-                          float* dstx, float* dsty, float* dstz, float* dstw
-                          )
-  {
-    // Fast slerp implementation by kwhatmough:
-    // It contains no division operations, no trig, no inverse trig
-    // and no sqrt. Not only does this code tolerate small constraint
-    // errors in the input quaternions, it actually corrects for them.
-
-    if(t == 0.0f) {
-      *dstx = q1x;
-      *dsty = q1y;
-      *dstz = q1z;
-      *dstw = q1w;
+  float atan_positive(float y, float x) {
+    float a, d, s, t; 
+    if( y > x ) { 
+      a = -x / y; 
+      d = M_PI / 2; 
+    } 
+    else { 
+      a = y / x; 
+      d = 0.0f; 
+    } 
+    s = a * a; 
+    t = 0.0028662257f; 
+    t *= s;     
+    t += -0.0161657367f; 
+    t *= s; 
+    t += 0.0429096138f; 
+    t *= s; 
+    t += -0.0752896400f; 
+    t *= s; 
+    t += 0.1065626393f; 
+    t *= s; 
+    t += -0.1420889944f; 
+    t *= s; 
+    t += 0.1999355085f; 
+    t *= s; 
+    t += -0.3333314528f; 
+    t *= s; 
+    t += 1.0f; 
+    t *= a; 
+    t += d; 
+    return t; 
+  }
+  
+  inline void Quat::slerp(const Quat& from, const Quat& to, float t, Quat& result) {
+    if(t <= 0.0f) {
+      memcpy(&result.x, &from.x, sizeof(float) * 4);
       return;
     }
-    else if(t == 1.0f)  {
-      *dstx = q2x;
-      *dsty = q2y;
-      *dstz = q2z;
-      *dstw = q2w;
+    else if(t >= 1.0f) {
+      memcpy(&result.x, &to.x, sizeof(float) * 4);
       return;
     }
-
-    if(q1x == q2x && q1y == q2y && q1z == q2z && q1w == q2w) {
-      *dstx = q1x;
-      *dsty = q1y;
-      *dstz = q1z;
-      *dstw = q1w;
-      return;
-    }
-
-    float half_y, alpha, beta;
-    float u, f1, f2a, f2b;
-    float ratio1, ratio2;
-    float half_sec_half_theta, vers_half_theta;
-    float sq_not_u, sq_u;
-
-    float cosTheta = q1w * q2w + q1x * q2x + q1y * q2y + q1z * q2z;
-
-    // As usual in all slerp implementations, we fold theta.
-    alpha = cosTheta >= 0 ? 1.0f : -1.0f;
-    half_y = 1.0f + alpha * cosTheta;
-
-    // Here we bisect the interval, so we need to fold t as well.
-    f2b = t - 0.5f;
-    u = f2b >= 0 ? f2b : -f2b;
-    f2a = u - f2b;
-    f2b += u;
-    u += u;
-    f1 = 1.0f - u;
-
-    // One iteration of Newton to get 1-cos(theta / 2) to good accuracy.
-    half_sec_half_theta = 1.09f - (0.476537f - 0.0903321f * half_y) * half_y;
-    half_sec_half_theta *= 1.5f - half_y * half_sec_half_theta * half_sec_half_theta;
-    vers_half_theta = 1.0f - half_y * half_sec_half_theta;
-
-    // Evaluate series expansions of the coefficients.
-    sq_not_u = f1 * f1;
-    ratio2 = 0.0000440917108f * vers_half_theta;
-    ratio1 = -0.00158730159f + (sq_not_u - 16.0f) * ratio2;
-    ratio1 = 0.0333333333f + ratio1 * (sq_not_u - 9.0f) * vers_half_theta;
-    ratio1 = -0.333333333f + ratio1 * (sq_not_u - 4.0f) * vers_half_theta;
-    ratio1 = 1.0f + ratio1 * (sq_not_u - 1.0f) * vers_half_theta;
-
-    sq_u = u * u;
-    ratio2 = -0.00158730159f + (sq_u - 16.0f) * ratio2;
-    ratio2 = 0.0333333333f + ratio2 * (sq_u - 9.0f) * vers_half_theta;
-    ratio2 = -0.333333333f + ratio2 * (sq_u - 4.0f) * vers_half_theta;
-    ratio2 = 1.0f + ratio2 * (sq_u - 1.0f) * vers_half_theta;
-
-    // Perform the bisection and resolve the folding done earlier.
-    f1 *= ratio1 * half_sec_half_theta;
-    f2a *= ratio2;
-    f2b *= ratio2;
-    alpha *= f1 + f2a;
-    beta = f1 + f2b;
-
-    // Apply final coefficients to a and b as usual.
-    float w = alpha * q1w + beta * q2w;
-    float x = alpha * q1x + beta * q2x;
-    float y = alpha * q1y + beta * q2y;
-    float z = alpha * q1z + beta * q2z;
-
-    // This final adjustment to the quaternion's length corrects for
-    // any small constraint error in the inputs q1 and q2 But as you
-    // can see, it comes at the cost of 9 additional multiplication
-    // operations. If this error-correcting feature is not required,
-    // the following code may be removed.
-    f1 = 1.5f - 0.5f * (w * w + x * x + y * y + z * z);
-    *dstw = w * f1;
-    *dstx = x * f1;
-    *dsty = y * f1;
-    *dstz = z * f1;
+    
+    float cosom, abs_cosom, sinom, sin_sqr, omega, scale0, scale1; 
+    cosom = from.x * to.x + from.y * to.y + from.z * to.z + from.w * to.w; 
+    abs_cosom = fabs( cosom ); 
+    if ( ( 1.0f - abs_cosom ) > 1e-6f ) { 
+      sin_sqr = 1.0f - abs_cosom * abs_cosom; 
+      sinom = rx_fast_sqrt( sin_sqr ); 
+      omega = atan_positive( sin_sqr * sinom, abs_cosom ); 
+      scale0 = sin_zero_half_pi( ( 1.0f - t ) * omega ) * sinom; 
+      scale1 = sin_zero_half_pi( t * omega ) * sinom; 
+    } else { 
+      scale0 = 1.0f - t; 
+      scale1 = t; 
+    } 
+    scale1 = ( cosom >= 0.0f ) ? scale1 : -scale1; 
+    result.x = scale0 * from.x + scale1 * to.x; 
+    result.y = scale0 * from.y + scale1 * to.y; 
+    result.z = scale0 * from.z + scale1 * to.z; 
+    result.w = scale0 * from.w + scale1 * to.w;
   }
 
   inline Quat Quat::operator*(const Quat& other) const {
@@ -491,6 +481,10 @@ namespace roxlu {
   inline Quat& Quat::operator*=(const Quat& other) {
     multiply(other);
     return *this;
+  }
+
+  inline void Quat::print() {
+    printf("%f, %f, %f, %f\n", x, y, z, w);
   }
 
 } // roxlu

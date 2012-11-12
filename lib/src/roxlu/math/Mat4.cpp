@@ -977,6 +977,7 @@ Mat4 Mat4::operator-(const Mat4& o) const {
 	r.m[13] = m[13] - o.m[13];
 	r.m[14] = m[14] - o.m[14];
 	r.m[15] = m[15] - o.m[15];
+
 	return r;
 }
 
