@@ -1,11 +1,13 @@
 #include <videorecorder/VideoRecorder.h>
 
 #if RGB_CONVERTER == CONVERTER_SWSCALE
-VideoRecorder::VideoRecorder(int inW, int inH, int outW, int outH, int fps)
+VideoRecorder::VideoRecorder(int inW, int inH, int outW, int outH, int fps, bool useVideo, bool useAudio)
   :in_width(inW)
   ,in_height(inH)
   ,out_width(outW)
   ,out_height(outH)
+  ,use_video(useVideo)
+  ,use_audio(useAudio)
 
 #else
    VideoRecorder::VideoRecorder(int inW, int inH, int fps)
@@ -20,21 +22,12 @@ VideoRecorder::VideoRecorder(int inW, int inH, int outW, int outH, int fps)
 #if RGB_CONVERTER == CONVERTER_SWSCALE
   ,sws(NULL)
 #endif
-  ,fp(NULL)
+   //  ,fp(NULL)
   ,io(NULL)
   ,num_frames(0)
   ,vfr_input(false)
   ,spx_enc(NULL)
   ,start_time(0)
-   // timeing
-   /*
-     ,last_dts(0)
-     ,prev_dts(0)
-     ,first_dts(0)
-     ,largest_pts(-1)
-     ,second_largest_pts(-1)
-     ,duration(0)
-   */
 {
   rec_params.video_width = out_width;
   rec_params.video_height = out_height;
@@ -58,11 +51,10 @@ void VideoRecorder::initEncoders() {
   }
 }
 
-void VideoRecorder::writeIOHeaders() {
-  //  io->writeHeaders(&rec_params);
-}
-
 void VideoRecorder::initAudioEncoder() {
+  if(!use_audio) {
+    return;
+  }
   int quality = 4;
   speex_bits_init(&spx_bits);
   spx_enc = speex_encoder_init(&speex_wb_mode); // wideband, 16khz
@@ -80,6 +72,9 @@ void VideoRecorder::initAudioEncoder() {
 }
 
 void VideoRecorder::initVideoEncoder() {
+  if(!use_video) {
+    return;
+  }
   setParams();
 
   // create the encoder
@@ -90,24 +85,16 @@ void VideoRecorder::initVideoEncoder() {
   }
   x264_encoder_parameters(encoder, &params);
 
-  if(io) {
-    //		io->writeParams(&rec_params);
-  }
-
   // allocate picture / sws
-  x264_picture_alloc(&pic_in, X264_CSP_I420, out_width, out_height);
+  //x264_picture_alloc(&pic_in, X264_CSP_I420, out_width, out_height);
+  x264_picture_alloc(&pic_in, X264_CSP_I420, in_width, in_height);
 #if RGB_CONVERTER == CONVERTER_SWSCALE
   sws = sws_getContext(in_width, in_height, PIX_FMT_RGB24, out_width, out_height, PIX_FMT_YUV420P, SWS_FAST_BILINEAR, NULL, NULL, NULL);
 #endif
 
-
   int nheader;
   x264_encoder_headers(encoder, &nals, &nheader);
   rec_params.x264_nal = nals;
-  if(io) {
-    //		io->writeHeaders(&rec_params);
-  }
-
 }
 
 void VideoRecorder::setParams() {
@@ -122,8 +109,7 @@ void VideoRecorder::setParams() {
   // intra refresh
   p->i_keyint_max = fps;
   p->i_keyint_max = 1; // for streaming we need to 
-  p->b_intra_refresh = 1;
-
+  p->b_intra_refresh = 1; // for streaming
 
   // rate control
   p->rc.i_rc_method = X264_RC_CRF;
@@ -132,45 +118,21 @@ void VideoRecorder::setParams() {
   p->rc.i_qp_min = 1; // @todo adjust for correct streaming quality
   p->rc.i_qp_max = 10;
 
-
   // streaming
-  p->b_repeat_headers = 0; // 1 for streaming, for now this only works with '0'
-  p->b_annexb = 0; // 1 for streaming, for now this only works with '0'
+  p->b_repeat_headers = 1; // 0 for streaming, 1 for raw h264
+  p->b_annexb = 1; // 0 for streaming, 1 for e.g. raw h264
 
   x264_param_apply_profile(p, "baseline");
 }
 
 bool VideoRecorder::openFile(const char* filepath) {
-  fp = fopen(filepath, "w+b");
-  if(!fp) {
-    printf("Error: Cannot open raw file.\n");
-    return false;
-  }
+  rec_params.filepath = filepath;
 
   if(io) {
     io->writeOpenFile(&rec_params);
   }
-
   initEncoders();
-
-  int r = writeHeaders();
-  if(r < 0) {
-    printf("Error: cannot write headers.\n");
-    return false;
-  }
-
   return true;
-}
-
-int VideoRecorder::writeHeaders() {
-
-  x264_nal_t* n = nals;
-  int size = n[0].i_payload + n[1].i_payload + n[2].i_payload;
-  if(fwrite(n[0].p_payload, size, 1, fp)) {
-    return size;
-  }
-
-  return 1;
 }
 
 // encode raw pcm 16bit signed data
@@ -187,10 +149,8 @@ int VideoRecorder::addAudioFrame(short int* data, int size) {
   rec_params.spx_buffer = spx_buffer;
   rec_params.audio_num_encoded_samples += rec_params.audio_frame_size;
 
-  if(io) {
-    //	io->writeAudioFrame(&rec_params);
-  }
   printf("@ Audio frame size: %d, encoded samples: %d\n", written, rec_params.audio_num_encoded_samples);
+
   AudioPacket* pkt = new AudioPacket();
   pkt->data = new rx_uint8[written];
   pkt->data_size = written;
@@ -242,16 +202,10 @@ int VideoRecorder::addVideoFrame(unsigned char* pixels) {
   else {
     if(io) {
       // store a new video packet.
-		
       VideoPacket* pkt = new VideoPacket();;
-      //			info_pkt.dts = (pic_out.i_dts * (1.0f/fps)) * 1000 + 0.5;
       pkt->dts = pic_out.i_dts;
       pkt->pts = pic_out.i_pts;
       pkt->time_dts = (Timer::now() - start_time);
-
-      //pkt->dts = (pic_out.i_dts * (1.0f/fps) * 1000 + 0.5f);
-      //pkt->pts = (pic_out.i_pts * (1.0f/fps) * 1000 + 0.5f);
-
 
       pkt->data = new rx_uint8[frame_size];
       memcpy(pkt->data, nals[0].p_payload, frame_size);
@@ -262,43 +216,27 @@ int VideoRecorder::addVideoFrame(unsigned char* pixels) {
       AVInfoPacket info_pkt;
       info_pkt.dx = video_packets.size() - 1;
       info_pkt.av_type = AV_VIDEO;
-      //info_pkt.dts = (pic_out.i_dts * (1.0f/fps)) * 1000 + 0.5; // working
       info_pkt.dts = pkt->time_dts;
 			
-      //printf("Info_pkt.dts: %d, VideoPacket.dts: %d, VideoPacket.pts: %d\n", info_pkt.dts, pkt->dts, pkt->pts);
       info_packets.push_back(info_pkt);
-      //io->writeVideoPacket(pkt);
-      //delete pkt;
 
       writePackets();
 						
       rec_params.x264_nal = nals;
       rec_params.x264_frame_size = frame_size;
       rec_params.x264_pic = &pic_out;
-      //io->writeVideoFrame(&rec_params);
-    }
-
-    if(fwrite(nals[0].p_payload, frame_size, 1, fp)) {
-      //      return frame_size;
     }
 
     return frame_size;
   }
-
   return -1;
 }
 
 void VideoRecorder::closeFile() {
-
-  if(fp) {
-    fclose(fp);
-    fp = NULL;
-  }
   if(io) {
     io->writeCloseFile(&rec_params);
   }
 }
-
 
 /*
   This function handles all logic related to muxing. We interleave the 
@@ -311,7 +249,7 @@ void VideoRecorder::writePackets() {
   std::sort(info_packets.begin(), info_packets.end(), AVInfoPacketSorter());
   for(int i = 0; i < info_packets.size(); ++i) {
     AVInfoPacket& info_pkt = info_packets[i];
-    printf("InfoPacket: %d, Type: %c, DTS: %d\n", i, info_pkt.av_type == AV_VIDEO ? 'V' : 'A', info_pkt.dts);
+    //printf("InfoPacket: %d, Type: %c, DTS: %d\n", i, info_pkt.av_type == AV_VIDEO ? 'V' : 'A', info_pkt.dts);
     if(info_pkt.av_type == AV_AUDIO) {
       io->writeAudioPacket(audio_packets[info_pkt.dx]);
       delete audio_packets[info_pkt.dx];
@@ -320,13 +258,10 @@ void VideoRecorder::writePackets() {
       io->writeVideoPacket(video_packets[info_pkt.dx]);
       delete video_packets[info_pkt.dx];
     }
-    printf("==============\n\n");
-    //io->writeVideoPacket(video_packets[i]);
   }
   audio_packets.clear();
   video_packets.clear();
   info_packets.clear();
-	
 }
 
 

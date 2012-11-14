@@ -7,22 +7,16 @@
 #include <roxlu/Roxlu.h>
 
 class VideoIOFLV : public VideoIO {
-public:
-	int writeOpenFile(VideoParams* p);
-	int writeParams(VideoParams* p);
-	int writeHeaders(VideoParams* p);
-	int writeVideoFrame(VideoParams* p);
-	int writeAudioFrame(VideoParams* p);
-	int writeCloseFile(VideoParams* p);
-	
-	// --------
-	int writeVideoPacket(VideoPacket* p); // @todo to be removed
-	int writeAudioPacket(AudioPacket* p); // @todo to be removed
-	// --------
-
-	virtual void flush(Buffer& buffer); // for VideoIOFLVSocket
-private:
-	FLV flv;
+ public:
+  int writeOpenFile(VideoParams* p);
+  int writeParams(VideoParams* p);
+  int writeHeaders(VideoParams* p);
+  int writeCloseFile(VideoParams* p);
+  int writeVideoPacket(VideoPacket* p);
+  int writeAudioPacket(AudioPacket* p);
+  virtual void flush(Buffer& buffer); // for VideoIOFLVSocket
+ private:
+  FLV flv;
 };
 
 #endif

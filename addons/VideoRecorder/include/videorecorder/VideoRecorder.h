@@ -26,7 +26,7 @@ extern "C" {
 class VideoRecorder {
  public:
 #if RGB_CONVERTER == CONVERTER_SWSCALE
-  VideoRecorder(int inW, int inH, int outW, int outH, int fps);
+  VideoRecorder(int inW, int inH, int outW, int outH, int fps, bool useVideo = true, bool useAudio = true);
 #else
   VideoRecorder(int inW, int inH, int fps);
 #endif
@@ -37,7 +37,6 @@ class VideoRecorder {
   void closeFile();
   void setIO(VideoIO* io);
   void setFPS(int fps);
-  void writeIOHeaders(); // tmp testing
   int getInWidth();
   int getInHeight();
  private:
@@ -45,7 +44,6 @@ class VideoRecorder {
   void initVideoEncoder();
   void initAudioEncoder();
   void setParams();
-  int writeHeaders();
   void writePackets();
  private:
   int out_width;
@@ -57,6 +55,8 @@ class VideoRecorder {
   int num_frames;
   bool vfr_input; // variable frame rate
   rx_uint64 start_time;
+  bool use_audio;
+  bool use_video;
 
   x264_param_t params;
   x264_t* encoder;
