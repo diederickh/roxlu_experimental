@@ -22,6 +22,7 @@ extern "C" {
 #include <videorecorder/VideoIOFLV.h>
 #include <videorecorder/VideoIOH264.h>
 #include <videorecorder/VideoIOFLVSocket.h>
+#include <videorecorder/OpenGLRecorder.h>
 
 class VideoRecorder {
  public:

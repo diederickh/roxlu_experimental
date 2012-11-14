@@ -28,6 +28,7 @@ set(videorecorder_source_files
   ${videorecorder_src_dir}/videorecorder/VideoIOFLV.cpp
   ${videorecorder_src_dir}/videorecorder/VideoIOH264.cpp
   ${videorecorder_src_dir}/videorecorder/VideoIOFLVSocket.cpp
+  ${videorecorder_src_dir}/videorecorder/OpenGLRecorder.cpp
   ${videorecorder_src_dir}/videorecorder/VideoRecorder.cpp
 )
 
