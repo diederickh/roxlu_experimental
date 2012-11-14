@@ -65,9 +65,9 @@ namespace roxlu {
     void fromAngleAxis(const float radians, const float xx, const float yy, const float zz); 
     void fromEuler(const float radiansX, const float radiansY, const float radiansZ);
     void multiply(const Quat& q);
-    void multiply(const Quat& q1, const Quat& q1, Quat* dst);
+    void multiply(const Quat& q1, const Quat& q2, Quat* dst);
     Vec3 transform(const Vec3& v) const;
-    void lerp(const Quat& q1, const Quat& q1, float t, Quat* dst);
+    void lerp(const Quat& q1, const Quat& q2, float t, Quat* dst);
     static void slerp(const Quat& from, const Quat& to, float t, Quat& result);
     void print();
 

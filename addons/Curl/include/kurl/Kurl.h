@@ -1,6 +1,7 @@
 #include <fstream>
 #include <sys/socket.h>
 #include <curl/curl.h>
+#include <cstdlib>
 #include <vector>
 
 // Wrapper around libcurl

@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <roxlu/Roxlu.h>
 #include <twitter/Twitter.h>
-#include <Kurl/Kurl.h>
+#include <kurl/Kurl.h>
 #include <Types.h>
 #include <jansson.h>
 #include <http_parser/http_parser.h>

@@ -1,4 +1,5 @@
 #!/bin/sh
+# Used libcurl 7.28
 d=${PWD}
 if [ ! -d build ] ; then 
     mkdir build

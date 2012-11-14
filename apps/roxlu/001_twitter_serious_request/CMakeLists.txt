@@ -5,7 +5,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/../../../lib/CMakeLists.txt) # roxlu cmake
 include(${roxlu_base_dir}/apps/external/CMakeLists.txt) # External (glfw)
 include(${roxlu_addons_dir}/Buttons/CMakeLists.txt) # Buttons addon
 include(${roxlu_addons_dir}/Twitter/CMakeLists.txt) # Twitter addon
-include(${roxlu_addons_dir}/Curl/CMakeLists.txt) # Curg addon
+include(${roxlu_addons_dir}/Curl/CMakeLists.txt) # Curl addon
 
 set(simulation_base ${CMAKE_CURRENT_LIST_DIR}/)
 set(simulation_install_dir ${simulation_base}bin/)

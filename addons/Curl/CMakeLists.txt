@@ -28,10 +28,6 @@ set(curl_libs
   z
 )
 
-if(ROXLU_PLATFORM_LINUX)
-  set(twitter_libs ${twitter_libs}  dl pthread rt)
-endif(ROXLU_PLATFORM_LINUX)
-
 set(roxlu_addon_libs
   ${roxlu_addon_libs}
   ${curl_libs}
