@@ -6,8 +6,10 @@
 #include <videorecorder/VideoTypes.h>
 #include <roxlu/Roxlu.h>
 
+
 class VideoIOFLV : public VideoIO {
  public:
+  int getType();
   int writeOpenFile(VideoParams* p);
   int writeParams(VideoParams* p);
   int writeHeaders(VideoParams* p);
@@ -17,6 +19,7 @@ class VideoIOFLV : public VideoIO {
   virtual void flush(Buffer& buffer); // for VideoIOFLVSocket
  private:
   FLV flv;
+  std::string filepath;
 };
 
 #endif

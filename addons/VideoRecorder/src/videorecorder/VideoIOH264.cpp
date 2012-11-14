@@ -5,6 +5,10 @@ VideoIOH264::VideoIOH264()
 {
 }
 
+int VideoIOH264::getType() {
+  return VIDEO_IO_H264;
+}
+
 int VideoIOH264::writeOpenFile(VideoParams* p) {
   fp = fopen(p->filepath.c_str(), "w+b");
   if(!fp) {

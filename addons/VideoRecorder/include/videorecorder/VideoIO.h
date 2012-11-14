@@ -8,8 +8,14 @@ extern "C" {
 #include <x264.h>
 }
 
+enum VideoIOOutputTypes {
+  VIDEO_IO_H264
+  ,VIDEO_IO_FLV
+};
+
 class VideoIO {
  public:
+  virtual int getType() = 0; // VideoIOOutputType
   virtual int writeOpenFile(VideoParams* p) = 0;
   virtual int writeParams(VideoParams* p) = 0;
   virtual int writeHeaders(VideoParams* p) = 0;

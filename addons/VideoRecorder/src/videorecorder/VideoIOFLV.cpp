@@ -1,7 +1,11 @@
 #include <videorecorder/VideoIOFLV.h>
 
+int VideoIOFLV::getType() {
+  return VIDEO_IO_FLV;
+}
 
 int VideoIOFLV::writeOpenFile(VideoParams* p) {
+  filepath = p->filepath;
   int s = flv.writeHeader(true, true);
   flush(flv.getBuffer());
   return s;
@@ -19,7 +23,6 @@ int VideoIOFLV::writeHeaders(VideoParams* p) {
   return s;
 }
 
-
 int VideoIOFLV::writeVideoPacket(VideoPacket* pkt) {
   int s = flv.writeVideoPacket(pkt);
   flush(flv.getBuffer());
@@ -33,7 +36,7 @@ int VideoIOFLV::writeAudioPacket(AudioPacket* pkt) {
 }
 
 int VideoIOFLV::writeCloseFile(VideoParams* p) {
-  flv.saveFile("data/particles_flv2.flv");
+  flv.saveFile(filepath.c_str());
   return 0;
 }
 

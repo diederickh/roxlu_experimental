@@ -118,9 +118,20 @@ void VideoRecorder::setParams() {
   p->rc.i_qp_min = 1; // @todo adjust for correct streaming quality
   p->rc.i_qp_max = 10;
 
-  // streaming
-  p->b_repeat_headers = 1; // 0 for streaming, 1 for raw h264
-  p->b_annexb = 1; // 0 for streaming, 1 for e.g. raw h264
+  // when creating a FLV, we need to set these to 0/0
+  // when writing a H264 we need to set these to 1/1
+   p->b_repeat_headers = 0; // 0 for streaming/flv, 1 for raw h264
+   p->b_annexb = 0; // 0 for streaming/flv, 1 for e.g. raw h264
+   if(io) {
+     if(io->getType() == VIDEO_IO_FLV) {
+       p->b_repeat_headers = 0; 
+       p->b_annexb = 0; 
+     }
+     else if(io->getType() == VIDEO_IO_H264) {
+       p->b_repeat_headers = 1; 
+       p->b_annexb = 1; 
+     }
+   }
 
   x264_param_apply_profile(p, "baseline");
 }

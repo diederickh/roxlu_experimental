@@ -18,6 +18,7 @@
 class VideoIOH264 : public VideoIO {
  public:
   VideoIOH264();
+  int getType();
   int writeOpenFile(VideoParams* p);
   int writeParams(VideoParams* p);
   int writeHeaders(VideoParams* p);
