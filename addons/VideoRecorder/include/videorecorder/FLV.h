@@ -21,57 +21,57 @@ extern "C" {
 */
 
 class FLV {
-public:
-	FLV();
-	~FLV();
+ public:
+  FLV();
+  ~FLV();
 
-	// reading
-	int readHeader();
-	int readTag(); 
+  // reading
+  int readHeader();
+  int readTag(); 
 
-	// writing: production
-	int writeHeader(bool hasVideo = true, bool hasAudio = true);
-	int writeParams(VideoParams* p);
-	int writeHeaders(VideoParams* p);
+  // writing: production
+  int writeHeader(bool hasVideo = true, bool hasAudio = true);
+  int writeParams(VideoParams* p);
+  int writeHeaders(VideoParams* p);
 
-	// --------------------------
-	int writeVideoPacket(VideoPacket* pkt);
-	int writeAudioPacket(AudioPacket* pkt);
-	// --------------------------
+  // --------------------------
+  int writeVideoPacket(VideoPacket* pkt);
+  int writeAudioPacket(AudioPacket* pkt);
+  // --------------------------
 
-	// io
-	void loadFile(const char* filepath);
-	void saveFile(const char* filepath);
-	Buffer& getBuffer();
+  // io
+  void loadFile(const char* filepath);
+  void saveFile(const char* filepath);
+  Buffer& getBuffer();
 
-	// debug
-	void printType(rx_uint8 t);
-private:
-	Buffer buffer;
-	AMF amf;
-	int pos_file_size;
-	int pos_datarate;
-	int pos_duration;
-	rx_uint64 time_start;
+  // debug
+  void printType(rx_uint8 t);
+ private:
+  Buffer buffer;
+  AMF amf;
+  int pos_file_size;
+  int pos_datarate;
+  int pos_duration;
+  rx_uint64 time_start;
 
-	double timebase;
-	bool vfr_input;
-	rx_int64 prev_dts;
-	rx_int64 prev_cts;
-	rx_int64 delay_time;
-	rx_int64 init_delta;
-	rx_int64 fps_num;
-	rx_int64 fps_den;
-	rx_int64 framenum;
-	int delay_frames;
-	bool dts_compress;
+  double timebase;
+  bool vfr_input;
+  rx_int64 prev_dts;
+  rx_int64 prev_cts;
+  rx_int64 delay_time;
+  rx_int64 init_delta;
+  rx_int64 fps_num;
+  rx_int64 fps_den;
+  rx_int64 framenum;
+  int delay_frames;
+  bool dts_compress;
 
-	rx_uint8* sei; // sei is copied and write is deferred after first frame
-	int sei_len;
+  rx_uint8* sei; // sei is copied and write is deferred after first frame
+  int sei_len;
 };
 
 inline Buffer& FLV::getBuffer() {
-	return buffer;
+  return buffer;
 }
 
 #endif

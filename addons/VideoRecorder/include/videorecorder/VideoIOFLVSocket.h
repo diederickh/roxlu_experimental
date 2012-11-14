@@ -7,11 +7,11 @@
 #include <roxlu/Roxlu.h>
 
 class VideoIOFLVSocket : public VideoIOFLV {
-public:
-	void connect(const char* ip, unsigned short int port);
-	void flush(Buffer& buffer);
-private:
-	Socket sock;
+ public:
+  void connect(const char* ip, unsigned short int port);
+  void flush(Buffer& buffer);
+ private:
+  Socket sock;
 };
 
 #endif

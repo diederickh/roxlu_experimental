@@ -29,106 +29,106 @@
 // AMF Types
 // -------------------------------------------------------
 struct AMFType {
-   AMFType(int type);
-	virtual ~AMFType();
-	virtual void print();
-	int getType();
-	int type;
+  AMFType(int type);
+  virtual ~AMFType();
+  virtual void print();
+  int getType();
+  int type;
 };
 
 struct AMFContainer : public AMFType{
-	AMFContainer();
-	AMFContainer(int type);
-	~AMFContainer();
-	void push_back(AMFType* type);
-	void deleteElements();
-	std::vector<AMFType*>::iterator find(const std::string& name);
-	void print();
-	std::vector<AMFType*> elements;
+  AMFContainer();
+  AMFContainer(int type);
+  ~AMFContainer();
+  void push_back(AMFType* type);
+  void deleteElements();
+  std::vector<AMFType*>::iterator find(const std::string& name);
+  void print();
+  std::vector<AMFType*> elements;
 };
 
 
 struct AMFNumber : public AMFType {
-	AMFNumber(double value);
-	double getValue() { return value; }
-	void print();
-	double value;
+  AMFNumber(double value);
+  double getValue() { return value; }
+  void print();
+  double value;
 };
 
 struct AMFString : public AMFType {
-	AMFString(const std::string& str, bool writeTag = false); // writeTag = write the tag marker
-	~AMFString();
-	void print();
-	std::string getValue();
-	std::string value;
-	bool write_tag;
+  AMFString(const std::string& str, bool writeTag = false); // writeTag = write the tag marker
+  ~AMFString();
+  void print();
+  std::string getValue();
+  std::string value;
+  bool write_tag;
 };
 
 struct AMFBoolean : public AMFType {
-	AMFBoolean(bool value);
-	void print();
-	bool getValue();
-	bool value;
+  AMFBoolean(bool value);
+  void print();
+  bool getValue();
+  bool value;
 };
 
 struct AMFObject : public AMFType {
-	AMFObject();
+  AMFObject();
 };
 
 struct AMFMovieClip : public AMFType {
-	AMFMovieClip();
+  AMFMovieClip();
 };
 
 struct AMFNull : public AMFType {
-	AMFNull();
+  AMFNull();
 };
 
 struct AMFUndefined : public AMFType {
-	AMFUndefined();
+  AMFUndefined();
 };
 
 struct AMFReference : public AMFType {
-	AMFReference();
+  AMFReference();
 };
 
 // Last element is an empty string (end marker)
 struct AMFEcmaArray : public AMFContainer {
-	AMFEcmaArray();
-	void operator()(const std::string& name, AMFType* el);
+  AMFEcmaArray();
+  void operator()(const std::string& name, AMFType* el);
 };
 
 struct AMFObjectEnd : public AMFType {
-	AMFObjectEnd();
-	void print();
+  AMFObjectEnd();
+  void print();
 };
 
 struct AMFStrictArray : public AMFType {
-	AMFStrictArray();
+  AMFStrictArray();
 };
 
 struct AMFDate : public AMFType {
-	AMFDate();
+  AMFDate();
 };
 
 struct AMFLongString : public AMFType {
-	AMFLongString();
+  AMFLongString();
 };
 
 struct AMFUnsupported : public AMFType {
-	AMFUnsupported();
+  AMFUnsupported();
 };
 
 struct AMFRecordSet : public AMFType {
-	AMFRecordSet();
+  AMFRecordSet();
 };
 
 struct AMFXML : public AMFType
- {
-	AMFXML();
+{
+  AMFXML();
 };
 
 struct AMFTypedObject : public AMFType {
-	AMFTypedObject();
+  AMFTypedObject();
 };
 
 #endif

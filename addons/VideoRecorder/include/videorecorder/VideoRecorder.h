@@ -31,10 +31,10 @@ class VideoRecorder {
   VideoRecorder(int inW, int inH, int fps);
 #endif
   ~VideoRecorder();
-  bool openFile(const char* filepath);
+  bool open(const char* filepath);
   int addVideoFrame(unsigned char* pixels);
   int addAudioFrame(short int* data, int size);
-  void closeFile();
+  void close();
   void setIO(VideoIO* io);
   void setFPS(int fps);
   int getInWidth();

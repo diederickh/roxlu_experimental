@@ -86,7 +86,6 @@ VideoPacket()
   }
   ~VideoPacket() {
     if(data) {
-      printf("~ delete data\n");
       delete[] data;
     }
   }

@@ -39,7 +39,7 @@ VideoRecorder::VideoRecorder(int inW, int inH, int outW, int outH, int fps, bool
 }
 
 VideoRecorder::~VideoRecorder() {
-  closeFile();
+  close();
 }
 
 void VideoRecorder::initEncoders() {
@@ -125,7 +125,7 @@ void VideoRecorder::setParams() {
   x264_param_apply_profile(p, "baseline");
 }
 
-bool VideoRecorder::openFile(const char* filepath) {
+bool VideoRecorder::open(const char* filepath) {
   rec_params.filepath = filepath;
 
   if(io) {
@@ -232,7 +232,7 @@ int VideoRecorder::addVideoFrame(unsigned char* pixels) {
   return -1;
 }
 
-void VideoRecorder::closeFile() {
+void VideoRecorder::close() {
   if(io) {
     io->writeCloseFile(&rec_params);
   }
