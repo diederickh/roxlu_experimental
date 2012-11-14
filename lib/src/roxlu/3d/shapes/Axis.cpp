@@ -87,6 +87,7 @@ namespace roxlu {
     shader.enable();
     shader.uniformMat4fv("u_projection_matrix", pm);
     shader.uniformMat4fv("u_view_matrix", vm);
+    glLineWidth(2.0f);
     glDrawArrays(GL_LINES, 0, nvertices);
   }
 

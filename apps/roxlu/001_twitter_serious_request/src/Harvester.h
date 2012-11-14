@@ -17,6 +17,19 @@ extern "C" {
 #include <bson.h>
 }
 
+/*
+- handy mongodb commands:
+  - db.images.files.find( { "_id" : ObjectId("50A162D07AA35C1300000271") } ).toArray()
+  - show dbs
+  - show collections
+  - use [dbname]
+  - Get all files which have a tweet_id_str field:
+    db.images.files.find( { tweet_id_str : { $exists : true } } ).count()
+  - Remove everything from a collection:
+     db.images.chunks.remove()
+ 
+ */
+
 // Harvesting real time data from
 // - twitter
 enum HarvestTypes {

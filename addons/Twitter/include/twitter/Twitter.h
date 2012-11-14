@@ -38,12 +38,23 @@ namespace roxlu {
       std::string status;
     };
 
-    struct TwitterStatusesFilter {
-      TwitterStatusesFilter(const std::string track = "", const std::string follow = "");
+    // https://api.twitter.com/1/geo/search.json?query=Holland
+    class TwitterStatusesFilter {
+    public:
+      //TwitterStatusesFilter();
+      //      TwitterStatusesFilter(const std::string track, const std::string follow);
+      void addLocation(
+                       const std::string long0,
+                       const std::string lat0, 
+                       const std::string long1,
+                       const std::string lat1
+                       );
       std::string getCommaSeparatedTrackList() const;
       std::string getCommaSeparatedFollowList() const;
+      std::string getCommaSeparatedLocationList() const; 
       std::vector<std::string> track;
       std::vector<std::string> follow;
+      std::vector<std::string> locations;
     };
 
     struct TwitterCallParams {

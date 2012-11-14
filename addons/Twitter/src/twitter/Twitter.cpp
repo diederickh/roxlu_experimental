@@ -201,22 +201,40 @@ namespace roxlu {
 
     // API SPECIFIC PARAMETER TYPES
     // ----------------------------
+    /*
+    TwitterStatusesFilter::TwitterStatusesFilter() {
+    }
+
     TwitterStatusesFilter::TwitterStatusesFilter(const std::string track, const std::string follow) {
-      printf("ctro");
       if(track.size()) {
         this->track.push_back(track);
       }
       if(follow.size()) {
         this->follow.push_back(follow);
       }
-      printf("2");
     }
+    */
 
     std::string TwitterStatusesFilter::getCommaSeparatedTrackList() const {
       return join(track, ",");
     }
     std::string TwitterStatusesFilter::getCommaSeparatedFollowList() const {
       return join(follow, ",");
+    }
+    std::string TwitterStatusesFilter::getCommaSeparatedLocationList() const {
+      return join(locations, ",");
+    }
+    void TwitterStatusesFilter::addLocation(
+                                       const std::string long0,
+                                       const std::string lat0,
+                                       const std::string long1,
+                                       const std::string lat1
+                                       )
+    {
+      locations.push_back(long0);
+      locations.push_back(lat0);
+      locations.push_back(long1);
+      locations.push_back(lat1);
     }
 
     // API IMPLEMENTATION
@@ -235,18 +253,31 @@ namespace roxlu {
       makeAPICall(cp);
     }
 
-    void Twitter::apiStatusesFilter(const TwitterStatusesFilter& param, cb_request_read_body bodyCB, void* bodyData) {
+
+
+    void Twitter::apiStatusesFilter(
+                                    const TwitterStatusesFilter& param,
+                                    cb_request_read_body bodyCB, 
+                                    void* bodyData
+                                    )
+
+
+    {
       HTTPParameters p;
-      printf("3");
+
       if(param.track.size() > 0) {
         p.add("track", param.getCommaSeparatedTrackList());
       }
-      printf("4");
+
       if(param.follow.size() > 0) {
         p.add("follow", param.getCommaSeparatedFollowList());
       }
 
-      printf("5");
+      if(param.locations.size() > 0) {
+        p.add("locations", param.getCommaSeparatedLocationList());
+        printf("%s\n", param.getCommaSeparatedLocationList().c_str());
+      }
+
       TwitterCallParams cp;
       cp.endpoint = "/1.1/statuses/filter.json";
       cp.host = "stream.twitter.com";
@@ -256,6 +287,7 @@ namespace roxlu {
       cp.params = p;
       makeAPICall(cp);
     }
+
 
   } // roxlu
 } // twitter

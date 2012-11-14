@@ -106,9 +106,10 @@ void Harvester::setup() {
   tw.setSSLPrivateKey(key_file.c_str());
   #include "Tokens.h"
 
-  roxlu::twitter::TwitterStatusesFilter tsf("twitter,love,sex");
+  roxlu::twitter::TwitterStatusesFilter tsf;
+  tsf.addLocation("3.2976616","50.750449","7.2276122","53.5757042");
   //roxlu::twitter::TwitterStatusesFilter tsf("3fm,3fmsr,sr12");
-  tw.apiStatusesFilter(tsf, Harvester::onTweet, this);
+  tw.apiStatusesFilter(tsf, Harvester::onTweet, (void*)this);
 }
 
 void Harvester::update() {
@@ -151,6 +152,7 @@ void Harvester::onTweet(const char* data, size_t len, void* harv) {
   std::string id_str;
   if(json_is_string(val)) {
     bson_append_string(&o, "id_str", json_string_value(val));
+    id_str = json_string_value(val);
   }
   else {
     printf("ERROR: CANNOT FIND ID_STR; MUST BE INCORRECT JSON\n");
@@ -219,10 +221,17 @@ void Harvester::onTweet(const char* data, size_t len, void* harv) {
             h->entries.push_back(he);
             he->type = HT_TWEET;
             he->media_id_str = media_id_str;
+            he->id_str = id_str;
             he->h = h;
             gridfile_writer_init(he->gfile, h->gfs, grid_filename.c_str(), grid_mime.c_str());
             h->entries.push_back(he);
-            
+
+            printf("gridfile ID: ");
+            for(int i = 0; i < sizeof(he->gfile->id.bytes); ++i) {
+              printf("%02X", (unsigned char)he->gfile->id.bytes[i]);
+            }
+            printf("\n");
+            // bson_oid_t
             //h->kurl.download(url, filename, Harvester::onTweetImageDownloadComplete, he);
             h->kurl.download(
                              url, 
@@ -259,7 +268,7 @@ void Harvester::onTweet(const char* data, size_t len, void* harv) {
   val = json_object_get(root, "text");
   if(json_is_string(val)) {
     bson_append_string(&o, "text", json_string_value(val));
-    //   printf("> %05lld =  %s\n", h->num, json_string_value(val));
+    printf("> %05lld =  %s\n", h->num, json_string_value(val));
     ++h->num;
   }
   
@@ -369,6 +378,32 @@ void Harvester::onTweetImageDownloadComplete(KurlConnection* c, void* userdata) 
     if(r != MONGO_OK) {
       printf("ERROR: Cannot close writer.\n");
     }
+    
+    // STORE TWEET ID IN FILES COLLECTION
+    // -----------------------------------
+    bson gf_query[1];
+    mongo_cursor gf_cursor[1];
+    bson_init(gf_query);
+    bson_append_oid(gf_query, "_id", &he->gfile->id);
+    bson_finish(gf_query);
+
+    bson gf_meta[1];
+    bson_init(gf_meta);
+    bson_append_start_object(gf_meta, "$set");
+    bson_append_string(gf_meta, "tweet_id_str", he->id_str.c_str());
+    bson_append_finish_object(gf_meta);
+    bson_finish(gf_meta);
+
+    int up_result = mongo_update(&he->h->mcon, "tweet.images.files", gf_query, gf_meta, MONGO_UPDATE_UPSERT, NULL);
+    if(up_result != MONGO_OK) {
+      printf("ERROR: %s\n", he->h->mcon.errstr);
+    }
+           
+    bson_destroy(gf_meta);
+    bson_destroy(gf_query);
+
+    // CLEANUP
+    // -------
     delete he;
     he->h->entries.erase(it);
   }

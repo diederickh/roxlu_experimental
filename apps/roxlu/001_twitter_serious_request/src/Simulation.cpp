@@ -9,7 +9,7 @@ Simulation::Simulation()
 void Simulation::setup() {
   setWindowTitle("Example simulation");
 
-  // harvester_thread.setup();
+  harvester_thread.setup();
 
   cam.perspective(60.0f, 4.0f/3.0f, 0.1f, 10.0f);
   cam.setPosition(0.0f, 0.0f, -1.0f);
@@ -17,7 +17,7 @@ void Simulation::setup() {
 
 void Simulation::update() {
   //gui.update();
-  //harvester.update();
+  //  harvester.update();
   /*
   uint64_t new_tweet_count = 0;
   uint64_t new_image_count = 0;
