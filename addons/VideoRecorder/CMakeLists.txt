@@ -44,7 +44,7 @@ set(videorecorder_libs
   ${videorecorder_lib_dir}/libswscale.a
   ${videorecorder_lib_dir}/libx264.a
   ${videorecorder_lib_dir}/libyuv.a
-  ${videorecorder_lib_dir}/libjpeg_turbo.a
+#  ${videorecorder_lib_dir}/libjpeg_turbo.a
 )
 
 

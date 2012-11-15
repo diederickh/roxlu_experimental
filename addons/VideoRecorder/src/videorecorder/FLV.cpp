@@ -143,8 +143,8 @@ int FLV::writeParams(VideoParams* params) {
 	timebase = (double)p->i_timebase_num / p->i_timebase_den;
 	delay_frames = p->i_bframe ? (p->i_bframe_pyramid ? 2 : 1) : 0;
 	printf("> VFR input: %d\n", vfr_input);
-	printf("> FPS num: %d\n", fps_num);
-	printf("> FPS den: %d\n", fps_den);
+	printf("> FPS num: %lld\n", fps_num);
+	printf("> FPS den: %lld\n", fps_den);
 	printf("> Timebase: %f\n", timebase);
 	printf("> Delay frames: %d\n", delay_frames);
 	
@@ -195,8 +195,6 @@ int FLV::writeParams(VideoParams* params) {
 	amf.putStringAMF0(buffer, AMFString("filesize", false));
 	pos_file_size = buffer.size();
 	amf.putNumberAMF0(buffer, AMFNumber(0));
-	char* str = "";
-
 
 	amf.putStringAMF0(buffer, AMFString("videodatarate", false));
 	pos_datarate = buffer.size();
@@ -295,9 +293,9 @@ int FLV::writeVideoPacket(VideoPacket* pkt) {
 	if(framenum == 0) {
 		delay_time = pkt->dts * -1;
 		if(!dts_compress && delay_time) {
-			printf("> Frame: initial delay: %d ms\n", convert_timebase_ms(pkt->pts + delay_time, timebase));
+			printf("> Frame: initial delay: %lld ms\n", convert_timebase_ms(pkt->pts + delay_time, timebase));
 		}
-		printf("> Frame: delay time: %d\n", delay_time);
+		printf("> Frame: delay time: %lld\n", delay_time);
 	}
 
 	rx_int64 dts;
@@ -316,10 +314,10 @@ int FLV::writeVideoPacket(VideoPacket* pkt) {
 	// for all but first frame
 	if(framenum > 0) {
 		if(prev_dts == dts) {
-			printf("> Frame: WARNING: duplicate dts: %d\n", dts);
+			printf("> Frame: WARNING: duplicate dts: %lld\n", dts);
 		}
 		if(prev_cts == cts) {
-			printf("> Frame: WARNING: duplicate cts: %d\n", cts);
+			printf("> Frame: WARNING: duplicate cts: %lld\n", cts);
 		}
 	}
 
@@ -336,8 +334,8 @@ int FLV::writeVideoPacket(VideoPacket* pkt) {
 	//buffer.putBigEndianU24(dts);  // timestamp, based on x264_picture_t.i_dts
 	//buffer.putU8(dts >> 24); // timestamp extended
 	buffer.putBigEndianU24(0); // stream id
-	printf("> Frame: dts >> 24: %d\n", ((dts >> 24)));
-	printf("> Frame: dts: %d, cts: %d, offset: %d\n", dts, cts, offset);
+	printf("> Frame: dts >> 24: %lld\n", ((dts >> 24)));
+	printf("> Frame: dts: %lld, cts: %lld, offset: %lld\n", dts, cts, offset);
 
 
 	// video data / avcvideopacket

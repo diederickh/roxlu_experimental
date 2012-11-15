@@ -150,6 +150,7 @@ namespace roxlu {
           }
         }
       }
+      return true;
     }
 
     static bool createDirectory(std::string path) {
