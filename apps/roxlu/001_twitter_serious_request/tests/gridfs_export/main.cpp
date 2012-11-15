@@ -71,6 +71,11 @@ int main() {
           std::string fname(md5);
           fname = "images/" +fname +ext;
           FILE* stream = fopen(fname.c_str(), "w+");
+          if(!stream) {
+            printf("Cannot open: %s\n", fname.c_str());
+            continue;
+          }
+
           gridfile_write_file(gfile, stream);
           fclose(stream);
         }
