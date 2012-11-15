@@ -3,8 +3,10 @@
 
 #include <string>
 #include <fstream>
+#include <vector>
 #include <cstdlib>
 #include <roxlu/core/platform/Platform.h>
+#include <sys/stat.h>
 
 #if ROXLU_PLATFORM == ROXLU_APPLE || ROXLU_PLATFORM == ROXLU_IOS
 #include <TargetConditionals.h>
@@ -120,7 +122,44 @@ namespace roxlu {
       return buf;
 #endif
     }
-  };
-}
+
+    // e.g.: File::createPath("/users/home/roxlu/data/images/2012/12/05/")
+    static bool createPath(std::string path) {
+      std::vector<std::string> dirs;
+      while(path.length() > 0) {
+        int index = path.find('/');
+        std::string dir = (index == -1 ) ? path : path.substr(0, index);
+        if(dir.length() > 0) {
+          dirs.push_back(dir);
+        }
+        if(index + 1 >= path.length() || index == -1) {
+          break;
+        }
+        path = path.substr(index + 1);
+      }
+    
+      struct stat s;
+      std::string dir_path;
+      for(unsigned int i = 0; i < dirs.size(); i++) {
+        dir_path += "/";
+        dir_path += dirs[i];
+        if(stat(dir_path.c_str(), &s) != 0) {
+          if(!File::createDirectory(dir_path.c_str())) {
+            printf("ERROR: cannot create directory: %s\n", dir_path.c_str());
+            return false;
+          }
+        }
+      }
+    }
+
+    static bool createDirectory(std::string path) {
+      if(mkdir(path.c_str(), 0777) != 0) {
+        return false;
+      }
+      return true;
+    }
+    
+  }; // File
+} // roxlu
 
 #endif

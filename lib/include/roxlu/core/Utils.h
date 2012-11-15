@@ -5,6 +5,8 @@
 //#include "Constants.h"
 
 #include <roxlu/core/Constants.h>
+#include <stdio.h>
+#include <time.h>
 
 #undef get16bits
 #if (defined(__GNUC__) && defined(__i386__)) || defined(__WATCOMC__) \
@@ -46,6 +48,18 @@ static float rx_fast_sqrt(float x) {
     r = *(float *)( &i ); 
     r = r * ( 1.5f - r * r * y ); 
     return r; 
+}
+
+// rx_strftime("%Y/%m%d"), http://www.cplusplus.com/reference/clibrary/ctime/strftime/
+inline std::string rx_strftime(const char* timestr) {
+  time_t t;
+  struct tm* info;
+  char buf[4096]; // must be enough..
+  time(&t);
+  info = localtime(&t);
+  strftime(buf, 4096, timestr, info);
+  std::string result(buf);
+  return result;
 }
 
 #endif
