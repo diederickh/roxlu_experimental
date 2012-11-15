@@ -7,6 +7,7 @@ void HarvesterThread::setup() {
 void HarvesterThread::run() {
   printf("START THE THREAD\n");
   harvester.setup();
+  printf("--------------------\n");
   while(true) {
     harvester.update();
   }
@@ -50,36 +51,47 @@ Harvester::Harvester()
 }
 
 Harvester::~Harvester() {
-  mongo_destroy(&mcon);
 }
 
 void Harvester::setup() {
-  /*
-    // Test with parsing a url
-  char* test_url = "http://p.twimg.com/A7BYjQsCUAAdYc6.jpg";
-  URLInfo u;
-  bool parse_result = parseURL(test_url, u);
-  printf("proto: %s\n", u.proto.c_str());
-  printf("host: %s\n", u.host.c_str());
-  printf("filename: %s\n", u.filename.c_str());
-  printf("file_ext: %s\n", u.file_ext.c_str());
-  printf("parse result: %d\n", parse_result);
-  return;
-  */
-
-  // setup mongo connections
-  mongo_init(&mcon);
-  mongo_set_op_timeout(&mcon, 1000);
-  int r = mongo_connect(&mcon, "127.0.0.1", 27017);
-  if(r != MONGO_OK) {
-    printf("ERROR: Cannot connect to mongo.\n");
+  if(!db.open("tweets.db")) {
+    printf("ERROR: cannot open database.\n");
+    ::exit(0);
+  }
+  bool r = db.query("CREATE TABLE IF NOT EXISTS tweets ("  \
+           "id INTEGER PRIMARY KEY AUTOINCREMENT, " \
+           "id_str TEXT, " \
+           "text TEXT, " \
+           "tags TEXT, " \
+           "created_at TEXT, " \
+           "in_reply_to_status_id_str TEXT, "  \
+           "in_reply_to_user_id_str TEXT, " \
+           "user_id_str TEXT, " \
+           "user_screen_name TEXT, " \
+           "user_location TEXT, " \
+           "user_lang TEXT, " \
+           "user_statuses_count INTEGER, " \
+           "user_friends_count INTEGER, " \
+           "user_followers_count INTEGER, " \
+           "retweeted INTEGER, " \
+           "coordinates_long REAL, " \
+           "coordinates_lat REAL, " \
+           "raw TEXT " \
+           ");");
+  if(!r) {
+    printf("ERROR: cannot create tweets table\n");
     ::exit(0);
   }
 
-  // create filesystem
-  r = gridfs_init(&mcon, "tweet", "images", gfs);
-  if(r != MONGO_OK) {
-    printf("ERROR: Cannot initialize file system.\n");
+  r = db.query("CREATE TABLE IF NOT EXISTS images (" \
+           "id INTEGER PRIMARY KEY AUTOINCREMENT, " \
+           "tweet_id_str TEXT, " \
+           "media_id_str TEXT, " \
+           "filepath TEXT " \
+           ");");
+
+  if(!r) {
+    printf("ERROR: Cannot open images table.\n");
     ::exit(0);
   }
 
@@ -87,28 +99,17 @@ void Harvester::setup() {
   tags.push_back("3fm");
   tags.push_back("3fmsr");
   tags.push_back("sr12");
-  tags.push_back("twitter");
-  tags.push_back("love");
-  tags.push_back("sex");
-
-  // query tweets
-  /*
-  mongo_cursor cursor;
-  mongo_cursor_init(&cursor, &mcon, "tweet.messages");
-  while(mongo_cursor_next(&cursor) == MONGO_OK) {
-    bson_print(&(cursor.current));
-  }
-  mongo_cursor_destroy(&cursor);
-  */
+  //tags.push_back("twitpic");
+  //tags.push_back("love");
+  //tags.push_back("sex");
 
   std::string key_file = File::toDataPath("client-key.pem");
-  printf("%s\n", key_file.c_str());
   tw.setSSLPrivateKey(key_file.c_str());
   #include "Tokens.h"
 
   roxlu::twitter::TwitterStatusesFilter tsf;
   tsf.addLocation("3.2976616","50.750449","7.2276122","53.5757042");
-  //roxlu::twitter::TwitterStatusesFilter tsf("3fm,3fmsr,sr12");
+  tsf.track(rx_join(tags, ","));
   tw.apiStatusesFilter(tsf, Harvester::onTweet, (void*)this);
 }
 
@@ -124,12 +125,6 @@ void Harvester::onTweet(const char* data, size_t len, void* harv) {
   // null terminate the data
   char* d = (char*)data;
   d[len] = '\0';
-
- // Create a new bson obj we store.
-  bson o;
-  bson_init(&o);
-  bson_append_new_oid(&o, "_id");
-  bson_append_string(&o, "raw", d);
 
   // Parse the json
   json_t* root;
@@ -150,15 +145,14 @@ void Harvester::onTweet(const char* data, size_t len, void* harv) {
   // id_str
   val = json_object_get(root, "id_str");
   std::string id_str;
-  if(json_is_string(val)) {
-    bson_append_string(&o, "id_str", json_string_value(val));
-    id_str = json_string_value(val);
-  }
-  else {
-    printf("ERROR: CANNOT FIND ID_STR; MUST BE INCORRECT JSON\n");
-    printf("\n\n%s\n\n", d);
+  if(!json_is_string(val)) {
     return;
   }
+
+  QueryInsert insert = h->db.insert("tweets");
+  id_str = json_string_value(val);
+  insert.use("id_str", id_str)
+    .use("raw",d);
   
   // Get images + hashtags
   json_t* ents = json_object_get(root, "entities");
@@ -167,6 +161,7 @@ void Harvester::onTweet(const char* data, size_t len, void* harv) {
     json_t* hashtags = json_object_get(ents, "hashtags");
     if(json_is_array(hashtags) && json_array_size(hashtags) > 0) {
       size_t num_tags = json_array_size(hashtags);
+      std::vector<std::string> found_tags;
       for(int k = 0; k < num_tags; ++k) {
         json_t* tag_obj = json_array_get(hashtags, k);
 
@@ -177,10 +172,13 @@ void Harvester::onTweet(const char* data, size_t len, void* harv) {
             std::transform(tag.begin(), tag.end(), tag.begin(), ::tolower);
             std::vector<std::string>::iterator it = std::find(h->tags.begin(), h->tags.end(), tag);
             if(it != h->tags.end()) {
-
+              found_tags.push_back(tag);
             }
           } 
         }
+      }
+      if(found_tags.size()) {
+        insert.use("tags", rx_join(found_tags,","));
       }
     }
     // media
@@ -207,14 +205,7 @@ void Harvester::onTweet(const char* data, size_t len, void* harv) {
           URLInfo u;
 
           if(parseURL(url, u)) {
-            std::string grid_filename = u.filename +"." +u.file_ext;;
-            std::string grid_mime = "unknown";
-            if(u.file_ext == "jpg") {
-              grid_mime = "image/jpeg";
-            }
-            else if(u.file_ext == "png") {
-              grid_mime = "image/png";
-            }
+            std::string grid_filename = media_id_str +"." +u.file_ext;
 
             // Download the media file
             HarvestEntry* he = new HarvestEntry();
@@ -223,41 +214,23 @@ void Harvester::onTweet(const char* data, size_t len, void* harv) {
             he->media_id_str = media_id_str;
             he->id_str = id_str;
             he->h = h;
-            gridfile_writer_init(he->gfile, h->gfs, grid_filename.c_str(), grid_mime.c_str());
+
             h->entries.push_back(he);
+            std::string save_subpath = rx_strftime("%Y/%m/%d/%H/");
+            File::createPath(File::toDataPath(save_subpath));
+            save_subpath += grid_filename;
+            
+            h->db.insert("images")
+              .use("tweet_id_str", id_str)
+              .use("media_id_str", media_id_str)
+              .use("filepath", save_subpath)
+              .execute();
 
-            printf("gridfile ID: ");
-            for(int i = 0; i < sizeof(he->gfile->id.bytes); ++i) {
-              printf("%02X", (unsigned char)he->gfile->id.bytes[i]);
-            }
-            printf("\n");
-            // bson_oid_t
-            //h->kurl.download(url, filename, Harvester::onTweetImageDownloadComplete, he);
-            h->kurl.download(
-                             url, 
-                             grid_filename.c_str(), 
-                             Harvester::onTweetImageDownloadComplete, 
-                             he, 
-                             Harvester::onTweetImageWriteChunk, 
-                             he
-                             );
-            //  gridfile_writer_done(gfile);
-            // gridfile_write_buffer(gfile, buf, bytes_read);
-
+            printf("\n\n>> IMAGE: %s (%s)\n\n", url, grid_filename.c_str());
+            h->kurl.download(url, File::toDataPath(save_subpath).c_str(), Harvester::onTweetImageDownloadComplete, he);
           }
           else {
-            printf("\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nCannot parse: %s\n!!!!!!!!!!!!!!!!!!!!!!\n\n", url);
           }
-
-          /* 
-             // ue http_parser_url to get pahtname
-          http_parser_url u;
-          int r = http_parser_parse_url(url, strlen(url)+1, 0, &u);
-          char filename[512];
-          memcpy(filename, url+u.field_data[UF_PATH].off+1, u.field_data[UF_PATH].len);
-          */
-          //printf(">>>>>>>>>> (%d), %s <%s>\n",r, json_string_value(media_url), filename);
-
         } 
       }
     }
@@ -267,27 +240,27 @@ void Harvester::onTweet(const char* data, size_t len, void* harv) {
   // text
   val = json_object_get(root, "text");
   if(json_is_string(val)) {
-    bson_append_string(&o, "text", json_string_value(val));
     printf("> %05lld =  %s\n", h->num, json_string_value(val));
+    insert.use("text", json_string_value(val));
     ++h->num;
   }
   
   // created_at
   val = json_object_get(root, "created_at");
   if(json_is_string(val)) {
-    bson_append_string(&o, "created_at", json_string_value(val));
+    insert.use("created_at", json_string_value(val));
   }
 
   // in_reply_to_status_id_str
   val = json_object_get(root, "in_reply_to_status_id_str");
   if(json_is_string(val)) {
-    bson_append_string(&o, "in_reply_to_status_id_str", json_string_value(val));
+    insert.use("in_reply_to_status_id_str", json_string_value(val));
   }
 
   // in_reply_to_user_id_str
   val = json_object_get(root, "in_reply_to_user_id_str");
   if(json_is_string(val)) {
-    bson_append_string(&o, "in_reply_to_user_id_str", json_string_value(val));
+    insert.use("in_reply_to_user_id_str", json_string_value(val));
   }
 
   // user
@@ -297,50 +270,50 @@ void Harvester::onTweet(const char* data, size_t len, void* harv) {
     // id_str
     json_t* subval = json_object_get(val, "id_str");
     if(json_is_string(subval)) {
-      bson_append_string(&o, "user_id_str", json_string_value(subval));
+      insert.use("user_id_str", json_string_value(subval));
     }
 
     // screen_name
     subval = json_object_get(val, "screen_name");
     if(json_is_string(subval)) {
-      bson_append_string(&o, "user_screen_name", json_string_value(subval));
+      insert.use("user_screen_name", json_string_value(subval));
     }
 
     // location
     subval = json_object_get(val, "location");
     if(json_is_string(subval)) {
-      bson_append_string(&o, "user_location", json_string_value(subval));
+      insert.use("user_location", json_string_value(subval));
     }
 
     // lang
     subval = json_object_get(val, "lang");
     if(json_is_string(subval)) {
-      bson_append_string(&o, "user_lang", json_string_value(subval));
+      insert.use("user_lang", json_string_value(subval));
     }
 
     // statuses_count
     subval = json_object_get(val, "statuses_count");
     if(json_is_integer(subval)) {
-      bson_append_int(&o, "user_statuses_count", json_integer_value(subval));
+      insert.use("user_statuses_count", json_integer_value(subval));
     }
 
     // friends count
     subval = json_object_get(val, "friends_count");
     if(json_is_integer(subval)) {
-      bson_append_int(&o, "user_friends_count", json_integer_value(subval));
+      insert.use("user_friends_count", json_integer_value(subval));
     }
 
     // followers count
     subval = json_object_get(val, "followers_count");
     if(json_is_integer(subval)) {
-      bson_append_int(&o, "user_followers_count", json_integer_value(subval));
+      insert.use("user_followers_count", json_integer_value(subval));
     }
   }
 
   // retweeted
   val = json_object_get(root, "retweeted");
   if(json_is_boolean(val)) {
-    bson_append_bool(&o, "", json_is_true(val));
+    insert.use("retweeted", json_is_true(val) ? 1 : 0);
   }
 
   // https://groups.google.com/forum/?fromgroups=#!topic/twitter-api-announce/5_wG5KjLcVA
@@ -353,57 +326,21 @@ void Harvester::onTweet(const char* data, size_t len, void* harv) {
     if(json_is_array(subval) && json_array_size(subval) == 2) {
       double longitude = json_number_value(json_array_get(subval, 0));
       double latitude = json_number_value(json_array_get(subval, 1));
-      bson_append_double(&o, "coordinates_long", longitude);
-      bson_append_double(&o, "coordinates_lat", latitude);
+      insert.use("coordinates_long", longitude);
+      insert.use("coordinates_lat", latitude);
     }
   }
-
-  bson_finish(&o);
-  mongo_insert(&h->mcon, "tweet.messages", &o, NULL);
-  //  bson_print(&o);
-  bson_destroy(&o);
-
+  
+  insert.execute();
   h->slice_tweet_count++;
+  json_decref(root);
   return;
 }
 
 void Harvester::onTweetImageDownloadComplete(KurlConnection* c, void* userdata) {
   HarvestEntry* he = static_cast<HarvestEntry*>(userdata);
-
-  he->h->slice_image_count++;
-
   std::vector<HarvestEntry*>::iterator it = std::find(he->h->entries.begin(), he->h->entries.end(), he);
   if(it != he->h->entries.end()) {
-    int r = gridfile_writer_done(he->gfile);
-    if(r != MONGO_OK) {
-      printf("ERROR: Cannot close writer.\n");
-    }
-    
-    // STORE TWEET ID IN FILES COLLECTION
-    // -----------------------------------
-    bson gf_query[1];
-    mongo_cursor gf_cursor[1];
-    bson_init(gf_query);
-    bson_append_oid(gf_query, "_id", &he->gfile->id);
-    bson_finish(gf_query);
-
-    bson gf_meta[1];
-    bson_init(gf_meta);
-    bson_append_start_object(gf_meta, "$set");
-    bson_append_string(gf_meta, "tweet_id_str", he->id_str.c_str());
-    bson_append_finish_object(gf_meta);
-    bson_finish(gf_meta);
-
-    int up_result = mongo_update(&he->h->mcon, "tweet.images.files", gf_query, gf_meta, MONGO_UPDATE_UPSERT, NULL);
-    if(up_result != MONGO_OK) {
-      printf("ERROR: %s\n", he->h->mcon.errstr);
-    }
-           
-    bson_destroy(gf_meta);
-    bson_destroy(gf_query);
-
-    // CLEANUP
-    // -------
     delete he;
     he->h->entries.erase(it);
   }
@@ -417,9 +354,6 @@ void Harvester::onTweetImageWriteChunk(
                                        void* userdata
                                        )
 {
-  //printf("Count: %zu, num_bytes: %zu\n", count, nmemb);
-  HarvestEntry* he = static_cast<HarvestEntry*>(userdata);
-  gridfile_write_buffer(he->gfile, data, count * nmemb);
 }
                                        
 void Harvester::resetSliceCounts() {

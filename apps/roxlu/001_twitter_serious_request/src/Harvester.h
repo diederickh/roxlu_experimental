@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <roxlu/Roxlu.h>
 #include <twitter/Twitter.h>
+#include <sqlite/Database.h>
 #include <kurl/Kurl.h>
 #include <Types.h>
 #include <jansson.h>
@@ -75,7 +76,7 @@ public:
   uint64_t slice_image_count;
   uint64_t slice_ends_on;
   uint64_t slice_duration;
-
+  Database db;
 };
 
 class HarvesterThread : public roxlu::Runnable {

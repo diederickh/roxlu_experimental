@@ -201,40 +201,30 @@ namespace roxlu {
 
     // API SPECIFIC PARAMETER TYPES
     // ----------------------------
-    /*
-    TwitterStatusesFilter::TwitterStatusesFilter() {
+    std::string TwitterStatusesFilter::getCommaSeparatedTrackList() {
+      return join(track_list, ",");
     }
-
-    TwitterStatusesFilter::TwitterStatusesFilter(const std::string track, const std::string follow) {
-      if(track.size()) {
-        this->track.push_back(track);
-      }
-      if(follow.size()) {
-        this->follow.push_back(follow);
-      }
+    std::string TwitterStatusesFilter::getCommaSeparatedFollowList() {
+      return join(follow_list, ",");
     }
-    */
-
-    std::string TwitterStatusesFilter::getCommaSeparatedTrackList() const {
-      return join(track, ",");
-    }
-    std::string TwitterStatusesFilter::getCommaSeparatedFollowList() const {
-      return join(follow, ",");
-    }
-    std::string TwitterStatusesFilter::getCommaSeparatedLocationList() const {
-      return join(locations, ",");
+    std::string TwitterStatusesFilter::getCommaSeparatedLocationList() {
+      return join(locations_list, ",");
     }
     void TwitterStatusesFilter::addLocation(
-                                       const std::string long0,
-                                       const std::string lat0,
-                                       const std::string long1,
-                                       const std::string lat1
+                                       std::string long0,
+                                       std::string lat0,
+                                       std::string long1,
+                                       std::string lat1
                                        )
     {
-      locations.push_back(long0);
-      locations.push_back(lat0);
-      locations.push_back(long1);
-      locations.push_back(lat1);
+      locations_list.push_back(long0);
+      locations_list.push_back(lat0);
+      locations_list.push_back(long1);
+      locations_list.push_back(lat1);
+    }
+
+    void TwitterStatusesFilter::track(std::string word) {
+      track_list.push_back(word);
     }
 
     // API IMPLEMENTATION
@@ -253,10 +243,8 @@ namespace roxlu {
       makeAPICall(cp);
     }
 
-
-
     void Twitter::apiStatusesFilter(
-                                    const TwitterStatusesFilter& param,
+                                    TwitterStatusesFilter param,
                                     cb_request_read_body bodyCB, 
                                     void* bodyData
                                     )
@@ -265,17 +253,16 @@ namespace roxlu {
     {
       HTTPParameters p;
 
-      if(param.track.size() > 0) {
+      if(param.track_list.size() > 0) {
         p.add("track", param.getCommaSeparatedTrackList());
       }
 
-      if(param.follow.size() > 0) {
+      if(param.follow_list.size() > 0) {
         p.add("follow", param.getCommaSeparatedFollowList());
       }
 
-      if(param.locations.size() > 0) {
+      if(param.locations_list.size() > 0) {
         p.add("locations", param.getCommaSeparatedLocationList());
-        printf("%s\n", param.getCommaSeparatedLocationList().c_str());
       }
 
       TwitterCallParams cp;

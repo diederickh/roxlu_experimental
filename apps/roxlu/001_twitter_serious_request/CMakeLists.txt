@@ -8,11 +8,13 @@ include(${roxlu_addons_dir}/Twitter/CMakeLists.txt) # Twitter addon
 include(${roxlu_addons_dir}/Curl/CMakeLists.txt) # Curl addon
 include(${roxlu_addons_dir}/Jansson/CMakeLists.txt) # Jansson addon
 include(${roxlu_addons_dir}/Mongo/CMakeLists.txt) # Mongo addon
+include(${roxlu_addons_dir}/SQLite/CMakeLists.txt) # SQLite addon
 
 set(simulation_base ${CMAKE_CURRENT_LIST_DIR}/)
 set(simulation_install_dir ${simulation_base}bin/)
 set(simulation_include_dir ${simulation_base}src/)
 set(CMAKE_INSTALL_PREFIX ${simulation_install_dir})
+set(CMAKE_BUILD_TYPE Debug)
 
 if(APPLE)
   set(CMAKE_EXE_LINKER_FLAGS " -framework CoreFoundation -framework OpenGL -framework Cocoa -framework IOKit ")
@@ -21,9 +23,6 @@ endif(APPLE)
 set(simulation_libs
   ${roxlu_addon_libs}
   ${glfw_libs}
-#  ${simulation_base}/src/mongo/lib/${roxlu_platform}/${roxlu_bits}/libmongoc.a
-#  ${simulation_base}/src/mongo/lib/${roxlu_platform}/${roxlu_bits}/libbson.a
-#  ${simulation_base}/src/jansson/lib/${roxlu_platform}/${roxlu_bits}/libjansson.a
 )
 
 get_filename_component(simulation_name ${CMAKE_CURRENT_SOURCE_DIR} NAME)
@@ -42,8 +41,6 @@ include_directories(
   ${external_include_dir}
   ${simulation_include_dir}
   ${roxlu_include_dirs}
-#  ${simulation_include_dir}/mongo/include/
-#  ${simulation_include_dir}/jansson/include/
 )
 
 add_definitions(

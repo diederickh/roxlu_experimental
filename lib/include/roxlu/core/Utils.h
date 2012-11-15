@@ -7,6 +7,8 @@
 #include <roxlu/core/Constants.h>
 #include <stdio.h>
 #include <time.h>
+#include <vector>
+#include <sstream>
 
 #undef get16bits
 #if (defined(__GNUC__) && defined(__i386__)) || defined(__WATCOMC__) \
@@ -59,6 +61,20 @@ inline std::string rx_strftime(const char* timestr) {
   info = localtime(&t);
   strftime(buf, 4096, timestr, info);
   std::string result(buf);
+  return result;
+}
+
+template<class T>
+static std::string rx_join(const std::vector<T>& entries, std::string sep) {
+  std::string result;
+  for(typename  std::vector<T>::const_iterator it = entries.begin(); it != entries.end(); ++it) {
+    std::stringstream ss; 
+    ss << *it;
+    result.append(ss.str());
+    if(it + 1 != entries.end()) {
+      result.append(sep);
+    }
+  }
   return result;
 }
 

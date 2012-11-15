@@ -3,6 +3,8 @@
 #include <Harvester.h>
 #include <roxlu/Roxlu.h>
 
+#define USE_TWIT_THREAD
+
 class Simulation : public SimulationBase {
 public:
   Simulation();
@@ -17,8 +19,10 @@ public:
   void onKeyUp(char key);
 private:
   buttons::Buttons gui;
+#ifdef USE_TWIT_THREAD
   HarvesterThread harvester_thread;
-
-  //  Harvester harvester;
+#else
+  Harvester harvester;
+#endif
   Camera cam;
 };

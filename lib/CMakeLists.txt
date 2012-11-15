@@ -72,4 +72,6 @@ endif(ROXLU_64BIT)
 # http://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
 add_definitions(
   "-Wno-invalid-offsetof"
+  "-Wreturn-type"
+  "-Werror=return-type"
 )

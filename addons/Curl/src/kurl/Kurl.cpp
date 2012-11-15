@@ -2,12 +2,15 @@
 
 size_t kurl_callback_write_function(char* data, size_t size, size_t nmemb, void* userdata) {
   if(nmemb > 0) {
-        KurlConnection* kc = static_cast<KurlConnection*>(userdata);
+    KurlConnection* kc = static_cast<KurlConnection*>(userdata);
     if(kc->write_callback) {
       kc->write_callback(kc, data, size, nmemb, kc->write_data);
     }
     else {
       kc->ofs.write(data, nmemb);
+      if(!kc->ofs) {
+        printf("ERROR: cannot write ot file in Kurl.\n");
+      }
     }
   }
   return size * nmemb;
@@ -88,8 +91,8 @@ bool Kurl::download(
     return false;
   }
   
-  // Only open a file when now writeCB is given
-  if(writeCB != NULL) {
+  // Only open a file when no writeCB is given
+  if(writeCB == NULL) {
     c->ofs.open(filename, std::ios::out | std::ios::binary);
     if(!c->ofs.is_open()) {
       printf("ERROR: Kurl::download, ofs.is_open() failed\n");

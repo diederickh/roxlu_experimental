@@ -12,138 +12,138 @@ using std::string;
 
 namespace buttons {
 
-class Buttons;
+  class Buttons;
 
-class Element {
-public:	
-	Element(int type, const string& name);
-	~Element();
+  class Element {
+  public:	
+    Element(int type, const string& name);
+    ~Element();
 
-	virtual void setup(){}
-	virtual void update(){}
-	virtual void draw(Shader& shader, const float* pm){} // custom drawing! pm = projection matrix
+    virtual void setup(){}
+    virtual void update(){}
+    virtual void draw(Shader& shader, const float* pm){} // custom drawing! pm = projection matrix
 	
-	virtual void generateStaticText() {}
-	virtual void updateTextPosition() {}
-	virtual void generateDynamicText() {};
-	virtual void updateDynamicText() {};
-	virtual void generateVertices(ButtonVertices& shapeVertices) = 0;
+    virtual void generateStaticText() {}
+    virtual void updateTextPosition() {}
+    virtual void generateDynamicText() {};
+    virtual void updateDynamicText() {};
+    virtual void generateVertices(ButtonVertices& shapeVertices) = 0;
 	
-	virtual void getChildElements(vector<Element*>& elements) {}
-	virtual void positionChildren(){}
-	virtual void onChildValueChanged(){} // gets called when the value of a child is change (and has called flagValueChanged())
+    virtual void getChildElements(vector<Element*>& elements) {}
+    virtual void positionChildren(){}
+    virtual void onChildValueChanged(){} // gets called when the value of a child is change (and has called flagValueChanged())
 				
-	virtual void onMouseMoved(int mx, int my) { } // global  move
-	virtual void onMouseDragged(int mx, int my, int dx, int dy) { } // global drag (check: drag_inside)
-	virtual void onMouseDown(int mx, int my) { } // global down
-	virtual void onMouseUp(int mx, int my) { } // global up
-	virtual void onMouseClick(int mx, int my) { } // when click and released inside
-	virtual void onMouseEnter(int mx, int my) { }
-	virtual void onMouseLeave(int mx, int my) { }
+    virtual void onMouseMoved(int mx, int my) { } // global  move
+    virtual void onMouseDragged(int mx, int my, int dx, int dy) { } // global drag (check: drag_inside)
+    virtual void onMouseDown(int mx, int my) { } // global down
+    virtual void onMouseUp(int mx, int my) { } // global up
+    virtual void onMouseClick(int mx, int my) { } // when click and released inside
+    virtual void onMouseEnter(int mx, int my) { }
+    virtual void onMouseLeave(int mx, int my) { }
 	
-	virtual bool canSave() = 0;
-	virtual void save(std::ofstream& ofs) = 0; 	// each element which stores something must write a size_t with the amount of data it stores
-	virtual void load(std::ifstream& ifs) = 0;
+    virtual bool canSave() = 0;
+    virtual void save(std::ofstream& ofs) = 0; 	// each element which stores something must write a size_t with the amount of data it stores
+    virtual void load(std::ifstream& ifs) = 0;
 	
-	virtual void onSaved(){}  // gets called once all data has been saved
-	virtual void onLoaded(){}  // gets called once all data has been loaded 
-	virtual bool serializeScheme(ButtonsBuffer& buffer){}; // serialize all data necessasry to "rebuild" this widget. client<->server
+    virtual void onSaved(){}  // gets called once all data has been saved
+    virtual void onLoaded(){}  // gets called once all data has been loaded 
+    virtual bool serializeScheme(ButtonsBuffer& buffer){ return true; }; // serialize all data necessasry to "rebuild" this widget. client<->server
 	
-	virtual void hide();
-	virtual void show();
+    virtual void hide();
+    virtual void show();
 		
-	virtual Element& setColor(const float hue, float sat = 0.2, float bright = 0.27, float a = 1.0f);
-	virtual void setValue(void* v) {}  // added this for client/sever model where the value (or template type) can't be known.
+    virtual Element& setColor(const float hue, float sat = 0.2, float bright = 0.27, float a = 1.0f);
+    virtual void setValue(void* v) {}  // added this for client/sever model where the value (or template type) can't be known.
   
 	
- 	void needsRedraw();
-	void needsTextUpdate(); // when you want to change the dynamic text
-	void flagValueChanged();
+    void needsRedraw();
+    void needsTextUpdate(); // when you want to change the dynamic text
+    void flagValueChanged();
 	
-	int x;
-	int y; 
-	int w;
-	int h;
-	int type;
+    int x;
+    int y; 
+    int w;
+    int h;
+    int type;
 
-	string label;
-	string name;
+    string label;
+    string name;
 	
-	int state;
-	bool is_child; // an element (like the color picker) can have children. children needs to be positioned by the parent!
-	bool is_mouse_inside;
-	bool is_mouse_down_inside;
-	bool is_visible; 
-	bool needs_redraw;	
-	bool needs_text_update;
-	bool value_changed;
-	bool drag_inside; // did the drag started from inside the element.
+    int state;
+    bool is_child; // an element (like the color picker) can have children. children needs to be positioned by the parent!
+    bool is_mouse_inside;
+    bool is_mouse_down_inside;
+    bool is_visible; 
+    bool needs_redraw;	
+    bool needs_text_update;
+    bool value_changed;
+    bool drag_inside; // did the drag started from inside the element.
 	
-	float* bg_top_color;
-	float* bg_bottom_color;
-	float col_text[4];
-	float col_bg_default[4];
-	float col_bg_top_hover[4];
-	float col_bg_bottom_hover[4];
-	float col_hue;
-	float col_sat;
-	float col_bright;
+    float* bg_top_color;
+    float* bg_bottom_color;
+    float col_text[4];
+    float col_bg_default[4];
+    float col_bg_top_hover[4];
+    float col_bg_bottom_hover[4];
+    float col_hue;
+    float col_sat;
+    float col_bright;
 	
-	Text* static_text;
-	Text* dynamic_text;
+    Text* static_text;
+    Text* dynamic_text;
 
-	void* event_data;  // used when issueing flagChanged  (used by Client<>Server, for e..g buttons)
-	Element* parent; // the parent element in case of a child. see Buttons::getChildElements
-};
+    void* event_data;  // used when issueing flagChanged  (used by Client<>Server, for e..g buttons)
+    Element* parent; // the parent element in case of a child. see Buttons::getChildElements
+  };
 
-inline void Element::flagValueChanged() {
-	if(parent != NULL) {
-		parent->value_changed = true;
-	}
-	value_changed = true;
-}
+  inline void Element::flagValueChanged() {
+    if(parent != NULL) {
+      parent->value_changed = true;
+    }
+    value_changed = true;
+  }
 
-inline void Element::needsRedraw() {
-	needs_redraw = true;
-}
+  inline void Element::needsRedraw() {
+    needs_redraw = true;
+  }
 
-inline void Element::needsTextUpdate() {
-	needs_text_update = true;
-}
+  inline void Element::needsTextUpdate() {
+    needs_text_update = true;
+  }
 
 
-//, const float sat, const float bright, float a) {
+  //, const float sat, const float bright, float a) {
 
-inline Element& Element::setColor(const float hue, float sat, float bright, float a) {
-	col_hue = hue;
-	col_sat = sat;
-	col_bright = bright;
+  inline Element& Element::setColor(const float hue, float sat, float bright, float a) {
+    col_hue = hue;
+    col_sat = sat;
+    col_bright = bright;
 
-	float rr,gg,bb;
-	HSL_to_RGB(col_hue, col_sat, col_bright, &rr, &gg, &bb);
-	BSET_COLOR(col_bg_default, rr, gg, bb, a);
-	bg_bottom_color = col_bg_default;
-	bg_top_color = col_bg_default;
-	col_bg_top_hover[3] = a;
-	col_bg_bottom_hover[3] = a;
-	col_text[3] = 0.9f;	
+    float rr,gg,bb;
+    HSL_to_RGB(col_hue, col_sat, col_bright, &rr, &gg, &bb);
+    BSET_COLOR(col_bg_default, rr, gg, bb, a);
+    bg_bottom_color = col_bg_default;
+    bg_top_color = col_bg_default;
+    col_bg_top_hover[3] = a;
+    col_bg_bottom_hover[3] = a;
+    col_text[3] = 0.9f;	
 	
-	float top_bright = std::min<float>(1.0, col_bright + 0.1);
-	float bot_bright = std::max<float>(0.0, col_bright - 0.1);
+    float top_bright = std::min<float>(1.0, col_bright + 0.1);
+    float bot_bright = std::max<float>(0.0, col_bright - 0.1);
 	
-	HSL_to_RGB(col_hue, col_sat , top_bright, &col_bg_top_hover[0], &col_bg_top_hover[1], &col_bg_top_hover[2]);
-	HSL_to_RGB(col_hue, col_sat , bot_bright, &col_bg_bottom_hover[0], &col_bg_bottom_hover[1], &col_bg_bottom_hover[2]);
-	HSL_to_RGB(col_hue, col_sat , col_bright + 0.4, &col_text[0], &col_text[1], &col_text[2]);
-	return *this;
-}
+    HSL_to_RGB(col_hue, col_sat , top_bright, &col_bg_top_hover[0], &col_bg_top_hover[1], &col_bg_top_hover[2]);
+    HSL_to_RGB(col_hue, col_sat , bot_bright, &col_bg_bottom_hover[0], &col_bg_bottom_hover[1], &col_bg_bottom_hover[2]);
+    HSL_to_RGB(col_hue, col_sat , col_bright + 0.4, &col_text[0], &col_text[1], &col_text[2]);
+    return *this;
+  }
 
-inline void Element::show() {
-	is_visible = true;
-}
+  inline void Element::show() {
+    is_visible = true;
+  }
 
-inline void Element::hide() {
-	is_visible = false;
-}
+  inline void Element::hide() {
+    is_visible = false;
+  }
 
 
 } // namespace buttons

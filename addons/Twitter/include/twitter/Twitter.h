@@ -41,20 +41,19 @@ namespace roxlu {
     // https://api.twitter.com/1/geo/search.json?query=Holland
     class TwitterStatusesFilter {
     public:
-      //TwitterStatusesFilter();
-      //      TwitterStatusesFilter(const std::string track, const std::string follow);
       void addLocation(
-                       const std::string long0,
-                       const std::string lat0, 
-                       const std::string long1,
-                       const std::string lat1
+                       std::string long0,
+                       std::string lat0, 
+                       std::string long1,
+                       std::string lat1
                        );
-      std::string getCommaSeparatedTrackList() const;
-      std::string getCommaSeparatedFollowList() const;
-      std::string getCommaSeparatedLocationList() const; 
-      std::vector<std::string> track;
-      std::vector<std::string> follow;
-      std::vector<std::string> locations;
+      void track(std::string word);
+      std::string getCommaSeparatedTrackList();
+      std::string getCommaSeparatedFollowList();
+      std::string getCommaSeparatedLocationList();
+      std::vector<std::string> track_list;
+      std::vector<std::string> follow_list;
+      std::vector<std::string> locations_list;
     };
 
     struct TwitterCallParams {
@@ -94,7 +93,7 @@ namespace roxlu {
       void setSSLPrivateKey(const char* filepath);
       void update();
       void makeAPICall(TwitterCallParams& p);
-      void apiStatusesFilter(const TwitterStatusesFilter& param, cb_request_read_body bodyCB = NULL, void* bodyData = NULL);
+      void apiStatusesFilter(TwitterStatusesFilter param, cb_request_read_body bodyCB = NULL, void* bodyData = NULL);
       void apiStatusesUpdate(const TwitterStatusesUpdate& param, cb_request_read_body bodyCB = NULL, void* bodyData = NULL);
     private:
       bool hasConsumerKeyAndSecret();
