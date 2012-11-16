@@ -44,13 +44,11 @@ namespace roxlu {
   public:
     std::string text;
     STB_TexteditState state;
-    
+    roxlu::Font* font; // used to render the editable text
+    unsigned int entry; // the entry you want to be editable  
   private:
     bool is_shader_created;
     bool is_initialized;
-    roxlu::Font* font; // used to render the editable text
-    unsigned int entry; // the entry you want to be editable
-    
     Shader shader;
     VAO vao;
     GLuint vbo;

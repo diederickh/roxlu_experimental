@@ -223,6 +223,10 @@ namespace roxlu {
       locations_list.push_back(lat1);
     }
 
+    void TwitterStatusesFilter::follow(std::string userid) {
+      follow_list.push_back(userid);
+    }
+
     void TwitterStatusesFilter::track(std::string word) {
       track_list.push_back(word);
     }

@@ -29,8 +29,9 @@ tw.setTokenSecret("SOME_TOKEN_SECRET");
    */
 #include "twitter_tokens.h" 
 
-  roxlu::twitter::TwitterStatusesFilter tsf("twitter,love,sex,friend");
-  tw.apiStatusesFilter(tsf, on_filter_update_callback);
+  roxlu::twitter::TwitterStatusesFilter tsf;
+  tsf.track("twitter,love,sex,friend");
+  tw.apiStatusesFilter(tsf, on_filter_update_callback, &tw);
 
   while(true) {
     tw.update();

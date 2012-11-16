@@ -30,8 +30,9 @@ tw.setTokenSecret("SOME_TOKEN_SECRET");
    */
 #include "twitter_tokens.h" 
 
-  roxlu::twitter::TwitterStatusesFilter tsf("","466622389");
-  tw.apiStatusesFilter(tsf, on_filter_update_callback);
+  roxlu::twitter::TwitterStatusesFilter tsf;
+  tsf.follow("466622389");
+  tw.apiStatusesFilter(tsf, on_filter_update_callback, (void*)&tw);
 
   while(true) {
     tw.update();

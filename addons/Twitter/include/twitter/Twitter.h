@@ -48,6 +48,7 @@ namespace roxlu {
                        std::string lat1
                        );
       void track(std::string word);
+      void follow(std::string userID);
       std::string getCommaSeparatedTrackList();
       std::string getCommaSeparatedFollowList();
       std::string getCommaSeparatedLocationList();
