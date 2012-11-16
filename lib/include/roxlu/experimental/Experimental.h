@@ -4,6 +4,7 @@
 #include <roxlu/experimental/Binning2D.h>
 #include <roxlu/experimental/Font.h>
 #include <roxlu/experimental/Image.h>
+#include <roxlu/experimental/Input.h>
 #include <roxlu/experimental/SimpleAnim.h>
 #include <roxlu/experimental/StereoCam.h>
 #include <roxlu/experimental/Timer.h>

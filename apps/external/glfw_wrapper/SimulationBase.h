@@ -11,8 +11,8 @@ public:
   virtual void onMouseUp(int x, int y, int button);
   virtual void onMouseDrag(int x, int y, int dx, int dy, int button);
   virtual void onMouseMove(int x, int y);
-  virtual void onKeyDown(char key);
-  virtual void onKeyUp(char key);
+  virtual void onKeyDown(int key);
+  virtual void onKeyUp(int key);
   virtual void onWindowResize(int w, int h);
   virtual void onWindowClose();
   void setWindowTitle(const char* title);

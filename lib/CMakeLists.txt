@@ -18,7 +18,8 @@ set(roxlu_addons_dir ${roxlu_base_dir}/addons/)
 file(GLOB_RECURSE roxlu_3d_sources ${roxlu_src_dir}/3d/*.cpp)
 file(GLOB_RECURSE roxlu_core_sources ${roxlu_src_dir}/core/*.cpp)
 file(GLOB_RECURSE roxlu_experimental_sources ${roxlu_src_dir}/experimental/*.cpp)
-file(GLOB_RECURSE roxlu_external_sources ${roxlu_src_dir}/external/*.c)
+file(GLOB_RECURSE roxlu_external_sources_c ${roxlu_src_dir}/external/*.c)
+file(GLOB_RECURSE roxlu_external_sources_cpp ${roxlu_src_dir}/external/*.cpp)
 file(GLOB_RECURSE roxlu_io_sources ${roxlu_src_dir}/io/*.cpp)
 file(GLOB_RECURSE roxlu_math_sources ${roxlu_src_dir}/math/*.cpp)
 file(GLOB_RECURSE roxlu_opengl_sources ${roxlu_src_dir}/opengl/*.cpp)
@@ -27,7 +28,8 @@ set(roxlu_sources
   ${roxlu_3d_sources}
   ${roxlu_core_sources}
   ${roxlu_experimental_sources}
-  ${roxlu_external_sources}
+  ${roxlu_external_sources_c}
+  ${roxlu_external_sources_cpp}
   ${roxlu_io_sources}
   ${roxlu_math_sources}
   ${roxlu_opengl_sources}
