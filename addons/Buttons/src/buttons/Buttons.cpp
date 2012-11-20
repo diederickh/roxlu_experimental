@@ -680,7 +680,7 @@ void Buttons::load(const string& file) {
 }
 
 Element* Buttons::getElement(const string& name) {
-	vector<Element*>::iterator it = std::find_if(elements.begin(), elements.end(), ElementByName(name));
+	vector<Element*>::iterator it = std::find_if(elements.begin(), elements.end(), ElementByName(createCleanName(name)));
 	if(it == elements.end()) {
 		return NULL;
 	}

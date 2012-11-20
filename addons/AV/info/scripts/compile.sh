@@ -24,6 +24,9 @@
 # - iconv ( http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz )
 # - libav ( git clone git://git.libav.org/libav.git && git reset --hard 65d94f63ca38b46a9d3719cb7d986d2daef90416 )
 # - crtmpserver ( svn co --username anonymous --password "" https://svn.rtmpd.com/crtmpserver/branches/1.0 crtmpserver )
+# - liblame 3.99.5 ( http://downloads.sourceforge.net/project/lame/lame/3.99/lame-3.99.5.tar.gz?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Flame%2Ffiles%2Flame%2F3.99%2F&ts=1343162097&use_mirror=dfn )
+# - speex 1.2 rc ( http://www.speex.org/downloads/ ) 
+
 
 # Usage (how to compile for libav)
 # --------------------------------
@@ -39,6 +42,8 @@
 #	- libogg
 #	- libvorbis
 #	- libtheora
+#	- lame
+#	- speex
 #	- x264
 #
 # - Compile with the following commands and in this order:
@@ -52,6 +57,8 @@
 #	./compile.sh ogg
 #	./compile.sh vorbis
 #	./compile.sh theora
+#	./compile.sh lame
+#	./compile.sh speex
 #	./compile.sh x264
 #	./compile.sh libav
 
@@ -248,6 +255,8 @@ if [ "$1" = "libav" ] ; then
 			--enable-libtheora \
 			--enable-gpl \
 			--enable-shared \
+			--enable-libmp3lame \
+			--enable-libspeex \
 			--disable-avserver target-os=darwin cc='/Developer/usr/bin/cc -m32 '
 	make clean
 	make
@@ -278,3 +287,16 @@ if [ "$1" = "irssi" ] ; then
 	make install
 fi
 
+if [ "$1" = "lame" ] ; then
+	cd lame
+	./configure --prefix=${bd}
+	make
+	make install
+fi
+
+if [ "$1" = "speex" ] ; then 
+	cd speex
+	./configure --prefix=${bd}
+	make 
+	make install
+fi

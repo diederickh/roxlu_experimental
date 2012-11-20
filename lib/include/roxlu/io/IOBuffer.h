@@ -84,12 +84,14 @@ public:
 	rx_uint8 	consumeByte();
 	rx_uint8 	consumeUI8();
 	rx_uint16	consumeUI16();
+	rx_uint32	consumeUI24();
 	rx_uint32 	consumeUI32();
 	rx_uint64 	consumeUI64();
 	float		consumeFloat();
 	bool		consumeBool();
 	rx_int8  	consumeI8();
 	rx_int16 	consumeI16();
+	rx_int32		consumeI24();
 	rx_int32 	consumeI32();
 	rx_int64 	consumeI64();
 	double 		consumeDouble();
@@ -111,6 +113,7 @@ public:
 		
 	// consume: big endian
 	rx_uint16 	consumeUI16BE();
+	rx_uint32	consumeUI24BE();
 	rx_uint32 	consumeUI32BE();
 	rx_uint64 	consumeUI64BE();
 	rx_int16 	consumeI16BE();
