@@ -2,7 +2,78 @@
 #include <videorecorder/VideoRecorder.h>
 #include <stdio.h>
 
-OpenGLRecorder::OpenGLRecorder() 
+// -------------------------------------------------------------------
+// OPENGL RECORDER THREAD
+// -------------------------------------------------------------------
+OpenGLRecorderWorker::OpenGLRecorderWorker() 
+  :rec(NULL)
+  ,num_bytes_in_image(0)
+  ,must_flush(false)
+  ,buffer(1024 * 1024 * 250) // 250 meg, which is more then enough for 1024x769 @ 60 fps
+{
+  clear();
+}
+
+OpenGLRecorderWorker::~OpenGLRecorderWorker() {
+  printf("@TODO: clear memory: this->images\n");
+}
+
+void OpenGLRecorderWorker::copyImage(unsigned char* pixels) {
+  mutex.lock();
+  size_t written = buffer.write((const char*)pixels, num_bytes_in_image);
+  printf("WRITTEN: %zu, bytes in buf: %zu\n", written, buffer.size());
+  mutex.unlock();
+}
+
+void OpenGLRecorderWorker::clear() {
+  mutex.lock();
+  for(std::vector<unsigned char*>::iterator it = images.begin(); it != images.end(); ++it) {
+    delete *it;
+  }
+  images.clear();
+  mutex.unlock();
+}
+
+void OpenGLRecorderWorker::flush() {
+  unsigned char* tmp_buffer = new unsigned char[num_bytes_in_image];
+  must_flush = true;
+  mutex.lock();
+  size_t bytes_read = 0;
+  while((bytes_read = buffer.read((char*)tmp_buffer, num_bytes_in_image)) > 0) {
+    rec->addVideoFrame(tmp_buffer);
+  }
+  mutex.unlock();
+  delete[] tmp_buffer;
+  clear();
+}
+
+void OpenGLRecorderWorker::run() {
+  unsigned char* curr_pix;
+  size_t bytes_read = 0;
+  unsigned char* tmp_buffer = new unsigned char[num_bytes_in_image];
+  while(!must_flush) {
+    mutex.lock();
+    curr_pix = NULL;
+    bytes_read = buffer.read((char*)tmp_buffer, num_bytes_in_image);
+    if(bytes_read > 0) {
+      curr_pix = tmp_buffer;
+    }
+    mutex.unlock();
+    if(curr_pix != NULL) {
+      rec->addVideoFrame(curr_pix);
+      curr_pix = NULL;
+    }
+  }
+  if(curr_pix != NULL) {
+    curr_pix = NULL;
+  }
+  delete[] tmp_buffer;
+}
+
+// -------------------------------------------------------------------
+// OPENGL RECORDER
+// -------------------------------------------------------------------
+OpenGLRecorder::OpenGLRecorder(float fps) 
   :rec(NULL)
   ,io_flv(NULL)
   ,pixels(NULL)
@@ -11,7 +82,10 @@ OpenGLRecorder::OpenGLRecorder()
   ,h(0)
   ,out_w(0)
   ,out_h(0)
+  ,grab_timeout(0)
+  ,time_per_frame(0)
 {
+  setFPS(fps);
 }
 
 OpenGLRecorder::~OpenGLRecorder() {
@@ -32,6 +106,12 @@ OpenGLRecorder::~OpenGLRecorder() {
   }
 }
 
+void OpenGLRecorder::setFPS(float fs) {
+  fps = fs;
+  time_per_frame = (1.0f/fps) * 1000;
+
+}
+
 void OpenGLRecorder::open(const char* filepath, int outW, int outH) {
   if(rec == NULL) {
     int viewport[4];
@@ -49,18 +129,27 @@ void OpenGLRecorder::open(const char* filepath, int outW, int outH) {
     io_flv = new VideoIOFLV();
     rec = new VideoRecorder(w,h,out_w,out_h, 60, true, false);
     rec->setIO(io_flv);
+    rec->setFPS(fps);
     rec->open(filepath);
     pixels = new unsigned char[w * h * 3];
     dest_pixels = new unsigned char[w * h * 3];
+    worker.rec = rec;
+    worker.num_bytes_in_image = w * h * 3;
+    worker_thread.create(worker);
   }
 }
 
 void OpenGLRecorder::grabFrame() {
   if(rec == NULL) {
-    //printf("ERROR: first open() the gl recorder.\n");
     return;
   }
-  //  glReadBuffer(GL_BACK); eglGetError();
+
+  rx_uint64 now = Timer::now();
+  if(now < grab_timeout) {
+    return;
+  }
+  grab_timeout = now + time_per_frame;
+
   glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)pixels);  eglGetError();
   int stride = w * 3;
   for(int j = 0; j < h; ++j) {
@@ -68,10 +157,11 @@ void OpenGLRecorder::grabFrame() {
     int dest_dx =  j * w * 3;
     memcpy(dest_pixels + dest_dx, pixels + src_dx, stride);
   }
-  rec->addVideoFrame(dest_pixels);
+  worker.copyImage(dest_pixels);
 }
 
 void OpenGLRecorder::close() {
+  worker.flush();
   rec->close();
   delete rec;
   rec = NULL;

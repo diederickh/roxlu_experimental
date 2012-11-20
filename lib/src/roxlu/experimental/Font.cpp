@@ -47,6 +47,7 @@ namespace roxlu {
     ,tex(0)
     ,win_w(0)
     ,win_h(0)
+    ,size(16)
     ,needs_update(false)
   {
     memset(pm, 0, sizeof(float) * 16);
@@ -168,6 +169,19 @@ namespace roxlu {
     flagChanged();
   }
 
+  float Font::getStringWidth(const std::string& str, unsigned int start, unsigned int end) {
+    float x = 0.0f;
+    float y = 0.0f;
+    float txt_w = 0.0f;
+    stbtt_aligned_quad q;
+    for(unsigned int i = start; i < end; ++i) {
+      char c = str[i];
+      stbtt_GetBakedQuad(cdata, w, h, c-32, &x, &y, &q, 1);
+      txt_w += (q.x1 - q.x0);
+    }
+    return txt_w;
+  }
+
   void Font::alignRight(unsigned int dx, float rightEdge) {
     FontEntry& e = entries[dx];
     e.align = FEA_RIGHT;
@@ -244,6 +258,7 @@ namespace roxlu {
       FontEntry& e = *it;
       mm[12] = e.pos[0];
       mm[13] = e.pos[1];
+      mm[14] = -0.5f;
       shader.uniformMat4fv("u_model_matrix", mm);
       glDrawArrays(GL_TRIANGLES, dx, vertices.size()); // e.num_vertices);
       dx += e.num_vertices;
@@ -253,11 +268,12 @@ namespace roxlu {
     // vao.unbind();
   }
 
-  bool Font::open(const std::string& filepath) {
+  bool Font::open(const std::string& filepath, unsigned int size) {
     if(is_initialized) {
       printf("ERROR: you can only use one font file per font object.\n");
       ::exit(0);
     }
+    this->size = size;
 
     // READ TTF DATA
     // -------------
@@ -267,16 +283,16 @@ namespace roxlu {
       return false;
     }
     fseek(fp, 0, SEEK_END);
-    int size = ftell(fp);
+    int fsize = ftell(fp);
     fseek(fp, 0, SEEK_SET);
 
-    unsigned char* font_buffer = new unsigned char[size];
+    unsigned char* font_buffer = new unsigned char[fsize];
     if(!font_buffer) {
       printf("ERROR: cannot allocate font buffer.\n");
       return false;
     }
 
-    fread(font_buffer, 1, size, fp);
+    fread(font_buffer, 1, fsize, fp);
     fclose(fp);
     fp = 0;
 
@@ -292,11 +308,11 @@ namespace roxlu {
     int char_end = 96;
     int num_chars = char_end - char_start;
     cdata = new stbtt_bakedchar[num_chars * 2]; // when using num_chars I get a  malloc: *** error for object 0x1008e2808: incorrect checksum for freed object - object was probably modified after being freed.
-
+    printf("Creating a font with size: %d\n", size);
     int r = stbtt_BakeFontBitmap(
                                  font_buffer, 
                                  0, 
-                                 25.0f, 
+                                 size,
                                  pixels, 
                                  w, h, 
                                  char_start, char_end, 

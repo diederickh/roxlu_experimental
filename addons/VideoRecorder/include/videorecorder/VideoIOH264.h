@@ -13,6 +13,8 @@
   Convert to some other format:
   ./avconv -i io_output.264 -vcodec copy out2.mov
 
+  Specify the bitrate
+  ./avconv -i test2.flv -b 512k morph_smaller.mov
  */
 
 class VideoIOH264 : public VideoIO {
