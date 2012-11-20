@@ -1,0 +1,1 @@
+/usr/bin/c++    -Wl,-search_paths_first -headerpad_max_install_names  CMakeFiles/textedit.dir/main.cpp.o CMakeFiles/textedit.dir/Users/diederickhuijbers/roxlu/lib/src/roxlu/external/stb_textedit.cpp.o CMakeFiles/textedit.dir/Users/diederickhuijbers/roxlu/lib/src/roxlu/experimental/Input.cpp.o  -o textedit  

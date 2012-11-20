@@ -21,7 +21,6 @@ OpenGLRecorderWorker::~OpenGLRecorderWorker() {
 void OpenGLRecorderWorker::copyImage(unsigned char* pixels) {
   mutex.lock();
   size_t written = buffer.write((const char*)pixels, num_bytes_in_image);
-  printf("WRITTEN: %zu, bytes in buf: %zu\n", written, buffer.size());
   mutex.unlock();
 }
 
