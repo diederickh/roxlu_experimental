@@ -86,6 +86,10 @@ namespace roxlu {
       pos = p;
     }
 
+    void setPos(const Vec3 p) {
+      pos = p;
+    }
+
     void setPos(const float& x, const float& y, const float& z) {
       pos.set(x,y,z);
     }
