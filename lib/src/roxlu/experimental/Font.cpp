@@ -159,7 +159,7 @@ namespace roxlu {
       CharVertex vd(q.x0, q.y0, q.s0, q.t0, e.col);
       CHAR_TRI(va, vb, vc);
       CHAR_TRI(va, vc, vd);
-      //printf("x0: %f, y0: %f, x1: %f, y1: %f\n", q.x0, q.y0, q.x1, q.y1);
+
       if(q.x1 > e.w) { 
         e.w = q.x1;
       }

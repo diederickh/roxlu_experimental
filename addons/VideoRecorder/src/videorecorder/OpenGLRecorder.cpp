@@ -15,7 +15,7 @@ OpenGLRecorderWorker::OpenGLRecorderWorker()
 }
 
 OpenGLRecorderWorker::~OpenGLRecorderWorker() {
-  printf("@TODO: clear memory: this->images\n");
+  flush();
 }
 
 void OpenGLRecorderWorker::copyImage(unsigned char* pixels) {
