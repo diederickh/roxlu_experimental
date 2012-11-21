@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../../../../lib/include/roxlu/experimental/Input.h
+string
+-
+roxlu/external/stb_textedit.h
+-
+
+../../../../lib/include/roxlu/external/stb_textedit.h
+string.h
+-
+
+/Users/diederickhuijbers/roxlu/lib/src/roxlu/external/stb_textedit.cpp
+string
+-
+roxlu/experimental/Input.h
+-
+roxlu/external/stb_textedit.h
+-
+
+/Users/diederickhuijbers/roxlu/tests/stb/textinput/main.cpp
+iostream
+-
+roxlu/experimental/Input.h
+-
+

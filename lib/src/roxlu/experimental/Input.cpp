@@ -51,7 +51,6 @@ namespace roxlu {
 
   void rx_textedit_layout_row(StbTexteditRow* r, Input* input, int c) {
     printf("layout_row(): ///////////////////////  %d\n", c);
-    
   }
 
   float rx_textedit_get_width(Input* input, int start, int end) {
@@ -78,7 +77,8 @@ namespace roxlu {
 
   int rx_textedit_insert_chars(Input* input, int start, char* chars, int n) {
     printf("IS IN INSERT MODE: %02X, cursor: %d, %02X\n", input->state.insert_mode, input->state.cursor, input->state.single_line);
-    input->text.insert(input->text.size() - start, chars, n);
+    //    input->text.insert(input->text.size() - start, chars, n);
+    input->text.insert( start, chars, n);
     input->font->write(input->entry, input->text);
     printf("insert_chars(), start: %d, length: %d, char: %s, new text is: %s\n", start, n,  chars, input->text.c_str());
     return 0;
@@ -109,16 +109,55 @@ namespace roxlu {
     is_initialized = true;
 
     if(!is_shader_created) {
+      printf("------\n%s\n-----------", INPUT_VS.c_str());
       shader.create(INPUT_VS, INPUT_FS);
       shader.a("a_pos", 0);
       shader.link();
       shader.u("u_projection_matrix").u("u_model_matrix");
       
       // @todo, calculate carret size
-      float cw = 2.0f;
-      float ch = 1.0f;
+      float cw = 6.0f * 0.5;  // draw from center
+      float ch = f->getSize() * 0.7; // draw from center
+      printf("SIZE: %d, %f\n", f->getSize(), ch);
+      float rect[] = {
+        0, 0.0f,
+        cw, 0.0f,
+        cw, -ch, 
+
+        cw, -ch,
+        0, -ch,
+        0, 0.0f
+      };
       is_shader_created = true;
+      vao.bind();
+      glGenBuffers(1, &vbo);
+      glBindBuffer(GL_ARRAY_BUFFER, vbo);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW);
+      
+      glEnableVertexAttribArray(0);
+      glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (GLvoid*)0);
     }
+  }
+
+  void Input::updateCarretPosition() {
+    carret_x = font->getStringWidth(text, 0, state.cursor);
+  }
+
+  void Input::draw() {
+    updateCarretPosition();
+    font->draw();
+    vao.bind();
+    shader.enable();
+    
+
+    FontEntry& e = (*font)[entry];
+    Mat4 model;
+    model.setPosition(e.pos[0] + carret_x, e.pos[1], -0.1f);
+
+    shader.uniformMat4fv("u_projection_matrix", font->getPM());
+    shader.uniformMat4fv("u_model_matrix", model.getPtr());
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
   }
 
   void Input::onMouseDown(int x, int y) {
@@ -144,6 +183,7 @@ namespace roxlu {
       return;
     }
     stb_textedit_key(this, &state, key); // local/xy
+    
   }
 
 } // roxlu

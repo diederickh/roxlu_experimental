@@ -12,7 +12,7 @@ static inline rx_uint16 EndianSwap16(rx_uint16 value) {
   return (rx_uint16)((value >> 8) | (value << 8));
 }
 
-static inline rx_int32 EndianSwap32(rx_int32 value) {
+static inline rx_uint32 EndianSwap32(rx_uint32 value) {
   return (((value & 0x000000ff) << 24) |
           ((value & 0x0000ff00) <<  8) |
           ((value & 0x00ff0000) >>  8) |

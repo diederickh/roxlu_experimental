@@ -19,8 +19,8 @@ namespace roxlu {
 	
     Image();
     ~Image();
-    bool load(const char* filepath);
-    bool save(const char* filepath);
+    bool load(const std::string& filepath);
+    bool save(const std::string& filepath);
     void copyPixels(const unsigned char* src, int w, int h, int components);
     int getWidth();
     int getHeight();

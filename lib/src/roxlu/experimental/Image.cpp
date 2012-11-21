@@ -19,24 +19,22 @@ namespace roxlu {
 
   Image::~Image() {
     if(pixels != NULL) {
-      printf("REMOVE!\n");
       delete[] pixels;
       pixels = NULL;
-      printf("D\n");
     }
   }
 
-  bool Image::load(const char* filepath) {
-    pixels = stbi_load(filepath, &width, &height, &bpp, 0);
+  bool Image::load(const std::string& filepath) {
+    pixels = stbi_load(filepath.c_str(), &width, &height, &bpp, 0);
     if(!pixels) {
       return false;
     }
     return true;
   }
 
-  bool Image::save(const char* filepath) {
+  bool Image::save(const std::string& filepath) {
     if(pixels != NULL) {
-      return stbi_write_png(filepath, width, height, bpp, pixels, bpp * width) > 0;
+      return stbi_write_png(filepath.c_str(), width, height, bpp, pixels, bpp * width) > 0;
     }
     return true;
   }

@@ -20,12 +20,13 @@ namespace roxlu {
     "attribute vec4 a_pos; "
     ""
     "void main() {"
-    "  gl_Position = u_projection_matrix * model_matrix * a_pos; " 
+    "  gl_Position = u_projection_matrix * u_model_matrix * a_pos; " 
     "}";
 
   const std::string INPUT_FS = ""
     "void main() {"
     "  gl_FragColor = vec4(1.0); "
+    "  gl_FragColor.a = 0.4; "
     "}";
 
   
@@ -35,18 +36,20 @@ namespace roxlu {
     Input();
     Input(roxlu::Font* font, unsigned int entry);
     ~Input();
-
     void setFont(roxlu::Font* font, unsigned int entry);
+    void draw();
     void onMouseDown(int x, int y); // global x/y
     void onMouseDragged(int x, int y);  // global x/y
     void onKeyDown(int key);  // global x/y
-
+  private:
+    void updateCarretPosition();
   public:
     std::string text;
     STB_TexteditState state;
     roxlu::Font* font; // used to render the editable text
     unsigned int entry; // the entry you want to be editable  
   private:
+    float carret_x;
     bool is_shader_created;
     bool is_initialized;
     Shader shader;

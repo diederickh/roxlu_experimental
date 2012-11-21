@@ -85,13 +85,16 @@ namespace roxlu {
   public:
     Font();
     ~Font();
-    bool open(const std::string& filepath);
+    bool open(const std::string& filepath, unsigned int size);
     int write(const std::string& text, float x, float y, float r = 1.0f, float g = 1.0f, float b = 1.0f, float a = 1.0f);
     int write(unsigned int dx, const std::string& text); // update text entry @index
     void alignRight(unsigned int dx, float rightEdge); 
+    unsigned int getSize();
     void update();
     void draw();
     void flagChanged();
+    float getStringWidth(const std::string& str, unsigned int start, unsigned int end);
+    const float* getPM(); // get the projection matrix
     FontEntry& operator[](const unsigned int dx);
   private: 
     void updateEntryIndices();
@@ -99,13 +102,14 @@ namespace roxlu {
     void createOrtho(int winW, int winH);
     const float* getPtr(); // get ptr to first CharVertex.pos.x
     size_t getNumBytes(); // number of bytes needed for VBO
-    const float* getPM(); // get the projection matrix
+
   private:
     bool needs_update;
     int win_w;
     int win_h;
     int w; // font texture w
     int h; // font texture h
+    int size; // font size in pixels
     stbtt_bakedchar* cdata;
     bool is_initialized;
   
@@ -135,6 +139,10 @@ namespace roxlu {
 
   inline FontEntry& Font::operator[](const unsigned int dx) {
     return entries[dx];
+  }
+
+  inline unsigned int Font::getSize() {
+    return size;
   }
 
   inline const float* Font::getPM() {
