@@ -167,6 +167,7 @@ namespace roxlu {
     e.needs_update = true;
     e.num_vertices = vertices.size() - e.start_dx;
     flagChanged();
+    return e.num_vertices;
   }
 
   float Font::getStringWidth(const std::string& str, unsigned int start, unsigned int end) {

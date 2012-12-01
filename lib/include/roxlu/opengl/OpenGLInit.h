@@ -11,7 +11,7 @@
    #include <GL/gl.h>
    #include <GL/glext.h>
  #elif ROXLU_PLATFORM == ROXLU_APPLE
-   #include <OpenGL/gl.h>
+  #include <OpenGL/gl.h>
  #endif
 
 #elif ROXLU_GL_WRAPPER == ROXLU_OPENFRAMEWORKS

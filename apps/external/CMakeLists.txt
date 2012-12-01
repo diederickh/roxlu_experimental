@@ -15,15 +15,25 @@ endif(ROXLU_PLATFORM_MAC)
 # 1 = GLFW, 2 = OPENFRAMEWORKS, 3 = CINDER, 4 = COCOA
 add_definitions("-DROXLU_GL_WRAPPER=1") 
 
+# GLFW
 set(glfw_base_dir ${CMAKE_CURRENT_LIST_DIR}/)
 set(glfw_include_dir ${glfw_base_dir}/glfw/include/)
 set(glfw_lib_dir ${glfw_base_dir}/glfw/lib/${roxlu_platform}/${roxlu_bits})
 set(glfw_wrapper_sources ${glfw_base_dir}/glfw_wrapper/SimulationBase.cpp)
 set(glfw_libs 
   ${glfw_lib_dir}/libglfw3.a
-
 )
 
+# GLEW
+set(glew_base_dir ${CMAKE_CURRENT_LIST_DIR}/)
+set(glew_include_dir ${glew_base_dir}/glew/include/)
+set(glew_lib_dir ${glew_base_dir}/glew/lib/${roxlu_platform}/${roxlu_bits})
+set(glew_libs
+  ${glew_lib_dir}/libGLEW.a
+)
+
+
+# Platform specifics
 if(ROXLU_PLATFORM_LINUX)
 set(glfw_libs
   ${glfw_libs}
@@ -36,6 +46,7 @@ endif(ROXLU_PLATFORM_LINUX)
 set(roxlu_include_dirs
   ${roxlu_include_dirs}
   ${glfw_include_dir}
+  ${glew_include_dir}
   ${CMAKE_CURRENT_LIST_DIR}/
 )
 

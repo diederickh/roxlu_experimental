@@ -1,4 +1,3 @@
-
 #ifndef ROXLU_PBD_PARTICLESH
 #define ROXLU_PBD_PARTICLESH
 
@@ -29,7 +28,7 @@ template<class T, class P, class S>
   class Particles {
  public:
   typedef typename std::vector<P*>::iterator iterator;
-  typedef	T Vec;
+  typedef T Vec;
 	
   Particles();
   ~Particles();
@@ -45,17 +44,18 @@ template<class T, class P, class S>
 	
   // attract to another particle
   template<class F>
-    void attract(P* p, const float radius, const float energy, F& cb);
+  void attract(P* p, const float radius, const float energy, F& cb);
   void attract(P* p, const float radius, const float energy);
+  void attract(const Vec3& pos, const float radius, const float energy);
 	
   // repel from each other, with callback when repelled
   template<class F>
-    void repel(const float f, F& cb);
+  void repel(const float f, F& cb);
   void repel(const float f);
 	
   // repel from particle, with callback when repelled
   template<class F>
-    void repel(P* p, const float radius, const float energy, F& cb);
+  void repel(P* p, const float radius, const float energy, F& cb);
   void repel(P* p, const float radius, const float energy);
 	
   void limitSpeed(const float speed);
@@ -277,6 +277,28 @@ template<class T, class P, class S>
       dir *= f;
       other.addForce(dir);
       cb(sourcep, other, dir, f, ls, CB_ATTRACT_PARTICLE);
+    }
+    ++it;
+  }
+}
+
+template<class T, class P, class S>
+void Particles<T, P, S>::attract(const Vec3& pos, const float radius, const float energy) {
+  typename vector<P*>::iterator it = particles.begin();
+  T dir;
+  float ls;
+  float f;
+  float dist_sq = radius * radius;
+	
+  while(it != particles.end()) {
+    P& other = *(*it);
+    dir = pos - other.position;
+    ls = dir.lengthSquared();
+    if(ls > dist_sq) {
+      dir.normalize();
+      f = (1.0-(1.0f/ls)) * energy;
+      dir *= f;
+      other.addForce(dir);
     }
     ++it;
   }
