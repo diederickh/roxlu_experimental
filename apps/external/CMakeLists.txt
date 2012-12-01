@@ -28,6 +28,7 @@ set(glfw_libs
 set(glew_base_dir ${CMAKE_CURRENT_LIST_DIR}/)
 set(glew_include_dir ${glew_base_dir}/glew/include/)
 set(glew_lib_dir ${glew_base_dir}/glew/lib/${roxlu_platform}/${roxlu_bits})
+
 set(glew_libs
   ${glew_lib_dir}/libGLEW.a
 )

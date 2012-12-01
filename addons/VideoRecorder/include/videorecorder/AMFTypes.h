@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <stdio.h>
 
 #define AMF0_TYPE_NUMBER 0x00
 #define AMF0_TYPE_BOOLEAN 0x01

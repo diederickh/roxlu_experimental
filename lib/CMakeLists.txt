@@ -71,6 +71,14 @@ if(ROXLU_64BIT)
 endif(ROXLU_64BIT)
 
 
+if(ROXLU_PLATFORM_LINUX)
+  set(roxlu_libs
+    "pthread"
+    "rt"
+  )
+
+endif(ROXLU_PLATFORM_LINUX)
+
 # http://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
 add_definitions(
   "-Wno-invalid-offsetof"

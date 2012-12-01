@@ -106,7 +106,7 @@ fi
 
 if [ "$1" = "av" ] ; then 
     cd libav 
-    ./configure --prefix=${bd} --enable-static --enable-libx264 --enable-libspeex --target-os=darwin --enable-gpl --disable-sse
+    ./configure --prefix=${bd} --enable-static --enable-libx264 --enable-libspeex --target-os=darwin --enable-gpl --disable-sse --enable-pic
     make 
     make install
 fi
