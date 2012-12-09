@@ -38,12 +38,12 @@ set(roxlu_addon_sources
 )
 
 set(videorecorder_libs
-  ${videorecorder_lib_dir}/libavutil.a
   ${videorecorder_lib_dir}/libspeex.a
   ${videorecorder_lib_dir}/libspeexdsp.a
   ${videorecorder_lib_dir}/libswscale.a
   ${videorecorder_lib_dir}/libx264.a
   ${videorecorder_lib_dir}/libyuv.a
+  ${videorecorder_lib_dir}/libavutil.a
 )
 
 

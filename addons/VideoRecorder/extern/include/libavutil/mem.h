@@ -26,6 +26,8 @@
 #ifndef AVUTIL_MEM_H
 #define AVUTIL_MEM_H
 
+#include <limits.h>
+
 #include "attributes.h"
 #include "avutil.h"
 
@@ -35,7 +37,7 @@
  */
 
 
-#if defined(__ICC) && _ICC < 1200 || defined(__SUNPRO_C)
+#if defined(__ICC) && __ICC < 1200 || defined(__SUNPRO_C)
     #define DECLARE_ALIGNED(n,t,v)      t __attribute__ ((aligned (n))) v
     #define DECLARE_ASM_CONST(n,t,v)    const t __attribute__ ((aligned (n))) v
 #elif defined(__TI_COMPILER_VERSION__)
@@ -87,7 +89,7 @@ void *av_malloc(size_t size) av_malloc_attrib av_alloc_size(1);
  * be allocated.
  * @see av_malloc()
  */
-av_alloc_size(1,2) static inline void *av_malloc_array(size_t nmemb, size_t size)
+av_alloc_size(1, 2) static inline void *av_malloc_array(size_t nmemb, size_t size)
 {
     if (size <= 0 || nmemb >= INT_MAX / size)
         return NULL;
@@ -138,7 +140,7 @@ void *av_mallocz(size_t size) av_malloc_attrib av_alloc_size(1);
  * @see av_mallocz()
  * @see av_malloc_array()
  */
-av_alloc_size(1,2) static inline void *av_mallocz_array(size_t nmemb, size_t size)
+av_alloc_size(1, 2) static inline void *av_mallocz_array(size_t nmemb, size_t size)
 {
     if (size <= 0 || nmemb >= INT_MAX / size)
         return NULL;
