@@ -13,6 +13,7 @@ set(roxlu_base_dir ${CMAKE_CURRENT_LIST_DIR}/../)
 set(roxlu_src_dir ${roxlu_base_dir}lib/src/roxlu/)
 set(roxlu_include_dir ${roxlu_base_dir}lib/include/)
 set(roxlu_addons_dir ${roxlu_base_dir}/addons/)
+set(roxlu_extern_src_dir ${roxlu_base_dir}/extern/src/)
 set(roxlu_extern_lib_dir ${roxlu_base_dir}/extern/lib)
 set(roxlu_extern_include_dir ${roxlu_base_dir}/extern/include)
 
@@ -20,8 +21,9 @@ set(roxlu_extern_include_dir ${roxlu_base_dir}/extern/include)
 file(GLOB_RECURSE roxlu_3d_sources ${roxlu_src_dir}/3d/*.cpp)
 file(GLOB_RECURSE roxlu_core_sources ${roxlu_src_dir}/core/*.cpp)
 file(GLOB_RECURSE roxlu_experimental_sources ${roxlu_src_dir}/experimental/*.cpp)
-file(GLOB_RECURSE roxlu_external_sources_c ${roxlu_src_dir}/external/*.c)
-file(GLOB_RECURSE roxlu_external_sources_cpp ${roxlu_src_dir}/external/*.cpp)
+file(GLOB_RECURSE roxlu_external_sources_c ${roxlu_src_dir}/external/*.c)  # part of roxlu lib
+file(GLOB_RECURSE roxlu_external_sources_cpp ${roxlu_src_dir}/external/*.cpp) # part of roxlu lib
+file(GLOB_RECURSE roxlu_extern_sources_c ${roxlu_extern_src_dir}/*.c) # 3rd party, used by addons
 file(GLOB_RECURSE roxlu_io_sources ${roxlu_src_dir}/io/*.cpp)
 file(GLOB_RECURSE roxlu_math_sources ${roxlu_src_dir}/math/*.cpp)
 file(GLOB_RECURSE roxlu_opengl_sources ${roxlu_src_dir}/opengl/*.cpp)
@@ -35,6 +37,7 @@ set(roxlu_sources
   ${roxlu_io_sources}
   ${roxlu_math_sources}
   ${roxlu_opengl_sources}
+  ${roxlu_extern_sources_c}
 )
 
 # get roxlu include dir

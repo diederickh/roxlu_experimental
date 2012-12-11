@@ -26,9 +26,8 @@ namespace roxlu {
         ERR_error_string_n(err, buf, sizeof(buf));
         printf("*** %s\n", buf);
       }
-
-      //      return;
     }
+
     WHERE_INFO(ssl, where, SSL_CB_LOOP, "LOOP");
     WHERE_INFO(ssl, where, SSL_CB_EXIT, "EXIT");
     WHERE_INFO(ssl, where, SSL_CB_READ, "READ");
@@ -41,6 +40,25 @@ namespace roxlu {
     return 1;
   }
 
+  void instagram_http_request_close(HTTPRequest* req, void* user) {
+    // call close handler if given.
+    InstagramAPICallback* api = static_cast<InstagramAPICallback*>(user);
+    if(api->close_cb) {
+      api->close_cb(req->in_buffer.c_str(), req->in_buffer.size(), api->user);
+    }
+
+    // remove request + api callback from instagram context
+    Instagram* ins = api->instagram;
+    std::vector<HTTPRequest*>::iterator it = std::find(ins->requests.begin(), ins->requests.end(), req);
+    if(it != ins->requests.end()) {
+      ins->requests.erase(it);
+    }
+    std::vector<InstagramAPICallback*>::iterator ait = std::find(ins->api_callbacks.begin(), ins->api_callbacks.end(), api);
+    if(ait != ins->api_callbacks.end()) {
+      ins->api_callbacks.erase(ait);
+    }
+  }
+
   // ---------------------------------------------------------
   // Libuv Callbacks
   // ---------------------------------------------------------
@@ -48,247 +66,279 @@ namespace roxlu {
     return uv_buf_init((char*)malloc(suggestedSize), suggestedSize);
   }
 
-  void instagram_idle_watch(uv_idle_t* handle, int status) {
-    Instagram* ins = static_cast<Instagram*>(handle->data);
-    printf("CURLS: %zu\n", ins->curls.size());
-    if(ins->must_stop_idler) {
-      printf("STOP IDLER!!!\n");
-      uv_idle_stop(handle);
-    }
-  }
-  
   void instagram_on_read(uv_stream_t* stream, ssize_t nread, uv_buf_t buf) {
-    printf("+++++++++++++++++++++++++++++++++++++++++++++++++++ READ\n");
     InstagramConnection* con = static_cast<InstagramConnection*>(stream->data);
-
+    
+    // CLOSED
     if(nread < 0) {
       if(buf.base) {
         free(buf.base);
+        buf.base = NULL;
       }
       con->state = ICS_NONE;
+      // ---------------------------
+      // HANDLE SUBSCRIPTION DATA
+      // -----------------------------
+      if(con->buffer[0] == 'P' && con->buffer[1] == 'O' && con->buffer[2] == 'S' && con->buffer[3] == 'T') {
+        std::stringstream ss(con->buffer);
+        std::string line;
+        bool last_line = false;
+        size_t size = con->buffer.size();
+        size_t body = 0;
+        for(int i = 0; i < con->buffer.size(); ++i) {
+          if(con->buffer[i] == '\r' && con->buffer[i+1] == '\n' && con->buffer[i+2] == '\r' && con->buffer[i+3] == '\n') {
+            body = i+4;
+            break;
+          }
+        }
 
+        while(std::getline(ss, line)) {
+          if(last_line) {
+            printf(">>>>>%s<<<<<\n", line.c_str());
+          }
+          if(line[0] == '\r' && line[1] == '\n') {
+            last_line = true;
+          }
+        }
+      }
+
+      // DELETE CONNECTION
+      std::vector<InstagramConnection*>::iterator it = std::find(con->instagram->clients.begin(), con->instagram->clients.end(), con);
+      if(it != con->instagram->clients.end()) {
+        con->instagram->clients.erase(it);
+      }
       return;
     }
+    // ERROR (?)
     else if(nread == 0) {
+      printf("@TODO WE MIGHT NEED TO REMOVE THE REQUEST HERE TOO!\n");
       free(buf.base);
+      buf.base = NULL;
       return;
     }
     else {
       std::copy(buf.base, buf.base+nread, std::back_inserter(con->buffer));
-      
-      // Handle the subscription request.
-      if(con->state == ICS_PARSE_HUB_CHALLENGE) {
-        std::string line;
-        std::stringstream ss(con->buffer);
-
-        while(std::getline(ss, line)) {
-          size_t pos = line.find("GET /");
-          if(pos != std::string::npos) {
-            struct slre reg;
-            struct cap capt[4 + 1];
-            if(!slre_compile(&reg, "GET /callback.html\\?hub.challenge=(\\S+)&hub.mode")) { // we need to escape the ?
-              printf("ERROR: cannot compile regexp\n");
-              return;
-            }
-            if(slre_match(&reg, line.c_str(), line.size(), capt)) {
-              char* res = new char[capt[1].len];
-              memcpy(res, line.c_str()+33, capt[1].len);
-              std::stringstream http;
-              http << "HTTP/1.1 200 OK\r\n"
-                   << "Content-Type: text/html\r\n"
-                   << "Content-Length: " << capt[1].len << "\r\n"
-                   << "\r\n"
-                   << res;
-              
-              printf("\n+++++++++++++++++++++++++++++++++++++\n\n");
-              printf("'%s'", http.str().c_str());
-              printf("\n+++++++++++++++++++++++++++++++++++++\n\n");
-              con->send(http.str().c_str(), http.str().size());
-              delete[] res;
-            }
-
-            /*
-    struct slre reg;
-    struct cap capt[4 + 1];
-    if(!slre_compile(&reg, "GET /callback.html\\?hub.challenge=(\\S+)&hub.mode")) {
-      printf("ERROR: cannot compile regexp\n");
-      return 0;
-    }
-    if(slre_match(&reg, line.c_str(), line.size(), capt)) {
-      printf("Capt: %d, %s, %d\n", capt[1].len, capt[1].ptr, capt[0].len);
-      char* res = new char[capt[1].len];
-      memcpy(res, line.c_str()+33, capt[1].len);
-      printf(">> %s\n", res);
-    }
-            */
-
-
-            // Parse the token
-            /*
-            char token[512];
-            pcre* re = NULL;
-            const char* errmsg;
-            int err;
-            int offsets[5];
-            re = pcre_compile("(.*)hub.challenge=(.*)&(.*)", PCRE_UNGREEDY | PCRE_DOTALL | PCRE_EXTENDED, &errmsg, &err, NULL);
-            pcre_exec(re, NULL, line.c_str(), line.size(), 0, 0, offsets, 3);
-            if(offsets[0] != -1 && offsets[1] > 0) {
-              int nchars = offsets[1] - 21;
-              if(nchars > 0 && nchars < 512) {
-                memcpy(token, line.c_str()+20, nchars);
-                token[nchars] = '\0';
-                std::stringstream http;
-                http << "HTTP/1.1 200 OK\r\n"
-                     << "Connection: close\r\n"
-                     << "\r\n"
-                     << token;
-                printf("Found token: %s\n", token);
-                printf("\n+++++++++++++++++++++++++++++++++++++\n\n");
-                printf("%s", http.str().c_str());
-                printf("\n+++++++++++++++++++++++++++++++++++++\n\n");
-                con->send(http.str().c_str(), http.str().size());
-              }
-            */
-            }
-          }
-        }
-        printf("%s\n", con->buffer.c_str());
+      free(buf.base);
+      buf.base = NULL;
+      if(con->buffer.size() < 3) {
+        return;
       }
-  }
+      std::stringstream ss(con->buffer);
+      
+      // ---------------------------
+      // HANDLE SUBSCRIPTION REQUEST
+      // -----------------------------
+      if(con->buffer[0] == 'G' && con->buffer[1] == 'E' && con->buffer[2] == 'T') {
+        struct slre reg;
+        struct cap capt[4 + 1];
+        int mode = 0; // mode 1: subscribe callback, mode 2: oauth token exchange
 
-  void instagram_after_write(uv_write_t* req, int status) {
-    printf(">>> AFTER WRITE, STATUS: %d\n", status);
-  }
-
-  void instagram_on_new_connection(uv_stream_t* server, int status) {
-    printf("VERBOSE: on new connection.\n");
-    if(status == -1) {
-      printf("ERROR: cannot accept new connection.\n");
-      return;
+        // callback.html
+        if(!slre_compile(&reg, "GET /callback.html\\?hub.challenge=(\\S+)&hub.mode")) { // we need to escape the ?
+          printf("WARNING: cannot compile regexp for callback.html\n");
+          return;
+        }
+        if(mode == 0 && slre_match(&reg, con->buffer.c_str(), con->buffer.size(), capt)) {
+          mode = 1;
+        }
+        
+        // oauth.html
+        if(mode == 0 && con->buffer.find("GET /oauth.html HTTP/1.1") != std::string::npos) {
+          mode = 2;
+        }
+                
+        if(mode == 1) {
+          // SUBSCRIBE CALLBACK
+          char* res = new char[capt[1].len];
+          memcpy(res, con->buffer.c_str()+33, capt[1].len);
+          std::stringstream http;
+          http << "HTTP/1.1 200 OK\r\n"
+               << "Content-Type: text/html\r\n"
+               << "Content-Length: " << capt[1].len << "\r\n"
+               << "\r\n"
+               << res;
+          con->send(http.str().c_str(), http.str().size());
+          delete[] res;
+        }
+        else if(mode == 2) {
+          // OAUTH CALLBACK
+          std::string msg = "<div style='font-family:arial;padding:10;background-color:#FFC;font-size:15px'>Copy the <strong style='color:red'>access_token</strong> value from the URL and save it to a file.<br>Use Instagram::setAccessToken() to enable authenticated requests for your application.</div>";
+          std::stringstream http;
+          http << "HTTP/1.1 200 OK\r\n"
+               << "Content-Type: text/html\r\n"
+               << "Content-Length: " << msg.size() << "\r\n"
+               << "Connction: close\r\n"
+               << "\r\n"
+               << msg;
+          con->send(http.str().c_str(), http.str().size());
+        }
+      }
     }
+   }
 
-    Instagram* instagram = static_cast<Instagram*>(server->data);
-    InstagramConnection* con = new InstagramConnection(instagram);
-    con->client = (uv_tcp_t*)malloc(sizeof(uv_tcp_t));
-    con->client->data = con;
-    con->state = ICS_PARSE_HUB_CHALLENGE;
-    con->write_req.data = con;
-    instagram->clients.push_back(con);
-    int r = uv_tcp_init(instagram->loop, con->client);
-    assert(r == 0);
+   void instagram_after_write(uv_write_t* req, int status) {
+   }
 
-    if(uv_accept(server, (uv_stream_t*)con->client) == 0) {
-      uv_read_start((uv_stream_t*)con->client, instagram_alloc_buffer, instagram_on_read);
-    }
-  }
+   void instagram_on_new_connection(uv_stream_t* server, int status) {
+     if(status == -1) {
+       printf("ERROR: cannot accept new connection.\n");
+       return;
+     }
 
-  // ---------------------------------------------------------
-  // INSTRAGRAM CONNECTION
-  // ---------------------------------------------------------
-  InstagramConnection::InstagramConnection(Instagram* instagram)
-    :instagram(instagram)
-    ,client(NULL)
-    ,state(ICS_PARSE_HUB_CHALLENGE)
-    ,curl(NULL)
-  {
-  }
+     Instagram* instagram = static_cast<Instagram*>(server->data);
+     InstagramConnection* con = new InstagramConnection(instagram);
+     con->client = (uv_tcp_t*)malloc(sizeof(uv_tcp_t));
+     con->client->data = con;
+     con->state = ICS_PARSE_HUB_CHALLENGE;
+     con->write_req.data = con;
+     instagram->clients.push_back(con);
+     int r = uv_tcp_init(instagram->loop, con->client);
+     assert(r == 0);
 
-  void InstagramConnection::send(const char* data, size_t len) {
-    uv_buf_t buf;
-    buf.base = (char*)data;
-    buf.len = len;
-    if(uv_write(&write_req, (uv_stream_t*)client, &buf, 1, instagram_after_write)) {
-    }
-  }
+     if(uv_accept(server, (uv_stream_t*)con->client) == 0) {
+       uv_read_start((uv_stream_t*)con->client, instagram_alloc_buffer, instagram_on_read);
+     }
+   }
 
-  // ---------------------------------------------------------
-  // INSTAGRAM
-  // ---------------------------------------------------------
-  Instagram::Instagram()
-    :must_stop_idler(false)
-    ,ssl_ctx(NULL)
-  {
-    curl_global_init(CURL_GLOBAL_ALL);
-    curlm = curl_multi_init();
-    RAND_poll();
-    SSL_library_init();
-    SSL_load_error_strings();
-    ssl_ctx = SSL_CTX_new(SSLv23_client_method());
-    SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_SSLv2);
-    SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, instagram_ssl_verify_peer);
-    SSL_CTX_set_info_callback(ssl_ctx, dummy_ssl_info_callback);
-  }
+   // ---------------------------------------------------------
+   // INSTRAGRAM CONNECTION
+   // ---------------------------------------------------------
+   InstagramConnection::InstagramConnection(Instagram* instagram)
+     :instagram(instagram)
+     ,client(NULL)
+     ,state(ICS_PARSE_HUB_CHALLENGE)
+   {
+   }
 
-  Instagram::~Instagram() {
-    curl_multi_cleanup(curlm);
-  }
+   void InstagramConnection::send(const char* data, size_t len) {
+     uv_buf_t buf;
+     buf.base = (char*)data;
+     buf.len = len;
+     if(uv_write(&write_req, (uv_stream_t*)client, &buf, 1, instagram_after_write)) {
+     }
+   }
 
-  bool Instagram::setup(const std::string clientID, const std::string clientSecret, const std::string sslPrivateKeyFile) {
-    /*
-    std::string line = "GET /callback.html?hub.challenge=c3b01b1384914f2c92fdfd66704b8409&hub.mode=subscribe HTTP/1.1";
-    struct slre reg;
-    struct cap capt[4 + 1];
-    if(!slre_compile(&reg, "GET /callback.html\\?hub.challenge=(\\S+)&hub.mode")) {
-      printf("ERROR: cannot compile regexp\n");
-      return 0;
-    }
-    if(slre_match(&reg, line.c_str(), line.size(), capt)) {
-      printf("Capt: %d, %s, %d\n", capt[1].len, capt[1].ptr, capt[0].len);
-      char* res = new char[capt[1].len];
-      memcpy(res, line.c_str()+33, capt[1].len);
-      printf(">> %s\n", res);
-    }
-    else {
-      printf("NO\n");
-    }
-    */
+   // ---------------------------------------------------------
+   // INSTAGRAM
+   // ---------------------------------------------------------
+   Instagram::Instagram()
+     :must_stop_idler(false)
+     ,ssl_ctx(NULL)
+     ,is_setup(false)
+   {
+     RAND_poll();
+     SSL_library_init();
+     SSL_load_error_strings();
+     ssl_ctx = SSL_CTX_new(SSLv23_client_method());
+     SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_SSLv2);
+     SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, instagram_ssl_verify_peer);
+     SSL_CTX_set_info_callback(ssl_ctx, dummy_ssl_info_callback);
+   }
 
-    client_id = clientID;
-    client_secret = clientSecret;
-    loop = uv_default_loop();
-    server.data = this;
-    idler.data = this;
+   Instagram::~Instagram() {
+   }
 
-    uv_tcp_init(loop, &server);
+   bool Instagram::setup(const std::string clientID, const std::string clientSecret, const std::string sslPrivateKeyFile) {
+     oauth.setup(clientID, clientSecret);
+     client_id = clientID;
+     client_secret = clientSecret;
+     loop = uv_default_loop();
+     server.data = this;
+     idler.data = this;
 
-    // SSL
-    int rc = SSL_CTX_use_PrivateKey_file(ssl_ctx, sslPrivateKeyFile.c_str(), SSL_FILETYPE_PEM);
-    if(!rc) {
-      printf("ERROR: Could not load client key file.\n");
-      return false;
-    }
+     uv_tcp_init(loop, &server);
 
-    struct sockaddr_in bind_addr = uv_ip4_addr("0.0.0.0", 7000);
-    uv_tcp_bind(&server, bind_addr);
-    int r = uv_listen((uv_stream_t*)&server, 128, instagram_on_new_connection);
-    if(r) {
-      printf("ERROR: listen error: %s\n", uv_err_name(uv_last_error(loop)));
-      return false;
-    }
+     // SSL
+     int rc = SSL_CTX_use_PrivateKey_file(ssl_ctx, sslPrivateKeyFile.c_str(), SSL_FILETYPE_PEM);
+     if(!rc) {
+       printf("ERROR: Could not load client key file.\n");
+       return false;
+     }
 
-    return true;
-  }
-
-  void Instagram::subscribe(const std::string object, const std::string objectID, const std::string aspect, const std::string token) {
-    printf("TODO TODO: CREATING A HTTPREQUEST ON THE HEAD W/O TRACKING IT!!!!!\n");
-    HTTPRequest* req = new HTTPRequest(loop, ssl_ctx);
-    req->setURL("api.instagram.com","/v1/subscriptions/", true, true);
-    //req->setURL("test.localhost","/test.php", false, true);
-
+     struct sockaddr_in bind_addr = uv_ip4_addr("0.0.0.0", 7000);
+     uv_tcp_bind(&server, bind_addr);
+     int r = uv_listen((uv_stream_t*)&server, 128, instagram_on_new_connection);
+     if(r) {
+       printf("ERROR: listen error: %s\n", uv_err_name(uv_last_error(loop)));
+       return false;
+     }
+     is_setup = true;
+     return true;
+   }
+  
+  void Instagram::requestAccessToken() {
+    HTTPParams qs;
+    qs.add("client_id", client_id);
+    qs.add("redirect_uri", "http://home.roxlu.com:7000/oauth.html");
+    qs.add("response_type", "token");
+    qs.percentEncode();
     
-    req->addFormField("client_id", client_id);
-    req->addFormField("client_secret", client_secret);
-    req->addFormField("object", object);
-    req->addFormField("object_id", objectID);
-    req->addFormField("aspect", aspect);
-    req->addFormField("token", token);
+    std::stringstream ss;
+    ss << "https://instagram.com/oauth/authorize/?" << qs.getQueryString();
+    printf("\n------------------------------------------------------------------\n");
+    printf("Open this link in a browser:\n%s\n", ss.str().c_str());
+    printf("\n------------------------------------------------------------------\n");
+  }
+
+
+   // @todo set on data callback to check response.
+   void Instagram::subscribe(const std::string object, const std::string objectID, const std::string aspect, const std::string token) {
+     HTTPRequest* req = new HTTPRequest(loop, ssl_ctx, NULL, NULL, instagram_http_request_close, this);
+     requests.push_back(req);
+     req->setURL("api.instagram.com","/v1/subscriptions/", true, true);
+     req->addFormField("client_id", client_id);
+     req->addFormField("client_secret", client_secret);
+     req->addFormField("object", object);
+     req->addFormField("object_id", objectID);
+     req->addFormField("aspect", aspect);
+     req->addFormField("token", token);
      req->addFormField("callback_url", "http://home.roxlu.com:7000/callback.html");
-    //   req->addFormField("callback_url", "http://home.roxlu.com/callback.html");
-    
+     req->send();
+   }
+
+  void Instagram::subscriptions(cb_instagram_on_data dataCB, cb_instagram_on_close closeCB, void* user) {
+    InstagramAPICallback* api = new InstagramAPICallback(closeCB, user, this);
+    HTTPRequest* req = new HTTPRequest(loop, ssl_ctx, dataCB, user, instagram_http_request_close, api);
+    requests.push_back(req);
+    api_callbacks.push_back(api);
+    req->setURL("api.instagram.com", "/v1/subscriptions?client_secret=" +client_secret +"&client_id=" +client_id, false, true);
     req->send();
   }
 
-  void Instagram::sendHTTP(const std::string data) {
+  void Instagram::mediaPopular(cb_instagram_on_data dataCB, cb_instagram_on_close closeCB, void* user) {
+    InstagramAPICallback* api = new InstagramAPICallback(closeCB, user, this);
+    HTTPRequest* req = new HTTPRequest(loop, ssl_ctx, dataCB, user, instagram_http_request_close, api);
+    requests.push_back(req);
+    api_callbacks.push_back(api);
+    req->setURL("api.instagram.com", "/v1/media/popular", false, true);
+    req->addURLField("access_token", oauth.getToken());
+    req->send();
+  }
+
+  void Instagram::locationsSearch(HTTPParams& params, cb_instagram_on_data dataCB, cb_instagram_on_close closeCB, void* user) {
+    InstagramAPICallback* api = new InstagramAPICallback(closeCB, user, this);
+    HTTPRequest* req = new HTTPRequest(loop, ssl_ctx, dataCB, user, instagram_http_request_close, api);
+    requests.push_back(req);
+    api_callbacks.push_back(api);
+    req->url_fields.copy(params);
+    req->setURL("api.instagram.com", "/v1/locations/search", false, true);
+    req->addURLField("access_token", oauth.getToken());
+    req->send();
+  }
+
+  void Instagram::mediaSearch(HTTPParams& params, cb_instagram_on_data dataCB, cb_instagram_on_close closeCB, void* user) {
+    InstagramAPICallback* api = new InstagramAPICallback(closeCB, user, this);
+    HTTPRequest* req = new HTTPRequest(loop, ssl_ctx, dataCB, user, instagram_http_request_close, api);
+    requests.push_back(req);
+    api_callbacks.push_back(api);
+    req->url_fields.copy(params);
+    req->setURL("api.instagram.com", "/v1/media/search", false, true);
+    req->addURLField("access_token", oauth.getToken());
+    req->send();
+  }
+
+  void Instagram::setAccessToken(const std::string token) {
+    oauth.setToken(token);
   }
 
   void Instagram::update() {

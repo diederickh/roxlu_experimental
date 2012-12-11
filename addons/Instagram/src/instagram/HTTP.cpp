@@ -27,6 +27,12 @@ namespace roxlu {
     entries.insert(std::pair<std::string, HTTPParam>(name, HTTPParam(name, value)));
   }
 
+  void HTTPParams::copy(const HTTPParams& p) {
+    for(std::map<std::string, HTTPParam>::const_iterator it = p.entries.begin(); it != p.entries.end(); ++it) {
+      add(it->second.name, it->second.value);
+    }
+  }
+
   std::string HTTPParams::getHeaderString() {
     std::string res; 
     for(std::map<std::string, HTTPParam>::iterator it = entries.begin(); it != entries.end(); ++it) {
@@ -80,12 +86,23 @@ namespace roxlu {
   // ------------------------------------
   // HTTP REQUEST
   // ------------------------------------
-  HTTPRequest::HTTPRequest(uv_loop_t* loop, SSL_CTX* sslCTX)
+  HTTPRequest::HTTPRequest(
+                           uv_loop_t* loop, 
+                           SSL_CTX* sslCTX, 
+                           cb_on_http_data onDataCallback, 
+                           void* onDataUser,
+                           cb_on_http_close onCloseCallback,
+                           void* onCloseUser
+                           )
     :is_post(false)
     ,is_secure(false)
     ,ssl(NULL)
     ,ssl_ctx(sslCTX)
     ,loop(loop)
+    ,data_cb(onDataCallback)
+    ,data_user(onDataUser) // gets passed to your callback
+    ,close_cb(onCloseCallback)
+    ,close_user(onCloseUser)
   {
     connect_req.data = this;
     tcp_req.data = this;
@@ -108,7 +125,11 @@ namespace roxlu {
   }
 
   void HTTPRequest::addFormField(const std::string name, const std::string value) {
-    fields.add(name, value);
+    form_fields.add(name, value);
+  }
+
+  void HTTPRequest::addURLField(const std::string name, const std::string value) {
+    url_fields.add(name, value);
   }
 
   std::string HTTPRequest::getAsString() {
@@ -116,18 +137,26 @@ namespace roxlu {
     std::string body;
     std::string header_str = header.getHeaderString();
 
+    // Form fields
     if(is_post) {
-      fields.percentEncode();
-      body = fields.getQueryString();
+      form_fields.percentEncode();
+      body = form_fields.getQueryString();
     }
 
-    ss << ((is_post) ? "POST ": "GET ") << path << " HTTP/1.1\r\n"
+    // Query string
+    std::string url_path = path;
+    url_fields.percentEncode();
+    std::string url_qs = url_fields.getQueryString();
+    if(url_qs.size()) {
+      url_path += "?" +url_qs;
+    }
+
+    ss << ((is_post) ? "POST ": "GET ") << url_path << " HTTP/1.1\r\n"
        << "Host: " << host << "\r\n"
        << "Accept: */*\r\n"
        << "Connection: close\r\n"
        << "Content-Length: " << body.size() << "\r\n";
     
-
     if(is_post) {
       ss << "Content-Type: application/x-www-form-urlencoded\r\n";
     }
@@ -198,8 +227,11 @@ namespace roxlu {
   }
 
   void ssl_read_decrypted(const char* data, size_t len, void* user) {
-    for(size_t i = 0; i < len; ++i) {
-      printf("%c", data[i]);
+    HTTPRequest* req = static_cast<HTTPRequest*>(user);
+    std::copy(data, data+len, std::back_inserter(req->in_buffer));
+
+    if(req->data_cb) {
+      req->data_cb(data, len, req->data_user);
     }
   }
 
@@ -217,7 +249,6 @@ namespace roxlu {
   }
 
   void httpreq_on_connect(uv_connect_t* con, int status) {
-    printf("httpreq_on_connect()\n");
     if(status == -1) {
       printf("ERROR: httpreq_on_connect, cannot connect. @todo clean memory\n");
       return;
@@ -248,16 +279,21 @@ namespace roxlu {
   }
 
   void httpreq_on_read(uv_stream_t* tcp, ssize_t nread, uv_buf_t buf) {
-    printf("httpreq_on_read()\n");
+    HTTPRequest* req = static_cast<HTTPRequest*>(tcp->data);
     if(nread < 0) {
-      printf("WARNING: disconnect\n");
+      if(req->close_cb) {
+        req->close_cb(req, req->close_user);
+      }
+      free(buf.base);
+      buf.base = NULL;
       return;
     }
-    HTTPRequest* req = static_cast<HTTPRequest*>(tcp->data);
+
     if(req->is_secure) {
       req->ssl_buffer.addEncryptedData(buf.base, nread);
       req->ssl_buffer.update();
       free(buf.base);
+      buf.base = NULL;
     }
     else {
       printf("@TODO handle insecure data\n");

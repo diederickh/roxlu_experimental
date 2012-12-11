@@ -19,6 +19,7 @@ set(instagram_source_files
   ${instagram_src_dir}/instagram/Instagram.cpp
   ${instagram_src_dir}/instagram/SSLBuffer.cpp
   ${instagram_src_dir}/instagram/HTTP.cpp
+  ${instagram_src_dir}/instagram/OAuth.cpp
 )
 
 set(roxlu_addon_sources
@@ -28,10 +29,8 @@ set(roxlu_addon_sources
   
 set(roxlu_addon_libs
   ${roxlu_addon_libs}
-  ${roxlu_extern_lib_dir}/libcurl.a
   ${roxlu_extern_lib_dir}/libcrypto.a
   ${roxlu_extern_lib_dir}/libssl.a
-  ${roxlu_extern_lib_dir}/libpcre.a
   ${roxlu_extern_lib_dir}/libuv.a
   z
 )
