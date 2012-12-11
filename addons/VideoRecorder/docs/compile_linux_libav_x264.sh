@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # 
 # Compile script for video recorder lib
 # -------------------------------------
@@ -38,43 +38,55 @@ fi
 if [ ! -d libav ] ; then
     mkdir libav 
     cd libav 
-    git clone git://git.libav.org/libav.git .
+    curl "http://libav.org/releases/libav-9_beta2.tar.gz" -o libav.tar.gz
+    tar -zxvf libav.tar.gz
+    mv libav-* libav
+    #git clone git://git.libav.org/libav.git .
     #&& git reset --hard 65d94f63ca38b46a9d3719cb7d986d2daef90416
 fi
 
+cd ${d}
 if [ ! -f speex.tar.gz ] ; then 
+    cd ${d}
     curl http://downloads.xiph.org/releases/speex/speex-1.2rc1.tar.gz -o speex.tar.gz
 fi
 
+cd ${d}
 if [ ! -d speex ] ; then 
     tar -zxvf speex.tar.gz
     mv speex-* speex
 fi
 
+cd ${d}
 if [ ! -f pkgconfig.tar.gz ] ; then 
     curl http://pkgconfig.freedesktop.org/releases/pkg-config-0.18.1.tar.gz -o pkgconfig.tar.gz
 fi
 
+cd ${d}
 if [ ! -d pkgconfig ] ; then 
     tar -zxvf pkgconfig.tar.gz
     mv pkg-config-* pkgconfig
 fi
 
+cd ${d}
 if [ ! -f yasm.tar.gz ] ; then 
     curl http://www.tortall.net/projects/yasm/releases/yasm-1.2.0.tar.gz -o yasm.tar.gz 
 fi
 
+cd ${d}
 if [ ! -d yasm ] ; then 
     tar -zxvf yasm.tar.gz
     mv yasm-* yasm
 fi
 
+cd ${d}
 if [ ! -d x264 ] ; then 
     mkdir x264 
     cd x264
     git clone git://git.videolan.org/x264.git .
 fi
 
+cd ${d}
 if [ "$1" = "pkg" ] ; then 
     cd pkgconfig 
     ./configure --prefix=${bd}
@@ -82,6 +94,7 @@ if [ "$1" = "pkg" ] ; then
     make install
 fi
 
+cd ${d}
 if [ "$1" = "yasm" ] ; then 
     cd yasm
     ./configure --prefix=${bd} 
@@ -89,6 +102,7 @@ if [ "$1" = "yasm" ] ; then
     make install
 fi
 
+cd ${d}
 if [ "$1" = "x264" ] ; then 
     cd x264
     ./configure --prefix=${bd} --enable-static 
@@ -96,6 +110,7 @@ if [ "$1" = "x264" ] ; then
     make install
 fi
 
+cd ${d}
 if [ "$1" = "speex" ] ; then 
     cd speex
     ./configure --prefix=${bd} --enable-sse --enable-static 
@@ -103,10 +118,13 @@ if [ "$1" = "speex" ] ; then
     make install
 fi
 
-
+cd ${d}
 if [ "$1" = "av" ] ; then 
     cd libav 
-    ./configure --prefix=${bd} --enable-static --enable-libx264 --enable-libspeex --target-os=darwin --enable-gpl --disable-sse
+    ./configure --prefix=${bd} --enable-static 
+    # --enable-libx264 --enable-libspeex --target-os=darwin --enable-gpl --disable-sse --enable-pic
+    # --disable-avcodec --disable-yasm
+    # --disable-devices --disable-avfilter
     make 
     make install
 fi

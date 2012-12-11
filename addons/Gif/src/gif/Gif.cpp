@@ -100,6 +100,7 @@ namespace roxlu {
     GIFEncodeClose(fp);
 
     fclose(fp);
+    return true;
   }
  
 

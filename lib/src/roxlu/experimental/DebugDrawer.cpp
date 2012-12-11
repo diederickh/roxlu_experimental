@@ -64,9 +64,13 @@ void DebugDrawer::setupOpenGL() {
   view_matrix_id = glGetUniformLocation(prog_id, "u_view_matrix");
     
   // Buffers
+#ifdef __APPLE__
   glGenVertexArraysAPPLE(1, &vao);
   glBindVertexArrayAPPLE(vao);
-  
+#else
+  glGenVertexArrays(1, &vao);
+  glBindVertexArray(vao);
+#endif  
   glGenBuffers(1, &vbo);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
@@ -101,8 +105,13 @@ void DebugDrawer::setupOpenGL() {
   tex_uniform = glGetUniformLocation(prog_tex, "u_tex");
   
   // -- 
+#ifdef __APPLE__
   glGenVertexArraysAPPLE(1, &vao_tex);
   glBindVertexArrayAPPLE(vao_tex);
+#else 
+  glGenVertexArrays(1, &vao_tex);
+  glBindVertexArray(vao_tex);
+#endif
 
   float tw = 1.0f;
   float th = 1.0f;
@@ -185,7 +194,11 @@ void DebugDrawer::draw(const float* pm, const float* vm) {
   glUseProgram(prog_id);
   glUniformMatrix4fv(projection_matrix_id, 1, GL_FALSE, pm);
   glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, vm);
+#ifdef __APPLE__
   glBindVertexArrayAPPLE(vao);
+#else
+  glBindVertexArray(vao);
+#endif
 
   if(needs_update) {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -228,8 +241,11 @@ void DebugDrawer::drawTexture(GLuint tex, const float x, const float y, const fl
   glActiveTexture(GL_TEXTURE3);
   glBindTexture(GL_TEXTURE_2D, tex);
   glUniform1i(tex_uniform, 3);
-
+#ifdef __APPLE__
   glBindVertexArrayAPPLE(vao_tex);
+#else
+  glBindVertexArray(vao_tex);
+#endif
   glDrawArrays(GL_TRIANGLES, 0, 6);
   
   glBindTexture(GL_TEXTURE_2D, 0);

@@ -1,6 +1,7 @@
 #ifndef ROXLU_IMAGEH
 #define ROXLU_IMAGEH
 
+#include <string.h>
 #include <string>
 #include <roxlu/external/External.h>
 
