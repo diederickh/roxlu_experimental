@@ -1,6 +1,8 @@
 #ifndef ROXLU_DEBUG_DRAWERH
 #define ROXLU_DEBUG_DRAWERH
 
+#ifdef ROXLU_GL_WRAPPER 
+
 #include <roxlu/Roxlu.h>
 #include <string>
 
@@ -98,5 +100,5 @@ class DebugDrawer {
   GLuint frag_id;
   GLuint prog_id;
 };
-
+#endif // ROXLU_GL_WRAPPER
 #endif

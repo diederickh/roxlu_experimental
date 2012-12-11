@@ -68,10 +68,9 @@ namespace roxlu {
 #if ROXLU_PLATFORM == ROXLU_APPLE
  #if ROXLU_GL_WRAPPER == ROXLU_OPENFRAMEWORKS
       return getCWD() +"/../../../data/" +file;	
- #elif ROXLU_GL_WRAPPER == ROXLU_GLFW
+      // #elif ROXLU_GL_WRAPPER == ROXLU_GLFW
+ #else
       return getCWD() +"data/" +file;	
- #else 
-      #error "NO ROXLU_GL_WRAPPER DEFINED!, SEE platform.h"
  #endif
 #elif ROXLU_PLATFORM == ROXLU_IOS
       return getCWD() +file;

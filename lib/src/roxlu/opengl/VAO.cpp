@@ -1,5 +1,5 @@
-//#include "VAO.h"
-// @todo make a portable opengl include header which defined base gl function names
+#ifdef ROXLU_GL_WRAPPER
+
 #include <roxlu/opengl/VAO.h>
 #include <roxlu/core/platform/Platform.h>
 
@@ -73,3 +73,5 @@ namespace roxlu {
 
 
 } // roxlu
+
+#endif // ROXLU_GL_WRAPPER

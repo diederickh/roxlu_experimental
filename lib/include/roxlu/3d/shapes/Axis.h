@@ -1,3 +1,5 @@
+#ifdef ROXLU_GL_WRAPPER
+
 #ifndef ROXLU_AXISH
 #define ROXLU_AXISH
 
@@ -41,3 +43,5 @@ namespace roxlu {
 
 } // roxlu
 #endif
+
+#endif // ROXLU_GL_WRAPPER

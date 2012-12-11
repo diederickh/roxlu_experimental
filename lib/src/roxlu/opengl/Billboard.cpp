@@ -1,4 +1,4 @@
-//#include "Billboard.h"
+#ifdef ROXLU_GL_WRAPPER
 
 #include <roxlu/opengl/Billboard.h>
 
@@ -139,3 +139,5 @@ void Billboard::unbind() {
 }
 
 } // roxlu
+
+#endif // ROXLU_GL_WRAPPER

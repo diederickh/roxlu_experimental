@@ -1,0 +1,46 @@
+    /*
+    std::stringstream ss;
+
+    CURL* curl;
+    CURLcode res;
+    struct curl_httppost* post = NULL;
+    struct curl_httppost* last = NULL;
+    struct curl_slist* headers = NULL;
+    printf("init.\n");
+    curl = curl_easy_init();
+    curls.push_back(curl);
+    if(!curl) {
+      printf("ERROR: cannot initialize curl\n");
+      return;
+    }
+    printf("Create form.\n");
+    curl_formadd(&post, &last, CURLFORM_COPYNAME, "client_id", CURLFORM_COPYCONTENTS, client_id.c_str(), CURLFORM_END);
+    curl_formadd(&post, &last, CURLFORM_COPYNAME, "client_secret", CURLFORM_COPYCONTENTS, client_secret.c_str(), CURLFORM_END);
+    curl_formadd(&post, &last, CURLFORM_COPYNAME, "object", CURLFORM_COPYCONTENTS, object.c_str(), CURLFORM_END);
+    curl_formadd(&post, &last, CURLFORM_COPYNAME, "object_id", CURLFORM_COPYCONTENTS, objectID.c_str(), CURLFORM_END);
+    curl_formadd(&post, &last, CURLFORM_COPYNAME, "aspect", CURLFORM_COPYCONTENTS, aspect.c_str(), CURLFORM_END);
+    curl_formadd(&post, &last, CURLFORM_COPYNAME, "token", CURLFORM_COPYCONTENTS, token.c_str(), CURLFORM_END);
+    //    curl_formadd(&post, &last, CURLFORM_COPYNAME, "callback_url", CURLFORM_COPYCONTENTS, "http://test.home.roxlu.com/callback.php", CURLFORM_END);
+    curl_formadd(&post, &last, CURLFORM_COPYNAME, "callback_url", CURLFORM_COPYCONTENTS, "http://test.home.roxlu.com:7000/callback.php", CURLFORM_END);
+    
+    res = curl_easy_setopt(curl, CURLOPT_URL, "https://api.instagram.com/v1/subscriptions/");
+    CHECK_CURL_RES(res, "ERROR: cannot set url.\n");
+
+    res = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE); 
+    CHECK_CURL_RES(res, "ERROR: cannot set ssl verify peer.\n");
+
+    res = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, FALSE); 
+    CHECK_CURL_RES(res, "ERROR: cannot set ssl verify host.\n");
+
+    res = curl_easy_setopt(curl, CURLOPT_HTTPPOST, post);
+    CHECK_CURL_RES(res, "ERROR: cannot set post.\n");
+
+    printf("Send request.\n");
+    //res = curl_easy_perform(curl);
+    //CHECK_CURL_RES(res, "ERROR: cannot execute curl.\n");
+    curl_multi_add_handle(curlm, curl);
+    //curl_easy_cleanup(curl);
+    //curl_formfree(post);
+    printf("SEND REQUEST\n");
+    */
+    //    uv_idle_start(&idler, instagram_idle_watch);

@@ -1,3 +1,5 @@
+#ifdef ROXLU_GL_WRAPPER 
+
 #include <roxlu/experimental/Input.h>
 #include <roxlu/experimental/Font.h>
 #include <roxlu/core/platform/Platform.h>
@@ -187,3 +189,5 @@ namespace roxlu {
   }
 
 } // roxlu
+
+#endif // ROXLU_GL_WRAPPER

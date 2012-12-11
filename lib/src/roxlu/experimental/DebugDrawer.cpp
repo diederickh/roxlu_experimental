@@ -1,5 +1,7 @@
 #include <roxlu/experimental/DebugDrawer.h>
 
+#ifdef ROXLU_GL_WRAPPER
+
 DebugDrawer::DebugDrawer()
   :is_initialized(false)
   ,bytes_allocated(0)
@@ -241,3 +243,5 @@ size_t DebugDrawer::getNumBytes() {
 const float* DebugDrawer::getPtr() {
   return vertices[0].getPtr();
 }
+
+#endif // ROXLU_GL_WRAPPER

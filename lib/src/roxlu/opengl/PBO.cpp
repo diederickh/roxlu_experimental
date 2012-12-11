@@ -1,6 +1,5 @@
-//#include "PBO.h"
+#ifdef ROXLU_GL_WRAPPER
 
-// @todo remove pbo from core... 
 #include <roxlu/opengl/PBO.h>
 
 PBO::PBO(GLuint nTarget)
@@ -83,4 +82,4 @@ PBO& PBO::unbind() {
 	return *this;
 }
 
-
+#endif // ROXLU_GL_WRAPPER

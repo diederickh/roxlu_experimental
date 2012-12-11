@@ -1,6 +1,8 @@
 #ifndef ROXLU_STB_FONTH
 #define ROXLU_STB_FONTH
 
+#ifdef ROXLU_GL_WRAPPER
+
 /*
 Status: 
 
@@ -150,4 +152,6 @@ namespace roxlu {
   }
 
 } // roxlu
+
+#endif // ROXLU_GL_WRAPPER
 #endif

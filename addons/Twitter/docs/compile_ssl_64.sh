@@ -1,4 +1,5 @@
 #!/bin/sh
+# Used openssl-1.0.1c
 d=${PWD}
 if [ ! -d build ] ; then 
    mkdir build

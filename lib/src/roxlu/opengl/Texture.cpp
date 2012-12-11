@@ -1,6 +1,4 @@
-//#include "Texture.h"
-//#include "Image.h"
-//#include "Error.h"
+#ifdef ROXLU_GL_WRAPPER
 
 #include <roxlu/opengl/Texture.h>
 #include <roxlu/opengl/Error.h>
@@ -71,3 +69,5 @@ namespace roxlu {
   }
 
 }; // roxlu
+
+#endif // ROXLU_GL_WRAPPER

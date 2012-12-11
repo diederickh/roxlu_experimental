@@ -1,4 +1,4 @@
-//#include "Axis.h"
+#ifdef ROXLU_GL_WRAPPER
 
 #include <roxlu/3d/shapes/Axis.h>
 
@@ -92,3 +92,5 @@ namespace roxlu {
   }
 
 } // roxlu
+
+#endif // ROXLU_GL_WRAPPER

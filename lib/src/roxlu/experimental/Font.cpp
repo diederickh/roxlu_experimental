@@ -1,5 +1,7 @@
 #include <roxlu/experimental/Font.h>
 
+#ifdef ROXLU_GL_WRAPPER
+
 namespace roxlu {
   // -----------------------------------------------------------------------------
   // CHAR VERTEX
@@ -344,3 +346,5 @@ namespace roxlu {
   }
 
 } // roxlu
+
+#endif // ROXLU_GL_WRAPPER

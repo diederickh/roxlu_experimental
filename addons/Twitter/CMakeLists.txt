@@ -47,7 +47,7 @@ set(twitter_libs
 
 
 if(ROXLU_PLATFORM_LINUX)
-  set(twitter_libs ${twitter_libs}  dl pthread rt)
+  set(twitter_libs ${twitter_libs} dl pthread rt)
 endif(ROXLU_PLATFORM_LINUX)
 
 set(roxlu_addon_libs

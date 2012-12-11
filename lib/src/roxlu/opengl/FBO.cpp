@@ -1,5 +1,4 @@
-//#include "FBO.h"
-//#include "Error.h"
+#ifdef ROXLU_GL_WRAPPER
 
 #include <roxlu/opengl/FBO.h>
 #include <roxlu/opengl/Error.h>
@@ -92,3 +91,4 @@ void FBO::unbind() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0); eglGetError();
 }
 
+#endif // ROXLU_GL_WRAPPER

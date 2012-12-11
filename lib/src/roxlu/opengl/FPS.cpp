@@ -1,3 +1,5 @@
+#ifdef ROXLU_GL_WRAPPER
+
 #include <roxlu/opengl/FPS.h>
 
 namespace roxlu {
@@ -211,3 +213,5 @@ namespace roxlu {
     pm[14] = -(f+n)/fmn;
   }
 }
+
+#endif // ROXLU_GL_WRAPPER

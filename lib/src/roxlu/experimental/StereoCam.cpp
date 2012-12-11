@@ -1,4 +1,4 @@
-//#include "StereoCam.h"
+#ifdef ROXLU_GL_WRAPPER
 
 #include <roxlu/experimental/StereoCam.h>
 
@@ -90,6 +90,7 @@ void StereoCam::placeRight() {
 	setupRight();
 }
 	
+#endif // ROXLU_GL_WRAPPER
 	
 	/*
 	:fov(60.0f)

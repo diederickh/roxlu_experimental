@@ -1,3 +1,5 @@
+#ifdef ROXLU_GL_WRAPPER
+
 #ifndef ROXLU_INPUTH
 #define ROXLU_INPUTH
 
@@ -66,3 +68,5 @@ namespace roxlu {
   static int rx_textedit_insert_chars(Input* input, int start, char* chars, int n);
 } // roxlu
 #endif
+
+#endif // ROXLU_GL_WRAPPER

@@ -1,5 +1,4 @@
-//#include "../Roxlu.h"
-
+#ifdef ROXLU_GL_WRAPPER
 
 #include <roxlu/opengl/Shader.h>
 
@@ -381,3 +380,5 @@ namespace roxlu {
   }
 
 } // roxlu
+
+#endif // ROXLU_GL_WRAPPER

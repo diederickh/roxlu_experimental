@@ -15,6 +15,7 @@
 #define ROXLU_CINDER 3
 #define ROXLU_COCOA 4
 
+
 // Detect system
 #ifdef _WIN32
 #define ROXLU_PLATFORM ROXLU_WINDOWS
@@ -42,7 +43,7 @@
 
 // Set creative lib specifics (e.g. used for datapath in io/File.h)
 #ifndef ROXLU_GL_WRAPPER
-#define ROXLU_GL_WRAPPER ROXLU_OPENFRAMEWORKS
+//#define ROXLU_GL_WRAPPER ROXLU_OPENFRAMEWORKS
 #endif
 
 

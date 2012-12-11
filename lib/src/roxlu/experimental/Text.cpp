@@ -1,4 +1,4 @@
-//#include "Text.h"
+#ifdef ROXLU_GL_WRAPPER
 
 #include <roxlu/experimental/Text.h>
 
@@ -300,3 +300,5 @@ void Text::translate(const int xx, const int yy) {
 }
 
 } // roxlu
+
+#endif // ROXLU_GL_WRAPPER

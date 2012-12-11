@@ -13,6 +13,8 @@ set(roxlu_base_dir ${CMAKE_CURRENT_LIST_DIR}/../)
 set(roxlu_src_dir ${roxlu_base_dir}lib/src/roxlu/)
 set(roxlu_include_dir ${roxlu_base_dir}lib/include/)
 set(roxlu_addons_dir ${roxlu_base_dir}/addons/)
+set(roxlu_extern_lib_dir ${roxlu_base_dir}/extern/lib)
+set(roxlu_extern_include_dir ${roxlu_base_dir}/extern/include)
 
 # get roxlu sources
 file(GLOB_RECURSE roxlu_3d_sources ${roxlu_src_dir}/3d/*.cpp)
@@ -39,6 +41,7 @@ set(roxlu_sources
 set(roxlu_include_dirs 
   ${roxlu_include_dirs}
   ${roxlu_include_dir}
+  ${roxlu_extern_include_dir}
 )
 
 include_directories(${roxlu_include_dirs})
@@ -77,3 +80,5 @@ add_definitions(
   "-Wreturn-type"
   "-Werror=return-type"
 )
+
+set(roxlu_extern_lib_dir ${roxlu_base_dir}/extern/lib/${roxlu_platform}/${roxlu_bits}/)

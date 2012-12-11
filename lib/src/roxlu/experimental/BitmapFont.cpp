@@ -1,4 +1,4 @@
-//#include "BitmapFont.h"
+#ifdef ROXLU_GL_WRAPPER
 
 #include <roxlu/experimental/BitmapFont.h>
 
@@ -217,4 +217,4 @@ void BitmapFont::buildText(TextVertices& vertices, const std::string& text, floa
 	outWidth = max_x - min_x;
 }
 
-
+#endif // ROXLU_GL_WRAPPER
