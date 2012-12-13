@@ -37,8 +37,6 @@ void FLV::saveFile(const char* filepath) {
   amf.putNumberAMF0(tmp, AMFNumber(buffer.size()));
   buffer.putBytes(tmp.getPtr(), tmp.size(), pos_file_size);
 
-  // rewrite 
-
   // save the buffer
   buffer.saveFile(filepath);
 }
@@ -125,8 +123,10 @@ int FLV::writeHeader(bool hasVideo, bool hasAudio) {
     flags |= 0x01; 
   }
   if(hasAudio) {
+    printf("HAS AUDIO\n");
     flags |= 0x04; 
   }
+  
   buffer.putU8(flags); // audio + video flags
   buffer.putBigEndianU32(9); // data offset
   buffer.putBigEndianU32(0); // previous tag size 0

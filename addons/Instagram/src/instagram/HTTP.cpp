@@ -59,7 +59,6 @@ namespace roxlu {
     for(std::map<std::string, HTTPParam>::iterator it = entries.begin(); it != entries.end(); ++it) {
       it->second.name = percentEncodeString(it->second.name);
       it->second.value = percentEncodeString(it->second.value);
-      printf("%s = %s\n", it->second.name.c_str(), it->second.value.c_str());
     }
   }
   
@@ -179,9 +178,6 @@ namespace roxlu {
     // CREATE HTTP REQUEST
     std::string request = getAsString();
     std::copy(request.begin(), request.end(), std::back_inserter(out_buffer));
-    printf("========\n");
-    printf("%s\n", request.c_str());
-    printf("========\n");
   
     // HINTS FOR SOCKET
     struct addrinfo hints;
@@ -222,6 +218,7 @@ namespace roxlu {
   // UV AND SSL CALLBACKS
   // -----------------------------------------------
   void ssl_write_to_socket(const char* data, size_t len, void* user) {
+
     HTTPRequest* req = static_cast<HTTPRequest*>(user);
     req->sendData(data, len);
   }
@@ -231,12 +228,11 @@ namespace roxlu {
     std::copy(data, data+len, std::back_inserter(req->in_buffer));
 
     if(req->data_cb) {
-      req->data_cb(data, len, req->data_user);
+       req->data_cb(data, len, req->data_user);
     }
   }
 
   void httpreq_on_resolved(uv_getaddrinfo_t* resolver, int status, struct addrinfo* res) {
-    printf("httpreq_on_resolved()\n");
     if(status == -1) {
       printf("ERROR: httpreq_on_resolved(), cannot resoleve. @todo clean memory\n");
       return;

@@ -33,6 +33,7 @@ VideoRecorder::VideoRecorder(int inW, int inH, int outW, int outH, int fps, bool
   rec_params.video_height = out_height;
   rec_params.video_codec_id = FLV_VIDEOCODEC_AVC;
   rec_params.audio_codec_id = FLV_SOUNDFORMAT_SPEEX;
+  rec_params.audio_enabled = use_audio;
   rec_params.x264_param = &params;
   rec_params.x264_nal = nals;
   rec_params.x264_pic = &pic_out;

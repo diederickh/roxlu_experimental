@@ -9,7 +9,7 @@
 
 extern "C" {
 #include <uv.h>
-#include <http_parser/http_parser.h>
+#include <http_parser.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>

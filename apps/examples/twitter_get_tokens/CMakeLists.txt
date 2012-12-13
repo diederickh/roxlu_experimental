@@ -11,6 +11,7 @@ file(GLOB_RECURSE example_sources src/*.cpp)
 
 set(compile_sources
   ${example_sources}
+  ${roxlu_sources}
   ${roxlu_addon_sources}
 )
 

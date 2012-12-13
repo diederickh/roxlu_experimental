@@ -232,7 +232,7 @@ namespace roxlu {
      ssl_ctx = SSL_CTX_new(SSLv23_client_method());
      SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_SSLv2);
      SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, instagram_ssl_verify_peer);
-     SSL_CTX_set_info_callback(ssl_ctx, dummy_ssl_info_callback);
+     //SSL_CTX_set_info_callback(ssl_ctx, dummy_ssl_info_callback);
    }
 
    Instagram::~Instagram() {
@@ -326,6 +326,7 @@ namespace roxlu {
     req->send();
   }
 
+  // http://instagram.com/developer/endpoints/media/#get_media_search
   void Instagram::mediaSearch(HTTPParams& params, cb_instagram_on_data dataCB, cb_instagram_on_close closeCB, void* user) {
     InstagramAPICallback* api = new InstagramAPICallback(closeCB, user, this);
     HTTPRequest* req = new HTTPRequest(loop, ssl_ctx, dataCB, user, instagram_http_request_close, api);

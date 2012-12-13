@@ -29,7 +29,7 @@ Simulation::Simulation()
 
   // Setup the video recorder.
   vid.setIO(&vid_io);
-  vid.open("bin/io_output.flv");
+  vid.open("io_output.flv");
 
   // write 75 frames
   for(int i = 0; i < 75; ++i) { 

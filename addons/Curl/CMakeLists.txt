@@ -6,7 +6,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/../../lib/CMakeLists.txt) # roxlu
 set(curl_base_dir ${CMAKE_CURRENT_LIST_DIR})
 set(curl_src_dir ${curl_base_dir}/src/kurl/)
 set(curl_include_dir ${curl_base_dir}/include)
-set(curl_lib_dir ${curl_base_dir}/lib/${roxlu_platform}/${roxlu_bits})
+
 
 include_directories(
   ${curl_include_dir}
@@ -24,7 +24,9 @@ set(roxlu_addon_sources
 )
 
 set(curl_libs
-  ${curl_lib_dir}/libcurl.a
+  ${roxlu_extern_lib_dir}/libcurl.a
+  ${roxlu_extern_lib_dir}/libssl.a
+  ${roxlu_extern_lib_dir}/libcrypto.a
   z
 )
 

@@ -13,7 +13,6 @@ endif(ROXLU_PLATFORM_MAC)
 set(twitter_base_dir ${CMAKE_CURRENT_LIST_DIR})
 set(twitter_src_dir ${twitter_base_dir}/src)
 set(twitter_include_dir ${twitter_base_dir}/include)
-set(twitter_lib_dir ${twitter_base_dir}/lib/${roxlu_platform}/${roxlu_bits})
 
 include_directories(
   ${twitter_include_dir}
@@ -28,23 +27,21 @@ set(twitter_source_files
   ${twitter_src_dir}/twitter/Buffer.cpp 
   ${twitter_src_dir}/twitter/SSLBuffer.cpp 
   ${twitter_src_dir}/twitter/PercentEncode.cpp
-  ${twitter_base_dir}/extern/src/http_parser/http_parser.c
   ${twitter_base_dir}/extern/src/formats/hmac_sha1.c
   ${twitter_base_dir}/extern/src/formats/json.c
   ${twitter_base_dir}/extern/src/formats/Base64Encoder.cpp
 )
 
 set(roxlu_addon_sources 
-  ${roxlu_addon_sources} 
   ${twitter_source_files}
+  ${roxlu_addon_sources} 
 )
 
 set(twitter_libs
-  ${twitter_lib_dir}/libssl.a
-  ${twitter_lib_dir}/libcrypto.a
-  ${twitter_lib_dir}/libuv.a
+  ${roxlu_extern_lib_dir}/libcrypto.a
+  ${roxlu_extern_lib_dir}/libssl.a
+  ${roxlu_extern_lib_dir}/libuv.a
 )
-
 
 if(ROXLU_PLATFORM_LINUX)
   set(twitter_libs ${twitter_libs} dl pthread rt)

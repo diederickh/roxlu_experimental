@@ -1,9 +1,12 @@
 #ifndef ROXLU_OPENSSL_BUFFERH
 #define ROXLU_OPENSSL_BUFFERH
 
+extern "C" {
 #include <openssl/ssl.h>
 #include <openssl/bio.h>
 #include <openssl/err.h>
+}
+
 #include <string>
 #include <vector>
 

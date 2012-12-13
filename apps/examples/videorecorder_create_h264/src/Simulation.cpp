@@ -29,7 +29,7 @@ Simulation::Simulation()
 
   // Setup the video recorder.
   vid.setIO(&vid_io);
-  vid.open("bin/io_output.264");
+  vid.open("io_output.264");
 
   // write 75 frames
   for(int i = 0; i < 75; ++i) { 
@@ -41,6 +41,7 @@ Simulation::Simulation()
 
   // close
   vid.close();
+  printf("Created video file.\n");
 }
 
 void Simulation::setup() {

@@ -6,7 +6,7 @@ int VideoIOFLV::getType() {
 
 int VideoIOFLV::writeOpenFile(VideoParams* p) {
   filepath = p->filepath;
-  int s = flv.writeHeader(true, true);
+  int s = flv.writeHeader(true, p->audio_enabled);
   flush(flv.getBuffer());
   return s;
 }

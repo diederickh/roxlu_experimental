@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <string>
 #include <instagram/Instagram.h>
 #include <http_parser.h>
 
@@ -9,27 +10,23 @@ http_parser_settings parser_settings;
 http_parser parser;
 size_t total;
 
-static int on_parser_simple(http_parser *p) {
-  return 0;
-}
+static int on_parser_simple(http_parser *p) { return 0; }
+static int on_parser_data(http_parser* p, const char* at, size_t len) { return 0; }
+static void on_subscription_list(const char* data, size_t len, void* user) { }
+static void on_locations_search(const char* data, size_t len, void* user) { }
 
-static int on_parser_data(http_parser* p, const char* at, size_t len) {
-  return 0;
-}
-
-
-static void on_subscription_list(const char* data, size_t len, void* user) {
-}
-
+// --------------------------------------------------
+// PARSING CHUNKED HTTP RESPINSE
+// --------------------------------------------------
 static int on_popular_media_body(http_parser* p, const char* data, size_t len) {
   total += len;
-  //printf("> %zu, %zu\n", len, total);
-  //printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n%s\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n", data);
+  std::string str(data, len);
+  printf("%s\n", str.c_str());
   return 0;
 }
 
+// Gets called when we the server disconnects us, data contains the full response
 static void on_popular_media(const char* data, size_t len, void* user) {
-   printf("RECEIVED: %zu\n", len);
   std::ofstream ofs("response.raw");
   if(ofs.is_open()) {
     ofs.write((char*)data, len);
@@ -38,13 +35,8 @@ static void on_popular_media(const char* data, size_t len, void* user) {
   int n = http_parser_execute(&parser, &parser_settings, data, len);
 }
 
-
-static void on_locations_search(const char* data, size_t len, void* user) {
-  printf("----------\n%s\n----------------\n", data);
-}
-
-static void on_media_search(const char* data, size_t len, void* user) {
- printf("----------\n%s\n----------------\n", data);
+static void on_media_search(const char* data, size_t len, void* user) { 
+  int n = http_parser_execute(&parser, &parser_settings, data, len);
 }
 
 int main() {
@@ -59,18 +51,21 @@ int main() {
   parser_settings.on_body = on_popular_media_body;
   http_parser_init(&parser, HTTP_RESPONSE);
 
-
   Instagram ins; 
-  ins.setup("e3a93c4ff4a24f1ebe4580736904c545", "bfbe3df9b2ae4741947f0e922bec3131", "/Users/diederickhuijbers/roxlu/tests/instagram/bin/client-key.pem");
+  ins.setup(
+            "e3a93c4ff4a24f1ebe4580736904c545", 
+            "bfbe3df9b2ae4741947f0e922bec3131", 
+            "/Users/diederickhuijbers/roxlu/tests/instagram/bin/client-key.pem"
+            );
   ins.setAccessToken("29281621.e3a93c4.472bb7156cd64bb4ad069fb5396919e1");
   //ins.mediaPopular(NULL,on_popular_media, &ins);
 
-  HTTPParams p;
-  p.add("lat","52.162455");
-  p.add("lng", "4.494756");
-  // ins.locationsSearch(p, on_locations_search, NULL, &ins);
- ins.mediaSearch(p, on_media_search, NULL, &ins);
-  //    void Instagram::locationsSearch(HTTPParams& params, cb_instagram_on_data dataCB, cb_instagram_on_close closeCB, void* user) {
+  // search for images around this point.
+  HTTPParams search_params;
+  search_params.add("lat", "52.153377");
+  search_params.add("lng", "4.509437");
+  ins.mediaSearch(search_params, NULL, on_media_search, &ins);
+
   while(true) {
     ins.update();
   }

@@ -134,13 +134,15 @@ VideoParams()
     ,audio_frame_size(0)
     ,audio_sample_rate(0)
     ,audio_timebase(0)
+    ,audio_enabled(true)
   {
   }
   std::string filepath; 
   int video_codec_id;
   int video_width;
   int video_height;
-	
+
+  bool audio_enabled;
   int audio_codec_id;
   char* spx_buffer;
   int spx_num_bytes;
