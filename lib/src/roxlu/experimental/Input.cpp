@@ -34,12 +34,15 @@
 #define STB_TEXTEDIT_K_UNDO GLFW_KEY_Z | GLFW_KEY_LEFT_CONTROL
 #define STB_TEXTEDIT_K_REDO GLFW_KEY_Z | GLFW_KEY_LEFT_ALT
 #else 
-#error "Input is only implemented for GLFW now..."
+//#error "Input is only implemented for GLFW now..."
 #endif
 
 #define F32 float
 #define S16 short int
 #define S32 int
+
+
+#if ROXLU_GL_WRAPPER == ROXLU_GLFW
 
 #define STB_TEXTEDIT_IMPLEMENTATION
 #include <roxlu/external/stb_textedit.h>
@@ -189,5 +192,6 @@ namespace roxlu {
   }
 
 } // roxlu
+#endif // ROXLU_GL_WRAPPER
 
 #endif // ROXLU_GL_WRAPPER

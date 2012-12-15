@@ -171,7 +171,7 @@ namespace roxlu {
 	
     //	float screen_w = ofGetWidth();
     //	float screen_h = ofGetHeight();
-    float aspect = screen_w/screen_h;
+    //float aspect = screen_w/screen_h;
 	
     float ndx = -1.0f + (mouse_x/screen_w) * 2.0f; // left: -1, right: 1
     float ndy = (1.0f - (mouse_y/(screen_h * 0.5))); // top: -1, bottom: 1

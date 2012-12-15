@@ -134,17 +134,18 @@ namespace roxlu {
     memcpy(e.col, col, sizeof(float) * 4);
 
     entries.push_back(e);
-    write(entries.size() - 1, text);
+    write(entries.size() - 1, text, r,g,b,a);
     //printf("Start: %zu, Num vertices: %zu, width: %zu,\n", e.start_dx, e.num_vertices, e.w);//, min_x, max_x);
     update();
     return entries.size()-1;
   }
 
-  int Font::write(unsigned int dx, const std::string& text) {
+  int Font::write(unsigned int dx, const std::string& text, float r, float g, float b, float a) {
     FontEntry& e = entries[dx];
     if(e.num_vertices) {
       vertices.erase(vertices.begin()+e.start_dx, vertices.begin()+(e.start_dx+e.num_vertices));
     }
+    e.col[0] = r, e.col[1] = g, e.col[2] = b, e.col[3] = a;
 
     // Create vertices
     e.w = 0;
@@ -255,7 +256,7 @@ namespace roxlu {
     shader.uniform1i("u_font_texture", 3);
   
     // draw
-    glPointSize(5.0f);
+    //glPointSize(5.0f);
     size_t dx = 0;
     for(std::vector<FontEntry>::iterator it = entries.begin(); it != entries.end(); ++it) {
       FontEntry& e = *it;

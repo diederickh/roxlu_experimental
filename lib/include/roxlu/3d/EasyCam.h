@@ -7,23 +7,20 @@
 
 namespace roxlu {
 
-class EasyCam : public Camera {
-public:
-	EasyCam();
-	void setup(float screenWidth, float screenHeight);
-	void onMouseDown(float x, float y);
-	void onMouseDragged(float x, float y, bool translate = false);
-	void onScrollWheel(float d);
-	ArcBall arcball;
-private:
-	bool shift_down;
-	Vec2 last_mouse_pos;
-	float last_x;
-	float last_y;
-	
-};
-
-
+  class EasyCam : public Camera {
+  public:
+    EasyCam();
+    void setup(float screenWidth, float screenHeight);
+    void onMouseDown(float x, float y);
+    void onMouseDragged(float x, float y, bool translate = false);
+    void onScrollWheel(float d);
+    ArcBall arcball;
+  private:
+    bool shift_down;
+    Vec2 last_mouse_pos;
+    float last_x;
+    float last_y;
+  };
 
 } // roxlu
 #endif

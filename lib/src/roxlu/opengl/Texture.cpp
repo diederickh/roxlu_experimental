@@ -7,8 +7,8 @@
 namespace roxlu {
 
   Texture::Texture() 
-    :wrap_s(GL_CLAMP) // GL_CLAMP_TO_EDGE (gl es)
-    ,wrap_t(GL_CLAMP)
+    :wrap_s(GL_CLAMP_TO_EDGE) // GL_CLAMP_TO_EDGE (gl es)
+    ,wrap_t(GL_CLAMP_TO_EDGE)
     ,min_filter(GL_LINEAR)
     ,mag_filter(GL_LINEAR)
     ,internal_format(GL_RGBA)

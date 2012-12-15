@@ -89,7 +89,7 @@ namespace roxlu {
     ~Font();
     bool open(const std::string& filepath, unsigned int size);
     int write(const std::string& text, float x, float y, float r = 1.0f, float g = 1.0f, float b = 1.0f, float a = 1.0f);
-    int write(unsigned int dx, const std::string& text); // update text entry @index
+    int write(unsigned int dx, const std::string& text, float r = 1.0f, float g = 1.0f, float b = 1.0f, float a = 1.0f); // update text entry @index
     void alignRight(unsigned int dx, float rightEdge); 
     unsigned int getSize();
     void update();

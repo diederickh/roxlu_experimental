@@ -9,51 +9,51 @@
 
 namespace roxlu {
 
-class Thread;
+  class Thread;
 
 #if defined(__APPLE__) || defined(__linux__)
 
-struct Mutex {
-	Mutex();
-	~Mutex();
-	void lock();
-	void unlock();
+  struct Mutex {
+    Mutex();
+    ~Mutex();
+    void lock();
+    void unlock();
 
-	pthread_mutex_t handle;
-};
+    pthread_mutex_t handle;
+  };
 
 #elif _WIN32
 
-struct Mutex {
-	Mutex();
-	~Mutex();
-	void lock();
-	void unlock();
-	CRITICAL_SECTION handle; // we're using critical sections; windows has "mutexes" to for IPC
-};
+  struct Mutex {
+    Mutex();
+    ~Mutex();
+    void lock();
+    void unlock();
+    CRITICAL_SECTION handle; // we're using critical sections; windows has "mutexes" to for IPC
+  };
 
 #endif
 
-class Runnable {
-public:
-	virtual void run() = 0;
-};
+  class Runnable {
+  public:
+    virtual void run() = 0;
+  };
 
 
-class Thread {
-public:
-	Thread();
-	~Thread();
-	void create(Runnable& run);
+  class Thread {
+  public:
+    Thread();
+    ~Thread();
+    void create(Runnable& run);
 #if defined(__APPLE__) || defined(__linux__)
-	static void* threadFunction(void* arg);
-	pthread_t handle;
+    static void* threadFunction(void* arg);
+    pthread_t handle;
 #elif _WIN32
-	static DWORD WINAPI threadFunction(LPVOID param);	
-	HANDLE handle;
-	DWORD id;
+    static DWORD WINAPI threadFunction(LPVOID param);	
+    HANDLE handle;
+    DWORD id;
 #endif
-};
+  };
 
 
 } // roxlu

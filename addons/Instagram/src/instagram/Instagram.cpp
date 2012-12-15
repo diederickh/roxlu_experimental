@@ -51,11 +51,11 @@ namespace roxlu {
     Instagram* ins = api->instagram;
     std::vector<HTTPRequest*>::iterator it = std::find(ins->requests.begin(), ins->requests.end(), req);
     if(it != ins->requests.end()) {
-      ins->requests.erase(it);
+      ins->requests.erase(it); // @todo where do we delete this?
     }
     std::vector<InstagramAPICallback*>::iterator ait = std::find(ins->api_callbacks.begin(), ins->api_callbacks.end(), api);
     if(ait != ins->api_callbacks.end()) {
-      ins->api_callbacks.erase(ait);
+      ins->api_callbacks.erase(ait); // @todo where do we delete this 
     }
   }
 
@@ -107,6 +107,7 @@ namespace roxlu {
       if(it != con->instagram->clients.end()) {
         con->instagram->clients.erase(it);
       }
+     //	@TODO DELETE CONNECTION!!
       return;
     }
     // ERROR (?)
@@ -187,7 +188,7 @@ namespace roxlu {
 
      Instagram* instagram = static_cast<Instagram*>(server->data);
      InstagramConnection* con = new InstagramConnection(instagram);
-     con->client = (uv_tcp_t*)malloc(sizeof(uv_tcp_t));
+     con->client = (uv_tcp_t*)malloc(sizeof(uv_tcp_t)); // @todo FREE
      con->client->data = con;
      con->state = ICS_PARSE_HUB_CHALLENGE;
      con->write_req.data = con;
