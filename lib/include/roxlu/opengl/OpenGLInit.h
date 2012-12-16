@@ -12,25 +12,30 @@
  #elif ROXLU_PLATFORM == ROXLU_APPLE
   #include <OpenGL/gl.h>
 
-// #ifndef glGenVertexArrays 
+  #ifndef glGenVertexArrays 
     #define glGenVertexArrays glGenVertexArraysAPPLE
-//#endif
-//#ifndef glBindVertexArrayAPPLE
+  #endif
+  #ifndef glBindVertexArrayAPPLE
     #define glBindVertexArray glBindVertexArrayAPPLE
-//  #endif 
+  #endif 
 
 
  #endif
 #elif ROXLU_GL_WRAPPER == ROXLU_OPENFRAMEWORKS
 #include "ofMain.h"
 #elif ROXLU_GL_WRAPPER == ROXLU_IOS
-#include <OpenGLES/ES2/gl.h>
-#include <OpenGLES/ES2/glext.h>
-#define glGenVertexArrays glGenVertexArraysOES
-#define glBindVertexArray glBindVertexArrayOES
+  #include <OpenGLES/ES2/gl.h>
+  #include <OpenGLES/ES2/glext.h>
+
+  #ifndef glGenVertexArrays
+    #define glGenVertexArrays glGenVertexArraysOES
+  #endif
+  #ifndef glBindVertexArray
+    #define glBindVertexArray glBindVertexArrayOES
+  #endif
 #elif ROXLU_GL_WRAPPER == ROXLU_CINDER
 #elif ROXLU_GL_WRAPPER == ROXLU_COCOA
 #include <OpenGL/gl.h>
-#endif
+#endif // ROXLU_GL_WRAPPER
 
 #endif
