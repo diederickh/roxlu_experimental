@@ -1,6 +1,7 @@
 #ifndef ROXLU_DATABASE_QUERY_SELECTH
 #define ROXLU_DATABASE_QUERY_SELECTH
 
+#include <stdio.h>
 #include <sqlite/Query.h>
 #include <sstream>
 #include <string>
