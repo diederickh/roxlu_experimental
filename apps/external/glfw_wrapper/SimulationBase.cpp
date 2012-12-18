@@ -32,6 +32,9 @@ void SimulationBase::onMouseDrag(int x, int y, int dx, int dy, int button) {
 void SimulationBase::onMouseMove(int x, int y) {
 }
 
+void SimulationBase::onChar(int ch) {
+}
+
 void SimulationBase::onKeyDown(int key) {
 }
 
