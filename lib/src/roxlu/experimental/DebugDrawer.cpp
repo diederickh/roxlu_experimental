@@ -6,6 +6,7 @@ DebugDrawer::DebugDrawer()
   :is_initialized(false)
   ,bytes_allocated(0)
   ,pos_id(0)
+  ,col_id(0)
   ,projection_matrix_id(0)
   ,view_matrix_id(0)
   ,vbo(0)
@@ -76,8 +77,12 @@ void DebugDrawer::setupOpenGL() {
 
   // set attributes
   pos_id = glGetAttribLocation(prog_id, "a_pos");
+  col_id = glGetAttribLocation(prog_id, "a_col");
   glEnableVertexAttribArray(pos_id);
-  glVertexAttribPointer(pos_id, 3, GL_FLOAT, GL_FALSE, sizeof(VertexP), (GLvoid*)offsetof(VertexP, pos));
+  glEnableVertexAttribArray(col_id);
+  glVertexAttribPointer(pos_id, 3, GL_FLOAT, GL_FALSE, sizeof(VertexPC), (GLvoid*)offsetof(VertexPC, pos));
+  glVertexAttribPointer(col_id, 4, GL_FLOAT, GL_FALSE, sizeof(VertexPC), (GLvoid*)offsetof(VertexPC, col));
+  printf("%d, %d\n", pos_id, col_id);
   
 
   // ---------------------------------------------------------
@@ -170,14 +175,15 @@ void DebugDrawer::begin(GLenum type) {
   entry.start_dx = vertices.size() - 1;
 }
 
-void DebugDrawer::addVertex(const Vec3 pos) {
+void DebugDrawer::addVertex(const Vec3 pos, const Vec4 col) {
   needs_update = true;
   vertex.setPos(pos);
+  vertex.setCol(col);
   vertices.push_back(vertex);
 }
 
-void DebugDrawer::addVertex(const float x, const float y, const float z) {
-  addVertex(Vec3(x,y,z));
+void DebugDrawer::addVertex(const float x, const float y, const float z, float r, float g, float b) {
+  addVertex(Vec3(x,y,z), Vec4(r,g,b,1.0f));
 }
 
 void DebugDrawer::end() {
@@ -253,7 +259,7 @@ void DebugDrawer::drawTexture(GLuint tex, const float x, const float y, const fl
 }
 
 size_t DebugDrawer::getNumBytes() {
-  return sizeof(VertexP) * vertices.size();
+  return sizeof(VertexPC) * vertices.size();
 }
 
 const float* DebugDrawer::getPtr() {

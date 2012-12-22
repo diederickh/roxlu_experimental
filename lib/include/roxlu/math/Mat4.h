@@ -72,6 +72,7 @@ namespace roxlu {
 	
     void setBillboard(const Vec3& right, const Vec3& up); // create billboard matrix (z-axis is calculated)
     void setBillboard(const float* right, const float* up);
+    void setAxis(const Vec3& x, const Vec3& y, const Vec3& z);
     void setXAxis(const Vec3& ax); // indices: 0,1,2
     void setXAxis(const float* ax); 
     void setYAxis(const Vec3& ax); // indices: 4,5,6
@@ -311,6 +312,12 @@ namespace roxlu {
 
   inline float Mat4::getZ() {
     return m[14];
+  }
+
+  inline void Mat4::setAxis(const Vec3& x, const Vec3& y, const Vec3& z) {
+    setXAxis(x);
+    setYAxis(y);
+    setZAxis(z);
   }
 
   inline void Mat4::setXAxis(const float* ax) {

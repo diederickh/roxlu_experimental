@@ -5,8 +5,10 @@
 #include <roxlu/io/Endianness.h>
 #include <roxlu/io/File.h>
 #include <roxlu/io/INI.h>
+#include <roxlu/io/OBJ.h>
 #include <roxlu/io/RingBuffer.h>
 #include <roxlu/io/Socket.h>
+#include <roxlu/io/Utils.h>
 
 using namespace roxlu;
 	

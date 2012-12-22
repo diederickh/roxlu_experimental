@@ -10,14 +10,18 @@ const std::string DEBUG_VS = ""
   "uniform mat4 u_projection_matrix;"
   "uniform mat4 u_view_matrix;"
   "attribute vec4 a_pos;"
+  "attribute vec4 a_col;"
+  "varying vec4 v_col; "
   ""
   "void main() { "
   "  gl_Position = u_projection_matrix * u_view_matrix  * a_pos; "
+  "  v_col = a_col; "
   " } ";
 
 const std::string DEBUG_FS = ""
+  "varying vec4 v_col; "
   "void main() { "
-  "  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); "
+  "  gl_FragColor = v_col; "
   "}";
 
 
@@ -55,8 +59,8 @@ class DebugDrawer {
   ~DebugDrawer();
   void begin(GLenum type);
   void end();
-  void addVertex(const Vec3 pos);
-  void addVertex(const float x, const float y, const float z);
+  void addVertex(const Vec3 pos, const Vec4 col);
+  void addVertex(const float x, const float y, const float z, float r = 1.0f, float g = 0.0f, float b = 0.0f);
   void draw(const float* pm, const float* vm);
   void drawTexture(GLuint tex, const float x, const float y, const float w, const float h);
  private: 
@@ -69,10 +73,10 @@ class DebugDrawer {
  private:
   bool is_initialized;
   bool needs_update;
-  std::vector<VertexP> vertices;
+  std::vector<VertexPC> vertices;
   std::vector<DrawEntry> entries;
   DrawEntry entry;
-  VertexP vertex;
+  VertexPC vertex;
 
   int win_w;
   int win_h;
@@ -92,6 +96,7 @@ class DebugDrawer {
   // --------
   size_t bytes_allocated;
   GLuint pos_id;
+  GLuint col_id;
   GLuint projection_matrix_id;
   GLuint view_matrix_id;
   GLuint vbo;
