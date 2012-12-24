@@ -64,7 +64,7 @@ int main() {
     running = !(glfwGetKey(window, GLFW_KEY_ESC));
   }
   glfwTerminate();
-  exit(EXIT_SUCCESS);
+  return EXIT_SUCCESS;
 };
 
 // CALLBACK DEFS

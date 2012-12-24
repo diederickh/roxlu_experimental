@@ -113,6 +113,7 @@ int FLV::readTag() {
 // W R I T I N G
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 int FLV::writeHeader(bool hasVideo, bool hasAudio) {
+
   buffer.putU8('F'); 
   buffer.putU8('L'); 
   buffer.putU8('V');

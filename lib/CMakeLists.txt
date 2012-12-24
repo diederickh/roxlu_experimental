@@ -2,8 +2,7 @@
 # addon or simulatin/example CMakelists.txt files:
 # - roxlu_addon_sources (addons should append their sources to this list, see Twitter addon)
 # - roxlu_addon_libs (addons should append their libs to this list, see Twitter addon)
-# - roxlu_linker_flags (frameworks, libs, etc.. which must be linked with for your application, see simulation cmake files)
-
+# - CMAKE_EXE_LINKER_FLAG (add extra frameworks, libs etc.. to the linker flags, see Videorecorder/Audio addons)
 cmake_minimum_required(VERSION 2.8)
 
 option(ROXLU_32BIT "Build 32bit version" OFF)

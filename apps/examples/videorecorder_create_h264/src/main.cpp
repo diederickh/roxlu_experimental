@@ -68,7 +68,8 @@ int main() {
   }
   
   glfwTerminate();
-  exit(EXIT_SUCCESS);
+  //exit(EXIT_SUCCESS);
+  return EXIT_SUCCESS;
 };
 
 // CALLBACK DEFS

@@ -47,6 +47,10 @@ set(videorecorder_libs
 )
 
 
+if(APPLE)
+  set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS}  -framework CoreFoundation -framework OpenGL -framework Cocoa -framework IOKit ")
+endif(APPLE)
+
 set(roxlu_addon_libs
   ${roxlu_addon_libs}
   ${videorecorder_libs}

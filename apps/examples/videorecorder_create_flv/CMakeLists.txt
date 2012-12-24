@@ -5,17 +5,11 @@ include(${CMAKE_CURRENT_LIST_DIR}/../../../lib/CMakeLists.txt) # roxlu cmake
 include(${roxlu_base_dir}/apps/external/CMakeLists.txt) # External (glfw)
 include(${roxlu_addons_dir}/Buttons/CMakeLists.txt) # Buttons addon
 include(${roxlu_addons_dir}/VideoRecorder/CMakeLists.txt) # Buttons addon
-#include(${roxlu_addons_dir}/Twitter/CMakeLists.txt) # Twitter addon
-#include(${roxlu_addons_dir}/Curl/CMakeLists.txt) # Curl addon
 
 set(simulation_base ${CMAKE_CURRENT_LIST_DIR}/)
 set(simulation_install_dir ${simulation_base}bin/)
 set(simulation_include_dir ${simulation_base}src/)
 set(CMAKE_INSTALL_PREFIX ${simulation_install_dir})
-
-if(APPLE)
-  set(CMAKE_EXE_LINKER_FLAGS " -framework CoreFoundation -framework OpenGL -framework Cocoa -framework IOKit ")
-endif(APPLE)
 
 set(simulation_libs
   ${roxlu_addon_libs}

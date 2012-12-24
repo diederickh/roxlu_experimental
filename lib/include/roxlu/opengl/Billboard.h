@@ -1,8 +1,6 @@
 #ifndef ROXLU_BILLBOARDH
 #define ROXLU_BILLBOARDH
 
-//#include "Roxlu.h"
-
 #include <roxlu/math/Mat4.h>
 #include <roxlu/math/Vec3.h>
 #include <roxlu/math/Quat.h>
