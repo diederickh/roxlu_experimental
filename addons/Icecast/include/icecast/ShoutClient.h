@@ -11,7 +11,13 @@ class ShoutClient {
  public:
   ShoutClient();
   ~ShoutClient();
-  int setup(const std::string ip);
+  int setup(const std::string ip,
+    const unsigned short port,
+    const std::string username,
+    const std::string password,
+    const std::string mount
+  );
+  
   void addAudio(const short int* data, size_t nbytes);
  private:
   shout_t* shout;

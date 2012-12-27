@@ -1,4 +1,4 @@
-#include "ShoutClient.h"
+#include <icecast/ShoutClient.h>
 
 ShoutClient::ShoutClient() {
 }
@@ -6,7 +6,14 @@ ShoutClient::ShoutClient() {
 ShoutClient::~ShoutClient() {
 }
 
-int ShoutClient::setup(const std::string ip) {
+int ShoutClient::setup(
+                       const std::string ip, 
+                       const unsigned short port, /* 8000 */
+                       const std::string username, /* shout */
+                       const std::string password, /* hackme */
+                       const std::string mount /* /example (no .mp3! ) */
+)
+{
   long ret;
 
   shout_init();
@@ -26,21 +33,21 @@ int ShoutClient::setup(const std::string ip) {
     return 1;
   }
 
-  if(shout_set_port(shout, 8000) != SHOUTERR_SUCCESS) {
+  if(shout_set_port(shout, port) != SHOUTERR_SUCCESS) {
     printf("Error setting port: %s\n", shout_get_error(shout));
     return 1;
   }
 
-  if(shout_set_password(shout, "hackme") != SHOUTERR_SUCCESS) {
+  if(shout_set_password(shout, password.c_str()) != SHOUTERR_SUCCESS) {
     printf("Error setting password: %s\n", shout_get_error(shout));
     return 1;
   }
-  if(shout_set_mount(shout, "/example") != SHOUTERR_SUCCESS) {
+  if(shout_set_mount(shout, mount.c_str()) != SHOUTERR_SUCCESS) {
     printf("Error setting mount: %s\n", shout_get_error(shout));
     return 1;
   }
 
-  if(shout_set_user(shout, "source") != SHOUTERR_SUCCESS) {
+  if(shout_set_user(shout, username.c_str()) != SHOUTERR_SUCCESS) {
     printf("Error setting user: %s\n", shout_get_error(shout));
     return 1;
   }
@@ -63,7 +70,7 @@ int ShoutClient::setup(const std::string ip) {
   while (ret == SHOUTERR_BUSY) {
     usleep(10000);
     ret = shout_get_connected(shout);
-    printf("Connecting.. :%d\n", ret);
+    printf("Connecting.. :%ld\n", ret);
   }
 
   lame_flags = lame_init();
@@ -73,17 +80,15 @@ int ShoutClient::setup(const std::string ip) {
   lame_set_mode(lame_flags, MONO);
 
   ret = lame_init_params(lame_flags);
-  printf("%ld\n", ret);
-
   return 0;
 }
 
+// 
 void ShoutClient::addAudio(const short int* data, size_t nbytes) {
   //int written = lame_encode_buffer_interleaved(lame_flags, (short int*)data, nbytes, mp3_buffer, MP3_BUFFER_SIZE);
   int written = lame_encode_buffer(lame_flags, data, data, 320, mp3_buffer, MP3_BUFFER_SIZE);
   if(written > 0) {
     int ret = shout_send(shout, mp3_buffer, written);
-    printf("ENCODED: %d\n", written);
     if(ret != SHOUTERR_SUCCESS) {
       printf("ERROR: cannot shout_send: %s\n", shout_get_error(shout));
     }
