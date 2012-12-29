@@ -14,4 +14,4 @@ fi
 
 cd ${d}/build
 cmake ../
-make
+make 

@@ -14,6 +14,7 @@ include_directories(
   ${roxlu_extern_lib_dir}/glib-2.0/include/
 )
 
+if(ROXLU_PLATFORM_MAC)
 set(pango_libs
   ${roxlu_extern_lib_dir}/libglib-2.0.a
   ${roxlu_extern_lib_dir}/libgobject-2.0.a
@@ -27,6 +28,35 @@ set(pango_libs
   ${roxlu_extern_lib_dir}/libpango-1.0.a
   ${roxlu_extern_lib_dir}/libpangocairo-1.0.a
 )
+endif(ROXLU_PLATFORM_MAC)
+
+if(ROXLU_PLATFORM_LINUX)
+set(pango_libs
+  ${roxlu_extern_lib_dir}/libiconv.a
+  ${roxlu_extern_lib_dir}/libffi.a
+  ${roxlu_extern_lib_dir}/libcairo.a
+  ${roxlu_extern_lib_dir}/libpixman-1.a
+  ${roxlu_extern_lib_dir}/libpng15.a
+  ${roxlu_extern_lib_dir}/libpango-1.0.a
+  ${roxlu_extern_lib_dir}/libgthread-2.0.a
+  ${roxlu_extern_lib_dir}/libgio-2.0.a
+  ${roxlu_extern_lib_dir}/libglib-2.0.a
+  ${roxlu_extern_lib_dir}/libgobject-2.0.a
+  ${roxlu_extern_lib_dir}/libgmodule-2.0.a
+  ${roxlu_extern_lib_dir}/libfreetype.a
+  ${roxlu_extern_lib_dir}/libfontconfig.a
+  ${roxlu_extern_lib_dir}/libpangocairo-1.0.a
+  ${roxlu_extern_lib_dir}/libintl.a
+  ${roxlu_extern_lib_dir}/libz.a
+  ${roxlu_extern_lib_dir}/libiconv.a
+  ${roxlu_extern_lib_dir}/libxml2.a
+  ${roxlu_extern_lib_dir}/libpangoft2-1.0.a
+  -ldl
+  -lpthread
+  -lrt
+)
+endif(ROXLU_PLATFORM_LINUX)
+
 
 set(roxlu_addon_libs
   ${roxlu_addon_libs}
