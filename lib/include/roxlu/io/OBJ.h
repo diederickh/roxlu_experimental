@@ -6,7 +6,9 @@
 #include <string>
 #include <fstream>
 #include <vector>
-
+#include <stdio.h>
+#include <stdlib.h> // atoi
+#include <string.h> // memcpy
 /** 
  * Super basic OBJ file importer. Only support the minimum to 
  * import one object, with the position and normal.
