@@ -2,9 +2,11 @@
 
 # COMPILING PANGO WITH CAIRO
 # --------------------------
-# This script compiles pango + cairo on Mac OSX 10.8.2 with all 
-# dependencies. This script has been tested only on this mac, but should
-# work on 10.6.x too.
+# This script compiles pango + cairo on Ubuntu 12.10 
+# (GNU/Linux 3.5.0-21-generic x86_64)
+#
+# THIS SCRIPT NEEDS A BIT OF WORK THOUGH! 
+# - copy fontconfig.pc to build/lib/pkgconfig/ somehow pangocairo.h is not created
 #
 # HOW TO COMPILE
 # --------------
@@ -59,6 +61,7 @@ automake_src="automake-1.12.6.tar.gz"
 m4_src="m4-1.4.16.tar.gz" # linux
 zlib_src="zlib-1.2.7.tar.gz" # linux
 xml_src="libxml2-2.9.0.tar.gz" # linux
+
 if [ ! -d ${bd} ] ; then 
     mkdir ${bd}
 fi
