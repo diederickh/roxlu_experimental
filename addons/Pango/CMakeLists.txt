@@ -43,17 +43,16 @@ set(pango_libs
   ${roxlu_extern_lib_dir}/libglib-2.0.a
   ${roxlu_extern_lib_dir}/libgobject-2.0.a
   ${roxlu_extern_lib_dir}/libgmodule-2.0.a
-  ${roxlu_extern_lib_dir}/libfreetype.a
-  ${roxlu_extern_lib_dir}/libfontconfig.a
   ${roxlu_extern_lib_dir}/libpangocairo-1.0.a
   ${roxlu_extern_lib_dir}/libintl.a
-  ${roxlu_extern_lib_dir}/libz.a
   ${roxlu_extern_lib_dir}/libiconv.a
-  ${roxlu_extern_lib_dir}/libxml2.a
   ${roxlu_extern_lib_dir}/libpangoft2-1.0.a
   -ldl
   -lpthread
   -lrt
+  -lfreetype
+  -lz
+  -lfontconfig
 )
 endif(ROXLU_PLATFORM_LINUX)
 

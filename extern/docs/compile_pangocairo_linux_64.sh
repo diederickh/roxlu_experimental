@@ -10,9 +10,22 @@
 #
 # HOW TO COMPILE
 # --------------
-# - Create a directores "sources" and download the sources (see list below)
-# - Run pangocairo.sh once to extract all sources and set everything in place
-# - Run pangocairo.sh several times in this order:
+# 1) First install the fontconfig development package (try both, one might fail)
+#
+#   $ apt-get install libfontconfig-dev
+#   $ apt-get install libfontconfig1-dev 
+#
+#   After installing libfontconfig, it will have installed the freetype-dev, 
+#   zlib-dev packages too. Next we need to find where the pkg-config file is stored
+#   you can do this by using the following commands:
+#
+#   $ dpkg -L libfontconfig1-dev | grep -i "fontconfig.pc"
+#   
+#   Copy the path you see there to the 'fontconfig_pkg_path' variable below
+#
+# 2) Create a directores "sources" and download the sources (see list below)
+# 3) Run pangocairo.sh once to extract all sources and set everything in place
+# 4) Run pangocairo.sh several times in this order:
 #    $ ./pangocairo.sh ffi
 #    $ ./pangocairo.sh iconv
 #    $ ./pangocairo.sh libtool
@@ -20,20 +33,19 @@
 #    $ ./pangocairo.sh autoconf
 #    $ ./pangocairo.sh automake
 #    $ ./pangocairo.sh gettext
-#    $ ./pangocairo.sh zlib
 #    $ ./pangocairo.sh glib
 #    $ ./pangocairo.sh pkgconfig
 #    $ ./pangocairo.sh png
 #    $ ./pangocairo.sh jpg
 #    $ ./pangocairo.sh pixman
-#    $ ./pangocairo.sh freetype
-#    $ ./pangocairo.sh xml
-#    $ ./pangocairo.sh fontconfig
 #    $ ./pangocairo.sh poppler
 #    $ ./pangocairo.sh harfbuzz
 #    $ ./pangocairo.sh cairo
 #    $ ./pangocairo.sh pango
 #
+
+# PATH TO fontconfig.pc (PKG CONFIG FILE)
+fontconfig_pkg_path="/usr/lib/x86_64-linux-gnu/pkgconfig/"
 
 bd=${PWD}/build
 sd=${PWD}/sources
@@ -51,16 +63,12 @@ ffi_src="libffi-3.0.11.tar.gz"
 libtool_src="libtool-2.4.2.tar.gz"
 jpg_src="jpegsrc.v8d.tar.gz"
 svg_src="librsvg-2.36.4.tar.xz"
-fontconfig_src="fontconfig-2.10.2.tar.gz"
 poppler_src="poppler-0.20.5.tar.gz"
-freetype_src="freetype-2.4.11.tar.gz"
 pango_src="pango-1.32.5.tar.xz"
 harfbuzz_src="harfbuzz-0.9.9.tar.bz2"
 autoconf_src="autoconf-2.69.tar.gz"
 automake_src="automake-1.12.6.tar.gz"
 m4_src="m4-1.4.16.tar.gz" # linux
-zlib_src="zlib-1.2.7.tar.gz" # linux
-xml_src="libxml2-2.9.0.tar.gz" # linux
 
 if [ ! -d ${bd} ] ; then 
     mkdir ${bd}
@@ -87,21 +95,43 @@ check_source ${glib_src}
 check_source ${ffi_src}
 check_source ${libtool_src}
 check_source ${jpg_src}
-check_source ${svg_src}
-check_source ${fontconfig_src}
 check_source ${poppler_src}
-check_source ${freetype_src}
 check_source ${pango_src}
 check_source ${harfbuzz_src}
 check_source ${autoconf_src}
 check_source ${automake_src}
 check_source ${m4_src}  # linux 
-check_source ${zlib_src} # linux
-check_source ${xml_src} # linux
 
 if [ ${found_sources} = 0 ] ; then 
     echo "Downlaod all dependencies into sources/" 
     exit
+fi
+
+if [ "$1" = "clean" ] ; then
+    cd ${pwd}
+    rm -rf pkgconfig
+    rm -rf png
+    rm -rf pixman
+    rm -rf cairo
+    rm -rf gettext
+    rm -rf iconv
+    rm -rf glib
+    rm -rf ffi
+    rm -rf libtool 
+    rm -rf jpg  
+    rm -rf png
+    rm -rf svg
+    rm -rf poppler
+    rm -rf freetype 
+    rm -rf fontconfig
+    rm -rf pango  
+    rm -rf autoconf
+    rm -rf harfbuzz 
+    rm -rf automake  
+    rm -rf m4 
+    rm -rf zlib 
+    rm -rf xml
+    rm -rf build
 fi
 
 # EXTRACT ALL SOURCES
@@ -135,17 +165,8 @@ fi
 if [ ! -d "jpg" ] ; then
     cp ${sd}/${jpg_src} . && tar -zxvf ${jpg_src} && mv jpeg-8d jpg && rm ${jpg_src}
 fi
-if [ ! -d "svg" ] ; then 
-    cp ${sd}/${svg_src} . && xz -d ${svg_src} && tar -xvf ${svg_src%.xz} && mv ${svg_src%.tar.xz} svg && rm ${svg_src%.tar.xz}.tar 
-fi
 if [ ! -d "poppler" ] ; then
     cp ${sd}/${poppler_src} . && tar -zxvf ${poppler_src} && mv ${poppler_src%.tar.gz} poppler  && rm ${poppler_src}
-fi 
-if [ ! -d "fontconfig" ] ; then
-    cp ${sd}/${fontconfig_src} . && tar -zxvf ${fontconfig_src} && mv ${fontconfig_src%.tar.gz} fontconfig  && rm ${fontconfig_src}
-fi 
-if [ ! -d "freetype" ] ; then
-    cp ${sd}/${freetype_src} . && tar -zxvf ${freetype_src} && mv ${freetype_src%.tar.gz} freetype  && rm ${freetype_src}
 fi 
 if [ ! -d "pango" ] ; then 
     cp ${sd}/${pango_src} . && xz -d ${pango_src} && tar -xvf ${pango_src%.xz} && mv ${pango_src%.tar.xz} pango && rm ${pango_src%.tar.xz}.tar 
@@ -161,12 +182,6 @@ if [ ! -d "automake" ] ; then
 fi
 if [ ! -d "m4" ] ; then
     cp ${sd}/${m4_src} . && tar -zxvf ${m4_src} && mv ${m4_src%.tar.gz} m4  && rm ${m4_src}
-fi
-if [ ! -d "zlib" ] ; then
-    cp ${sd}/${zlib_src} . && tar -zxvf ${zlib_src} && mv ${zlib_src%.tar.gz} zlib  && rm ${zlib_src}
-fi
-if [ ! -d "xml" ] ; then
-    cp ${sd}/${xml_src} . && tar -zxvf ${xml_src} && mv ${xml_src%.tar.gz} xml  && rm ${xml_src}
 fi
  
 # MAKE SURE WE'RE USING OUR LOCAL BUILD DIRECTORIES
@@ -253,15 +268,6 @@ if [ "$1" = "gettext" ] ; then
     make install
 fi
 
-# zlib
-if [ "$1" = "zlib" ] ; then 
-    set -x
-    cd ${pwd}/zlib
-    ./configure --prefix=${bd}
-    make
-    make install
-fi
-
 # glib
 if [ "$1" = "glib" ] ; then 
     set -x
@@ -279,7 +285,6 @@ fi
 
 # pkgconfig
 if [ "$1" = "pkgconfig" ] ; then 
-  #  export LDFLAGS="${LDFLAGS} -framework Carbon"
     export GLIB_CFLAGS="-I${bd}/include/ -I${bd}/include/glib-2.0/ -I${bd}/lib/glib-2.0/include/"
     export GLIB_LIBS="-lglib-2.0  -liconv"
     set -x
@@ -325,48 +330,9 @@ if [ "$1" = "pixman" ] ; then
     make install
 fi
 
-# freetype
-if [ "$1" = "freetype" ] ; then 
-    export PKG_CONFIG=${bd}/bin/pkg-config
-    export PKG_CONFIG_PATH=${bd}/lib/pkgconfig
-    cd ${pwd}/freetype
-    ./configure --prefix=${bd} \
-	--enable-static=yes
-    make clean
-    make 	
-    make install
-fi
-
-
-# xml
-if [ "$1" = "xml" ] ; then 
-    export PKG_CONFIG=${bd}/bin/pkg-config
-    export PKG_CONFIG_PATH=${bd}/lib/pkgconfig
-    cd ${pwd}/xml
-    ./configure --prefix=${bd} \
-	--enable-static=yes 
-    make clean
-    make 	
-    make install
-fi
-
-# fontconfig
-if [ "$1" = "fontconfig" ] ; then 
-    export PKG_CONFIG=${bd}/bin/pkg-config
-    export PKG_CONFIG_PATH=${bd}/lib/pkgconfig
-    cd ${pwd}/fontconfig
-    ./configure --prefix=${bd} \
-	--enable-static=yes \
-        --enable-libxml2
-    make clean
-    make 	
-    make install
-fi
-
 # poppler
 if [ "$1" = "poppler" ] ; then 
-    export FONTCONFIG_CFLAGS="-I${bd}/include/"
-    export FONTCONFIG_LIBS="-lfontconfig"
+    export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:${fontconfig_pkg_path}
     cd ${pwd}/poppler
     ./configure --prefix=${bd} \
 	--enable-static=yes 
@@ -377,6 +343,7 @@ fi
 
 # harfbuzz
 if [ "$1" = "harfbuzz" ] ; then 
+    export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:${fontconfig_pkg_path}
     cd ${pwd}/harfbuzz
     ./configure --prefix=${bd} \
 	--enable-static=yes 
@@ -387,19 +354,14 @@ fi
 
 # cairo
 if [ "$1" = "cairo" ] ; then
-    # we must disable-ft else pango can't load fonts somehow
     cd ${pwd}/cairo
     export PKG_CONFIG=${bd}/bin/pkg-config
     export PKG_CONFIG_PATH=${bd}/lib/pkgconfig
+    export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:${fontconfig_pkg_path}
     export pixman_CFLAGS="-I/${bd}/include/pixman-1/"
     export pixman_LIBS="-lpixman-1"
     export POPPLER_CFLAGS="-I${bd}/include/"
     export POPPLER_LIBS="-lpoppler"
-    export FREETYPE_CFLAGS="-I${bd}/include/freetype2/"
-    export FREETYPE_LIBS="-lfreetype"
-    export FONTCONFIG_CFLAGS="-I${bd}/include/"
-    export FONTCONFIG_LIBS="-lfontconfig"
-
     ./configure --prefix=${bd} \
 	--disable-xlib \
         --enable-ft \
@@ -416,15 +378,11 @@ fi
 # pango
 if [ "$1" = "pango" ] ; then 
     export PKG_CONFIG=${bd}/bin/pkg-config
-    export PKG_CONFIG_PATH=${bd}/lib/pkgconfig:${pwd}/fontconfig/
+    export PKG_CONFIG_PATH=${bd}/lib/pkgconfig:${fontconfig_pkg_path}
     export CAIRO_CFLAGS="-I${bd}/include/cairo/"
     export CAIRO_LIBS="-lcairo "
     export POPPLER_CFLAGS="-I${bd}/include/"
     export POPPLER_LIBS="-lpoppler"
-    export FREETYPE_CFLAGS="-I${bd}/include/freetype2/"
-    export FREETYPE_LIBS="-lfreetype"
-    export FONTCONFIG_CFLAGS="-I${bd}/include/"
-    export FONTCONFIG_LIBS="-lfontconfig"
     export pixman_CFLAGS="-I/${bd}/include/pixman-1/"
     export pixman_LIBS="-lpixman-1"
 

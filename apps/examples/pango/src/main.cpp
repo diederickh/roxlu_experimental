@@ -6,7 +6,7 @@ int main() {
   
   // Create surface with default arial font
   TextSurface ts;
-  ts.setup("Arial 15", 500, 550);
+  ts.setup("Nimbus Mono 15", 500, 550);
   ts.fill(1.0, 0.3, 0.3, .1);
 
   // Set some text and render it onto the surfface
