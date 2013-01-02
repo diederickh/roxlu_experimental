@@ -10,6 +10,11 @@
 #include <vector>
 #include <sstream>
 
+#ifdef ROXLU_GL_WRAPPER
+#include <roxlu/opengl/OpenGLInit.h>
+#include <roxlu/opengl/Error.h>
+#endif
+
 #undef get16bits
 #if (defined(__GNUC__) && defined(__i386__)) || defined(__WATCOMC__) \
 || defined(_MSC_VER) || defined (__BORLANDC__) || defined (__TURBOC__)
@@ -77,5 +82,25 @@ static std::string rx_join(const std::vector<T>& entries, std::string sep) {
   }
   return result;
 }
+
+
+#ifdef ROXLU_GL_WRAPPER
+
+// Creates a vertex + frag shader and a program. 
+// We do not yet link the program so you can set attribute locations
+inline GLuint rx_create_shader(const char* vs, const char* fs) {
+  GLuint vert_id = glCreateShader(GL_VERTEX_SHADER);
+  GLuint frag_id = glCreateShader(GL_FRAGMENT_SHADER);
+  printf("vert id: %d\n", vert_id);
+  glShaderSource(vert_id, 1, &vs, NULL);
+  glShaderSource(frag_id, 1, &fs, NULL);
+  glCompileShader(vert_id); eglGetShaderInfoLog(vert_id);
+  glCompileShader(frag_id); eglGetShaderInfoLog(frag_id);
+  GLuint prog = glCreateProgram();
+  glAttachShader(prog, vert_id);
+  glAttachShader(prog, frag_id);
+  return prog;
+}
+#endif
 
 #endif

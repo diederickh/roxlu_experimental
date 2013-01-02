@@ -19,7 +19,7 @@
 
 // We need to set these to a sane value
 #if ROXLU_GL_WRAPPER == ROXLU_GLFW
-#include <GL/glfw3.h>
+#include <glfw_opengl/glfw3.h>
 //#define STB_TEXTEDIT_K_SHIFT 0
 #define STB_TEXTEDIT_K_LEFT GLFW_KEY_LEFT
 #define STB_TEXTEDIT_K_RIGHT GLFW_KEY_RIGHT
@@ -50,7 +50,7 @@
 namespace roxlu {
   // ------------- 
   int rx_textedit_string_length(Input* input) {
-    printf("string_length() : %d\n", input->text.size());
+    printf("string_length() : %ld\n", input->text.size());
     return input->text.size();
   }
 

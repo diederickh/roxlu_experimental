@@ -3,6 +3,7 @@
 
 #include <roxlu/core/platform/Platform.h>
 
+#define GLSL(version, shader)  "#version " #version "\n" #shader
 
 #if ROXLU_GL_WRAPPER == ROXLU_GLFW
  #if ROXLU_PLATFORM == ROXLU_LINUX
@@ -10,17 +11,17 @@
    #include <GL/gl.h>
    #include <GL/glext.h>
  #elif ROXLU_PLATFORM == ROXLU_APPLE
-  #include <OpenGL/gl.h>
+  #include <glew_opengl/glew.h>
+//   #include <OpenGL/gl.h>
+//   #include <OpenGL/glext.h>
+   #include <glfw_opengl/glfw3.h>
+//#include <OpenGL/gl.h>
+  #undef glGenVertexArrays
+  #undef glBindVertexArray
+  #define glGenVertexArrays glGenVertexArraysAPPLE
+  #define glBindVertexArray glBindVertexArrayAPPLE
 
-  #ifndef glGenVertexArrays 
-    #define glGenVertexArrays glGenVertexArraysAPPLE
-  #endif
-  #ifndef glBindVertexArrayAPPLE
-    #define glBindVertexArray glBindVertexArrayAPPLE
-  #endif 
-
-
- #endif
+ #endif // ROXLU_GL_WRAPPER == ROXLU_APPLE
 #elif ROXLU_GL_WRAPPER == ROXLU_OPENFRAMEWORKS
 #include "ofMain.h"
 #elif ROXLU_GL_WRAPPER == ROXLU_IOS
@@ -37,5 +38,7 @@
 #elif ROXLU_GL_WRAPPER == ROXLU_COCOA
 #include <OpenGL/gl.h>
 #endif // ROXLU_GL_WRAPPER
+
+
 
 #endif

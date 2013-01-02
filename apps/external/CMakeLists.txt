@@ -4,11 +4,7 @@ cmake_minimum_required(VERSION 2.8)
 include(${CMAKE_CURRENT_LIST_DIR}/../../lib/CMakeLists.txt)
 
 if(ROXLU_PLATFORM_MAC)
-  set(
-    roxlu_linker_flags 
-    ${roxlu_linker_flags} 
-    " -framework CoreFoundation -framework OpenGL -framework Cocoa -framework IOKit "
-    )
+  set(roxlu_linker_flags  "${roxlu_linker_flags}  -framework CoreFoundation -framework OpenGL -framework Cocoa -framework IOKit ")
 endif(ROXLU_PLATFORM_MAC)
 
 
@@ -20,19 +16,16 @@ set(glfw_base_dir ${CMAKE_CURRENT_LIST_DIR}/)
 set(glfw_include_dir ${glfw_base_dir}/glfw/include/)
 set(glfw_lib_dir ${glfw_base_dir}/glfw/lib/${roxlu_platform}/${roxlu_bits})
 set(glfw_wrapper_sources ${glfw_base_dir}/glfw_wrapper/SimulationBase.cpp)
-set(glfw_libs 
-  ${glfw_lib_dir}/libglfw3.a
-)
 
 # GLEW
 set(glew_base_dir ${CMAKE_CURRENT_LIST_DIR}/)
 set(glew_include_dir ${glew_base_dir}/glew/include/)
 set(glew_lib_dir ${glew_base_dir}/glew/lib/${roxlu_platform}/${roxlu_bits})
 
-set(glew_libs
-  ${glew_lib_dir}/libGLEW.a
+set(glfw_libs 
+  ${glfw_lib_dir}/libglfw3.a
+   ${glew_lib_dir}/libGLEW.a
 )
-
 
 # Platform specifics
 if(ROXLU_PLATFORM_LINUX)
