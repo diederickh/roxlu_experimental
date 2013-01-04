@@ -29,7 +29,6 @@ void FLV::loadFile(const char* filepath) {
   buffer.loadFile(filepath);
 }
 
-
 void FLV::saveFile(const char* filepath) {
 
   // rewrite the file size.
@@ -289,6 +288,7 @@ int FLV::writeHeaders(VideoParams* p) {
 #define convert_timebase_ms(timestamp, timebase) (rx_int64)((timestamp) * (timebase) * 1000 + 0.5)
 
 int FLV::writeVideoPacket(VideoPacket* pkt) {
+  printf("FLV: writeVideoPacket()\n");
   int now = buffer.size();
 
   // get the delay time for the first frame.
@@ -376,7 +376,7 @@ int FLV::writeVideoPacket(VideoPacket* pkt) {
 
 // We only support speex now.
 int FLV::writeAudioPacket(AudioPacket* p) {
-  printf("> Frame: audio.\n");
+  printf("FLV: writeAudioPacket().\n");
 
   // tag info
   // ========
@@ -393,6 +393,7 @@ int FLV::writeAudioPacket(AudioPacket* p) {
   // ================
   int start_data = buffer.size();
   int format = (FLV_SOUNDFORMAT_SPEEX << 4) | 1 << 1 | 0x00; // speex: format = 11, soundrate = 0, soundsize = 1, soundtype = 0
+  printf("FLV: format code: %02X\n", format);
   buffer.putU8(format);
   buffer.putBytes(p->data, p->data_size);
 
@@ -403,7 +404,7 @@ int FLV::writeAudioPacket(AudioPacket* p) {
   // previous tag size
   rx_uint32 tag_size = buffer.size() - now;
   buffer.putBigEndianU32(tag_size);
-  printf("> Frame audio was %d bytes.\n--\n", tag_size);
+  printf("FLV: Frame audio was %d bytes.\n--\n", tag_size);
   return -1;
 }
 

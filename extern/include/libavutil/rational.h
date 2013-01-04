@@ -2,25 +2,25 @@
  * rational numbers
  * Copyright (c) 2003 Michael Niedermayer <michaelni@gmx.at>
  *
- * This file is part of Libav.
+ * This file is part of FFmpeg.
  *
- * Libav is free software; you can redistribute it and/or
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
  *
- * Libav is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with Libav; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 /**
- * @file
+ * @file libavutil/rational.h
  * rational numbers
  * @author Michael Niedermayer <michaelni@gmx.at>
  */
@@ -29,13 +29,7 @@
 #define AVUTIL_RATIONAL_H
 
 #include <stdint.h>
-#include <limits.h>
-#include "attributes.h"
-
-/**
- * @addtogroup lavu_math
- * @{
- */
+#include "common.h"
 
 /**
  * rational number numerator/denominator
@@ -46,23 +40,20 @@ typedef struct AVRational{
 } AVRational;
 
 /**
- * Compare two rationals.
+ * Compares two rationals.
  * @param a first rational
  * @param b second rational
- * @return 0 if a==b, 1 if a>b, -1 if a<b, and INT_MIN if one of the
- * values is of the form 0/0
+ * @return 0 if a==b, 1 if a>b and -1 if a<b
  */
 static inline int av_cmp_q(AVRational a, AVRational b){
     const int64_t tmp= a.num * (int64_t)b.den - b.num * (int64_t)a.den;
 
-    if(tmp) return ((tmp ^ a.den ^ b.den)>>63)|1;
-    else if(b.den && a.den) return 0;
-    else if(a.num && b.num) return (a.num>>31) - (b.num>>31);
-    else                    return INT_MIN;
+    if(tmp) return (tmp>>63)|1;
+    else    return 0;
 }
 
 /**
- * Convert rational to double.
+ * Converts rational to double.
  * @param a rational to convert
  * @return (double) a
  */
@@ -71,7 +62,7 @@ static inline double av_q2d(AVRational a){
 }
 
 /**
- * Reduce a fraction.
+ * Reduces a fraction.
  * This is useful for framerate calculations.
  * @param dst_num destination numerator
  * @param dst_den destination denominator
@@ -83,7 +74,7 @@ static inline double av_q2d(AVRational a){
 int av_reduce(int *dst_num, int *dst_den, int64_t num, int64_t den, int64_t max);
 
 /**
- * Multiply two rationals.
+ * Multiplies two rationals.
  * @param b first rational
  * @param c second rational
  * @return b*c
@@ -91,7 +82,7 @@ int av_reduce(int *dst_num, int *dst_den, int64_t num, int64_t den, int64_t max)
 AVRational av_mul_q(AVRational b, AVRational c) av_const;
 
 /**
- * Divide one rational by another.
+ * Divides one rational by another.
  * @param b first rational
  * @param c second rational
  * @return b/c
@@ -99,7 +90,7 @@ AVRational av_mul_q(AVRational b, AVRational c) av_const;
 AVRational av_div_q(AVRational b, AVRational c) av_const;
 
 /**
- * Add two rationals.
+ * Adds two rationals.
  * @param b first rational
  * @param c second rational
  * @return b+c
@@ -107,7 +98,7 @@ AVRational av_div_q(AVRational b, AVRational c) av_const;
 AVRational av_add_q(AVRational b, AVRational c) av_const;
 
 /**
- * Subtract one rational from another.
+ * Subtracts one rational from another.
  * @param b first rational
  * @param c second rational
  * @return b-c
@@ -115,20 +106,7 @@ AVRational av_add_q(AVRational b, AVRational c) av_const;
 AVRational av_sub_q(AVRational b, AVRational c) av_const;
 
 /**
- * Invert a rational.
- * @param q value
- * @return 1 / q
- */
-static av_always_inline AVRational av_inv_q(AVRational q)
-{
-    AVRational r = { q.den, q.num };
-    return r;
-}
-
-/**
- * Convert a double precision floating point number to a rational.
- * inf is expressed as {1,0} or {-1,0} depending on the sign.
- *
+ * Converts a double precision floating point number to a rational.
  * @param d double to convert
  * @param max the maximum allowed numerator and denominator
  * @return (AVRational) d
@@ -136,20 +114,16 @@ static av_always_inline AVRational av_inv_q(AVRational q)
 AVRational av_d2q(double d, int max) av_const;
 
 /**
- * @return 1 if q1 is nearer to q than q2, -1 if q2 is nearer
- * than q1, 0 if they have the same distance.
+ * @return 1 if \q1 is nearer to \p q than \p q2, -1 if \p q2 is nearer
+ * than \p q1, 0 if they have the same distance.
  */
 int av_nearer_q(AVRational q, AVRational q1, AVRational q2);
 
 /**
- * Find the nearest value in q_list to q.
+ * Finds the nearest value in \p q_list to \p q.
  * @param q_list an array of rationals terminated by {0, 0}
  * @return the index of the nearest value found in the array
  */
 int av_find_nearest_q_idx(AVRational q, const AVRational* q_list);
-
-/**
- * @}
- */
 
 #endif /* AVUTIL_RATIONAL_H */

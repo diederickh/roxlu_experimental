@@ -3,6 +3,7 @@
 
 #include <roxlu/Roxlu.h>
 #include <vector>
+#include <string>
 
 class VideoIOFLV;
 class VideoRecorder;
@@ -13,15 +14,18 @@ class OpenGLRecorderWorker : public Runnable {
   ~OpenGLRecorderWorker();
   void run();
   void copyImage(unsigned char* pixels);
+  void copyAudio(void* data, size_t nbytes);
   void flush();
   void clear();
  public:
-  RingBuffer buffer;
+  RingBuffer video_buffer;
+  RingBuffer audio_buffer;
   bool must_flush;
   VideoRecorder* rec;
   Mutex mutex;
   size_t num_bytes_in_image;
   std::vector<unsigned char*> images;
+  unsigned char* tmp_pixel_buffer;
 };
 
 class OpenGLRecorder {
@@ -29,8 +33,9 @@ class OpenGLRecorder {
   OpenGLRecorder(float fps = 30.0f);
   ~OpenGLRecorder();
   void setOutputSize(int w, int h);
-  void open(const char* filepath, int outW = 0, int outH = 0);
+  void open(const std::string& filepath, int outW = 0, int outH = 0);
   void grabFrame();
+  void addAudioFrame(void* data, size_t nbytes);
   void close();
   void setFPS(const float fs);
  private:

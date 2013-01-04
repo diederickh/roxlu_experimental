@@ -11,8 +11,10 @@
 
   if (self) {
     session = [[AVCaptureSession alloc]init];
-    if([session canSetSessionPreset:AVCaptureSessionPresetHigh]) {
-      session.sessionPreset = AVCaptureSessionPresetHigh;
+
+//    if([session canSetSessionPreset:AVCaptureSessionPresetHigh]) {
+    if([session canSetSessionPreset:AVCaptureSessionPreset640x480]) {
+      session.sessionPreset = AVCaptureSessionPreset640x480; //AVCaptureSessionPresetHigh;
       printf("Set high preset.\n");
     }
     else {
@@ -98,6 +100,8 @@
          didOutputSampleBuffer:(CMSampleBufferRef) sampleBuffer
          fromConnection:(AVCaptureConnection*) connection 
 {
+        
+
   CVImageBufferRef img_ref = CMSampleBufferGetImageBuffer(sampleBuffer);
   CVPixelBufferLockBaseAddress(img_ref, 0);
   size_t w = CVPixelBufferGetWidth(img_ref);

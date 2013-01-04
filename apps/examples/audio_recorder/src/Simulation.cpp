@@ -14,7 +14,7 @@ Simulation::Simulation()
 {
   pcm.open(File::toDataPath("input.pcm"));
   audio.setInputListener(audio_in_cb, this);
-  audio.openInputStream(0, 1, paInt16, 16000, 320);
+  audio.openInputStream(1, 2, paInt16, 16000, 320);
   audio.startInputStream();
 }
 

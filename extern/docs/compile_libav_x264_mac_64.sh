@@ -19,6 +19,16 @@
 #
 # IMPORTANT: I HAD TO DISABLE SSE ON MAC AS IT GAVE AN ERROR WITH SWSCALE
 #
+# VERSIONS:
+# ---------
+# 0.0.1 // 2013.01.13  - Somehow using libswscale together with portaudio resulted in a segfault
+#                        while running. This error seems to be related with sws_scale + SSE. I recompiled
+#                        using this script on 2013.01.03, both without SSE for libav, which fixed
+#                        the wierd crashes. The tried to compile again with SSE support and
+#                        then couldn't reproduce the error again. I'm using this configure
+#                        for libav now (which seems to work):
+#                        ./configure --prefix=${bd} --enable-static --enable-swscale
+# 0.0.0 // 2012.??.??  - First release
 #
 # Compile:
 # --------
@@ -125,7 +135,8 @@ fi
 cd ${d}
 if [ "$1" = "av" ] ; then 
     cd libav/libav/
-    ./configure --prefix=${bd} --enable-static 
+    # ./configure --prefix=${bd} --enable-static 
+    ./configure --prefix=${bd} --enable-static --enable-swscale
     # --enable-libx264 --enable-libspeex --target-os=darwin --enable-gpl --disable-sse --enable-pic
     # --disable-avcodec --disable-yasm
     # --disable-devices --disable-avfilter

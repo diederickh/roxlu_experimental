@@ -29,6 +29,7 @@ VideoRecorder::VideoRecorder(int inW, int inH, int outW, int outH, int fps, bool
   ,spx_enc(NULL)
   ,start_time(0)
 {
+
   rec_params.video_width = out_width;
   rec_params.video_height = out_height;
   rec_params.video_codec_id = FLV_VIDEOCODEC_AVC;
@@ -150,8 +151,11 @@ bool VideoRecorder::open(const char* filepath) {
 // encode raw pcm 16bit signed data
 int VideoRecorder::addAudioFrame(short int* data, int size) {
   if(!start_time) {
-    start_time = Timer::now();
+    return 0;
+    // start_time = Timer::now();
   }
+  //printf("++++++++++++++++++++++++++++++ AUDIO FRAME START TIME: %lld +++++++++++++++++++++++++ \n", start_time);
+   
 	
   speex_bits_reset(&spx_bits);
   speex_encode_int(spx_enc, data, &spx_bits);
@@ -177,6 +181,7 @@ int VideoRecorder::addAudioFrame(short int* data, int size) {
   info_pkt.dx = audio_packets.size() - 1;
   info_packets.push_back(info_pkt);
 
+  printf("VideoRecorder::addAudioFrame() --> writePackets()\n");
   writePackets();
   return written;
 }
@@ -184,10 +189,12 @@ int VideoRecorder::addAudioFrame(short int* data, int size) {
 int VideoRecorder::addVideoFrame(unsigned char* pixels) {
   if(!start_time) {
     start_time = Timer::now();
+    printf(">>>>>>>>>>>>>>>>>>>>>>>>> VIDEO FRAME START TIME: %lld <<<<<<<<<<<<<<<<<<<<<<<<<<<\n", start_time);
   }
 #if RGB_CONVERTER == CONVERTER_SWSCALE
+  //                     ,(const  uint8_t* const*)&pixels 
   int h = sws_scale(sws
-                    ,(const  uint8_t* const*)&pixels 
+                    ,(uint8_t**)&pixels 
                     ,&in_stride
                     ,0
                     ,in_height
@@ -261,7 +268,7 @@ void VideoRecorder::writePackets() {
   std::sort(info_packets.begin(), info_packets.end(), AVInfoPacketSorter());
   for(int i = 0; i < info_packets.size(); ++i) {
     AVInfoPacket& info_pkt = info_packets[i];
-    //printf("InfoPacket: %d, Type: %c, DTS: %d\n", i, info_pkt.av_type == AV_VIDEO ? 'V' : 'A', info_pkt.dts);
+    printf("InfoPacket: %d, Type: %c, DTS: %d\n", i, info_pkt.av_type == AV_VIDEO ? 'V' : 'A', info_pkt.dts);
     if(info_pkt.av_type == AV_AUDIO) {
       io->writeAudioPacket(audio_packets[info_pkt.dx]);
       delete audio_packets[info_pkt.dx];

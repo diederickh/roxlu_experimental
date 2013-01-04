@@ -7,6 +7,14 @@
 #include <videocapture/VideoCaptureMac.h>
 //#endif
 
+enum RX_CAPTURE_FORMATS {
+  RX_CAP_1280_1024_30,
+  RX_CAP_1024_768_30,
+  RX_CAP_640_480_30,
+  RX_CAO_320_240_30
+};
+
+// callback on framedata
 typedef void(*rx_capture_frame_cb)(void* pixels, size_t nbytes, void* user);
 
 /* 

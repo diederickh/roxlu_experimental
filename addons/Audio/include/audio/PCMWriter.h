@@ -1,11 +1,10 @@
 #ifndef ROXLU_PCMWRITERH
 #define ROXLU_PCMWRITERH
 
-#include <audio/AudioListener.h>
 #include <roxlu/Roxlu.h>
 #include <string>
 
-class PCMWriter : public AudioListener {
+class PCMWriter { //  : public AudioListener {
  public:
   PCMWriter();
   ~PCMWriter();

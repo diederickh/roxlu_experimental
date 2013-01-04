@@ -9,18 +9,29 @@ OpenGLRecorderWorker::OpenGLRecorderWorker()
   :rec(NULL)
   ,num_bytes_in_image(0)
   ,must_flush(false)
-  ,buffer(1024 * 1024 * 250) // 250 meg, which is more then enough for 1024x769 @ 60 fps
+  ,video_buffer(1024 * 1024 * 250) // 250 meg, which is more then enough for 1024x768 @ 60 fps
+  ,audio_buffer(1024 * 1025 * 25) 
+  ,tmp_pixel_buffer(NULL)
 {
   clear();
 }
 
 OpenGLRecorderWorker::~OpenGLRecorderWorker() {
   flush();
+  if(tmp_pixel_buffer != NULL) {
+    delete[] tmp_pixel_buffer;
+  }
 }
 
 void OpenGLRecorderWorker::copyImage(unsigned char* pixels) {
   mutex.lock();
-  size_t written = buffer.write((const char*)pixels, num_bytes_in_image);
+  size_t written = video_buffer.write((const char*)pixels, num_bytes_in_image);
+  mutex.unlock();
+}
+
+void OpenGLRecorderWorker::copyAudio(void* data, size_t nbytes) {
+  mutex.lock();
+  size_t written = audio_buffer.write((const char*)data, nbytes);
   mutex.unlock();
 }
 
@@ -34,39 +45,95 @@ void OpenGLRecorderWorker::clear() {
 }
 
 void OpenGLRecorderWorker::flush() {
-  unsigned char* tmp_buffer = new unsigned char[num_bytes_in_image];
+
+  
+  //  printf("OpenGLRecorderWorker::flush(), bytes in audio buffer: %zu\n", audio_buffer.size());
+
+  // unsigned char* tmp_buffer = new unsigned char[num_bytes_in_image];
+  if(tmp_pixel_buffer == NULL) {
+    tmp_pixel_buffer = new unsigned char[num_bytes_in_image];
+  }
   must_flush = true;
   mutex.lock();
   size_t bytes_read = 0;
-  while((bytes_read = buffer.read((char*)tmp_buffer, num_bytes_in_image)) > 0) {
-    rec->addVideoFrame(tmp_buffer);
+  while((bytes_read = video_buffer.read((char*)tmp_pixel_buffer, num_bytes_in_image)) > 0) {
+    rec->addVideoFrame(tmp_pixel_buffer);
+  }
+
+  // bytes_read = 0;
+  while((bytes_read = audio_buffer.read((char*)tmp_pixel_buffer, 320 * sizeof(short int))) > 0) {
+    rec->addAudioFrame((short int *)tmp_pixel_buffer, 320 * sizeof(short int));
   }
   mutex.unlock();
-  delete[] tmp_buffer;
+  // delete[] tmp_buffer;
   clear();
 }
 
+// @todo we actually don't need to copy from the ringbuffer, we could just pass a pointer to it
 void OpenGLRecorderWorker::run() {
-  unsigned char* curr_pix;
+  //  return;
+  unsigned char* curr_data;
   size_t bytes_read = 0;
-  unsigned char* tmp_buffer = new unsigned char[num_bytes_in_image];
+  //unsigned char* tmp_buffer = new unsigned char[num_bytes_in_image];
+  if(tmp_pixel_buffer == NULL) {
+    tmp_pixel_buffer = new unsigned char[num_bytes_in_image];
+  }
   while(!must_flush) {
-    mutex.lock();
-    curr_pix = NULL;
-    bytes_read = buffer.read((char*)tmp_buffer, num_bytes_in_image);
-    if(bytes_read > 0) {
-      curr_pix = tmp_buffer;
+    //    mutex.lock();
+    size_t bytes_read = 0;
+    while((bytes_read = video_buffer.read((char*)tmp_pixel_buffer, num_bytes_in_image)) > 0) {
+      rec->addVideoFrame(tmp_pixel_buffer);
     }
-    mutex.unlock();
-    if(curr_pix != NULL) {
-      rec->addVideoFrame(curr_pix);
-      curr_pix = NULL;
+
+    // bytes_read = 0;
+    int i = 0;
+    while((bytes_read = audio_buffer.read((char*)tmp_pixel_buffer, 320 * sizeof(short int))) > 0) {
+      rec->addAudioFrame((short int *)tmp_pixel_buffer, 320 * sizeof(short int));
+      printf("(%d) In audio buffer: %zu, framebytes: %zu\n", i++, audio_buffer.size(), 320 * sizeof(short int));
     }
+    //    mutex.unlock();
+
+    /*
+    // copy pixel data from buffer
+    {
+      mutex.lock();
+
+      curr_data = NULL;
+      bytes_read = video_buffer.read((char*)tmp_pixel_buffer, num_bytes_in_image);
+      if(bytes_read > 0) {
+        curr_data = tmp_pixel_buffer;
+      }
+      mutex.unlock();
+
+
+      // write pixel data
+      if(curr_data != NULL) {
+        rec->addVideoFrame(curr_data);
+        curr_data = NULL;
+      }
+    }
+
+    // copy audio data from buffer
+    {
+      mutex.lock();
+      bytes_read = audio_buffer.read((char*)tmp_pixel_buffer, 320 * sizeof(short int));
+      if(bytes_read > 0) {
+        curr_data = tmp_pixel_buffer;
+      }
+      mutex.unlock();
+
+      // write audio data
+      if(curr_data != NULL) {
+        rec->addAudioFrame((short int*)curr_data, 320 * sizeof(short int));
+        curr_data = NULL;
+      }
+    }
+    */
   }
-  if(curr_pix != NULL) {
-    curr_pix = NULL;
+  if(curr_data != NULL) {
+    curr_data = NULL;
   }
-  delete[] tmp_buffer;
+  //  delete[] tmp_buffer;
 }
 
 // -------------------------------------------------------------------
@@ -111,7 +178,7 @@ void OpenGLRecorder::setFPS(float fs) {
 
 }
 
-void OpenGLRecorder::open(const char* filepath, int outW, int outH) {
+void OpenGLRecorder::open(const std::string& filepath, int outW, int outH) {
   if(rec == NULL) {
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport); eglGetError();
@@ -126,10 +193,10 @@ void OpenGLRecorder::open(const char* filepath, int outW, int outH) {
     }
 
     io_flv = new VideoIOFLV();
-    rec = new VideoRecorder(w,h,out_w,out_h, 60, true, false);
+    rec = new VideoRecorder(w,h,out_w,out_h, 60, true, true); // @todo, use FPS, test audio
     rec->setIO(io_flv);
     rec->setFPS(fps);
-    rec->open(filepath);
+    rec->open(filepath.c_str());
     pixels = new unsigned char[w * h * 3];
     dest_pixels = new unsigned char[w * h * 3];
     worker.rec = rec;
@@ -157,6 +224,10 @@ void OpenGLRecorder::grabFrame() {
     memcpy(dest_pixels + dest_dx, pixels + src_dx, stride);
   }
   worker.copyImage(dest_pixels);
+}
+
+void OpenGLRecorder::addAudioFrame(void* data, size_t nbytes) {
+  worker.copyAudio(data, nbytes);
 }
 
 void OpenGLRecorder::close() {

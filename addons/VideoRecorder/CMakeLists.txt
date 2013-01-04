@@ -48,7 +48,7 @@ set(videorecorder_libs
 
 
 if(APPLE)
-  set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS}  -framework CoreFoundation -framework OpenGL -framework Cocoa -framework IOKit ")
+  set(roxlu_linker_flags  "${roxlu_linker_flags}  -framework CoreFoundation -framework OpenGL -framework Cocoa -framework IOKit ")
 endif(APPLE)
 
 set(roxlu_addon_libs
@@ -56,9 +56,10 @@ set(roxlu_addon_libs
   ${videorecorder_libs}
 )
 
+# 2013.01.03, I had to comment -D__STDC_CONSTANT_MACROS on mac 10.8
 set(CMAKE_CXX_FLAGS 
   ${CMAKE_CXX_FLAGS} 
-  -D__STDC_CONSTANT_MACROS 
+#  -D__STDC_CONSTANT_MACROS 
 )
 
 add_library(roxlu_videorecorder STATIC ${videorecorder_source_files})

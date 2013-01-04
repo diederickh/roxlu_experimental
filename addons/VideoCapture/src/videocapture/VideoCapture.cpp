@@ -21,6 +21,7 @@ VideoCapture::VideoCapture()
   :allocated_bytes(0)
   ,has_new_data(false)
   ,nbytes(0)
+  ,bytes(NULL)
 {
   c = rx_capture_init();
 }

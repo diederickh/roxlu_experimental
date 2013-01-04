@@ -35,7 +35,7 @@ set(audio_libs
 )
 
 if(APPLE)
-  set(CMAKE_EXE_LINKER_FLAGS " ${CMAKE_EXE_LINKER_FLAGS} -framework CoreAudio -framework AudioToolbox -framework AudioUnit -framework CoreServices "
+  set(roxlu_linker_flags " ${roxlu_linker_flags} -framework CoreAudio -framework AudioToolbox -framework AudioUnit -framework CoreServices "
 )
 endif(APPLE)
 

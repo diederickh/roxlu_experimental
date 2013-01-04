@@ -1,4 +1,23 @@
 #!/bin/sh
+#
+# Compile libyuv for mac 64bit.
+#
+# Versions:
+# ---------
+# 0.0.1 // 2013.01.03 - The current script builds a i386 library. To create a 64bit library do:
+#                       1) run this script
+#                       2) open libyuv/trunk/libyuv.xcodeproj
+#                       3) select the target then select the settings tab and change architecture to Intel 64
+#
+#                       Compile libjpeg_turbo too:
+#                       1) open third_party/libjpeg_turbo/libjpeg_turbo.xcodeproj
+#                       2) select the libjpeg_turbo target
+#                       3) change architecture to 64 bit 
+#                       4) change the scheme 'Debug' type to 'Release'
+#                       5) copy the file libjpeg_turbo.a from trunk/xcodebuild/Release/
+#
+# 0.0.0 // 2012.??.?? - initial release
+#
 d=${PWD}
 bd=${d}/build
 system=`uname`
