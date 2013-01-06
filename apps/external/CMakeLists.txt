@@ -34,6 +34,7 @@ set(glfw_libs
   GL
   X11
   Xxf86vm
+  rt
 )
 endif(ROXLU_PLATFORM_LINUX)
 

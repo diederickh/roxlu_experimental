@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <videocapture/rx_capture.h>
 #include <stdio.h>
+#include <string.h> // memcpy
 
 extern void video_capture_callback(void* pixels, size_t nbytes, void* user);
 
