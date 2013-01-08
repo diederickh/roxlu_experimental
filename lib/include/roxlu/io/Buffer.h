@@ -6,7 +6,6 @@
 #include <fstream>
 #include <iterator>
 #include <algorithm>
-#include <inttypes.h>
 
 
 #include <roxlu/Roxlu.h>

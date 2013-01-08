@@ -13,6 +13,8 @@ VorbisWriter::~VorbisWriter() {
 }
 
 void VorbisWriter::open(const std::string filepath) {
+  /*
+  #ifdef OMT
   fp = fopen(filepath.c_str(), "w+");
   if(!fp) {
     printf("ERROR: cannot open vorbis file...\n");
@@ -40,7 +42,7 @@ void VorbisWriter::open(const std::string filepath) {
   vorbis_block_init(&vd, &vb);
 
   // create ogg stream
-  srand(time(NULL));
+  srand((unsigned)time(NULL));
   ogg_stream_init(&os, rand());
   
   // write headers
@@ -63,16 +65,18 @@ void VorbisWriter::open(const std::string filepath) {
     fwrite(og.body, 1, og.body_len, fp);
   }
   printf("DONE!\n");
+#endif
   is_setup = true;
+  */
 }
 
 void VorbisWriter::close() {
+
   if(fp == NULL) {
     return;
   }
   fclose(fp);
   fp = NULL;
-
   if(is_setup) {
     ogg_stream_clear(&os);
     vorbis_block_clear(&vb);

@@ -154,6 +154,7 @@ bool OggMaker::theoraSetup() {
   ycbcr[2].data = yuv_v = new unsigned char[ycbcr[2].stride * ycbcr[2].height];
 
   in_image = vpx_img_alloc(NULL, VPX_IMG_FMT_RGB24, image_w, image_h, 0);
+
   out_planes[0] = ycbcr[0].data;
   out_planes[1] = ycbcr[1].data;
   out_planes[2] = ycbcr[2].data;
@@ -170,7 +171,6 @@ bool OggMaker::theoraSetup() {
     printf("ERROR: cannot create sws convert context.");
     return false;
   }
-
   return true;
 }
 

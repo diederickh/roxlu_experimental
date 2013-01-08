@@ -846,9 +846,9 @@ namespace roxlu {
     return *this;
   }
 
-  Mat4& Mat4::perspective(float fov, float aspect, float near, float far) {
-    float hh = tanf(fov * DEG_TO_RAD * 0.5) * near;
-    return frustum(-hh*aspect, hh*aspect, -hh, hh, near, far);
+  Mat4& Mat4::perspective(float fov, float aspect, float n, float f) {
+    float hh = tanf(fov * DEG_TO_RAD * 0.5) * n;
+    return frustum(-hh*aspect, hh*aspect, -hh, hh, n, f);
   }
 
   Mat4& Mat4::frustumCenter(float w, float h, float n, float f) {

@@ -1,20 +1,23 @@
 #ifndef ROXLU_OGGMAKER_H
 #define ROXLU_OGGMAKER_H
 
+// tmp, disabling some includes for linker errors
+#define OMT
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
 #include <roxlu/Roxlu.h>
 
 extern "C" {
-#include <theora/codec.h>
-#include <theora/theoraenc.h>
+
 #include <vpx/vpx_image.h>
 #include <ogg/ogg.h>
 #include <libyuv.h>
 #include <libswscale/swscale.h>
 #include <speex/speex.h>
 #include <speex/speex_header.h>
+#include <theora/codec.h>
+#include <theora/theoraenc.h>
 #include <vorbis/vorbisenc.h>
 }
 
@@ -57,12 +60,14 @@ class OggMaker {
   unsigned char* yuv_y;
   unsigned char* yuv_u;
   unsigned char* yuv_v;
-  vpx_image_t* in_image;
+
   unsigned char* out_planes[3];
   int out_strides[3];
   int in_stride;
   int num_video_frames;
   int num_audio_frames;
+
+  vpx_image_t* in_image; 
   struct SwsContext* sws;
 
   rx_uint64 last_time;
@@ -77,8 +82,6 @@ class OggMaker {
   vorbis_comment vc;
   vorbis_dsp_state vd;
   vorbis_block vb;
-
-
 };
 
 
