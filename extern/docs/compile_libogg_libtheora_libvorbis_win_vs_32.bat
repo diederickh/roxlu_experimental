@@ -4,14 +4,19 @@
 :: 
 :: HOW TO:
 :: ------
+:: 0) Prerequisites
+::    - Make sure that you've installed the "Microsoft Windows SDK for Windows 7
+::     and .NET Framework 4" See: http://www.microsoft.com/en-us/download/details.aspx?id=8279
+:: 
 :: 1) Create some directories: 
 ::    - Downloads\compile_ogg
 ::    - Downloads\compile_ogg\sources\
 ::   
 :: 2) Download these sources and put them in the 'sources' dir:
 ::   - libogg-1.3.0.zip
-::   - libtheora-1.1.1.zip
 ::   - libvorbis-1.3.3.zip
+:: 
+::   - We're using theora from SVN, build with revision: 18763
 :: 
 :: 3) Create a directory "sources" and extract the zip file 
 ::    using explorer > right mouse click > "Extract all..." option
@@ -29,9 +34,8 @@
 ::    For each solution right click the static lib project, and select "Properties"
 ::    to open the project properties, go to:
 ::    
-::    Configuration Properties > C/C++ > Code Generation
-::
-::    And change "Runtime Library" to "Multi-Threaded (/MT)"
+::    Configuration Properties > C/C++ > Code Generation: "Runtime Library" to "Multi-Threaded (/MT)"
+::    Configuration Properties > C/C++ > Optimization: "Whole Program Optimization" to "No"
 ::
 ::    Next, open a "Microsoft Visual Studio [2010,2012] console and execute this script, 
 ::    all libs will be stored in:
@@ -41,24 +45,35 @@
 ::
 :: VERSION:
 :: --------
+:: 2012.01.08 - Using latest theora version from svn, 
+:: 2012.01.08 - Can't convert the 2008 solution for libtheora to MSVC 2010 :( (the svn version has a 2010 project though)
 :: 2012.01.07 - Initial release
 
 set d=%CD%
 set sd=%d%\sources
-set bd=%d%\build
+set bd=%d%\build\
 
 if not exist %bd% (
    mkdir %bd%
 )
 
 set ogg_src=libogg-1.3.0
-set theora_src=libtheora-1.1.1
 set vorbis_src=libvorbis-1.3.3
 
 set found_sources=1
 call :check_source %ogg_src%
-call :check_source %theora_src%
 call :check_source %vorbis_src%
+
+:: CHECKOUT LIBTHEORA
+if not exist %sd%\theora (
+   cd %sd% 
+   mkdir theora
+   cd theora
+   svn co -r 18763 http://svn.xiph.org/trunk/theora .
+   cd %d%
+   goto :eof
+)
+
 
 if %found_sources% == 0 (
    echo ERROR: First download all sources and extract in sources/
@@ -74,7 +89,7 @@ cd %d%
 set INCLUDE=%sd%\%ogg_src%\%ogg_src%\include\;%bd%;%INCLUDE%
 set LIB=%bd%;%LIB%;
 
-cd %sd%\%theora_src%\%theora_src%\win32\VS2008\
+cd %sd%\theora\win32\VS2010\
 msbuild libtheora_static.sln /p:useenv=true /p:Configuration=Release /p:OutDir=%bd% /t:libtheora_static
 
 :: COMPILE VORBIS

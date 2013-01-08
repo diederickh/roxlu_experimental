@@ -1,0 +1,35 @@
+Compiling port audio for windows
+=================================
+1) Download the release from: http://portaudio.com/download.html
+   Download the file: http://portaudio.com/archives/pa_stable_v19_20111121.tgz
+
+2) Download and install the direct x sdk: http://www.microsoft.com/en-us/download/details.aspx?id=6812
+
+3) Install CMake 2.8+ if you haven't installed it yet. Then open the CMake Gui
+   - Start > CMake 2.8 > CMake (cmake-gui)
+   - Browse to the extract files, select "portaudio" dir for the "Source coude" input
+   - Select some other dir you want to use to build everything
+   - Press [Configure] button
+      - Visual Studio 10 / 11 
+      (*) Use default native compiler
+   - Select: 
+     PORTAUDIO_DLL_LINK_WITH_STATIC_RUNTIME [ ]
+     PORTAUDIO_ENABLE_ASIO                  [ ]
+     PORTAUDIO_ENABLE_DSOUND                [x]
+     PORTAUDIO_ENABLE_WASAPI                [ ]
+     PORTAUDIO_ENABLE_WDMKS                 [ ]
+     PORTAUDIO_ENABLE_WMME                  [ ]
+     PORTAUDIO_UNICODE_BUILD                [ ]
+
+   - I had to manually set the paths to DirectX. Check the [x] Advanced [x] Grouped checkboxes and fill 
+       the DSOUND_* values.
+
+   - Press the [Generate] button and a solution file is created.
+
+4) Open the solution in Microsoft Visual Studio
+   - Right click the "portaudio_static" project, select "Properties"
+     Then change: Configuration Porperties > C/C++ > Code Generation: MultiThreaded /MT
+
+5) Right click "portaudio_static" and select "Build", a static library will be build. See the
+   bin\Win32\Release dir.
+     
