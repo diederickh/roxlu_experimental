@@ -56,7 +56,7 @@
 #define WRITE_TO_FILE   (0)
 
 /* Select sample format. */
-#if 1
+#if 0
 #define PA_SAMPLE_TYPE  paFloat32
 typedef float SAMPLE;
 #define SAMPLE_SILENCE  (0.0f)
@@ -213,6 +213,7 @@ int main(void)
     data.frameIndex = 0;
     numSamples = totalFrames * NUM_CHANNELS;
     numBytes = numSamples * sizeof(SAMPLE);
+    printf("numBytes: %Iu\n", numBytes);
     data.recordedSamples = (SAMPLE *) malloc( numBytes ); /* From now on, recordedSamples is initialised. */
     if( data.recordedSamples == NULL )
     {

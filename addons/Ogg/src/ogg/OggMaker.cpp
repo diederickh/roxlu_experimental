@@ -1,7 +1,9 @@
 #include <ogg/OggMaker.h>
 
 OggMaker::OggMaker()
-  :use_audio(true)
+  :vfmt(OVF_RGB24)
+  ,afmt(OAF_FLOAT32)
+  ,use_audio(true)
   ,use_video(true)
   ,is_setup(false)
   ,image_w(640)
@@ -18,6 +20,9 @@ OggMaker::OggMaker()
   ,last_time(0)
   ,millis_per_frame(0)
   ,time_accum(0)
+  ,bytes_per_sample(0)
+  ,num_channels(0)
+  ,samplerate(0)
   ,sws(NULL)
 {
   millis_per_frame = (1.0/fps) * 1000;
@@ -52,12 +57,32 @@ OggMaker::~OggMaker() {
   }
 }
 
-bool OggMaker::setup() {
-  fp = fopen("monkey.ogv", "w");
+bool OggMaker::setup(OggVideoFormat videoFormat,
+                     OggAudioFormat audioFormat,
+                     int numChannels,
+                     int sampleRate,
+                     size_t bytesPerSample
+)
+{
+  fp = fopen("monkey.ogv", "wb");
   if(!fp) {
     printf("ERROR: cannot open ogg file.\n");
     return false;
   }
+  
+  num_channels = numChannels;
+  vfmt = videoFormat;
+  afmt = audioFormat;
+  samplerate = sampleRate;
+  bytes_per_sample = bytesPerSample;
+
+  /* @todo move to print
+  printf("OggMaker.num_channels: %d\n", num_channels);
+  printf("OggMaker.samplerate: %d\n", samplerate);
+  printf("OggMaker.bytes_per_sample: %d\n", int(bytes_per_sample));
+  printf("OggMaker.afmt: %s\n", (afmt == OAF_INT16) ? "OAF_INT16" : "OAF_FLOAT32");
+  */
+
   // setup + write headers
   if(use_audio) {
     if(!vorbisSetup()) {
@@ -86,6 +111,7 @@ bool OggMaker::setup() {
 }
 
 bool OggMaker::theoraSetup() {
+  // @todo use vfmt member; we might have YUV422 too 
   // initialize encoder info
   th_info_init(&ti);
   ti.frame_width = ((image_w + 15) >> 4) << 4;
@@ -162,6 +188,7 @@ bool OggMaker::theoraSetup() {
   out_strides[1] = ycbcr[1].stride;
   out_strides[2] = ycbcr[2].stride;
 
+  // @todo use the "vfmt" member to make a conversion context 
   sws = sws_getContext(image_w, image_h, PIX_FMT_RGB24,
                        image_w, image_h, PIX_FMT_YUV420P,
                        SWS_FAST_BILINEAR, NULL, NULL, NULL
@@ -198,7 +225,7 @@ void OggMaker::oggStreamFlush(ogg_stream_state& os) {
 bool OggMaker::vorbisSetup() {
   int r = 0;
   vorbis_info_init(&vi);
-  r = vorbis_encode_init_vbr(&vi, 1, 16000, .4); // assuming 1 channel, 16Khz
+  r = vorbis_encode_init_vbr(&vi, num_channels, samplerate, .4); 
 
   if(r != 0) {
     printf("ERROR: cannot initialize vorbis\n");
@@ -232,27 +259,45 @@ bool OggMaker::vorbisSetup() {
   return true;
 }
 
-void OggMaker::addAudioFrame(void* data, size_t nbytes) {
+void OggMaker::addAudioFrame(void* input, size_t nframes) {
   if(!use_audio) {
     return;
   }
-  num_audio_frames++;
-  int num_channels = 1;
-  int nframes = 320;
-  float** buffer = vorbis_analysis_buffer(&vd, nbytes);
-  short int* input_ptr = (short int*)data;
-  int dest_dx = 0;
+  num_audio_frames++; 
 
-  // convert to float
-  for(int i = 0; i < nframes; ++i) {
-    int src_dx = i * num_channels;
-    for(int j = 0; j < num_channels; ++j) {
-      float src_value = (input_ptr[src_dx] / 32768.0f);
-      printf("@TODO TEST AUDIO CONVERSION IN OggMaker::addAudioFrame()\n");
-      buffer[j][dest_dx++] = src_value;
-      ++src_dx;
+  float** buffer = vorbis_analysis_buffer(&vd, nframes);
+
+  // check if we need to convert the input.
+  if(afmt == OAF_INT16) {
+    short int* input_ptr = (short int*)input;
+    float* out_channel_ptr = NULL;
+    short int* in_channel_ptr = NULL;
+    for(int i = 0; i < num_channels; ++i) {
+      in_channel_ptr = input_ptr + i;
+      out_channel_ptr = buffer[i];
+      for(int j = 0; j < nframes; ++j) {
+        out_channel_ptr[j] = (float(*(in_channel_ptr))) / 32768.0f;
+        in_channel_ptr += num_channels;
+      }
     }
   }
+  else if(afmt == OAF_FLOAT32) {
+    int src_dx = 0;
+    int dest_dx = 0;
+    float* input_ptr = (float*)input;
+    float* out_channel_ptr = NULL;
+    float* in_channel_ptr = NULL;
+    for(int i = 0; i < num_channels; ++i) {
+      src_dx = 0;
+      out_channel_ptr = buffer[i];
+      in_channel_ptr = input_ptr + i;
+      for(int j = 0; j < nframes; ++j) {
+        out_channel_ptr[j] = *in_channel_ptr;
+        in_channel_ptr += num_channels;
+      }
+    }
+  }
+
   int r = vorbis_analysis_wrote(&vd, nframes);
   if (r != 0) {
     printf("ERROR: error with vorbis_analysis_wrote\n");
@@ -271,7 +316,7 @@ void OggMaker::addAudioFrame(void* data, size_t nbytes) {
   }
 }
 
-void OggMaker::addVideoFrame(void* pixels, size_t nbytes, int last, OGGMAKER_IN_FMT fmt) {
+void OggMaker::addVideoFrame(void* pixels, size_t nbytes, int last) {
   if(!use_video) {
     return;
   }
@@ -279,7 +324,7 @@ void OggMaker::addVideoFrame(void* pixels, size_t nbytes, int last, OGGMAKER_IN_
     printf("ERROR: cannot add video frame, first call setup()\n");
     return;
   }
-  if(fmt != OIF_RGB24) {
+  if(vfmt != OVF_RGB24) {
     printf("ERROR: cannot add video frame ... only OIF_RGB24 is supported for now.\n");
     return;
   }
