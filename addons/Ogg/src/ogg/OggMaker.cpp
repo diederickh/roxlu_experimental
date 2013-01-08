@@ -248,7 +248,8 @@ void OggMaker::addAudioFrame(void* data, size_t nbytes) {
     int src_dx = i * num_channels;
     for(int j = 0; j < num_channels; ++j) {
       float src_value = (input_ptr[src_dx] / 32768.0f);
-      buffer[0][dest_dx++] = src_value;
+      printf("@TODO TEST AUDIO CONVERSION IN OggMaker::addAudioFrame()\n");
+      buffer[j][dest_dx++] = src_value;
       ++src_dx;
     }
   }
