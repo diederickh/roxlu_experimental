@@ -91,7 +91,8 @@ bool Audio::openInputStream(
 {
   PaStreamParameters input;
 
-  bzero(&input, sizeof(input));
+  //bzero(&input, sizeof(input));
+  memset(&input, 0, sizeof(input));
 
   input.channelCount = numChannels;
   input.device = device;

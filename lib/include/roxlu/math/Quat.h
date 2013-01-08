@@ -409,7 +409,7 @@ namespace roxlu {
     float a, d, s, t; 
     if( y > x ) { 
       a = -x / y; 
-      d = M_PI / 2; 
+      d = PI / 2; 
     } 
     else { 
       a = y / x; 

@@ -4,9 +4,13 @@
 //#define ROXLU_CAPTURE_OSX=0
 //#define ROXLU_CAPTURE_PLATFORM=ROXLU_CAPTURE_OSX
 //#if ROXLU_CAPTURE_PLATFORM == ROXLU_CAPTURE_OSX
-#include <videocapture/VideoCaptureMac.h>
+// #include <videocapture/VideoCaptureMac.h>
 //#endif
 
+struct rx_capture_t;
+ 
+// figuring out a good cross platform solution to set with/height/fps .. not sure
+// if this is the one we need :) 
 enum RX_CAPTURE_FORMATS {
   RX_CAP_1280_1024_30,
   RX_CAP_1024_768_30,

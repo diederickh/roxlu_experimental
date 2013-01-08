@@ -12,16 +12,16 @@
    #include <GL/glext.h>
  #elif ROXLU_PLATFORM == ROXLU_APPLE
   #include <glew_opengl/glew.h>
-//   #include <OpenGL/gl.h>
-//   #include <OpenGL/glext.h>
-   #include <glfw_opengl/glfw3.h>
-//#include <OpenGL/gl.h>
+  #include <glfw_opengl/glfw3.h>
+
   #undef glGenVertexArrays
   #undef glBindVertexArray
   #define glGenVertexArrays glGenVertexArraysAPPLE
   #define glBindVertexArray glBindVertexArrayAPPLE
-
- #endif // ROXLU_GL_WRAPPER == ROXLU_APPLE
+ #elif ROXLU_PLATFORM == ROXLU_WINDOWS
+  #include <glew_opengl/glew.h>
+  #include <glfw_opengl/glfw3.h>
+ #endif // ROXLU_GL_WRAPPER == ROXLU_WINDOWS
 #elif ROXLU_GL_WRAPPER == ROXLU_OPENFRAMEWORKS
 #include "ofMain.h"
 #elif ROXLU_GL_WRAPPER == ROXLU_IOS

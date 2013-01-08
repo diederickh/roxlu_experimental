@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <string>
 #include <vorbis/vorbisenc.h>
 
@@ -22,7 +23,6 @@ class VorbisWriter {
   ogg_stream_state os;
   ogg_page og;
   ogg_packet op;
-
   FILE* fp;
 };
 #endif

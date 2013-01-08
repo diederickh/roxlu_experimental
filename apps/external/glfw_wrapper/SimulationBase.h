@@ -1,4 +1,5 @@
 #include <iostream>
+#define GLEW_STATIC
 #include <glew_opengl/glew.h>
 #include <glfw_opengl/glfw3.h>
 
