@@ -1,6 +1,6 @@
 @echo off
 :: Buid script for libogg, libtheora and libvorbis on windows using 
-:: MSVC 2012 express on Windows 7.
+:: Microsoft Visual Studio 2010 and 2012 Express on Windows 7.
 :: 
 :: HOW TO:
 :: ------
@@ -18,8 +18,25 @@
 ::    for the files above you get "sources\libogg-1.3.0\libogg-1.3.0\"
 ::    you get the same for theora and vorbix.
 ::
-:: 4) Execute this script, all libs will be stored in:
-::    - Downloads\build\
+:: 4) Before we run this script to compile the libraries you need to set the 
+::    Runtime Library that is the MSVC compiled uses to create the libraries. 
+::    For this you need to open all of the solution files:
+:: 
+::    libogg-1.3.0\win32\VS2010\libogg_static.sln
+::    libtheora-1.1.1\win32\VS2008\libtheora_static.sln
+::    libvorbis-1.3.3\win32\VS2010\vorbis_static.sln
+::
+::    For each solution right click the static lib project, and select "Properties"
+::    to open the project properties, go to:
+::    
+::    Configuration Properties > C/C++ > Code Generation
+::
+::    And change "Runtime Library" to "Multi-Threaded (/MT)"
+::
+::    Next, open a "Microsoft Visual Studio [2010,2012] console and execute this script, 
+::    all libs will be stored in:
+:: 
+::    - Downloads\[your_dir]\build\
 ::
 ::
 :: VERSION:
