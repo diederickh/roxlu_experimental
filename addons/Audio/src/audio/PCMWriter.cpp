@@ -3,7 +3,7 @@
 // Just added this as an test.... might be removed
 
 PCMWriter::PCMWriter() 
-  :ring_buffer(1024 * 1000)
+  :ring_buffer(1024 * 1024 * 10)
   ,fp(0)
 {
 }

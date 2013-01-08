@@ -106,7 +106,8 @@ bool Audio::openInputStream(
                               ,NULL
                               ,samplerate
                               ,framesPerBuffer
-                              ,paNoFlag
+                              //                              ,paNoFlag
+                              ,paClipOff
                               ,&Audio::inputStreamCallback
                               ,(void*) this
                               );
