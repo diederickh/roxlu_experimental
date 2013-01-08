@@ -3,4 +3,4 @@ d=${PWD}
 ./compile.sh
 cd ${d}/build
 make install
-${d}/bin/instagram
+${d}/bin/portaudio
