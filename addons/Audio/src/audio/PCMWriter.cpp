@@ -2,22 +2,32 @@
 
 // Just added this as an test.... might be removed
 PCMWriter::PCMWriter() 
-  :ring_buffer(1024 * 1024 * 10)
+  :ring_buffer(0)
   ,fp(0)
+  ,num_channels(2)
+  ,bytes_per_sample(sizeof(short))
+  ,samplerate(44100)
+  ,expected_seconds_to_record(10)
 {
 }
-
 
 PCMWriter::~PCMWriter() {
   close();
 }
 
-bool PCMWriter::open(const std::string filepath) {
-  fp = fopen(filepath.c_str(), "w");
+// We use the expected seconds to record to allocate a memory buffer; make sure this is enough.
+bool PCMWriter::open(const std::string filepath, int expectedSecondsToRecord, int sampleRate, int nchannels, size_t bytesPerSample) {
+  fp = fopen(filepath.c_str(), "wb");
   if(!fp) {
-    printf("ERROR: cannot open file..\n");
+    printf("ERROR: cannot open file: %s..\n", filepath.c_str());
     return false;
   }
+  expected_seconds_to_record = expectedSecondsToRecord;
+  samplerate = sampleRate;
+  num_channels = nchannels;
+  bytes_per_sample = bytesPerSample;
+  size_t bytes_needed = (samplerate * expected_seconds_to_record * num_channels * bytes_per_sample);
+  ring_buffer.resize(bytes_needed);
   return true;
 }
 
@@ -37,6 +47,5 @@ void PCMWriter::onAudioIn(const void* input, unsigned long numFrames) {
   if(!fp) {
     return;
   }
-  int num_channels = 1;
-  ring_buffer.write((char*)input, numFrames * sizeof(short int) * num_channels);
+  ring_buffer.write((char*)input, numFrames * bytes_per_sample * num_channels);
 }

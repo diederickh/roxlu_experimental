@@ -1,7 +1,8 @@
 #include <ogg/CaptureBuffer.h>
 
 CaptureBuffer::CaptureBuffer()
-  :record(true)
+  :is_setup(false)
+  ,record(true)
   ,got_audio(false)
   ,got_video(false)
   ,audio_fp(NULL)
@@ -11,41 +12,28 @@ CaptureBuffer::CaptureBuffer()
   ,video_bytes_written(0)
   ,audio_bytes_written(0)
   ,audio_samples_written(0)
-  ,audio_samplerate(16000)
-  ,fps(60)
+  ,audio_samplerate(0)
+  ,fps(20)
   ,millis_per_frame(0)
-  ,image_w(640)
-  ,image_h(480)
-  ,num_channels(1) // assuming unsigned short 
+  ,image_w(0)
+  ,image_h(0)
+  ,num_channels(0) 
   ,bytes_per_image(0)
   ,bytes_per_audio(0)
+  ,bytes_per_sample(0)
   ,tmp_video_buffer(NULL)
   ,tmp_audio_buffer(NULL)
 {
-  audio_fp = fopen("audio.raw", "w+");
+  audio_fp = fopen("audio.raw", "wb+");
   if(!audio_fp) {
     printf("ERROR: cannot open audio file.\n");
   }
 
-  video_fp = fopen("video.raw", "w+");
+  video_fp = fopen("video.raw", "wb+");
   if(!video_fp) {
     printf("ERROR: cannot open video file.\n");
   }
 
-  bytes_per_image = image_w * image_h * 3;
-  bytes_per_audio = 320 * sizeof(short int) * num_channels;
-
-  tmp_video_buffer = new unsigned char[bytes_per_image];
-  tmp_audio_buffer = new unsigned char[bytes_per_audio];
-
-  memset(tmp_video_buffer, 0, bytes_per_image);
-  memset(tmp_audio_buffer, 0, bytes_per_audio);
-
-  millis_per_frame = (1.0/fps) * 1000;
-
-  if(!ogg_maker.setup()) {
-    ::exit(0);
-  }
 }
 
 CaptureBuffer::~CaptureBuffer() {
@@ -71,7 +59,49 @@ CaptureBuffer::~CaptureBuffer() {
   
 }
 
-void CaptureBuffer::addAudioFrame(rx_uint64 timestamp, const void* data, size_t nbytes, size_t nframes) {
+bool CaptureBuffer::setup(OggVideoFormat vfmt, 
+                          int w, 
+                          int h,
+                          OggAudioFormat afmt, 
+                          int numChannels, 
+                          int samplerate, 
+                          size_t bytesPerSample,
+                          size_t maxFramesPerCall
+)
+{
+  image_w = w;
+  image_h = h;
+  audio_samplerate = samplerate;
+  num_channels = numChannels;
+  bytes_per_sample = bytesPerSample;
+  bytes_per_image = image_w * image_h * 3;
+  bytes_per_audio = maxFramesPerCall * bytesPerSample * num_channels;
+
+  tmp_video_buffer = new unsigned char[bytes_per_image];
+  tmp_audio_buffer = new unsigned char[bytes_per_audio];
+
+  memset(tmp_video_buffer, 0, bytes_per_image);
+  memset(tmp_audio_buffer, 0, bytes_per_audio);
+
+  millis_per_frame = (1.0/fps) * 1000;
+
+  if(!ogg_maker.setup(vfmt, afmt, num_channels, samplerate, bytesPerSample)) {
+    return false;
+  }
+
+  is_setup = true;
+  return true;
+}
+
+void CaptureBuffer::addAudioFrame(rx_uint64 timestamp, 
+                                  const void* data, 
+                                  size_t nframes
+)
+{
+  if(!is_setup) {
+    return;
+  }
+
   if(!record) {
     return;
   }
@@ -86,18 +116,22 @@ void CaptureBuffer::addAudioFrame(rx_uint64 timestamp, const void* data, size_t 
   fr.timestamp = timestamp;
   fr.offset = audio_bytes_written;
   fr.num_frames = nframes;
-  fr.nbytes = nbytes;
+  fr.nbytes = nframes * bytes_per_sample * num_channels;
   frames.push_back(fr);
 
   // write the raw audio data
-  fwrite((char*)data, nbytes, 1, audio_fp);
+  fwrite((char*)data, fr.nbytes, 1, audio_fp);
 
-  audio_bytes_written += nbytes;
+  audio_bytes_written += fr.nbytes;
   audio_samples_written += nframes;
   naudio_frames++;
 }
 
-void CaptureBuffer::addVideoFrame(rx_uint64 timestamp, const void* data, size_t nbytes) {
+void CaptureBuffer::addVideoFrame(rx_uint64 timestamp, const void* data) {
+  if(!is_setup) {
+    return;
+  }
+
   if(!record) {
     return;
   }
@@ -114,17 +148,21 @@ void CaptureBuffer::addVideoFrame(rx_uint64 timestamp, const void* data, size_t 
   fr.timestamp = timestamp;
   fr.offset = video_bytes_written;
   fr.num_frames = 1; // not really used.
-  fr.nbytes = nbytes;
+  fr.nbytes = bytes_per_image;
   frames.push_back(fr);
 
   // write the raw frame.
-  fwrite((char*)data, nbytes, 1, video_fp);
+  fwrite((char*)data, bytes_per_image, 1, video_fp);
 
-  video_bytes_written += nbytes;
+  video_bytes_written += bytes_per_image;
   nvideo_frames++;
 }
 
 void CaptureBuffer::encode() {
+  if(!is_setup) {
+    return;
+  }
+
   record = false;
   std::sort(frames.begin(), frames.end(), CaptureFrameSorter());
   double total_audio_samples = 0;
@@ -150,14 +188,14 @@ void CaptureBuffer::encode() {
 
       fseek(audio_fp, f.offset, SEEK_SET);
       fread(tmp_audio_buffer, sizeof(char), f.nbytes, audio_fp);
-      ogg_maker.addAudioFrame(tmp_audio_buffer, f.nbytes);
+      ogg_maker.addAudioFrame(tmp_audio_buffer, f.num_frames);
+
+      printf("Frame: %d / ~%d\n", int(video_frame), int(nvideo_frames));
 
       if(audio_real_time >= total_capture_time) {
         last = -1;
       }
   
-      printf("Frame: %lld / %zu\n", video_frame, nvideo_frames);
-
       // check if we need to catch up with the video frames
       int duplicate = -1;
       while(last_video_frame_num < video_frame) {

@@ -2,14 +2,14 @@
 #define ROXLU_OGGMAKER_H
 
 // tmp, disabling some includes for linker errors
-#define OMT
+#define OMT // @todo remove
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
 #include <roxlu/Roxlu.h>
+#include <ogg/Types.h>
 
 extern "C" {
-
 #include <vpx/vpx_image.h>
 #include <ogg/ogg.h>
 #include <libyuv.h>
@@ -21,18 +21,19 @@ extern "C" {
 #include <vorbis/vorbisenc.h>
 }
 
-enum OGGMAKER_IN_FMT {
-  OIF_RGB24,
-  OIF_YUV420
-};
 
 class OggMaker {
  public:
   OggMaker();
   ~OggMaker();
-  bool setup();
-  void addVideoFrame(void* pixels, size_t nbytes, int last,  OGGMAKER_IN_FMT fmt = OIF_RGB24);
-  void addAudioFrame(void* data, size_t nbytes); // for now 16 bit, mono, 320 frames
+  bool setup(OggVideoFormat vfmt, 
+    OggAudioFormat afmt, 
+    int numChannels, 
+    int samplerate,
+    size_t bytesPerSample
+  );
+  void addVideoFrame(void* pixels, size_t nbytes, int last);
+  void addAudioFrame(void* data, size_t nframes);
   void duplicateFrames(int dup);
   void print();
  private:
@@ -43,6 +44,8 @@ class OggMaker {
   void oggStreamFlush(ogg_stream_state& os);
   void oggStreamPageOut(ogg_stream_state& os);
  private:
+  OggVideoFormat vfmt;
+  OggAudioFormat afmt;
   bool use_audio;
   bool use_video;
   bool is_setup;
@@ -75,6 +78,9 @@ class OggMaker {
   rx_uint64 time_accum; // can be removed
 
   // audio
+  size_t bytes_per_sample;
+  size_t samplerate;
+  int num_channels;
   ogg_stream_state audio_oss;
   ogg_packet vheader_comm;
   ogg_packet vheader_code;

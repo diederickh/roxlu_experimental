@@ -5,6 +5,10 @@
 VorbisWriter::VorbisWriter() 
   :fp(NULL)
   ,is_setup(false)
+  ,num_channels(0)
+  ,samplerate(0)
+  ,bytes_per_sample(0)
+  ,format(VW_FLOAT32)
 {
 }
 
@@ -12,10 +16,8 @@ VorbisWriter::~VorbisWriter() {
   close();
 }
 
-void VorbisWriter::open(const std::string filepath) {
-  /*
-  #ifdef OMT
-  fp = fopen(filepath.c_str(), "w+");
+void VorbisWriter::open(const std::string filepath, int sampleRate, int nchannels, size_t bytesPerSample, VorbisWriterFormat f) {
+  fp = fopen(filepath.c_str(), "wb+");
   if(!fp) {
     printf("ERROR: cannot open vorbis file...\n");
     fp = NULL;
@@ -23,9 +25,14 @@ void VorbisWriter::open(const std::string filepath) {
   }
   
   // encode setup
+  samplerate = sampleRate;
+  num_channels = nchannels;
+  bytes_per_sample = bytesPerSample;
+  format = f;
+
   int r = 0;
   vorbis_info_init(&vi);
-  r = vorbis_encode_init_vbr(&vi, 1, 16000, .4); // assuming 1 channel, 16Khz
+  r = vorbis_encode_init_vbr(&vi, num_channels, sampleRate, .4); // .4 = quality
   printf("init: %d\n", r);
 
   if(r != 0) {
@@ -65,9 +72,7 @@ void VorbisWriter::open(const std::string filepath) {
     fwrite(og.body, 1, og.body_len, fp);
   }
   printf("DONE!\n");
-#endif
   is_setup = true;
-  */
 }
 
 void VorbisWriter::close() {
@@ -77,6 +82,7 @@ void VorbisWriter::close() {
   }
   fclose(fp);
   fp = NULL;
+
   if(is_setup) {
     ogg_stream_clear(&os);
     vorbis_block_clear(&vb);
@@ -84,30 +90,53 @@ void VorbisWriter::close() {
     vorbis_comment_clear(&vc);
     vorbis_info_clear(&vi);
   }
+
+  is_setup = false;
 }
 
 // @todo, nicely set e_o_s flag
 void VorbisWriter::onAudioIn(const void* input, unsigned long nframes) {
+  if(!fp) {
+    return;
+  }
   if(!is_setup) {
     printf("ERROR: onAudioIn(), first call open().\n");
     return;
   }
-  int num_channels = 1;
-  size_t nbytes = nframes * sizeof(short int) * num_channels;
-  float** buffer = vorbis_analysis_buffer(&vd, nbytes);
-  short int* input_ptr = (short int*)input;
 
-  int dest_dx = 0;
-  for(int i = 0; i < nframes; ++i) {
-    int src_dx = i * num_channels;
+  float** buffer = vorbis_analysis_buffer(&vd, nframes);
 
-    for(int j = 0; j < num_channels; ++j) {
-      float src_value = (input_ptr[src_dx] / 32768.0f);
-      // printf("%f\n", src_value);
-      buffer[0][dest_dx++] = src_value;
-      ++src_dx;
+  // check if we need to convert the input.
+  if(format == VW_INT16) {
+    short int* input_ptr = (short int*)input;
+    float* out_channel_ptr = NULL;
+    short int* in_channel_ptr = NULL;
+    for(int i = 0; i < num_channels; ++i) {
+      in_channel_ptr = input_ptr + i;
+      out_channel_ptr = buffer[i];
+      for(int j = 0; j < nframes; ++j) {
+        out_channel_ptr[j] = (float(*(in_channel_ptr))) / 32768.0f;
+        in_channel_ptr += num_channels;
+      }
     }
   }
+  else if(format == VW_FLOAT32) {
+    int src_dx = 0;
+    int dest_dx = 0;
+    float* input_ptr = (float*)input;
+    float* out_channel_ptr = NULL;
+    float* in_channel_ptr = NULL;
+    for(int i = 0; i < num_channels; ++i) {
+      src_dx = 0;
+      out_channel_ptr = buffer[i];
+      in_channel_ptr = input_ptr + i;
+      for(int j = 0; j < nframes; ++j) {
+        out_channel_ptr[j] = *in_channel_ptr;
+        in_channel_ptr += num_channels;
+      }
+    }
+  }
+
   int r = vorbis_analysis_wrote(&vd, nframes);
   if (r != 0) {
     printf("ERROR: error with vorbis_analysis_wrote\n");
