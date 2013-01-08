@@ -1,6 +1,10 @@
 #!/bin/bash
 #  
 # Compiles libogg, libvorbis, libtheora.
+
+
+
+
 # Download the following file and put them in sources:
 #
 # - libogg-1.3.0.tar.gz

@@ -1,0 +1,2 @@
+/Users/roxlu/roxlu/tests/portaudio/build/CMakeFiles/portaudio.dir
+/Users/roxlu/roxlu/tests/portaudio/build/CMakeFiles/roxlu_audio.dir
