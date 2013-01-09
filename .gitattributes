@@ -1,0 +1,17 @@
+* text=auto
+*.c text
+*.cpp text
+*.h text
+*.bat text
+*.s text
+*.sln text eol=crlf
+*.a binary
+*.lib binary
+*.so binary
+*.dll binary
+*.png binary
+*.jpg binary
+*.doc binary
+*.zip binary
+
+
