@@ -171,7 +171,7 @@ typedef struct th_setup_info th_setup_info;
 /**\defgroup decfuncs Functions for Decoding*/
 /*@{*/
 /**\name Functions for decoding
- * You must link to <tt>libtheoradec</tt> if you use any of the 
+ * You must link to <tt>libtheoradec</tt> if you use any of the
  * functions in this section.
  *
  * The functions are listed in the order they are used in a typical decode.
@@ -267,7 +267,10 @@ extern void th_setup_free(th_setup_info *_setup);
  *                See \ref decctlcodes "the list of available control codes"
  *                 for details.
  * \param _buf    The parameters for this control code.
- * \param _buf_sz The size of the parameter buffer.*/
+ * \param _buf_sz The size of the parameter buffer.
+ * \return Possible return values depend on the control code used.
+ *          See \ref decctlcodes "the list of control codes" for
+ *          specific values. Generally 0 indicates success.*/
 extern int th_decode_ctl(th_dec_ctx *_dec,int _req,void *_buf,
  size_t _buf_sz);
 /**Submits a packet containing encoded video data to the decoder.
@@ -283,7 +286,8 @@ extern int th_decode_ctl(th_dec_ctx *_dec,int _req,void *_buf,
  * \retval 0             Success.
  *                       A new decoded frame can be retrieved by calling
  *                        th_decode_ycbcr_out().
- * \retval TH_DUPFRAME   The packet represented a dropped (0-byte) frame.
+ * \retval TH_DUPFRAME   The packet represented a dropped frame (either a
+ *                        0-byte frame or an INTER frame with no coded blocks).
  *                       The player can skip the call to th_decode_ycbcr_out(),
  *                        as the contents of the decoded frame buffer have not
  *                        changed.

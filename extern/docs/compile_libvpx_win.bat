@@ -1,5 +1,4 @@
 @echo off
-echo We are using the library from: http://code.google.com/p/webm/downloads/detail?name=vpx-vp8-debug-src-x86-win32mt-vs9-v1.1.0.zip&can=2&q=
 
 Compiling libvpx on Windows
 =================================
@@ -23,6 +22,7 @@ Compiling libvpx on Windows
    $ mkdir vpx && cd vpx
    $ mkdir vpx && vpx
    $ git clone http://git.chromium.org/webm/libvpx.git .
+   $ git checkout 27825e9e3a70c1d71c2bdea5bd44bf7b4bbb1824
    $ cd 
    $ cd Downloads/vpx
    $ mkdir build
