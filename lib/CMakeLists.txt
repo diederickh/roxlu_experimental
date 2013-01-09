@@ -70,7 +70,7 @@ if(APPLE)
 endif(APPLE)
 
 if(WIN32) 
-  set(roxlu_platform "win/vs2012/")
+  set(roxlu_platform "win/vs2010/")
   set(ROXLU_PLATFORM_WIN TRUE)
 endif(WIN32)
 

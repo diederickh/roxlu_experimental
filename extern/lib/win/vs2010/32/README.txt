@@ -1,1 +1,0 @@
-libtheora_static_MT.lib is copied from ms2012

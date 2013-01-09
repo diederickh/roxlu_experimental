@@ -29,7 +29,7 @@ if(ROXLU_PLATFORM_WIN)
     ${roxlu_extern_lib_dir}/libogg_static_${roxlu_win_runtime}.lib
     ${roxlu_extern_lib_dir}/libtheora_static_${roxlu_win_runtime}.lib
     ${roxlu_extern_lib_dir}/libvorbis_static_${roxlu_win_runtime}.lib
-    ${roxlu_extern_lib_dir}/vpxmt_${roxlu_win_runtime}.lib
+    ${roxlu_extern_lib_dir}/vpx_${roxlu_win_runtime}.lib
     ${roxlu_extern_lib_dir}/libavutil_${roxlu_win_runtime}.a
     ${roxlu_extern_lib_dir}/libswscale_${roxlu_win_runtime}.a
 
