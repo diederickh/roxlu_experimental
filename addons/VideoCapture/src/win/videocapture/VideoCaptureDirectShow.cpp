@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "VideoCaptureDirectShow.h"
+#include <videocapture/VideoCaptureDirectShow.h>
 
 
 
