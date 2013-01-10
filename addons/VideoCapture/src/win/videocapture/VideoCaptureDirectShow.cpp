@@ -1,25 +1,54 @@
-#include "StdAfx.h"
 #include <videocapture/VideoCaptureDirectShow.h>
-
-
 
 // ---------------------------------------------------------------------
 // VideoCaptureDirectShoCallback
 // ---------------------------------------------------------------------
-HRESULT VideoCaptureDirectShowCallback::SampleCB(double timestamp, 
+VideoCaptureDirectShowCallback::VideoCaptureDirectShowCallback(VideoCaptureDirectShow* vidcap)
+  :vidcap(vidcap)
+{
+  InitializeCriticalSection(&critical_section);
+}
+
+VideoCaptureDirectShowCallback::~VideoCaptureDirectShowCallback() {
+  DeleteCriticalSection(&critical_section);
+}
+
+// For some reason sample is always NULL
+HRESULT STDMETHODCALLTYPE VideoCaptureDirectShowCallback::SampleCB(double timestamp, 
                                                  IMediaSample* sample)
 {
-  printf("callback..\n");
+  if(sample != NULL) {
+    printf("callback: %f. %p.\n", timestamp, sample);
+  }
   return S_OK;
 }
 
-HRESULT VideoCaptureDirectShowCallback::BufferCB(
+HRESULT STDMETHODCALLTYPE VideoCaptureDirectShowCallback::BufferCB(
                                                       double timestamp, 
                                                       BYTE* buffer,
                                                       long size)
 {
-  printf("callback.\n");
+  printf("In BufferCB, this = %p, %f\n", this, timestamp);
+  vidcap->frame_cb((void*)buffer, size, vidcap->frame_user);
   return S_OK;
+}
+
+STDMETHODIMP VideoCaptureDirectShowCallback::QueryInterface(REFIID riid, void **obj) {
+  if((riid == IID_ISampleGrabberCB) || (riid == IID_IUnknown)) {
+    *obj = static_cast<ISampleGrabberCB*>(this);
+    return S_OK;
+  }
+  else {
+    return E_NOINTERFACE;
+  }
+}
+
+STDMETHODIMP_(ULONG) VideoCaptureDirectShowCallback::AddRef() {
+  return 1;
+}
+
+STDMETHODIMP_(ULONG) VideoCaptureDirectShowCallback::Release() {
+  return 2;
 }
 
 
@@ -30,13 +59,18 @@ HRESULT VideoCaptureDirectShowCallback::BufferCB(
 int VideoCaptureDirectShow::num_com_init = 0;
 
 VideoCaptureDirectShow::VideoCaptureDirectShow(void)
-  :is_graph_setup(false)
+  :width(0)
+  ,height(0)
+  ,is_graph_setup(false)
   ,graph(NULL)
   ,builder(NULL)
   ,capture_device_filter(NULL)
   ,media_control(NULL)
   ,sample_grabber_filter(NULL)
   ,sample_grabber_iface(NULL)
+  ,frame_cb(NULL)
+  ,frame_user(NULL)
+  ,callback_type(BUFFERED_CALLBACK)
 {
   if(!num_com_init) {
     HRESULT hr = NULL;
@@ -103,22 +137,21 @@ int VideoCaptureDirectShow::openDevice(int dev) {
   while(enum_moniker->Next(1, &moniker, NULL) == S_OK) {
 
     if(dx == dev) {
-      IBaseFilter* cap = NULL;
-      hr = moniker->BindToObject(0, 0, IID_IBaseFilter, (void**)&cap);
+      hr = moniker->BindToObject(0, 0, IID_IBaseFilter, (void**)&capture_device_filter);
       if(FAILED(hr)) {
         printf("ERROR: Cannot bind moniker to base filter.\n");
         break;
       }
 
-      capture_device_filter = cap; 
-
-      hr = graph->AddFilter(cap, L"Roxlu Capture Filter");
+      hr = graph->AddFilter(capture_device_filter, L"Roxlu Capture Filter");
       if(FAILED(hr)) {
         printf("ERROR: cannot add filter.\n");
         break;
       }
 
       device_found = true;
+      moniker->Release();
+      moniker = NULL;
       break;
     }
     ++dx;
@@ -146,29 +179,39 @@ int VideoCaptureDirectShow::openDevice(int dev) {
                         (void**)&sample_grabber_filter);
   RETURN_IF_FAILED(hr, "ERROR: failed to aquire a CLSID_SampleGrabber.\n", 0);
 
-  hr = sample_grabber_filter->QueryInterface(IID_ISampleGrabber, (void**)&sample_grabber_iface);
-  RETURN_IF_FAILED(hr, "ERROR: cannot query the IID_ISampleGrabber", 0);
-  
-  hr = sample_grabber_iface->SetBufferSamples(FALSE); // if you want it to use an internal buffer set it to TRUE
-  RETURN_IF_FAILED(hr, "ERROR: cannot set buffer samples\n", 0);
-  
-  hr = sample_grabber_iface->SetOneShot(FALSE); // if you only want to get one shot
-  RETURN_IF_FAILED(hr, "ERROR: cannot set the one shot feature.\n", 0);
-
-  sample_grabber_listener = new VideoCaptureDirectShowCallback();
-  hr = sample_grabber_iface->SetCallback(sample_grabber_listener, 0); // we do not use a buffered io, http://msdn.microsoft.com/en-us/library/windows/desktop/dd376992(v=vs.85).aspx
-  RETURN_IF_FAILED(hr, "ERROR: cannot set the grabber callback.\n", 0);
 
   hr = graph->AddFilter(sample_grabber_filter, L"SampleGrabber");
   RETURN_IF_FAILED(hr, "ERROR: cannot add sample grabber filter to the graph.\n", 0);
+
+  hr = sample_grabber_filter->QueryInterface(IID_ISampleGrabber, (void**)&sample_grabber_iface);
+  RETURN_IF_FAILED(hr, "ERROR: cannot query the IID_ISampleGrabber", 0);
+
+  hr = sample_grabber_iface->SetBufferSamples(TRUE);
+  RETURN_IF_FAILED(hr, "ERROR: cannot set buffer samples\n", 0);
+  
+  hr = sample_grabber_iface->SetOneShot(FALSE);
+  RETURN_IF_FAILED(hr, "ERROR: cannot set the one shot feature.\n", 0);
+
+  sample_grabber_listener = new VideoCaptureDirectShowCallback(this);
+  hr = sample_grabber_iface->SetCallback(sample_grabber_listener, 1);
+  RETURN_IF_FAILED(hr, "ERROR: cannot set the grabber callback.\n", 0);
 
   AM_MEDIA_TYPE mt;
   ZeroMemory(&mt, sizeof(AM_MEDIA_TYPE));
   mt.majortype = MEDIATYPE_Video;
   mt.subtype = MEDIASUBTYPE_RGB24;
   mt.formattype = FORMAT_VideoInfo;
+
   hr = sample_grabber_iface->SetMediaType(&mt); // we could ask another type here (e.g. YUV)
   RETURN_IF_FAILED(hr, "ERROR: cannot set media type.\n", 0);
+
+  sample_grabber_iface->GetConnectedMediaType(&mt);
+  printAmMediaType(&mt);
+
+  // @todo THIS COULD HELP THE PERFORMANCE:
+  // http://msdn.microsoft.com/en-us/library/windows/desktop/dd377588(v=vs.85).aspx
+  // See "Run the graph" here:
+  // http://msdn.microsoft.com/en-us/library/windows/desktop/dd407288(v=vs.85).aspx
 
   // -------------------------------------------------------------
   // STEP 3: CREATE NULL RENDERER; THE VIDEO NEEDS AN 'END' POINT
@@ -199,14 +242,18 @@ int VideoCaptureDirectShow::openDevice(int dev) {
 
   // From: https://github.com/ofTheo/videoInput/blob/master/videoInputSrcAndDemos/libs/videoInput/videoInput.cpp
   // We release some of the filters as in refered link it's mentioned this sovles freezes
-  // capture_device_filter->Release(); // not releasing because we want to use this in "printVerboseInfo"
-  // capture_device_filter = NULL;
+  capture_device_filter->Release(); // not releasing because we want to use this in "printVerboseInfo"
+  capture_device_filter = NULL;
   sample_grabber_filter->Release();
   sample_grabber_filter = NULL;
   null_renderer_filter->Release();
   null_renderer_filter = NULL;
 
   is_graph_setup = true;
+  if(!saveGraphToFile()) {
+    printf("ERROR: cannot save graph to file.\n");
+    return 0;
+  }
   return 1;
 }
 
@@ -216,6 +263,7 @@ int VideoCaptureDirectShow::startCapture() {
     return 0;
   }
   HRESULT hr = media_control->Run();
+  
   RETURN_IF_FAILED(hr, "ERROR: call Run() on the MediaControl fails.\n", 0);
   return 1;
 }
@@ -307,7 +355,7 @@ int VideoCaptureDirectShow::printVerboseInfo() {
 
   IAMStreamConfig* conf;
   HRESULT hr = NULL;
-  hr = builder->FindInterface(&PIN_CATEGORY_CAPTURE, 
+  hr = builder->FindInterface(&PIN_CATEGORY_CAPTURE, // we use capture here because webcams don't have a preview pin
                             &MEDIATYPE_Video, 
                             capture_device_filter, 
                             IID_IAMStreamConfig,
@@ -540,7 +588,6 @@ void VideoCaptureDirectShow::nukeDownStream(IBaseFilter* filter) {
 }
 
 // From SDK and 
-// https://github.com/ofTheo/videoInput/blob/master/videoInputSrcAndDemos/libs/videoInput/videoInput.cpp
 void VideoCaptureDirectShow::destroyGraph() {
   HRESULT hr = NULL;
   int r = 0;
@@ -704,4 +751,46 @@ std::string VideoCaptureDirectShow::mediaFormatFormatTypeToString(GUID type) {
   else if(type == FORMAT_WaveFormatEx) { return "FORMAT_WaveFormatEx"; }
   else if(type == GUID_NULL) { return "GUID_NULL"; } 
   else {  return "UNKOWN NOT ADDED TO LIST.\n";  }
+}
+
+// http://msdn.microsoft.com/en-us/library/windows/desktop/dd377551(v=vs.85).aspx
+int VideoCaptureDirectShow::saveGraphToFile() {
+  printf("------------- SAVING GRAPH --------------\n");
+  const WCHAR wszStreamName[] = L"ActiveMovieGraph"; 
+  const WCHAR path[] = L"data0.grf";
+  HRESULT hr;
+    
+  IStorage *pStorage = NULL;
+  hr = StgCreateDocfile(
+                        path,
+                        STGM_CREATE | STGM_TRANSACTED | STGM_READWRITE | STGM_SHARE_EXCLUSIVE,
+                        0, &pStorage);
+  if(FAILED(hr)) 
+    {
+      return 0;
+    }
+
+  IStream *pStream;
+  hr = pStorage->CreateStream(
+                              wszStreamName,
+                              STGM_WRITE | STGM_CREATE | STGM_SHARE_EXCLUSIVE,
+                              0, 0, &pStream);
+  if (FAILED(hr)) 
+    {
+      pStorage->Release();    
+      return 0;
+    }
+
+  IPersistStream *pPersist = NULL;
+  graph->QueryInterface(IID_IPersistStream, (void**)&pPersist);
+  hr = pPersist->Save(pStream, TRUE);
+  pStream->Release();
+  pPersist->Release();
+  if (SUCCEEDED(hr)) 
+    {
+      hr = pStorage->Commit(STGC_DEFAULT);
+    }
+  pStorage->Release();
+  printf("------------- DONE  --------------\n");
+  return 1;
 }

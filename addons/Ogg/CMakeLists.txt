@@ -24,16 +24,42 @@ set(roxlu_addon_sources
 )
 
 if(ROXLU_PLATFORM_WIN)
-  set(roxlu_addon_libs
-    ${roxlu_addon_libs}
-    ${roxlu_extern_lib_dir}/libogg_static_${roxlu_win_runtime}.lib
-    ${roxlu_extern_lib_dir}/libtheora_static_${roxlu_win_runtime}.lib
-    ${roxlu_extern_lib_dir}/libvorbis_static_${roxlu_win_runtime}.lib
-    ${roxlu_extern_lib_dir}/vpx_${roxlu_win_runtime}.lib
-    ${roxlu_extern_lib_dir}/libavutil_${roxlu_win_runtime}.a
-    ${roxlu_extern_lib_dir}/libswscale_${roxlu_win_runtime}.a
+  if(ROXLU_WIN_LIB_STATIC) 
 
+    set(roxlu_addon_libs
+      ${roxlu_addon_libs}
+      ${roxlu_extern_lib_dir}/libogg_static_${roxlu_win_runtime}.lib
+      ${roxlu_extern_lib_dir}/libtheora_static_${roxlu_win_runtime}.lib
+      ${roxlu_extern_lib_dir}/libvorbis_static_${roxlu_win_runtime}.lib
+      ${roxlu_extern_lib_dir}/vpx_static_${roxlu_win_runtime}.lib
+      ${roxlu_extern_lib_dir}/libavutil_static_${roxlu_win_runtime}.a
+      ${roxlu_extern_lib_dir}/libswscale_static_${roxlu_win_runtime}.a
     )
+  elseif(ROXLU_WIN_LIB_DYNAMIC)
+
+    set(roxlu_addon_libs
+      ${roxlu_addon_libs}
+      ${roxlu_extern_lib_dir}/libogg_import_${roxlu_win_runtime}.lib
+      ${roxlu_extern_lib_dir}/libtheora_import_${roxlu_win_runtime}.lib
+      ${roxlu_extern_lib_dir}/libvorbis_import_${roxlu_win_runtime}.lib
+      ${roxlu_extern_lib_dir}/vpx_static_${roxlu_win_runtime}.lib
+      ${roxlu_extern_lib_dir}/libavutil_import_MD.lib
+      ${roxlu_extern_lib_dir}/libswscale_import_MD.lib
+      )
+
+    set(roxlu_install_files
+      ${roxlu_install_files}
+      ${roxlu_extern_lib_dir}/libavutil.dll
+      ${roxlu_extern_lib_dir}/libswscale.dll
+      ${roxlu_extern_lib_dir}/libogg.dll
+      ${roxlu_extern_lib_dir}/libtheora.dll
+      ${roxlu_extern_lib_dir}/libvorbis.dll
+      ${roxlu_extern_lib_dir}/libvorbisfile.dll
+      ${roxlu_extern_lib_dir}/swscale-2.dll
+      ${roxlu_extern_lib_dir}/avutil-52.dll
+      )
+  endif()
+
 endif(ROXLU_PLATFORM_WIN)
 
 add_library(roxlu_ogg STATIC ${ogg_source_files})

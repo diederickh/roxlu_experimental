@@ -51,7 +51,20 @@ if(UNIX AND NOT APPLE)
 endif(UNIX AND NOT APPLE)
 
 
-set(roxlu_addon_libs  ${roxlu_addon_libs} rx_capture )
+if(WIN32) 
+  set(rxcapture_source_files
+    ${videocapture_src_platform_dir}/videocapture/rx_capture_win.cpp
+    ${videocapture_src_platform_dir}/videocapture/VideoCaptureDirectShow.cpp
+    )
+  set(roxlu_addon_libs
+    ${roxlu_addon_libs}
+    strmiids.lib
+    )
+  add_library(rx_capture ${rxcapture_source_files})
+endif()
+
+
+set(roxlu_addon_libs ${roxlu_addon_libs} rx_capture)
  
 set(roxlu_addon_sources  ${roxlu_addon_sources}  ${videocapture_source_files} )
 

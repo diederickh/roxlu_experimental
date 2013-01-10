@@ -4,6 +4,18 @@
 # - roxlu_addon_libs (addons should append their libs to this list, see Twitter addon)
 # - CMAKE_EXE_LINKER_FLAG (add extra frameworks, libs etc.. to the linker flags, see Videorecorder/Audio addons)
 # - for windows builds you can use ${roxlu_win_runtime} which is set to MT, MTd, MD, MDd (MD is used for import libs)
+#
+#
+#
+# General variables
+# -----------------
+# - roxlu_platform_lib_dir:  Used to create a per platform path for libraries.
+#                            "vs2012/" "vs2010/" (including slash)
+# - roxlu_platform:          String like "linux", "win", "mac"
+# - roxlu_install_files:     Files you want to move to the install directory
+#                            for example with ROXLU_WIN_LIB_DYNAMIC is set to TRUE
+#                            you might want to copy the DLL files to the install dir.
+
 cmake_minimum_required(VERSION 2.8)
 
 option(ROXLU_32BIT "Build 32bit version" OFF)
@@ -66,16 +78,25 @@ endif(ROXLU_64BIT)
 
 if(APPLE)
   set(roxlu_platform "mac") 
+  set(roxlu_platform_lib_dir "")
   set(ROXLU_PLATFORM_MAC TRUE)
 endif(APPLE)
 
 if(WIN32) 
-  set(roxlu_platform "win/vs2010/")
+  set(roxlu_platform "win")
+  set(roxlu_platform_lib_dir "vs2010/")
+
+  set(ROXLU_WIN_LIB_DYNAMIC TRUE)
+  set(ROXLU_WIN_LIB_STATIC FALSE)
+  set(ROXLU_WIN_LIB_MT FALSE)
+  set(ROXLU_WIN_LIB_MD TRUE)
+
   set(ROXLU_PLATFORM_WIN TRUE)
 endif(WIN32)
 
 if(UNIX AND NOT APPLE)
   set(roxlu_platform "linux")
+  set(roxlu_platform_lib_dir "")
   set(ROXLU_PLATFORM_LINUX TRUE)
 endif(UNIX AND NOT APPLE)
 
@@ -104,12 +125,17 @@ add_definitions(
 )
 endif(NOT ROXLU_PLATFORM_WIN)
 
-set(roxlu_extern_lib_dir ${roxlu_base_dir}/extern/lib/${roxlu_platform}/${roxlu_bits}/)
+set(roxlu_extern_lib_dir ${roxlu_base_dir}/extern/lib/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}/)
 
 # - On windows we don't have inttypes.h so we add a include dir
 # - We also set the runtime library for windows. This is kind of experimental 
-if(ROXLU_PLATFORM_WIN) 
-  set(roxlu_win_runtime "MT") 
+if(ROXLU_PLATFORM_WIN)
+  if(ROXLU_WIN_LIB_MT)
+    set(roxlu_win_runtime "MT") 
+  elseif(ROXLU_WIN_LIB_MD)
+    set(roxlu_win_runtime "MD") 
+  endif()
+
   set(CMAKE_C_FLAGS_DEBUG "/${roxlu_win_runtime}")
   set(CMAKE_C_FLAGS_RELEASE "/${roxlu_win_runtime}")
   set(CMAKE_CXX_FLAGS_DEBUG "/${roxlu_win_runtime}")

@@ -1,7 +1,6 @@
 #ifndef ROXLU_VIDEOCAPTURE_BASE_H
 #define ROXLU_VIDEOCAPTURE_BASE_H
 
-//#include <roxlu/Roxlu.h>
 #include <algorithm>
 #include <videocapture/rx_capture.h>
 #include <stdio.h>

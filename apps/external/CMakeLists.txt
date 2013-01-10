@@ -14,14 +14,14 @@ add_definitions("-DROXLU_GL_WRAPPER=1")
 # GLFW
 set(glfw_base_dir ${CMAKE_CURRENT_LIST_DIR}/)
 set(glfw_include_dir ${glfw_base_dir}/glfw/include/)
-set(glfw_lib_dir ${glfw_base_dir}/glfw/lib/${roxlu_platform}/${roxlu_bits})
+set(glfw_lib_dir ${glfw_base_dir}/glfw/lib/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits})
 set(glfw_wrapper_sources ${glfw_base_dir}/glfw_wrapper/SimulationBase.cpp)
 
 # GLEW
 set(glew_base_dir ${CMAKE_CURRENT_LIST_DIR}/)
 set(glew_include_dir ${glew_base_dir}/glew/include/)
 set(glew_src_dir ${glew_base_dir}/glew/src/)
-set(glew_lib_dir ${glew_base_dir}/glew/lib/${roxlu_platform}/${roxlu_bits})
+set(glew_lib_dir ${glew_base_dir}/glew/lib/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits})
 
 if(NOT ROXLU_PLATFORM_WIN)
 set(glfw_libs 
@@ -33,8 +33,8 @@ endif(NOT ROXLU_PLATFORM_WIN)
 if(ROXLU_PLATFORM_WIN)
   set(glfw_libs
     opengl32.lib
-    ${glew_lib_dir}/glew32_${roxlu_win_runtime}.lib
-    ${glfw_lib_dir}/glfw3_${roxlu_win_runtime}.lib
+    ${glew_lib_dir}/glew32_static_${roxlu_win_runtime}.lib
+    ${glfw_lib_dir}/glfw3_static_${roxlu_win_runtime}.lib
     )
   add_definitions("-DGLEW_STATIC")
 endif(ROXLU_PLATFORM_WIN)
