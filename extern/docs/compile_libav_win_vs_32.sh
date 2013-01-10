@@ -68,6 +68,9 @@
 #      $ ./configure --toolchain=msvc --arch=i686 --extra-cflags="-I/c/msinttypes/"
 #      $ make
 #      
+#      NOTE: if you want to create DLL files, use:
+#      $ ./configure --toolchain=msvc --arch=i686 --enable-shared --extra-cflags="-I/c/msinttypes/"
+# 
 #    - Once everything is compiled you can get the static libraries, linked against
 #      the /MT (MultiThreaded) runtime lib from e.g libutil/libavutil.a, libswscale/libswscale.a
 #      
