@@ -6,16 +6,52 @@ RingBuffer::RingBuffer(size_t capacity)
   ,write_index(0)
   ,read_index(0)
   ,bytes_stored(0)
+  ,buffer(NULL)
 
 {
-  buffer = new char[capacity];
+  if(capacity > 0) {
+    buffer = new char[capacity];
+    memset(buffer, 0, capacity);
+  }
 }
 
 RingBuffer::~RingBuffer() {
-  delete[] buffer;
+  if(buffer != NULL) {
+    delete[] buffer;
+  }
+}
+
+void RingBuffer::resize(size_t bytes) {
+  if(buffer == NULL) {
+    buffer = new char[bytes];
+    memset(buffer, 0, capacity);
+    capacity = bytes;
+  }
+  else {
+    if(bytes < capacity) {
+      return; // we do not shrink
+    }
+
+    size_t to_grow = capacity - bytes;
+    if(to_grow <= 0) {
+      return;
+    }
+    char* tmp_buffer = new char[bytes];
+    memset(tmp_buffer, 0, bytes);
+
+    if(size() > 0) {
+      memcpy(tmp_buffer, buffer, size());
+    }
+    delete[] buffer;
+    buffer = tmp_buffer;
+    capacity = bytes;
+  }
 }
 
 size_t RingBuffer::write(const char* data, size_t bytes) {
+  if(capacity == 0) {
+    resize(1024*1024);
+  }
   if(bytes == 0) {
     return 0;
   }

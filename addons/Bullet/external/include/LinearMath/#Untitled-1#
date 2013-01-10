@@ -1,9 +1,0 @@
-class Vec3 {
-};
-
-class btVector3 {
-};
-
-Vec3 my_vec;
-
-btVector3 bt_vec = my_vec;

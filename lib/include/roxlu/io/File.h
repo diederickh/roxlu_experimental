@@ -153,10 +153,15 @@ namespace roxlu {
     }
 
     static bool createDirectory(std::string path) {
+      #ifdef _WIN32
+      printf("File::createDirectory(), not implemented yet!\n");
+      return false;
+      #else
       if(mkdir(path.c_str(), 0777) != 0) {
         return false;
       }
       return true;
+      #endif
     }
     
   }; // File

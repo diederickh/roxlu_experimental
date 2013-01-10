@@ -1,0 +1,2 @@
+/usr/bin/ar cr libroxlu_audio.a  CMakeFiles/roxlu_audio.dir/Users/roxlu/roxlu/addons/Audio/src/audio/Audio.cpp.o CMakeFiles/roxlu_audio.dir/Users/roxlu/roxlu/addons/Audio/src/audio/PCMWriter.cpp.o
+/usr/bin/ranlib libroxlu_audio.a

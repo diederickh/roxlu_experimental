@@ -1,0 +1,2 @@
+/Users/roxlu/roxlu/apps/examples/pango/build/CMakeFiles/pango.dir
+/Users/roxlu/roxlu/apps/examples/pango/build/CMakeFiles/roxlu_pango.dir

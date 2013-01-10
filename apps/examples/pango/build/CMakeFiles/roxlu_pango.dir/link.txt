@@ -1,0 +1,2 @@
+/usr/bin/ar cr libroxlu_pango.a  CMakeFiles/roxlu_pango.dir/Users/roxlu/roxlu/addons/Pango/src/pango/TextSurface.cpp.o
+/usr/bin/ranlib libroxlu_pango.a

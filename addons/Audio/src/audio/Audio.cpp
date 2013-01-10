@@ -9,6 +9,7 @@ Audio::Audio()
   if(err != paNoError) {
     printf("ERROR: cannot initialize port audio.\n");
     printf("ERROR: portaudio message: %s\n", Pa_GetErrorText(err));
+    ::exit(0);
   }
 }
 
@@ -40,6 +41,10 @@ int Audio::listDevices() {
   }
 
   return -1;
+}
+
+int Audio::getDefaultInputDevice() {
+  return Pa_GetDefaultInputDevice();
 }
 
 bool Audio::isInputFormatSupported(int device, int numChannels, PaSampleFormat format, double samplerate) {
@@ -81,6 +86,12 @@ std::string Audio::getSampleFormatText(PaSampleFormat f) {
 
 
 // --------------------------------------------------
+/**
+ * Open an input stream.
+ * @param PaSampleFormat:
+ *        - paInt16 
+ *        - paFloat32: in a range of -1.0 / +1.0
+ */
 bool Audio::openInputStream(
                             int device
                             ,int numChannels
@@ -91,7 +102,8 @@ bool Audio::openInputStream(
 {
   PaStreamParameters input;
 
-  bzero(&input, sizeof(input));
+  //bzero(&input, sizeof(input));
+  memset(&input, 0, sizeof(input));
 
   input.channelCount = numChannels;
   input.device = device;
@@ -105,7 +117,8 @@ bool Audio::openInputStream(
                               ,NULL
                               ,samplerate
                               ,framesPerBuffer
-                              ,paNoFlag
+                              //                              ,paNoFlag
+                              ,paClipOff
                               ,&Audio::inputStreamCallback
                               ,(void*) this
                               );

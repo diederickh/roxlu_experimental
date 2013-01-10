@@ -93,7 +93,7 @@ namespace roxlu {
 	
     Mat4& frustum(float l, float r, float b, float t, float n, float f);
     Mat4& frustumCenter(float w, float h, float n, float f);
-    Mat4& perspective(float fov, float aspect, float near, float far);
+    Mat4& perspective(float fov, float aspect, float n, float f);
     Mat4& ortho(float l, float r, float b, float t, float n, float f);
     Mat4& orthoCenter(float w, float h, float n, float f);
     Mat4& orthoTopLeft(float w, float h, float n, float f);

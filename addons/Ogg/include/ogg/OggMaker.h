@@ -1,35 +1,39 @@
 #ifndef ROXLU_OGGMAKER_H
 #define ROXLU_OGGMAKER_H
 
+// tmp, disabling some includes for linker errors
+#define OMT // @todo remove
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
 #include <roxlu/Roxlu.h>
+#include <ogg/Types.h>
 
 extern "C" {
-#include <theora/codec.h>
-#include <theora/theoraenc.h>
 #include <vpx/vpx_image.h>
 #include <ogg/ogg.h>
 #include <libyuv.h>
 #include <libswscale/swscale.h>
 #include <speex/speex.h>
 #include <speex/speex_header.h>
+#include <theora/codec.h>
+#include <theora/theoraenc.h>
 #include <vorbis/vorbisenc.h>
 }
 
-enum OGGMAKER_IN_FMT {
-  OIF_RGB24,
-  OIF_YUV420
-};
 
 class OggMaker {
  public:
   OggMaker();
   ~OggMaker();
-  bool setup();
-  void addVideoFrame(void* pixels, size_t nbytes, int last,  OGGMAKER_IN_FMT fmt = OIF_RGB24);
-  void addAudioFrame(void* data, size_t nbytes); // for now 16 bit, mono, 320 frames
+  bool setup(OggVideoFormat vfmt, 
+    OggAudioFormat afmt, 
+    int numChannels, 
+    int samplerate,
+    size_t bytesPerSample
+  );
+  void addVideoFrame(void* pixels, size_t nbytes, int last);
+  void addAudioFrame(void* data, size_t nframes);
   void duplicateFrames(int dup);
   void print();
  private:
@@ -40,6 +44,8 @@ class OggMaker {
   void oggStreamFlush(ogg_stream_state& os);
   void oggStreamPageOut(ogg_stream_state& os);
  private:
+  OggVideoFormat vfmt;
+  OggAudioFormat afmt;
   bool use_audio;
   bool use_video;
   bool is_setup;
@@ -57,12 +63,14 @@ class OggMaker {
   unsigned char* yuv_y;
   unsigned char* yuv_u;
   unsigned char* yuv_v;
-  vpx_image_t* in_image;
+
   unsigned char* out_planes[3];
   int out_strides[3];
   int in_stride;
   int num_video_frames;
   int num_audio_frames;
+
+  vpx_image_t* in_image; 
   struct SwsContext* sws;
 
   rx_uint64 last_time;
@@ -70,6 +78,9 @@ class OggMaker {
   rx_uint64 time_accum; // can be removed
 
   // audio
+  size_t bytes_per_sample;
+  size_t samplerate;
+  int num_channels;
   ogg_stream_state audio_oss;
   ogg_packet vheader_comm;
   ogg_packet vheader_code;
@@ -77,8 +88,6 @@ class OggMaker {
   vorbis_comment vc;
   vorbis_dsp_state vd;
   vorbis_block vb;
-
-
 };
 
 

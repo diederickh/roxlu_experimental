@@ -29,10 +29,32 @@ set(roxlu_addon_sources
   ${audio_source_files}
 )
 
-set(audio_libs
-  ${roxlu_extern_lib_dir}/libportaudio.a
-  ${roxlu_extern_lib_dir}/libportaudiocpp.a
-)
+if(ROXLU_PLATFORM_WIN) 
+
+  if(ROXLU_WIN_LIB_DYNAMIC)
+
+    set(audio_libs
+      ${roxlu_extern_lib_dir}/portaudio_import_x86_${roxlu_win_runtime}.lib
+      )
+
+    set(roxlu_install_files
+      ${roxlu_install_files}
+      ${roxlu_extern_lib_dir}/portaudio_x86.dll
+      )
+
+  else()
+
+    set(audio_libs
+      ${roxlu_extern_lib_dir}/portaudio_static_x86_${roxlu_win_runtime}.lib
+    )
+
+  endif()
+else() 
+  set(audio_libs
+    ${roxlu_extern_lib_dir}/libportaudio.a
+    ${roxlu_extern_lib_dir}/libportaudiocpp.a
+    )
+endif(ROXLU_PLATFORM_WIN)
 
 if(APPLE)
   set(roxlu_linker_flags " ${roxlu_linker_flags} -framework CoreAudio -framework AudioToolbox -framework AudioUnit -framework CoreServices "

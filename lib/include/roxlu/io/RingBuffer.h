@@ -9,6 +9,7 @@ class RingBuffer {
  public:
   RingBuffer(size_t capacity);
   ~RingBuffer();
+  void resize(size_t bytes);
   size_t write(const char* data, size_t bytes);
   size_t read(char* data, size_t bytes);
   size_t drain(size_t bytes);

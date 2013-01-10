@@ -42,7 +42,7 @@ void SimulationBase::onKeyUp(int key) {
 }
 
 void SimulationBase::setWindowTitle(const char* title) {
-  glfwSetWindowTitle(*window, title);
+  glfwSetWindowTitle(window, title);
 }
 
 void SimulationBase::onWindowResize(int w, int h) {
