@@ -57,6 +57,14 @@ static float rx_fast_sqrt(float x) {
     return r; 
 }
 
+inline void rx_sleep_millis(int millis) {
+#ifdef _WIN32
+  Sleep(millis);
+#else
+  usleep(millis * 1000);
+#endif
+}
+
 // rx_strftime("%Y/%m%d"), http://www.cplusplus.com/reference/clibrary/ctime/strftime/
 inline std::string rx_strftime(const char* timestr) {
   time_t t;
@@ -91,7 +99,6 @@ static std::string rx_join(const std::vector<T>& entries, std::string sep) {
 inline GLuint rx_create_shader(const char* vs, const char* fs) {
   GLuint vert_id = glCreateShader(GL_VERTEX_SHADER);
   GLuint frag_id = glCreateShader(GL_FRAGMENT_SHADER);
-  printf("vert id: %d\n", vert_id);
   glShaderSource(vert_id, 1, &vs, NULL);
   glShaderSource(frag_id, 1, &fs, NULL);
   glCompileShader(vert_id); eglGetShaderInfoLog(vert_id);

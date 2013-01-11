@@ -15,6 +15,12 @@
 # - roxlu_install_files:     Files you want to move to the install directory
 #                            for example with ROXLU_WIN_LIB_DYNAMIC is set to TRUE
 #                            you might want to copy the DLL files to the install dir.
+# - roxlu_addon_libs:        If you need to link with additional libraries you can 
+#                            add them to this collection.
+# - roxlu_extern_lib_dir:    path to the "extern/lib/[OS]/[platform/compiler]/[arch]/ 
+#                            so you can directly use something like:
+#                            ${roxlu_extern_lib_dir}/libportaudio.a to target libraries.
+#
 
 cmake_minimum_required(VERSION 2.8)
 
@@ -30,12 +36,12 @@ set(roxlu_extern_lib_dir ${roxlu_base_dir}/extern/lib)
 set(roxlu_extern_include_dir ${roxlu_base_dir}/extern/include)
 
 # get roxlu sources
-file(GLOB_RECURSE roxlu_3d_sources ${roxlu_src_dir}/3d/*.cpp)
-file(GLOB_RECURSE roxlu_core_sources ${roxlu_src_dir}/core/*.cpp)
-file(GLOB_RECURSE roxlu_experimental_sources ${roxlu_src_dir}/experimental/*.cpp)
-file(GLOB_RECURSE roxlu_external_sources_c ${roxlu_src_dir}/external/*.c)  # part of roxlu lib
-file(GLOB_RECURSE roxlu_external_sources_cpp ${roxlu_src_dir}/external/*.cpp) # part of roxlu lib
-file(GLOB_RECURSE roxlu_extern_sources_c ${roxlu_extern_src_dir}/*.c) # 3rd party, used by addons
+file(GLOB_RECURSE NOTDOT roxlu_3d_sources ${roxlu_src_dir}/3d/*.cpp)
+file(GLOB_RECURSE NOTDOT roxlu_core_sources ${roxlu_src_dir}/core/*.cpp)
+file(GLOB_RECURSE NOTDOT roxlu_experimental_sources ${roxlu_src_dir}/experimental/*.cpp)
+file(GLOB_RECURSE NOTDOT roxlu_external_sources_c ${roxlu_src_dir}/external/*.c)  # part of roxlu lib
+file(GLOB_RECURSE NOTDOT roxlu_external_sources_cpp ${roxlu_src_dir}/external/*.cpp) # part of roxlu lib
+file(GLOB_RECURSE NOTDOT roxlu_extern_sources_c ${roxlu_extern_src_dir}/*.c) # 3rd party, used by addons
 file(GLOB_RECURSE roxlu_io_sources ${roxlu_src_dir}/io/*.cpp)
 file(GLOB_RECURSE roxlu_math_sources ${roxlu_src_dir}/math/*.cpp)
 file(GLOB_RECURSE roxlu_opengl_sources ${roxlu_src_dir}/opengl/*.cpp)
