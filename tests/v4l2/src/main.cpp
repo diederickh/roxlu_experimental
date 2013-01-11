@@ -15,7 +15,7 @@ void sig_handler(int signum) {
 int main() {
   printf("Video4Linux2 Test\n");
   
-  signal(SIGINT, sig_handler);
+  //  signal(SIGINT, sig_handler);
 
 
   cap.setup();
