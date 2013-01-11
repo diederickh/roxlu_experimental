@@ -14,8 +14,8 @@ int rx_capture_list_devices(rx_capture_t* c) {
   return c->cap->listDevices();
 }
 
-int rx_capture_open_device(rx_capture_t* c, int device) {
-  return c->cap->openDevice(device);
+int rx_capture_open_device(rx_capture_t* c, int device, int w, int h, VideoCaptureFormat fmt) {
+  return c->cap->openDevice(device, w, h, fmt);
 }
 
 int rx_capture_start(rx_capture_t* c) {
@@ -38,4 +38,7 @@ int rx_capture_get_height(rx_capture_t* c) {
   return c->cap->getHeight();
 }
 
+int rx_capture_is_format_supported(rx_capture_t* c, VideoCaptureFormat fmt, int w, int h, int set) {
+  return c->cap->isFormatSupported(fmt, w, h, set);
+}
 

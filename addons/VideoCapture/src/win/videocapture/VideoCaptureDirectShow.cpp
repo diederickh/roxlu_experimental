@@ -1,5 +1,7 @@
 #include <videocapture/VideoCaptureDirectShow.h>
 
+
+
 // ---------------------------------------------------------------------
 // VideoCaptureDirectShoCallback
 // ---------------------------------------------------------------------
@@ -28,7 +30,7 @@ HRESULT STDMETHODCALLTYPE VideoCaptureDirectShowCallback::BufferCB(
                                                       BYTE* buffer,
                                                       long size)
 {
-  printf("In BufferCB, this = %p, %f\n", this, timestamp);
+  printf("In BufferCB, this = %p, %f, %Iu\n", this, timestamp, size);
   vidcap->frame_cb((void*)buffer, size, vidcap->frame_user);
   return S_OK;
 }
@@ -94,7 +96,7 @@ VideoCaptureDirectShow::~VideoCaptureDirectShow(void) {
   close();
 }
 
-int VideoCaptureDirectShow::openDevice(int dev) {
+int VideoCaptureDirectShow::openDevice(int dev, int w, int h, VideoCaptureFormat fmt) {
   if(is_graph_setup) {
     printf("ERROR: graph is already created which means the device is opened already.\n");
     return 0;
@@ -166,7 +168,16 @@ int VideoCaptureDirectShow::openDevice(int dev) {
   }
 
   // -----------------------------------------------------
-  // STEP 2: CREATE A SAMPLE GRABBER HOOK TO GET FRAMES
+  // STEP 2: Check if we 're capable of using the given 
+  // format and sizes.
+  // -----------------------------------------------------
+  if(!isFormatSupported(fmt, w, h, 1)) {
+    printf("ERROR: the given format is not supported.\n");
+    return 0;
+  }
+
+  // -----------------------------------------------------
+  // STEP 3: CREATE A SAMPLE GRABBER HOOK TO GET FRAMES
   // http://msdn.microsoft.com/en-us/library/windows/desktop/dd407288(v=vs.85).aspx
   // -----------------------------------------------------
   hr = graph->QueryInterface(IID_IMediaControl, (void**)&media_control);
@@ -199,12 +210,15 @@ int VideoCaptureDirectShow::openDevice(int dev) {
   AM_MEDIA_TYPE mt;
   ZeroMemory(&mt, sizeof(AM_MEDIA_TYPE));
   mt.majortype = MEDIATYPE_Video;
-  mt.subtype = MEDIASUBTYPE_RGB24;
+  //mt.subtype = MEDIASUBTYPE_RGB24;
+  //mt.subtype = MEDIASUBTYPE_YUY2;
+  mt.subtype = videoCaptureFormatToMediaCaptureFormat(fmt);
   mt.formattype = FORMAT_VideoInfo;
 
   hr = sample_grabber_iface->SetMediaType(&mt); // we could ask another type here (e.g. YUV)
   RETURN_IF_FAILED(hr, "ERROR: cannot set media type.\n", 0);
 
+  //  AM_MEDIA_TYPE mt;
   sample_grabber_iface->GetConnectedMediaType(&mt);
   printAmMediaType(&mt);
 
@@ -214,7 +228,7 @@ int VideoCaptureDirectShow::openDevice(int dev) {
   // http://msdn.microsoft.com/en-us/library/windows/desktop/dd407288(v=vs.85).aspx
 
   // -------------------------------------------------------------
-  // STEP 3: CREATE NULL RENDERER; THE VIDEO NEEDS AN 'END' POINT
+  // STEP 4: CREATE NULL RENDERER; THE VIDEO NEEDS AN 'END' POINT
   // http://msdn.microsoft.com/en-us/library/windows/desktop/dd407288(v=vs.85).aspx
   // ------------------------------------------------------------- 
   hr = CoCreateInstance(CLSID_NullRenderer, 
@@ -242,8 +256,8 @@ int VideoCaptureDirectShow::openDevice(int dev) {
 
   // From: https://github.com/ofTheo/videoInput/blob/master/videoInputSrcAndDemos/libs/videoInput/videoInput.cpp
   // We release some of the filters as in refered link it's mentioned this sovles freezes
-  capture_device_filter->Release(); // not releasing because we want to use this in "printVerboseInfo"
-  capture_device_filter = NULL;
+  // capture_device_filter->Release(); // not releasing because we want to use this in "printVerboseInfo"
+  // capture_device_filter = NULL;
   sample_grabber_filter->Release();
   sample_grabber_filter = NULL;
   null_renderer_filter->Release();
@@ -256,6 +270,10 @@ int VideoCaptureDirectShow::openDevice(int dev) {
   }
   return 1;
 }
+
+// int VideoCaptureDirectShow::getNumBytesPerFrame(VideoCaptureFormat fmt, int w, int h) {
+  
+// }
 
 int VideoCaptureDirectShow::startCapture() {
   if(!is_graph_setup) {
@@ -280,7 +298,7 @@ int VideoCaptureDirectShow::stopCapture() {
 
 // We use the CaptureGraphBuilder2 Interface to create a capture graph
 bool VideoCaptureDirectShow::initCaptureGraphBuilder() {
-  if(is_graph_setup) {
+  if(builder != NULL) {
     return true;
   }
 
@@ -309,7 +327,6 @@ bool VideoCaptureDirectShow::initCaptureGraphBuilder() {
   }
 
   builder->SetFiltergraph(graph);
-  is_graph_setup = true;
   return true;
 }
 
@@ -346,13 +363,90 @@ int VideoCaptureDirectShow::listDevices() {
   }
 }
 
+// Test if a format is supported and if 'set != 0' we will also try to set it.
+int VideoCaptureDirectShow::isFormatSupported(VideoCaptureFormat fmt, int w, int h, int set) {
+  if(builder == NULL || capture_device_filter == NULL) {
+    printf("ERROR: cannot check if format is supported because device filter is still NULL.\n");
+    return 0;
+  }
+
+  IAMStreamConfig* conf = NULL;
+  HRESULT hr = builder->FindInterface(&PIN_CATEGORY_CAPTURE,
+                                      &MEDIATYPE_Video,
+                                      capture_device_filter,
+                                      IID_IAMStreamConfig,
+                                      (void**)&conf);
+
+  if(hr == E_NOINTERFACE) {  printf("ERROR: cannot find IID_IAMStreamConfig interface\n"); return 0; }
+  if(hr == E_FAIL) { printf("ERROR: IID_IAMStreamConfig fail\n");  return 0; }
+  if(hr == E_POINTER) { printf("ERROR: IID_IAMStreamConfig passed null\n"); return 0; } 
+
+  int count = 0;
+  int size = 0;
+  hr = conf->GetNumberOfCapabilities(&count, &size);
+  if(FAILED(hr)) {
+    printf("ERROR: cannot get the number of capabilities.\n");
+    conf->Release();
+    conf = NULL;
+    return 0;
+  }
+
+  if(size != sizeof(VIDEO_STREAM_CONFIG_CAPS)) {
+    printf("ERROR: returned size from GetNumberOfCapabilities is not the same as VIDEO_STREAM_CONFIG_CAPS.\n");
+    conf->Release();
+    conf = NULL;
+    return 0;
+  }
+  int found = 0;
+  for(int i = 0; i < count ; ++i) {
+    VIDEO_STREAM_CONFIG_CAPS caps;
+    AM_MEDIA_TYPE* mt; // @todo how do we delete/free this?
+    hr = conf->GetStreamCaps(i, &mt, (BYTE*)&caps);
+    if(FAILED(hr)) {
+      printf("ERROR: GetStreamCaps() failed in IsFormatSupported().\n");
+      continue;
+    }
+
+    if(mt->majortype == MEDIATYPE_Video && 
+       mt->subtype == videoCaptureFormatToMediaCaptureFormat(fmt) &&
+       mt->formattype == FORMAT_VideoInfo && 
+       mt->cbFormat >= sizeof(VIDEOINFOHEADER) && 
+       mt->pbFormat != NULL)
+    {
+      VIDEOINFOHEADER* info = (VIDEOINFOHEADER*)mt->pbFormat;
+      found = 1;
+
+      if(set) {
+
+        info->bmiHeader.biWidth = w;
+        info->bmiHeader.biHeight = h;
+        info->bmiHeader.biSizeImage = DIBSIZE(info->bmiHeader);
+
+        hr = conf->SetFormat(mt);
+        if(FAILED(hr)) {
+          printf("ERROR: cannot set the format in isFormatSupported! \n");
+          found = 0;
+        }
+
+        width = w;
+        height = h;
+        deleteMediaType(mt);
+        break;
+      }
+      //printf(">>>>>>>> %d, %d\n", info->bmiHeader.biWidth, info->bmiHeader.biHeight);
+    }
+    deleteMediaType(mt);
+  }
+  return found;
+}
+
 
 int VideoCaptureDirectShow::printVerboseInfo() {
   if(!is_graph_setup) {
     printf("ERROR: you need to open a device before calling printVerboseInfo()\n");
     return 0;
   }
-
+  printf("> %p\n", capture_device_filter);
   IAMStreamConfig* conf;
   HRESULT hr = NULL;
   hr = builder->FindInterface(&PIN_CATEGORY_CAPTURE, // we use capture here because webcams don't have a preview pin
@@ -396,7 +490,7 @@ int VideoCaptureDirectShow::printVerboseInfo() {
   }
 
   for(int i = 0; i < count; ++i) {
-    VIDEO_STREAM_CONFIG_CAPS cap;
+    VIDEO_STREAM_CONFIG_CAPS cap; 
     hr = conf->GetStreamCaps(i, &mt, (BYTE*)&cap);
     if(FAILED(hr)) {
       printf("WARNING: GetStreamCaps for index: %d failed.\n", i);
@@ -407,7 +501,7 @@ int VideoCaptureDirectShow::printVerboseInfo() {
     // see here for an example: http://www.microsoftfaqs.com/msg/14713491.aspx
     // backup: https://gist.github.com/bd9e4982ce2e7da2fcca
     printAmMediaType(mt);
-    printf("--------------------------------------------------\n");
+    deleteMediaType(mt);
 
   }
   conf->Release();
@@ -416,6 +510,7 @@ int VideoCaptureDirectShow::printVerboseInfo() {
 }
 
 void VideoCaptureDirectShow::printAmMediaType(AM_MEDIA_TYPE* mt) {
+  /*
   printf("AM_MEDIA_TYPE.majortype: %s\n", mediaFormatMajorTypeToString(mt->majortype).c_str());
   printf("AM_MEDIA_TYPE.subtype: %s\n", mediaFormatSubTypeToString(mt->subtype).c_str());
   printf("AM_MEDIA_TYPE.bFixedSizeSamples: %c\n", (mt->bFixedSizeSamples == TRUE) ? 'y' : 'n');
@@ -431,6 +526,26 @@ void VideoCaptureDirectShow::printAmMediaType(AM_MEDIA_TYPE* mt) {
     // from fps in 100 nano units to seconds:
     double fps = 1.0 / (double(ih->AvgTimePerFrame) / 10000000.0f); 
     printf("VIDEOINFOHEADER - fps: %f\n", fps);
+  }
+  */
+  //  printf("majortype: %s, ", mediaFormatMajorTypeToString(mt->majortype).c_str());
+  printf("subtype: %s, ", mediaFormatSubTypeToString(mt->subtype).c_str());
+  //printf("bFixedSizeSamples: %c, ", (mt->bFixedSizeSamples == TRUE) ? 'y' : 'n');
+  //printf("bTemporalCompression: %c, ", (mt->bTemporalCompression == TRUE) ? 'y' : 'n');
+  printf("lSampleSize: %Iu, ", mt->lSampleSize);
+  //printf("formattype: %s, ", mediaFormatFormatTypeToString(mt->formattype));
+  // printf("cbFormat: %Iu, ", mt->cbFormat);
+  if(mt->formattype == FORMAT_VideoInfo && mt->cbFormat >= sizeof(VIDEOINFOHEADER)) {
+    VIDEOINFOHEADER* ih = (VIDEOINFOHEADER*)mt->pbFormat;
+    printf("width: %Iu, ", LONG(ih->bmiHeader.biWidth));
+    printf("height: %Iu, ", LONG(ih->bmiHeader.biHeight));
+    // from fps in seconds to nano example:  (1/30) * 10,000,000
+    // from fps in 100 nano units to seconds:
+    double fps = 1.0 / (double(ih->AvgTimePerFrame) / 10000000.0f); 
+    printf("fps: %f\n", fps);
+  }
+  else {
+    printf("\n");
   }
 }
 
@@ -755,42 +870,63 @@ std::string VideoCaptureDirectShow::mediaFormatFormatTypeToString(GUID type) {
 
 // http://msdn.microsoft.com/en-us/library/windows/desktop/dd377551(v=vs.85).aspx
 int VideoCaptureDirectShow::saveGraphToFile() {
-  printf("------------- SAVING GRAPH --------------\n");
-  const WCHAR wszStreamName[] = L"ActiveMovieGraph"; 
+  const WCHAR stream_name[] = L"ActiveMovieGraph"; 
   const WCHAR path[] = L"data0.grf";
   HRESULT hr;
     
-  IStorage *pStorage = NULL;
-  hr = StgCreateDocfile(
-                        path,
+  IStorage *storage = NULL;
+  hr = StgCreateDocfile(path,
                         STGM_CREATE | STGM_TRANSACTED | STGM_READWRITE | STGM_SHARE_EXCLUSIVE,
-                        0, &pStorage);
-  if(FAILED(hr)) 
-    {
-      return 0;
-    }
+                        0, &storage);
+  if(FAILED(hr)){
+    return 0;
+  }
 
-  IStream *pStream;
-  hr = pStorage->CreateStream(
-                              wszStreamName,
+  IStream *stream;
+  hr = storage->CreateStream(stream_name,
                               STGM_WRITE | STGM_CREATE | STGM_SHARE_EXCLUSIVE,
-                              0, 0, &pStream);
-  if (FAILED(hr)) 
-    {
-      pStorage->Release();    
-      return 0;
-    }
+                              0, 0, &stream);
+  if(FAILED(hr)) {
+    storage->Release();    
+    return 0;
+  }
 
-  IPersistStream *pPersist = NULL;
-  graph->QueryInterface(IID_IPersistStream, (void**)&pPersist);
-  hr = pPersist->Save(pStream, TRUE);
-  pStream->Release();
-  pPersist->Release();
-  if (SUCCEEDED(hr)) 
-    {
-      hr = pStorage->Commit(STGC_DEFAULT);
-    }
-  pStorage->Release();
-  printf("------------- DONE  --------------\n");
+  IPersistStream *persist = NULL;
+  graph->QueryInterface(IID_IPersistStream, (void**)&persist);
+  hr = persist->Save(stream, TRUE);
+  stream->Release();
+  persist->Release();
+
+  if(SUCCEEDED(hr)) {
+    hr = storage->Commit(STGC_DEFAULT);
+  }
+  storage->Release();
   return 1;
+}
+
+GUID VideoCaptureDirectShow::videoCaptureFormatToMediaCaptureFormat(VideoCaptureFormat fmt) {
+  switch(fmt) {
+    case VC_FMT_RGB24: return MEDIASUBTYPE_RGB24; break;
+    case VC_FMT_YUY2: return MEDIASUBTYPE_YUY2; break;
+    case VC_FMT_I420: return MEDIASUBTYPE_IYUV; break;
+    default: {
+      printf("ERROR: we have not yet added a conversion from %d to a DirectShow format.\n", fmt);
+      ::exit(EXIT_FAILURE);
+    }
+  };
+}
+
+void VideoCaptureDirectShow::deleteMediaType(AM_MEDIA_TYPE* mt) {
+  if(mt == NULL) {
+    return;
+  }
+  if(mt->cbFormat != 0) {
+    CoTaskMemFree((PVOID)mt->pbFormat);
+    mt->cbFormat = 0;
+    mt->pbFormat = NULL;
+  }
+  if(mt->pUnk != NULL) {
+    mt->pUnk->Release();
+    mt->pUnk = NULL;
+  }
 }

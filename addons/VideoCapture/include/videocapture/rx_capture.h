@@ -7,16 +7,21 @@
 // #include <videocapture/VideoCaptureMac.h>
 //#endif
 
+#include <videocapture/Types.h>
+
 struct rx_capture_t;
  
 // figuring out a good cross platform solution to set with/height/fps .. not sure
 // if this is the one we need :) 
+/*
 enum RX_CAPTURE_FORMATS {
   RX_CAP_1280_1024_30,
   RX_CAP_1024_768_30,
   RX_CAP_640_480_30,
   RX_CAO_320_240_30
 };
+*/
+
 
 // callback on framedata
 typedef void(*rx_capture_frame_cb)(void* pixels, size_t nbytes, void* user);
@@ -36,7 +41,7 @@ extern rx_capture_t* rx_capture_init();
 extern int rx_capture_list_devices(rx_capture_t* c);
 
 // select the device number (see rx_capture_list_devices) as input and setup a connection 
-extern int rx_capture_open_device(rx_capture_t* c, int device);
+extern int rx_capture_open_device(rx_capture_t* c, int device, int w, int h, VideoCaptureFormat fmt);
 
 // start captureing 
 extern int rx_capture_start(rx_capture_t* c);
@@ -52,4 +57,7 @@ extern int rx_capture_get_width(rx_capture_t* c);
 
 // get the height of the capture stream
 extern int rx_capture_get_height(rx_capture_t* c); 
+
+// test if a video format (see Types.h) and dimensions are supported
+extern int rx_capture_is_format_supported(rx_capture_t* c, VideoCaptureFormat mt, int w, int h, int set = 0);
 #endif

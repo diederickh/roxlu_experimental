@@ -37,9 +37,9 @@ int VideoCapture::printVerboseInfo() {
   return rx_capture_print_verbose_info(c);
 }
 
-int VideoCapture::openDevice(int device) {
+int VideoCapture::openDevice(int device, int w, int h, VideoCaptureFormat fmt) {
   rx_capture_set_frame_callback(c, video_capture_callback, this);
-  return rx_capture_open_device(c, device);
+  return rx_capture_open_device(c, device, w, h, fmt);
 }
 
 int VideoCapture::startCapture() {

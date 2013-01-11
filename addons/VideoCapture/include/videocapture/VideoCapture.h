@@ -14,14 +14,16 @@ class VideoCapture {
   ~VideoCapture();
   int listDevices();
   int printVerboseInfo();
-  int openDevice(int device);
+  int openDevice(int device, int w, int h, VideoCaptureFormat fmt);
   int startCapture();
+  int isFormatSupported(VideoCaptureFormat fmt, int w, int h); 
   unsigned char* getPtr(); // get pointer to 'bytes'
   size_t getNumBytes(); // get number of bytes in 'bytes'
   bool hasNewData(); // returns true when we received data from capture device
   void copyData(char* dest); // copies data + sets 'has_new_data' to false. Make sure 'dest' can hold getNumBytes
   int getWidth();
   int getHeight();
+  void resetHasNewData(); // tells us that we've read the last frame
  private: 
   void setupShader();
   void setupBuffer();
@@ -48,6 +50,10 @@ inline bool VideoCapture::hasNewData() {
 
 inline void VideoCapture::copyData(char *dest) {
   memcpy(dest, bytes, nbytes);
+
+}
+
+inline void VideoCapture::resetHasNewData() {
   has_new_data = false;
 }
 
@@ -57,6 +63,10 @@ inline int VideoCapture::getWidth() {
 
 inline int VideoCapture::getHeight() {
   return rx_capture_get_height(c);
+}
+
+inline int VideoCapture::isFormatSupported(VideoCaptureFormat fmt, int w, int h) {
+  return rx_capture_is_format_supported(c, fmt, w, h);
 }
 #endif
 
