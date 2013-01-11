@@ -1,9 +1,9 @@
 * text=auto
-*.c crlf
-*.cpp crlf
-*.h crlf
-*.bat crlf
-*.s crlf
+*.c text
+*.cpp text
+*.h text
+*.bat text
+*.s text
 *.sln text eol=crlf
 *.a binary
 *.lib binary
