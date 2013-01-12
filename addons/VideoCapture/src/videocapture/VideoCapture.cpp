@@ -23,7 +23,13 @@ VideoCapture::VideoCapture()
   ,nbytes(0)
   ,bytes(NULL)
 {
+#if defined(__APPLE__)
   capture = rx_capture_avfoundation;
+#elif defined(_WIN32)
+  capture = rx_capture_directshow;
+#else 
+ #error WE HAVE NOT YET CREATED A VIDEO CAPTURE WRAPPER FOR THIS PLATFORM
+#endif
   capture.initialize(&capture);
 }
 

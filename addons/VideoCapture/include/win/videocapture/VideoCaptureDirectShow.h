@@ -122,7 +122,9 @@ inline int VideoCaptureDirectShow::setFrameCallback(rx_capture_frame_cb cb, void
   return 1;
 }
 
+/*
 struct rx_capture_t {
   VideoCaptureDirectShow* cap;
 };
+*/
 #endif
