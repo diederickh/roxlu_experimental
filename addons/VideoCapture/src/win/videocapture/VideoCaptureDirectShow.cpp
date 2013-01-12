@@ -882,7 +882,7 @@ int VideoCaptureDirectShow::saveGraphToFile(const WCHAR* filename) {
 GUID VideoCaptureDirectShow::videoCaptureFormatToMediaCaptureFormat(VideoCaptureFormat fmt) {
   switch(fmt) {
     case VC_FMT_RGB24: return MEDIASUBTYPE_RGB24; break;
-    case VC_FMT_YUY2: return MEDIASUBTYPE_YUY2; break;
+    case VC_FMT_UYVY422: return MEDIASUBTYPE_YUY2; break;
     case VC_FMT_I420: return MEDIASUBTYPE_IYUV; break;
     default: {
       printf("ERROR: we have not yet added a conversion from %d to a DirectShow format.\n", fmt);
