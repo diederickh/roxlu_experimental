@@ -30,7 +30,6 @@ HRESULT STDMETHODCALLTYPE VideoCaptureDirectShowCallback::BufferCB(
                                                       BYTE* buffer,
                                                       long size)
 {
-  printf("In BufferCB, this = %p, %f, %Iu\n", this, timestamp, size);
   vidcap->frame_cb((void*)buffer, size, vidcap->frame_user);
   return S_OK;
 }
@@ -264,16 +263,12 @@ int VideoCaptureDirectShow::openDevice(int dev, int w, int h, VideoCaptureFormat
   null_renderer_filter = NULL;
 
   is_graph_setup = true;
-  if(!saveGraphToFile()) {
+  if(!saveGraphToFile(L"somegraph.grf")) {
     printf("ERROR: cannot save graph to file.\n");
     return 0;
   }
   return 1;
 }
-
-// int VideoCaptureDirectShow::getNumBytesPerFrame(VideoCaptureFormat fmt, int w, int h) {
-  
-// }
 
 int VideoCaptureDirectShow::startCapture() {
   if(!is_graph_setup) {
@@ -510,7 +505,6 @@ int VideoCaptureDirectShow::printVerboseInfo() {
 }
 
 void VideoCaptureDirectShow::printAmMediaType(AM_MEDIA_TYPE* mt) {
-  /*
   printf("AM_MEDIA_TYPE.majortype: %s\n", mediaFormatMajorTypeToString(mt->majortype).c_str());
   printf("AM_MEDIA_TYPE.subtype: %s\n", mediaFormatSubTypeToString(mt->subtype).c_str());
   printf("AM_MEDIA_TYPE.bFixedSizeSamples: %c\n", (mt->bFixedSizeSamples == TRUE) ? 'y' : 'n');
@@ -526,26 +520,6 @@ void VideoCaptureDirectShow::printAmMediaType(AM_MEDIA_TYPE* mt) {
     // from fps in 100 nano units to seconds:
     double fps = 1.0 / (double(ih->AvgTimePerFrame) / 10000000.0f); 
     printf("VIDEOINFOHEADER - fps: %f\n", fps);
-  }
-  */
-  //  printf("majortype: %s, ", mediaFormatMajorTypeToString(mt->majortype).c_str());
-  printf("subtype: %s, ", mediaFormatSubTypeToString(mt->subtype).c_str());
-  //printf("bFixedSizeSamples: %c, ", (mt->bFixedSizeSamples == TRUE) ? 'y' : 'n');
-  //printf("bTemporalCompression: %c, ", (mt->bTemporalCompression == TRUE) ? 'y' : 'n');
-  printf("lSampleSize: %Iu, ", mt->lSampleSize);
-  //printf("formattype: %s, ", mediaFormatFormatTypeToString(mt->formattype));
-  // printf("cbFormat: %Iu, ", mt->cbFormat);
-  if(mt->formattype == FORMAT_VideoInfo && mt->cbFormat >= sizeof(VIDEOINFOHEADER)) {
-    VIDEOINFOHEADER* ih = (VIDEOINFOHEADER*)mt->pbFormat;
-    printf("width: %Iu, ", LONG(ih->bmiHeader.biWidth));
-    printf("height: %Iu, ", LONG(ih->bmiHeader.biHeight));
-    // from fps in seconds to nano example:  (1/30) * 10,000,000
-    // from fps in 100 nano units to seconds:
-    double fps = 1.0 / (double(ih->AvgTimePerFrame) / 10000000.0f); 
-    printf("fps: %f\n", fps);
-  }
-  else {
-    printf("\n");
   }
 }
 
@@ -771,7 +745,7 @@ std::string VideoCaptureDirectShow::mediaFormatMajorTypeToString(GUID type) {
   else if(type == MEDIATYPE_URL_STREAM) { return "MEDIATYPE_URL_STREAM"; } 
   else if(type == MEDIATYPE_VBI) { return "MEDIATYPE_VBI"; } 
   else if(type == MEDIATYPE_Video) { return "MEDIATYPE_Video"; } 
-  return "UNKNOWN - NOT ADDED TO LIST";
+  return "OTHER";
 }
 
 // Debugging / verbosity 
@@ -851,7 +825,7 @@ std::string VideoCaptureDirectShow::mediaFormatSubTypeToString(GUID type) {
   else if(type == MEDIASUBTYPE_MPEG2_VIDEO) { return "MEDIASUBTYPE_MPEG2_VIDEO"; } 
   else if(type == MEDIASUBTYPE_DOLBY_AC3) { return "MEDIASUBTYPE_DOLBY_AC3"; } 
   else if(type == MEDIASUBTYPE_MPEG2_AUDIO) { return "MEDIASUBTYPE_MPEG2_AUDIO";} 
-  else {  return "UNKOWN NOT ADDED TO LIST.\n";  }
+  else {  return "OTHER";  }
 }
 
 
@@ -865,17 +839,17 @@ std::string VideoCaptureDirectShow::mediaFormatFormatTypeToString(GUID type) {
   else if(type == FORMAT_VideoInfo2) { return "FORMAT_VideoInfo2"; } 
   else if(type == FORMAT_WaveFormatEx) { return "FORMAT_WaveFormatEx"; }
   else if(type == GUID_NULL) { return "GUID_NULL"; } 
-  else {  return "UNKOWN NOT ADDED TO LIST.\n";  }
+  else {  return "OTHER";  }
 }
 
 // http://msdn.microsoft.com/en-us/library/windows/desktop/dd377551(v=vs.85).aspx
-int VideoCaptureDirectShow::saveGraphToFile() {
+int VideoCaptureDirectShow::saveGraphToFile(const WCHAR* filename) {
   const WCHAR stream_name[] = L"ActiveMovieGraph"; 
-  const WCHAR path[] = L"data0.grf";
+  //const WCHAR path[] = L"data0.grf";
   HRESULT hr;
     
   IStorage *storage = NULL;
-  hr = StgCreateDocfile(path,
+  hr = StgCreateDocfile(filename,
                         STGM_CREATE | STGM_TRANSACTED | STGM_READWRITE | STGM_SHARE_EXCLUSIVE,
                         0, &storage);
   if(FAILED(hr)){

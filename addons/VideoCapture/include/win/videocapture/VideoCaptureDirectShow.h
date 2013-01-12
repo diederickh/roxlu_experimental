@@ -72,7 +72,6 @@ public:
   int getHeight();
   int setFrameCallback(rx_capture_frame_cb cb, void* user);
   int isFormatSupported(VideoCaptureFormat fmt, int w, int h, int set);
-  //  int getNumBytesPerFrame(VideoCaptureFormat fmt, int w, int h);
  private:
   void close();
   bool initCaptureGraphBuilder();
@@ -83,7 +82,7 @@ public:
   std::string mediaFormatMajorTypeToString(GUID type);
   std::string mediaFormatSubTypeToString(GUID type);
   std::string mediaFormatFormatTypeToString(GUID type);
-  int saveGraphToFile();
+  int saveGraphToFile(const WCHAR* filename);
   GUID videoCaptureFormatToMediaCaptureFormat(VideoCaptureFormat fmt);
   void deleteMediaType(AM_MEDIA_TYPE* mt);
  public:
@@ -100,9 +99,7 @@ public:
   IMediaEvent* media_event;
   IBaseFilter* sample_grabber_filter; // used to retrieve sample in our callback
   ISampleGrabber* sample_grabber_iface; // necessary object to retrieve samples
-
   IBaseFilter* null_renderer_filter; // end point of our graph
-
   bool is_graph_setup;
   static int num_com_init;
   std::vector<VideoCaptureDirectShowDevice> devices;
@@ -119,16 +116,13 @@ inline int VideoCaptureDirectShow::getHeight() {
   return height;
 }
 
-//inline int VideoCaptureDirectShow::setFrameCallback(videocapture_directshow_cb cb, void* user) {
 inline int VideoCaptureDirectShow::setFrameCallback(rx_capture_frame_cb cb, void* user) {
   frame_cb = cb;
   frame_user = user;
   return 1;
 }
 
-
 struct rx_capture_t {
   VideoCaptureDirectShow* cap;
 };
-
 #endif
