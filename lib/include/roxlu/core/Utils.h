@@ -57,6 +57,14 @@ static float rx_fast_sqrt(float x) {
     return r; 
 }
 
+inline void rx_sleep_millis(int millis) {
+#ifdef _WIN32
+  Sleep(millis);
+#else
+  usleep(millis * 1000);
+#endif
+}
+
 // rx_strftime("%Y/%m%d"), http://www.cplusplus.com/reference/clibrary/ctime/strftime/
 inline std::string rx_strftime(const char* timestr) {
   time_t t;
@@ -91,7 +99,6 @@ static std::string rx_join(const std::vector<T>& entries, std::string sep) {
 inline GLuint rx_create_shader(const char* vs, const char* fs) {
   GLuint vert_id = glCreateShader(GL_VERTEX_SHADER);
   GLuint frag_id = glCreateShader(GL_FRAGMENT_SHADER);
-  printf("vert id: %d\n", vert_id);
   glShaderSource(vert_id, 1, &vs, NULL);
   glShaderSource(frag_id, 1, &fs, NULL);
   glCompileShader(vert_id); eglGetShaderInfoLog(vert_id);
@@ -102,5 +109,114 @@ inline GLuint rx_create_shader(const char* vs, const char* fs) {
   return prog;
 }
 #endif
+
+// -------------------------------------- WIN ---------------------------------------
+#if ROXLU_PLATFORM == ROXLU_WINDOWS
+static std::string rx_get_exe_path() {
+  char buffer[MAX_PATH];
+
+  // Try to get the executable path with a buffer of MAX_PATH characters.
+  DWORD result = ::GetModuleFileNameA(nullptr, buffer, static_cast<DWORD>(MAX_PATH));
+  if (result) {
+    return "";
+  }
+
+  std::string::size_type pos = std::string(buffer).find_last_of( "\\/" );
+  return std::string(buffer).substr(0, pos);
+}
+
+static rx_uint64 rx_millis(void) {
+  static LARGE_INTEGER s_frequency;
+  static BOOL s_use_qpc = QueryPerformanceFrequency(&s_frequency);
+  if (s_use_qpc) {
+    LARGE_INTEGER now;
+    QueryPerformanceCounter(&now);
+    return (1000LL * now.QuadPart) / s_frequency.QuadPart;
+  } else {
+    return GetTickCount();
+  }
+}
+
+// -------------------------------------- LINUX -------------------------------------
+#elif ROXLU_PLATFORM == ROXLU_LINUX
+
+static std::string rx_get_exe_path() {
+  char buffer[MAX_PATH];
+  size_t size = MAX_PATH;
+  ssize_t n = readlink("/proc/self/exe", buffer, size - 1);
+  if (n <= 0) {
+    return "";
+  }
+  buffer[n] = '\0';
+
+
+  const char* dn = dirname(buffer);
+  size = strlen(dn);
+  std::string ret(dn, size) ;
+  ret.push_back('/');
+  return ret;
+}
+
+static uint64_t rx_millis() {
+  timeval time;
+  gettimeofday(&time, NULL);
+  uint64_t n = time.tv_usec;
+  n /= 1000; // convert seconds to millis
+  n += (time.tv_sec * 1000); // convert micros to millis
+  return n;
+}
+
+
+// -------------------------------------- OSX ---------------------------------------
+#elif ROXLU_PLATFORM == ROXLU_APPLE
+static std::string rx_get_exe_path() {
+  char buffer[1024];
+  uint32_t usize = sizeof(buffer);;
+
+  int result;
+  char* path;
+  char* fullpath;
+
+  result = _NSGetExecutablePath(buffer, &usize);
+  if (result) {
+    return "";
+  }
+
+  path = (char*)malloc(2 * PATH_MAX);
+  fullpath = realpath(buffer, path);
+
+  if (fullpath == NULL) {
+    free(path);
+    return "";
+  }
+
+  strncpy(buffer, fullpath, usize);
+  free(fullpath);
+  const char* dn = dirname(buffer);
+  usize = strlen(dn);
+  std::string ret(dn, usize) ;
+  ret.push_back('/');
+  return ret;
+}
+
+static uint64_t rx_millis(void) {
+  mach_timebase_info_data_t info;
+  if (mach_timebase_info(&info) != KERN_SUCCESS) {
+    abort();
+  }
+  return (mach_absolute_time() * info.numer / info.denom) / 1000000;
+}
+
+#endif
+
+
+static std::string rx_to_data_path(const std::string filename) {
+  std::string exepath = rx_get_exe_path();
+  exepath += "data/" +filename;
+  return exepath;
+}
+
+
+
 
 #endif

@@ -59,7 +59,19 @@ if(ROXLU_PLATFORM_WIN)
       ${roxlu_extern_lib_dir}/avutil-52.dll
       )
   endif()
-
-endif(ROXLU_PLATFORM_WIN)
+elseif(ROXLU_PLATFORM_LINUX)
+  set(roxlu_addon_libs
+    ${roxlu_addon_libs}
+    ${roxlu_extern_lib_dir}/libogg.a
+    ${roxlu_extern_lib_dir}/libvorbis.a
+    ${roxlu_extern_lib_dir}/libvorbisenc.a
+    ${roxlu_extern_lib_dir}/libtheora.a
+    ${roxlu_extern_lib_dir}/libswscale.a
+    ${roxlu_extern_lib_dir}/libavutil.a
+    ${roxlu_extern_lib_dir}/libvpx.a
+    )
+elseif(ROXLU_PLATFORM_MAC)
+  message(FATAL_ERROR "Need to fix the libs for ogg addon on mac")
+endif()
 
 add_library(roxlu_ogg STATIC ${ogg_source_files})

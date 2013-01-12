@@ -11,6 +11,8 @@
 #include <string>
 #include <videocapture/qedit.h>
 #include <videocapture/rx_capture.h>
+#include <videocapture/Types.h>
+
 /**
  * Experimental Video Capture on Windows
  *
@@ -55,18 +57,22 @@ enum VideoCaptureDirectShowCallbackTypes {
   ,BUFFERED_CALLBACK = 1
 };
 
+
+
 class VideoCaptureDirectShow {
 public:
   VideoCaptureDirectShow(void);
   ~VideoCaptureDirectShow(void);
   int listDevices();
   int printVerboseInfo();
-  int openDevice(int dev);
+  int openDevice(int dev, int w, int h, VideoCaptureFormat fmt);
   int startCapture();
   int stopCapture();
   int getWidth();
   int getHeight();
   int setFrameCallback(rx_capture_frame_cb cb, void* user);
+  int isFormatSupported(VideoCaptureFormat fmt, int w, int h, int set);
+  //  int getNumBytesPerFrame(VideoCaptureFormat fmt, int w, int h);
  private:
   void close();
   bool initCaptureGraphBuilder();
@@ -78,6 +84,8 @@ public:
   std::string mediaFormatSubTypeToString(GUID type);
   std::string mediaFormatFormatTypeToString(GUID type);
   int saveGraphToFile();
+  GUID videoCaptureFormatToMediaCaptureFormat(VideoCaptureFormat fmt);
+  void deleteMediaType(AM_MEDIA_TYPE* mt);
  public:
   rx_capture_frame_cb frame_cb;
   void* frame_user;

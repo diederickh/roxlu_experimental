@@ -15,8 +15,22 @@
 # - roxlu_install_files:     Files you want to move to the install directory
 #                            for example with ROXLU_WIN_LIB_DYNAMIC is set to TRUE
 #                            you might want to copy the DLL files to the install dir.
+# - roxlu_addon_libs:        If you need to link with additional libraries you can 
+#                            add them to this collection.
+# - roxlu_extern_lib_dir:    path to the "extern/lib/[OS]/[platform/compiler]/[arch]/ 
+#                            so you can directly use something like:
+#                            ${roxlu_extern_lib_dir}/libportaudio.a to target libraries.
+# - roxlu_win_runtime:       For windows builds this is set to MT, MD so you know 
+#                            what libraries to link against. Because we're not building
+#                            all debug libraries for windows, we have a separate setting
+#                            that you can use:
+# - roxlu_win_runtime_project: This is set to MDd for a debug build, you can use this to
+#                              include debug libs on windows.
 
 cmake_minimum_required(VERSION 2.8)
+
+#set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 
 option(ROXLU_32BIT "Build 32bit version" OFF)
 option(ROXLU_64BIT "Build 64bit version" ON)
@@ -132,18 +146,27 @@ set(roxlu_extern_lib_dir ${roxlu_base_dir}/extern/lib/${roxlu_platform}/${roxlu_
 if(ROXLU_PLATFORM_WIN)
   if(ROXLU_WIN_LIB_MT)
     set(roxlu_win_runtime "MT") 
+    set(roxlu_win_runtime_project "MT")
   elseif(ROXLU_WIN_LIB_MD)
     set(roxlu_win_runtime "MD") 
+    set(roxlu_win_runtime_project "MD")
+    if(CMAKE_BUILD_TYPE STREQUAL Debug)
+      set(roxlu_win_runtime_project "MDd")
+    endif()
+
   endif()
 
-  set(CMAKE_C_FLAGS_DEBUG "/${roxlu_win_runtime}")
-  set(CMAKE_C_FLAGS_RELEASE "/${roxlu_win_runtime}")
-  set(CMAKE_CXX_FLAGS_DEBUG "/${roxlu_win_runtime}")
-  set(CMAKE_CXX_FLAGS_RELEASE "/${roxlu_win_runtime}")
+  set(CMAKE_C_FLAGS_DEBUG "/${roxlu_win_runtime_project}")
+  set(CMAKE_C_FLAGS_RELEASE "/${roxlu_win_runtime_project}")
+  set(CMAKE_CXX_FLAGS_DEBUG "/${roxlu_win_runtime_project}")
+  set(CMAKE_CXX_FLAGS_RELEASE "/${roxlu_win_runtime_project}")
+
 
   set(roxlu_extern_include_dir
     ${roxlu_extern_include_dir}
     ${roxlu_base_dir}/extern/include/msinttypes/
     )
+
+  add_definitions( "/wd4995 /wd4244 /wd4305 /D_CRT_SECURE_NO_WARNINGS /W3")
 
 endif(ROXLU_PLATFORM_WIN)
