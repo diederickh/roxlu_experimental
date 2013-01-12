@@ -17,13 +17,12 @@ int rx_capture_avfoundation_list_devices(rx_capture_t* handle) {
 }
 
 int rx_capture_avfoundation_is_format_supported(
-  rx_capture_t* c, 
+  rx_capture_t* handle, 
   VideoCaptureFormat fmt, 
   int w, int h, int set
 )
 {
-  printf("@todo AVFoundation, check if format is supported.\n");
-  return 0;
+  return [(id)handle->data isFormatSupported: fmt forWidth: w andHeight: h andApply: set];
 }
 
 int rx_capture_avfoundation_print_verbose_info(rx_capture_t* c) {
@@ -38,7 +37,9 @@ int rx_capture_avfoundation_open_device(
    VideoCaptureFormat fmt
 )
 {
-   return [(id)c->data openDevice:device];
+   return [(id)c->data openDevice:device 
+                       withWidth:w andHeight:h
+                       andFormat:fmt andApply:1];
 }
 
 int rx_capture_avfoundation_start_capture(rx_capture_t* c) {

@@ -8,19 +8,10 @@
   frame_user = nil;
   width = 0;
   height = 0;
-
+  input = nil;
+  output = nil;
+        
   if (self) {
-    session = [[AVCaptureSession alloc]init];
-
-//    if([session canSetSessionPreset:AVCaptureSessionPresetHigh]) {
-    if([session canSetSessionPreset:AVCaptureSessionPreset640x480]) {
-      session.sessionPreset = AVCaptureSessionPreset640x480; //AVCaptureSessionPresetHigh;
-      printf("Set high preset.\n");
-    }
-    else {
-      printf("ERROR: Cannot set high caputre preset.\n");
-      return nil;
-    }
   }
   return self;
 }
@@ -49,7 +40,65 @@
   return c;
 }
 
-- (int) openDevice:(int)dev {
+- (int) isFormatSupported: (VideoCaptureFormat) fmt 
+                          forWidth:(int) w 
+                          andHeight:(int) h 
+                          andApply:(int) applyFormat 
+{
+  if(input == nil) {
+     printf("WARNING: you first need to open the capture device before you can check a format.\n");
+     return 0;
+  }       
+
+  FourCharCode pixel_fmt_to_test = [self videoCaptureFormatTypeToCMPixelFormatType: fmt];
+  char* cptr;
+  for(AVCaptureDeviceFormat* f in [[input device] formats]) {
+     FourCharCode code = CMFormatDescriptionGetMediaSubType([f formatDescription]);
+     if(code != pixel_fmt_to_test) {
+        continue;
+     }
+     cptr = (char*)&code;
+     CMVideoDimensions dims = CMVideoFormatDescriptionGetDimensions([f formatDescription]);
+     if(dims.width == w && dims.height == h) {
+        if(applyFormat) {
+           AVCaptureDevice* d = [input device];
+           [d lockForConfiguration:nil];
+           [d setActiveFormat: f]; /* sets pixel format */
+           [d unlockForConfiguration];
+        }       
+        return 1;
+     }
+  }
+  return 0;
+}
+
+- (NSString* const) widthHeightToCaptureSessionPreset:(int) w andHeight:(int) h {
+  if(w == 320 && h == 240) { return AVCaptureSessionPreset320x240; }
+  else if(w == 352 && h == 288) { return AVCaptureSessionPreset352x288; } 
+  else if(w == 640 && h == 480) { return AVCaptureSessionPreset640x480; }
+  else if(w == 960 && h == 540) { return AVCaptureSessionPreset960x540; }
+  else if(w == 1280 && h == 720) { return AVCaptureSessionPreset1280x720; }
+  else {
+    return AVCaptureSessionPresetHigh; // if no preset matches we return the highest
+  }
+}
+
+- (int) openDevice:(int)dev 
+                   withWidth:(int) w  
+                   andHeight:(int) h 
+                   andFormat:(VideoCaptureFormat) fmt 
+                   andApply:(int)applyFormat
+{
+  session = [[AVCaptureSession alloc]init];
+  NSString* const preset = [self widthHeightToCaptureSessionPreset: w andHeight: h];
+  if([session canSetSessionPreset:preset]) {
+     session.sessionPreset = preset; 
+  }
+  else {
+     printf("ERROR: Cannot set high caputre preset.\n");
+     return nil;
+  }
+
   // Find the device
   int c = 0;
   NSError* error;
@@ -72,6 +121,11 @@
   }
   [session addInput:input];
 
+  // set the given format
+  if([self isFormatSupported: fmt forWidth:w andHeight:h andApply:applyFormat] == 0) {
+     printf("WARNING: we cannot set the format, continueing anyway.\n");
+  }
+
   // get width / height
   CMVideoDimensions dims = CMVideoFormatDescriptionGetDimensions([[[input device] activeFormat] formatDescription]);
   width = dims.width;
@@ -80,7 +134,7 @@
 
   // Configure output
   output = [[AVCaptureVideoDataOutput alloc] init];
-  dispatch_queue_t queue = dispatch_queue_create("Video Queue", DISPATCH_QUEUE_SERIAL);
+   dispatch_queue_t queue = dispatch_queue_create("Video Queue", DISPATCH_QUEUE_SERIAL);
   [output setSampleBufferDelegate:self queue:queue];
   if(![session canAddOutput:output]) {
      printf("ERROR: cannot add output to current session; sessions needs to be configured.\n");
@@ -100,16 +154,10 @@
          didOutputSampleBuffer:(CMSampleBufferRef) sampleBuffer
          fromConnection:(AVCaptureConnection*) connection 
 {
-        
-
   CVImageBufferRef img_ref = CMSampleBufferGetImageBuffer(sampleBuffer);
   CVPixelBufferLockBaseAddress(img_ref, 0);
-  size_t w = CVPixelBufferGetWidth(img_ref);
-  size_t h = CVPixelBufferGetHeight(img_ref);                
-  size_t bytes_per_row = CVPixelBufferGetBytesPerRow(img_ref);
   size_t buffer_size = CVPixelBufferGetDataSize(img_ref);
   void* base_address = CVPixelBufferGetBaseAddress(img_ref);
-  //printf("w: %zu, h: %zu, bytes_per_row: %zu, total; %zu\n", w, h, bytes_per_row, buffer_size);        
   frame_cb((void*)base_address, buffer_size, frame_user);
   CVPixelBufferUnlockBaseAddress(img_ref, 0);
 }
@@ -126,4 +174,14 @@
 - (int) getHeight {
   return height;
 }
+
+- (FourCharCode) videoCaptureFormatTypeToCMPixelFormatType:(VideoCaptureFormat) fmt {
+  if(fmt == VC_FMT_RGB24) { return kCMPixelFormat_24RGB; }
+  else if(fmt == VC_FMT_YUYV422) { return kCMPixelFormat_422YpCbCr8_yuvs; }
+  else if(fmt == VC_FMT_UYVY422) { return kCMPixelFormat_422YpCbCr8; }
+  else {
+   return 0;
+  }
+}
+
 @end

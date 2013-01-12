@@ -175,6 +175,7 @@ bool CaptureBuffer::wantsNewVideoFrame() {
 
 void CaptureBuffer::encode() {
   if(!is_setup) {
+    printf("WARNING: cannot encode because we havent been setup.\n");
     return;
   }
 

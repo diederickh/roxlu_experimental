@@ -8,7 +8,7 @@ fi
 
 if [ ! -d ${d}/glfw ] ; then 
     git clone https://github.com/elmindreda/glfw.git 
-    git reset --hard f0f4af42871aa8004747ce3df025e4cfef4d2d07
+    git reset --hard 747b6d880563c0461df028d9e287652f16de7b17
 fi
 
 if [ ! -d ${d}/compile ] ; then 
