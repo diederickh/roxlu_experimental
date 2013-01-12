@@ -7,7 +7,7 @@
 
 typedef void(*rx_capture_frame_cb)(void* pixels, size_t nbytes, void* user);
 
-@interface rx_capture_t : NSObject<AVCaptureVideoDataOutputSampleBufferDelegate> {
+@interface VideoCaptureAVFoundation : NSObject<AVCaptureVideoDataOutputSampleBufferDelegate> {
   AVCaptureSession* session;
   AVCaptureDeviceInput* input; 
   AVCaptureVideoDataOutput* output;
@@ -23,7 +23,7 @@ typedef void(*rx_capture_frame_cb)(void* pixels, size_t nbytes, void* user);
 - (void) captureOutput:(AVCaptureOutput*)captureOutput
          didOutputSampleBuffer:(CMSampleBufferRef) sampleBuffer
          fromConnection:(AVCaptureConnection*) connection;
-- (int) start;
+- (int) captureStart;
 - (void) setFrameCallback:(rx_capture_frame_cb) frameCB user:(void*) frameUser;
 - (int) getWidth;
 - (int) getHeight;

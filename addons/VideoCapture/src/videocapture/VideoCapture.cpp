@@ -23,26 +23,11 @@ VideoCapture::VideoCapture()
   ,nbytes(0)
   ,bytes(NULL)
 {
-  c = rx_capture_init();
+  capture = rx_capture_avfoundation;
+  capture.initialize(&capture);
 }
 
 VideoCapture::~VideoCapture() {
 }
 
-int VideoCapture::listDevices() {
-  return rx_capture_list_devices(c);
-}
-
-int VideoCapture::printVerboseInfo() {
-  return rx_capture_print_verbose_info(c);
-}
-
-int VideoCapture::openDevice(int device, int w, int h, VideoCaptureFormat fmt) {
-  rx_capture_set_frame_callback(c, video_capture_callback, this);
-  return rx_capture_open_device(c, device, w, h, fmt);
-}
-
-int VideoCapture::startCapture() {
-  return rx_capture_start(c);
-}
 

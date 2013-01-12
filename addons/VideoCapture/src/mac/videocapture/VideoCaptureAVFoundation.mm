@@ -1,6 +1,6 @@
-#import <videocapture/VideoCaptureMac.h>
+#import <videocapture/VideoCaptureAVFoundation.h>
 
-@implementation rx_capture_t
+@implementation VideoCaptureAVFoundation
 
 - (id) init {
   self = [super init];
@@ -25,7 +25,7 @@
   return self;
 }
 
-- (int) listDevices {
+- (int) listDevices {   
   int c = 0;
   NSArray* devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
   for(AVCaptureDevice* device in devices) {
@@ -91,7 +91,7 @@
   return 1;
 }
 
-- (int) start {
+- (int) captureStart {
   [session startRunning];
   return 1;
 }

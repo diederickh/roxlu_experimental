@@ -32,7 +32,23 @@ Funtions which return integer, return:
 0 = error
 1 > success
 
- */
+*/
+
+struct rx_capture_t {
+  int (*initialize)(rx_capture_t* handle);
+  int (*list_devices)(rx_capture_t* handle);
+  int (*print_verbose_info)(rx_capture_t* handle);
+  int (*is_format_supported)(rx_capture_t* handle, VideoCaptureFormat fmt, int w, int h, int set);
+  int (*open_device)(rx_capture_t* handle, int device, int w, int h, VideoCaptureFormat fmt);
+  int (*capture_start)(rx_capture_t* handle);
+  int (*set_frame_callback)(rx_capture_t* handle, rx_capture_frame_cb cb, void* user);
+  int (*get_width)(rx_capture_t* handle);
+  int (*get_height)(rx_capture_t* handle);
+  void* data;
+};
+
+extern const rx_capture_t rx_capture_avfoundation;
+
 
 // initializes the session 
 extern rx_capture_t* rx_capture_init(); 

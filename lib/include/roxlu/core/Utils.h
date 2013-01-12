@@ -1,9 +1,6 @@
 #ifndef ROXLU_UTILSH
 #define ROXLU_UTILSH
 
-//#include "pstdint.h" /* Replace with <stdint.h> if appropriate */
-//#include "Constants.h"
-
 #include <roxlu/core/Constants.h>
 #include <stdio.h>
 #include <time.h>
@@ -13,6 +10,17 @@
 #ifdef ROXLU_GL_WRAPPER
 #include <roxlu/opengl/OpenGLInit.h>
 #include <roxlu/opengl/Error.h>
+#endif
+
+#if ROXLU_PLATFORM == ROXLU_APPLE
+#include <libgen.h> /* dirname */
+#include <CoreFoundation/CFRunLoop.h>
+#include <mach/mach.h>
+#include <mach/mach_time.h>
+#include <mach-o/dyld.h> /* _NSGetExecutablePath */
+#include <sys/resource.h>
+#include <sys/sysctl.h>
+#include <unistd.h>  /* sysconf */
 #endif
 
 #undef get16bits
@@ -209,14 +217,10 @@ static uint64_t rx_millis(void) {
 
 #endif
 
-
 static std::string rx_to_data_path(const std::string filename) {
   std::string exepath = rx_get_exe_path();
   exepath += "data/" +filename;
   return exepath;
 }
-
-
-
 
 #endif
