@@ -16,8 +16,9 @@ VideoCaptureDirectShowCallback::~VideoCaptureDirectShowCallback() {
 }
 
 // For some reason sample is always NULL
-HRESULT STDMETHODCALLTYPE VideoCaptureDirectShowCallback::SampleCB(double timestamp, 
-                                                 IMediaSample* sample)
+HRESULT STDMETHODCALLTYPE VideoCaptureDirectShowCallback::SampleCB(
+                                                                   double timestamp, 
+                                                                   IMediaSample* sample)
 {
   if(sample != NULL) {
     printf("callback: %f. %p.\n", timestamp, sample);
