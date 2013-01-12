@@ -6,6 +6,31 @@
 #include <ogg/Types.h>
 #include <vector>
 
+/*
+
+ Temporary buffer which stores all RAW frames (rgb only for now) into 
+ a file. It does the same with the audio data. Once everything is captured
+ it encodes everything and makes sure that the video frames are kept in 
+ sync by using the audio frames as base-time.
+
+ Usage:
+ ------
+
+ // setup:
+ CaptureBuffer cap;
+ cap.setup(...)
+
+
+ // when you receive a new audio frame, add it directly:
+ cap.addAudioFrame(Timer::millis(), ...)
+ 
+
+ // to add video frames you check 'wantsNewVideoFrame()'
+ if(cap.wantsNewVideoFrame()) {
+    cap.addVideoFrame(..)
+ }
+ */
+
 struct CaptureFrame {
   char type; // V = video, A = audio
   rx_uint64 timestamp;
@@ -35,6 +60,7 @@ class CaptureBuffer {
   );
 
   void addAudioFrame(rx_uint64 timestamp, const void* data, size_t nframes);
+  bool wantsNewVideoFrame(); // returns true when we need a new video frame (based on the set framerate)
   void addVideoFrame(rx_uint64 timestamp, const void* data); 
   void encode();
  public:
@@ -62,5 +88,6 @@ class CaptureBuffer {
   unsigned char* tmp_video_buffer;
   unsigned char* tmp_audio_buffer;
   OggMaker ogg_maker;
+  rx_uint64 fps_timeout; // when this timeout occurs we need a new video frame
 };
 #endif

@@ -11,6 +11,8 @@
 #include <string>
 #include <videocapture/qedit.h>
 #include <videocapture/rx_capture.h>
+#include <videocapture/Types.h>
+
 /**
  * Experimental Video Capture on Windows
  *
@@ -55,18 +57,21 @@ enum VideoCaptureDirectShowCallbackTypes {
   ,BUFFERED_CALLBACK = 1
 };
 
+
+
 class VideoCaptureDirectShow {
 public:
   VideoCaptureDirectShow(void);
   ~VideoCaptureDirectShow(void);
   int listDevices();
   int printVerboseInfo();
-  int openDevice(int dev);
+  int openDevice(int dev, int w, int h, VideoCaptureFormat fmt);
   int startCapture();
   int stopCapture();
   int getWidth();
   int getHeight();
   int setFrameCallback(rx_capture_frame_cb cb, void* user);
+  int isFormatSupported(VideoCaptureFormat fmt, int w, int h, int set);
  private:
   void close();
   bool initCaptureGraphBuilder();
@@ -77,7 +82,9 @@ public:
   std::string mediaFormatMajorTypeToString(GUID type);
   std::string mediaFormatSubTypeToString(GUID type);
   std::string mediaFormatFormatTypeToString(GUID type);
-  int saveGraphToFile();
+  int saveGraphToFile(const WCHAR* filename);
+  GUID videoCaptureFormatToMediaCaptureFormat(VideoCaptureFormat fmt);
+  void deleteMediaType(AM_MEDIA_TYPE* mt);
  public:
   rx_capture_frame_cb frame_cb;
   void* frame_user;
@@ -92,9 +99,7 @@ public:
   IMediaEvent* media_event;
   IBaseFilter* sample_grabber_filter; // used to retrieve sample in our callback
   ISampleGrabber* sample_grabber_iface; // necessary object to retrieve samples
-
   IBaseFilter* null_renderer_filter; // end point of our graph
-
   bool is_graph_setup;
   static int num_com_init;
   std::vector<VideoCaptureDirectShowDevice> devices;
@@ -111,16 +116,15 @@ inline int VideoCaptureDirectShow::getHeight() {
   return height;
 }
 
-//inline int VideoCaptureDirectShow::setFrameCallback(videocapture_directshow_cb cb, void* user) {
 inline int VideoCaptureDirectShow::setFrameCallback(rx_capture_frame_cb cb, void* user) {
   frame_cb = cb;
   frame_user = user;
   return 1;
 }
 
-
+/*
 struct rx_capture_t {
   VideoCaptureDirectShow* cap;
 };
-
+*/
 #endif

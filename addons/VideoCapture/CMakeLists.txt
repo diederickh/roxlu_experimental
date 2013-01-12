@@ -26,7 +26,7 @@ if(APPLE)
 
   set(rxcapture_source_files
     ${videocapture_src_platform_dir}/videocapture/rx_capture_mac.mm
-    ${videocapture_src_platform_dir}/videocapture/VideoCaptureMac.mm
+    ${videocapture_src_platform_dir}/videocapture/VideoCaptureAVFoundation.mm
   )
 
   set(roxlu_linker_flags  "${roxlu_linker_flags} -framework CoreFoundation -framework Cocoa -framework AVFoundation -framework CoreVideo -framework CoreMedia -framework CoreMediaIO" )

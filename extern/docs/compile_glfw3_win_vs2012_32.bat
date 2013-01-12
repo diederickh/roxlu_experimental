@@ -13,17 +13,18 @@
 ::
 :: 3) Execute this script from your MSVC CMD window. After running you'll find yourself
 ::    a build directory that contains the static libraries. By default we use the 
-::    "MultiThreaded" runtime (/MT)
+::    "MultiThreaded" runtime (/MD)
 
 
 set d=%CD%
 
 if not exist %d%\glfw (
    git clone https://github.com/elmindreda/glfw.git 
+   git reset --hard 747b6d880563c0461df028d9e287652f16de7b17
 )
 
-:: call :compile_msvc compile_vs2010,build_vs2010,"Visual Studio 10"
-call :compile_msvc compile_vs2012,build_vs2012,"Visual Studio 11"
+call :compile_msvc compile_vs2010,build_vs2010,"Visual Studio 10"
+:: call :compile_msvc compile_vs2012,build_vs2012,"Visual Studio 11"
 
 :compile_msvc
         cd %d%
@@ -33,8 +34,8 @@ call :compile_msvc compile_vs2012,build_vs2012,"Visual Studio 11"
         mkdir %~2
         cd %d%/%~1
         echo. %d%\glfw
-        cmake -DCMAKE_INSTALL_PREFIX="%d%\%~2" -DCMAKE_C_FLAGS_DEBUG="/MT" -DCMAKE_C_FLAGS_RELEASE="/MT" -DCMAKE_CXX_FLAGS_DEBUG="/MT" -DCMAKE_CXX_FLAGS_RELEASE="/MT" -G "%~3" %d%\glfw 
-        cmake --build . --target install -- /p:Configuration=Release   
+        cmake -DCMAKE_INSTALL_PREFIX="%d%\%~2" -DCMAKE_C_FLAGS_DEBUG="/MD" -DCMAKE_C_FLAGS_RELEASE="/MD" -DCMAKE_CXX_FLAGS_DEBUG="/MD" -DCMAKE_CXX_FLAGS_RELEASE="/MD" -G "%~3" %d%\glfw 
+        cmake --build . --target install -- /p:Configuration=Release 
 goto:eof
 
 :eof

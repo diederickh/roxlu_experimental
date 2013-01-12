@@ -13,7 +13,7 @@ CaptureBuffer::CaptureBuffer()
   ,audio_bytes_written(0)
   ,audio_samples_written(0)
   ,audio_samplerate(0)
-  ,fps(20)
+  ,fps(60)
   ,millis_per_frame(0)
   ,image_w(0)
   ,image_h(0)
@@ -23,6 +23,7 @@ CaptureBuffer::CaptureBuffer()
   ,bytes_per_sample(0)
   ,tmp_video_buffer(NULL)
   ,tmp_audio_buffer(NULL)
+  ,fps_timeout(0)
 {
   audio_fp = fopen("audio.raw", "wb+");
   if(!audio_fp) {
@@ -84,6 +85,7 @@ bool CaptureBuffer::setup(OggVideoFormat vfmt,
   memset(tmp_audio_buffer, 0, bytes_per_audio);
 
   millis_per_frame = (1.0/fps) * 1000;
+  
 
   if(!ogg_maker.setup(vfmt, afmt, num_channels, samplerate, bytesPerSample)) {
     return false;
@@ -158,8 +160,22 @@ void CaptureBuffer::addVideoFrame(rx_uint64 timestamp, const void* data) {
   nvideo_frames++;
 }
 
+bool CaptureBuffer::wantsNewVideoFrame() {
+  if(!fps_timeout) {
+    fps_timeout = rx_millis() + millis_per_frame;
+    return true;
+  }
+  rx_uint64 now = rx_millis();
+  if(now >= fps_timeout) {
+    fps_timeout = now + millis_per_frame;
+    return true;
+  }
+  return false;
+}
+
 void CaptureBuffer::encode() {
   if(!is_setup) {
+    printf("WARNING: cannot encode because we havent been setup.\n");
     return;
   }
 
@@ -223,3 +239,4 @@ void CaptureBuffer::encode() {
     }
   }
 }
+

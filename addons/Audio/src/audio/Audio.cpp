@@ -100,9 +100,19 @@ bool Audio::openInputStream(
                             ,unsigned long framesPerBuffer
                             )
 {
+  PaDeviceIndex total_devices = Pa_GetDeviceCount();
+  if(device >= total_devices) {
+    printf("ERROR: unknown device id: %d\n", device);
+    return false;
+  }
+  
+  if(!isInputFormatSupported(device, numChannels, format, samplerate)) {
+    printf("ERROR: input format is not supported for this device: %d\n", device);
+    return false;
+  }
+
   PaStreamParameters input;
 
-  //bzero(&input, sizeof(input));
   memset(&input, 0, sizeof(input));
 
   input.channelCount = numChannels;

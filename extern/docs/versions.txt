@@ -1,1 +1,2 @@
-Portaudio: pa_stable_v19_20111121.tgz
+Portaudio: pa_stable_v19_20111121.tgz, 2013.01.10
+GLFW: 747b6d880563c0461df028d9e287652f16de7b17,  2013.01.11
