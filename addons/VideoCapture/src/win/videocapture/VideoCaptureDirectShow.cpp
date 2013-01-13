@@ -271,6 +271,16 @@ int VideoCaptureDirectShow::openDevice(int dev, int w, int h, VideoCaptureFormat
   return 1;
 }
 
+int VideoCaptureDirectShow::closeDevice() {
+  if(!is_graph_setup) {
+    printf("ERROR: cannot close a device when the graph hasn't been setup.\n");
+    return 0;
+  }
+  HRESULT hr = media_control->StopWhenReady();
+  RETURN_IF_FAILED(hr, "ERROR: cannot stop the stream, and close the device.\n", 0);
+  return 1;
+}
+
 int VideoCaptureDirectShow::startCapture() {
   if(!is_graph_setup) {
     printf("ERROR: first open a device before you start the capture.\n");

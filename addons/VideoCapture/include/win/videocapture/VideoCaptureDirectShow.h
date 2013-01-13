@@ -57,8 +57,6 @@ enum VideoCaptureDirectShowCallbackTypes {
   ,BUFFERED_CALLBACK = 1
 };
 
-
-
 class VideoCaptureDirectShow {
 public:
   VideoCaptureDirectShow(void);
@@ -66,6 +64,7 @@ public:
   int listDevices();
   int printVerboseInfo();
   int openDevice(int dev, int w, int h, VideoCaptureFormat fmt);
+  int closeDevice(); // for now just stop the graph from running
   int startCapture();
   int stopCapture();
   int getWidth();
@@ -121,10 +120,4 @@ inline int VideoCaptureDirectShow::setFrameCallback(rx_capture_frame_cb cb, void
   frame_user = user;
   return 1;
 }
-
-/*
-struct rx_capture_t {
-  VideoCaptureDirectShow* cap;
-};
-*/
 #endif

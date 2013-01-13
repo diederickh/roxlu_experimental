@@ -41,10 +41,17 @@ int rx_capture_directshow_open_device(rx_capture_t* handle,
   return ds->openDevice(device, w, h, fmt);
 }
 
+int rx_capture_directshow_close_device(rx_capture_t* handle) {
+  VideoCaptureDirectShow* ds = (VideoCaptureDirectShow*)handle->data;
+  return ds->closeDevice();
+}
 
 int rx_capture_directshow_start_capture(rx_capture_t* handle) {
   VideoCaptureDirectShow* ds = (VideoCaptureDirectShow*)handle->data;
   return ds->startCapture();
+}
+
+void rx_capture_directshow_update(rx_capture_t* handle) {
 }
 
 int rx_capture_directshow_set_frame_callback(rx_capture_t* handle, 
@@ -71,7 +78,9 @@ const rx_capture_t rx_capture_directshow = {
   rx_capture_directshow_print_verbose_info,
   rx_capture_directshow_is_format_supported,
   rx_capture_directshow_open_device,
+  rx_capture_directshow_close_device,
   rx_capture_directshow_start_capture,
+  rx_capture_directshow_update,
   rx_capture_directshow_set_frame_callback,
   rx_capture_directshow_get_width,
   rx_capture_directshow_get_height
