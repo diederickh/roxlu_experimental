@@ -178,7 +178,6 @@ void CaptureBuffer::encode() {
     printf("WARNING: cannot encode because we havent been setup.\n");
     return;
   }
-
   record = false;
   std::sort(frames.begin(), frames.end(), CaptureFrameSorter());
   double total_audio_samples = 0;
