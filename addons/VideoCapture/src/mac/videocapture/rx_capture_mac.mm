@@ -42,8 +42,16 @@ int rx_capture_avfoundation_open_device(
                        andFormat:fmt andApply:1];
 }
 
+int rx_capture_avfoundation_close_device(rx_capture_t* c) {
+  [(id)c->data captureStop];
+  return 0;
+}
+
 int rx_capture_avfoundation_start_capture(rx_capture_t* c) {
   return [(id)c->data captureStart];
+}
+
+void rx_capture_avfoundation_update(rx_capture_t* c) {
 }
 
 int rx_capture_avfoundation_set_frame_callback(rx_capture_t* c, rx_capture_frame_cb cb, void* userData) {
@@ -65,7 +73,9 @@ const rx_capture_t rx_capture_avfoundation = {
   rx_capture_avfoundation_print_verbose_info,
   rx_capture_avfoundation_is_format_supported,
   rx_capture_avfoundation_open_device,
+  rx_capture_avfoundation_close_device,
   rx_capture_avfoundation_start_capture,
+  rx_capture_avfoundation_update,
   rx_capture_avfoundation_set_frame_callback,
   rx_capture_avfoundation_get_width,
   rx_capture_avfoundation_get_height

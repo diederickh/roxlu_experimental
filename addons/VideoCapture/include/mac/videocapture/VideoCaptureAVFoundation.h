@@ -23,6 +23,7 @@ typedef void(*rx_capture_frame_cb)(void* pixels, size_t nbytes, void* user);
          didOutputSampleBuffer:(CMSampleBufferRef) sampleBuffer
          fromConnection:(AVCaptureConnection*) connection;
 - (int) captureStart;
+- (int) captureStop;
 - (void) setFrameCallback:(rx_capture_frame_cb) frameCB user:(void*) frameUser;
 - (int) isFormatSupported:(VideoCaptureFormat) fmt forWidth:(int)w andHeight:(int)h andApply:(int)applyFormat;
 - (FourCharCode) videoCaptureFormatTypeToCMPixelFormatType:(VideoCaptureFormat) fmt;
