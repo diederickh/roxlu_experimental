@@ -18,6 +18,8 @@ extern "C" {
 
 #include <string>
 #include <vector>
+#include <videocapture/rx_capture.h>
+#include <videocapture/Types.h>
 
 #define V4L2_MAX_QUERYABLE_INPUTS 16
 
@@ -40,24 +42,33 @@ struct LinuxCaptureBuffer {
   size_t length;
 };
 
-class V4L2Capture {
+class VideoCaptureV4L2 {
  public:
-  V4L2Capture();
-  ~V4L2Capture();
+  VideoCaptureV4L2();
+  ~VideoCaptureV4L2();
   void setup();
   int listDevices();
   int printVerboseInfo();
-  int openDevice(int device);
+  int openDevice(int device, int w, int h, VideoCaptureFormat capFormat);
+  int isFormatSupported(VideoCaptureFormat fmt, int w, int h, int applyFormat = 0);
   int startCapture();
   int stopCapture();
   void update();
   int closeDevice();
   int getWidth();
   int getHeight();
+  void setFrameCallback(rx_capture_frame_cb cb, void* user);
  private:
   bool initMMAP();
   int printDeviceInfo(int dev);
+  void printV4L2Format(v4l2_format* fmt);
+  std::string v4l2BufTypeToString(int type);
+  std::string v4l2PixelFormatToString(int pixfmt);
   std::vector<LinuxCaptureDevice> getDeviceList();
+  int videoCaptureFormatToPixelFormat(VideoCaptureFormat fmt);
+ public:
+  rx_capture_frame_cb frame_cb;
+  void* frame_user;
  private:
   int width; // width of webcam images
   int height; // height of webcam images
@@ -67,16 +78,16 @@ class V4L2Capture {
   std::vector<LinuxCaptureBuffer*> buffers;
 };
 
-// our exported rx_capture_t type
-struct rx_capture_t {
-  V4L2Capture* cap;
-};
-
-inline int V4L2Capture::getWidth() {
+inline int VideoCaptureV4L2::getWidth() {
   return width;
 }
 
-inline int V4L2Capture::getHeight() {
+inline int VideoCaptureV4L2::getHeight() {
   return height;
+}
+
+inline void VideoCaptureV4L2::setFrameCallback(rx_capture_frame_cb cb, void* user) {
+  frame_cb = cb;
+  frame_user = user;
 }
 #endif

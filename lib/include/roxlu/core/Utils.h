@@ -4,15 +4,17 @@
 #include <roxlu/core/Constants.h>
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
 #include <vector>
 #include <sstream>
+
 
 #ifdef ROXLU_GL_WRAPPER
 #include <roxlu/opengl/OpenGLInit.h>
 #include <roxlu/opengl/Error.h>
 #endif
 
-#if ROXLU_PLATFORM == ROXLU_APPLE
+#ifdef __APPLE__
 #include <libgen.h> /* dirname */
 #include <CoreFoundation/CFRunLoop.h>
 #include <mach/mach.h>
@@ -21,6 +23,11 @@
 #include <sys/resource.h>
 #include <sys/sysctl.h>
 #include <unistd.h>  /* sysconf */
+#elif defined(__linux) 
+#include <unistd.h> /* readlink */
+#include <sys/time.h> /* timeofday */
+#include <libgen.h> /* dirname */
+#define MAX_PATH 4096
 #endif
 
 #undef get16bits

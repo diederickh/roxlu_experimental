@@ -150,6 +150,11 @@
   return 1;
 }
 
+- (int) captureStop {
+  [session stopRunning];
+  return 1;
+}
+
 - (void) captureOutput:(AVCaptureOutput*)captureOutput
          didOutputSampleBuffer:(CMSampleBufferRef) sampleBuffer
          fromConnection:(AVCaptureConnection*) connection 
