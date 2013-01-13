@@ -24,8 +24,8 @@ Audio::~Audio() {
 
 int Audio::listDevices() {
   int num = Pa_GetDeviceCount();
-  if(num < 0) {
-    printf("ERROR: Pa_CountDevices returned: 0x%x\n", num);
+  if(num <= 0) {
+    printf("ERROR: Pa_CountDevices returned: %d\n", num);
     return -1;
   };
 
@@ -101,18 +101,17 @@ bool Audio::openInputStream(
                             )
 {
   PaDeviceIndex total_devices = Pa_GetDeviceCount();
-  if(device >= total_devices) {
+  if(!total_devices || device >= total_devices) {
     printf("ERROR: unknown device id: %d\n", device);
     return false;
   }
-  
+
   if(!isInputFormatSupported(device, numChannels, format, samplerate)) {
     printf("ERROR: input format is not supported for this device: %d\n", device);
     return false;
   }
 
   PaStreamParameters input;
-
   memset(&input, 0, sizeof(input));
 
   input.channelCount = numChannels;

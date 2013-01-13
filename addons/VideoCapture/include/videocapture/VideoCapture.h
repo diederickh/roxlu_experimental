@@ -15,7 +15,9 @@ class VideoCapture {
   int listDevices();
   int printVerboseInfo();
   int openDevice(int device, int w, int h, VideoCaptureFormat fmt);
+  int closeDevice();
   int startCapture();
+  void update();
   int isFormatSupported(VideoCaptureFormat fmt, int w, int h, int set = 0); 
   unsigned char* getPtr(); // get pointer to 'bytes'
   size_t getNumBytes(); // get number of bytes in 'bytes'
@@ -43,6 +45,10 @@ inline unsigned char* VideoCapture::getPtr() {
 
 inline size_t VideoCapture::getNumBytes() {
   return nbytes;
+}
+
+inline void VideoCapture::update() {
+  capture.update(&capture);
 }
 
 inline bool VideoCapture::hasNewData() {
@@ -80,6 +86,10 @@ inline int VideoCapture::printVerboseInfo() {
 inline int VideoCapture::openDevice(int device, int w, int h, VideoCaptureFormat fmt) {
   capture.set_frame_callback(&capture, video_capture_callback, this);
   return capture.open_device(&capture, device, w, h, fmt);
+}
+
+inline int VideoCapture::closeDevice() {
+  return capture.close_device(&capture);
 }
 
 inline int VideoCapture::startCapture() {

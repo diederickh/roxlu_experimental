@@ -41,11 +41,10 @@ if(UNIX AND NOT APPLE)
 
   set(rxcapture_source_files
     ${videocapture_src_platform_dir}/videocapture/rx_capture_linux.cpp
-    ${videocapture_src_platform_dir}/videocapture/V4L2Capture.cpp
+    ${videocapture_src_platform_dir}/videocapture/VideoCaptureV4L2.cpp
     )
 
   add_library(rx_capture ${rxcapture_source_files})
-#  set(roxlu_linker_flags "${roxlu_linker_flags} -ludev")
   target_link_libraries(rx_capture "udev")
 
 endif(UNIX AND NOT APPLE)

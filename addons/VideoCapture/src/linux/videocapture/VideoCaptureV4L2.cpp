@@ -1,23 +1,24 @@
-#include <videocapture/V4L2Capture.h>
+#include <videocapture/VideoCaptureV4L2.h>
 
-V4L2Capture::V4L2Capture() 
+VideoCaptureV4L2::VideoCaptureV4L2() 
   :io_method(LINCAP_IO_METHOD_READ)
   ,is_opened(false)
   ,fd(0)
-  ,width(640) // @todo hardcoded for now
-  ,height(480) // @todo hardcoded for now
+  ,width(0) 
+  ,height(0) 
+  ,frame_cb(NULL)
+  ,frame_user(NULL)
 {
 }
 
-V4L2Capture::~V4L2Capture() {
-  printf("~V4LCapture()\n");
+VideoCaptureV4L2::~VideoCaptureV4L2() {
   closeDevice();
 }
 
-void V4L2Capture::setup() {
+void VideoCaptureV4L2::setup() {
 }
 
-int V4L2Capture::openDevice(int device) {
+int VideoCaptureV4L2::openDevice(int device, int w, int h, VideoCaptureFormat capFormat) {
   std::vector<LinuxCaptureDevice> devices = getDeviceList();
   if(device >= devices.size()) {
     return 0;
@@ -56,21 +57,17 @@ int V4L2Capture::openDevice(int device) {
   if(can_io_stream) {
     io_method = LINCAP_IO_METHOD_MMAP;
   }
-  
-  // try a specific format
-  struct v4l2_format fmt;
-  fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-  fmt.fmt.pix.width = width;
-  fmt.fmt.pix.height = height;
-  fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
-  fmt.fmt.pix.field = V4L2_FIELD_ANY; // @todo check what is best to use here
-  if(ioctl(fd, VIDIOC_S_FMT, &fmt) == -1) {
-    printf("ERROR: cannot set video format.\n");
+
+  if(!isFormatSupported(capFormat, w, h, 1)) {
+    printf("ERROR: cannot set pixelformat and size: %dx%d\n", w,h);
+    return 0;
   }
+
+  width = w;
+  height = h;
 
   // initialize IO
   if(io_method == LINCAP_IO_METHOD_MMAP) {
-    printf("INIT MMAP\n");
     initMMAP();
   }
   else if(io_method == LINCAP_IO_METHOD_READ) {
@@ -79,15 +76,65 @@ int V4L2Capture::openDevice(int device) {
   }
   else if(io_method == LINCAP_IO_METHOD_USERPTR) {
     printf("ERROR: this device can use i/o with userptr, but we need to program it.\n");
-    ::exit(0);
+    ::exit(EXIT_FAILURE);
   }
-  printf("DONE\n");
-         // printDeviceInfo(fd);
   is_opened = true;
   return 1;
 }
 
-int V4L2Capture::startCapture() {
+int VideoCaptureV4L2::videoCaptureFormatToPixelFormat(VideoCaptureFormat fmt) {
+  switch(fmt) {
+    case VC_FMT_RGB24: return V4L2_PIX_FMT_RGB24;
+    case VC_FMT_YUYV422: return V4L2_PIX_FMT_YUYV;
+    case VC_FMT_UYVY422: return V4L2_PIX_FMT_UYVY;
+    case VC_FMT_I420: return V4L2_PIX_FMT_YUV420;
+    default: return 0;
+  }
+}
+
+int VideoCaptureV4L2::isFormatSupported(VideoCaptureFormat fmt, int w, int h, int applyFormat) {
+  if(!fd) {
+    printf("ERROR: first open the device before testing a format.\n");
+    return 0;
+  }
+
+  // As described in section 4.1.3, http://www.linuxtv.org/downloads/legacy/video4linux/API/V4L2_API/spec-single/v4l2.html#id2832544
+  // we first retrieve the current pixel format and then adjust the settings to our needs before
+  // trying the format.
+  struct v4l2_format curr_fmt;
+  memset(&curr_fmt, 0, sizeof(curr_fmt));
+  curr_fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+  if(ioctl(fd, VIDIOC_G_FMT, &curr_fmt) == -1) {
+    printf("ERROR: cannot get VIDIOC_G_FMT in isFormatSupported.\n");
+    return 0;
+  }
+
+  curr_fmt.fmt.pix.width = w;
+  curr_fmt.fmt.pix.height = h;
+  curr_fmt.fmt.pix.pixelformat = videoCaptureFormatToPixelFormat(fmt);
+  if(curr_fmt.fmt.pix.pixelformat == 0) {
+    printf("ERROR: cannot convert VideoCaptureFormat to v4l2 pixelformat.\n");
+    return 0;
+  }
+
+  if(ioctl(fd, VIDIOC_TRY_FMT, &curr_fmt) == -1) {
+    printf("ERROR: the format is not supported!\n");
+    return 0;
+  }
+
+  if(applyFormat) {
+    printf("-----------------------------------------------\n");
+    printV4L2Format(&curr_fmt);
+    printf("-----------------------------------------------\n");
+    if(ioctl(fd, VIDIOC_S_FMT, &curr_fmt) == -1) {
+      printf("ERROR: cannot set new format; is the device busy maybe? @todo add some checking.\n");
+      return 0;
+    }
+  }
+  return 1;
+}
+
+int VideoCaptureV4L2::startCapture() {
   if(!is_opened) {
     printf("ERROR: cannot start capture; the device is not opened.\n");
     return 0;
@@ -122,7 +169,7 @@ int V4L2Capture::startCapture() {
   return 1;
 }
 
-int V4L2Capture::stopCapture() {
+int VideoCaptureV4L2::stopCapture() {
   if(!is_opened) {
     printf("ERROR: cannot stop capture.. we didn't start yet.\n");
     return 0;
@@ -145,7 +192,7 @@ int V4L2Capture::stopCapture() {
   return 1;
 }
 
-void V4L2Capture::update() {
+void VideoCaptureV4L2::update() {
   if(!is_opened) {
     printf("WARNING: calling update() but not device opened.\n");
     return;
@@ -179,7 +226,12 @@ void V4L2Capture::update() {
           return;
         }
       }
-      printf("buf.index: %d, buf.bytes_used: %d\n", buf.index, buf.bytesused);
+
+      if(frame_cb) {
+        //printf("buf.index: %d, buf.bytes_used: %d, buffers[buf.index].length: %zu\n", buf.index, buf.bytesused, buffers[buf.index]->length);
+        frame_cb(buffers[buf.index]->start, buffers[buf.index]->length, frame_user);
+      }
+
       if(ioctl(fd, VIDIOC_QBUF, &buf) == -1) {
         printf("ERROR: cannot enqueue buf again.\n");
         return;
@@ -195,7 +247,7 @@ void V4L2Capture::update() {
 
 
 // Initializes mmap io, see: http://linuxtv.org/downloads/v4l-dvb-apis/capture-example.html
-bool V4L2Capture::initMMAP() {
+bool VideoCaptureV4L2::initMMAP() {
   struct v4l2_requestbuffers req;
   memset(&req, 0, sizeof(req));
   req.count = 4;
@@ -245,7 +297,7 @@ bool V4L2Capture::initMMAP() {
         return false;
       }
       else if(errno == EINVAL) {
-        printf("ERROR cannot map memory, the start or lengt or offset are not suitable. Flags or prot value is not supported. No buffers have been allocated. (EINVAL)\n");
+        printf("ERROR cannot map memory, the start or length or offset are not suitable. Flags or prot value is not supported. No buffers have been allocated. (EINVAL)\n");
         return false;
       }
     }
@@ -253,28 +305,32 @@ bool V4L2Capture::initMMAP() {
   return true;
 }
 
-int V4L2Capture::closeDevice() {
+int VideoCaptureV4L2::closeDevice() {
   if(!is_opened) {
     return 0;
   }
 
+  // Turn off streaming, i/o
   stopCapture();
 
+  // Unmap mappe dmemory
   if(io_method == LINCAP_IO_METHOD_MMAP) {
     for(int i = 0; i < buffers.size(); ++i) {
+      printf("Unmapping MMAP buffer: %d/%zu\n",i, buffers.size());
       LinuxCaptureBuffer* b = buffers[i];
       if(munmap(b->start, b->length) == -1) {
         printf("ERROR: cannot unmap buffer: %d\n", i);
       }
       delete b;
     }
+    buffers.clear();
   }
   else {
     printf("ERROR: cannot close device because it's using an I/O method we haven't programmed yet.\n");
     return 0;
   }
 
-
+  printf("Closing capture file descriptor.\n");
   if(close(fd) == -1) {
     printf("ERROR: cannot close device.\n");
   }
@@ -284,7 +340,7 @@ int V4L2Capture::closeDevice() {
   return 1;
 }
 
-int V4L2Capture::printVerboseInfo() {
+int VideoCaptureV4L2::printVerboseInfo() {
   if(!is_opened) {
     printf("ERROR: cannot print verbose info when no device has been opened.\n");
     return 0;
@@ -292,7 +348,7 @@ int V4L2Capture::printVerboseInfo() {
   return printDeviceInfo(fd);
 }
 
-int V4L2Capture::printDeviceInfo(int dev) {
+int VideoCaptureV4L2::printDeviceInfo(int dev) {
   struct v4l2_capability capability;
   struct v4l2_standard standard;
   struct v4l2_input input;
@@ -353,7 +409,7 @@ int V4L2Capture::printDeviceInfo(int dev) {
       printf("fmtdesc.index: %d\n", fmtdesc.index);
       printf("fmtdesc.description: %s\n", fmtdesc.description);
       char* f = (char*)&fmtdesc.pixelformat;
-      printf("fmtdesc.pixelformat: %c%c%c%c\n", f[0], f[1], f[2], f[3]);
+      printf("fmtdesc.pixelformat: %c%c%c%c - %s\n", f[0], f[1], f[2], f[3], v4l2PixelFormatToString(fmtdesc.pixelformat).c_str());
       printf("fmtdesc.flags, V4L2_FMT_FLAG_COMPRESSED: %d\n", (fmtdesc.flags & V4L2_FMT_FLAG_COMPRESSED) == V4L2_FMT_FLAG_COMPRESSED);
       printf("fmtdesc.flags, V4L2_FMT_FLAG_EMULATED: %d\n", (fmtdesc.flags & V4L2_FMT_FLAG_EMULATED) == V4L2_FMT_FLAG_EMULATED);
 
@@ -390,8 +446,7 @@ int V4L2Capture::printDeviceInfo(int dev) {
 
   return 0;
 }
-
-int V4L2Capture::listDevices() {
+int VideoCaptureV4L2::listDevices() {
   std::vector<LinuxCaptureDevice> devices = getDeviceList();
   if(!devices.size()) {
     printf("WARNING: no video4linux devices found\n");
@@ -408,7 +463,7 @@ int V4L2Capture::listDevices() {
 
 // List of devices: http://www.ideasonboard.org/uvc/ 
 // How to use libudev: http://www.signal11.us/oss/udev/
-std::vector<LinuxCaptureDevice> V4L2Capture::getDeviceList() {
+std::vector<LinuxCaptureDevice> VideoCaptureV4L2::getDeviceList() {
   std::vector<LinuxCaptureDevice> found_devices;
   struct udev* udev;
   struct udev_enumerate* enumerate;
@@ -456,3 +511,73 @@ std::vector<LinuxCaptureDevice> V4L2Capture::getDeviceList() {
   udev_unref(udev);
   return found_devices;
 }
+
+void VideoCaptureV4L2::printV4L2Format(v4l2_format* fmt) {
+  if(!fmt) {
+    return;
+  }
+  if(fmt->type == V4L2_BUF_TYPE_VIDEO_CAPTURE) {
+    printf("v4l2_format.type: %s\n", v4l2BufTypeToString(fmt->type).c_str());
+    printf("v4l2_format.fmt.width: %d\n", fmt->fmt.pix.width);
+    printf("v4l2_format.fmt.height: %d\n", fmt->fmt.pix.height);
+    printf("v4l2_format.fmt.pixelformat: %s\n", v4l2PixelFormatToString(fmt->fmt.pix.pixelformat).c_str());
+  }
+}
+
+std::string VideoCaptureV4L2::v4l2BufTypeToString(int type) {
+  switch(type) {
+    case V4L2_BUF_TYPE_VIDEO_CAPTURE: return "V4L2_BUF_TYPE_VIDEO_CAPTURE";
+    case V4L2_BUF_TYPE_VIDEO_OUTPUT: return "V4L2_BUF_TYPE_VIDEO_OUTPUT"; 
+    case V4L2_BUF_TYPE_VIDEO_OVERLAY: return "V4L2_BUF_TYPE_VIDEO_OVERLAY";  
+    case V4L2_BUF_TYPE_VBI_CAPTURE: return "V4L2_BUF_TYPE_VBI_CAPTURE"; 
+    case V4L2_BUF_TYPE_VBI_OUTPUT: return "V4L2_BUF_TYPE_VBI_OUTPUT";  
+    case V4L2_BUF_TYPE_SLICED_VBI_CAPTURE: return "V4L2_BUF_TYPE_SLICED_VBI_CAPTURE";  
+    case V4L2_BUF_TYPE_SLICED_VBI_OUTPUT: return "V4L2_BUF_TYPE_SLICED_VBI_OUTPUT";  
+    case V4L2_BUF_TYPE_VIDEO_OUTPUT_OVERLAY: return "V4L2_BUF_TYPE_VIDEO_OUTPUT_OVERLAY"; 
+    default: return "UNKNOWN";
+  };
+}
+
+// http://www.linuxtv.org/downloads/legacy/video4linux/API/V4L2_API/spec-single/v4l2.html#rgb-formats
+std::string VideoCaptureV4L2::v4l2PixelFormatToString(int pixfmt) {
+  switch(pixfmt) {
+    case V4L2_PIX_FMT_RGB332: return "V4L2_PIX_FMT_RGB332";
+    case V4L2_PIX_FMT_RGB444: return "V4L2_PIX_FMT_RGB444";
+    case V4L2_PIX_FMT_RGB555: return "V4L2_PIX_FMT_RGB555";
+    case V4L2_PIX_FMT_RGB565: return "V4L2_PIX_FMT_RGB565";
+    case V4L2_PIX_FMT_RGB555X: return "V4L2_PIX_FMT_RGB555X"; 
+    case V4L2_PIX_FMT_RGB565X: return "V4L2_PIX_FMT_RGB565X";
+    case V4L2_PIX_FMT_BGR24: return "V4L2_PIX_FMT_BGR24";
+    case V4L2_PIX_FMT_RGB24: return "V4L2_PIX_FMT_RGB24";
+    case V4L2_PIX_FMT_BGR32: return "V4L2_PIX_FMT_BGR32";
+    case V4L2_PIX_FMT_RGB32: return "V4L2_PIX_FMT_RGB32";
+    case V4L2_PIX_FMT_SBGGR8: return "V4L2_PIX_FMT_SBGGR8";
+    case V4L2_PIX_FMT_SGRBG8: return "V4L2_PIX_FMT_SGRBG8";
+    case V4L2_PIX_FMT_SBGGR16: return "V4L2_PIX_FMT_SBGGR16";
+    case V4L2_PIX_FMT_YUV444: return "V4L2_PIX_FMT_YUV444";
+    case V4L2_PIX_FMT_YUV555: return "V4L2_PIX_FMT_YUV555";
+    case V4L2_PIX_FMT_YUV565: return "V4L2_PIX_FMT_YUV565";
+    case V4L2_PIX_FMT_YUV32: return "V4L2_PIX_FMT_YUV32";
+    case V4L2_PIX_FMT_GREY: return "V4L2_PIX_FMT_GREY";
+    case V4L2_PIX_FMT_Y16: return "V4L2_PIX_FMT_Y16";
+    case V4L2_PIX_FMT_YUYV: return "V4L2_PIX_FMT_YUYV";
+    case V4L2_PIX_FMT_UYVY: return "V4L2_PIX_FMT_UYVY";
+    case V4L2_PIX_FMT_YVYU: return "V4L2_PIX_FMT_YVYU";
+    case V4L2_PIX_FMT_VYUY: return "V4L2_PIX_FMT_VYUY";
+    case V4L2_PIX_FMT_Y41P: return "V4L2_PIX_FMT_Y41P";
+    case V4L2_PIX_FMT_YVU420: return "V4L2_PIX_FMT_YVU420";
+    case V4L2_PIX_FMT_YUV420: return "V4L2_PIX_FMT_YUV420";
+    case V4L2_PIX_FMT_YVU410: return "V4L2_PIX_FMT_YVU410";
+    case V4L2_PIX_FMT_YUV410: return "V4L2_PIX_FMT_YUV410";
+    case V4L2_PIX_FMT_YUV422P: return "V4L2_PIX_FMT_YUV422P";
+    case V4L2_PIX_FMT_YUV411P: return "V4L2_PIX_FMT_YUV411P";
+    case V4L2_PIX_FMT_NV12: return "V4L2_PIX_FMT_NV12";
+    case V4L2_PIX_FMT_NV21: return "V4L2_PIX_FMT_NV21";
+    case V4L2_PIX_FMT_NV16: return "V4L2_PIX_FMT_NV16";
+    case V4L2_PIX_FMT_NV61: return "V4L2_PIX_FMT_NV61";
+    case V4L2_PIX_FMT_JPEG: return "V4L2_PIX_FMT_JPEG";
+    case V4L2_PIX_FMT_MPEG: return "V4L2_PIX_FMT_MPEG";
+    default: return "UNKNOWN";
+  }
+}
+

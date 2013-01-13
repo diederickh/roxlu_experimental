@@ -12,6 +12,7 @@ void video_capture_callback(void* pixels, size_t nbytes, void* user) {
     }
     c->bytes = new unsigned char[c->allocated_bytes];
   }
+  // @todo not all I/O methods need to copy the data!
   memcpy(c->bytes, pixels, nbytes);
   c->has_new_data = true;
   c->nbytes = nbytes;
@@ -28,12 +29,13 @@ VideoCapture::VideoCapture()
 #elif defined(_WIN32)
   capture = rx_capture_directshow;
 #else 
- #error WE HAVE NOT YET CREATED A VIDEO CAPTURE WRAPPER FOR THIS PLATFORM
+  capture = rx_capture_v4l2;
 #endif
   capture.initialize(&capture);
 }
 
 VideoCapture::~VideoCapture() {
+  capture.close_device(&capture);
 }
 
 

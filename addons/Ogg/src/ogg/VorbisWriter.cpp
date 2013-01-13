@@ -33,7 +33,6 @@ void VorbisWriter::open(const std::string filepath, int sampleRate, int nchannel
   int r = 0;
   vorbis_info_init(&vi);
   r = vorbis_encode_init_vbr(&vi, num_channels, sampleRate, .4); // .4 = quality
-  printf("init: %d\n", r);
 
   if(r != 0) {
     printf("ERROR: cannot initialize vorbis\n");
@@ -65,13 +64,12 @@ void VorbisWriter::open(const std::string filepath, int sampleRate, int nchannel
   while(true) {
     int result = ogg_stream_flush(&os, &og);
     if(result == 0) {
-      printf("VORBIS == 0\n");
       break;
     }
     fwrite(og.header, 1, og.header_len, fp);
     fwrite(og.body, 1, og.body_len, fp);
   }
-  printf("DONE!\n");
+
   is_setup = true;
 }
 

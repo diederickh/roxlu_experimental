@@ -47,6 +47,7 @@ set(glfw_libs
   X11
   Xxf86vm
   rt
+  /usr/lib/x86_64-linux-gnu/libXrandr.so
 )
 endif(ROXLU_PLATFORM_LINUX)
 
