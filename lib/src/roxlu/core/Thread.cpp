@@ -1,4 +1,5 @@
 #include <roxlu/core/Thread.h>
+#include <stdio.h>
 
 namespace roxlu {
   // ---------------------------------------------------
@@ -56,6 +57,15 @@ namespace roxlu {
     pthread_create(&handle, NULL, Thread::threadFunction, &run);
   }
 
+  void Thread::join() {
+    printf("JOINING\n");
+    pthread_join(handle, NULL);
+  }
+
+  void Thread::exit() {
+    pthread_exit(NULL);
+  }
+
 #elif _WIN32
 
   DWORD WINAPI Thread::threadFunction(LPVOID arg) {
@@ -85,6 +95,10 @@ namespace roxlu {
       0,                      // use default creation flags 
       &dwThreadIdArray[i]);  
     */
+  }
+
+  void Thread::join() {
+    printf("ERROR: Thread::join() is not yet implemented on Windows\n");
   }
 #endif
 

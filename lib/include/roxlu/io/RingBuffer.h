@@ -14,8 +14,10 @@ class RingBuffer {
   size_t read(char* data, size_t bytes);
   size_t drain(size_t bytes);
   size_t size();
+  size_t getWriteIndex();
   char* getReadPtr();
-
+  size_t getCapacity();
+  void reset();
  private:
   size_t read_index;
   size_t write_index;
@@ -30,5 +32,19 @@ inline size_t RingBuffer::size() {
 
 inline char* RingBuffer::getReadPtr() {
   return buffer + read_index;
+}
+
+inline size_t RingBuffer::getWriteIndex() {
+  return write_index;
+}
+
+inline size_t RingBuffer::getCapacity() {
+  return capacity;
+}
+
+inline void RingBuffer::reset() {
+  write_index = 0;
+  read_index = 0;
+  bytes_stored = 0;
 }
 #endif

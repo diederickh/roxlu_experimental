@@ -45,6 +45,8 @@ namespace roxlu {
     Thread();
     ~Thread();
     void create(Runnable& run);
+    void join();
+    void exit();
 #if defined(__APPLE__) || defined(__linux__)
     static void* threadFunction(void* arg);
     pthread_t handle;

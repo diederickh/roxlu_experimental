@@ -56,7 +56,7 @@ bool Audio::isInputFormatSupported(int device, int numChannels, PaSampleFormat f
   input.hostApiSpecificStreamInfo = NULL;
   input.sampleFormat = format;
   input.suggestedLatency = Pa_GetDeviceInfo(device)->defaultLowInputLatency;
-  
+
   err = Pa_IsFormatSupported(&input, NULL, samplerate);
   if(err == paFormatIsSupported) {
     printf("+ [%d] supports channels: %d, format: %s, samplerate: %d\n", device, numChannels, getSampleFormatText(format).c_str(), int(samplerate));

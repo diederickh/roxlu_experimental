@@ -3,7 +3,7 @@
 
 #include <string>
 #include <shout/shout.h>
-#include <lame/lame.h>
+#include <lame/lame.h> /* see API in liblame source for info on encoding */
 
 #define MP3_BUFFER_SIZE 8192
 

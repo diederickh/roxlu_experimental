@@ -11,6 +11,9 @@ SimulationBase::SimulationBase()
 {
 }
 
+SimulationBase::~SimulationBase() {
+}
+
 void SimulationBase::setup() {
 }
 

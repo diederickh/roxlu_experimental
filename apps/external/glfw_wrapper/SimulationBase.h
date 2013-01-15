@@ -6,6 +6,7 @@
 class SimulationBase {
 public:
   SimulationBase();
+  virtual ~SimulationBase();
   virtual void setup();
   virtual void update();
   virtual void draw();
