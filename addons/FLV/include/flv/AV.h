@@ -169,7 +169,7 @@ inline void AV::addVideoFrame(const void* data) {
   if(must_stop) {
     return;
   }
-  if(audio_is_buffer_ready) {
+  if(audio_num_channels == 0 || audio_is_buffer_ready) {
     if(!vid_time_started) {
       vid_time_started = rx_millis();
     }

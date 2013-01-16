@@ -222,6 +222,7 @@ bool AV::setupX264() {
 }
 
 void AV::run() {
+
   // audio + video 
   if(vid_w != 0 && audio_num_channels != 0) {
     std::vector<AVPacket*> work_packets;
