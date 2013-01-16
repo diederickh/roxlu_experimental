@@ -191,16 +191,16 @@ bool AV::setupX264() {
     return false;
   }
 
-  p->i_log_level = X264_LOG_DEBUG;
+  //p->i_log_level = X264_LOG_DEBUG;
   p->i_threads = 1;
   p->i_width = vid_w;
   p->i_height = vid_h;
   p->i_fps_num = vid_fps;
   p->i_fps_den = 1;
   p->b_annexb = 0; // for flv files this must be 0
+  p->b_repeat_headers = 0;
 
   /*
-    p->b_intra_refresh = 1; // when set nothing is shown  
     p->b_annexb = 0;
     p->b_repeat_headers = 0;
     p->i_keyint_max = 1;

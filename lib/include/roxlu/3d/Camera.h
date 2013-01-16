@@ -102,6 +102,7 @@ namespace roxlu {
   }
 
   inline Mat4& Camera::vm() {
+
     return view_matrix;
   }
 

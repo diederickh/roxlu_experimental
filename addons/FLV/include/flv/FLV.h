@@ -237,10 +237,12 @@ inline void FLV::setCallbacks(
 }
 
 inline void FLV::flush() {
-  if(cb_flush == NULL) {
+  if(cb_write == NULL) {
+    printf("VERBOSE: FLV: cannot write data, write callback not yet set.\n");
     return;
   }
   if(!is_opened) {
+    printf("VERBOSE: FLV: cannot write data, not yet opened.\n");
     return;
   }
   bytes_flushed += cb_write(&buffer[0], buffer.size(), cb_user);

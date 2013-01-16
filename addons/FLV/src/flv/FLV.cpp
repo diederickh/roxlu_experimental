@@ -25,7 +25,6 @@ FLV::~FLV() {
 }
 
 int FLV::open(FLVHeader header) {
-
   flv_header = header;
 
   putTag("FLV");                                                                     // default flv first 3 bytes
@@ -34,9 +33,9 @@ int FLV::open(FLVHeader header) {
   put32(9);                                                                          // data offest
   put32(0);                                                                          // previous tag size
 
-  flush();
-  
   is_opened = true;
+
+  flush();
   return 1;
 }
 
@@ -53,7 +52,7 @@ int FLV::writeParams(FLVParams params) {
 
   int metadata_count = 5 * flv_header.has_video +   // width, height, videodatarate, framerate, videocodecid
                        5 * flv_header.has_audio +   // audiodatarate, audiosamplerate, audiosamplesize, stereo, audiocodecid
-                       3;                            // canSeekToEnd, duration, filesize
+                       4;                            // canSeekToEnd, duration, filesize
 
   // tag info header
   put8(0x00 | ((is_encrypted) ? 0x20 : 0x00) | FLV_TAG_SCRIPT_DATA); 
@@ -113,6 +112,10 @@ int FLV::writeParams(FLVParams params) {
     putAmfDouble(FLV_SOUNDFORMAT_MP3);
   }
 
+  putAmfString("streamName");
+  put8(AMF0_TYPE_STRING);
+  putAmfString("roxlu");
+
   putAmfString("canSeekToEnd");
   putAmfBool(false);
 
@@ -133,6 +136,7 @@ int FLV::writeParams(FLVParams params) {
   put32(size() - start_size); // PreviousTagSize
 
   flush();
+
   dump();
   return 1;
 }
@@ -174,6 +178,7 @@ int FLV::writeVideoPacket(FLVVideoPacket pkt) {
   size_t data_size = size() - data_size_start;
   rewrite24(data_size, data_size_pos);  // DataSize
   put32(size() - start_size);           // PreviousTagSize
+
   flush();
 
   last_video_timestamp = pkt.timestamp;
@@ -189,8 +194,6 @@ int FLV::writeAvcSequenceHeader(FLVAvcSequenceHeader hdr) {
     printf("WARNING: cannot write avc sequence header; flv stream is closed\n");
     return 0;
   }
-
-  printf("++++++++++ WRITING AVC SEQUENCE HEADER +++++++++++++++\n");
 
   size_t start_size = size();
   size_t tag_size_pos= start_size + 1;
@@ -237,7 +240,7 @@ int FLV::writeAvcSequenceHeader(FLVAvcSequenceHeader hdr) {
   size_t data_size = size() - tag_size_start;
   rewrite24(data_size, tag_size_pos);
   put32(size() - start_size);
-  flush();
+  //  flush();
   return 1;
 }
 
@@ -246,6 +249,7 @@ int FLV::writeAudioPacket(FLVAudioPacket pkt) {
     printf("WARNING: cannot write audio packet; flv stream is closed\n");
     return 0;
   }
+
   size_t start_size = size();
   size_t tag_size_pos= start_size + 1;
   int is_encrypted = 0;
