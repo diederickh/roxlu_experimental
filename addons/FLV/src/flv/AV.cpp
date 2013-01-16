@@ -76,6 +76,7 @@ bool AV::initialize() {
   flv_header.has_video = (vid_w != 0 && vid_h != 0);
 
   if(flv_header.has_audio) {
+    flv_header.sound_bitrate = 128000.0;
     flv_header.sound_type = (audio_num_channels > 1) ? FLV_SOUNDTYPE_STEREO : FLV_SOUNDTYPE_MONO;
     flv_header.sound_bits = FLV_SOUNDSIZE_16BIT; // we're compressing with mp3 so it's internally always 16bit, as per spec
     flv_header.sound_samplerate = audioSampleRateToFLVSampleRate(audio_samplerate);
@@ -190,11 +191,25 @@ bool AV::setupX264() {
     return false;
   }
 
+  p->i_log_level = X264_LOG_DEBUG;
   p->i_threads = 1;
   p->i_width = vid_w;
   p->i_height = vid_h;
   p->i_fps_num = vid_fps;
   p->i_fps_den = 1;
+  p->b_annexb = 0; // for flv files this must be 0
+
+  /*
+    p->b_intra_refresh = 1; // when set nothing is shown  
+    p->b_annexb = 0;
+    p->b_repeat_headers = 0;
+    p->i_keyint_max = 1;
+    p->rc.i_rc_method = X264_RC_CRF;
+    p->rc.i_qp_min = 1;
+    p->rc.i_qp_max = 10;
+    p->rc.f_rf_constant = 25;
+    p->rc.f_rf_constant_max = 35;
+  */
 
   vid_encoder = x264_encoder_open(&vid_params);
   if(!vid_encoder) {

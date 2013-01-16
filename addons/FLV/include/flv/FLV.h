@@ -109,6 +109,7 @@ struct FLVHeader {
   FLVSoundType sound_type;
   FLVAudioBitDepth sound_bits; 
   FLVAudioSampleRate sound_samplerate; 
+  double sound_bitrate; // how many kbits e.g. 128000
 }; 
 
 // used to write the meta data
@@ -160,6 +161,7 @@ class FLV {
   void putTag(std::string tag); // just write a string directly 
   void putAmfString(std::string str);
   void putAmfDouble(double v);
+  void putAmfBool(bool flag);
   void rewrite24(rx_uint32 v, size_t dx); 
   rx_uint64 swap64(rx_uint64 v);
   rx_uint64 swapDouble(double v); // swap, but return a uint64
@@ -193,7 +195,7 @@ class FLV {
   std::string flvAmf0TypeToString(int type); // converts an AMF type to string
 
  public:
-  FLVHeader flv_header; // contains info about audio encoding
+  FLVHeader flv_header; // contains info about audio and video encoding
 
  private:
   /* callbacks */
@@ -213,6 +215,7 @@ class FLV {
   size_t framerate_pos; // position in buffer where the framerate is stored; used to rewrite later (if possible)
   size_t duration_pos; // position in buffer where the duration is stored; used to rewrite later (if possible)
   size_t filesize_pos; // position in buffer where filesize is stored; used to rewrite later (if possible)
+  size_t datarate_pos; // position in buffere where the datarate is stored; is rewritten at the end.
   rx_uint64 last_video_timestamp; // used to rewrite the duration field
   rx_uint64 total_num_frames; // total num frames added, used to recalc. framerate
   bool is_opened; // check to make sure we don't open twice; and nicely cleanup
@@ -303,6 +306,11 @@ inline void FLV::putAmfDouble(double v) {
   rx_uint64 tmp = 0;
   memcpy((char*)&tmp, (char*)&v, 8);
   put64(tmp);
+}
+
+inline void FLV::putAmfBool(bool flag) {
+  put8(AMF0_TYPE_BOOLEAN);
+  put8(!!flag);
 }
 
 inline rx_uint8 FLV::get8() {

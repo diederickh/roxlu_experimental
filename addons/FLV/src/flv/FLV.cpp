@@ -10,6 +10,7 @@ FLV::FLV()
   ,framerate_pos(0)
   ,duration_pos(0)
   ,filesize_pos(0)
+  ,datarate_pos(0)
   ,bytes_flushed(0)
   ,bytes_written(0)
   ,last_video_timestamp(0)
@@ -24,11 +25,12 @@ FLV::~FLV() {
 }
 
 int FLV::open(FLVHeader header) {
+
   flv_header = header;
 
   putTag("FLV");                                                                     // default flv first 3 bytes
   put8(1);                                                                           // version
-  put8( 0x00 | (header.has_video) ? 0x01 : 0x00 | (header.has_audio) ? 0x04 : 0x00); // has video + audio
+  put8( 0x00 | header.has_video << 2 | header.has_audio); // has video + audio
   put32(9);                                                                          // data offest
   put32(0);                                                                          // previous tag size
 
@@ -49,8 +51,12 @@ int FLV::writeParams(FLVParams params) {
   x264_param_t* p = params.x264_params;
   int is_encrypted = 0; 
 
+  int metadata_count = 5 * flv_header.has_video +   // width, height, videodatarate, framerate, videocodecid
+                       5 * flv_header.has_audio +   // audiodatarate, audiosamplerate, audiosamplesize, stereo, audiocodecid
+                       3;                            // canSeekToEnd, duration, filesize
+
   // tag info header
-  put8(0x00 |  ((is_encrypted) ? 0x20 : 0x00) | FLV_TAG_SCRIPT_DATA); 
+  put8(0x00 | ((is_encrypted) ? 0x20 : 0x00) | FLV_TAG_SCRIPT_DATA); 
   put24(0);            // data length
   put24(0);            // timestamp
   put8(0);             // timestamp extended
@@ -62,27 +68,53 @@ int FLV::writeParams(FLVParams params) {
   putAmfString("onMetaData");
 
   put8(AMF0_TYPE_ECMA_ARRAY);
-  put32(7);            // 7 elements
+  put32(metadata_count);            // 7 elements
 
-  putAmfString("width");
-  putAmfDouble(p->i_width);
+  if(flv_header.has_video) {
+    putAmfString("width");
+    putAmfDouble(p->i_width);
   
-  putAmfString("height");
-  putAmfDouble(p->i_height);
-  
-  putAmfString("framerate");
-  framerate_pos = bytes_written + 1;
-
-  if(!p->b_vfr_input) {
-    putAmfDouble((double)p->i_fps_num / p->i_fps_den);
-  }
-  else {
-    printf("FLV WARNING: WE HAVE VFR_INPUT, WE NEED TO RECALC THE FPS AT THE END.\n");
+    putAmfString("height");
+    putAmfDouble(p->i_height);
+    
+    putAmfString("videodatarate");
+    datarate_pos = bytes_written + 1;
     putAmfDouble(0);
+  
+    putAmfString("framerate");
+    framerate_pos = bytes_written + 1;
+
+    if(!p->b_vfr_input) {
+      putAmfDouble((double)p->i_fps_num / p->i_fps_den);
+    }
+    else {
+      printf("FLV WARNING: WE HAVE VFR_INPUT, WE NEED TO RECALC THE FPS AT THE END.\n");
+      putAmfDouble(0);
+    }
+
+    putAmfString("videocodecid");
+    putAmfDouble(FLV_VIDEOCODEC_AVC);
   }
 
-  putAmfString("videocodecid");
-  putAmfDouble(FLV_VIDEOCODEC_AVC);
+  if(flv_header.has_video) {
+    putAmfString("audiodatarate");
+    putAmfDouble(flv_header.sound_bitrate/1024.0);
+
+    putAmfString("audiosamplerate");
+    putAmfDouble(44100.0);
+    
+    putAmfString("audiodatarate");
+    putAmfDouble(flv_header.sound_bits == FLV_SOUNDSIZE_16BIT ? 16.0 : 8.0);
+
+    putAmfString("stereo");
+    putAmfBool(flv_header.sound_type == FLV_SOUNDTYPE_STEREO);
+
+    putAmfString("audiocodecid");
+    putAmfDouble(FLV_SOUNDFORMAT_MP3);
+  }
+
+  putAmfString("canSeekToEnd");
+  putAmfBool(false);
 
   putAmfString("duration");
   duration_pos = bytes_written + 1;
@@ -90,9 +122,6 @@ int FLV::writeParams(FLVParams params) {
   
   putAmfString("filesize");
   filesize_pos = bytes_written + 1;
-  putAmfDouble(0);
-
-  putAmfString("videodatarate");
   putAmfDouble(0);
   
   putAmfString("");
@@ -132,7 +161,13 @@ int FLV::writeVideoPacket(FLVVideoPacket pkt) {
   put8(0x01);                           // AVCPacketType, 1 = AVC NALU 
   put24(0);                             // CompositionTime, if AVCPacketType == 1 then we need to set the composition time offset
 
-  // @todo write SEI
+  if(sei_data) {
+    put(sei_data, sei_size);
+    delete[] sei_data; 
+    sei_data = NULL;
+    sei_size = 0;
+  }
+
   // avc-video-packet
   put(pkt.nals_data, pkt.nals_size);
 
@@ -154,6 +189,9 @@ int FLV::writeAvcSequenceHeader(FLVAvcSequenceHeader hdr) {
     printf("WARNING: cannot write avc sequence header; flv stream is closed\n");
     return 0;
   }
+
+  printf("++++++++++ WRITING AVC SEQUENCE HEADER +++++++++++++++\n");
+
   size_t start_size = size();
   size_t tag_size_pos= start_size + 1;
   int is_encrypted = 0;
@@ -164,8 +202,11 @@ int FLV::writeAvcSequenceHeader(FLVAvcSequenceHeader hdr) {
   int sei_size = nal[2].i_payload;
   rx_uint8* sps = nal[0].p_payload + 4;
 
+  sei_data = new rx_uint8[sei_size];
+  memcpy((char*)sei_data, nal[2].p_payload, sei_size);
+
   // tag info header
-  put8((1 << 4 | 7));                       // keyframe, avc codec, unencrypted
+  put8(FLV_TAG_VIDEO);                       // keyframe, avc codec, unencrypted
   put24(0);                                 // data length of this packet (rewritten at the end)
   put24(0);                                 // timestamp
   put8(0);                                  // timestamp extended
@@ -239,21 +280,29 @@ int FLV::close(FLVCloseParams p) {
     return 0;
   }
   cb_flush(cb_user);
-
+  
   double d = 0.0;
   rx_uint64 v = 0.0;
 
+  // framerate
   double framerate = double(last_video_timestamp) / total_num_frames;
   v = swapDouble(framerate);
   cb_rewrite((char*)&v, sizeof(rx_uint64), framerate_pos, cb_user);
 
+  // duration
   d = double(last_video_timestamp) / 1000.0;
   v = swapDouble(d);
   cb_rewrite((char*)&v, sizeof(rx_uint64), duration_pos, cb_user);
 
+  // filesize
   v = swapDouble(bytes_flushed);
   cb_rewrite((char*)&v, sizeof(rx_uint64), filesize_pos, cb_user);
   
+  // datarate
+  d = (bytes_flushed * 8) / last_video_timestamp;
+  v = swapDouble(d);
+  cb_rewrite((char*)&v, sizeof(rx_uint64), datarate_pos, cb_user);
+
   cb_close(cb_user);
 
   read_dx = 0;
@@ -262,6 +311,7 @@ int FLV::close(FLVCloseParams p) {
   framerate_pos = 0;
   duration_pos = 0;
   filesize_pos = 0;
+  datarate_pos = 0;
   last_video_timestamp = 0;
   total_num_frames = 0;
   sei_size = 0;
@@ -356,6 +406,10 @@ void FLV::dumpAmf0(int type) {
         printf("--\n");
         return;
       };
+      case AMF0_TYPE_BOOLEAN: {
+        printf("amf0_type_boolean: %d\n", get8());
+        return;
+      }
       default: {
         printf("ERROR: FLV::dumpAmf0(), we do not handle the type '%s' yet.\n", flvAmf0TypeToString(type).c_str());
         ::exit(EXIT_FAILURE);
