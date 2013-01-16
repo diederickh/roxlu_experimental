@@ -26,7 +26,14 @@ if(ROXLU_PLATFORM_WIN)
   #if(ROXLU_WIN_LIB_STATIC) 
   #elseif(ROXLU_WIN_LIB_DYNAMIC)
   #endif()
-#elseif(ROXLU_PLATFORM_LINUX)
+elseif(ROXLU_PLATFORM_LINUX)
+  set(roxlu_addon_libs
+    ${roxlu_addon_libs}
+    ${roxlu_extern_lib_dir}/libx264.a
+    ${roxlu_extern_lib_dir}/libmp3lame.a
+    ${roxlu_extern_lib_dir}/libavutil.a
+    ${roxlu_extern_lib_dir}/libswscale.a
+    )
 elseif(ROXLU_PLATFORM_MAC)
   set(roxlu_addon_libs
     ${roxlu_addon_libs}
