@@ -60,7 +60,7 @@ int FLV::writeParams(FLVParams params) {
   put24(0);            // timestamp
   put8(0);             // timestamp extended
   put24(0);            // stream id, always 0
-
+  printf(">>>>>>>>> FLV::WRITEPARAMS()\n");
   // meta data
   size_t data_size_start = size();
   put8(AMF0_TYPE_STRING);

@@ -46,11 +46,7 @@ if(ROXLU_PLATFORM_WIN)
     ${roxlu_extern_lib_dir}/avutil-52.dll
     ${roxlu_extern_lib_dir}/libx264.dll
     )
-  
- # add_definitions("-D_MSWSOCK_")
-  #if(ROXLU_WIN_LIB_STATIC) 
-  #elseif(ROXLU_WIN_LIB_DYNAMIC)
-  #endif()
+
 elseif(ROXLU_PLATFORM_LINUX)
   set(roxlu_addon_libs
     ${roxlu_addon_libs}
@@ -66,6 +62,7 @@ elseif(ROXLU_PLATFORM_MAC)
     ${roxlu_extern_lib_dir}/libmp3lame.a
     ${roxlu_extern_lib_dir}/libavutil.a
     ${roxlu_extern_lib_dir}/libswscale.a
+
     )
 endif()
 
