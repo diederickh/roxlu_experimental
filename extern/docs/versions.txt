@@ -1,2 +1,17 @@
 Portaudio: pa_stable_v19_20111121.tgz, 2013.01.10
 GLFW: mac/win: 747b6d880563c0461df028d9e287652f16de7b17, linux: d1dac4b9656886d2ad1ea21357058ec145581d44,  2013.01.11
+Libuv: 358957cdec34cc2c7c0116637e624800b0e5e36a, 17 jan 2013
+x264: bc13772e21d0e61dea6ba81d0d387604b5b360df, 17 jan 2023
+Liblamemp3: 3.99.5
+
+
+
+
+
+UP TO DATE LIBRARIES
+--------------------
+                                WIN        LINUX      MAC
+x264                             +           -         -
+glfw      
+libuv                            +
+portaudio                        +            +        +

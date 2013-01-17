@@ -161,11 +161,14 @@ if(ROXLU_PLATFORM_WIN)
   set(CMAKE_CXX_FLAGS_DEBUG "/${roxlu_win_runtime_project}")
   set(CMAKE_CXX_FLAGS_RELEASE "/${roxlu_win_runtime_project}")
 
+  
+#   set(roxlu_extern_include_dir
+#     ${roxlu_extern_include_dir}
+#     ${roxlu_base_dir}/extern/include/msinttypes/
+#     )
+# 
 
-  set(roxlu_extern_include_dir
-    ${roxlu_extern_include_dir}
-    ${roxlu_base_dir}/extern/include/msinttypes/
-    )
+  include_directories(${roxlu_base_dir}/extern/include/msinttypes/)
 
   add_definitions( "/wd4995 /wd4244 /wd4305 /D_CRT_SECURE_NO_WARNINGS /W3")
 

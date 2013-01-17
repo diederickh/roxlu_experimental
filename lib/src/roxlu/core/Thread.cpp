@@ -100,6 +100,10 @@ namespace roxlu {
   void Thread::join() {
     printf("ERROR: Thread::join() is not yet implemented on Windows\n");
   }
+
+  void Thread::exit() {
+    printf("ERROR: Thread::exit(), is not yet implemented on Windows.\n");
+  }
 #endif
 
 } // roxlu
