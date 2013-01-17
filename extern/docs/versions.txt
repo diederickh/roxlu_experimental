@@ -13,5 +13,5 @@ UP TO DATE LIBRARIES
                                 WIN        LINUX      MAC
 x264                             +           -         -
 glfw      
-libuv                            +
-portaudio                        +            +        +
+libuv                            +           -         +
+portaudio                        +           +         +
