@@ -83,4 +83,13 @@ elseif(ROXLU_PLATFORM_MAC)
     )
 endif()
 
+if(CMAKE_BUILD_TYPE STREQUAL Debug)
+  if(CMAKE_COMPILER_IS_GNUCXX)
+    add_definitions("-ggdb")
+  endif()
+  if(MSVC)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUGS} /Od")
+  endif()
+endif();
+
 add_library(roxlu_ogg STATIC ${ogg_source_files})

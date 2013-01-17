@@ -132,7 +132,7 @@ static std::string rx_get_exe_path() {
 
   // Try to get the executable path with a buffer of MAX_PATH characters.
   DWORD result = ::GetModuleFileNameA(nullptr, buffer, static_cast<DWORD>(MAX_PATH));
-  if (result) {
+  if(result == 0) {
     return "";
   }
 

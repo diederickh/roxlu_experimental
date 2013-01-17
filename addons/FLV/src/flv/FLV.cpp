@@ -95,7 +95,8 @@ int FLV::writeParams(FLVParams params) {
     putAmfDouble(FLV_VIDEOCODEC_AVC);
   }
 
-  if(flv_header.has_video) {
+  if(flv_header.has_audio) {
+    printf("__________________________________________________<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>\n");
     putAmfString("audiodatarate");
     putAmfDouble(flv_header.sound_bitrate/1024.0);
 
@@ -135,9 +136,9 @@ int FLV::writeParams(FLVParams params) {
   rewrite24(data_size, data_size_pos); // DataSize
   put32(size() - start_size); // PreviousTagSize
 
+  dump();
   flush();
 
-  dump();
   return 1;
 }
 
