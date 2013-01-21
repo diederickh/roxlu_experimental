@@ -6,7 +6,7 @@ if [ ! -d libuv ] ; then
     mkdir libuv 
     cd libuv 
     git clone https://github.com/joyent/libuv.git .
-    git checkout 92fb84b751e18f032c02609467f44bfe927b80c5 
+    git --reset hard 358957cdec34cc2c7c0116637e624800b0e5e36a
 fi
 
 
