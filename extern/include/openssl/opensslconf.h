@@ -88,8 +88,8 @@
 
 #if !(defined(VMS) || defined(__VMS)) /* VMS uses logical names instead */
 #if defined(HEADER_CRYPTLIB_H) && !defined(OPENSSLDIR)
-#define ENGINESDIR "/Users/diederickhuijbers/Downloads/_curl_and_ssl/build/lib/engines"
-#define OPENSSLDIR "/Users/diederickhuijbers/Downloads/_curl_and_ssl/build/ssl"
+#define ENGINESDIR "/Users/roxlu/Documents/programming/c++/roxlu_libs/scripts/mac/libssl/../build/lib/engines"
+#define OPENSSLDIR "/Users/roxlu/Documents/programming/c++/roxlu_libs/scripts/mac/libssl/../build/ssl"
 #endif
 #endif
 

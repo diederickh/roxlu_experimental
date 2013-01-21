@@ -96,4 +96,12 @@ typedef signed char int8;
 #endif  // __GNUC__
 #endif  // LIBYUV_API
 
+// Visual C x86 or GCC little endian.
+#if defined(__x86_64__) || defined(_M_X64) || \
+  defined(__i386__) || defined(_M_IX86) || \
+  defined(__arm__) || defined(_M_ARM) || \
+  (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+#define LIBYUV_LITTLE_ENDIAN
+#endif
+
 #endif  // INCLUDE_LIBYUV_BASIC_TYPES_H_  NOLINT

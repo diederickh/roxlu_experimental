@@ -27,6 +27,9 @@ set(pango_libs
   ${roxlu_extern_lib_dir}/libpng15.a
   ${roxlu_extern_lib_dir}/libpango-1.0.a
   ${roxlu_extern_lib_dir}/libpangocairo-1.0.a
+  ${roxlu_extern_lib_dir}/libfontconfig.a
+  ${roxlu_extern_lib_dir}/libpangoft2-1.0.a
+  ${roxlu_extern_lib_dir}/libfreetype.a
 )
 endif(ROXLU_PLATFORM_MAC)
 

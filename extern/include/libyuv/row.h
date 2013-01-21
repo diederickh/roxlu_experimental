@@ -99,6 +99,7 @@ extern "C" {
 #define HAS_YUY2TOYROW_SSE2
 
 // Effects
+#define HAS_ARGBADDROW_SSE2
 #define HAS_ARGBAFFINEROW_SSE2
 #define HAS_ARGBATTENUATEROW_SSSE3
 #define HAS_ARGBBLENDROW_SSSE3
@@ -106,6 +107,7 @@ extern "C" {
 #define HAS_ARGBGRAYROW_SSSE3
 #define HAS_ARGBINTERPOLATEROW_SSSE3
 #define HAS_ARGBMIRRORROW_SSSE3
+#define HAS_ARGBMULTIPLYROW_SSE2
 #define HAS_ARGBQUANTIZEROW_SSE2
 #define HAS_ARGBSEPIAROW_SSSE3
 #define HAS_ARGBSHADEROW_SSE2
@@ -118,6 +120,7 @@ extern "C" {
 // TODO(fbarchard): Port to gcc.
 #if !defined(YUV_DISABLE_ASM) && defined(_M_IX86)
 #define HAS_ARGBCOLORTABLEROW_X86
+#define HAS_ARGBTOUV444ROW_SSSE3
 #endif
 
 // The following are Yasm x86 only.
@@ -225,6 +228,7 @@ extern "C" {
 #define HAS_ARGBQUANTIZEROW_NEON
 #define HAS_ARGBGRAYROW_NEON
 #define HAS_ARGBSEPIAROW_NEON
+#define HAS_ARGBSHADEROW_NEON
 #define HAS_ARGBCOLORMATRIXROW_NEON
 #endif
 
@@ -489,6 +493,13 @@ void ARGB1555ToUVRow_C(const uint8* src_argb1555, int src_stride_argb1555,
                        uint8* dst_u, uint8* dst_v, int width);
 void ARGB4444ToUVRow_C(const uint8* src_argb4444, int src_stride_argb4444,
                        uint8* dst_u, uint8* dst_v, int width);
+
+void ARGBToUV444Row_SSSE3(const uint8* src_argb,
+                          uint8* dst_u, uint8* dst_v, int width);
+void ARGBToUV444Row_Unaligned_SSSE3(const uint8* src_argb,
+                                    uint8* dst_u, uint8* dst_v, int width);
+void ARGBToUV444Row_Any_SSSE3(const uint8* src_argb,
+                              uint8* dst_u, uint8* dst_v, int width);
 
 void ARGBToUV422Row_SSSE3(const uint8* src_argb,
                           uint8* dst_u, uint8* dst_v, int width);
@@ -957,6 +968,23 @@ void ARGBBlendRow_NEON(const uint8* src_argb, const uint8* src_argb1,
 void ARGBBlendRow_C(const uint8* src_argb, const uint8* src_argb1,
                     uint8* dst_argb, int width);
 
+// ARGB multiply images.  Same API as Blend, but these require
+// pointer and width alignment for SSE2.
+void ARGBMultiplyRow_C(const uint8* src_argb, const uint8* src_argb1,
+                       uint8* dst_argb, int width);
+void ARGBMultiplyRow_SSE2(const uint8* src_argb, const uint8* src_argb1,
+                          uint8* dst_argb, int width);
+void ARGBMultiplyRow_Any_SSE2(const uint8* src_argb, const uint8* src_argb1,
+                              uint8* dst_argb, int width);
+
+// ARGB add images.
+void ARGBAddRow_C(const uint8* src_argb, const uint8* src_argb1,
+                  uint8* dst_argb, int width);
+void ARGBAddRow_SSE2(const uint8* src_argb, const uint8* src_argb1,
+                     uint8* dst_argb, int width);
+void ARGBAddRow_Any_SSE2(const uint8* src_argb, const uint8* src_argb1,
+                         uint8* dst_argb, int width);
+
 void ARGBToRGB24Row_Any_SSSE3(const uint8* src_argb, uint8* dst_rgb, int pix);
 void ARGBToRAWRow_Any_SSSE3(const uint8* src_argb, uint8* dst_rgb, int pix);
 void ARGBToRGB565Row_Any_SSE2(const uint8* src_argb, uint8* dst_rgb, int pix);
@@ -1259,7 +1287,6 @@ void CumulativeSumToAverageRow_C(const int32* topleft, const int32* botleft,
                                  int width, int area, uint8* dst, int count);
 void ComputeCumulativeSumRow_C(const uint8* row, int32* cumsum,
                                const int32* previous_cumsum, int width);
-
 
 LIBYUV_API
 void ARGBAffineRow_C(const uint8* src_argb, int src_argb_stride,

@@ -120,6 +120,9 @@ pango: /Users/roxlu/roxlu/lib/../extern/lib/mac/64/libpixman-1.a
 pango: /Users/roxlu/roxlu/lib/../extern/lib/mac/64/libpng15.a
 pango: /Users/roxlu/roxlu/lib/../extern/lib/mac/64/libpango-1.0.a
 pango: /Users/roxlu/roxlu/lib/../extern/lib/mac/64/libpangocairo-1.0.a
+pango: /Users/roxlu/roxlu/lib/../extern/lib/mac/64/libfontconfig.a
+pango: /Users/roxlu/roxlu/lib/../extern/lib/mac/64/libpangoft2-1.0.a
+pango: /Users/roxlu/roxlu/lib/../extern/lib/mac/64/libfreetype.a
 pango: CMakeFiles/pango.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --red --bold "Linking CXX executable pango"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/pango.dir/link.txt --verbose=$(VERBOSE)
