@@ -1,2 +1,4 @@
-/Users/roxlu/roxlu/apps/examples/pango/build/CMakeFiles/pango.dir
-/Users/roxlu/roxlu/apps/examples/pango/build/CMakeFiles/roxlu_pango.dir
+C:/Users/roxlu/Documents/roxlu/apps/examples/pango/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/roxlu/Documents/roxlu/apps/examples/pango/build/CMakeFiles/ZERO_CHECK.dir
+C:/Users/roxlu/Documents/roxlu/apps/examples/pango/build/CMakeFiles/pango.dir
+C:/Users/roxlu/Documents/roxlu/apps/examples/pango/build/CMakeFiles/roxlu_pango.dir
