@@ -12,6 +12,8 @@ if [ ! -d bin ] ; then
    mkdir bin/data
 fi
 
-cd ${d}
-cd bin
+cd build
+make install
+cd ${d}/bin
 ./${app}
+

@@ -13,5 +13,7 @@ if [ ! -d bin ] ; then
 fi
 
 cd build
-cmake ../
 make install
+cd ${d}/bin
+./${app}
+
