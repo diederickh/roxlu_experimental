@@ -75,10 +75,7 @@ set(roxlu_include_dirs
   ${roxlu_include_dirs}
   ${roxlu_include_dir}
   ${roxlu_extern_include_dir}
-
 )
-
-
 
 # On windows we build 32bit (msvc2012 is 32bit by default)
 if(WIN32)

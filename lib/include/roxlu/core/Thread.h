@@ -39,7 +39,6 @@ namespace roxlu {
     virtual void run() = 0;
   };
 
-
   class Thread {
   public:
     Thread();

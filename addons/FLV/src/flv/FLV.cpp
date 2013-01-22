@@ -283,6 +283,7 @@ int FLV::close(FLVCloseParams p) {
     printf("WARNING: trying to close FLV, but we're not opened. Maybe you already closed flv?\n");
     return 0;
   }
+
   cb_flush(cb_user);
   
   double d = 0.0;
@@ -301,7 +302,7 @@ int FLV::close(FLVCloseParams p) {
   // filesize
   v = swapDouble(bytes_flushed);
   cb_rewrite((char*)&v, sizeof(rx_uint64), filesize_pos, cb_user);
-  
+
   // datarate
   d = (bytes_flushed * 8) / last_video_timestamp;
   v = swapDouble(d);

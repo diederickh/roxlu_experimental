@@ -10,14 +10,20 @@ include(${roxlu_addons_dir}/Audio/CMakeLists.txt)              # Audio addon
 set(simulation_base ${CMAKE_CURRENT_LIST_DIR}/)
 set(simulation_install_dir ${simulation_base}bin/)
 set(simulation_include_dir ${simulation_base}src/)
-set(CMAKE_INSTALL_PREFIX ${simulation_install_dir})
+set(simulation_install_dir_windows ${CMAKE_CURRENT_BINARY_DIR}/)
 
+set(CMAKE_INSTALL_PREFIX ${simulation_install_dir})
 set(CMAKE_EXE_LINKER_FLAGS ${roxlu_linker_flags})
 #set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_BUILD_TYPE Debug)
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
-  add_definitions("-ggdb")
+  if(CMAKE_COMPILER_IS_GNUCXX)
+    add_definitions("-ggdb")
+  endif()
+  if(MSVC)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUGS} /Od /ZI")
+    endif()
 endif()
 
 set(simulation_libs

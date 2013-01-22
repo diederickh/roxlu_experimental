@@ -317,7 +317,6 @@ void AV::run() {
       work_packets.clear();
     } // video only
   }
-
   reset();
   thread.exit();
 }

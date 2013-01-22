@@ -7,6 +7,14 @@ set(curl_base_dir ${CMAKE_CURRENT_LIST_DIR})
 set(curl_src_dir ${curl_base_dir}/src/kurl/)
 set(curl_include_dir ${curl_base_dir}/include)
 
+if(CMAKE_BUILD_TYPE STREQUAL Debug)
+  if(CMAKE_COMPILER_IS_GNUCXX)
+    add_definitions("-ggdb")
+  endif()
+  if(MSVC)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUGS} /Od /ZI")
+    endif()
+endif()
 
 include_directories(
   ${curl_include_dir}

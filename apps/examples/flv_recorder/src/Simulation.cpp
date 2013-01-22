@@ -20,12 +20,14 @@ size_t flv_write(char* data, size_t nbytes, void* user) {
 }
 
 void flv_rewrite(char* data, size_t nbytes, size_t pos, void* user) {
+
   Simulation* s = static_cast<Simulation*>(user);
+  printf("TRYING TO REWRITE: sim: %p, file: %p\n", s, s->flv_fp);
   if(!s->flv_fp) {
     printf("WARNING: cannot re-write to flv, file not opened.\n");
     return;
   }
-
+  printf("REWRITING: sim: %p, file: %p\n", s, s->flv_fp);
   long int curr = ftell(s->flv_fp);
   fseek(s->flv_fp, pos, SEEK_SET);
   fwrite(data,nbytes, 1, s->flv_fp);
@@ -47,7 +49,10 @@ void flv_close(void* user) {
     printf("WARNING: cannot flush, file not opened.\n");
     return;
   }
+  printf("flv_close <--> CLOSING: %p, %p\n", s, s->flv_fp);
   fclose(s->flv_fp);
+  s->flv_fp = NULL;
+
   printf("FILE CLOSED!\n");
 }
 
@@ -63,7 +68,8 @@ Simulation::Simulation()
 
 Simulation::~Simulation() {
   //  av.reset();
-  //  av.stop();
+  av.stop();
+  av.waitForEncodingThreadToFinish();
   
   //  av_thread.join();
 }
@@ -227,7 +233,8 @@ void Simulation::setupAudio() {
 
 void Simulation::setupCapture() {
   cap.listDevices();
-  bool r = cap.openDevice(0, VIDEO_W, VIDEO_H, VC_FMT_UYVY422 ); //  VC_FMT_YUYV422); // format might differ on windows (VC_FMT_UYVY422)
+  //  bool r = cap.openDevice(0, VIDEO_W, VIDEO_H, VC_FMT_UYVY422 ); //  VC_FMT_YUYV422); // format might differ on windows (VC_FMT_UYVY422)
+  bool r = cap.openDevice(0, VIDEO_W, VIDEO_H, VC_FMT_YUYV422); //  VC_FMT_YUYV422); // format might differ on windows (VC_FMT_UYVY422)
   if(!r) {
     printf("ERROR: cannot open video capture device. Check if the device number is correct.\n");
     ::exit(EXIT_FAILURE);
@@ -239,7 +246,7 @@ void Simulation::setupCapture() {
     ::exit(EXIT_FAILURE);
   }
 
-  sws = sws_getContext(cap.getWidth(), cap.getHeight(), PIX_FMT_UYVY422,
+  sws = sws_getContext(cap.getWidth(), cap.getHeight(), PIX_FMT_YUYV422,
                        cap.getWidth(), cap.getHeight(), PIX_FMT_RGB24,
                        SWS_FAST_BILINEAR, NULL, NULL, NULL);
   if(!sws) {

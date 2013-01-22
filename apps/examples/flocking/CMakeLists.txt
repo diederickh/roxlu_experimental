@@ -20,6 +20,15 @@ set(simulation_libs
   ${glfw_libs}
 )
 
+if(CMAKE_BUILD_TYPE STREQUAL Debug)
+  if(CMAKE_COMPILER_IS_GNUCXX)
+    add_definitions("-ggdb")
+  endif()
+  if(MSVC)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUGS} /Od /ZI")
+    endif()
+endif()
+
 get_filename_component(simulation_name ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 
 file(GLOB_RECURSE simulation_sources src/*.cpp)

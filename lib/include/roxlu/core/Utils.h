@@ -237,4 +237,6 @@ static std::string rx_to_data_path(const std::string filename) {
 
 static std::string rx_to_exe_path(std::string filename) {
   return rx_get_exe_path() +filename;
-}#endif
+}
+
+#endif // ROXLU_UTILSH

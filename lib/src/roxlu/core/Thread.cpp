@@ -58,7 +58,6 @@ namespace roxlu {
   }
 
   void Thread::join() {
-    printf("JOINING\n");
     pthread_join(handle, NULL);
   }
 
@@ -76,34 +75,29 @@ namespace roxlu {
 
   void Thread::create(Runnable& run) {
     handle = CreateThread(
-                          NULL
-                          ,0
-                          ,Thread::threadFunction
-                          ,&run
-                          ,0
+                          NULL                       // default security attributes
+                          ,0                         // use default stack size                          
+                          ,Thread::threadFunction    // thread function name
+                          ,&run                      // argument to thread function 
+                          ,0                         // use default creation flags 
                           ,&id
                           );
     if(handle == NULL) {
-      //	printf("Error creating thread.\n");
+      printf("Thread::Create() - Error creating thread.\n");
     }
-    /*
-      CreateThread( 
-      NULL,                   // default security attributes
-      0,                      // use default stack size  
-      MyThreadFunction,       // thread function name
-      pDataArray[i],          // argument to thread function 
-      0,                      // use default creation flags 
-      &dwThreadIdArray[i]);  
-    */
   }
 
   void Thread::join() {
-    printf("ERROR: Thread::join() is not yet implemented on Windows\n");
+    WaitForSingleObject(handle, INFINITE);
   }
 
   void Thread::exit() {
-    printf("ERROR: Thread::exit(), is not yet implemented on Windows.\n");
+    if(handle) {
+      CloseHandle(handle);
+      handle = NULL;
+    }
   }
+
 #endif
 
 } // roxlu

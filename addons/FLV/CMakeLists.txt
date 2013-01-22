@@ -3,6 +3,15 @@ cmake_minimum_required(VERSION 2.8)
 
 include(${CMAKE_CURRENT_LIST_DIR}/../../lib/CMakeLists.txt) # roxlu
 
+if(CMAKE_BUILD_TYPE STREQUAL Debug)
+  if(CMAKE_COMPILER_IS_GNUCXX)
+    add_definitions("-ggdb")
+  endif()
+  if(MSVC)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUGS} /Od /ZI")
+    endif()
+endif()
+
 set(flv_base_dir ${CMAKE_CURRENT_LIST_DIR})
 set(flv_src_dir ${flv_base_dir}/src/)
 set(flv_include_dir ${flv_base_dir}/include/)
@@ -38,15 +47,6 @@ if(ROXLU_PLATFORM_WIN)
     psapi.lib
     iphlpapi.lib
     )
-
-#     ${roxlu_extern_lib_dir}/libuv_static_${roxlu_win_runtime}.lib
-#     ${roxlu_extern_lib_dir}/libavutil_import_MD.lib
-#     ${roxlu_extern_lib_dir}/libswscale_import_MD.lib
-#     ${roxlu_extern_lib_dir}/libx264_import_MD.lib
-#     ${roxlu_extern_lib_dir}/libmp3lame_static_release_MD.lib
-#     ${roxlu_extern_lib_dir}/libmpghip-static.lib
-
-
 
   set(roxlu_install_files
     ${roxlu_install_files}

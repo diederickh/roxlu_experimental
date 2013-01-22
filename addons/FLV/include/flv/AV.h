@@ -7,7 +7,6 @@
  FLV flv;
  flv.setCallbacks(write_flv, rewrite_flv, flush_flv, close_flv, this); // callbacks
  
- 
  // setup av
  AV av;
  av.setFLV(flv); 
@@ -26,6 +25,17 @@
  if(av.wantsNewVideoFrame()) {
     av.addVideoFrame(pixels); 
  )
+
+ // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ //                     SUPER IMPORTANT!
+ // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ // BECAUSE ENCODING IS DONE IN A SEPARATE THREAD YOU NEED TO 
+ // MAKE SURE THAT YOU CALL: av.waitForEncodingThreadToFinish()
+ // IN YOU DESTRUCTOR! 
+ // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ av.waitForEncodingThreadToFinish();
+ 
 
 
  Dev info:
@@ -104,6 +114,8 @@ class AV : public Runnable {
 
   void start();
   void stop();
+
+  void waitForEncodingThreadToFinish();
 
  private:
   bool initializeVideo();
@@ -248,4 +260,9 @@ inline void AV::start() {
 inline void AV::stop() {
   must_stop = true;
 }
+
+inline void AV::waitForEncodingThreadToFinish() {
+  thread.join();
+}
+
 #endif

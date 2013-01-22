@@ -19,6 +19,14 @@ set(compile_libs
   ${roxlu_addon_libs}
 )
 
+if(CMAKE_BUILD_TYPE STREQUAL Debug)
+  if(CMAKE_COMPILER_IS_GNUCXX)
+    add_definitions("-ggdb")
+  endif()
+  if(MSVC)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUGS} /Od /ZI")
+    endif()
+endif()
 
 set(example_install_dir_windows ${CMAKE_CURRENT_BINARY_DIR}/)
 set(example_base_dir ${CMAKE_CURRENT_LIST_DIR})
