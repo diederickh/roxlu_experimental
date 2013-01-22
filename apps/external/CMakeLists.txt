@@ -14,7 +14,6 @@ add_definitions("-DROXLU_GL_WRAPPER=1")
 # GLFW
 set(glfw_base_dir ${CMAKE_CURRENT_LIST_DIR}/)
 set(glfw_include_dir ${glfw_base_dir}/glfw/include/)
-set(glfw_lib_dir ${glfw_base_dir}/glfw/lib/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits})
 set(glfw_wrapper_sources ${glfw_base_dir}/glfw_wrapper/SimulationBase.cpp)
 
 # GLEW
@@ -23,26 +22,32 @@ if(NOT ROXLU_PLATFORM_WIN)
     ${roxlu_extern_lib_dir}/libglfw3.a
     ${roxlu_extern_lib_dir}/libGLEW.a
     )
+  add_definitions("-DGLEW_STATIC")
 endif()
 
 if(ROXLU_PLATFORM_WIN)
   set(glfw_libs
     opengl32.lib
-    ${glew_lib_dir}/glew32_static_${roxlu_win_runtime}.lib
-    ${glfw_lib_dir}/glfw3_static_${roxlu_win_runtime}.lib
+    ${roxlu_extern_lib_dir}/glew32.lib
+    ${roxlu_extern_lib_dir}/glfw3.lib
     )
-  add_definitions("-DGLEW_STATIC")
+
+  set(roxlu_install_files
+    ${roxlu_install_files}
+    ${roxlu_extern_bin_dir}/glew32.dll
+    )
+
 endif(ROXLU_PLATFORM_WIN)
 
 # Platform specifics
 if(ROXLU_PLATFORM_LINUX)
-set(glfw_libs
-  ${glfw_libs}
-  GL
-  X11
-  Xxf86vm
-  rt
-  /usr/lib/x86_64-linux-gnu/libXrandr.so
+  set(glfw_libs
+    ${glfw_libs}
+    GL
+    X11
+    Xxf86vm
+    rt
+    /usr/lib/x86_64-linux-gnu/libXrandr.so
 )
 endif(ROXLU_PLATFORM_LINUX)
 

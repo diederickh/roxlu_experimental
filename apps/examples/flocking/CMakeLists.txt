@@ -44,4 +44,10 @@ target_link_libraries(${simulation_name} ${simulation_libs})
 
 # Installation 
 install(TARGETS ${simulation_name} DESTINATION ${simulation_install_dir})
+install(FILES ${roxlu_install_files} DESTINATION ${simulation_install_dir})
+
+if(WIN32)
+  install(FILES ${roxlu_install_files} DESTINATION ${simulation_install_dir_windows}/Release)
+  install(FILES ${roxlu_install_files} DESTINATION ${simulation_install_dir_windows}/Debug)
+endif()
 

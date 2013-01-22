@@ -29,6 +29,6 @@ install(TARGETS ${example_name} DESTINATION ${example_install_dir})
 install(FILES ${roxlu_install_files} DESTINATION ${example_install_dir})
 
 if(WIN32)
-#  install(FILES ${roxlu_install_files} DESTINATION ${_install_dir_windows}/Release)
+#  install(FILES ${roxlu_install_files} DESTINATION ${simulation_install_dir_windows}/Release)
 #  install(FILES ${roxlu_install_files} DESTINATION ${simulation_install_dir_windows}/Debug)
 endif()
