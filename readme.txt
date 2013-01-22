@@ -15,3 +15,7 @@ We're using CMake aas build system which set a define called ROXLU_GL_WRAPPER
 (see include/roxlu/opengl/OpenGLInit.h). When we do not set the ROXLU_GL_WRAPPER
 define all openGL related code will be excluded from compilation.
 
+Install Ubuntu/linux
+=====================
+You might need to install some additional developer packages:
+- apt-get install libudev-dev

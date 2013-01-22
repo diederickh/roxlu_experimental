@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <vector>
 #include <string>
+#include <assert.h>
 
 extern "C" { 
 #include <x264.h>
@@ -316,6 +317,7 @@ inline void FLV::putAmfBool(bool flag) {
 }
 
 inline rx_uint8 FLV::get8() {
+  assert(buffer.size() > 0);
   return buffer[read_dx++];
 }
 

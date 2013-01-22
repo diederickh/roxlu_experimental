@@ -8,6 +8,7 @@ TextSurface::TextSurface()
   ,width(0)
   ,height(0)
 {
+  g_type_init();
 }
 
 TextSurface::~TextSurface() {

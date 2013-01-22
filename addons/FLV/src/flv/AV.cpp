@@ -65,7 +65,7 @@ bool AV::setupAudio(int numChannels, int sampleRate, int maxSamplesPerFrame, AVA
     printf("ERROR: unsupported audio format.. we haven't defined a size per sample yet.\n");
     return false;
   }
-
+  printf("++++++++++ __________________________________________________________________________ SETUP // INITIALZIE\n");
   audio_bytes_per_frame = audio_num_channels * audio_bytes_per_sample * audio_max_samples_per_frame;
   return true;
 }
@@ -222,6 +222,7 @@ bool AV::setupX264() {
 }
 
 void AV::run() {
+
   // audio + video 
   if(vid_w != 0 && audio_num_channels != 0) {
     std::vector<AVPacket*> work_packets;

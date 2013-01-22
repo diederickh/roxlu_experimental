@@ -1,20 +1,20 @@
 /*
  * copyright (c) 2006 Michael Niedermayer <michaelni@gmx.at>
  *
- * This file is part of FFmpeg.
+ * This file is part of Libav.
  *
- * FFmpeg is free software; you can redistribute it and/or
+ * Libav is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
  *
- * FFmpeg is distributed in the hope that it will be useful,
+ * Libav is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with FFmpeg; if not, write to the Free Software
+ * License along with Libav; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
@@ -23,14 +23,14 @@
 
 #include <stdarg.h>
 #include "avutil.h"
+#include "attributes.h"
 
 /**
- * Describes the class of an AVClass context structure. That is an
+ * Describe the class of an AVClass context structure. That is an
  * arbitrary struct of which the first field is a pointer to an
  * AVClass struct (e.g. AVCodecContext, AVFormatContext etc.).
  */
-typedef struct AVCLASS AVClass;
-struct AVCLASS {
+typedef struct AVClass {
     /**
      * The name of the class; usually it is the same name as the
      * context structure type to which the AVClass is associated.
@@ -39,7 +39,7 @@ struct AVCLASS {
 
     /**
      * A pointer to a function which returns the name of a context
-     * instance \p ctx associated with the class.
+     * instance ctx associated with the class.
      */
     const char* (*item_name)(void* ctx);
 
@@ -49,19 +49,48 @@ struct AVCLASS {
      * @see av_set_default_options()
      */
     const struct AVOption *option;
-};
+
+    /**
+     * LIBAVUTIL_VERSION with which this structure was created.
+     * This is used to allow fields to be added without requiring major
+     * version bumps everywhere.
+     */
+
+    int version;
+
+    /**
+     * Offset in the structure where log_level_offset is stored.
+     * 0 means there is no such variable
+     */
+    int log_level_offset_offset;
+
+    /**
+     * Offset in the structure where a pointer to the parent context for
+     * logging is stored. For example a decoder could pass its AVCodecContext
+     * to eval as such a parent context, which an av_log() implementation
+     * could then leverage to display the parent context.
+     * The offset can be NULL.
+     */
+    int parent_log_context_offset;
+
+    /**
+     * Return next AVOptions-enabled child or NULL
+     */
+    void* (*child_next)(void *obj, void *prev);
+
+    /**
+     * Return an AVClass corresponding to the next potential
+     * AVOptions-enabled child.
+     *
+     * The difference between child_next and this is that
+     * child_next iterates over _already existing_ objects, while
+     * child_class_next iterates over _all possible_ children.
+     */
+    const struct AVClass* (*child_class_next)(const struct AVClass *prev);
+} AVClass;
 
 /* av_log API */
 
-#if LIBAVUTIL_VERSION_INT < (50<<16)
-#define AV_LOG_QUIET -1
-#define AV_LOG_FATAL 0
-#define AV_LOG_ERROR 0
-#define AV_LOG_WARNING 1
-#define AV_LOG_INFO 1
-#define AV_LOG_VERBOSE 1
-#define AV_LOG_DEBUG 2
-#else
 #define AV_LOG_QUIET    -8
 
 /**
@@ -95,14 +124,9 @@ struct AVCLASS {
  * Stuff which is only useful for libav* developers.
  */
 #define AV_LOG_DEBUG    48
-#endif
-
-#if LIBAVUTIL_VERSION_INT < (50<<16)
-extern int av_log_level;
-#endif
 
 /**
- * Sends the specified message to the log if the level is less than or equal
+ * Send the specified message to the log if the level is less than or equal
  * to the current av_log_level. By default, all logging messages are sent to
  * stderr. This behavior can be altered by setting a different av_vlog callback
  * function.
@@ -115,16 +139,35 @@ extern int av_log_level;
  * subsequent arguments are converted to output.
  * @see av_vlog
  */
-#ifdef __GNUC__
-void av_log(void*, int level, const char *fmt, ...) __attribute__ ((__format__ (__printf__, 3, 4)));
-#else
-void av_log(void*, int level, const char *fmt, ...);
-#endif
+void av_log(void *avcl, int level, const char *fmt, ...) av_printf_format(3, 4);
 
-void av_vlog(void*, int level, const char *fmt, va_list);
+void av_vlog(void *avcl, int level, const char *fmt, va_list);
 int av_log_get_level(void);
 void av_log_set_level(int);
 void av_log_set_callback(void (*)(void*, int, const char*, va_list));
 void av_log_default_callback(void* ptr, int level, const char* fmt, va_list vl);
+const char* av_default_item_name(void* ctx);
+
+/**
+ * av_dlog macros
+ * Useful to print debug messages that shouldn't get compiled in normally.
+ */
+
+#ifdef DEBUG
+#    define av_dlog(pctx, ...) av_log(pctx, AV_LOG_DEBUG, __VA_ARGS__)
+#else
+#    define av_dlog(pctx, ...)
+#endif
+
+/**
+ * Skip repeated messages, this requires the user app to use av_log() instead of
+ * (f)printf as the 2 would otherwise interfere and lead to
+ * "Last message repeated x times" messages below (f)printf messages with some
+ * bad luck.
+ * Also to receive the last, "last repeated" line if any, the user app must
+ * call av_log(NULL, AV_LOG_QUIET, ""); at the end
+ */
+#define AV_LOG_SKIP_REPEATED 1
+void av_log_set_flags(int arg);
 
 #endif /* AVUTIL_LOG_H */

@@ -27,34 +27,62 @@ set(pango_libs
   ${roxlu_extern_lib_dir}/libpng15.a
   ${roxlu_extern_lib_dir}/libpango-1.0.a
   ${roxlu_extern_lib_dir}/libpangocairo-1.0.a
+  ${roxlu_extern_lib_dir}/libfontconfig.a
+  ${roxlu_extern_lib_dir}/libpangoft2-1.0.a
+  ${roxlu_extern_lib_dir}/libfreetype.a
 )
-endif(ROXLU_PLATFORM_MAC)
+endif()
 
 if(ROXLU_PLATFORM_LINUX)
-set(pango_libs
-  ${roxlu_extern_lib_dir}/libiconv.a
-  ${roxlu_extern_lib_dir}/libffi.a
-  ${roxlu_extern_lib_dir}/libcairo.a
-  ${roxlu_extern_lib_dir}/libpixman-1.a
-  ${roxlu_extern_lib_dir}/libpng15.a
-  ${roxlu_extern_lib_dir}/libpango-1.0.a
-  ${roxlu_extern_lib_dir}/libgthread-2.0.a
-  ${roxlu_extern_lib_dir}/libgio-2.0.a
-  ${roxlu_extern_lib_dir}/libglib-2.0.a
-  ${roxlu_extern_lib_dir}/libgobject-2.0.a
-  ${roxlu_extern_lib_dir}/libgmodule-2.0.a
-  ${roxlu_extern_lib_dir}/libpangocairo-1.0.a
-  ${roxlu_extern_lib_dir}/libintl.a
-  ${roxlu_extern_lib_dir}/libiconv.a
-  ${roxlu_extern_lib_dir}/libpangoft2-1.0.a
-  -ldl
-  -lpthread
-  -lrt
-  -lfreetype
-  -lz
-  -lfontconfig
-)
-endif(ROXLU_PLATFORM_LINUX)
+  set(pango_libs
+    ${roxlu_extern_lib_dir}/libiconv.a
+    ${roxlu_extern_lib_dir}/libffi.a
+    ${roxlu_extern_lib_dir}/libcairo.a
+    ${roxlu_extern_lib_dir}/libpixman-1.a
+    ${roxlu_extern_lib_dir}/libpng15.a
+    ${roxlu_extern_lib_dir}/libpango-1.0.a
+    ${roxlu_extern_lib_dir}/libgthread-2.0.a
+    ${roxlu_extern_lib_dir}/libgio-2.0.a
+    ${roxlu_extern_lib_dir}/libglib-2.0.a
+    ${roxlu_extern_lib_dir}/libgobject-2.0.a
+    ${roxlu_extern_lib_dir}/libgmodule-2.0.a
+    ${roxlu_extern_lib_dir}/libpangocairo-1.0.a
+    ${roxlu_extern_lib_dir}/libintl.a
+    ${roxlu_extern_lib_dir}/libiconv.a
+    ${roxlu_extern_lib_dir}/libpangoft2-1.0.a
+    -ldl
+    -lpthread
+    -lrt
+    -lfreetype
+    -lz
+    -lfontconfig
+  )
+endif()
+
+if(ROXLU_PLATFORM_WIN) 
+  set(pango_libs
+    ${roxlu_extern_lib_dir}/pango-1.0.lib
+    ${roxlu_extern_lib_dir}/pangocairo-1.0.lib
+    ${roxlu_extern_lib_dir}/cairo.lib
+    ${roxlu_extern_lib_dir}/glib-2.0.lib
+    ${roxlu_extern_lib_dir}/gobject-2.0.lib
+    ${roxlu_extern_lib_dir}/pixman-1.lib
+    )
+  set(roxlu_install_files
+    ${roxlu_install_files}
+    ${roxlu_extern_bin_dir}/pango-1.dll
+    ${roxlu_extern_bin_dir}/pangocairo-1.dll
+    ${roxlu_extern_bin_dir}/cairo.dll
+    ${roxlu_extern_bin_dir}/gmodule-2.dll
+    ${roxlu_extern_bin_dir}/glib-2.dll
+    ${roxlu_extern_bin_dir}/gobject-2.dll
+    ${roxlu_extern_bin_dir}/libintl.dll
+    ${roxlu_extern_bin_dir}/iconv.dll
+    ${roxlu_extern_bin_dir}/libpng15.dll
+    ${roxlu_extern_bin_dir}/zlib1.dll
+    ${roxlu_extern_bin_dir}/pangowin32-1.dll
+    )
+endif()
 
 
 set(roxlu_addon_libs

@@ -14,6 +14,8 @@ set(audio_src_dir ${audio_base_dir}/src)
 set(audio_include_dir ${audio_base_dir}/include)
 set(audio_lib_dir ${audio_base_dir}/lib/${roxlu_platform}/${roxlu_bits})
 
+
+
 include_directories(
   ${audio_include_dir}
   ${audio_src_dir}
@@ -67,3 +69,12 @@ set(roxlu_addon_libs
 )
 
 add_library(roxlu_audio STATIC ${audio_source_files})
+
+#if(CMAKE_BUILD_TYPE STREQUAL Debug)
+#  if(CMAKE_COMPILER_IS_GNUCXX)
+#    add_definitions("-ggdb")
+#  endif()
+#  if(MSVC)
+#    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUGS} /Od")
+#  endif()
+#endif()

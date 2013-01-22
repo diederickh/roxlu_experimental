@@ -20,6 +20,7 @@
 # - roxlu_extern_lib_dir:    path to the "extern/lib/[OS]/[platform/compiler]/[arch]/ 
 #                            so you can directly use something like:
 #                            ${roxlu_extern_lib_dir}/libportaudio.a to target libraries.
+# - roxlu_extern_bin_dir:    Mostly used on windows to get a path to the DLL files
 # - roxlu_win_runtime:       For windows builds this is set to MT, MD so you know 
 #                            what libraries to link against. Because we're not building
 #                            all debug libraries for windows, we have a separate setting
@@ -39,8 +40,9 @@ set(roxlu_base_dir ${CMAKE_CURRENT_LIST_DIR}/../)
 set(roxlu_src_dir ${roxlu_base_dir}lib/src/roxlu/)
 set(roxlu_include_dir ${roxlu_base_dir}lib/include/)
 set(roxlu_addons_dir ${roxlu_base_dir}/addons/)
+#set(roxlu_extern_bin_dir ${roxlu_base_dir}/extern/bin/)
 set(roxlu_extern_src_dir ${roxlu_base_dir}/extern/src/)
-set(roxlu_extern_lib_dir ${roxlu_base_dir}/extern/lib)
+#set(roxlu_extern_lib_dir ${roxlu_base_dir}/extern/lib)
 set(roxlu_extern_include_dir ${roxlu_base_dir}/extern/include)
 
 # get roxlu sources
@@ -97,15 +99,19 @@ if(APPLE)
 endif(APPLE)
 
 if(WIN32) 
-  set(roxlu_platform "win")
-  set(roxlu_platform_lib_dir "vs2010/")
-
-  set(ROXLU_WIN_LIB_DYNAMIC TRUE)
-  set(ROXLU_WIN_LIB_STATIC FALSE)
   set(ROXLU_WIN_LIB_MT FALSE)
   set(ROXLU_WIN_LIB_MD TRUE)
 
+  set(roxlu_platform "win")
+
+  if(ROXLU_WIN_LIB_MT)
+    set(roxlu_platform_lib_dir "vs2010/MT/")
+  else()
+    set(roxlu_platform_lib_dir "vs2010/MD/")
+  endif()
+
   set(ROXLU_PLATFORM_WIN TRUE)
+
 endif(WIN32)
 
 if(UNIX AND NOT APPLE)
@@ -140,6 +146,7 @@ add_definitions(
 endif(NOT ROXLU_PLATFORM_WIN)
 
 set(roxlu_extern_lib_dir ${roxlu_base_dir}/extern/lib/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}/)
+set(roxlu_extern_bin_dir ${roxlu_base_dir}/extern/bin/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}/)
 
 # - On windows we don't have inttypes.h so we add a include dir
 # - We also set the runtime library for windows. This is kind of experimental 
@@ -161,11 +168,8 @@ if(ROXLU_PLATFORM_WIN)
   set(CMAKE_CXX_FLAGS_DEBUG "/${roxlu_win_runtime_project}")
   set(CMAKE_CXX_FLAGS_RELEASE "/${roxlu_win_runtime_project}")
 
-
-  set(roxlu_extern_include_dir
-    ${roxlu_extern_include_dir}
-    ${roxlu_base_dir}/extern/include/msinttypes/
-    )
+  
+  include_directories(${roxlu_base_dir}/extern/include/msinttypes/)
 
   add_definitions( "/wd4995 /wd4244 /wd4305 /D_CRT_SECURE_NO_WARNINGS /W3")
 

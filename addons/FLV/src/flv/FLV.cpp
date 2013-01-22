@@ -29,7 +29,7 @@ int FLV::open(FLVHeader header) {
 
   putTag("FLV");                                                                     // default flv first 3 bytes
   put8(1);                                                                           // version
-  put8( 0x00 | header.has_video << 2 | header.has_audio); // has video + audio
+  put8( 0x00 | header.has_audio << 2 | header.has_video); // has video + audio
   put32(9);                                                                          // data offest
   put32(0);                                                                          // previous tag size
 
@@ -95,7 +95,7 @@ int FLV::writeParams(FLVParams params) {
     putAmfDouble(FLV_VIDEOCODEC_AVC);
   }
 
-  if(flv_header.has_video) {
+  if(flv_header.has_audio) {
     putAmfString("audiodatarate");
     putAmfDouble(flv_header.sound_bitrate/1024.0);
 
@@ -135,9 +135,9 @@ int FLV::writeParams(FLVParams params) {
   rewrite24(data_size, data_size_pos); // DataSize
   put32(size() - start_size); // PreviousTagSize
 
+  dump();
   flush();
 
-  dump();
   return 1;
 }
 

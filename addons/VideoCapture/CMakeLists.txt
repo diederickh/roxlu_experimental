@@ -68,3 +68,13 @@ set(roxlu_addon_libs ${roxlu_addon_libs} rx_capture)
 set(roxlu_addon_sources  ${roxlu_addon_sources}  ${videocapture_source_files} )
 
 add_library(roxlu_videocapture STATIC ${videocapture_source_files})
+
+
+#if(CMAKE_BUILD_TYPE STREQUAL Debug)
+#  if(CMAKE_COMPILER_IS_GNUCXX)
+#    add_definitions("-ggdb")
+#  endif()
+#  if(MSVC)
+#    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUGS} /Od /ZI")
+#  endif()
+#endif()

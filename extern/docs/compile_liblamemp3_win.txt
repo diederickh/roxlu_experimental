@@ -1,0 +1,6 @@
+Compile liblamemp3
+------------------
+1) Download the source (3.99.5)
+2) Open the project in the "vc" directory
+3) Compile the SSE2, NASM and default release version; 
+4) Copy the files from the "output" directory
