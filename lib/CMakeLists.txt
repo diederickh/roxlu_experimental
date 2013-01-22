@@ -116,7 +116,7 @@ endif(WIN32)
 
 if(UNIX AND NOT APPLE)
   set(roxlu_platform "linux")
-  set(roxlu_platform_lib_dir "")
+  set(roxlu_platform_lib_dir "gcc/static/")
   set(ROXLU_PLATFORM_LINUX TRUE)
 endif(UNIX AND NOT APPLE)
 
