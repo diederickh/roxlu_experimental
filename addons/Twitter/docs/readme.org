@@ -15,12 +15,12 @@
       `$ openssl req -new -x509 -nodes -days 36000 -key ca-key.pem -out ca-cert.pem`
 
     3. Create client certificate, remove passphrase and sign it with the CA certificate
-
-      `$ openssl req -newkey rsa:2048 -days 36000 -nodes -keyout client-key.pem -out client-req.pem`
-
-      `$ openssl rsa -in client-key.pem -out client-key.pem`
-
-      `$ openssl x509 -req -in client-req.pem -days 36000 -CA ca-cert.pem -CAkey ca-key.pem -set_serial 01 -out client-cert.pem`
+    
+   #+begin_src sh
+   $ openssl req -newkey rsa:2048 -days 36000 -nodes -keyout client-key.pem -out client-req.pem
+   $ openssl rsa -in client-key.pem -out client-key.pem
+   $ openssl x509 -req -in client-req.pem -days 36000 -CA ca-cert.pem -CAkey ca-key.pem -set_serial 01 -out client-cert.pem
+   #+end_src
 
     _You now have the following files_
     - client-cert.pem = public key
