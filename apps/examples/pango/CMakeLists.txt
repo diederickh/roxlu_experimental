@@ -38,8 +38,6 @@ target_link_libraries(${example_name} ${compile_libs})
 
 install(TARGETS ${example_name} DESTINATION ${example_install_dir})
 
-message(${roxlu_install_files})
-
 install(FILES ${roxlu_install_files} DESTINATION ${example_install_dir})
 
 if(WIN32)

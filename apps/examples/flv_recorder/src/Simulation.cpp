@@ -233,7 +233,7 @@ void Simulation::setupAudio() {
 
 void Simulation::setupCapture() {
   cap.listDevices();
-  //  bool r = cap.openDevice(0, VIDEO_W, VIDEO_H, VC_FMT_UYVY422 ); //  VC_FMT_YUYV422); // format might differ on windows (VC_FMT_UYVY422)
+  //bool r = cap.openDevice(0, VIDEO_W, VIDEO_H, VC_FMT_UYVY422 ); //  VC_FMT_YUYV422); // format might differ on windows (VC_FMT_UYVY422)
   bool r = cap.openDevice(0, VIDEO_W, VIDEO_H, VC_FMT_YUYV422); //  VC_FMT_YUYV422); // format might differ on windows (VC_FMT_UYVY422)
   if(!r) {
     printf("ERROR: cannot open video capture device. Check if the device number is correct.\n");
