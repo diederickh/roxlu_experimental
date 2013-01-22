@@ -8,7 +8,9 @@ include(${roxlu_addons_dir}/Pango/CMakeLists.txt) # Pango addon
 
 set(CMAKE_EXE_LINKER_FLAGS ${roxlu_linker_flags})
 
-file(GLOB_RECURSE example_sources src/*.cpp)
+set(example_sources 
+  src/main.cpp
+  )
 
 set(compile_sources
   ${example_sources}

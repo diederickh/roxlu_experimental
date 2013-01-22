@@ -76,7 +76,15 @@ elseif(WIN32)
 endif()
 
 if(NOT APPLE AND UNIX)
-  set(twitter_libs ${twitter_libs} dl pthread rt)
+    set(twitter_libs
+
+      ${roxlu_extern_lib_dir}/libssl.a
+      ${roxlu_extern_lib_dir}/libuv.a
+      ${roxlu_extern_lib_dir}/libcrypto.a
+      dl
+      pthread 
+      rt
+    )
 endif()
 
 set(roxlu_addon_libs
