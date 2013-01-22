@@ -1,5 +1,7 @@
 #include <fstream>
+#if defined(__APPLE__) || defined(__linux) 
 #include <sys/socket.h>
+#endif
 #include <curl/curl.h>
 #include <cstdlib>
 #include <vector>

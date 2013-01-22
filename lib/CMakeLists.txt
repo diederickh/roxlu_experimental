@@ -75,6 +75,7 @@ set(roxlu_include_dirs
   ${roxlu_include_dirs}
   ${roxlu_include_dir}
   ${roxlu_extern_include_dir}
+  ${roxlu_extern_lib_dir}/curl/ 
 )
 
 include_directories(${roxlu_include_dirs})

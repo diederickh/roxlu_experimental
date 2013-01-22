@@ -19,9 +19,20 @@ set(compile_libs
   ${roxlu_addon_libs}
 )
 
+
+set(example_install_dir_windows ${CMAKE_CURRENT_BINARY_DIR}/)
 set(example_base_dir ${CMAKE_CURRENT_LIST_DIR})
 set(example_install_dir ${example_base_dir}/bin/)
 
 add_executable(${example_name} ${compile_sources})
+
 target_link_libraries(${example_name} ${compile_libs})
+
 install(TARGETS ${example_name} DESTINATION ${example_install_dir})
+
+install(FILES ${roxlu_install_files} DESTINATION ${example_install_dir})
+
+if(WIN32)
+  install(FILES ${roxlu_install_files} DESTINATION ${example_install_dir_windows}/Release)
+  install(FILES ${roxlu_install_files} DESTINATION ${example_install_dir_windows}/Debug)
+endif()

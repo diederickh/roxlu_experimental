@@ -23,12 +23,31 @@ set(roxlu_addon_sources
   ${curl_source_files}
 )
 
-set(curl_libs
-  ${roxlu_extern_lib_dir}/libcurl.a
-  ${roxlu_extern_lib_dir}/libssl.a
-  ${roxlu_extern_lib_dir}/libcrypto.a
-  z
-)
+if(WIN32)
+    set(curl_libs
+      ${roxlu_extern_lib_dir}/libcurl.lib
+      ${roxlu_extern_lib_dir}/ssleay32.lib
+      ${roxlu_extern_lib_dir}/libeay32.lib
+      ${roxlu_extern_lib_dir}/zdll.lib
+      )
+
+    set(roxlu_install_files
+      ${roxlu_install_files}
+      ${roxlu_extern_bin_dir}/libcurl.dll
+      ${roxlu_extern_bin_dir}/libeay32.dll
+      ${roxlu_extern_bin_dir}/ssleay32.dll
+      )
+
+#    message(FATAL_ERROR ${roxlu_install_files})
+    
+else()
+  set(curl_libs
+    ${roxlu_extern_lib_dir}/libcurl.a
+    ${roxlu_extern_lib_dir}/libssl.a
+    ${roxlu_extern_lib_dir}/libcrypto.a
+    ${roxlu_extern_lib_dir}/libz.a
+    )
+endif()
 
 set(roxlu_addon_libs
   ${roxlu_addon_libs}
