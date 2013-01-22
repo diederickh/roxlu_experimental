@@ -148,8 +148,6 @@ namespace roxlu {
     void OAuth::updateNonce() {
       nonce = makeNonce();
       epoch = timestamp();
-      //  nonce = "b1ebeace3fe6680da8b51fa1b0a5a2fe";
-      //  epoch = 1351429385;
     }
 
     std::string OAuth::makeNonce() {

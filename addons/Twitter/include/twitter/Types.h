@@ -43,7 +43,17 @@ namespace roxlu {
       u64 t = time(0);
       return t;
 #else
-#error "Need to implement timestamp() on windows";
+      static LARGE_INTEGER s_frequency;
+      static BOOL s_use_qpc = QueryPerformanceFrequency(&s_frequency);
+      if(s_use_qpc) {
+        LARGE_INTEGER now;
+        QueryPerformanceCounter(&now);
+        return (1000LL * now.QuadPart) / s_frequency.QuadPart;
+      } 
+      else {
+        return GetTickCount();
+      }
+      //#error "Need to implement timestamp() on windows";
 #endif
     }
 

@@ -8,6 +8,7 @@ extern "C" {
 }
 
 #include <string>
+#include <iterator>
 #include <vector>
 
 /** 

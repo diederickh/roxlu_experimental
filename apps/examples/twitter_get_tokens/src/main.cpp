@@ -1,6 +1,7 @@
-#include <iostream>
 #include <twitter/Twitter.h>
-#include <unistd.h>
+#include <iostream>
+//#include <unistd.h>
+#include <roxlu/Roxlu.h>
 
 // Our callbacks
 void on_access_token_received_callback(roxlu::twitter::TwitterTokenInfo info, void* data);
@@ -8,6 +9,7 @@ void on_request_token_callback(std::string token, std::string tokenSecret, std::
 
 int main() {
   // On linux + mac, get the filepath to the SSL client key (see twitter addon readme on how to create one)
+  /*
   char dir[1024];
   if(getcwd(dir, sizeof(dir)) == NULL) {
     printf("ERROR: Cannot get current directory.\n");
@@ -15,6 +17,8 @@ int main() {
   }
   char key_file[1024];
   sprintf(key_file, "%s/%s", dir, "data/client-key.pem");
+  */
+  //  std::string key_file = rx_to_data_path("client-key.pem");
 
   // Get a request-token, then exchange this token for a aouth token (see callback);
   roxlu::twitter::Twitter tw;

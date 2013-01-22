@@ -1,6 +1,11 @@
 #ifndef ROXLU_HTTP_REQUESTH
 #define ROXLU_HTTP_REQUESTH
 
+
+extern "C" {
+#  include <uv.h> // Must be included -before- any windows include (windows.h)
+}
+
 #include <sstream>
 #include <iostream>
 #include <string>
@@ -8,11 +13,10 @@
 #include <algorithm>
 
 extern "C" {
-#include <uv.h>
-#include <http_parser.h>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-#include <openssl/rand.h>
+#  include <http_parser.h>
+#  include <openssl/ssl.h>
+#  include <openssl/err.h>
+#  include <openssl/rand.h>
 }
 
 #include <twitter/Buffer.h>

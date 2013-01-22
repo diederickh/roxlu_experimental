@@ -6,9 +6,8 @@
 
 //#define WINVER 0x0502
 //#define _WIN32_WINNT 0x0502
-
-#include <time.h>
-#include <windows.h>
+//#include <time.h>
+//#include <windows.h>
 /*
 #if (_MSC_VER < 1300)
    typedef signed char       int8_t;

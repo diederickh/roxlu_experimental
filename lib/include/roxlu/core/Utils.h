@@ -14,21 +14,23 @@
 #include <roxlu/opengl/Error.h>
 #endif
 
-#ifdef __APPLE__
-#include <libgen.h> /* dirname */
-#include <CoreFoundation/CFRunLoop.h>
-#include <mach/mach.h>
-#include <mach/mach_time.h>
-#include <mach-o/dyld.h> /* _NSGetExecutablePath */
-#include <sys/resource.h>
-#include <sys/sysctl.h>
-#include <unistd.h>  /* sysconf */
-
+// @todo maybe add this stuff to "Platform.h" 
+#if defined(__APPLE__)
+#  include <libgen.h> /* dirname */
+#  include <CoreFoundation/CFRunLoop.h>
+#  include <mach/mach.h>
+#  include <mach/mach_time.h>
+#  include <mach-o/dyld.h> /* _NSGetExecutablePath */
+#  include <sys/resource.h>
+#  include <sys/sysctl.h>
+#  include <unistd.h>  /* sysconf */
 #elif defined(__linux) 
-#include <unistd.h> /* readlink */
-#include <sys/time.h> /* timeofday */
-#include <libgen.h> /* dirname */
-#define MAX_PATH 4096
+#  include <unistd.h> /* readlink */
+#  include <sys/time.h> /* timeofday */
+#  include <libgen.h> /* dirname */
+#  define MAX_PATH 4096
+#elif defined(_WIN32)
+#  include <roxlu/core/platform/Platform.h>
 #endif
 
 #undef get16bits

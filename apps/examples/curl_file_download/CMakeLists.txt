@@ -28,9 +28,10 @@ if(CMAKE_BUILD_TYPE STREQUAL Debug)
     endif()
 endif()
 
-set(example_install_dir_windows ${CMAKE_CURRENT_BINARY_DIR}/)
+
 set(example_base_dir ${CMAKE_CURRENT_LIST_DIR})
 set(example_install_dir ${example_base_dir}/bin/)
+set(example_install_dir_windows ${CMAKE_CURRENT_BINARY_DIR}/)
 
 add_executable(${example_name} ${compile_sources})
 

@@ -1,3 +1,4 @@
+
 # Twitter cmakelists.txt
 cmake_minimum_required(VERSION 2.8)
 
@@ -12,12 +13,12 @@ if(CMAKE_BUILD_TYPE STREQUAL Debug)
     endif()
 endif()
 
-if(ROXLU_PLATFORM_MAC)
+if(APPLE)
   set(roxlu_linker_flags 
     ${roxlu_linker_flags} 
     " -framework CoreFoundation -framework CoreServices "
     )	    
-endif(ROXLU_PLATFORM_MAC)
+endif()
 
 set(twitter_base_dir ${CMAKE_CURRENT_LIST_DIR})
 set(twitter_src_dir ${twitter_base_dir}/src)
@@ -47,19 +48,45 @@ set(roxlu_addon_sources
   ${roxlu_addon_sources} 
 )
 
-set(twitter_libs
-  ${roxlu_extern_lib_dir}/libcrypto.a
-  ${roxlu_extern_lib_dir}/libssl.a
-  ${roxlu_extern_lib_dir}/libuv.a
-)
+if(APPLE) 
+  set(twitter_libs
+    ${roxlu_extern_lib_dir}/libcrypto.a
+    ${roxlu_extern_lib_dir}/libssl.a
+    ${roxlu_extern_lib_dir}/libuv.a
+    )
 
-if(ROXLU_PLATFORM_LINUX)
+elseif(WIN32)
+
+  set(twitter_libs
+    ${roxlu_extern_lib_dir}/ssleay32.lib
+    ${roxlu_extern_lib_dir}/libeay32.lib
+    ${roxlu_extern_lib_dir}/zdll.lib
+    ${roxlu_extern_lib_dir}/libuv.lib
+    ws2_32.lib
+    psapi.lib
+    iphlpapi
+    )
+
+  set(roxlu_install_files
+    ${roxlu_install_files}
+    ${roxlu_extern_bin_dir}/libcurl.dll
+    ${roxlu_extern_bin_dir}/libeay32.dll
+    ${roxlu_extern_bin_dir}/ssleay32.dll
+    )
+endif()
+
+if(UNIX)
   set(twitter_libs ${twitter_libs} dl pthread rt)
-endif(ROXLU_PLATFORM_LINUX)
+endif()
 
 set(roxlu_addon_libs
   ${roxlu_addon_libs}
   ${twitter_libs}
 )
+
+
+
+
+#message(${roxlu_addon_libs})
 
 add_library(roxlu_twitter STATIC ${twitter_source_files})

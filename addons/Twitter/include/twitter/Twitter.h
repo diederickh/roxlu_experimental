@@ -1,6 +1,12 @@
 #ifndef ROXLU_TWITTERH
 #define ROXLU_TWITTERH
 
+#include <twitter/HTTP.h>
+#include <twitter/Buffer.h>
+#include <twitter/OAuth.h>
+#include <twitter/Types.h>
+#include <twitter/SSLBuffer.h>
+
 // AWESOME: http://blog.brookmiles.ca/2010/07/14/twitter-oauth-in-c-for-win32-part-2/
 #include <cstdlib>
 #include <iostream>
@@ -12,13 +18,6 @@ extern "C" {
 #include <openssl/err.h>
 #include <openssl/rand.h>
 }
-
-#include <twitter/HTTP.h>
-#include <twitter/Buffer.h>
-#include <twitter/OAuth.h>
-#include <twitter/Types.h>
-#include <twitter/SSLBuffer.h>
-
 
 namespace roxlu {
   namespace twitter { 
