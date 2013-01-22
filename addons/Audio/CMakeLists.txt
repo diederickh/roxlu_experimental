@@ -14,8 +14,6 @@ set(audio_src_dir ${audio_base_dir}/src)
 set(audio_include_dir ${audio_base_dir}/include)
 set(audio_lib_dir ${audio_base_dir}/lib/${roxlu_platform}/${roxlu_bits})
 
-
-
 include_directories(
   ${audio_include_dir}
   ${audio_src_dir}
@@ -33,29 +31,21 @@ set(roxlu_addon_sources
 
 if(ROXLU_PLATFORM_WIN) 
 
-  if(ROXLU_WIN_LIB_DYNAMIC)
-
-    set(audio_libs
-      ${roxlu_extern_lib_dir}/portaudio_import_x86_${roxlu_win_runtime}.lib
-      )
-
-    set(roxlu_install_files
-      ${roxlu_install_files}
-      ${roxlu_extern_lib_dir}/portaudio_x86.dll
-      )
-
-  else()
-
-    set(audio_libs
-      ${roxlu_extern_lib_dir}/portaudio_static_x86_${roxlu_win_runtime}.lib
+  set(audio_libs 
+    ${roxlu_extern_lib_dir}/portaudio_x86.lib
     )
 
-  endif()
+  set(roxlu_install_files
+    ${roxlu_install_files}
+    ${roxlu_extern_bin_dir}/portaudio_x86.dll
+    )
+
 else() 
+
   set(audio_libs
     ${roxlu_extern_lib_dir}/libportaudio.a
-#    ${roxlu_extern_lib_dir}/libportaudiocpp.a
     )
+
 endif(ROXLU_PLATFORM_WIN)
 
 if(APPLE)
@@ -70,11 +60,3 @@ set(roxlu_addon_libs
 
 add_library(roxlu_audio STATIC ${audio_source_files})
 
-#if(CMAKE_BUILD_TYPE STREQUAL Debug)
-#  if(CMAKE_COMPILER_IS_GNUCXX)
-#    add_definitions("-ggdb")
-#  endif()
-#  if(MSVC)
-#    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUGS} /Od")
-#  endif()
-#endif()
