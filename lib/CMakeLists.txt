@@ -75,10 +75,10 @@ set(roxlu_include_dirs
   ${roxlu_include_dirs}
   ${roxlu_include_dir}
   ${roxlu_extern_include_dir}
-  ${roxlu_extern_lib_dir}/curl/ 
+
 )
 
-include_directories(${roxlu_include_dirs})
+
 
 # On windows we build 32bit (msvc2012 is 32bit by default)
 if(WIN32)
@@ -151,6 +151,13 @@ endif(NOT ROXLU_PLATFORM_WIN)
 set(roxlu_extern_lib_dir ${roxlu_base_dir}/extern/lib/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}/)
 set(roxlu_extern_bin_dir ${roxlu_base_dir}/extern/bin/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}/)
 
+set(roxlu_include_dirs
+  ${roxlu_include_dirs}
+  ${roxlu_extern_lib_dir}/curl/ 
+)
+
+
+
 # - On windows we don't have inttypes.h so we add a include dir
 # - We also set the runtime library for windows. This is kind of experimental 
 if(ROXLU_PLATFORM_WIN)
@@ -176,4 +183,13 @@ if(ROXLU_PLATFORM_WIN)
 
   add_definitions( "/wd4995 /wd4244 /wd4305 /D_CRT_SECURE_NO_WARNINGS /W3")
 
+  set(roxlu_include_dirs
+    ${roxlu_include_dirs}
+    ${roxlu_extern_lib_dir}/curl/
+    ${roxlu_extern_lib_dir}/msinttypes/
+    )
+    
+
 endif(ROXLU_PLATFORM_WIN)
+
+include_directories(${roxlu_include_dirs})

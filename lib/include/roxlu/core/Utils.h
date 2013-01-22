@@ -139,7 +139,8 @@ static std::string rx_get_exe_path() {
   }
 
   std::string::size_type pos = std::string(buffer).find_last_of( "\\/" );
-  return std::string(buffer).substr(0, pos);
+
+  return std::string(buffer).substr(0, pos) +"\\";
 }
 
 static rx_uint64 rx_millis(void) {
@@ -149,13 +150,15 @@ static rx_uint64 rx_millis(void) {
     LARGE_INTEGER now;
     QueryPerformanceCounter(&now);
     return (1000LL * now.QuadPart) / s_frequency.QuadPart;
-  } else {
+  } 
+  else {
     return GetTickCount();
   }
 }
 
 // -------------------------------------- LINUX -------------------------------------
 #elif defined(__linux) 
+
 
 static std::string rx_get_exe_path() {
   char buffer[MAX_PATH];
@@ -232,4 +235,6 @@ static std::string rx_to_data_path(const std::string filename) {
   return exepath;
 }
 
-#endif
+static std::string rx_to_exe_path(std::string filename) {
+  return rx_get_exe_path() +filename;
+}#endif

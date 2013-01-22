@@ -25,26 +25,38 @@ set(roxlu_addon_sources
 if(ROXLU_PLATFORM_WIN)
   set(roxlu_addon_libs
     ${roxlu_addon_libs}
-    ${roxlu_extern_lib_dir}/libuv_static_${roxlu_win_runtime}.lib
-    ${roxlu_extern_lib_dir}/libavutil_import_MD.lib
-    ${roxlu_extern_lib_dir}/libswscale_import_MD.lib
-    ${roxlu_extern_lib_dir}/libx264_import_MD.lib
-    ${roxlu_extern_lib_dir}/libmp3lame_static_release_MD.lib
+    ${roxlu_extern_lib_dir}/libuv.lib
+    ${roxlu_extern_lib_dir}/avutil.lib
+    ${roxlu_extern_lib_dir}/swscale.lib
+    ${roxlu_extern_lib_dir}/libx264.dll.a
+    ${roxlu_extern_lib_dir}/libmp3lame.lib
     ${roxlu_extern_lib_dir}/libmpghip-static.lib
 
+    
     # for libuv/sockets
     ws2_32.lib
     psapi.lib
     iphlpapi.lib
     )
 
+#     ${roxlu_extern_lib_dir}/libuv_static_${roxlu_win_runtime}.lib
+#     ${roxlu_extern_lib_dir}/libavutil_import_MD.lib
+#     ${roxlu_extern_lib_dir}/libswscale_import_MD.lib
+#     ${roxlu_extern_lib_dir}/libx264_import_MD.lib
+#     ${roxlu_extern_lib_dir}/libmp3lame_static_release_MD.lib
+#     ${roxlu_extern_lib_dir}/libmpghip-static.lib
+
+
+
   set(roxlu_install_files
     ${roxlu_install_files}
-    ${roxlu_extern_lib_dir}/libavutil.dll
-    ${roxlu_extern_lib_dir}/libswscale.dll
-    ${roxlu_extern_lib_dir}/swscale-2.dll
-    ${roxlu_extern_lib_dir}/avutil-52.dll
-    ${roxlu_extern_lib_dir}/libx264.dll
+    ${roxlu_extern_bin_dir}/avcodec-54.dll
+    ${roxlu_extern_bin_dir}/swscale-2.dll
+    ${roxlu_extern_bin_dir}/swscale.dll
+    ${roxlu_extern_bin_dir}/avutil.dll
+    ${roxlu_extern_bin_dir}/avutil-52.dll
+    ${roxlu_extern_bin_dir}/libx264-129.dll
+    ${roxlu_extern_bin_dir}/libmp3lame.dll
     )
 
 elseif(ROXLU_PLATFORM_LINUX)

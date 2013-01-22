@@ -190,7 +190,7 @@ void Simulation::setupShaderAndBuffers() {
 
 
 void Simulation::setupFLV() {
-  std::string flv_output = rx_get_exe_path() +"simulation.flv";
+  std::string flv_output = rx_to_exe_path("simulation.flv");
   flv_fp = fopen(flv_output.c_str(), "wb");
   if(!flv_fp) {
     printf("ERROR: cannot create simulation.flv file.\n");
@@ -227,7 +227,7 @@ void Simulation::setupAudio() {
 
 void Simulation::setupCapture() {
   cap.listDevices();
-  bool r = cap.openDevice(0, VIDEO_W, VIDEO_H, VC_FMT_YUYV422); // format might differ on windows (VC_FMT_UYVY422)
+  bool r = cap.openDevice(0, VIDEO_W, VIDEO_H, VC_FMT_UYVY422 ); //  VC_FMT_YUYV422); // format might differ on windows (VC_FMT_UYVY422)
   if(!r) {
     printf("ERROR: cannot open video capture device. Check if the device number is correct.\n");
     ::exit(EXIT_FAILURE);
