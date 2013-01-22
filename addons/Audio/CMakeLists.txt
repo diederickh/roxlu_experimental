@@ -54,7 +54,7 @@ if(ROXLU_PLATFORM_WIN)
 else() 
   set(audio_libs
     ${roxlu_extern_lib_dir}/libportaudio.a
-    ${roxlu_extern_lib_dir}/libportaudiocpp.a
+#    ${roxlu_extern_lib_dir}/libportaudiocpp.a
     )
 endif(ROXLU_PLATFORM_WIN)
 

@@ -16,7 +16,7 @@ void Simulation::setup() {
   // CREATE PARTICLES
   float v = 0.02;
   float r = 250.0f;
-  int num = 2050;
+  int num = 750;
   for(int i = 0; i < num; ++i) {
     RParticle p;
     p.pos.set(random(-r, r),random(-r,r), random(-r,r));

@@ -58,8 +58,8 @@
 #include <buttons/Rectangle.h>
 #include <buttons/Vector.h>
 #include <buttons/Storage.h>
-#include <buttons/Server.h>
-#include <buttons/Client.h>
+// #include <buttons/Server.h> // NEEDS TO BE UPDATED TO USE LIBUV
+// #include <buttons/Client.h> // NEEDS TO BE UPDATED TO USE LIBUV
 
 using std::vector;
 using namespace roxlu;

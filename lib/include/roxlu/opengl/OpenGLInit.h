@@ -11,8 +11,8 @@
    #include <GL/gl.h>
    #include <GL/glext.h>
  #elif ROXLU_PLATFORM == ROXLU_APPLE
-  #include <glew_opengl/glew.h>
-  #include <glfw_opengl/glfw3.h>
+  #include <GL/glew.h>
+  #include <GL/glfw3.h>
 
   #undef glGenVertexArrays
   #undef glBindVertexArray

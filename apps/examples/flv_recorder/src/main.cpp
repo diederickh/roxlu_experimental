@@ -24,7 +24,7 @@ int main() {
 
   int c = 0;
   GLFWmonitor** m = glfwGetMonitors(&c);
-  printf("monitor: %d\n", c);
+
   // init
   glfwSetErrorCallback(error_callback);
   if(!glfwInit()) {

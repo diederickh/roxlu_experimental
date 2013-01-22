@@ -191,7 +191,6 @@ void Simulation::setupShaderAndBuffers() {
 
 void Simulation::setupFLV() {
   std::string flv_output = rx_get_exe_path() +"simulation.flv";
-  flv_output = "/Users/roxlu/Applications/Apache2/htdocs/test/html/rtmpplayer/simulation.flv";
   flv_fp = fopen(flv_output.c_str(), "wb");
   if(!flv_fp) {
     printf("ERROR: cannot create simulation.flv file.\n");

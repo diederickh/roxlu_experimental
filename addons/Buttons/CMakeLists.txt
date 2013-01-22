@@ -8,7 +8,16 @@ set(buttons_include_dir ${buttons_base_dir}/include)
 set(buttons_src_dir ${buttons_base_dir}/src)
 
 
-file(GLOB_RECURSE buttons_source_files ${buttons_src_dir}/*.cpp)
+file(GLOB_RECURSE buttons_source_files 
+  ${buttons_src_dir}/Button.cpp
+  ${buttons_src_dir}/Buttons.cpp  
+  ${buttons_src_dir}/Element.cpp
+  ${buttons_src_dir}/Panel.cpp
+  ${buttons_src_dir}/Radio.cpp
+  ${buttons_src_dir}/Slider.cpp
+  ${buttons_src_dir}/Storage.cpp
+  ${buttons_src_dir}/Toggle.cpp
+)
 
 set(roxlu_addon_sources
   ${roxlu_addon_sources}

@@ -14,4 +14,5 @@ fi
 
 cd ${d}/build
 cmake ../
-make 
+cmake --build . --target install
+

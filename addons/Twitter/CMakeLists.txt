@@ -18,6 +18,7 @@ include_directories(
   ${twitter_include_dir}
   ${twitter_base_dir}/extern/include/
   ${twitter_src_dir}
+  ${roxlu_extern_src_dir} # for http_parser
 )
 
 set(twitter_source_files

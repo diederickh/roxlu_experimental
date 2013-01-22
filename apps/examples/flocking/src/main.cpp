@@ -5,22 +5,25 @@ Simulation* sim_ptr;
 
 // CALLBACKS
 // ---------
-void window_size_callback(GLFWwindow window, int w, int h);
-int window_close_callback(GLFWwindow window);
-void mouse_button_callback(GLFWwindow window, int button, int action);
-void cursor_callback(GLFWwindow window, int x, int y);
-void scroll_callback(GLFWwindow window, double x, double y);
-void key_callback(GLFWwindow window, int key, int action);
+void window_size_callback(GLFWwindow* window, int w, int h);
+int window_close_callback(GLFWwindow* window);
+void mouse_button_callback(GLFWwindow* window, int button, int action);
+void cursor_callback(GLFWwindow* window, int x, int y);
+void scroll_callback(GLFWwindow* window, double x, double y);
+void key_callback(GLFWwindow* window, int key, int action);
 void error_callback(int err, const char* msg);
-void char_callback(GLFWwindow window, int chr);
+void char_callback(GLFWwindow* window, int chr);
 
 
 // APPLICATION ENTRY
 // -----------------
 int main() {
-  int width = 1024;
-  int height = 768;
+  int width = 640;
+  int height = 480;
   sim_ptr = NULL;
+
+  int c = 0;
+  GLFWmonitor** m = glfwGetMonitors(&c);
 
   // init
   glfwSetErrorCallback(error_callback);
@@ -29,10 +32,12 @@ int main() {
     exit(EXIT_FAILURE);
   }
 
-  glfwWindowHint(GLFW_DEPTH_BITS, 16);
-  glfwWindowHint(GLFW_FSAA_SAMPLES, 4);
-  // GLFW_FULLSCREEN
-  GLFWwindow window = glfwCreateWindow(width, height, GLFW_WINDOWED, "Simulation", NULL);
+  // glfwWindowHint(GLFW_DEPTH_BITS, 16);
+  // glfwWindowHint(GLFW_FSAA_SAMPLES, 4);
+
+
+  //GLFWwindow window = glfwCreateWindow(width, height, GLFW_WINDOWED, "Simulation", NULL);
+  GLFWwindow* window = glfwCreateWindow(width, height, "Simulation", NULL, NULL);
   if(!window) {
     printf("ERROR: cannot open window.\n");
     exit(EXIT_FAILURE);
@@ -48,9 +53,16 @@ int main() {
 
   glfwMakeContextCurrent(window);
 
+  //  glewExperimental = true;
+  GLenum err = glewInit();
+  if (GLEW_OK != err) {
+    fprintf(stderr, "GLEW Error: %s\n", glewGetErrorString(err));
+    exit(EXIT_FAILURE);
+  }
+
   Simulation sim;
   sim_ptr = &sim;
-  sim.window = &window;
+  sim.window = window;
   sim.setup();
   
   bool running = true;
@@ -69,20 +81,20 @@ int main() {
 
 // CALLBACK DEFS
 // --------------
-void window_size_callback(GLFWwindow window, int w, int h) {
+void window_size_callback(GLFWwindow* window, int w, int h) {
   if(sim_ptr) {
     sim_ptr->onWindowResize(w,h);
   }
 }
 
-int window_close_callback(GLFWwindow window) {
+int window_close_callback(GLFWwindow* window) {
   if(sim_ptr) {
     sim_ptr->onWindowClose();
   }
   return GL_TRUE;
 }
 
-void mouse_button_callback(GLFWwindow window, int button, int action) {
+void mouse_button_callback(GLFWwindow* window, int button, int action) {
   if(!sim_ptr) {
     return;
   }
@@ -98,7 +110,7 @@ void mouse_button_callback(GLFWwindow window, int button, int action) {
   }
 }
 
-void cursor_callback(GLFWwindow window, int x, int y) {
+void cursor_callback(GLFWwindow* window, int x, int y) {
   if(!sim_ptr) {
     return;
   }
@@ -115,20 +127,20 @@ void cursor_callback(GLFWwindow window, int x, int y) {
   sim_ptr->prev_mouse_y = sim_ptr->mouse_y;
 }
 
-void scroll_callback(GLFWwindow window, double x, double y) {
+void scroll_callback(GLFWwindow* window, double x, double y) {
   if(!sim_ptr) {
     return;
   }
 }
 
-void char_callback(GLFWwindow window, int ch) {
+void char_callback(GLFWwindow* window, int ch) {
   if(!sim_ptr) {
     return;
   }
   sim_ptr->onChar(ch);
 }
 
-void key_callback(GLFWwindow window, int key, int action) {
+void key_callback(GLFWwindow* window, int key, int action) {
   if(!sim_ptr) {
     return;
   }

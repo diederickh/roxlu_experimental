@@ -18,17 +18,12 @@ set(glfw_lib_dir ${glfw_base_dir}/glfw/lib/${roxlu_platform}/${roxlu_platform_li
 set(glfw_wrapper_sources ${glfw_base_dir}/glfw_wrapper/SimulationBase.cpp)
 
 # GLEW
-set(glew_base_dir ${CMAKE_CURRENT_LIST_DIR}/)
-set(glew_include_dir ${glew_base_dir}/glew/include/)
-set(glew_src_dir ${glew_base_dir}/glew/src/)
-set(glew_lib_dir ${glew_base_dir}/glew/lib/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits})
-
 if(NOT ROXLU_PLATFORM_WIN)
-set(glfw_libs 
-  ${glfw_lib_dir}/libglfw3.a
-   ${glew_lib_dir}/libGLEW.a
-)
-endif(NOT ROXLU_PLATFORM_WIN)
+  set(glfw_libs 
+    ${roxlu_extern_lib_dir}/libglfw3.a
+    ${roxlu_extern_lib_dir}/libGLEW.a
+    )
+endif()
 
 if(ROXLU_PLATFORM_WIN)
   set(glfw_libs

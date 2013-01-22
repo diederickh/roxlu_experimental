@@ -23,6 +23,7 @@
 #include <sys/resource.h>
 #include <sys/sysctl.h>
 #include <unistd.h>  /* sysconf */
+
 #elif defined(__linux) 
 #include <unistd.h> /* readlink */
 #include <sys/time.h> /* timeofday */
@@ -126,7 +127,8 @@ inline GLuint rx_create_shader(const char* vs, const char* fs) {
 #endif
 
 // -------------------------------------- WIN ---------------------------------------
-#if ROXLU_PLATFORM == ROXLU_WINDOWS
+#ifdef _WIN32
+
 static std::string rx_get_exe_path() {
   char buffer[MAX_PATH];
 
@@ -153,7 +155,7 @@ static rx_uint64 rx_millis(void) {
 }
 
 // -------------------------------------- LINUX -------------------------------------
-#elif ROXLU_PLATFORM == ROXLU_LINUX
+#elif defined(__linux) 
 
 static std::string rx_get_exe_path() {
   char buffer[MAX_PATH];
@@ -183,7 +185,7 @@ static uint64_t rx_millis() {
 
 
 // -------------------------------------- OSX ---------------------------------------
-#elif ROXLU_PLATFORM == ROXLU_APPLE
+#elif defined(__APPLE__)
 static std::string rx_get_exe_path() {
   char buffer[1024];
   uint32_t usize = sizeof(buffer);;

@@ -21,6 +21,7 @@
 #                            so you can directly use something like:
 #                            ${roxlu_extern_lib_dir}/libportaudio.a to target libraries.
 # - roxlu_extern_bin_dir:    Mostly used on windows to get a path to the DLL files
+# - roxlu_extern_src_dir:    For libraries we compile from src
 # - roxlu_win_runtime:       For windows builds this is set to MT, MD so you know 
 #                            what libraries to link against. Because we're not building
 #                            all debug libraries for windows, we have a separate setting
@@ -44,6 +45,7 @@ set(roxlu_addons_dir ${roxlu_base_dir}/addons/)
 set(roxlu_extern_src_dir ${roxlu_base_dir}/extern/src/)
 #set(roxlu_extern_lib_dir ${roxlu_base_dir}/extern/lib)
 set(roxlu_extern_include_dir ${roxlu_base_dir}/extern/include)
+set(roxlu_extern_src_dir ${roxlu_base_dir}/extern/src)
 
 # get roxlu sources
 file(GLOB_RECURSE roxlu_3d_sources ${roxlu_src_dir}/3d/*.cpp)
@@ -94,7 +96,7 @@ endif(ROXLU_64BIT)
 
 if(APPLE)
   set(roxlu_platform "mac") 
-  set(roxlu_platform_lib_dir "")
+  set(roxlu_platform_lib_dir "gcc/static/")
   set(ROXLU_PLATFORM_MAC TRUE)
 endif(APPLE)
 
