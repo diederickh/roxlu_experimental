@@ -24,7 +24,7 @@ namespace roxlu {
     QuerySelect& from(const string& fromTable);
     bool execute(QueryResult& result);
     string toString();
-	
+
     template<typename T>
       QuerySelect& use(const string& fieldName, const T& fieldValue) {
       field_values.use(fieldName, fieldValue);

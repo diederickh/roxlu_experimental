@@ -1,3 +1,11 @@
+/**
+ * Object used to iterate over query data.
+ *  
+ * IMPORTANT: make sure that 'free()' is called
+ * to free up and finalize the sqlite3_stmt. We
+ * will call free() in the destructor too. 
+ *
+ */
 #ifndef ROXLU_DATABASE_QUERYRESULTH
 #define ROXLU_DATABASE_QUERYRESULTH
 
@@ -19,6 +27,7 @@ namespace roxlu {
     bool execute(const string& sql, QueryParams& params, int queryType);
     bool isOK();
     bool next();
+    bool free();
 	
     string getString(int index);
     int64_t getInt(int index);
