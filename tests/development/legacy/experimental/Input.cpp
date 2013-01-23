@@ -19,7 +19,7 @@
 
 // We need to set these to a sane value
 #if ROXLU_GL_WRAPPER == ROXLU_GLFW
-#include <glfw_opengl/glfw3.h>
+
 //#define STB_TEXTEDIT_K_SHIFT 0
 #define STB_TEXTEDIT_K_LEFT GLFW_KEY_LEFT
 #define STB_TEXTEDIT_K_RIGHT GLFW_KEY_RIGHT

@@ -46,14 +46,20 @@ if(WIN32)
       ${roxlu_extern_bin_dir}/ssleay32.dll
       )
 
-#    message(FATAL_ERROR ${roxlu_install_files})
-    
 else()
   set(curl_libs
     ${roxlu_extern_lib_dir}/libcurl.a
     ${roxlu_extern_lib_dir}/libssl.a
     ${roxlu_extern_lib_dir}/libcrypto.a
     ${roxlu_extern_lib_dir}/libz.a
+    )
+endif()
+
+if(UNIX AND NOT APPLE)
+  set(curl_libs
+    ${curl_libs}
+    dl
+    rt
     )
 endif()
 

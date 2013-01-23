@@ -41,22 +41,73 @@ set(roxlu_base_dir ${CMAKE_CURRENT_LIST_DIR}/../)
 set(roxlu_src_dir ${roxlu_base_dir}lib/src/roxlu/)
 set(roxlu_include_dir ${roxlu_base_dir}lib/include/)
 set(roxlu_addons_dir ${roxlu_base_dir}/addons/)
-#set(roxlu_extern_bin_dir ${roxlu_base_dir}/extern/bin/)
 set(roxlu_extern_src_dir ${roxlu_base_dir}/extern/src/)
-#set(roxlu_extern_lib_dir ${roxlu_base_dir}/extern/lib)
 set(roxlu_extern_include_dir ${roxlu_base_dir}/extern/include)
 set(roxlu_extern_src_dir ${roxlu_base_dir}/extern/src)
 
 # get roxlu sources
-file(GLOB_RECURSE roxlu_3d_sources ${roxlu_src_dir}/3d/*.cpp)
-file(GLOB_RECURSE roxlu_core_sources ${roxlu_src_dir}/core/*.cpp)
-file(GLOB_RECURSE roxlu_experimental_sources ${roxlu_src_dir}/experimental/*.cpp)
+set(roxlu_3d_sources
+  ${roxlu_src_dir}/3d/Camera.cpp
+  ${roxlu_src_dir}/3d/ArcBall.cpp
+  ${roxlu_src_dir}/3d/EasyCam.cpp
+  ${roxlu_src_dir}/3d/shapes/Axis.cpp
+)
+
+set(roxlu_core_sources 
+  ${roxlu_src_dir}/core/Thread.cpp
+  ${roxlu_src_dir}/core/Utils.cpp
+  ${roxlu_src_dir}/core/StringUtil.cpp
+  ${roxlu_src_dir}/core/Noise.cpp
+)
+
+set(roxlu_experimental_sources 
+  ${roxlu_src_dir}/experimental/Image.cpp
+  ${roxlu_src_dir}/experimental/StereoCam.cpp
+  ${roxlu_src_dir}/experimental/DebugDrawer.cpp
+  ${roxlu_src_dir}/experimental/Tweens.cpp
+  ${roxlu_src_dir}/experimental/BitmapFont.cpp
+  ${roxlu_src_dir}/experimental/Font.cpp
+  ${roxlu_src_dir}/experimental/SimpleAnim.cpp
+  ${roxlu_src_dir}/experimental/Tween.cpp
+  ${roxlu_src_dir}/experimental/TGA.cpp
+  ${roxlu_src_dir}/experimental/TGARecorder.cpp
+  ${roxlu_src_dir}/experimental/Text.cpp
+)
+
+set( roxlu_io_sources
+  ${roxlu_src_dir}/io/Buffer.cpp
+  ${roxlu_src_dir}/io/RingBuffer.cpp
+  ${roxlu_src_dir}/io/INI.cpp
+  ${roxlu_src_dir}/io/File.cpp
+  ${roxlu_src_dir}/io/OBJ.cpp
+)
+
+set(roxlu_math_sources 
+  ${roxlu_src_dir}/math/Quat.cpp
+  ${roxlu_src_dir}/math/Mat4.cpp
+  ${roxlu_src_dir}/math/Mat3.cpp
+  ${roxlu_src_dir}/math/Vec2.cpp
+  ${roxlu_src_dir}/math/Vec3.cpp
+  ${roxlu_src_dir}/math/Vec4.cpp
+)
+
+set(roxlu_opengl_sources 
+  ${roxlu_src_dir}/opengl/FBO.cpp
+  ${roxlu_src_dir}/opengl/Texture.cpp
+  ${roxlu_src_dir}/opengl/FPS.cpp
+  ${roxlu_src_dir}/opengl/Shader.cpp
+  ${roxlu_src_dir}/opengl/PBO.cpp
+  ${roxlu_src_dir}/opengl/Billboard.cpp
+  ${roxlu_src_dir}/opengl/VAO.cpp
+  ${roxlu_src_dir}/opengl/MatrixStack.cpp
+)
+
+set(roxlu_external_sources_cpp 
+
+)
+
 file(GLOB_RECURSE roxlu_external_sources_c ${roxlu_src_dir}/external/*.c)  # part of roxlu lib
-file(GLOB_RECURSE roxlu_external_sources_cpp ${roxlu_src_dir}/external/*.cpp) # part of roxlu lib
-file(GLOB_RECURSE roxlu_extern_sources_c ${roxlu_extern_src_dir}/*.c) # 3rd party, used by addons
-file(GLOB_RECURSE roxlu_io_sources ${roxlu_src_dir}/io/*.cpp)
-file(GLOB_RECURSE roxlu_math_sources ${roxlu_src_dir}/math/*.cpp)
-file(GLOB_RECURSE roxlu_opengl_sources ${roxlu_src_dir}/opengl/*.cpp)
+set(roxlu_extern_sources_c ${roxlu_extern_src_dir}/http_parser.c) # 3rd party, used by addons
 
 set(roxlu_sources
   ${roxlu_3d_sources}
@@ -116,7 +167,7 @@ endif(WIN32)
 
 if(UNIX AND NOT APPLE)
   set(roxlu_platform "linux")
-  set(roxlu_platform_lib_dir "")
+  set(roxlu_platform_lib_dir "gcc/static/")
   set(ROXLU_PLATFORM_LINUX TRUE)
 endif(UNIX AND NOT APPLE)
 
