@@ -69,6 +69,7 @@
         return 1;
      }
   }
+  printf("WARNING: we did not find a suitable format\n");
   return 0;
 }
 
@@ -131,7 +132,6 @@
   width = dims.width;
   height = dims.height;
 
-
   // Configure output
   output = [[AVCaptureVideoDataOutput alloc] init];
    dispatch_queue_t queue = dispatch_queue_create("Video Queue", DISPATCH_QUEUE_SERIAL);
@@ -181,6 +181,7 @@
 }
 
 - (FourCharCode) videoCaptureFormatTypeToCMPixelFormatType:(VideoCaptureFormat) fmt {
+
   if(fmt == VC_FMT_RGB24) { return kCMPixelFormat_24RGB; }
   else if(fmt == VC_FMT_YUYV422) { return kCMPixelFormat_422YpCbCr8_yuvs; }
   else if(fmt == VC_FMT_UYVY422) { return kCMPixelFormat_422YpCbCr8; }

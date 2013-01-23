@@ -8,6 +8,12 @@
 #include <roxlu/core/platform/Platform.h>
 #include <sys/stat.h>
 
+#if defined(_WIN32)
+#   include <roxlu/external/dirent.h> 
+#else
+#   include <dirent.h>
+#endif
+
 #if ROXLU_PLATFORM == ROXLU_APPLE || ROXLU_PLATFORM == ROXLU_IOS
 #include <TargetConditionals.h>
 #include <mach-o/dyld.h>
@@ -164,6 +170,41 @@ namespace roxlu {
       #endif
     }
     
+    static std::vector<std::string> getDirectories(std::string path) {
+      std::vector<std::string> result;
+      DIR* dir;
+      struct dirent* ent;
+      if((dir = opendir(path.c_str())) != NULL) {
+        while((ent = readdir(dir)) != NULL) {
+          if(ent->d_type == DT_DIR) {
+            if(strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
+              continue;
+            }
+            result.push_back(ent->d_name);
+          }
+        }
+        closedir(dir);
+      }
+      return result;
+    }
+    
+    static std::vector<std::string> getFiles(std::string path) {
+      std::vector<std::string> result;
+      DIR* dir;
+      struct dirent* ent;
+      if((dir = opendir(path.c_str())) != NULL) {
+        while((ent = readdir(dir)) != NULL) {
+          if(ent->d_type == DT_REG) {
+            result.push_back(path +"/" +ent->d_name);
+          }
+        }
+        closedir(dir);
+      }
+      return result;
+    }
+
+
+
   }; // File
 } // roxlu
 

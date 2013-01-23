@@ -13,6 +13,8 @@
 using std::string;
 using std::vector;
 
+#define SQL(str) #str    // stringify macro: SQL(insert into ...)
+
 namespace roxlu {
 
   class Database {

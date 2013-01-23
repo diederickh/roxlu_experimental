@@ -7,9 +7,19 @@ size_t kurl_callback_write_function(char* data, size_t size, size_t nmemb, void*
       kc->write_callback(kc, data, size, nmemb, kc->write_data);
     }
     else {
-      kc->ofs.write(data, nmemb);
-      if(!kc->ofs) {
-        printf("ERROR: cannot write ot file in Kurl.\n");
+      if(kc->type == KURL_FILE_DOWNLOAD) {
+        kc->ofs.write(data, nmemb);
+        if(!kc->ofs) {
+          printf("ERROR: cannot write to file in Kurl.\n");
+        }
+      }
+      else if(kc->type == KURL_FORM) {
+        for(size_t i = 0; i < nmemb; ++i) {
+          printf("%c", data[i]);
+        }
+      }
+      else {
+        printf("VERBOSE: no callback for this type of connection (Kurl) \n");
       }
     }
   }
@@ -116,3 +126,63 @@ bool Kurl::download(
   return true;
 }
 
+
+bool Kurl::post(Form& f,
+                kurl_cb_on_complete completeCB, 
+                void* completeData,
+                kurl_cb_on_write writeCB, 
+                void* writeData
+) {
+  if(!f.isSetup()) {
+    printf("WARNING: given form is not setup/complete.\n");
+    return false;
+  }
+
+  printf("post a form!\n");
+  CURLcode result;
+  CURLFORMcode form_result;
+  struct curl_httppost* post_curr = NULL;
+  struct curl_httppost* post_last = NULL;
+
+  KurlConnection* c = new KurlConnection();
+  c->handle = curl_easy_init();
+  if(!c->handle) {
+    printf("ERROR: cannot curl_easy_init() for form.\n");
+    return false;
+  }
+
+  c->type = KURL_FORM;
+  c->complete_data = completeData;
+  c->complete_callback = completeCB;
+  c->write_callback = writeCB;
+  c->write_data = writeData;
+
+  for(std::vector<FormInput>::iterator it = f.inputs.begin(); it != f.inputs.end(); ++it) {
+    form_result = curl_formadd(&post_curr, &post_last, CURLFORM_COPYNAME, (*it).name.c_str(), 
+                               CURLFORM_COPYCONTENTS, (*it).value.c_str(), CURLFORM_END);
+    RETURN_CURLCODE(form_result, "ERROR: cannot add input to form.\n", false, c);
+  }
+
+  for(std::vector<FormFile>::iterator it = f.files.begin(); it != f.files.end(); ++it) {
+    form_result = curl_formadd(&post_curr, &post_last, CURLFORM_COPYNAME, (*it).name.c_str(), 
+                              CURLFORM_FILE, (*it).filepath.c_str(), CURLFORM_END);
+    RETURN_CURLCODE(form_result, "ERROR: cannot add file to form.\n", false, c);
+  }
+  
+  result = curl_easy_setopt(c->handle, CURLOPT_URL, f.url.c_str());
+  RETURN_CURLCODE(result, "ERROR: Failed settings the url for the form.\n", false, c);
+  
+  result = curl_easy_setopt(c->handle, CURLOPT_HTTPPOST, post_curr);
+  RETURN_CURLCODE(result, "ERROR: Failed to create curlopt_httppost.\n", false, c);
+
+  result = curl_easy_setopt(c->handle, CURLOPT_WRITEFUNCTION, kurl_callback_write_function);
+  RETURN_CURLCODE(result, "ERROR: Failed to set curlopt_writefunction for form.\n", false, c);
+
+  result = curl_easy_setopt(c->handle, CURLOPT_WRITEDATA, c);
+  RETURN_CURLCODE(result, "ERROR: Failed to set curopt_writedata for form.\n", false, c);
+
+  curl_multi_add_handle(handle, c->handle);
+  connections.push_back(c);
+  //result = curl_easy_setopt(c->handle, CURLOPT_TIMEOUT, 1000);
+  return true;
+}

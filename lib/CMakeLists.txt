@@ -74,7 +74,7 @@ set(roxlu_experimental_sources
   ${roxlu_src_dir}/experimental/Text.cpp
 )
 
-set( roxlu_io_sources
+set(roxlu_io_sources
   ${roxlu_src_dir}/io/Buffer.cpp
   ${roxlu_src_dir}/io/RingBuffer.cpp
   ${roxlu_src_dir}/io/INI.cpp

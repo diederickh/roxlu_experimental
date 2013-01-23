@@ -20,14 +20,12 @@ size_t flv_write(char* data, size_t nbytes, void* user) {
 }
 
 void flv_rewrite(char* data, size_t nbytes, size_t pos, void* user) {
-
   Simulation* s = static_cast<Simulation*>(user);
-  printf("TRYING TO REWRITE: sim: %p, file: %p\n", s, s->flv_fp);
   if(!s->flv_fp) {
     printf("WARNING: cannot re-write to flv, file not opened.\n");
     return;
   }
-  printf("REWRITING: sim: %p, file: %p\n", s, s->flv_fp);
+
   long int curr = ftell(s->flv_fp);
   fseek(s->flv_fp, pos, SEEK_SET);
   fwrite(data,nbytes, 1, s->flv_fp);
@@ -49,11 +47,9 @@ void flv_close(void* user) {
     printf("WARNING: cannot flush, file not opened.\n");
     return;
   }
-  printf("flv_close <--> CLOSING: %p, %p\n", s, s->flv_fp);
+
   fclose(s->flv_fp);
   s->flv_fp = NULL;
-
-  printf("FILE CLOSED!\n");
 }
 
 Simulation::Simulation()
@@ -194,7 +190,6 @@ void Simulation::setupShaderAndBuffers() {
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, VIDEO_W, VIDEO_H, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 }
 
-
 void Simulation::setupFLV() {
   std::string flv_output = rx_to_exe_path("simulation.flv");
   flv_fp = fopen(flv_output.c_str(), "wb");
@@ -239,6 +234,8 @@ void Simulation::setupCapture() {
     printf("ERROR: cannot open video capture device. Check if the device number is correct.\n");
     ::exit(EXIT_FAILURE);
   }
+
+  //cap.printVerboseInfo();
 
   r = cap.startCapture();
   if(!r) {
