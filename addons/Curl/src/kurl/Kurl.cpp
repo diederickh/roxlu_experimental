@@ -165,7 +165,7 @@ bool Kurl::post(Form& f,
 
   for(std::vector<FormFile>::iterator it = f.files.begin(); it != f.files.end(); ++it) {
     form_result = curl_formadd(&post_curr, &post_last, CURLFORM_COPYNAME, (*it).name.c_str(), 
-                              CURLFORM_FILE, (*it).filepath.c_str(), CURLFORM_END);
+                               CURLFORM_FILE, (*it).filepath.c_str(), CURLFORM_END);
     RETURN_CURLCODE(form_result, "ERROR: cannot add file to form.\n", false, c);
   }
   
