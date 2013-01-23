@@ -38,12 +38,12 @@ namespace roxlu {
   bool QueryResult::free() {
     if(stmt != NULL) {
       if(sqlite3_reset(stmt) != SQLITE_OK) {
-        printf("ERROR: QueryResult::free(), cannot sqlite3_reset().\n");
+        //printf("ERROR: QueryResult::free(), cannot sqlite3_reset().\n");
         return false;
       }
 
       if(sqlite3_finalize(stmt) != SQLITE_OK) {
-        printf("ERROR: QueryResult::free(), cannot sqlite3_finalize().\n");
+        //printf("ERROR: QueryResult::free(), cannot sqlite3_finalize().\n");
         return false;
       }
       stmt = NULL;
@@ -74,12 +74,6 @@ namespace roxlu {
 
   bool QueryResult::next() {
     last_result = sqlite3_step(stmt);
-    if(last_result != SQLITE_ROW) {
-      printf("WE NEED TO FINALIZE!\n");
-    }
-    else {
-      printf("NO TYET FINALIZING\n");
-    }
     return last_result == SQLITE_ROW;
   }
 

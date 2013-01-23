@@ -32,10 +32,13 @@ KurlConnection::KurlConnection()
   ,handle(NULL)
   ,complete_data(NULL)
   ,complete_callback(NULL)
+  ,http_post(NULL)
 {
+  printf("> KurlConnection::KurlConnection()\n");
 }
 
 KurlConnection::~KurlConnection() {
+  printf("< KurlConnection::~KurlConnection()\n");
 }
 
 // -----------------------------------
@@ -69,10 +72,12 @@ void Kurl::update() {
           if(c->type == KURL_FILE_DOWNLOAD) {
             c->ofs.close();
           }
+          else if(c->type == KURL_FORM && c->http_post != NULL) {
+            curl_formfree(c->http_post);
+          }
           if(c->complete_callback) {
             c->complete_callback(c, c->complete_data);
           }
-
           delete c;
           it = connections.erase(it);
           break;
@@ -138,16 +143,17 @@ bool Kurl::post(Form& f,
     return false;
   }
 
-  printf("post a form!\n");
   CURLcode result;
   CURLFORMcode form_result;
   struct curl_httppost* post_curr = NULL;
   struct curl_httppost* post_last = NULL;
 
   KurlConnection* c = new KurlConnection();
+
   c->handle = curl_easy_init();
   if(!c->handle) {
     printf("ERROR: cannot curl_easy_init() for form.\n");
+    delete c;
     return false;
   }
 
@@ -181,7 +187,10 @@ bool Kurl::post(Form& f,
   result = curl_easy_setopt(c->handle, CURLOPT_WRITEDATA, c);
   RETURN_CURLCODE(result, "ERROR: Failed to set curopt_writedata for form.\n", false, c);
 
-  curl_multi_add_handle(handle, c->handle);
+  curl_multi_add_handle(handle, c->handle); // @todo add error check
+
+  c->http_post = post_curr;
+
   connections.push_back(c);
   //result = curl_easy_setopt(c->handle, CURLOPT_TIMEOUT, 1000);
   return true;

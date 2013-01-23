@@ -36,6 +36,8 @@ int main() {
       printf("Name: %s, Score: %lld, ID: %lld\n", result.getString(1).c_str(), result.getInt(2), result.getInt(0));
     }
   }
-
+  
+  // IMPORTANT: call QueryResult.free() when you're done with the result.
+  reuslt.free();
   return 1;
 };

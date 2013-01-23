@@ -46,6 +46,7 @@ struct KurlConnection {
   KurlConnection();
   ~KurlConnection();
   CURL* handle;
+  struct curl_httppost* http_post;
   int type;
   void* data; // user data
   Kurl* kurl;
