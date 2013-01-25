@@ -16,6 +16,7 @@ void RDebugDrawer::draw(const float* pm, const float* vm, const float* nm, std::
   glUniformMatrix4fv(pm_id, 1, GL_FALSE, pm);
   glUniformMatrix3fv(nm_id, 1, GL_FALSE, nm);
   glUniform1i(mode_id, mode);
+  Mat3 normal_matrix; 
   Mat4 model;
   Vec3 up(0.0, 1.0, 0.0);
   Vec3 right(1.0, 0.0, 0.0);
@@ -26,7 +27,8 @@ void RDebugDrawer::draw(const float* pm, const float* vm, const float* nm, std::
     up = cross(right, p.vel_norm);
     model.setAxis(right, up, p.vel_norm);
     model.setPosition(p.pos);
-
+    normal_matrix = model; // here we copy the 3x3 top matrix to the boid
+    glUniformMatrix3fv(nm_id, 1, GL_FALSE, normal_matrix.getPtr());
     glUniformMatrix4fv(mm_id, 1, GL_FALSE, model.getPtr());
     glDrawArrays(GL_TRIANGLES, 0, num_vertices);
   }

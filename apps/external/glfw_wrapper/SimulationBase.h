@@ -22,6 +22,8 @@ public:
   void setWindowTitle(const char* title);
 
 public:
+  unsigned int window_w;
+  unsigned int window_h;
   int mouse_x;
   int mouse_y;
   int prev_mouse_x;

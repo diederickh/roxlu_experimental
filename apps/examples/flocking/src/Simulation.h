@@ -1,6 +1,7 @@
 #include <glfw_wrapper/SimulationBase.h>
 #include <buttons/Buttons.h>
 #include <roxlu/Roxlu.h>
+#include <flv/ScreenRecorder.h>
 #include <pbd/PBD.h>
 
 #include "RParticles.h"
@@ -27,7 +28,6 @@ public:
   EasyCam cam;
   FPS fps;
 
-  // Testing with runge kutta
   RParticles ps;
   RDebugDrawer rdrawer;
 
@@ -35,4 +35,6 @@ public:
   float dt;
   double last_timestep;
   double time_accum;
+
+  ScreenRecorder recorder;
 };

@@ -104,6 +104,19 @@ typedef void(*flv_rewrite_data_cb)(char* data, size_t nbytes, size_t pos, void* 
 typedef void(*flv_flush_data_cb)(void* user);
 typedef void(*flv_close_cb)(void* user);
 
+
+struct FLVFileWriter {
+  FLVFileWriter();
+  ~FLVFileWriter();
+  bool open(std::string filepath);
+  static size_t write(char* data, size_t nbytes, void* user);
+  static void rewrite(char* data,  size_t nbytes, size_t pos, void* user);
+  static void flush(void * user);
+  static void close(void* user);
+private:
+  FILE* fp;
+};
+
 struct FLVHeader {
   int has_audio; 
   int has_video;
@@ -373,13 +386,6 @@ inline rx_uint64 FLV::swapDouble(double v) {
   src = swap64(src);
   return src;
 }
-
-/*
-inline void FLV::rewriteDouble(double v, size_t pos) {
-  rx_uint64 r = swapDouble(v);
-  cb_write((char*)&r, sizeof(rx_uint64), pos, cb_user);
-}
-*/
 
 inline rx_uint64 FLV::get64() { 
   rx_uint64 v;

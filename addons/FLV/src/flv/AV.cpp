@@ -3,6 +3,7 @@
 AV::AV() 
   :vid_w(640)
   ,vid_h(480)
+  ,vid_num_channels(3)
   ,vid_fps(0.0)
   ,vid_millis_per_frame(0.0)
   ,vid_fmt(AV_FMT_RGB24)
@@ -40,7 +41,9 @@ bool AV::setupVideo(int w, int h, double fps, AVVideoFormat fmt) {
   vid_w = w;
   vid_h = h;
   vid_fmt = fmt;
-  vid_tmp_buffer = new char[vid_w * vid_h * 3];
+  vid_num_channels = (fmt == AV_FMT_RGB24) ? 3 : 4; 
+
+  vid_tmp_buffer = new char[vid_w * vid_h * vid_num_channels];
   return true;
 }
 
@@ -65,7 +68,6 @@ bool AV::setupAudio(int numChannels, int sampleRate, int maxSamplesPerFrame, AVA
     printf("ERROR: unsupported audio format.. we haven't defined a size per sample yet.\n");
     return false;
   }
-  printf("++++++++++ __________________________________________________________________________ SETUP // INITIALZIE\n");
   audio_bytes_per_frame = audio_num_channels * audio_bytes_per_sample * audio_max_samples_per_frame;
   return true;
 }
@@ -108,7 +110,7 @@ bool AV::initializeVideo() {
     return false;
   }
 
-  vid_bytes_per_frame = vid_w * vid_h * 3;
+  vid_bytes_per_frame = vid_w * vid_h * vid_num_channels;
 
   printX264Params(&vid_params);
 
@@ -118,10 +120,13 @@ bool AV::initializeVideo() {
     return false;
   }
 
-  vid_sws = sws_getContext(vid_w, vid_h, PIX_FMT_RGB24, 
+  AVPixelFormat av_fmt = videoFormatToAVPixelFormat(vid_fmt);
+  vid_sws = sws_getContext(vid_w, vid_h, av_fmt,
                            vid_w, vid_h, PIX_FMT_YUV420P, 
                            SWS_FAST_BILINEAR, NULL, NULL, NULL);
+  printAVPixelFormat(av_fmt);
 
+  
   if(!vid_sws) {
     printf("ERROR: cannot setup sws\n");
     return false;
@@ -391,7 +396,7 @@ void AV::encodeVideoPacket(AVPacket* p) {
     return;
   }
 
-  int vid_in_stride = vid_w * 3; // @todo make member
+  int vid_in_stride = vid_w * vid_num_channels; // @todo make member
   video_work_buffer.read(vid_tmp_buffer, vid_bytes_per_frame); // @todo test/use: p->num_bytes
   int h = sws_scale(vid_sws,
                     (uint8_t**)&vid_tmp_buffer,
@@ -548,4 +553,14 @@ void AV::printX264Headers(x264_nal_t* nal) {
   printf("pps_size: %d\n", nal[1].i_payload);
   printf("sei_size: %d\n", nal[2].i_payload);
   printf("--\n");
+}
+
+void AV::printAVPixelFormat(AVPixelFormat p) {
+  std::string str;
+  switch(p) {
+    case PIX_FMT_RGB24: str = "PIX_FMT_RGB24"; break;
+    case PIX_FMT_BGRA: str = "PIX_FMT_BGRA"; break;
+    default: str = "PIX_FMT_NONE"; break;
+  }
+  printf("AVPixelFormat: %s\n", str.c_str());
 }

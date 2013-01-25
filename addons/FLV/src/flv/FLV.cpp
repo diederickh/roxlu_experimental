@@ -455,3 +455,82 @@ std::string FLV::flvAmf0TypeToString(int type) {
     default: return "UNKNOWN";
   }
 };
+
+
+FLVFileWriter::FLVFileWriter() 
+  :fp(NULL)
+{
+}
+
+FLVFileWriter::~FLVFileWriter() {
+  if(fp != NULL) {
+    fclose(fp);
+    fp = NULL;
+  }
+}
+
+bool FLVFileWriter::open(std::string filepath) {
+  fp = fopen(filepath.c_str(), "wb");
+  if(!fp) {
+    printf("ERROR: FLVFileWriter cannot open the given file: %s\n", filepath.c_str());
+    return false;
+  }
+  return true;
+}
+
+size_t FLVFileWriter::write(char* data, size_t nbytes, void* user) {
+  if(nbytes <= 0) {
+    return 0;
+  }
+  FLVFileWriter* f = static_cast<FLVFileWriter*>(user);
+  if(f->fp == NULL) {
+    printf("VERBOSE: FVLFileWriter was asked to write to a file, but the file is not open.\n");
+    return 0;
+  }
+
+  size_t written  = fwrite(data, nbytes, 1, f->fp);
+
+  if(written != 1) {
+    printf("WARNING: FLVFileWriter failed to write to file.\n");
+    return 0;
+  }
+  return nbytes;
+}
+
+void FLVFileWriter::rewrite(char* data, size_t nbytes, size_t pos, void* user) {
+  FLVFileWriter* f = static_cast<FLVFileWriter*>(user);
+  if(f->fp == NULL) {
+    printf("VERBOSE: FVLFileWriter was asked to rewrite to a file, but the file is not open.\n");
+    return ;
+  }
+
+  long int curr_pos = ftell(f->fp);
+  fseek(f->fp, pos, SEEK_SET);
+
+  size_t written = fwrite(data, nbytes, 1, f->fp);
+  if(written != 1) {
+    printf("VERBOSE: FLVFileWriter cannot rewrite some bytes.\n");
+  }
+
+  fseek(f->fp, curr_pos, SEEK_SET);
+}
+
+void FLVFileWriter::flush(void* user) {
+  FLVFileWriter* f = static_cast<FLVFileWriter*>(user);
+  if(f->fp == NULL) {
+    printf("VERBOSE: FVLFileWriter was asked to flush file, but the file is not open.\n");
+    return;
+  }
+  fflush(f->fp);
+}
+
+void FLVFileWriter::close(void* user) {
+  return;
+  FLVFileWriter* f = static_cast<FLVFileWriter*>(user);
+  if(f->fp == NULL) {
+    printf("VERBOSE: FVLFileWriter was asked to flush file, but the file is not open.\n");
+    return;
+  }
+  fclose(f->fp);
+  f->fp = NULL;
+}

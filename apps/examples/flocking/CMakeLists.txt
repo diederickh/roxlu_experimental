@@ -3,13 +3,15 @@ cmake_minimum_required(VERSION 2.8)
 
 include(${CMAKE_CURRENT_LIST_DIR}/../../../lib/CMakeLists.txt) # roxlu cmake
 include(${roxlu_base_dir}/apps/external/CMakeLists.txt) # External (glfw)
-include(${roxlu_addons_dir}/PositionBasedDynamics/CMakeLists.txt) # Buttons addon
+include(${roxlu_addons_dir}/PositionBasedDynamics/CMakeLists.txt) # PBD
+include(${roxlu_addons_dir}/FLV/CMakeLists.txt) # PBD
 include(${roxlu_addons_dir}/Buttons/CMakeLists.txt) # Buttons addon
 
 set(simulation_base ${CMAKE_CURRENT_LIST_DIR}/)
 set(simulation_install_dir ${simulation_base}bin/)
 set(simulation_include_dir ${simulation_base}src/)
 set(CMAKE_INSTALL_PREFIX ${simulation_install_dir})
+#set(CMAKE_BUILD_TYPE Release)
 
 if(APPLE)
   set(CMAKE_EXE_LINKER_FLAGS " -framework CoreFoundation -framework OpenGL -framework Cocoa -framework IOKit ")

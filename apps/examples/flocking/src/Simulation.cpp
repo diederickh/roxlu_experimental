@@ -41,6 +41,11 @@ void Simulation::setup() {
   dt = (1.0/60.0) * 1000;  
   last_timestep = Timer::now();
   rdrawer.setup();
+
+  if(!recorder.setup(rx_to_data_path("flocking.flv"), window_w, window_h)) {
+    printf("ERROR: cannot setup recorder\n");
+    ::exit(EXIT_FAILURE);
+  }
 }
 
 void Simulation::update() {
@@ -63,6 +68,7 @@ void Simulation::update() {
 }
 
 void Simulation::draw() {
+  recorder.beginFrame();
   const float* vm = cam.vm().getPtr();
   const float* pm = cam.pm().getPtr();
   const float* nm = cam.nm().getPtr();
@@ -74,6 +80,8 @@ void Simulation::draw() {
   // DRAW PREDATORS
   rdrawer.mode = 1;
   rdrawer.draw(pm, vm, nm, ps.predators);
+
+  recorder.endFrame();
 
   fps.draw();
 }
@@ -102,6 +110,12 @@ void Simulation::onChar(int ch) {
       ps.particles[i].vel_norm = ps.particles[i].vel; 
       ps.particles[i].vel_norm.normalize();
     }
+  }
+  else if(ch == '1') {
+    recorder.start();
+  }
+  else if(ch == '2') {
+    recorder.stop();
   }
 }
 

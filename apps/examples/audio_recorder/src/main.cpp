@@ -18,8 +18,8 @@ void char_callback(GLFWwindow* window, int chr);
 // APPLICATION ENTRY
 // -----------------
 int main() {
-  int width = 640;
-  int height = 480;
+  int width = 1024;
+  int height = 768;
   sim_ptr = NULL;
 
   int c = 0;
@@ -34,7 +34,6 @@ int main() {
 
   // glfwWindowHint(GLFW_DEPTH_BITS, 16);
   // glfwWindowHint(GLFW_FSAA_SAMPLES, 4);
-
 
   //GLFWwindow window = glfwCreateWindow(width, height, GLFW_WINDOWED, "Simulation", NULL);
   GLFWwindow* window = glfwCreateWindow(width, height, "Simulation", NULL, NULL);
@@ -63,6 +62,8 @@ int main() {
   Simulation sim;
   sim_ptr = &sim;
   sim.window = window;
+  sim.window_w = width;
+  sim.window_h = height;
   sim.setup();
   
   bool running = true;

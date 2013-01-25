@@ -18,8 +18,7 @@
  av.addAudioFrame(data, number_of_frames); // number of frames is probably 512 (in this example)
 
  // start the AV thread
- Thread av_thread;
- av_thread.start(av);
+ av.start();
 
  // add new video frames when necessary:
  if(av.wantsNewVideoFrame()) {
@@ -69,7 +68,8 @@ extern "C" {
 #define MP3_BUFFER_SIZE 8192
 
 enum AVVideoFormat {
-  AV_FMT_RGB24
+  AV_FMT_RGB24,
+  AV_FMT_BGRA32
 };
 
 enum AVAudioFormat {
@@ -123,7 +123,9 @@ class AV : public Runnable {
   bool setupX264();
   void printX264Params(x264_param_t* p);
   void printX264Headers(x264_nal_t* nal); // prints result of x264_encoder_headers
+  void printAVPixelFormat(AVPixelFormat p);
   FLVAudioSampleRate audioSampleRateToFLVSampleRate(int rate);
+  AVPixelFormat videoFormatToAVPixelFormat(AVVideoFormat f);
 
  private:
 
@@ -147,6 +149,7 @@ class AV : public Runnable {
   AVVideoFormat vid_fmt;
   int vid_w;
   int vid_h;
+  int vid_num_channels; // how many color channels (3 = rgb, 4 = rgba)
   double vid_fps;
   double vid_millis_per_frame;
   int vid_total_frames; // number of frames added to the encodersi
@@ -263,6 +266,14 @@ inline void AV::stop() {
 
 inline void AV::waitForEncodingThreadToFinish() {
   thread.join();
+}
+
+inline AVPixelFormat AV::videoFormatToAVPixelFormat(AVVideoFormat f) {
+  switch(f) {
+    case AV_FMT_RGB24: return PIX_FMT_RGB24; 
+    case AV_FMT_BGRA32: return PIX_FMT_BGRA;
+    default: return PIX_FMT_NONE;
+  }
 }
 
 #endif

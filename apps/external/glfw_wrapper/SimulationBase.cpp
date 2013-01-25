@@ -8,6 +8,8 @@ SimulationBase::SimulationBase()
   ,prev_mouse_y(0)
   ,pressed_mouse_button(0)
   ,window(NULL)
+  ,window_w(0)
+  ,window_h(0)
 {
 }
 
