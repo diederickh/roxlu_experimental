@@ -9,7 +9,7 @@ class TextSurface {
  public:
   TextSurface();
   ~TextSurface();
-  bool setup(const std::string& font, int w, int h);
+  bool setup(const std::string& font, int w, int h, cairo_format_t fmt = CAIRO_FORMAT_ARGB32);
   void setText(const std::string& txt, float r = 0.0f, float g = 0.0, float b = 0.0, float a = 1.0);
   void setMarkup(const std::string& txt);
   void setTextWidth(int w);
@@ -27,6 +27,7 @@ class TextSurface {
   void wrapWord(); /* wrap on word boundaries */
   void wrapChar(); /* wrap on character boundaries */
   void wrapWordChar();  /* wrap on word boundaries, but fallback on char boundaries */
+  unsigned char* getPixels(); 
  public:
   cairo_t* cr;
   cairo_surface_t* surface;

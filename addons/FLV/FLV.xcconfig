@@ -1,0 +1,2 @@
+FLV_INCLUDES=$(ROXLU_ADDON_DIR)/FLV/include/ $(REID) 
+FLV_LIBS=$(RELD)/libx264.a $(RELD)/libmp3lame.a $(RELD)/libavutil.a $(RELD)/libswscale.a

@@ -1,0 +1,2 @@
+PANGO_INCLUDES=$(ROXLU_ADDON_DIR)/Pango/include/ $(REID)/pango-1.0/ $(REID)/glib-2.0/ $(RELD)/glib-2.0/include/
+PANGO_LIBS=$(RELD)/libpangocairo-1.0.a $(RELD)/libpango-1.0.a $(RELD)/libintl.a $(RELD)libiconv.a $(RELD)libffi.a $(RELD)libgio-2.0.a $(RELD)libglib-2.0.a $(RELD)libgmodule-2.0.a $(RELD)libgobject-2.0.a

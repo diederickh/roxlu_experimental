@@ -1,0 +1,2 @@
+CURL_INCLUDES=$(ROXLU_ADDON_DIR)/Curl/include/ $(REID) $(RELD)/curl/
+CURL_LIBS=$(RELD)/libcurl.a $(RELD)/libssl.a $(RELD)/libcrypto.a

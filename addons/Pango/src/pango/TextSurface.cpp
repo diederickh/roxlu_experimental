@@ -18,11 +18,11 @@ TextSurface::~TextSurface() {
   }
 }
 
-bool TextSurface::setup(const std::string& font, int w, int h) {
+bool TextSurface::setup(const std::string& font, int w, int h, cairo_format_t fmt) {
   width = w;
   height = h;
 
-  surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+  surface = cairo_image_surface_create(fmt, width, height);
   if(surface == NULL) {
     printf("ERROR: Cannot create surface (%d, %d)\n", width, height);
     return false;
@@ -88,7 +88,7 @@ bool TextSurface::saveAsPNG(const std::string& filepath) {
   assert(surface);
   status = cairo_surface_write_to_png(surface, filepath.c_str());
   if(status != CAIRO_STATUS_SUCCESS) {
-    printf("ERROR: Cannot saveAsPNG(), to %s\n", filepath.c_str());
+    printf("ERROR: Cannot saveAsPNG(), to %s - %s\n", filepath.c_str(), cairo_status_to_string(status));
     return false;
   }
   return true;
@@ -97,4 +97,9 @@ bool TextSurface::saveAsPNG(const std::string& filepath) {
 void TextSurface::move(double x, double y) {
   assert(cr);
   cairo_move_to(cr, x, y);
+}
+
+unsigned char* TextSurface::getPixels() {
+  cairo_surface_flush(surface);
+  return cairo_image_surface_get_data(surface);
 }
