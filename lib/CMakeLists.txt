@@ -103,11 +103,18 @@ set(roxlu_opengl_sources
 )
 
 set(roxlu_external_sources_cpp 
-
+ 
 )
 
-file(GLOB_RECURSE roxlu_external_sources_c ${roxlu_src_dir}/external/*.c)  # part of roxlu lib
-set(roxlu_extern_sources_c ${roxlu_extern_src_dir}/http_parser.c) # 3rd party, used by addons
+#file(GLOB_RECURSE roxlu_external_sources_c ${roxlu_src_dir}/external/*.c)  # part of roxlu lib
+
+# 3rd party, used by addons
+set(roxlu_extern_sources_c 
+  ${roxlu_src_dir}/external/http_parser.c
+  ${roxlu_src_dir}/external/stb_image_write.c
+  ${roxlu_src_dir}/external/slre.c
+  ${roxlu_src_dir}/external/stb_truetype.c
+) 
 
 set(roxlu_sources
   ${roxlu_3d_sources}

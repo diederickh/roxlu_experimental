@@ -54,7 +54,7 @@ namespace roxlu {
       req +="\r\n"; 
       req += body;
 
-      //printf("%s\n", req.c_str());
+      printf("%s\n", req.c_str());
       return req;
     }
 
@@ -349,7 +349,9 @@ namespace roxlu {
       hints.ai_socktype = SOCK_STREAM;
       hints.ai_protocol = IPPROTO_TCP;
       hints.ai_flags = 0;
-  
+      
+      printf("HTTPConnection::sendRequest() - %s, %s\n", r.getURL().proto.c_str(), r.getURL().host.c_str());
+
       int result = uv_getaddrinfo(loop, &c->resolver_req, HTTP::callbackOnResolved, r.getURL().host.c_str(), "80", &hints);
       if(result) {
         printf("ERROR: HTTP::sendRequest(), error uv_getaddrinfo: %s\n", uv_err_name(uv_last_error(loop)));
@@ -425,6 +427,8 @@ namespace roxlu {
         return;
       }
 
+      printf("> HTTP::callbackOnResolved() - found host.\n");
+
       HTTPConnection* c = static_cast<HTTPConnection*>(resolver->data);
       uv_tcp_init(resolver->loop, &c->socket);
       uv_tcp_connect(
@@ -443,7 +447,7 @@ namespace roxlu {
         printf("ERROR: callbackOnConnect(). @todo remove from connections\n");
         return;
       }
-
+      printf("> HTTP::callbackOnConnect - connected.\n");
       HTTPConnection* c = static_cast<HTTPConnection*>(con->data);
       int result = uv_read_start(
                                  (uv_stream_t*)&c->socket, 
@@ -474,6 +478,11 @@ namespace roxlu {
     }
  
     void HTTP::callbackSSLReadDecryptedData(const char* data, size_t len, void* con) {
+      /*
+      for(size_t i = 0; i < len; ++i) {
+        printf("%c", data[i]);
+      }
+      */
       HTTPConnection* c = static_cast<HTTPConnection*>(con);
       c->response.addToInputBuffer(data, len);
       c->response.parseInputBuffer();
