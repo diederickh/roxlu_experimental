@@ -47,7 +47,8 @@ RELD=$(ROXLU_EXTERN_LIB_DIR)
 #include "../addons/Pango/Pango.xcconfig"
 #include "../addons/Curl/Curl.xcconfig"
 #include "../addons/FLV/FLV.xcconfig"
+#include "../addons/Twitter/Twitter.xcconfig"
 
-ROXLU_LIBS=$(PANGO_LIBS) $(CURL_LIBS) $(FLV_LIBS)
-ROXLU_INCLUDES=$(ROXLU_INCLUDE_DIR) $(PANGO_INCLUDES) $(CURL_INCLUDES) $(FLV_INCLUDES)
+ROXLU_LIBS=$(PANGO_LIBS) $(CURL_LIBS) $(FLV_LIBS) $(TWITTER_LIBS)
+ROXLU_INCLUDES=$(ROXLU_INCLUDE_DIR) $(PANGO_INCLUDES) $(CURL_INCLUDES) $(FLV_INCLUDES) $(TWITTER_INCLUDES)
 

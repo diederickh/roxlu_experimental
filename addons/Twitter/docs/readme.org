@@ -3,7 +3,10 @@
   This library only has two dependencies for which static libraries are included.
   - OpenSSL 1.01
   - libuv, hash: 149b16f1232d8fdcf5436534d6ade6f9877e1b8f 
-
+  - Make sure that you add the sources of the Twitter addon to your project. These are:
+    - Twitter/src/twitter/*.cpp
+    - Twitter/extern/format/*.*
+    
 ** How to use this library
 
 *** Step 1: Create a SSL private key
