@@ -8,7 +8,7 @@
       <AdditionalIncludeDirectories>$(ROXLU_DIR)\addons\FLV\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(SolutionDir)$(Configuration)\FLV_release.lib;$(ROXLU_EXTERN_LIB_DIR)\libmp3lame.lib;$(ROXLU_EXTERN_LIB_DIR)\swscale.lib;$(ROXLU_EXTERN_LIB_DIR)\libx264.dll.a;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)$(Configuration)\FLV_release.lib;$(ROXLU_EXTERN_LIB_DIR)\libmp3lame.lib;$(ROXLU_EXTERN_LIB_DIR)\swscale.lib;$(ROXLU_EXTERN_LIB_DIR)\x264.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -26,7 +26,7 @@ copy  "$(ROXLU_EXTERN_BIN_DIR)\swscale-2.dll" "$(SolutionDir)bin\"
 copy  "$(ROXLU_EXTERN_BIN_DIR)\swscale.dll" "$(SolutionDir)bin\" 
 copy  "$(ROXLU_EXTERN_BIN_DIR)\avutil.dll" "$(SolutionDir)bin\" 
 copy  "$(ROXLU_EXTERN_BIN_DIR)\avutil-52.dll" "$(SolutionDir)bin\" 
-copy  "$(ROXLU_EXTERN_BIN_DIR)\libx264-129.dll" "$(SolutionDir)bin\" 
+copy  "$(ROXLU_EXTERN_BIN_DIR)\x264.dll" "$(SolutionDir)bin\" 
 </Command>
     </PreLinkEvent>
   </ItemDefinitionGroup>
