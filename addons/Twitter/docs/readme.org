@@ -35,7 +35,7 @@
     - client-key.pem = private key
 
     - Use the client-key.pem for your twitter applications
-
+      
 *** Step 2: Get a access token:
     - See the example application: examples/twitter_get_tokens/ 
       You should run this application from the command line. It will ask you to 
