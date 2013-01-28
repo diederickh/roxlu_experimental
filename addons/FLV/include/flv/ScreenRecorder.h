@@ -1,9 +1,10 @@
 #ifndef ROXLU_FLV_SCREENRECORDER_H
 #define ROXLU_FLV_SCREENRECORDER_H
 
-#include <roxlu/Roxlu.h>
+#include <inttypes.h>
 #include <flv/AV.h>
 #include <flv/FLV.h>
+#include <roxlu/Roxlu.h>
 #include <string>
 
 #define SCREEN_RECORDER_USE_PBO

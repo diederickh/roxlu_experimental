@@ -23,7 +23,7 @@
   #include <GL/glfw3.h>
  #endif // ROXLU_GL_WRAPPER == ROXLU_WINDOWS
 #elif ROXLU_GL_WRAPPER == ROXLU_OPENFRAMEWORKS
-#include "ofMain.h"
+#include <ofMain.h>
 #elif ROXLU_GL_WRAPPER == ROXLU_IOS
   #include <OpenGLES/ES2/gl.h>
   #include <OpenGLES/ES2/glext.h>

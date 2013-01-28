@@ -24,15 +24,19 @@
 #ifndef ROXLU_AV_FLV_H
 #define ROXLU_AV_FLV_H
 
+#include <inttypes.h>
+
+extern "C" { 
+#include <x264.h>
+}
+
 #include <roxlu/Roxlu.h>
 #include <algorithm>
 #include <vector>
 #include <string>
 #include <assert.h>
 
-extern "C" { 
-#include <x264.h>
-}
+
 
 #define AMF0_TYPE_NUMBER 0x00
 #define AMF0_TYPE_BOOLEAN 0x01

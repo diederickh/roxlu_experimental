@@ -10,3 +10,6 @@ Thumbs.db
 __*
 .AppleDouble
 .svn
+*build*
+*build\Release*
+*build\Debug*

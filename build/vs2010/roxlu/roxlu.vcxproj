@@ -1,0 +1,186 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E9A9CD49-1086-4725-AB1D-3B0B7AB859CA}</ProjectGuid>
+    <RootNamespace>roxlu</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\lib\roxlu_openframeworks.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\lib\roxlu_openframeworks.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <TargetName>$(ProjectName)_debug</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <TargetName>$(ProjectName)_release</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>.\..\..\..\lib\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>ROXLU_GL_WRAPPER=ROXLU_OPENFRAMEWORKS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\lib\src\roxlu\3d\ArcBall.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\3d\Camera.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\3d\EasyCam.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\3d\shapes\Axis.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\core\Noise.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\core\StringUtil.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\core\Thread.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\core\Utils.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\BitmapFont.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\DebugDrawer.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\Font.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\Image.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\SimpleAnim.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\StereoCam.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\Text.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\TGA.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\TGARecorder.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\Tween.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\Tweens.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\external\slre.c" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\external\stb_image_write.c" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\external\stb_textedit.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\external\stb_truetype.c" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\io\Buffer.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\io\File.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\io\INI.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\io\OBJ.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\io\RingBuffer.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\math\Mat3.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\math\Mat4.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\math\Quat.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\math\Vec2.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\math\Vec3.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\math\Vec4.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\opengl\Billboard.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\opengl\FBO.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\opengl\FPS.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\opengl\PBO.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\opengl\Shader.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\opengl\Texture.cpp" />
+    <ClCompile Include="..\..\..\lib\src\roxlu\opengl\VAO.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\lib\include\roxlu\3d\3d.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\3d\ArcBall.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\3d\Camera.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\3d\EasyCam.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\3d\Quad.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\3d\Ray.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\3d\shapes\Axis.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\3d\Triangle.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\3d\VertexTypes.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\3d\VerticesBuffer.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\core\Constants.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\core\Core.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\core\Keyboard.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\core\Noise.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\core\platform\Platform.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\core\platform\windows\WindowsPlatform.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\core\StringUtil.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\core\Thread.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\core\Utils.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\Binning2D.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\BitmapFont.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\DebugDrawer.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\Experimental.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\Font.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\Image.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\SimpleAnim.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\StereoCam.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\Text.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\TGA.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\TGARecorder.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\Timer.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\Tween.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\Tweens.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\external\dirent.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\external\External.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\external\slre.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\graphics\Color.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\graphics\Graphics.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\io\Buffer.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\io\Endianness.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\io\File.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\io\INI.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\io\IO.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\io\OBJ.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\io\RingBuffer.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\io\Utils.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\math\Mat3.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\math\Mat4.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\math\Math.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\math\Quat.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\math\Random.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\math\Spline.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\math\Vec2.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\math\Vec3.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\math\Vec4.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\Billboard.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\Error.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\FBO.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\FPS.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\MatrixStack.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\OpenGL.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\OpenGLInit.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\PBO.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\Shader.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\Texture.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\VAO.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\Roxlu.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -53,17 +53,19 @@
 #ifndef ROXLU_AV_H
 #define ROXLU_AV_H
 
-#include <roxlu/Roxlu.h>
 #include <inttypes.h>
-#include <stdio.h>
-#include <vector>
-#include <flv/FLV.h>
 
 extern "C" {
 #include <x264.h>
 #include <libswscale/swscale.h>
 #include <lame/lame.h>
 }
+
+#include <roxlu/Roxlu.h>
+#include <stdio.h>
+#include <vector>
+#include <flv/FLV.h>
+
 
 #define MP3_BUFFER_SIZE 8192
 
