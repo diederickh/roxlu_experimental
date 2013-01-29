@@ -1,5 +1,8 @@
 #include <flv/ScreenRecorder.h>
 
+// @todo we probably want a bigger distance between the read and write 
+// PBO indices.
+
 ScreenRecorder::ScreenRecorder() 
   :width(0)
   ,height(0)

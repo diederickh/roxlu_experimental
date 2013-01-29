@@ -25,6 +25,7 @@ include_directories(
 )
 
 if(ROXLU_PLATFORM_MAC)
+
 set(pango_libs
   ${roxlu_extern_lib_dir}/libglib-2.0.a
   ${roxlu_extern_lib_dir}/libgobject-2.0.a
@@ -40,7 +41,12 @@ set(pango_libs
   ${roxlu_extern_lib_dir}/libfontconfig.a
   ${roxlu_extern_lib_dir}/libpangoft2-1.0.a
   ${roxlu_extern_lib_dir}/libfreetype.a
+  ${roxlu_extern_lib_dir}/libz.a
+  ${roxlu_extern_lib_dir}/libxml2.a
+  -lbz2
+  -lexpat
 )
+
 endif()
 
 if(ROXLU_PLATFORM_LINUX)
@@ -102,6 +108,7 @@ set(roxlu_addon_libs
 
 set(pango_source_files
   ${pango_src_dir}/pango/TextSurface.cpp
+  ${pango_src_dir}/pango/TextGLSurface.cpp
 )
 set(roxlu_addon_sources
   ${roxlu_addon_sources}

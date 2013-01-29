@@ -38,7 +38,7 @@ if(ROXLU_PLATFORM_WIN)
     ${roxlu_extern_lib_dir}/libuv.lib
     ${roxlu_extern_lib_dir}/avutil.lib
     ${roxlu_extern_lib_dir}/swscale.lib
-    ${roxlu_extern_lib_dir}/libx264.dll.a
+    ${roxlu_extern_lib_dir}/x264.lib
     ${roxlu_extern_lib_dir}/libmp3lame.lib
     ${roxlu_extern_lib_dir}/libmpghip-static.lib
 
@@ -56,7 +56,7 @@ if(ROXLU_PLATFORM_WIN)
     ${roxlu_extern_bin_dir}/swscale.dll
     ${roxlu_extern_bin_dir}/avutil.dll
     ${roxlu_extern_bin_dir}/avutil-52.dll
-    ${roxlu_extern_bin_dir}/libx264-129.dll
+    ${roxlu_extern_bin_dir}/x264.dll
     ${roxlu_extern_bin_dir}/libmp3lame.dll
     )
 

@@ -28,6 +28,8 @@ class TextSurface {
   void wrapChar(); /* wrap on character boundaries */
   void wrapWordChar();  /* wrap on word boundaries, but fallback on char boundaries */
   unsigned char* getPixels(); 
+  int getWidth();
+  int getHeight();
  public:
   cairo_t* cr;
   cairo_surface_t* surface;
@@ -88,7 +90,8 @@ inline PangoRectangle TextSurface::getPixelExtents() {
 
 inline void TextSurface::fill(float r, float g, float b, float a) {
   cairo_save(cr);
-  cairo_set_source_rgba(cr, r,g,b,a);
+   cairo_set_source_rgba(cr, r,g,b,a);
+  // cairo_set_source_rgba(cr, g,b,a,r);
   cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
   cairo_paint(cr);
   cairo_restore(cr);
@@ -98,4 +101,11 @@ inline void TextSurface::clear() {
   fill(0.0, 0.0, 0.0, 0.0);
 }
 
+inline int TextSurface::getWidth() {
+  return width;
+}
+
+inline int TextSurface::getHeight() {
+  return height;
+}
 #endif

@@ -48,6 +48,7 @@ bool TextSurface::setup(const std::string& font, int w, int h, cairo_format_t fm
 
   pango_layout_set_font_description(layout, font_desc);
   pango_font_description_free(font_desc);
+
   font_desc = NULL;
   return true;
 }

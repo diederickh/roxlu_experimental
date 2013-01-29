@@ -241,4 +241,29 @@ static std::string rx_to_exe_path(std::string filename) {
   return rx_get_exe_path() +filename;
 }
 
+/* 
+   double check that your window is really APP_WIDTH and APP_HEIGHT!
+   rx_ortho(0, APP_WIDTH, APP_HEIGHT, 0, -1.0, 1.0, pm);
+ */
+static void rx_ortho(float l, float r, float b, float t, float n, float f, float* dest) {
+  dest[0] = (2.0f / (r - l));
+  dest[1] = 0.0f;
+  dest[2] = 0.0f;
+  dest[3] = 0.0f;
+
+  dest[4] = 0.0f;
+  dest[5] = (2.0f / (t - b));
+  dest[6] = 0.0f;
+  dest[7] = 0.0f;
+  
+  dest[8] = 0.0f; 
+  dest[9] = 0.0f;
+  dest[10] = (-2.0f / (f - n));
+  dest[11] = 0.0f;
+
+  dest[12] = - ((r + l) / (r - l));
+  dest[13] = - ((t + b) / (t - b));
+  dest[14] = - ((f + n) / (f - n));
+  dest[15] = 1.0f;
+}
 #endif // ROXLU_UTILSH
