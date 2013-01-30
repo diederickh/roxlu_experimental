@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{31EF323B-A066-4F8C-A300-00215A4563E4}</ProjectGuid>
-    <RootNamespace>FLV</RootNamespace>
-    <ProjectName>roxlu_flv</ProjectName>
+    <ProjectGuid>{D81A2180-EF4D-4779-A3E4-9658A5159488}</ProjectGuid>
+    <RootNamespace>Pango</RootNamespace>
+    <ProjectName>roxlu_pango</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -22,7 +22,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
@@ -41,17 +41,12 @@
     <Import Project="..\..\..\..\lib\roxlu_settings.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <TargetName>$(ProjectName)</TargetName>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <TargetName>$(ProjectName)</TargetName>
-  </PropertyGroup>
+  <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.\..\..\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ROXLU_EXTERN_INC_DIR)\glib-2.0\;$(ROXLU_EXTERN_LIB_DIR)\glib-2.0\include\;$(ROXLU_EXTERN_INC_DIR)\pango-1.0\;.\..\..\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -63,7 +58,6 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>.\..\..\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -72,14 +66,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\flv\AV.cpp" />
-    <ClCompile Include="..\..\src\flv\FLV.cpp" />
-    <ClCompile Include="..\..\src\flv\ScreenRecorder.cpp" />
+    <ClCompile Include="..\..\src\pango\TextGLSurface.cpp" />
+    <ClCompile Include="..\..\src\pango\TextSurface.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\flv\AV.h" />
-    <ClInclude Include="..\..\include\flv\FLV.h" />
-    <ClInclude Include="..\..\include\flv\ScreenRecorder.h" />
+    <ClInclude Include="..\..\include\pango\TextGLSurface.h" />
+    <ClInclude Include="..\..\include\pango\TextSurface.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
