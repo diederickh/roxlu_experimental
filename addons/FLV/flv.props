@@ -8,7 +8,7 @@
       <AdditionalIncludeDirectories>$(ROXLU_DIR)\addons\FLV\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(SolutionDir)$(Configuration)\FLV_debug.lib;$(ROXLU_EXTERN_LIB_DIR)\libmp3lame.lib;$(ROXLU_EXTERN_LIB_DIR)\x264.lib;$(ROXLU_EXTERN_LIB_DIR)\swscale.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)$(Configuration)\roxlu_flv.lib;$(ROXLU_EXTERN_LIB_DIR)\libmp3lame.lib;$(ROXLU_EXTERN_LIB_DIR)\x264.lib;$(ROXLU_EXTERN_LIB_DIR)\swscale.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>

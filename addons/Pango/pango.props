@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_PropertySheetDisplayName>roxlu_pango</_PropertySheetDisplayName>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ROXLU_DIR)\addons\Pango\include\;$(ROXLU_EXTERN_INC_DIR)\glib-2.0\;$(ROXLU_EXTERN_LIB_DIR)\glib-2.0\include\;$(ROXLU_EXTERN_INC_DIR)\pango-1.0\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(SolutionDir)$(Configuration)\roxlu_pango.lib;$(ROXLU_EXTERN_LIB_DIR)\pango-1.0.lib;$(ROXLU_EXTERN_LIB_DIR)\pangocairo-1.0.lib;$(ROXLU_EXTERN_LIB_DIR)\cairo.lib;$(ROXLU_EXTERN_LIB_DIR)\glib-2.0.lib;$(ROXLU_EXTERN_LIB_DIR)\gobject-2.0.lib;$(ROXLU_EXTERN_LIB_DIR)\pixman-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PreLinkEvent>
+      <Command>copy  "$(ROXLU_EXTERN_BIN_DIR)\pango-1.dll" "$(SolutionDir)bin\" 
+copy  "$(ROXLU_EXTERN_BIN_DIR)\pangocairo-1.dll" "$(SolutionDir)bin\" 
+copy  "$(ROXLU_EXTERN_BIN_DIR)\cairo.dll" "$(SolutionDir)bin\" 
+copy  "$(ROXLU_EXTERN_BIN_DIR)\gmodule-2.dll" "$(SolutionDir)bin\" 
+copy  "$(ROXLU_EXTERN_BIN_DIR)\glib-2.dll" "$(SolutionDir)bin\" 
+copy  "$(ROXLU_EXTERN_BIN_DIR)\gobject-2.dll" "$(SolutionDir)bin\" 
+copy  "$(ROXLU_EXTERN_BIN_DIR)\libintl.dll" "$(SolutionDir)bin\" 
+copy  "$(ROXLU_EXTERN_BIN_DIR)\iconv.dll" "$(SolutionDir)bin\" 
+copy  "$(ROXLU_EXTERN_BIN_DIR)\libpng15.dll" "$(SolutionDir)bin\" 
+copy  "$(ROXLU_EXTERN_BIN_DIR)\zlib1.dll" "$(SolutionDir)bin\" 
+copy  "$(ROXLU_EXTERN_BIN_DIR)\pangowin32-1.dll" "$(SolutionDir)bin\" </Command>
+    </PreLinkEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>
