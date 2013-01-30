@@ -1,5 +1,5 @@
-SETUP ROXLU FOR OPENFRAMEWORKS
-==============================
+SETUP ROXLU FOR OPENFRAMEWORKS WITH XCODE
+=========================================
 
 A) **Add the configuration settings to your target:**
 
