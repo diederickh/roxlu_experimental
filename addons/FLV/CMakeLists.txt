@@ -42,7 +42,6 @@ if(ROXLU_PLATFORM_WIN)
     ${roxlu_extern_lib_dir}/libmp3lame.lib
     ${roxlu_extern_lib_dir}/libmpghip-static.lib
 
-    
     # for libuv/sockets
     ws2_32.lib
     psapi.lib
@@ -71,12 +70,18 @@ elseif(ROXLU_PLATFORM_LINUX)
 elseif(ROXLU_PLATFORM_MAC)
   set(roxlu_addon_libs
     ${roxlu_addon_libs}
-    ${roxlu_extern_lib_dir}/libx264.a
+
     ${roxlu_extern_lib_dir}/libmp3lame.a
     ${roxlu_extern_lib_dir}/libavutil.a
     ${roxlu_extern_lib_dir}/libswscale.a
-
     )
+
+  if(CMAKE_BUILD_TYPE STREQUAL Debug)
+    set(roxlu_addon_libs ${roxlu_addon_libs} ${roxlu_extern_lib_debug_dir}/libx264.a)
+  else()
+    set(roxlu_addon_libs ${roxlu_addon_libs} ${roxlu_extern_lib_dir}/libx264.a)
+  endif()
+
 endif()
 
 

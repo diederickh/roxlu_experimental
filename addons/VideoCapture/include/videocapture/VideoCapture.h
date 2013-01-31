@@ -26,6 +26,7 @@ class VideoCapture {
   int getWidth();
   int getHeight();
   void resetHasNewData(); // tells us that we've read the last frame
+  VideoCaptureFormat getFormat();
  private: 
   void setupShader();
   void setupBuffer();
@@ -37,6 +38,7 @@ class VideoCapture {
   size_t allocated_bytes;
   unsigned char* bytes;
   rx_capture_t capture;
+  VideoCaptureFormat fmt;
 };
 
 inline unsigned char* VideoCapture::getPtr() {
@@ -83,8 +85,9 @@ inline int VideoCapture::printVerboseInfo() {
   return capture.print_verbose_info(&capture);
 }
 
-inline int VideoCapture::openDevice(int device, int w, int h, VideoCaptureFormat fmt) {
+inline int VideoCapture::openDevice(int device, int w, int h, VideoCaptureFormat format) {
   capture.set_frame_callback(&capture, video_capture_callback, this);
+  fmt = format;
   return capture.open_device(&capture, device, w, h, fmt);
 }
 
@@ -94,6 +97,10 @@ inline int VideoCapture::closeDevice() {
 
 inline int VideoCapture::startCapture() {
   return capture.capture_start(&capture);
+}
+
+inline VideoCaptureFormat VideoCapture::getFormat() {
+  return fmt;
 }
 
 #endif

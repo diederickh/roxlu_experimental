@@ -15,16 +15,16 @@ class ScreenRecorder {
   ScreenRecorder();
   ~ScreenRecorder();
   bool setup(std::string filepath, 
-    unsigned int w, 
-    unsigned int h);
+    unsigned int inWidth, 
+    unsigned int inHeight,
+    unsigned int outWdth,
+    unsigned int outHeight,
+    int fps);
   
-  void beginFrame();
-  void endFrame();
+  void grabFrame();
 
-  void start();
-  void stop();
- private:
-  void processPixels();
+  void start(); // must be called once, starts the encoding thread
+  void stop(); // shuts down the encoder, is automatically called by destructor too.
 
  private:
 

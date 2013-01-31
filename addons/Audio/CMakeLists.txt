@@ -64,7 +64,7 @@ if(APPLE)
    ${fr_audio_toolbox}
    ${fr_core_services}
    )
-)
+
 endif(APPLE)
 
 set(roxlu_addon_libs

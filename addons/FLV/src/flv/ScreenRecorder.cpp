@@ -18,15 +18,19 @@ ScreenRecorder::~ScreenRecorder() {
 }
 
 bool ScreenRecorder::setup(std::string filepath, 
-                           unsigned int w, 
-                           unsigned int h)
+                           unsigned int inw, 
+                           unsigned int inh,
+                           unsigned int outw,
+                           unsigned int outh,
+                           int fps)
 {
   if(!flv_writer.open(filepath)) {
     return false;
   }
 
-  // if(!av.setupVideo(w,h,60, AV_FMT_RGB24)) {
-  if(!av.setupVideo(w,h,60, AV_FMT_BGRA32)) {
+  av.setVerticalFlip(true);
+
+  if(!av.setupVideo(inw, inh, outw, outh, fps, AV_FMT_BGRA32)) {
     return false;
   }
 
@@ -38,12 +42,12 @@ bool ScreenRecorder::setup(std::string filepath,
 
   av.setFLV(&flv);
 
-  this->width = w;
-  this->height = h;
+  this->width = inw;
+  this->height = inh;
 
 #if !defined(SCREEN_RECORDER_USE_PBO)
-  pixels = new unsigned char[w * h * channels];
-  memset(pixels, 0, w * h * channels);
+  pixels = new unsigned char[inw * inh * channels];
+  memset(pixels, 0, inw * inh * channels);
 #endif
 
   if(!av.initialize()) {
@@ -55,21 +59,18 @@ bool ScreenRecorder::setup(std::string filepath,
   glGenBuffers(SCREEN_RECORDER_NUM_PBOS, pbos);
   for(int i = 0; i < SCREEN_RECORDER_NUM_PBOS; ++i) {
     glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[i]);
-    glBufferData(GL_PIXEL_PACK_BUFFER, w * h * channels, pixels, GL_STREAM_READ);
+    glBufferData(GL_PIXEL_PACK_BUFFER, inw * inh * channels, pixels, GL_STREAM_READ);
   }
 
   glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 #endif
 
-
   return true;
 }
 
-void ScreenRecorder::beginFrame() {
-}
-
-void ScreenRecorder::endFrame() {
+void ScreenRecorder::grabFrame() {
   if(!is_recording) {
+    printf("VERBOSE: ScreenRecorder::grabFrame() - already stopped.\n");
     return;
   }
 
@@ -80,6 +81,7 @@ void ScreenRecorder::endFrame() {
   }
 #else
   if(av.wantsNewVideoFrame()) {
+    rx_int64 now = rx_millis();
     int write_dx = (dx++) % SCREEN_RECORDER_NUM_PBOS;
     int read_dx = (write_dx + 1) % SCREEN_RECORDER_NUM_PBOS;
 
@@ -99,15 +101,16 @@ void ScreenRecorder::endFrame() {
 #endif
 }
 
-void ScreenRecorder::processPixels() {
-}
-
 void ScreenRecorder::start() {
   is_recording = true;
   av.start();
 }
 
 void ScreenRecorder::stop() {
+  if(!is_recording) {
+    printf("VERBOSE: ScreenRecorder::stop() - already stopped.\n");
+    return;
+  }
   is_recording = false;
   av.stop();
 }

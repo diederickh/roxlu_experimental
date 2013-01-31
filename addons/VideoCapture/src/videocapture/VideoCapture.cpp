@@ -23,6 +23,7 @@ VideoCapture::VideoCapture()
   ,has_new_data(false)
   ,nbytes(0)
   ,bytes(NULL)
+  ,fmt(VC_NONE)
 {
 #if defined(__APPLE__)
   capture = rx_capture_avfoundation;

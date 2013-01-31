@@ -10,7 +10,7 @@
  // setup av
  AV av;
  av.setFLV(flv); 
- av.setupVideo(640, 480, 60, AV_FMT_RGB24);
+ av.setupVideo(640, 480, 640, 480, 60, AV_FMT_RGB24);
  av.setupAudio(1, 44100, 512, AV_FMT_INT16); 
  av.initialize();
  
@@ -102,7 +102,7 @@ class AV : public Runnable {
  public: 
   AV();
   ~AV();
-  bool setupVideo(int width, int height, double fps, AVVideoFormat videoFmt);
+  bool setupVideo(int inWidth, int inHeight, int outWidth, int outHeight, double fps, AVVideoFormat videoFmt);
   bool setupAudio(int numChannels, int sampleRate, int maxSamplesPerFrame, AVAudioFormat audioFmt);
   bool initialize();
   void run();  // threaded function
@@ -118,6 +118,7 @@ class AV : public Runnable {
   void stop();
 
   void waitForEncodingThreadToFinish();
+  void setVerticalFlip(bool flip);  // enable or disable vertical flip of video input, must be called before setupVideo()  (handy when recording downloaded pixels from opengl)
 
  private:
   bool initializeVideo();
@@ -149,8 +150,10 @@ class AV : public Runnable {
   
   /* video members */
   AVVideoFormat vid_fmt;
-  int vid_w;
-  int vid_h;
+  int vid_in_w; 
+  int vid_in_h;
+  int vid_out_w;
+  int vid_out_h;
   int vid_num_channels; // how many color channels (3 = rgb, 4 = rgba)
   double vid_fps;
   double vid_millis_per_frame;
@@ -165,6 +168,7 @@ class AV : public Runnable {
   x264_picture_t vid_pic_in;
   x264_picture_t vid_pic_out; // result from x264_encoder_encode(), we don't have to free this; only when using x264_picture_alloc
   SwsContext* vid_sws;
+  bool vid_vflip; // flip video input
 
   /* muxer */
   bool is_initialized;
@@ -197,8 +201,9 @@ inline void AV::addVideoFrame(const void* data) {
       p->type = AV_VIDEO;
       p->timestamp = rx_millis() - vid_time_started;
       p->write_index = video_ring_buffer.getWriteIndex();
-      p->num_bytes = vid_bytes_per_frame;
-      p->num_frames = 1; 
+      p->num_bytes =  vid_bytes_per_frame;
+      p->num_frames = 1;
+
       video_ring_buffer.write((char*)data, p->num_bytes);
       packets.push_back(p);
 
@@ -278,4 +283,8 @@ inline AVPixelFormat AV::videoFormatToAVPixelFormat(AVVideoFormat f) {
   }
 }
 
+
+inline void AV::setVerticalFlip(bool flip) {
+  vid_vflip = true;
+}
 #endif

@@ -19,6 +19,8 @@
 # - roxlu_extern_lib_dir:    path to the "extern/lib/[OS]/[platform/compiler]/[arch]/ 
 #                            so you can directly use something like:
 #                            ${roxlu_extern_lib_dir}/libportaudio.a to target libraries.
+# - roxlu_extern_lib_debug_dir: point to the debug version of the libs: adds a 'd' after 
+#                               ${roxlu_extern_lib_dir}
 # - roxlu_extern_bin_dir:    Mostly used on windows to get a path to the DLL files
 # - roxlu_extern_src_dir:    For libraries we compile from src
 # - roxlu_win_runtime:       For windows builds this is set to MT, MD so you know 
@@ -104,8 +106,6 @@ set(roxlu_opengl_sources
 set(roxlu_external_sources_cpp 
  
 )
-
-#file(GLOB_RECURSE roxlu_external_sources_c ${roxlu_src_dir}/external/*.c)  # part of roxlu lib
 
 # 3rd party, used by addons
 set(roxlu_extern_sources_c 
@@ -203,13 +203,13 @@ add_definitions(
 endif(NOT ROXLU_PLATFORM_WIN)
 
 set(roxlu_extern_lib_dir ${roxlu_base_dir}/extern/lib/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}/)
+set(roxlu_extern_lib_debug_dir ${roxlu_base_dir}/extern/lib/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}d/)
 set(roxlu_extern_bin_dir ${roxlu_base_dir}/extern/bin/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}/)
 
 set(roxlu_include_dirs
   ${roxlu_include_dirs}
   ${roxlu_extern_lib_dir}/curl/ 
 )
-
 
 
 # - On windows we don't have inttypes.h so we add a include dir
