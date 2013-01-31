@@ -26,26 +26,26 @@ include_directories(
 
 if(ROXLU_PLATFORM_MAC)
 
-set(pango_libs
-  ${roxlu_extern_lib_dir}/libglib-2.0.a
-  ${roxlu_extern_lib_dir}/libgobject-2.0.a
-  ${roxlu_extern_lib_dir}/libgmodule-2.0.a
-  ${roxlu_extern_lib_dir}/libiconv.a
-  ${roxlu_extern_lib_dir}/libintl.a
-  ${roxlu_extern_lib_dir}/libffi.a
-  ${roxlu_extern_lib_dir}/libcairo.a
-  ${roxlu_extern_lib_dir}/libpixman-1.a
-  ${roxlu_extern_lib_dir}/libpng15.a
-  ${roxlu_extern_lib_dir}/libpango-1.0.a
-  ${roxlu_extern_lib_dir}/libpangocairo-1.0.a
-  ${roxlu_extern_lib_dir}/libfontconfig.a
-  ${roxlu_extern_lib_dir}/libpangoft2-1.0.a
-  ${roxlu_extern_lib_dir}/libfreetype.a
-  ${roxlu_extern_lib_dir}/libz.a
-  ${roxlu_extern_lib_dir}/libxml2.a
-  -lbz2
-  -lexpat
-)
+  set(pango_libs
+    ${roxlu_extern_lib_dir}/libglib-2.0.a
+    ${roxlu_extern_lib_dir}/libgobject-2.0.a
+    ${roxlu_extern_lib_dir}/libgmodule-2.0.a
+    ${roxlu_extern_lib_dir}/libiconv.a
+    ${roxlu_extern_lib_dir}/libintl.a
+    ${roxlu_extern_lib_dir}/libffi.a
+    ${roxlu_extern_lib_dir}/libcairo.a
+    ${roxlu_extern_lib_dir}/libpixman-1.a
+    ${roxlu_extern_lib_dir}/libpng15.a
+    ${roxlu_extern_lib_dir}/libpango-1.0.a
+    ${roxlu_extern_lib_dir}/libpangocairo-1.0.a
+    ${roxlu_extern_lib_dir}/libfontconfig.a
+    ${roxlu_extern_lib_dir}/libpangoft2-1.0.a
+    ${roxlu_extern_lib_dir}/libfreetype.a
+    ${roxlu_extern_lib_dir}/libz.a
+    ${roxlu_extern_lib_dir}/libxml2.a
+    -lbz2
+    -lexpat
+    )
 
 endif()
 
@@ -100,26 +100,20 @@ if(ROXLU_PLATFORM_WIN)
     )
 endif()
 
-
-set(roxlu_addon_libs
-  ${roxlu_addon_libs}
-  ${pango_libs}
-)
-
 set(pango_source_files
   ${pango_src_dir}/pango/TextSurface.cpp
   ${pango_src_dir}/pango/TextGLSurface.cpp
 )
+
 set(roxlu_addon_sources
   ${roxlu_addon_sources}
   ${pango_source_files}
 )
 
-if(APPLE)
-  set(roxlu_linker_flags
-   ${roxlu_linker_flags}
-   "${CMAKE_EXE_LINKER_FLAGS}  -framework CoreFoundation -framework QuartzCore -framework ApplicationServices -lz -lbz2 -lexpat")
-endif(APPLE)
+set(roxlu_addon_libs
+  ${roxlu_addon_libs}
+  ${pango_libs}
+)
 
 add_library(roxlu_pango STATIC ${pango_source_files})
 

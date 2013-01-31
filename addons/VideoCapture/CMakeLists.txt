@@ -25,20 +25,33 @@ include_directories(
 
 set(videocapture_source_files
   ${videocapture_src_dir}/videocapture/VideoCapture.cpp
+  ${videocapture_src_dir}/videocapture/VideoCaptureGLSurface.cpp
 )
 
 # APPLE
 # ------------------------
 if(APPLE) 
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ObjC++")
-  set(CMAKE_CXX_FLAGS ${CMAKE_C_FLAGS})
-
   set(rxcapture_source_files
     ${videocapture_src_platform_dir}/videocapture/rx_capture_mac.mm
     ${videocapture_src_platform_dir}/videocapture/VideoCaptureAVFoundation.mm
   )
 
-  set(roxlu_linker_flags  "${roxlu_linker_flags} -framework CoreFoundation -framework Cocoa -framework AVFoundation -framework CoreVideo -framework CoreMedia -framework CoreMediaIO" )
+  find_library(fr_core_foundation CoreFoundation)
+  find_library(fr_cocoa Cocoa)
+  find_library(fr_avfoundation AVFoundation)
+  find_library(fr_core_video CoreVideo)
+  find_library(fr_core_media CoreMedia)
+  find_library(fr_core_media_io CoreMediaIO)
+  
+  set(roxlu_addon_libs
+    ${roxlu_addon_libs}
+    ${fr_core_foundation}
+    ${fr_cocoa}
+    ${fr_avfoundation}
+    ${fr_core_video}
+    ${fr_core_media}
+    ${fr_core_media_io}
+    )
 
   add_library(rx_capture ${rxcapture_source_files})
 
@@ -78,12 +91,8 @@ set(roxlu_addon_sources  ${roxlu_addon_sources}  ${videocapture_source_files} )
 
 add_library(roxlu_videocapture STATIC ${videocapture_source_files})
 
+if(APPLE)
+  set_target_properties(roxlu_videocapture PROPERTIES COMPILE_FLAGS "-ObjC++")
+  set_target_properties(rx_capture PROPERTIES COMPILE_FLAGS "-ObjC++")
+endif()
 
-#if(CMAKE_BUILD_TYPE STREQUAL Debug)
-#  if(CMAKE_COMPILER_IS_GNUCXX)
-#    add_definitions("-ggdb")
-#  endif()
-#  if(MSVC)
-#    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUGS} /Od /ZI")
-#  endif()
-#endif()

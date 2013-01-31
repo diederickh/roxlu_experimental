@@ -3,12 +3,6 @@ cmake_minimum_required(VERSION 2.8)
 
 include(${CMAKE_CURRENT_LIST_DIR}/../../lib/CMakeLists.txt)
 
-if(ROXLU_PLATFORM_MAC)
-set(roxlu_linker_flags 
-   ${roxlu_linker_flags} 
-)	    
-endif(ROXLU_PLATFORM_MAC)
-
 set(opencv_base_dir ${CMAKE_CURRENT_LIST_DIR})
 set(opencv_src_dir ${opencv_base_dir}/src)
 set(opencv_include_dir ${opencv_base_dir}/include)

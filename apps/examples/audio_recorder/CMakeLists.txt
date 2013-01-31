@@ -10,7 +10,6 @@ set(simulation_base ${CMAKE_CURRENT_LIST_DIR}/)
 set(simulation_install_dir ${simulation_base}bin/)
 set(simulation_include_dir ${simulation_base}src/)
 set(CMAKE_INSTALL_PREFIX ${simulation_install_dir})
-set(CMAKE_EXE_LINKER_FLAGS ${roxlu_linker_flags})
 
 set(simulation_libs
   ${roxlu_addon_libs}

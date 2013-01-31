@@ -67,14 +67,31 @@ class TextGLSurface {
  public:
   TextGLSurface();
   ~TextGLSurface();
+
+  /* gl */
   void setup(const std::string font, unsigned int surfaceW, unsigned int surfaceH, unsigned int windowW, unsigned int windowH);
-  void setPixels(unsigned char* pixels);
-  void setText(const std::string str, float r = 0.0f, float g = 0.0f, float b = 1.0f, float a = 1.0f);
-  void fill(float r, float g, float b, float a);
   void draw(int x, int y);
   void clear();
+
+  /* text surface */
+  void setPixels(unsigned char* pixels);
+  void setText(const std::string str, float r = 0.0f, float g = 0.0f, float b = 0.0f, float a = 1.0f);
+  void setTextWidth(int w);
+  void setTextHeight(int h);
+  void setMarkup(const std::string str);
+  void fill(float r, float g, float b, float a);
+
+  /* alignment and wrapping */
+  void alignLeft();
+  void aligntRight();
+  void alignCenter();
+  void wrapWord();
+  void wrapChar();
+  void wrapWordChar();
+
  public:
   TextSurface text;
+
  private:
   static GLuint prog;
   static GLint u_pm;
@@ -109,8 +126,23 @@ inline void TextGLSurface::setText(const std::string str, float r, float g, floa
   needs_update = true;
 }
 
+inline void TextGLSurface::setMarkup(const std::string str) {
+  text.setMarkup(str);
+  needs_update = true;
+}
+
 inline void TextGLSurface::fill(float r, float g, float b, float a) {
   text.fill(r,g,b,a);
+  needs_update = true;
+}
+
+inline void TextGLSurface::setTextWidth(int w) {
+  text.setTextWidth(w);
+  needs_update = true;
+}
+
+inline void TextGLSurface::setTextHeight(int h) {
+  text.setTextHeight(h);
   needs_update = true;
 }
 
@@ -118,5 +150,36 @@ inline void TextGLSurface::clear() {
   text.clear();
   needs_update = true;
 }
+
+inline void TextGLSurface::alignLeft() {
+  text.alignLeft();
+  needs_update = true;
+}
+
+inline void TextGLSurface::aligntRight() {
+  text.alignRight();
+  needs_update = true;
+}
+
+inline void TextGLSurface::alignCenter() {
+  text.alignCenter();
+  needs_update = true;
+}
+
+inline void TextGLSurface::wrapWord() {
+  text.wrapWord();
+  needs_update = true;
+}
+
+inline void TextGLSurface::wrapChar() {
+  text.wrapChar();
+  needs_update = true;
+}
+
+inline void TextGLSurface::wrapWordChar() {
+  text.wrapWordChar();
+  needs_update = true;
+}
+
 #endif
 

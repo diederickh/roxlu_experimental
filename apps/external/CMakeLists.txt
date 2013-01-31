@@ -3,9 +3,6 @@ cmake_minimum_required(VERSION 2.8)
 
 include(${CMAKE_CURRENT_LIST_DIR}/../../lib/CMakeLists.txt)
 
-if(ROXLU_PLATFORM_MAC)
-  set(roxlu_linker_flags  "${roxlu_linker_flags}  -framework CoreFoundation -framework OpenGL -framework Cocoa -framework IOKit ")
-endif(ROXLU_PLATFORM_MAC)
 
 
 # 1 = GLFW, 2 = OPENFRAMEWORKS, 3 = CINDER, 4 = COCOA
@@ -38,6 +35,24 @@ if(ROXLU_PLATFORM_WIN)
     )
 
 endif(ROXLU_PLATFORM_WIN)
+
+
+
+if(APPLE)
+  find_library(fr_corefoundation CoreFoundation)
+  find_library(fr_cocoa Cocoa)
+  find_library(fr_opengl OpenGL)
+  find_library(fr_iokit IOKit)
+
+  set(glfw_libs
+    ${glfw_libs}
+    ${fr_corefoundation}
+    ${fr_cocoa}
+    ${fr_opengl}
+    ${fr_iokit}
+    )
+
+endif()
 
 # Platform specifics
 if(ROXLU_PLATFORM_LINUX)

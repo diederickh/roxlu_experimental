@@ -12,12 +12,6 @@ if(CMAKE_BUILD_TYPE STREQUAL Debug)
     endif()
 endif()
 
-if(ROXLU_PLATFORM_MAC)
-  set(roxlu_linker_flags 
-    ${roxlu_linker_flags} 
-    )	    
-endif(ROXLU_PLATFORM_MAC)
-
 set(gif_base_dir ${CMAKE_CURRENT_LIST_DIR})
 set(gif_src_dir ${gif_base_dir}/src)
 set(gif_include_dir ${gif_base_dir}/include)

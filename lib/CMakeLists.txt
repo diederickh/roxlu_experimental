@@ -2,7 +2,6 @@
 # addon or simulatin/example CMakelists.txt files:
 # - roxlu_addon_sources (addons should append their sources to this list, see Twitter addon)
 # - roxlu_addon_libs (addons should append their libs to this list, see Twitter addon)
-# - CMAKE_EXE_LINKER_FLAG (add extra frameworks, libs etc.. to the linker flags, see Videorecorder/Audio addons)
 # - for windows builds you can use ${roxlu_win_runtime} which is set to MT, MTd, MD, MDd (MD is used for import libs)
 #
 #

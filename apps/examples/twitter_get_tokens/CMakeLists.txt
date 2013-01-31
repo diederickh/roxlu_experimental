@@ -6,8 +6,6 @@ get_filename_component(example_name ${CMAKE_CURRENT_LIST_DIR} NAME)
 include(${CMAKE_CURRENT_LIST_DIR}/../../../lib/CMakeLists.txt) # roxlu cmake
 include(${roxlu_addons_dir}/Twitter/CMakeLists.txt) # Twitter addon
 
-set(CMAKE_EXE_LINKER_FLAGS ${roxlu_linker_flags})
-
 file(GLOB_RECURSE example_sources src/*.cpp)
 
 set(compile_sources

@@ -12,12 +12,6 @@ if(CMAKE_BUILD_TYPE STREQUAL Debug)
     endif()
 endif()
 
-if(ROXLU_PLATFORM_MAC)
-set(roxlu_linker_flags 
-   ${roxlu_linker_flags} 
-)	    
-endif(ROXLU_PLATFORM_MAC)
-
 set(audio_base_dir ${CMAKE_CURRENT_LIST_DIR})
 set(audio_src_dir ${audio_base_dir}/src)
 set(audio_include_dir ${audio_base_dir}/include)
@@ -58,7 +52,18 @@ else()
 endif(ROXLU_PLATFORM_WIN)
 
 if(APPLE)
-  set(roxlu_linker_flags " ${roxlu_linker_flags} -framework CoreAudio -framework AudioToolbox -framework AudioUnit -framework CoreServices "
+ find_library(fr_audio CoreAudio)
+ find_library(fr_audio_unit AudioUnit)
+ find_library(fr_audio_toolbox AudioToolbox)
+ find_library(fr_core_services CoreServices)
+
+ set(audio_libs
+   ${audio_libs}
+   ${fr_audio}
+   ${fr_audio_unit}
+   ${fr_audio_toolbox}
+   ${fr_core_services}
+   )
 )
 endif(APPLE)
 

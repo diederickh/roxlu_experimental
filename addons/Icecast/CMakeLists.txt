@@ -12,12 +12,6 @@ if(CMAKE_BUILD_TYPE STREQUAL Debug)
     endif()
 endif()
 
-if(ROXLU_PLATFORM_MAC)
-set(roxlu_linker_flags 
-   ${roxlu_linker_flags} 
-)	    
-endif(ROXLU_PLATFORM_MAC)
-
 set(icecast_base_dir ${CMAKE_CURRENT_LIST_DIR})
 set(icecast_src_dir ${icecast_base_dir}/src)
 set(icecast_include_dir ${icecast_base_dir}/include)

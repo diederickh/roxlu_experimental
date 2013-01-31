@@ -13,10 +13,6 @@ set(simulation_include_dir ${simulation_base}src/)
 set(CMAKE_INSTALL_PREFIX ${simulation_install_dir})
 #set(CMAKE_BUILD_TYPE Release)
 
-if(APPLE)
-  set(CMAKE_EXE_LINKER_FLAGS " -framework CoreFoundation -framework OpenGL -framework Cocoa -framework IOKit ")
-endif(APPLE)
-
 set(simulation_libs
   ${roxlu_addon_libs}
   ${glfw_libs}

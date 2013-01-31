@@ -12,12 +12,6 @@ if(CMAKE_BUILD_TYPE STREQUAL Debug)
     endif()
 endif()
 
-if(ROXLU_PLATFORM_MAC)
-set(roxlu_linker_flags 
-   ${roxlu_linker_flags} 
-)	    
-endif(ROXLU_PLATFORM_MAC)
-
 set(sqlite_base_dir ${CMAKE_CURRENT_LIST_DIR})
 set(sqlite_src_dir ${sqlite_base_dir}/src)
 set(sqlite_include_dir ${sqlite_base_dir}/include)

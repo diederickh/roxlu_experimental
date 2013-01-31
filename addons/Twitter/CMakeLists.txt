@@ -14,10 +14,13 @@ if(CMAKE_BUILD_TYPE STREQUAL Debug)
 endif()
 
 if(APPLE)
-  set(roxlu_linker_flags 
-    ${roxlu_linker_flags} 
-    " -framework CoreFoundation -framework CoreServices "
-    )	    
+  find_library(fr_corefoundation CoreFoundation)
+  find_library(fr_core_services CoreServices)
+  set(roxlu_addon_libs
+    ${roxlu_addon_libs}
+    ${fr_corefoundation}
+    ${fr_core_services}
+    )
 endif()
 
 set(twitter_base_dir ${CMAKE_CURRENT_LIST_DIR})

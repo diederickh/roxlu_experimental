@@ -145,7 +145,7 @@ static std::string rx_get_exe_path() {
   return std::string(buffer).substr(0, pos) +"\\";
 }
 
-static rx_uint64 rx_millis(void) {
+static rx_int64 rx_millis(void) {
   static LARGE_INTEGER s_frequency;
   static BOOL s_use_qpc = QueryPerformanceFrequency(&s_frequency);
   if (s_use_qpc) {
@@ -179,10 +179,10 @@ static std::string rx_get_exe_path() {
   return ret;
 }
 
-static uint64_t rx_millis() {
+static int64_t rx_millis() {
   timeval time;
   gettimeofday(&time, NULL);
-  uint64_t n = time.tv_usec;
+  int64_t n = time.tv_usec;
   n /= 1000; // convert seconds to millis
   n += (time.tv_sec * 1000); // convert micros to millis
   return n;
@@ -221,7 +221,7 @@ static std::string rx_get_exe_path() {
   return ret;
 }
 
-static uint64_t rx_millis(void) {
+static int64_t rx_millis(void) {
   mach_timebase_info_data_t info;
   if (mach_timebase_info(&info) != KERN_SUCCESS) {
     abort();

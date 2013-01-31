@@ -13,7 +13,7 @@ set(simulation_include_dir ${simulation_base}src/)
 set(simulation_install_dir_windows ${CMAKE_CURRENT_BINARY_DIR}/)
 
 set(CMAKE_INSTALL_PREFIX ${simulation_install_dir})
-set(CMAKE_EXE_LINKER_FLAGS ${roxlu_linker_flags})
+
 #set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_BUILD_TYPE Debug)
 
