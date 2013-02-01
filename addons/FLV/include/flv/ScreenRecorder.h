@@ -14,12 +14,15 @@ class ScreenRecorder {
  public:
   ScreenRecorder();
   ~ScreenRecorder();
-  bool setup(std::string filepath, 
+
+  bool setup(
     unsigned int inWidth, 
     unsigned int inHeight,
     unsigned int outWdth,
     unsigned int outHeight,
     int fps);
+
+  bool open(std::string filepath);
   
   void grabFrame();
 
@@ -33,6 +36,7 @@ class ScreenRecorder {
   FLVFileWriter flv_writer;
   FLV flv;
   bool is_recording;
+  bool is_file_opened;
 
   /* GL */
   unsigned int width;

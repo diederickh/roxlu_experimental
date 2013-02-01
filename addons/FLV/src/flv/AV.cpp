@@ -16,6 +16,7 @@ AV::AV()
   ,vid_tmp_buffer(NULL)
   ,vid_total_frames(0)
   ,vid_time_started(0)
+  ,vid_last_timestamp(0)
   ,audio_samplerate(0)
   ,audio_total_samples(0)
   ,audio_num_channels(0)
@@ -35,6 +36,7 @@ AV::AV()
 
 AV::~AV() {
   stop();
+  shutdown();
 }
 
 bool AV::setupVideo(int inw, 
@@ -42,7 +44,8 @@ bool AV::setupVideo(int inw,
                     int outw, 
                     int outh, 
                     double fps,
-                    AVVideoFormat fmt
+                    AVVideoFormat fmt,
+                    FLV* f
 )
 {
   vid_fps = fps;
@@ -54,6 +57,7 @@ bool AV::setupVideo(int inw,
   vid_fmt = fmt;
   vid_num_channels = (fmt == AV_FMT_RGB24) ? 3 : 4; 
   vid_bytes_per_frame = vid_in_w * vid_in_h * vid_num_channels;
+  flv = f;
 
   vid_tmp_buffer = new char[vid_bytes_per_frame];
   memset(vid_tmp_buffer, 0x00, vid_bytes_per_frame);
@@ -70,7 +74,7 @@ bool AV::setupAudio(int numChannels,
 )
 {
   if(numChannels != 1 && numChannels != 2) {
-    printf("ERROR: only 1 or 2 audio channels are supported.\n");
+    RX_ERROR(("only 1 or 2 audio channels are supported."));
     return false;
   }
 
@@ -86,7 +90,7 @@ bool AV::setupAudio(int numChannels,
     audio_bytes_per_sample = 4;
   }
   else {
-    printf("ERROR: unsupported audio format.. we haven't defined a size per sample yet.\n");
+    RX_ERROR(("unsupported audio format.. we haven't defined a size per sample yet."));
     return false;
   }
   audio_bytes_per_frame = audio_num_channels * audio_bytes_per_sample * audio_max_samples_per_frame;
@@ -94,6 +98,65 @@ bool AV::setupAudio(int numChannels,
 }
 
 bool AV::initialize() {
+  if(!initializeVideo()) {
+    RX_ERROR(("cannot initialize video."));
+    return false;
+  }
+
+  if(!initializeAudio()) {
+    RX_ERROR(("cannot initialize audio."));
+    return false;
+  }
+  is_initialized = true;
+  must_stop = false;
+  return true;
+}
+
+bool AV::initializeVideo() {
+  unsigned int csp = (vid_vflip) ? X264_CSP_I420 | X264_CSP_VFLIP : X264_CSP_I420;
+  int r = x264_picture_alloc(&vid_pic_in, csp, vid_out_w, vid_out_h);
+  if(r != 0) {
+    RX_ERROR(("cannot allocate picture that holds the encoded data."));
+    return false;
+  }
+
+  AVPixelFormat av_fmt = videoFormatToAVPixelFormat(vid_fmt);
+  vid_sws = sws_getContext(vid_in_w, vid_in_h, av_fmt,
+                           vid_out_w, vid_out_h, PIX_FMT_YUV420P, 
+                           SWS_FAST_BILINEAR, NULL, NULL, NULL);
+
+  printAVPixelFormat(av_fmt);
+  
+  if(!vid_sws) {
+    RX_ERROR(("cannot setup sws."));
+    return false;
+  }
+  return true;
+}
+
+bool AV::initializeAudio() {
+  if(audio_num_channels) {
+    audio_lame_flags = lame_init();
+    if(audio_lame_flags == NULL) {
+      RX_ERROR(("ERROR: cannot initialize lame."));
+      return false;
+    }
+    lame_set_num_channels(audio_lame_flags, audio_num_channels);
+    lame_set_in_samplerate(audio_lame_flags, audio_samplerate);
+    lame_set_brate(audio_lame_flags, 128);
+    //lame_set_mode(audio_lame_flags, MONO); // lets lame pick the mode
+    lame_set_quality(audio_lame_flags, 5); // 2 = high, 5 = medium, 7 = low
+
+    int r = lame_init_params(audio_lame_flags);
+    if(r < 0) {
+      RX_ERROR(("ERROR: error with lame_init_params()"));
+      return false;
+    }
+  }
+  return true;  
+}
+
+bool AV::openFLV() {
   FLVHeader flv_header;
   flv_header.has_audio = (audio_samplerate != 0);
   flv_header.has_video = (vid_in_w != 0 && vid_in_h != 0);
@@ -106,57 +169,12 @@ bool AV::initialize() {
   }
 
   if(flv == NULL) {
-    printf("ERROR: FLV is not set.\n");
+    RX_ERROR(("ERROR: AV::openFLV() - FLV is not set."));
     return false;
   }
 
   flv->open(flv_header);
 
-  if(!initializeVideo()) {
-    printf("ERROR: cannot initialize video.\n");
-    return false;
-  }
-
-  if(!initializeAudio()) {
-    printf("ERROR: cannot initialize audio.\n");
-    return false;
-  }
-  is_initialized = true;
-  must_stop = false;
-  return true;
-}
-
-bool AV::initializeVideo() {
-  if(!setupX264()) {
-    return false;
-  }
-
-  printX264Params(&vid_params);
-
-  unsigned int csp = (vid_vflip) ? X264_CSP_I420 | X264_CSP_VFLIP : X264_CSP_I420;
-  int r = x264_picture_alloc(&vid_pic_in, csp, vid_out_w, vid_out_h);
-  if(r != 0) {
-    printf("ERROR: cannot allocate picture that holds the encoded data.\n");
-    return false;
-  }
-
-  AVPixelFormat av_fmt = videoFormatToAVPixelFormat(vid_fmt);
-  vid_sws = sws_getContext(vid_in_w, vid_in_h, av_fmt,
-                           vid_out_w, vid_out_h, PIX_FMT_YUV420P, 
-                           SWS_FAST_BILINEAR, NULL, NULL, NULL);
-
-  printAVPixelFormat(av_fmt);
-  
-  if(!vid_sws) {
-    printf("ERROR: cannot setup sws\n");
-    return false;
-  }
-
-  if(flv == NULL) {
-    printf("ERROR: FLV is not set.\n");
-    return false;
-  }
-  
   FLVParams flv_params;
   flv_params.x264_params = &vid_params;
   flv->writeParams(flv_params);
@@ -165,57 +183,33 @@ bool AV::initializeVideo() {
   x264_nal_t* nals = NULL;
   x264_encoder_headers(vid_encoder, &nals, &num_nals);
   if(!nals) {
-    printf("ERROR: x264_encoder_headers() returned NULL!\n");
+    RX_ERROR(("x264_encoder_headers() returned NULL!"));
     return false;
   }
-  printf("num_nals in header: %d\n", num_nals);
   printX264Headers(nals);
 
   FLVAvcSequenceHeader avc_header;
   avc_header.nals = nals;
   flv->writeAvcSequenceHeader(avc_header);
-
   return true;
 }
 
-bool AV::initializeAudio() {
-  if(audio_num_channels) {
-    audio_lame_flags = lame_init();
-    if(audio_lame_flags == NULL) {
-      printf("ERROR: cannot initialize lame.\n");
-      return false;
-    }
-    lame_set_num_channels(audio_lame_flags, audio_num_channels);
-    lame_set_in_samplerate(audio_lame_flags, audio_samplerate);
-    lame_set_brate(audio_lame_flags, 128);
-    //lame_set_mode(audio_lame_flags, MONO); // lets lame pick the mode
-    lame_set_quality(audio_lame_flags, 5); // 2 = high, 5 = medium, 7 = low
-
-    int r = lame_init_params(audio_lame_flags);
-    if(r < 0) {
-      printf("ERROR: error with lame_init_params()\n");
-      return false;
-    }
-  }
-  return true;  
-}
-
-bool AV::setupX264() {
+bool AV::openX264() {
   int r = 0;
   x264_param_t* p = &vid_params;
 
   r = x264_param_default_preset(p, "ultrafast", "zerolatency"); // ultrafast, zerolatency
   if(r != 0) {
-    printf("ERROR: cannot set x264 preset.\n");
+    RX_ERROR(("cannot set x264 preset."));
     return false;
   }
 
   r = x264_param_apply_profile(p, "baseline");
   if(r != 0) {
-    printf("ERROR: cannot apply profile.\n");
+    RX_ERROR(("cannot apply profile."));
     return false;
   }
-#if !defined(NDEBUG)
+#if !defined(NDEBUG) && RX_LOG_LEVEL >= RX_LOG_LEVEL_VERBOSE
   p->i_log_level = X264_LOG_DEBUG;
 #endif
   p->i_threads = 1;
@@ -228,11 +222,13 @@ bool AV::setupX264() {
 
   vid_encoder = x264_encoder_open(&vid_params);
   if(!vid_encoder) {
-    printf("ERROR: cannot open x264 encoder.\n");
+    RX_ERROR(("cannot open x264 encoder."));
     return false;
   }
 
   x264_encoder_parameters(vid_encoder, &vid_params);
+
+  printX264Params(&vid_params);
   return true;
 }
 
@@ -242,10 +238,6 @@ void AV::run() {
   if(vid_in_w != 0 && audio_num_channels != 0) {
     std::vector<AVPacket*> work_packets;
     while(true) {
-      if(must_stop) {
-        break;
-      }
-
       if(!is_initialized) {
         rx_sleep_millis(vid_millis_per_frame);
         continue;
@@ -283,11 +275,19 @@ void AV::run() {
 
       for(std::vector<AVPacket*>::iterator it = work_packets.begin(); it != work_packets.end(); ++it) {
         delete *it;
+        *it = NULL;
       }
+      work_packets.clear();
 
       audio_work_buffer.reset();
       video_work_buffer.reset();
-      work_packets.clear();
+
+      stop_mutex.lock();
+      if(must_stop) {
+        stop_mutex.unlock();
+        break;
+      }
+      stop_mutex.unlock();
     }
   }
 
@@ -295,10 +295,7 @@ void AV::run() {
   else {
     std::vector<AVPacket*> work_packets;
     while(true) {
-      if(must_stop) {
-        break;
-      }
-
+      
       if(!is_initialized) {
         rx_sleep_millis(vid_millis_per_frame);
         continue;
@@ -307,7 +304,7 @@ void AV::run() {
       if(!vid_is_buffer_ready) { 
         continue;
       }
-      
+
       mutex.lock();
       {
         std::copy(packets.begin(), packets.end(), std::back_inserter(work_packets));
@@ -323,13 +320,22 @@ void AV::run() {
           encodeVideoPacket(p);
         }
       }
-
+  
       for(std::vector<AVPacket*>::iterator it = work_packets.begin(); it != work_packets.end(); ++it) {
         delete *it;
+        *it = NULL;
       }
+      work_packets.clear();
 
       video_work_buffer.reset();
-      work_packets.clear();
+
+      stop_mutex.lock();
+      if(must_stop) {
+        stop_mutex.unlock();
+        break;
+      }
+      stop_mutex.unlock();
+
     } // video only
   }
   reset();
@@ -338,13 +344,13 @@ void AV::run() {
 
 void AV::encodeAudioPacket(AVPacket* p) {
   if(!is_initialized) {
-    printf("WARNING: cannot add audio frame when we're not initialized.\n");
+    RX_WARNING(("cannot add audio frame when we're not initialized."));
     return;
   }
 
   size_t bytes_read = audio_work_buffer.read((char*)audio_tmp_in_buffer, p->num_bytes);
   if(bytes_read != p->num_bytes) {
-    printf("ERROR: cannot read audio from buffer. Skipping encoding.\n");
+    RX_ERROR(("cannot read audio from buffer. Skipping encoding."));
     return;
   }
   short int* src_ptr = (short int*)audio_tmp_in_buffer;
@@ -402,7 +408,7 @@ void AV::encodeAudioPacket(AVPacket* p) {
 
 void AV::encodeVideoPacket(AVPacket* p) {
   if(!is_initialized) {
-    printf("WARNING: cannot add audio frame when we're not initialized.\n");
+    RX_WARNING(("cannot add audio frame when we're not initialized."));
     return;
   }
 
@@ -418,7 +424,7 @@ void AV::encodeVideoPacket(AVPacket* p) {
                     vid_pic_in.img.i_stride);
 
   if(h != vid_out_h) {
-    printf("ERROR: cannot sws_scale().\n");
+    RX_ERROR(("cannot sws_scale().\n"));
     return;
   }
 
@@ -430,13 +436,18 @@ void AV::encodeVideoPacket(AVPacket* p) {
   int frame_size = x264_encoder_encode(vid_encoder, &nal, &nals_count, &vid_pic_in, &vid_pic_out);
 
   if(frame_size < 0) {
-    printf("ERROR: x264_encoder_encode fails\n");
+    RX_WARNING(("x264_encoder_encode fails"));
     return;
   }
   if(nal == NULL) {
-    printf("WARNING: x264_encoder_encode() return 0 nals.\n");
+    RX_ERROR(("x264_encoder_encode() return 0 nals."));
     return;
   }
+
+  if(p->timestamp < vid_last_timestamp) {
+    RX_ERROR(("Given timestamp is smaller the previous one! Current timestamp: %lld, previous: %lld", p->timestamp, vid_last_timestamp));
+  }
+  vid_last_timestamp = p->timestamp;
       
   FLVVideoPacket flv_vid_packet;
   flv_vid_packet.timestamp = p->timestamp; //vid_total_frames * vid_millis_per_frame;
@@ -446,23 +457,13 @@ void AV::encodeVideoPacket(AVPacket* p) {
   flv->writeVideoPacket(flv_vid_packet);
 }
 
-void AV::reset() {
+void AV::shutdown() {
   if(!is_initialized) {
+    RX_VERBOSE(("we're not yet initialized so cannot shutdown."));
     return;
   }
 
   is_initialized = false;
-
-  FLVCloseParams p;
-  flv->close(p);
-  
-  lame_close(audio_lame_flags);
-  audio_lame_flags = NULL;
-  memset(audio_tmp_in_buffer, 0, (MP3_BUFFER_SIZE * 2));
-  memset(audio_tmp_in_buffer_left, 0, MP3_BUFFER_SIZE);
-  memset(audio_tmp_in_buffer_right, 0, MP3_BUFFER_SIZE);
-  memset(audio_tmp_out_buffer, 0, MP3_BUFFER_SIZE);
-
   audio_samplerate = 0;
   audio_num_channels = 0;
   audio_bytes_per_frame = 0;
@@ -481,23 +482,68 @@ void AV::reset() {
   vid_bytes_per_frame = 0;
   vid_timeout = 0;
   vid_time_started = 0;
+  vid_is_buffer_ready = false;
+  vid_last_timestamp = 0;
+
+  delete[] vid_tmp_buffer;
+  vid_tmp_buffer = NULL;
 
   memset((char*)&vid_params, 0, sizeof(vid_params));
-  audio_ring_buffer.reset();
-  video_ring_buffer.reset();
-  audio_work_buffer.reset();
-  video_work_buffer.reset();
-  
-  x264_encoder_close(vid_encoder);
-  
+
   x264_picture_clean(&vid_pic_in);
 
   sws_freeContext(vid_sws);
+
+  lame_close(audio_lame_flags);
+  audio_lame_flags = NULL;
   
   vid_sws = NULL;
   vid_encoder = NULL;
 }
 
+void AV::reset() {
+  if(!is_initialized) {
+    RX_VERBOSE(("we're not yet initialized, so cannot reset()."));
+    return;
+  }
+
+  FLVCloseParams p;
+  flv->close(p);
+  
+  memset(audio_tmp_in_buffer, 0, (MP3_BUFFER_SIZE * 2));
+  memset(audio_tmp_in_buffer_left, 0, MP3_BUFFER_SIZE);
+  memset(audio_tmp_in_buffer_right, 0, MP3_BUFFER_SIZE);
+  memset(audio_tmp_out_buffer, 0, MP3_BUFFER_SIZE);
+
+  audio_is_buffer_ready = 0;
+  audio_total_samples = 0;
+  audio_time_started = 0;
+  audio_is_buffer_ready = false;
+
+  vid_total_frames = 0;
+  vid_timeout = 0;
+  vid_time_started = 0;
+  vid_is_buffer_ready = false;
+  vid_last_timestamp = 0;
+
+  audio_ring_buffer.reset();
+  video_ring_buffer.reset();
+  audio_work_buffer.reset();
+  video_work_buffer.reset();
+
+  stop_mutex.lock();
+  must_stop = false;
+  stop_mutex.unlock();
+
+  x264_encoder_close(vid_encoder);
+
+  for(std::vector<AVPacket*>::iterator it = packets.begin(); it != packets.end(); ++it) {
+    delete *it;
+    *it = NULL;
+  }
+  packets.clear();
+
+}
 
 FLVAudioSampleRate AV::audioSampleRateToFLVSampleRate(int rate) {
   switch(rate) {
@@ -506,7 +552,7 @@ FLVAudioSampleRate AV::audioSampleRateToFLVSampleRate(int rate) {
     case 22050: return FLV_SOUNDRATE_22KHZ;
     case 44100: return FLV_SOUNDRATE_44KHZ;
     default: {
-      printf("ERROR: cannot convert the given audio samplerate to one that can be used by FLV. exiting.\n");
+      RX_ERROR(("cannot convert the given audio samplerate to one that can be used by FLV. exiting."));
       ::exit(EXIT_FAILURE);
     };
   }

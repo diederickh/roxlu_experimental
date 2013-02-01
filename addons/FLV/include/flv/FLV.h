@@ -36,8 +36,6 @@ extern "C" {
 #include <string>
 #include <assert.h>
 
-
-
 #define AMF0_TYPE_NUMBER 0x00
 #define AMF0_TYPE_BOOLEAN 0x01
 #define AMF0_TYPE_STRING 0x02
@@ -60,6 +58,7 @@ extern "C" {
 #define FLV_TAG_AUDIO 8
 #define FLV_TAG_VIDEO 9
 #define FLV_TAG_SCRIPT_DATA 18
+
 
 enum FLVSoundCodec {
   FLV_SOUNDFORMAT_LINEAR_PCM_NE = 0 // native endan

@@ -470,9 +470,11 @@ FLVFileWriter::~FLVFileWriter() {
 }
 
 bool FLVFileWriter::open(std::string filepath) {
+  RX_VERBOSE(("open file: %s", filepath.c_str()));
+
   fp = fopen(filepath.c_str(), "wb");
   if(!fp) {
-    printf("ERROR: FLVFileWriter cannot open the given file: %s\n", filepath.c_str());
+    RX_ERROR(("cannot open the given file: %s", filepath.c_str()));
     return false;
   }
   return true;
@@ -484,32 +486,36 @@ size_t FLVFileWriter::write(char* data, size_t nbytes, void* user) {
   }
   FLVFileWriter* f = static_cast<FLVFileWriter*>(user);
   if(f->fp == NULL) {
-    printf("VERBOSE: FVLFileWriter was asked to write to a file, but the file is not open.\n");
+    RX_WARNING(("was asked to write to a file, but the file is not open."));
     return 0;
   }
 
+  RX_VERBOSE(("write %d bytes to file.", int(nbytes)));
   size_t written  = fwrite(data, nbytes, 1, f->fp);
 
   if(written != 1) {
-    printf("WARNING: FLVFileWriter failed to write to file.\n");
+    RX_WARNING(("failed to write to file."));
     return 0;
   }
   return nbytes;
 }
 
 void FLVFileWriter::rewrite(char* data, size_t nbytes, size_t pos, void* user) {
+
+
   FLVFileWriter* f = static_cast<FLVFileWriter*>(user);
   if(f->fp == NULL) {
-    printf("VERBOSE: FVLFileWriter was asked to rewrite to a file, but the file is not open.\n");
+    RX_WARNING(("was asked to rewrite to a file, but the file is not open."));
     return ;
   }
 
+  RX_VERBOSE(("rewrite at %d.", int(pos)));
   long int curr_pos = ftell(f->fp);
   fseek(f->fp, pos, SEEK_SET);
 
   size_t written = fwrite(data, nbytes, 1, f->fp);
   if(written != 1) {
-    printf("VERBOSE: FLVFileWriter cannot rewrite some bytes.\n");
+    RX_ERROR(("cannot rewrite some bytes."));
   }
 
   fseek(f->fp, curr_pos, SEEK_SET);
@@ -518,19 +524,22 @@ void FLVFileWriter::rewrite(char* data, size_t nbytes, size_t pos, void* user) {
 void FLVFileWriter::flush(void* user) {
   FLVFileWriter* f = static_cast<FLVFileWriter*>(user);
   if(f->fp == NULL) {
-    printf("VERBOSE: FVLFileWriter was asked to flush file, but the file is not open.\n");
+    RX_WARNING(("was asked to flush file, but the file is not open."));
     return;
   }
+
+  RX_VERBOSE(("flush data"));
   fflush(f->fp);
 }
 
 void FLVFileWriter::close(void* user) {
-  return;
   FLVFileWriter* f = static_cast<FLVFileWriter*>(user);
   if(f->fp == NULL) {
-    printf("VERBOSE: FVLFileWriter was asked to flush file, but the file is not open.\n");
+    RX_WARNING(("was asked to flush file, but the file is not open.\n"));
     return;
   }
+
+  RX_VERBOSE(("close flv file."));
   fclose(f->fp);
   f->fp = NULL;
 }

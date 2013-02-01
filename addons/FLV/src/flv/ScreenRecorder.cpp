@@ -10,27 +10,45 @@ ScreenRecorder::ScreenRecorder()
   ,pixels(NULL)
   ,dx(0)
   ,is_recording(false)
+  ,is_file_opened(false)
 {
   memset(pbos, 0, sizeof(pbos));
 }
 
 ScreenRecorder::~ScreenRecorder() {
+#if !defined(SCREEN_RECORDER_USE_PBO) 
+  if(pixels != NULL) {
+    delete[] pixels;
+    pixels = NULL;
+  }
+#endif
+  is_file_opened = false;
+  is_recording = false;
+  width = 0;
+  channels = 0;
+  dx = 0;
 }
 
-bool ScreenRecorder::setup(std::string filepath, 
-                           unsigned int inw, 
+bool ScreenRecorder::open(std::string filepath) {
+  RX_VERBOSE(("Open file: %s", filepath.c_str()));
+
+  if(!flv_writer.open(filepath)) {
+    return false;
+  }
+  is_file_opened = true;
+  return true;
+}
+
+bool ScreenRecorder::setup(unsigned int inw, 
                            unsigned int inh,
                            unsigned int outw,
                            unsigned int outh,
                            int fps)
 {
-  if(!flv_writer.open(filepath)) {
-    return false;
-  }
 
   av.setVerticalFlip(true);
 
-  if(!av.setupVideo(inw, inh, outw, outh, fps, AV_FMT_BGRA32)) {
+  if(!av.setupVideo(inw, inh, outw, outh, fps, AV_FMT_BGRA32, &flv)) {
     return false;
   }
 
@@ -40,7 +58,7 @@ bool ScreenRecorder::setup(std::string filepath,
                    &FLVFileWriter::close,
                    &flv_writer);
 
-  av.setFLV(&flv);
+
 
   this->width = inw;
   this->height = inh;
@@ -51,7 +69,7 @@ bool ScreenRecorder::setup(std::string filepath,
 #endif
 
   if(!av.initialize()) {
-    printf("WARNING: ScreenRecorder::setup(), cannot initialize AV.\n");
+    RX_WARNING(("cannot initialize AV."));
     return false;
   }
 
@@ -69,8 +87,9 @@ bool ScreenRecorder::setup(std::string filepath,
 }
 
 void ScreenRecorder::grabFrame() {
+
   if(!is_recording) {
-    printf("VERBOSE: ScreenRecorder::grabFrame() - already stopped.\n");
+    RX_WARNING(("stopped, cant grab."));
     return;
   }
 
@@ -81,6 +100,7 @@ void ScreenRecorder::grabFrame() {
   }
 #else
   if(av.wantsNewVideoFrame()) {
+    RX_VERBOSE(("Grab a frame."));
     rx_int64 now = rx_millis();
     int write_dx = (dx++) % SCREEN_RECORDER_NUM_PBOS;
     int read_dx = (write_dx + 1) % SCREEN_RECORDER_NUM_PBOS;
@@ -102,15 +122,24 @@ void ScreenRecorder::grabFrame() {
 }
 
 void ScreenRecorder::start() {
+  if(is_recording) {
+    RX_WARNING(("already started."));
+    return;
+  }
+
+  RX_VERBOSE(("Start recording."));
   is_recording = true;
   av.start();
 }
 
 void ScreenRecorder::stop() {
   if(!is_recording) {
-    printf("VERBOSE: ScreenRecorder::stop() - already stopped.\n");
+    RX_WARNING(("already stopped."));
     return;
   }
-  is_recording = false;
+
+  RX_VERBOSE(("Stop recording."));
   av.stop();
+  is_recording = false;
+  is_file_opened = false; // av.stop() calls close on the flv writer
 }
