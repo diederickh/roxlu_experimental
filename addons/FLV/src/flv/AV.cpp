@@ -559,58 +559,58 @@ FLVAudioSampleRate AV::audioSampleRateToFLVSampleRate(int rate) {
 }
 
 void AV::printX264Params(x264_param_t* p) {
-  printf("--------------------------------------------------\n");
-  printf("x264_param_t.i_threads: %d\n", p->i_threads);
-  printf("x264_param_t.i_lookahead_threads: %d\n", p->i_lookahead_threads);
-  printf("x264_param_t.b_sliced_threads: %d\n", p->b_sliced_threads);
-  printf("x264_param_t.b_deterministic: %d \n", p->b_deterministic);
-  printf("x264_param_t.b_cpu_independent: %d \n", p->b_cpu_independent);
-  printf("x264_param_t.i_sync_lookahead: %d\n", p->i_sync_lookahead);
-  printf("x264_param_t.i_width: %d\n", p->i_width);
-  printf("x264_param_t.i_height: %d\n", p->i_height);
-  printf("x264_param_t.i_csp: %d \n", p->i_csp);
-  printf("x264_param_t.i_level_idc: %d\n", p->i_level_idc);
-  printf("x264_param_t.i_frame_total: %d \n", p->i_frame_total);
-  printf("x264_param_t.i_nal_hrd: %d \n", p->i_nal_hrd);
+  RX_VERBOSE(("--------------------------------------------------\n"));
+  RX_VERBOSE(("x264_param_t.i_threads: %d\n", p->i_threads));
+  RX_VERBOSE(("x264_param_t.i_lookahead_threads: %d\n", p->i_lookahead_threads));
+  RX_VERBOSE(("x264_param_t.b_sliced_threads: %d\n", p->b_sliced_threads));
+  RX_VERBOSE(("x264_param_t.b_deterministic: %d \n", p->b_deterministic));
+  RX_VERBOSE(("x264_param_t.b_cpu_independent: %d \n", p->b_cpu_independent));
+  RX_VERBOSE(("x264_param_t.i_sync_lookahead: %d\n", p->i_sync_lookahead));
+  RX_VERBOSE(("x264_param_t.i_width: %d\n", p->i_width));
+  RX_VERBOSE(("x264_param_t.i_height: %d\n", p->i_height));
+  RX_VERBOSE(("x264_param_t.i_csp: %d \n", p->i_csp));
+  RX_VERBOSE(("x264_param_t.i_level_idc: %d\n", p->i_level_idc));
+  RX_VERBOSE(("x264_param_t.i_frame_total: %d \n", p->i_frame_total));
+  RX_VERBOSE(("x264_param_t.i_nal_hrd: %d \n", p->i_nal_hrd));
   // skipping vui
-  printf("--\n");
-  printf("x264_param_t.i_frame_reference: %d\n", p->i_frame_reference);
-  printf("x264_param_t.i_dpb_size: %d \n", p->i_dpb_size);
-  printf("x264_param_t.i_keyint_max: %d \n", p->i_keyint_max);
-  printf("x264_param_t.i_keyint_min: %d \n", p->i_keyint_min);
-  printf("x264_param_t.i_scenecut_threshold: %d: \n", p->i_scenecut_threshold);
-  printf("x264_param_t.b_intra_refresh: %d\n", p->b_intra_refresh);
-  printf("x264_param_t.i_bframe: %d\n", p->i_bframe);
-  printf("x264_param_t.i_bframe_adaptive: %d\n", p->i_bframe_adaptive);
+  RX_VERBOSE(("--\n"));
+  RX_VERBOSE(("x264_param_t.i_frame_reference: %d\n", p->i_frame_reference));
+  RX_VERBOSE(("x264_param_t.i_dpb_size: %d \n", p->i_dpb_size));
+  RX_VERBOSE(("x264_param_t.i_keyint_max: %d \n", p->i_keyint_max));
+  RX_VERBOSE(("x264_param_t.i_keyint_min: %d \n", p->i_keyint_min));
+  RX_VERBOSE(("x264_param_t.i_scenecut_threshold: %d: \n", p->i_scenecut_threshold));
+  RX_VERBOSE(("x264_param_t.b_intra_refresh: %d\n", p->b_intra_refresh));
+  RX_VERBOSE(("x264_param_t.i_bframe: %d\n", p->i_bframe));
+  RX_VERBOSE(("x264_param_t.i_bframe_adaptive: %d\n", p->i_bframe_adaptive));
   // skipping a lot..
-  printf("--\n");
-  printf("x264_param_t.i_rc_method: %d\n", p->rc.i_rc_method);
-  printf("x264_param_t.i_qp_constant: %d\n", p->rc.i_qp_constant);
-  printf("x264_param_t.i_qp_min: %d\n", p->rc.i_qp_min);
-  printf("x264_param_t.i_qp_max: %d \n", p->rc.i_qp_max);
-  printf("x264_param_t.i_qp_step: %d \n", p->rc.i_qp_step);
-  printf("x264_param_t.i_bitrate: %d \n", p->rc.i_bitrate);
+  RX_VERBOSE(("--\n"));
+  RX_VERBOSE(("x264_param_t.i_rc_method: %d\n", p->rc.i_rc_method));
+  RX_VERBOSE(("x264_param_t.i_qp_constant: %d\n", p->rc.i_qp_constant));
+  RX_VERBOSE(("x264_param_t.i_qp_min: %d\n", p->rc.i_qp_min));
+  RX_VERBOSE(("x264_param_t.i_qp_max: %d \n", p->rc.i_qp_max));
+  RX_VERBOSE(("x264_param_t.i_qp_step: %d \n", p->rc.i_qp_step));
+  RX_VERBOSE(("x264_param_t.i_bitrate: %d \n", p->rc.i_bitrate));
   // skipping .. 
-  printf("--\n");
-  printf("x264_param_t.b_aud: %d\n", p->b_aud);
-  printf("x264_param_t.b_repeat_headers: %d \n", p->b_repeat_headers);
-  printf("x264_param_t.b_annexb: %d (flv does not support annexb)\n", p->b_annexb);
-  printf("x264_param_t.i_sps_id: %d \n", p->i_sps_id);
-  printf("x264_param_t.b_vfr_input: %d\n", p->b_vfr_input);
-  printf("x264_param_t.b_pulldown: %d\n", p->b_pulldown);
-  printf("x264_param_t.i_fps_num: %d\n", p->i_fps_num);
-  printf("x264_param_t.i_fps_den: %d\n", p->i_fps_den);
-  printf("x264_param_t.i_timebase_num: %d \n", p->i_timebase_num);
-  printf("x264_param_t.i_timebase_den: %d\n", p->i_timebase_den);
-  printf("--------------------------------------------------\n");
+  RX_VERBOSE(("--\n"));
+  RX_VERBOSE(("x264_param_t.b_aud: %d\n", p->b_aud));
+  RX_VERBOSE(("x264_param_t.b_repeat_headers: %d \n", p->b_repeat_headers));
+  RX_VERBOSE(("x264_param_t.b_annexb: %d (flv does not support annexb)\n", p->b_annexb));
+  RX_VERBOSE(("x264_param_t.i_sps_id: %d \n", p->i_sps_id));
+  RX_VERBOSE(("x264_param_t.b_vfr_input: %d\n", p->b_vfr_input));
+  RX_VERBOSE(("x264_param_t.b_pulldown: %d\n", p->b_pulldown));
+  RX_VERBOSE(("x264_param_t.i_fps_num: %d\n", p->i_fps_num));
+  RX_VERBOSE(("x264_param_t.i_fps_den: %d\n", p->i_fps_den));
+  RX_VERBOSE(("x264_param_t.i_timebase_num: %d \n", p->i_timebase_num));
+  RX_VERBOSE(("x264_param_t.i_timebase_den: %d\n", p->i_timebase_den));
+  RX_VERBOSE(("--------------------------------------------------\n"));
 }
 
 void AV::printX264Headers(x264_nal_t* nal) {
-  printf("--\n");
-  printf("sps_size: %d\n", nal[0].i_payload);
-  printf("pps_size: %d\n", nal[1].i_payload);
-  printf("sei_size: %d\n", nal[2].i_payload);
-  printf("--\n");
+  RX_VERBOSE(("--\n"));
+  RX_VERBOSE(("sps_size: %d\n", nal[0].i_payload));
+  RX_VERBOSE(("pps_size: %d\n", nal[1].i_payload));
+  RX_VERBOSE(("sei_size: %d\n", nal[2].i_payload));
+  RX_VERBOSE(("--\n"));
 }
 
 void AV::printAVPixelFormat(AVPixelFormat p) {
@@ -620,5 +620,5 @@ void AV::printAVPixelFormat(AVPixelFormat p) {
     case PIX_FMT_BGRA: str = "PIX_FMT_BGRA"; break;
     default: str = "PIX_FMT_NONE"; break;
   }
-  printf("AVPixelFormat: %s\n", str.c_str());
+  RX_VERBOSE(("AVPixelFormat: %s\n", str.c_str()));
 }
