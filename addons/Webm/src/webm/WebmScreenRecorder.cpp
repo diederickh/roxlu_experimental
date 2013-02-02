@@ -1,4 +1,5 @@
 #include <webm/WebmScreenRecorder.h>
+#include <roxlu/Roxlu.h>
 
 WebmScreenRecorder::WebmScreenRecorder()
   :webm(&ebml),
@@ -22,6 +23,12 @@ WebmScreenRecorder::~WebmScreenRecorder() {
 
 bool WebmScreenRecorder::setup(WebmScreenRecorderSettings cfg) {
   settings = cfg;
+
+  if(cfg.cb_user == NULL) {
+    RX_ERROR(("cb_user not set in the configs"));
+    return false;
+  }
+
   ebml.setCallbacks(settings.cb_write,
                     settings.cb_close,
                     settings.cb_peek,
@@ -63,7 +70,9 @@ bool WebmScreenRecorder::setup(WebmScreenRecorderSettings cfg) {
     RX_ERROR(("cannot allocate memory for pixels"));
     return false;
   }
+  memset(pixels, 0xFF, nbytes_per_video_frame);
 #endif
+
 
   return true;
 }

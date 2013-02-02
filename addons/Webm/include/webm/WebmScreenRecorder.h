@@ -60,6 +60,7 @@ inline WebmScreenRecorderSettings::WebmScreenRecorderSettings()
                                   cb_peek(NULL),
                                   cb_read(NULL),
                                   cb_skip(NULL),
+                                  cb_user(NULL),
                                   use_video(false),
                                   use_audio(false),
                                   vid_in_w(0),
@@ -77,6 +78,7 @@ inline WebmScreenRecorderSettings::~WebmScreenRecorderSettings() {
   cb_peek = NULL;
   cb_read = NULL;
   cb_skip = NULL;
+  cb_user = NULL;
   use_video = false;
   use_audio = false;
   vid_in_w = 0;
@@ -87,3 +89,5 @@ inline WebmScreenRecorderSettings::~WebmScreenRecorderSettings() {
 }
 
 #endif
+
+

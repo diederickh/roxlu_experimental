@@ -81,7 +81,6 @@ extern "C" {
 #define ID_CHANNELS 0x9f
 #define ID_BIT_DEPTH 0x6264
 
-
 /* Cues Elements */
 #define ID_CUES 0x1c53bb6b
 #define ID_CUE_POINT 0xbb
@@ -166,8 +165,6 @@ struct EBMLFile {                                                               
   EBMLFile();
   ~EBMLFile();
   bool open(const std::string filepath);
-
-private:
   FILE* fp;
 };
 
@@ -252,6 +249,7 @@ class EBML {
   std::vector<char> tmp_buffer;                                                   /* because we can't predict the size of some elements we use a intermediate buffer to store data */
 
   uint64_t time_cluster_started;                                                  /* timestamp in nanoseconds when the last cluster started. all simpleblocks base their relative time on this */
+  uint64_t time_stream_started;                                                   /* time we first received a simpleblock */
 };
 
 inline uint64_t EBML::ru64() {
@@ -277,29 +275,20 @@ inline uint64_t EBML::ru64() {
 }
 
 inline uint64_t EBML::ru56() {
-  RX_WARNING(("FIX - validate"));
+  RX_ERROR(("FIX - validate"));
   uint64_t result = 0;
   return result;
 }
 
 inline uint64_t EBML::ru48() {
-  RX_WARNING(("FIX - validate"));
+  RX_ERROR(("FIX - validate"));
   uint64_t result = 0;
   return result;
 }
 
 inline uint64_t EBML::ru40() {
-  RX_WARNING(("FIX - validate"));
+  RX_ERROR(("FIX - validate"));
   uint64_t result = 0;
-  /*
-  cb_read((char*)&result, 5, cb_user);
-  unsigned char* p = (unsigned char*)&result;
-  printf("\n\nRU40:\n--------------------------\n");
-  for(int i = 0; i < 5; ++i) {
-    printf("%02X ", p[i]);
-  }
-  printf("\n------------------------------\n");
-  */
   result = ((result >> 32) & 0x00000000000000FF);
   return result;
 }
@@ -317,15 +306,6 @@ inline uint32_t EBML::ru24() {
   uint32_t result = 0;
   readData((char*)&result, 3);
   result = ((result >> 16) & 0x000000FF) | (result & 0x0000FF00) | ((result << 16) & 0x00FF0000); //| ((result << 16) & 0x00FF0000);
-
-  /*
-  unsigned char* p = (unsigned char*)&result;
-  for(int i = 0; i < 3; ++i) {
-    printf("%02X ", p[i]);
-  }
-  printf("\n");
-  */
-
   RX_VERBOSE(("reading 3 bytes of size, which gives -> %d", result));
   return result;
 }
@@ -349,7 +329,6 @@ inline uint8_t EBML::peek() {
   return result;
 }
 
-// Returns how many bytes need to be 'read/written' 
 inline int EBML::decodeSize(uint8_t b) {
   if((b & 0x80) == 0x80) {
     return 1;
@@ -462,18 +441,15 @@ inline uint64_t EBML::readID() {
 inline uint64_t EBML::readDataSize() {
   uint8_t size = peek();
   int num_bytes = decodeSize(size);
-  // printf("Decode size: %02X, num_bytes: %d \n", size, num_bytes);
+
   switch(num_bytes) {
     case 1: { 
-      //printf("size u8\n");
       return (ru8() & 0x7F);
     };
     case 2: { 
-      //printf("size u16\n");
       return (ru16() & 0x3FFF); // @todo need to test this
     }
     case 3: { 
-
       RX_WARNING(("TODO: Need to read 3 bytes, @todo validate."));
       return (ru24() & 0x1FFFFF); // @todo need to test this
     }
@@ -509,9 +485,6 @@ inline size_t EBML::readData(char* dest, size_t nbytes) {
 
 inline void EBML::writeID(uint64_t id, std::vector<char>* dest) {
   int num_bytes = encodeSize(id);
-  if(id == ID_TRACK_ENTRY) {
-    RX_VERBOSE(("ID TRACK ENTRY NUM BYTES: %d", num_bytes));
-  }
   writeReversed((char*)&id, num_bytes, dest);
 }
 
@@ -522,36 +495,34 @@ inline void EBML::writeDataSize(uint64_t size, std::vector<char>* dest) {
     write((char*)&size, 1, dest);
   }
   else if(size < 0x7FF) {
+    RX_VERBOSE(("Data size: 2 bytes: %lld.", size));
     size = 0x0000000000004000 | size;
     writeReversed((char*)&size, 2, dest);
-    RX_ERROR(("@todo Data size: 2 bytes."));
   }
   else if(size < 0x7FFFFF) {
-    size = 0x00000000003FFF | size;
-
-    printf("--\n");
-    unsigned char* p = (unsigned char*)&size;
-    for(int i = 7; i >= 0; i--) {
-      printf("%02X ", p[i]);
-    }
-    printf("--\n");
+    RX_VERBOSE(("Data size: 3 bytes: %lld.", size));
+    size = 0x0000000000200000 | size;
     writeReversed((char*)&size, 3, dest);
-    RX_ERROR(("@todo Data size: 3 bytes. "));
   }
   else if(size < 0x7FFFFFFF) {
     RX_ERROR(("@todo Data size: 4 bytes."));
+    ::exit(0);
   }
   else if(size < 0x7FFFFFFFFF) {
     RX_ERROR(("@todo Data size: 5 bytes."));
+    ::exit(0);
   }
   else if(size < 0x7FFFFFFFFFFF) {
     RX_ERROR(("@todo Data size: 6 bytes."));
+    ::exit(0);
   }
   else if(size < 0x7FFFFFFFFFFFFF) {
     RX_ERROR(("@todo Data size: 7 bytes."));
+    ::exit(0);
   }
   else if(size < 0x7FFFFFFFFFFFFFFF) {
     RX_ERROR(("@todo Data size: 8 bytes."));
+    ::exit(0);
   }
   else {
     RX_ERROR(("WARNING: Data size, not handled"));
@@ -584,7 +555,6 @@ inline void EBML::write(char* data, size_t nbytes, std::vector<char>* dest) {
 
 inline void EBML::writeReversed(char* data, size_t nbytes, std::vector<char>* dest) {
   for(int i = nbytes-1; i >= 0; i--) {
-    //printf("%02X ", (unsigned char)data[i]);
     dest->push_back(data[i]);
   }
 }
@@ -602,9 +572,7 @@ inline void EBML::clear() {
 }
 
 inline void EBML::eu8(uint64_t id, uint8_t data, std::vector<char>* dest) {
-
   writeID(id, dest);
-  RX_VERBOSE(("DATA TO WRITE: %hhd", data));
   writeDataSize(1, dest);
   wu8(data, dest);
 }
@@ -623,8 +591,6 @@ inline void EBML::eu32(uint64_t id, uint32_t data, std::vector<char>* dest) {
 
 inline void EBML::eunumber(uint64_t id, uint64_t data, std::vector<char>* dest) {
   int num_bytes = encodeSize(data);
-  RX_VERBOSE(("enumber, num bytes: %d", num_bytes));
-
   writeID(id, dest);
   writeDataSize(num_bytes, dest);
   writeReversed((char*)&data, num_bytes, dest);

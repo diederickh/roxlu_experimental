@@ -141,33 +141,31 @@ int EBML::addSimpleBlock(EBMLSimpleBlock b) {
   if(!time_cluster_started) {
     RX_WARNING(("Create new cluster"));
     time_cluster_started = b.timestamp;
+    time_stream_started = b.timestamp;
     
     EBMLCluster c;
-    c.timecode = time_cluster_started;
+    c.timecode = time_cluster_started - time_stream_started;
     openCluster(c);
   }
 
   /* create a new cluser every X-millis */
   short int timecode = (b.timestamp - time_cluster_started);
   if(timecode > 5000) {
-    RX_ERROR(("we need to create a new cluster"));
+    RX_WARNING(("creating a new cluster"));
     time_cluster_started = b.timestamp;
     timecode = 0;
     
     EBMLCluster c;
-    c.timecode = time_cluster_started;
+    c.timecode = time_cluster_started - time_stream_started;
     openCluster(c);
   }
 
-  RX_VERBOSE(("Add EBMLSimpleBlock: %lld, time_cluster_started: %lld, relative timecode: %lld ns, %d ms", b.timestamp, time_cluster_started, b.timestamp - time_cluster_started,timecode) );
-  
   writeDataSize(b.track_number, &tmp_buffer);
   wu16(timecode, &tmp_buffer);
   wu8(b.flags, &tmp_buffer);
   write(b.data, b.nbytes, &tmp_buffer);
   
   writeID(ID_SIMPLE_BLOCK, &buffer);
-  RX_VERBOSE(("SIMPLE BLOCK SIZE: %zu", tmp_buffer.size()));
   writeDataSize(tmp_buffer.size(), &buffer);
   flush(&buffer);
   flush(&tmp_buffer);
@@ -375,7 +373,7 @@ EBMLFile::~EBMLFile() {
 }
 
 bool EBMLFile::open(const std::string filepath) {
-  fp = fopen(filepath.c_str(), "wb+");
+  fp = fopen(filepath.c_str(), "r+b");
   if(!fp) {
     RX_ERROR(("Cannot open: %s", filepath.c_str()));
     return false;
@@ -383,17 +381,23 @@ bool EBMLFile::open(const std::string filepath) {
   return true;
 }
 
-size_t EBMLFile::write(char* data, size_t nbytes, void* user) {
+size_t ebml_file_write(char* data, size_t nbytes, void* user) {
   EBMLFile* w = static_cast<EBMLFile*>(user);
+  if(!w->fp) {
+    RX_ERROR(("cannot write, file not handle not valid"));
+    return 0;
+  }
+
   int r = fwrite(data, nbytes, 1, w->fp);
   if(r != 1) {
     RX_ERROR(("Cannot write data to ebml file."));
     return 0;
   }
+
   return nbytes;
 }
 
-void EBMLFile::close(void* user) {
+void ebml_file_close(void* user) {
   EBMLFile* w = static_cast<EBMLFile*>(user);
   if(w->fp == NULL) {
     RX_WARNING(("already closed."));
@@ -405,16 +409,26 @@ void EBMLFile::close(void* user) {
   RX_VERBOSE(("closed file."));
 }
 
-size_t EBMLFile::peek(char* dest, void* user) {
+size_t ebml_file_peek(char* dest, void* user) {
   EBMLFile* w = static_cast<EBMLFile*>(user);
+  if(!w->fp) {
+    RX_ERROR(("cannot peek, file not handle not valid"));
+    return 0;
+  }
+
   *dest = fgetc(w->fp);
   ungetc(*dest, w->fp);
   return 1;
 }
 
 
-size_t EBMLFile::read(char* dest, size_t nbytes, void* user) {
+size_t ebml_file_read(char* dest, size_t nbytes, void* user) {
   EBMLFile* w = static_cast<EBMLFile*>(user);
+  if(!w->fp) {
+    RX_ERROR(("cannot read, file not handle not valid"));
+    return 0;
+  }
+
   int r = fread(dest, nbytes, 1, w->fp);
   if(r != 1) {
     RX_ERROR(("cannot read from file."));
@@ -423,8 +437,13 @@ size_t EBMLFile::read(char* dest, size_t nbytes, void* user) {
   return nbytes;
 }
 
-size_t EBMLFile::skip(size_t nbytes, void* user) {
+size_t ebml_file_skip(size_t nbytes, void* user) {
   EBMLFile* w = static_cast<EBMLFile*>(user);
+  if(!w->fp) {
+    RX_ERROR(("cannot skip, file not handle not valid"));
+    return 0;
+  }
+
   if(fseek(w->fp, nbytes, SEEK_CUR) != 0) {
     RX_ERROR(("cannot fseek()."));
     return 0;
