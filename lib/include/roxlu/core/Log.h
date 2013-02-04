@@ -8,7 +8,7 @@
 
 #define RX_LOG_LEVEL_NONE 0 
 
-#define RX_LOG_LEVEL RX_LOG_LEVEL_ERROR
+#define RX_LOG_LEVEL RX_LOG_LEVEL_VERBOSE
 
 
 #if defined(_MSC_VER)
