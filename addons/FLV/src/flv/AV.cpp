@@ -24,6 +24,7 @@ AV::AV()
   ,audio_bytes_per_frame(0)
   ,audio_is_buffer_ready(false)
   ,audio_time_started(0)
+  ,audio_lame_flags(NULL)
   ,flv(NULL)
   ,audio_ring_buffer(1024 * 1024 * 5) 
   ,audio_work_buffer(1024 * 1024 * 5)
@@ -494,8 +495,10 @@ void AV::shutdown() {
 
   sws_freeContext(vid_sws);
 
-  lame_close(audio_lame_flags);
-  audio_lame_flags = NULL;
+  if(audio_lame_flags) { 
+    lame_close(audio_lame_flags);
+    audio_lame_flags = NULL;
+  }
   
   vid_sws = NULL;
   vid_encoder = NULL;

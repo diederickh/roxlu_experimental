@@ -24,7 +24,7 @@ include_directories(
 set(flv_source_files
   ${flv_src_dir}/flv/AV.cpp
   ${flv_src_dir}/flv/FLV.cpp
-  ${flv_src_dir}/flv/ScreenRecorder.cpp
+  ${flv_src_dir}/flv/FLVScreenRecorder.cpp
 )
  
 set(roxlu_addon_sources

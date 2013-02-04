@@ -1,6 +1,8 @@
 #ifndef ROXLU_TEXT_SURFACEH
 #define ROXLU_TEXT_SURFACEH
 
+// $(ROXLU_OF_DIR)\libs\openFrameworks;$(ROXLU_OF_DIR)\libs\openFrameworks\graphics;$(ROXLU_OF_DIR)\libs\openFrameworks\app;$(ROXLU_OF_DIR)\libs\openFrameworks\sound;$(ROXLU_OF_DIR)\libs\openFrameworks\utils;$(ROXLU_OF_DIR)\libs\openFrameworks\communication;$(ROXLU_OF_DIR)\libs\openFrameworks\video;$(ROXLU_OF_DIR)\libs\openFrameworks\types;$(ROXLU_OF_DIR)\libs\openFrameworks\math;$(ROXLU_OF_DIR)\libs\openFrameworks\3d;$(ROXLU_OF_DIR)\libs\openFrameworks\gl;$(ROXLU_OF_DIR)\libs\openFrameworks\events;$(ROXLU_OF_DIR)\libs\glut\include;$(ROXLU_OF_DIR)\libs\rtAudio\include;$(ROXLU_OF_DIR)\libs\quicktime\include;$(ROXLU_OF_DIR)\libs\freetype\include;$(ROXLU_OF_DIR)\libs\freetype\include\freetype2;$(ROXLU_OF_DIR)\libs\freeImage\include;$(ROXLU_OF_DIR)\libs\fmodex\include;$(ROXLU_OF_DIR)\libs\videoInput\include;$(ROXLU_OF_DIR)\libs\glew\include\;$(ROXLU_OF_DIR)\libs\glu\include;$(ROXLU_OF_DIR)\libs\tess2\include;$(ROXLU_OF_DIR)\libs\cairo\include\cairo;$(ROXLU_OF_DIR)\libs\poco\include;$(ROXLU_OF_DIR)\addons;$(ROXLU_DIR)\extern\include\;$(ROXLU_DIR)\lib\include\;$(ROXLU_EXTERN_LIB_DIR)\msinttypes\;%(AdditionalIncludeDirectories)
+
 #include <assert.h>
 #include <string>
 #include <pango/pangocairo.h>
@@ -9,7 +11,7 @@ class TextSurface {
  public:
   TextSurface();
   ~TextSurface();
-  bool setup(const std::string& font, int w, int h, cairo_format_t fmt = CAIRO_FORMAT_ARGB32);
+  bool setup(const std::string& font, int w, int h, cairo_format_t fmt = CAIRO_FORMAT_ARGB32); //CAIRO_FORMAT_RGB24
   void setText(const std::string& txt, float r = 0.0f, float g = 0.0, float b = 0.0, float a = 1.0);
   void setMarkup(const std::string& txt);
   void setTextWidth(int w);

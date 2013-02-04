@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Source Files\win">
+      <UniqueIdentifier>{6686cfb4-272c-4b1c-ba52-a81eadabe790}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\win">
+      <UniqueIdentifier>{e42c7269-90aa-4b1d-9959-39d99b3282a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\videocapture">
+      <UniqueIdentifier>{f5e0cdfa-d52a-418e-9bbf-90d7a963abc4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\videocapture">
+      <UniqueIdentifier>{111fb567-f434-437e-8289-f4a482c33573}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\win\videocapture\rx_capture_win.cpp">
+      <Filter>Source Files\win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\win\videocapture\VideoCaptureDirectShow.cpp">
+      <Filter>Source Files\win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\videocapture\VideoCaptureGLSurface.cpp">
+      <Filter>Source Files\videocapture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\videocapture\VideoCapture.cpp">
+      <Filter>Source Files\videocapture</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\win\videocapture\qedit.h">
+      <Filter>Header Files\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\win\videocapture\VideoCaptureDirectShow.h">
+      <Filter>Header Files\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\videocapture\rx_capture.h">
+      <Filter>Header Files\videocapture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\videocapture\Types.h">
+      <Filter>Header Files\videocapture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\videocapture\VideoCapture.h">
+      <Filter>Header Files\videocapture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\videocapture\VideoCaptureGLSurface.h">
+      <Filter>Header Files\videocapture</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
