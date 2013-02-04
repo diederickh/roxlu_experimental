@@ -32,13 +32,11 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\..\..\..\lib\roxlu.props" />
-    <Import Project="..\..\..\..\lib\roxlu_settings.props" />
+    <Import Project="..\..\..\..\lib\build\vs2010\roxlu.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\..\..\..\lib\roxlu.props" />
-    <Import Project="..\..\..\..\lib\roxlu_settings.props" />
+    <Import Project="..\..\..\..\lib\build\vs2010\roxlu.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -74,12 +72,12 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\flv\AV.cpp" />
     <ClCompile Include="..\..\src\flv\FLV.cpp" />
-    <ClCompile Include="..\..\src\flv\ScreenRecorder.cpp" />
+    <ClCompile Include="..\..\src\flv\FLVScreenRecorder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\flv\AV.h" />
     <ClInclude Include="..\..\include\flv\FLV.h" />
-    <ClInclude Include="..\..\include\flv\ScreenRecorder.h" />
+    <ClInclude Include="..\..\include\flv\FLVScreenRecorder.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

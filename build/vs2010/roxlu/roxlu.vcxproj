@@ -31,11 +31,9 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\..\..\lib\roxlu.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\..\..\lib\roxlu.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -48,7 +46,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.\..\..\..\lib\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\..\..\..\extern\include\;.\..\..\..\lib\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ROXLU_GL_WRAPPER=ROXLU_OPENFRAMEWORKS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -125,6 +123,7 @@
     <ClInclude Include="..\..\..\lib\include\roxlu\core\Constants.h" />
     <ClInclude Include="..\..\..\lib\include\roxlu\core\Core.h" />
     <ClInclude Include="..\..\..\lib\include\roxlu\core\Keyboard.h" />
+    <ClInclude Include="..\..\..\lib\include\roxlu\core\Log.h" />
     <ClInclude Include="..\..\..\lib\include\roxlu\core\Noise.h" />
     <ClInclude Include="..\..\..\lib\include\roxlu\core\platform\Platform.h" />
     <ClInclude Include="..\..\..\lib\include\roxlu\core\platform\windows\WindowsPlatform.h" />

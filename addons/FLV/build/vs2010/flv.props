@@ -2,7 +2,9 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup>
+    <_PropertySheetDisplayName>roxlu_flv</_PropertySheetDisplayName>
+  </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>$(ROXLU_DIR)\addons\FLV\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -20,7 +22,7 @@
       <Message>Lame</Message>
     </PreBuildEvent>
     <PreLinkEvent>
-      <Command>copy  "$(ROXLU_EXTERN_BIN_DIR)\libmp3lame.dll" "$(SolutionDir)bin\" 
+      <Command>xcopy  "$(ROXLU_EXTERN_BIN_DIR)libmp3lame.dll" "$(SolutionDir)bin\"  /y
 copy  "$(ROXLU_EXTERN_BIN_DIR)\avcodec-54.dll" "$(SolutionDir)bin\" 
 copy  "$(ROXLU_EXTERN_BIN_DIR)\swscale-2.dll" "$(SolutionDir)bin\" 
 copy  "$(ROXLU_EXTERN_BIN_DIR)\swscale.dll" "$(SolutionDir)bin\" 

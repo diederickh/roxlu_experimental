@@ -33,6 +33,7 @@ TextGLSurface::TextGLSurface()
     u_pm = glGetUniformLocation(prog, "u_pm");
     u_tex = glGetUniformLocation(prog, "u_tex");
   }
+
 }
 
 TextGLSurface::~TextGLSurface() {
@@ -57,6 +58,7 @@ TextGLSurface::~TextGLSurface() {
     glDeleteBuffers(1, &vbo);
     vbo = 0;
   }
+
   // @todo cleaning up VAO crashes 
 }
 
@@ -72,7 +74,8 @@ void TextGLSurface::setup(const std::string font, unsigned int surfaceW, unsigne
   surface_h = surfaceH;
   window_w = windowW;
   window_h = windowH;
-  num_bytes = surface_w * surface_h * 4; 
+  num_bytes = surface_w * surface_h * 4;  // @TODO
+  //num_bytes = surface_w * surface_h * 3;  // @TODO
 
   glBindTexture(GL_TEXTURE_RECTANGLE, 0);
   glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
@@ -92,6 +95,7 @@ void TextGLSurface::setup(const std::string font, unsigned int surfaceW, unsigne
   glGenTextures(1, &tex);
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
   glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, surface_w, surface_h, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, 0);
+
   glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -202,7 +206,7 @@ void TextGLSurface::setPixels(unsigned char* pixels) {
 
   glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos[read_dx]);
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
-  glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, surface_w, surface_h, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV,  0);
+  glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, surface_w, surface_h, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV,  0); // @todo
 
   glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos[write_dx]);
   glBufferData(GL_PIXEL_UNPACK_BUFFER, num_bytes, NULL, GL_STREAM_DRAW);
@@ -216,6 +220,7 @@ void TextGLSurface::setPixels(unsigned char* pixels) {
   glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
   TEXT_GL_SURFACE_TIMER_END
 #else 
+  RX_VERBOSE(("Not using pbos to render"));
   TEXT_GL_SURFACE_TIMER_START
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
   glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, surface_w, surface_h, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, pixels);

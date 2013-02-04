@@ -10,17 +10,25 @@
 #define SCREEN_RECORDER_USE_PBO
 #define SCREEN_RECORDER_NUM_PBOS 5
 
-class ScreenRecorder {
- public:
-  ScreenRecorder();
-  ~ScreenRecorder();
+struct FLVScreenRecorderSettings {
+	FLVScreenRecorderSettings();
+	~FLVScreenRecorderSettings();
+	void reset(); 
 
-  bool setup(
-    unsigned int inWidth, 
-    unsigned int inHeight,
-    unsigned int outWdth,
-    unsigned int outHeight,
-    int fps);
+	/* video settings */
+	unsigned int vid_in_w;
+	unsigned int vid_in_h;
+	unsigned int vid_out_w;
+	unsigned int vid_out_h;
+	int vid_fps;
+};
+
+class FLVScreenRecorder {
+ public:
+  FLVScreenRecorder();
+  ~FLVScreenRecorder();
+
+  bool setup(FLVScreenRecorderSettings settings);
 
   bool open(std::string filepath);
   
@@ -30,6 +38,7 @@ class ScreenRecorder {
   void stop(); // shuts down the encoder, is automatically called by destructor too.
 
  private:
+	FLVScreenRecorderSettings settings;
 
   /* Recording */
   AV av;
@@ -39,8 +48,6 @@ class ScreenRecorder {
   bool is_file_opened;
 
   /* GL */
-  unsigned int width;
-  unsigned int height;
   unsigned int channels;
   unsigned char* pixels;
   GLuint pbos[SCREEN_RECORDER_NUM_PBOS];

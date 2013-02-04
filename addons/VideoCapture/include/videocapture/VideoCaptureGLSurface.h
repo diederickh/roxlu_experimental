@@ -6,6 +6,7 @@
 #include <videocapture/Types.h>
 #include <roxlu/opengl/OpenGLInit.h>
 #include <roxlu/opengl/Error.h>
+#include <roxlu/core/Log.h>
 
 #define VIDEO_CAP_NUM_PBOS 2
 

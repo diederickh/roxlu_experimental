@@ -37,8 +37,6 @@ void VideoCaptureGLSurface::setup(int w, int h, VideoCaptureFormat format) {
   num_bytes = w * h * 4; // when using yuv, we allocate a bit too much
 
   if(prog == 0) {
-    printf("Creating prog!\n");
-    //prog = rx_create_shader(VIDEO_CAP_VS, VIDEO_CAP_FS);
     GLuint vs = glCreateShader(GL_VERTEX_SHADER);
     GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(vs, 1, &VIDEO_CAP_VS, NULL);
@@ -60,7 +58,11 @@ void VideoCaptureGLSurface::setup(int w, int h, VideoCaptureFormat format) {
   glGenTextures(1, &tex);
 
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
+#if defined(__APPLE__)
   glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, surface_w, surface_h, 0, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, NULL);
+#elif defined(_WIN32)
+  glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGB, surface_w, surface_h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+#endif
   glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -103,9 +105,9 @@ void VideoCaptureGLSurface::draw(int x, int y, int w, int h) {
 }
 
 void VideoCaptureGLSurface::setupGL() {
-  printf("VideoCaptureGLSurface::setupGL ----------------------------------\n");
+  
   if(vao != 0) {
-    printf("ERRORL cannot re-setup GL.. already initialized.\n");
+    RX_ERROR(("cannot re-setup GL.. already initialized.\n"));
     return;
   }
   
@@ -130,7 +132,6 @@ void VideoCaptureGLSurface::setupGL() {
 
     glUseProgram(prog);
     glUniformMatrix4fv(u_pm, 1, GL_FALSE, pm);
-    printf("PM set: %dx%d\n", viewport[2], viewport[3]);
   }
   
   glGenBuffers(VIDEO_CAP_NUM_PBOS, pbos);
@@ -175,7 +176,14 @@ void VideoCaptureGLSurface::setPixels(unsigned char* pixels, size_t nbytes) {
 
   glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos[read_dx]);
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
+#if defined(__APLLE_)
   glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, surface_w, surface_h, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, 0);
+<<<<<<< HEAD
+=======
+#elif defined(_WIN32)
+  glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, surface_w, surface_h, GL_RGB, GL_UNSIGNED_BYTE, 0);
+#endif
+>>>>>>> origin/master
 
   glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos[write_dx]);
   glBufferData(GL_PIXEL_UNPACK_BUFFER, nbytes, NULL, GL_STREAM_DRAW); 
@@ -189,7 +197,7 @@ void VideoCaptureGLSurface::setPixels(unsigned char* pixels, size_t nbytes) {
 
 
 void VideoCaptureGLSurface::reset() {
-  printf("VideoCaptureGLSurface::reset()\n");
+  RX_VERBOSE(("reset"));
   if(tex) {
     glDeleteTextures(1, &tex);
     tex = 0;

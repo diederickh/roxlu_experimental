@@ -1,12 +1,10 @@
-#include <flv/ScreenRecorder.h>
+#include <flv/FLVScreenRecorder.h>
 
 // @todo we probably want a bigger distance between the read and write 
 // PBO indices.
 
-ScreenRecorder::ScreenRecorder() 
-  :width(0)
-  ,height(0)
-  ,channels(4)
+FLVScreenRecorder::FLVScreenRecorder() 
+  :channels(4)
   ,pixels(NULL)
   ,dx(0)
   ,is_recording(false)
@@ -15,7 +13,7 @@ ScreenRecorder::ScreenRecorder()
   memset(pbos, 0, sizeof(pbos));
 }
 
-ScreenRecorder::~ScreenRecorder() {
+FLVScreenRecorder::~FLVScreenRecorder() {
 #if !defined(SCREEN_RECORDER_USE_PBO) 
   if(pixels != NULL) {
     delete[] pixels;
@@ -24,12 +22,11 @@ ScreenRecorder::~ScreenRecorder() {
 #endif
   is_file_opened = false;
   is_recording = false;
-  width = 0;
   channels = 0;
   dx = 0;
 }
 
-bool ScreenRecorder::open(std::string filepath) {
+bool FLVScreenRecorder::open(std::string filepath) {
   RX_VERBOSE(("Open file: %s", filepath.c_str()));
 
   if(!flv_writer.open(filepath)) {
@@ -39,16 +36,19 @@ bool ScreenRecorder::open(std::string filepath) {
   return true;
 }
 
-bool ScreenRecorder::setup(unsigned int inw, 
-                           unsigned int inh,
-                           unsigned int outw,
-                           unsigned int outh,
-                           int fps)
-{
+bool FLVScreenRecorder::setup(FLVScreenRecorderSettings cfg) {
+	assert(cfg.vid_in_w != 0);
+	assert(cfg.vid_in_h != 0);
+	
+	settings = cfg;
 
   av.setVerticalFlip(true);
 
-  if(!av.setupVideo(inw, inh, outw, outh, fps, AV_FMT_BGRA32, &flv)) {
+  bool r = av.setupVideo(settings.vid_in_w, settings.vid_in_h, 
+												 settings.vid_out_w, settings.vid_out_h, settings.vid_fps, 
+												 AV_FMT_BGRA32, &flv);
+
+	if(!r) {
     return false;
   }
 
@@ -58,14 +58,9 @@ bool ScreenRecorder::setup(unsigned int inw,
                    &FLVFileWriter::close,
                    &flv_writer);
 
-
-
-  this->width = inw;
-  this->height = inh;
-
 #if !defined(SCREEN_RECORDER_USE_PBO)
-  pixels = new unsigned char[inw * inh * channels];
-  memset(pixels, 0, inw * inh * channels);
+  pixels = new unsigned char[settings.vid_in_w * settings.vid_in_h * channels];
+  memset(pixels, 0, settings.vid_in_w * settings.vid_in_h * channels);
 #endif
 
   if(!av.initialize()) {
@@ -77,7 +72,7 @@ bool ScreenRecorder::setup(unsigned int inw,
   glGenBuffers(SCREEN_RECORDER_NUM_PBOS, pbos);
   for(int i = 0; i < SCREEN_RECORDER_NUM_PBOS; ++i) {
     glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[i]);
-    glBufferData(GL_PIXEL_PACK_BUFFER, inw * inh * channels, pixels, GL_STREAM_READ);
+    glBufferData(GL_PIXEL_PACK_BUFFER, settings.vid_in_w * settings.vid_in_h * channels, pixels, GL_STREAM_READ);
   }
 
   glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
@@ -86,7 +81,7 @@ bool ScreenRecorder::setup(unsigned int inw,
   return true;
 }
 
-void ScreenRecorder::grabFrame() {
+void FLVScreenRecorder::grabFrame() {
 
   if(!is_recording) {
     RX_WARNING(("stopped, cant grab."));
@@ -95,7 +90,7 @@ void ScreenRecorder::grabFrame() {
 
 #if !defined(SCREEN_RECORDER_USE_PBO)
   if(av.wantsNewVideoFrame()) {
-    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+    glReadPixels(0, 0, settings.vid_in_w, settings.vid_in_h, GL_RGB, GL_UNSIGNED_BYTE, pixels);
     av.addVideoFrame(pixels);
   }
 #else
@@ -106,7 +101,7 @@ void ScreenRecorder::grabFrame() {
     int read_dx = (write_dx + 1) % SCREEN_RECORDER_NUM_PBOS;
 
     glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[write_dx]);
-    glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, 0); 
+    glReadPixels(0, 0, settings.vid_in_w, settings.vid_in_h, GL_BGRA, GL_UNSIGNED_BYTE, 0); 
 
     glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[read_dx]);
     GLubyte* ptr = (GLubyte*) glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
@@ -121,7 +116,7 @@ void ScreenRecorder::grabFrame() {
 #endif
 }
 
-void ScreenRecorder::start() {
+void FLVScreenRecorder::start() {
   if(is_recording) {
     RX_WARNING(("already started."));
     return;
@@ -132,7 +127,7 @@ void ScreenRecorder::start() {
   av.start();
 }
 
-void ScreenRecorder::stop() {
+void FLVScreenRecorder::stop() {
   if(!is_recording) {
     RX_WARNING(("already stopped."));
     return;
@@ -142,4 +137,20 @@ void ScreenRecorder::stop() {
   av.stop();
   is_recording = false;
   is_file_opened = false; // av.stop() calls close on the flv writer
+}
+
+FLVScreenRecorderSettings::FLVScreenRecorderSettings() {
+	reset();
+}
+FLVScreenRecorderSettings::~FLVScreenRecorderSettings() {
+	reset();
+}
+
+void FLVScreenRecorderSettings::reset() {
+	vid_in_w = 0;
+	vid_in_h = 0;
+	vid_out_w = 0;
+	vid_out_h = 0;
+	vid_fps = 0;
+
 }
