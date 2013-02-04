@@ -22,14 +22,23 @@
       <Message>Lame</Message>
     </PreBuildEvent>
     <PreLinkEvent>
-      <Command>xcopy  "$(ROXLU_EXTERN_BIN_DIR)libmp3lame.dll" "$(SolutionDir)bin\"  /y
-copy  "$(ROXLU_EXTERN_BIN_DIR)\avcodec-54.dll" "$(SolutionDir)bin\" 
-copy  "$(ROXLU_EXTERN_BIN_DIR)\swscale-2.dll" "$(SolutionDir)bin\" 
-copy  "$(ROXLU_EXTERN_BIN_DIR)\swscale.dll" "$(SolutionDir)bin\" 
-copy  "$(ROXLU_EXTERN_BIN_DIR)\avutil.dll" "$(SolutionDir)bin\" 
-copy  "$(ROXLU_EXTERN_BIN_DIR)\avutil-52.dll" "$(SolutionDir)bin\" 
-copy  "$(ROXLU_EXTERN_BIN_DIR)\x264.dll" "$(SolutionDir)bin\" </Command>
+      <Command>xcopy  "$(ROXLU_EXTERN_BIN_DIR)avcodec-54.dll" "$(SolutionDir)bin\"  /y
+xcopy  "$(ROXLU_EXTERN_BIN_DIR)swscale-2.dll" "$(SolutionDir)bin\" /y
+xcopy  "$(ROXLU_EXTERN_BIN_DIR)swscale.dll" "$(SolutionDir)bin\"  /y
+xcopy  "$(ROXLU_EXTERN_BIN_DIR)avutil.dll" "$(SolutionDir)bin\"  /y
+xcopy  "$(ROXLU_EXTERN_BIN_DIR)avutil-52.dll" "$(SolutionDir)bin\" /y 
+xcopy  "$(ROXLU_EXTERN_BIN_DIR)x264.dll" "$(SolutionDir)bin\"  /y
+xcopy  "$(ROXLU_EXTERN_BIN_DIR)libmp3lame.dll" "$(SolutionDir)bin\" /y</Command>
     </PreLinkEvent>
+    <CustomBuildStep>
+      <Command>xcopy  "$(ROXLU_EXTERN_BIN_DIR)avcodec-54.dll" "$(SolutionDir)bin\"  /y
+xcopy  "$(ROXLU_EXTERN_BIN_DIR)swscale-2.dll" "$(SolutionDir)bin\" /y
+xcopy  "$(ROXLU_EXTERN_BIN_DIR)swscale.dll" "$(SolutionDir)bin\"  /y
+xcopy  "$(ROXLU_EXTERN_BIN_DIR)avutil.dll" "$(SolutionDir)bin\"  /y
+xcopy  "$(ROXLU_EXTERN_BIN_DIR)avutil-52.dll" "$(SolutionDir)bin\" /y 
+xcopy  "$(ROXLU_EXTERN_BIN_DIR)x264.dll" "$(SolutionDir)bin\"  /y
+xcopy  "$(ROXLU_EXTERN_BIN_DIR)libmp3lame.dll" "$(SolutionDir)bin\" /y</Command>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup />
 </Project>

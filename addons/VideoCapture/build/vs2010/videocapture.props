@@ -12,6 +12,11 @@
     <Link>
       <AdditionalDependencies>$(SolutionDir)$(Configuration)\roxlu_videocapture.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PreLinkEvent>
+      <Command>
+
+</Command>
+    </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup />
 </Project>

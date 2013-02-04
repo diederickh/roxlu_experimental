@@ -16,6 +16,12 @@
       <AdditionalIncludeDirectories>$(ROXLU_EXTERN_INC_DIR)\cairo;$(ROXLU_DIR)\extern\include\;$(ROXLU_DIR)\lib\include\;$(ROXLU_EXTERN_LIB_DIR)\msinttypes\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ROXLU_GL_WRAPPER=ROXLU_OPENFRAMEWORKS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(SolutionDir)$(Configuration)\roxlu.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PreLinkEvent>
+      <Command>copy  "$(ROXLU_EXTERN_BIN_DIR)*.dll" "$(SolutionDir)bin\" </Command>
+    </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <BuildMacro Include="ROXLU_DIR">
