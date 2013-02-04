@@ -108,15 +108,15 @@ typedef void(*flv_flush_data_cb)(void* user);
 typedef void(*flv_close_cb)(void* user);
 
 
+size_t flv_file_write(char* data, size_t nbytes, void* user);
+void flv_file_rewrite(char* data,  size_t nbytes, size_t pos, void* user);
+void flv_file_flush(void * user);
+void flv_file_close(void* user);
+
 struct FLVFileWriter {
   FLVFileWriter();
   ~FLVFileWriter();
   bool open(std::string filepath);
-  static size_t write(char* data, size_t nbytes, void* user);
-  static void rewrite(char* data,  size_t nbytes, size_t pos, void* user);
-  static void flush(void * user);
-  static void close(void* user);
-private:
   FILE* fp;
 };
 

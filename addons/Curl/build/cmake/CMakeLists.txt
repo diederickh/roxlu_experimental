@@ -1,20 +1,11 @@
 # Curl CMakeLists.txt
 cmake_minimum_required(VERSION 2.8)
 
-include(${CMAKE_CURRENT_LIST_DIR}/../../lib/CMakeLists.txt) # roxlu 
+include(${CMAKE_CURRENT_LIST_DIR}/../../../../lib/build/cmake/CMakeLists.txt) # roxlu 
 
-set(curl_base_dir ${CMAKE_CURRENT_LIST_DIR})
+set(curl_base_dir ${CMAKE_CURRENT_LIST_DIR}/../../)
 set(curl_src_dir ${curl_base_dir}/src/kurl/)
 set(curl_include_dir ${curl_base_dir}/include)
-
-if(CMAKE_BUILD_TYPE STREQUAL Debug)
-  if(CMAKE_COMPILER_IS_GNUCXX)
-    add_definitions("-ggdb")
-  endif()
-  if(MSVC)
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUGS} /Od /ZI")
-    endif()
-endif()
 
 include_directories(
   ${curl_include_dir}

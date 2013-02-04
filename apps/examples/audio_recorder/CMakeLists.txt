@@ -1,10 +1,10 @@
 # simulation, twitter serious request cmakelists.txt
 cmake_minimum_required(VERSION 2.8)
 
-include(${CMAKE_CURRENT_LIST_DIR}/../../../lib/CMakeLists.txt) # roxlu cmake
+include(${CMAKE_CURRENT_LIST_DIR}/../../../lib/build/cmake/CMakeLists.txt) # roxlu cmake
 include(${roxlu_base_dir}/apps/external/CMakeLists.txt) # External (glfw)
-include(${roxlu_addons_dir}/Buttons/CMakeLists.txt) # Buttons addon
-include(${roxlu_addons_dir}/Audio/CMakeLists.txt) # Audio addon
+include(${roxlu_addons_dir}/Buttons/build/cmake/CMakeLists.txt) # Buttons addon
+include(${roxlu_addons_dir}/Audio/build/cmake/CMakeLists.txt) # Audio addon
 
 set(simulation_base ${CMAKE_CURRENT_LIST_DIR}/)
 set(simulation_install_dir ${simulation_base}bin/)

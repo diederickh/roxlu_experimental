@@ -1,0 +1,404 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Source Files\3d">
+      <UniqueIdentifier>{abed4e0c-414a-4461-a1c8-75858c899a85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\3d\shapes">
+      <UniqueIdentifier>{28613da4-8048-422c-8639-3a06a8814056}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{108fda3d-0819-412c-9e65-b41d52e6bc20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\experimental">
+      <UniqueIdentifier>{80bd671d-afd8-4b85-93db-8b3c95bb49a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\external">
+      <UniqueIdentifier>{bf848341-2fda-4476-84b1-b8b568e26352}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\io">
+      <UniqueIdentifier>{b4a67791-cd44-4946-9d69-3f3fbe0035d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\math">
+      <UniqueIdentifier>{6eb8d836-904c-4126-992d-38e37371b8e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\opengl">
+      <UniqueIdentifier>{0a64a8d9-aa5d-4d75-97dd-ac4e259f4bc6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\3d">
+      <UniqueIdentifier>{86415a33-9852-480b-a37a-336a232b627e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\3d\shapes">
+      <UniqueIdentifier>{10fb5f0f-da35-40e3-ab70-76d60eabe877}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\core">
+      <UniqueIdentifier>{b18fb5e7-341f-4cbb-8640-ebf8d87fa381}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\core\platform">
+      <UniqueIdentifier>{b85d4521-dd40-44c8-86c2-69a57f9e5641}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\core\platform\windows">
+      <UniqueIdentifier>{0e1ecb7a-b934-42e0-ac0e-186b3c6e4939}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\experimental">
+      <UniqueIdentifier>{98b2db32-9828-4342-b3bc-5198d3459316}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\external">
+      <UniqueIdentifier>{9e3f377c-6441-42b1-8205-d630882f71d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\io">
+      <UniqueIdentifier>{41c82d8d-07de-473d-b5f5-08bf0eecaad1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\graphics">
+      <UniqueIdentifier>{f0ac4e6c-89b8-441a-a0b8-aebe63899acf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\graphics">
+      <UniqueIdentifier>{b5d50cc9-0c5f-47f7-b3f6-cbe34dd924df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\math">
+      <UniqueIdentifier>{ff127683-0629-4511-bee3-d522cb63a253}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\opengl">
+      <UniqueIdentifier>{cf2fe476-4d3e-42a2-85eb-0424bf274cbe}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\lib\src\roxlu\3d\ArcBall.cpp">
+      <Filter>Source Files\3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\3d\Camera.cpp">
+      <Filter>Source Files\3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\3d\EasyCam.cpp">
+      <Filter>Source Files\3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\3d\shapes\Axis.cpp">
+      <Filter>Source Files\3d\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\core\Noise.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\core\StringUtil.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\core\Thread.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\core\Utils.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\BitmapFont.cpp">
+      <Filter>Source Files\experimental</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\DebugDrawer.cpp">
+      <Filter>Source Files\experimental</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\Font.cpp">
+      <Filter>Source Files\experimental</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\Image.cpp">
+      <Filter>Source Files\experimental</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\SimpleAnim.cpp">
+      <Filter>Source Files\experimental</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\StereoCam.cpp">
+      <Filter>Source Files\experimental</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\Text.cpp">
+      <Filter>Source Files\experimental</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\TGA.cpp">
+      <Filter>Source Files\experimental</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\TGARecorder.cpp">
+      <Filter>Source Files\experimental</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\Tween.cpp">
+      <Filter>Source Files\experimental</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\experimental\Tweens.cpp">
+      <Filter>Source Files\experimental</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\external\slre.c">
+      <Filter>Source Files\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\external\stb_image_write.c">
+      <Filter>Source Files\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\external\stb_textedit.cpp">
+      <Filter>Source Files\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\external\stb_truetype.c">
+      <Filter>Source Files\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\io\Buffer.cpp">
+      <Filter>Source Files\io</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\io\File.cpp">
+      <Filter>Source Files\io</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\io\INI.cpp">
+      <Filter>Source Files\io</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\io\OBJ.cpp">
+      <Filter>Source Files\io</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\io\RingBuffer.cpp">
+      <Filter>Source Files\io</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\math\Mat3.cpp">
+      <Filter>Source Files\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\math\Mat4.cpp">
+      <Filter>Source Files\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\math\Quat.cpp">
+      <Filter>Source Files\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\math\Vec2.cpp">
+      <Filter>Source Files\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\math\Vec3.cpp">
+      <Filter>Source Files\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\math\Vec4.cpp">
+      <Filter>Source Files\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\opengl\Billboard.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\opengl\FBO.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\opengl\FPS.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\opengl\PBO.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\opengl\Shader.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\opengl\Texture.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib\src\roxlu\opengl\VAO.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\lib\include\roxlu\3d\3d.h">
+      <Filter>Header Files\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\3d\ArcBall.h">
+      <Filter>Header Files\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\3d\Camera.h">
+      <Filter>Header Files\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\3d\EasyCam.h">
+      <Filter>Header Files\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\3d\Quad.h">
+      <Filter>Header Files\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\3d\Ray.h">
+      <Filter>Header Files\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\3d\Triangle.h">
+      <Filter>Header Files\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\3d\VertexTypes.h">
+      <Filter>Header Files\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\3d\VerticesBuffer.h">
+      <Filter>Header Files\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\3d\shapes\Axis.h">
+      <Filter>Header Files\3d\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\core\Constants.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\core\Core.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\core\Keyboard.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\core\Noise.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\core\StringUtil.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\core\Thread.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\core\Utils.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\core\platform\Platform.h">
+      <Filter>Header Files\core\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\core\platform\windows\WindowsPlatform.h">
+      <Filter>Header Files\core\platform\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\Binning2D.h">
+      <Filter>Header Files\experimental</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\BitmapFont.h">
+      <Filter>Header Files\experimental</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\DebugDrawer.h">
+      <Filter>Header Files\experimental</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\Experimental.h">
+      <Filter>Header Files\experimental</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\Font.h">
+      <Filter>Header Files\experimental</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\Image.h">
+      <Filter>Header Files\experimental</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\SimpleAnim.h">
+      <Filter>Header Files\experimental</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\StereoCam.h">
+      <Filter>Header Files\experimental</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\Text.h">
+      <Filter>Header Files\experimental</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\TGA.h">
+      <Filter>Header Files\experimental</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\TGARecorder.h">
+      <Filter>Header Files\experimental</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\Timer.h">
+      <Filter>Header Files\experimental</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\Tween.h">
+      <Filter>Header Files\experimental</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\experimental\Tweens.h">
+      <Filter>Header Files\experimental</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\external\dirent.h">
+      <Filter>Header Files\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\external\External.h">
+      <Filter>Header Files\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\external\slre.h">
+      <Filter>Header Files\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\io\Buffer.h">
+      <Filter>Header Files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\io\Endianness.h">
+      <Filter>Header Files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\io\File.h">
+      <Filter>Header Files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\io\INI.h">
+      <Filter>Header Files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\io\IO.h">
+      <Filter>Header Files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\io\OBJ.h">
+      <Filter>Header Files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\io\RingBuffer.h">
+      <Filter>Header Files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\io\Utils.h">
+      <Filter>Header Files\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\graphics\Color.h">
+      <Filter>Header Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\graphics\Graphics.h">
+      <Filter>Header Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\math\Mat3.h">
+      <Filter>Header Files\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\math\Mat4.h">
+      <Filter>Header Files\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\math\Math.h">
+      <Filter>Header Files\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\math\Quat.h">
+      <Filter>Header Files\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\math\Random.h">
+      <Filter>Header Files\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\math\Spline.h">
+      <Filter>Header Files\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\math\Vec2.h">
+      <Filter>Header Files\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\math\Vec3.h">
+      <Filter>Header Files\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\math\Vec4.h">
+      <Filter>Header Files\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\Billboard.h">
+      <Filter>Header Files\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\Error.h">
+      <Filter>Header Files\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\FBO.h">
+      <Filter>Header Files\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\FPS.h">
+      <Filter>Header Files\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\MatrixStack.h">
+      <Filter>Header Files\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\OpenGL.h">
+      <Filter>Header Files\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\OpenGLInit.h">
+      <Filter>Header Files\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\PBO.h">
+      <Filter>Header Files\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\Shader.h">
+      <Filter>Header Files\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\Texture.h">
+      <Filter>Header Files\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\opengl\VAO.h">
+      <Filter>Header Files\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\Roxlu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib\include\roxlu\core\Log.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

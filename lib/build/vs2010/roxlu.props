@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <ROXLU_DIR>C:\Users\roxlu\Documents\of\2013_P083_prodemos\apps\prodemos\roxlu\</ROXLU_DIR>
+    <ROXLU_OF_DIR>C:\Users\roxlu\Documents\of\2013_P083_prodemos</ROXLU_OF_DIR>
+    <ROXLU_EXTERN_LIB_DIR>$(ROXLU_DIR)\extern\lib\win\vs2010\MD\32\</ROXLU_EXTERN_LIB_DIR>
+    <ROXLU_EXTERN_BIN_DIR>$(ROXLU_DIR)\extern\bin\win\vs2010\MD\32\</ROXLU_EXTERN_BIN_DIR>
+    <ROXLU_EXTERN_INC_DIR>$(ROXLU_DIR)\extern\include\</ROXLU_EXTERN_INC_DIR>
+  </PropertyGroup>
+  <PropertyGroup>
+    <_PropertySheetDisplayName>roxlu</_PropertySheetDisplayName>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ROXLU_EXTERN_INC_DIR)\cairo;$(ROXLU_DIR)\extern\include\;$(ROXLU_DIR)\lib\include\;$(ROXLU_EXTERN_LIB_DIR)\msinttypes\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>ROXLU_GL_WRAPPER=ROXLU_OPENFRAMEWORKS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="ROXLU_DIR">
+      <Value>$(ROXLU_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="ROXLU_OF_DIR">
+      <Value>$(ROXLU_OF_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="ROXLU_EXTERN_LIB_DIR">
+      <Value>$(ROXLU_EXTERN_LIB_DIR)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="ROXLU_EXTERN_BIN_DIR">
+      <Value>$(ROXLU_EXTERN_BIN_DIR)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="ROXLU_EXTERN_INC_DIR">
+      <Value>$(ROXLU_EXTERN_INC_DIR)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

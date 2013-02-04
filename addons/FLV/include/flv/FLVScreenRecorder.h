@@ -21,6 +21,12 @@ struct FLVScreenRecorderSettings {
 	unsigned int vid_out_w;
 	unsigned int vid_out_h;
 	int vid_fps;
+
+	/* audio settings */
+	unsigned int audio_num_channels;
+	unsigned int audio_samplerate;
+	unsigned int audio_max_samples;
+	AVAudioFormat audio_format;
 };
 
 class FLVScreenRecorder {
@@ -33,6 +39,7 @@ class FLVScreenRecorder {
   bool open(std::string filepath);
   
   void grabFrame();
+	void addAudio(void* input, int nframes);
 
   void start(); // must be called once, starts the encoding thread
   void stop(); // shuts down the encoder, is automatically called by destructor too.

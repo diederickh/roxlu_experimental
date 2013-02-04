@@ -176,14 +176,11 @@ void VideoCaptureGLSurface::setPixels(unsigned char* pixels, size_t nbytes) {
 
   glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos[read_dx]);
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
-#if defined(__APLLE_)
+#if defined(__APPLE__)
   glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, surface_w, surface_h, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, 0);
-<<<<<<< HEAD
-=======
 #elif defined(_WIN32)
   glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, surface_w, surface_h, GL_RGB, GL_UNSIGNED_BYTE, 0);
 #endif
->>>>>>> origin/master
 
   glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos[write_dx]);
   glBufferData(GL_PIXEL_UNPACK_BUFFER, nbytes, NULL, GL_STREAM_DRAW); 

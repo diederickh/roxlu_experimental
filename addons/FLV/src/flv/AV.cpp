@@ -136,6 +136,10 @@ bool AV::initializeVideo() {
 }
 
 bool AV::initializeAudio() {
+  return true;  
+}
+
+bool AV::openLame() {
   if(audio_num_channels) {
     audio_lame_flags = lame_init();
     if(audio_lame_flags == NULL) {
@@ -154,7 +158,7 @@ bool AV::initializeAudio() {
       return false;
     }
   }
-  return true;  
+	return true;
 }
 
 bool AV::openFLV() {
@@ -512,6 +516,13 @@ void AV::reset() {
 
   FLVCloseParams p;
   flv->close(p);
+
+	if(audio_lame_flags) {
+		printf("----- LAME FLAGS HAVE BEEN SET ----------\n");
+		//lame_encode_finish(audio_lame_flags, audio_tmp_in_buffer, MP3_BUFFER_SIZE);
+		lame_close(audio_lame_flags);
+		audio_lame_flags = NULL;
+	}
   
   memset(audio_tmp_in_buffer, 0, (MP3_BUFFER_SIZE * 2));
   memset(audio_tmp_in_buffer_left, 0, MP3_BUFFER_SIZE);

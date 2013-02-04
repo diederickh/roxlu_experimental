@@ -1,18 +1,9 @@
 # SQLite cmakelists.txt
 cmake_minimum_required(VERSION 2.8)
 
-include(${CMAKE_CURRENT_LIST_DIR}/../../lib/CMakeLists.txt) # Roxlu cmake
+include(${CMAKE_CURRENT_LIST_DIR}/../../../../lib/build/cmake/CMakeLists.txt) # Roxlu cmake
 
-if(CMAKE_BUILD_TYPE STREQUAL Debug)
-  if(CMAKE_COMPILER_IS_GNUCXX)
-    add_definitions("-ggdb")
-  endif()
-  if(MSVC)
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUGS} /Od /ZI")
-    endif()
-endif()
-
-set(sqlite_base_dir ${CMAKE_CURRENT_LIST_DIR})
+set(sqlite_base_dir ${CMAKE_CURRENT_LIST_DIR}/../../)
 set(sqlite_src_dir ${sqlite_base_dir}/src)
 set(sqlite_include_dir ${sqlite_base_dir}/include)
 set(sqlite_lib_dir ${sqlite_base_dir}/lib/${roxlu_platform}/${roxlu_bits})

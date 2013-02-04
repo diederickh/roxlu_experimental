@@ -480,7 +480,7 @@ bool FLVFileWriter::open(std::string filepath) {
   return true;
 }
 
-size_t FLVFileWriter::write(char* data, size_t nbytes, void* user) {
+size_t flv_file_write(char* data, size_t nbytes, void* user) {
   if(nbytes <= 0) {
     return 0;
   }
@@ -500,9 +500,7 @@ size_t FLVFileWriter::write(char* data, size_t nbytes, void* user) {
   return nbytes;
 }
 
-void FLVFileWriter::rewrite(char* data, size_t nbytes, size_t pos, void* user) {
-
-
+void flv_file_rewrite(char* data, size_t nbytes, size_t pos, void* user) {
   FLVFileWriter* f = static_cast<FLVFileWriter*>(user);
   if(f->fp == NULL) {
     RX_WARNING(("was asked to rewrite to a file, but the file is not open."));
@@ -521,7 +519,7 @@ void FLVFileWriter::rewrite(char* data, size_t nbytes, size_t pos, void* user) {
   fseek(f->fp, curr_pos, SEEK_SET);
 }
 
-void FLVFileWriter::flush(void* user) {
+void flv_file_flush(void* user) {
   FLVFileWriter* f = static_cast<FLVFileWriter*>(user);
   if(f->fp == NULL) {
     RX_WARNING(("was asked to flush file, but the file is not open."));
@@ -532,7 +530,7 @@ void FLVFileWriter::flush(void* user) {
   fflush(f->fp);
 }
 
-void FLVFileWriter::close(void* user) {
+void flv_file_close(void* user) {
   FLVFileWriter* f = static_cast<FLVFileWriter*>(user);
   if(f->fp == NULL) {
     RX_WARNING(("was asked to flush file, but the file is not open.\n"));

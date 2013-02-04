@@ -84,8 +84,9 @@ class AV : public Runnable {
   void run();  // do not call yourself, threaded function
  private:
   bool initializeVideo(); // initializes video codecs, called by initialize()
-  bool initializeAudio(); // initializes audio codecs, called by initialize()
+  bool initializeAudio(); // initializes audio codecs, called by initialize(), for now we do not need to ininitialize anything here; see start() which creates a lame instance when necessary
   bool openX264(); // opens the x264 encoder; we do this before calling openFLV() in start()
+	bool openLame(); // opens the lame encoder 
   bool openFLV();  // writes the flv-header, params (audio+video) and avc-sequence header, called by start()
 
   void printX264Params(x264_param_t* p);
@@ -237,6 +238,10 @@ inline void AV::start() {
     RX_ERROR(("ERROR: cannot open X264"));
     return;
   }
+	if(!openLame()) {
+		RX_ERROR(("cannot create lame mp3 encoder"));
+		return;
+	}
   if(!openFLV()) {
     RX_ERROR(("ERROR: cannot open FLV."));
     return;

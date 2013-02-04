@@ -1,9 +1,9 @@
 # buttons addon cmakelists.txt
 cmake_minimum_required(VERSION 2.8)
 
-include(${CMAKE_CURRENT_LIST_DIR}/../../lib/CMakeLists.txt) # roxlu cmake
+include(${CMAKE_CURRENT_LIST_DIR}/../../../../lib/build/cmake/CMakeLists.txt) # roxlu cmake
 
-set(buttons_base_dir ${CMAKE_CURRENT_LIST_DIR})
+set(buttons_base_dir ${CMAKE_CURRENT_LIST_DIR}/../../)
 set(buttons_include_dir ${buttons_base_dir}/include)
 set(buttons_src_dir ${buttons_base_dir}/src)
 

@@ -1,9 +1,7 @@
 # external cmakelist.txt
 cmake_minimum_required(VERSION 2.8)
 
-include(${CMAKE_CURRENT_LIST_DIR}/../../lib/CMakeLists.txt)
-
-
+include(${CMAKE_CURRENT_LIST_DIR}/../../lib/build/cmake/CMakeLists.txt)
 
 # 1 = GLFW, 2 = OPENFRAMEWORKS, 3 = CINDER, 4 = COCOA
 add_definitions("-DROXLU_GL_WRAPPER=1") 

@@ -49,13 +49,23 @@ bool FLVScreenRecorder::setup(FLVScreenRecorderSettings cfg) {
 												 AV_FMT_BGRA32, &flv);
 
 	if(!r) {
+		RX_ERROR(("cannot setup video"));
     return false;
   }
 
-  flv.setCallbacks(&FLVFileWriter::write,
-                   &FLVFileWriter::rewrite,
-                   &FLVFileWriter::flush,
-                   &FLVFileWriter::close,
+	if(settings.audio_num_channels != 0 && settings.audio_max_samples != 0) {
+		r = av.setupAudio(settings.audio_num_channels, settings.audio_samplerate, 
+											settings.audio_max_samples, settings.audio_format);
+		if(!r) {
+			RX_ERROR(("cannot setup audio"));
+			return false;
+		}
+	}
+
+  flv.setCallbacks(flv_file_write,
+                   flv_file_rewrite,
+                   flv_file_flush,
+                   flv_file_close,
                    &flv_writer);
 
 #if !defined(SCREEN_RECORDER_USE_PBO)
@@ -116,6 +126,10 @@ void FLVScreenRecorder::grabFrame() {
 #endif
 }
 
+void FLVScreenRecorder::addAudio(void* input, int nframes) {
+	av.addAudioFrame(input, nframes);
+}
+
 void FLVScreenRecorder::start() {
   if(is_recording) {
     RX_WARNING(("already started."));
@@ -152,5 +166,8 @@ void FLVScreenRecorderSettings::reset() {
 	vid_out_w = 0;
 	vid_out_h = 0;
 	vid_fps = 0;
-
+	audio_num_channels = 0;
+	audio_samplerate = 0;
+	audio_max_samples = 0;
+	audio_format = AV_FMT_INT16;
 }

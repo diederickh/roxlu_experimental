@@ -3,15 +3,6 @@ cmake_minimum_required(VERSION 2.8)
 
 include(${CMAKE_CURRENT_LIST_DIR}/../../lib/CMakeLists.txt) # roxlu
 
-if(CMAKE_BUILD_TYPE STREQUAL Debug)
-  if(CMAKE_COMPILER_IS_GNUCXX)
-    add_definitions("-ggdb")
-  endif()
-  if(MSVC)
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUGS} /Od /ZI")
-    endif()
-endif()
-
 set(ogg_base_dir ${CMAKE_CURRENT_LIST_DIR})
 set(ogg_src_dir ${ogg_base_dir}/src/)
 set(ogg_include_dir ${ogg_base_dir}/include/)
