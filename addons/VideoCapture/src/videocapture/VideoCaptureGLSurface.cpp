@@ -177,7 +177,6 @@ void VideoCaptureGLSurface::setPixels(unsigned char* pixels, size_t nbytes) {
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
   glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, surface_w, surface_h, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, 0);
 
-
   glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos[write_dx]);
   glBufferData(GL_PIXEL_UNPACK_BUFFER, nbytes, NULL, GL_STREAM_DRAW); 
   GLubyte* ptr = (GLubyte*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);

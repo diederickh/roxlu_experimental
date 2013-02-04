@@ -73,7 +73,6 @@ bool WebmScreenRecorder::setup(WebmScreenRecorderSettings cfg) {
   memset(pixels, 0xFF, nbytes_per_video_frame);
 #endif
 
-
   return true;
 }
 
