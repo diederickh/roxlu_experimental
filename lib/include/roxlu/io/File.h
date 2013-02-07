@@ -18,10 +18,14 @@
 #if ROXLU_PLATFORM == ROXLU_APPLE || ROXLU_PLATFORM == ROXLU_IOS
 #include <TargetConditionals.h>
 #include <mach-o/dyld.h>
+#define RX_PATH_SEPARATOR '/'
 #elif ROXLU_PLATFORM == ROXLU_WINDOWS
 #include <windows.h>
+#include <direct.h> // _mkdir
+#define RX_PATH_SEPARATOR '\\'
 #elif ROXLU_PLATFORM == ROXLU_LINUX
 #include <unistd.h> // getcwd
+#define RX_PATH_SEPARATOR '/'
 #endif
 
 using std::string;
@@ -133,7 +137,7 @@ namespace roxlu {
     static bool createPath(std::string path) {
       std::vector<std::string> dirs;
       while(path.length() > 0) {
-        int index = path.find('/');
+        int index = path.find(RX_PATH_SEPARATOR);
         std::string dir = (index == -1 ) ? path : path.substr(0, index);
         if(dir.length() > 0) {
           dirs.push_back(dir);
@@ -147,11 +151,11 @@ namespace roxlu {
       struct stat s;
       std::string dir_path;
       for(unsigned int i = 0; i < dirs.size(); i++) {
-        dir_path += "/";
+        dir_path.push_back(RX_PATH_SEPARATOR);
         dir_path += dirs[i];
         if(stat(dir_path.c_str(), &s) != 0) {
           if(!File::createDirectory(dir_path.c_str())) {
-            RX_ERROR(("Cannot create directory: %s", dir_path.c_str());
+            RX_ERROR(("Cannot create directory: %s", dir_path.c_str()));
             return false;
           }
         }
@@ -161,9 +165,15 @@ namespace roxlu {
 
     static bool createDirectory(std::string path) {
 #ifdef _WIN32
+	 
       if(_mkdir(path.c_str()) != 0) {
-        RX_ERROR(("Cannot create directory: %s", path.c_str());
-        return false;
+		if(errno == ENOENT) { 
+			RX_ERROR(("Cannot create directory: %s (ENOENT)", path.c_str()));
+			return false;
+		}
+		else if(errno == EEXIST) {
+			RX_ERROR(("Cannot create directory: %s (EEXIST)", path.c_str()));
+		}
       }
       return true;
 #else
