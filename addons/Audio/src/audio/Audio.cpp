@@ -14,6 +14,18 @@ Audio::Audio()
 }
 
 Audio::~Audio() {
+
+  if(input_stream) {
+    PaError err = Pa_StopStream(input_stream);
+    if(err != paNoError) {
+      printf("ERROR: cannot stop audio input stream: %s\n", Pa_GetErrorText(err));
+    }
+    else {
+      printf("VERBOSE: closed input audio stream\n");
+    }
+    input_stream = NULL;
+  }
+
   PaError err = Pa_Terminate();
   if(err != paNoError) {
     printf("ERROR: cannot terminate port audio.\n");
@@ -181,11 +193,7 @@ bool Audio::stopInputStream() {
   }
   return true;
 }
-/*
-void Audio::setInputListener(AudioListener* listener) {
-  input_listener = listener;
-}
-*/
+
 void Audio::setInputListener(cb_audio_in inCB, void* inUser) {
   in_cb = inCB;
   in_user = inUser;
