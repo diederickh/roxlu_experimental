@@ -146,11 +146,31 @@ namespace roxlu {
 
     // e.g.: File::createPath("/users/home/roxlu/data/images/2012/12/05/")
     static bool createPath(std::string path) {
+      // win 
+#ifdef _WIN32
+      std::string drive;
+      for(int i = 0; i < path.size()-1; ++i) {
+        if(path[i] == ':' && path[i + 1] == '\\') {
+          break;
+        }
+        drive.push_back(path[i]);
+      }
+      path = path.substr(drive.size() + 2);
+      drive = drive + ":";
+      printf("path: %s\n", path.c_str());
+#endif
+      // -- end win
+
       std::vector<std::string> dirs;
       while(path.length() > 0) {
 
-        //        int index = path.find('/');
-        int index = path.find('\\');
+     
+#ifdef _WIN32
+        int index = path.find('\\'); // win 
+#else
+        int index = path.find('/'); // posix
+#endif
+
         std::string dir = (index == -1 ) ? path : path.substr(0, index);
         printf("# %s\n", dir.c_str());
         if(dir.length() > 0) {
@@ -164,8 +184,16 @@ namespace roxlu {
     
       struct stat s;
       std::string dir_path;
+#ifdef _WIN32
+      dir_path = drive;
+#endif
       for(unsigned int i = 0; i < dirs.size(); i++) {
+#ifdef _WIN32
+        dir_path += "\\";
+#else
         dir_path += "/";
+#endif
+
         dir_path += dirs[i];
         if(stat(dir_path.c_str(), &s) != 0) {
           if(!File::createDirectory(dir_path.c_str())) {
@@ -177,9 +205,8 @@ namespace roxlu {
       return true;
     }
 
+
     static bool createDirectory(std::string path) {
-      printf("> %s\n", path.c_str());
-      return true;
 #ifdef _WIN32
       if(_mkdir(path.c_str()) != 0) {
         if(errno == ENOENT) { 
