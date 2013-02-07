@@ -5,16 +5,26 @@
 #include <fstream>
 #include <vector>
 #include <cstdlib>
-#include <roxlu/core/Log.h>
 #include <roxlu/core/platform/Platform.h>
 #include <sys/stat.h>
-
 
 #if defined(_WIN32)
 #   include <roxlu/external/dirent.h> 
 #else
 #   include <dirent.h>
 #endif
+
+/*
+#if ROXLU_PLATFORM == ROXLU_APPLE || ROXLU_PLATFORM == ROXLU_IOS
+#include <TargetConditionals.h>
+#include <mach-o/dyld.h>
+#elif ROXLU_PLATFORM == ROXLU_WINDOWS
+#include <windows.h>
+#elif ROXLU_PLATFORM == ROXLU_LINUX
+#include <unistd.h> // getcwd
+#endif
+
+*/
 
 #if ROXLU_PLATFORM == ROXLU_APPLE || ROXLU_PLATFORM == ROXLU_IOS
 #  include <TargetConditionals.h>
@@ -48,7 +58,7 @@ namespace roxlu {
 		
       of.open(file.c_str(), std::ios::out);
       if(!of.is_open()) {
-        RX_ERROR(("File: cannot open file: '%s'\n", file.c_str()));
+        printf("File: cannot open file: '%s'\n", file.c_str());
         return;
       }
       of.write(contents.c_str(), contents.length());
@@ -63,7 +73,7 @@ namespace roxlu {
       std::string line = "";
       std::ifstream ifs(file.c_str());
       if(!ifs.is_open()) {
-        RX_ERROR(("File: cannot open file: '%s'\n", file.c_str()));
+        printf("File: cannot open file: '%s'\n", file.c_str());
         return result;
       }
       while(getline(ifs,line)) {
@@ -78,12 +88,12 @@ namespace roxlu {
 	
     static string toDataPath(const char* file) {
 #if ROXLU_PLATFORM == ROXLU_APPLE
-#if ROXLU_GL_WRAPPER == ROXLU_OPENFRAMEWORKS
+ #if ROXLU_GL_WRAPPER == ROXLU_OPENFRAMEWORKS
       return getCWD() +"/../../../data/" +file;	
       // #elif ROXLU_GL_WRAPPER == ROXLU_GLFW
-#else
+ #else
       return getCWD() +"data/" +file;	
-#endif
+ #endif
 #elif ROXLU_PLATFORM == ROXLU_IOS
       return getCWD() +file;
 #elif ROXLU_PLATFORM == ROXLU_WINDOWS
@@ -109,7 +119,7 @@ namespace roxlu {
       char path[1024];
       uint32_t size = sizeof(path);
       if (_NSGetExecutablePath(path, &size) != 0) {
-        RX_WARNING(("buffer too small; need size %u", size));
+        printf("buffer too small; need size %u\n", size);
       }
       char res[1024];
       char* clean = realpath(path, res);
@@ -138,9 +148,11 @@ namespace roxlu {
     static bool createPath(std::string path) {
       std::vector<std::string> dirs;
       while(path.length() > 0) {
-        //        int index = path.find(RX_PATH_SEPARATOR);
-        int index = path.find('/');
+
+        //        int index = path.find('/');
+        int index = path.find('\\');
         std::string dir = (index == -1 ) ? path : path.substr(0, index);
+        printf("# %s\n", dir.c_str());
         if(dir.length() > 0) {
           dirs.push_back(dir);
         }
@@ -153,12 +165,11 @@ namespace roxlu {
       struct stat s;
       std::string dir_path;
       for(unsigned int i = 0; i < dirs.size(); i++) {
-        //        dir_path.push_back(RX_PATH_SEPARATOR);
-        dir_path.push_back('/');
+        dir_path += "/";
         dir_path += dirs[i];
         if(stat(dir_path.c_str(), &s) != 0) {
           if(!File::createDirectory(dir_path.c_str())) {
-            RX_ERROR(("Cannot create directory: %s", dir_path.c_str()));
+            printf("ERROR: cannot create directory: %s\n", dir_path.c_str());
             return false;
           }
         }
@@ -167,9 +178,9 @@ namespace roxlu {
     }
 
     static bool createDirectory(std::string path) {
-      printf("create dir: %s\n", path.c_str());
+      printf("> %s\n", path.c_str());
+      return true;
 #ifdef _WIN32
-	 
       if(_mkdir(path.c_str()) != 0) {
         if(errno == ENOENT) { 
           RX_ERROR(("Cannot create directory: %s (ENOENT)", path.c_str()));
@@ -180,51 +191,51 @@ namespace roxlu {
         }
       }
       return true;
+
 #else
       if(mkdir(path.c_str(), 0777) != 0) {
-        RX_ERROR(("Cannot create directory: %s", path.c_str());
-          return false;
-          }
-          return true;
+        return false;
+      }
+      return true;
 #endif
-      }
+    }
     
-      static std::vector<std::string> getDirectories(std::string path) {
-        std::vector<std::string> result;
-        DIR* dir;
-        struct dirent* ent;
-        if((dir = opendir(path.c_str())) != NULL) {
-          while((ent = readdir(dir)) != NULL) {
-            if(ent->d_type == DT_DIR) {
-              if(strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
-                continue;
-              }
-              result.push_back(ent->d_name);
+    static std::vector<std::string> getDirectories(std::string path) {
+      std::vector<std::string> result;
+      DIR* dir;
+      struct dirent* ent;
+      if((dir = opendir(path.c_str())) != NULL) {
+        while((ent = readdir(dir)) != NULL) {
+          if(ent->d_type == DT_DIR) {
+            if(strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
+              continue;
             }
+            result.push_back(ent->d_name);
           }
-          closedir(dir);
         }
-        return result;
+        closedir(dir);
       }
+      return result;
+    }
     
-      static std::vector<std::string> getFiles(std::string path) {
-        std::vector<std::string> result;
-        DIR* dir;
-        struct dirent* ent;
-        if((dir = opendir(path.c_str())) != NULL) {
-          while((ent = readdir(dir)) != NULL) {
-            if(ent->d_type == DT_REG) {
-              result.push_back(path +"/" +ent->d_name);
-            }
+    static std::vector<std::string> getFiles(std::string path) {
+      std::vector<std::string> result;
+      DIR* dir;
+      struct dirent* ent;
+      if((dir = opendir(path.c_str())) != NULL) {
+        while((ent = readdir(dir)) != NULL) {
+          if(ent->d_type == DT_REG) {
+            result.push_back(path +"/" +ent->d_name);
           }
-          closedir(dir);
         }
-        return result;
+        closedir(dir);
       }
+      return result;
+    }
 
 
 
-    }; // File
-  } // roxlu
+  }; // File
+} // roxlu
 
 #endif
