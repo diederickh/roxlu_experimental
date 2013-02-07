@@ -8,6 +8,10 @@ void webm_vpx_write_cb(const vpx_codec_cx_pkt_t* pkt, int64_t pts, void* user) {
   //b.timestamp = pkt->data.frame.pts;
   b.timestamp = pts; // uv_hrtime();
   b.flags = 0;
+  if(pkt->data.frame.flags & VPX_FRAME_IS_KEY) {
+    RX_VERBOSE((" ------ KEYFRAME ------- "));
+    b.flags |= 0x80;
+  }
   b.nbytes = pkt->data.frame.sz;
   b.data = (char*)pkt->data.frame.buf;
 

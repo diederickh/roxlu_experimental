@@ -33,7 +33,6 @@ TextGLSurface::TextGLSurface()
     u_pm = glGetUniformLocation(prog, "u_pm");
     u_tex = glGetUniformLocation(prog, "u_tex");
   }
-
 }
 
 TextGLSurface::~TextGLSurface() {

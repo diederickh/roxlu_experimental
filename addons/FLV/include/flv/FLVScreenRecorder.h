@@ -7,26 +7,26 @@
 #include <roxlu/Roxlu.h>
 #include <string>
 
-#define SCREEN_RECORDER_USE_PBO
+//#define SCREEN_RECORDER_USE_PBO
 #define SCREEN_RECORDER_NUM_PBOS 5
 
 struct FLVScreenRecorderSettings {
-	FLVScreenRecorderSettings();
-	~FLVScreenRecorderSettings();
-	void reset(); 
+  FLVScreenRecorderSettings();
+  ~FLVScreenRecorderSettings();
+  void reset(); 
 
-	/* video settings */
-	unsigned int vid_in_w;
-	unsigned int vid_in_h;
-	unsigned int vid_out_w;
-	unsigned int vid_out_h;
-	int vid_fps;
+  /* video settings */
+  unsigned int vid_in_w;
+  unsigned int vid_in_h;
+  unsigned int vid_out_w;
+  unsigned int vid_out_h;
+  int vid_fps;
 
-	/* audio settings */
-	unsigned int audio_num_channels;
-	unsigned int audio_samplerate;
-	unsigned int audio_max_samples;
-	AVAudioFormat audio_format;
+  /* audio settings */
+  unsigned int audio_num_channels;
+  unsigned int audio_samplerate;
+  unsigned int audio_max_samples;
+  AVAudioFormat audio_format;
 };
 
 class FLVScreenRecorder {
@@ -39,13 +39,13 @@ class FLVScreenRecorder {
   bool open(std::string filepath);
   
   void grabFrame();
-	void addAudio(void* input, int nframes);
+  void addAudio(void* input, int nframes);
 
   void start(); // must be called once, starts the encoding thread
   void stop(); // shuts down the encoder, is automatically called by destructor too.
 
  private:
-	FLVScreenRecorderSettings settings;
+  FLVScreenRecorderSettings settings;
 
   /* Recording */
   AV av;
@@ -56,8 +56,11 @@ class FLVScreenRecorder {
 
   /* GL */
   unsigned int channels;
-  unsigned char* pixels;
+
   GLuint pbos[SCREEN_RECORDER_NUM_PBOS];
   unsigned int dx;
+#if !defined(SCREEN_RECORDER_USE_PBO)
+  unsigned char* pixels;
+#endif
 };
 #endif

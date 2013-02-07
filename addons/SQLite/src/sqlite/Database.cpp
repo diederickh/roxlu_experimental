@@ -9,6 +9,10 @@ namespace roxlu  {
   }
 
   Database::~Database() {
+    if(opened) {
+      printf("closing database.\n");
+      sqlite3_close(db);
+    }
   }
 
   //http://icculus.org/~chunky/stuff/sqlite3_example/sqlite3_example_bind.c

@@ -1,3 +1,5 @@
+#ifdef ROXLU_GL_WRAPPER
+
 #include <webm/WebmScreenRecorder.h>
 #include <roxlu/Roxlu.h>
 
@@ -34,6 +36,8 @@ bool WebmScreenRecorder::setup(WebmScreenRecorderSettings cfg) {
                     settings.cb_peek,
                     settings.cb_read,
                     settings.cb_skip,
+                    NULL,
+                    NULL,
                     settings.cb_user);
 
   if(settings.vid_fmt == VPX_IMG_FMT_NONE) {
@@ -102,3 +106,4 @@ void WebmScreenRecorder::grabFrame() {
 }
 
 
+#endif // ROXLU_GL_WRAPPER

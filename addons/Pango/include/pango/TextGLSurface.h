@@ -128,6 +128,7 @@ inline void TextGLSurface::setText(const std::string str, float r, float g, floa
 
 inline void TextGLSurface::setMarkup(const std::string str) {
   text.setMarkup(str);
+  has_text = true;
   needs_update = true;
 }
 

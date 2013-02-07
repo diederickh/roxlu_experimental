@@ -1,3 +1,5 @@
+#ifdef ROXLU_GL_WRAPPER
+
 #ifndef ROXLU_WEBM_SCREENRECORDER_H
 #define ROXLU_WEBM_SCREENRECORDER_H
 
@@ -90,4 +92,4 @@ inline WebmScreenRecorderSettings::~WebmScreenRecorderSettings() {
 
 #endif
 
-
+#endif // ROXLU_GL_WRAPPER
