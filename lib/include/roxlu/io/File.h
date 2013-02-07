@@ -5,6 +5,7 @@
 #include <fstream>
 #include <vector>
 #include <cstdlib>
+#include <roxlu/core/Log.h>
 #include <roxlu/core/platform/Platform.h>
 #include <sys/stat.h>
 
@@ -42,7 +43,7 @@ namespace roxlu {
 		
       of.open(file.c_str(), std::ios::out);
       if(!of.is_open()) {
-        printf("File: cannot open file: '%s'\n", file.c_str());
+        RX_ERROR(("File: cannot open file: '%s'\n", file.c_str()));
         return;
       }
       of.write(contents.c_str(), contents.length());
@@ -57,7 +58,7 @@ namespace roxlu {
       std::string line = "";
       std::ifstream ifs(file.c_str());
       if(!ifs.is_open()) {
-        printf("File: cannot open file: '%s'\n", file.c_str());
+        RX_ERROR(("File: cannot open file: '%s'\n", file.c_str()));
         return result;
       }
       while(getline(ifs,line)) {
@@ -72,12 +73,12 @@ namespace roxlu {
 	
     static string toDataPath(const char* file) {
 #if ROXLU_PLATFORM == ROXLU_APPLE
- #if ROXLU_GL_WRAPPER == ROXLU_OPENFRAMEWORKS
+#if ROXLU_GL_WRAPPER == ROXLU_OPENFRAMEWORKS
       return getCWD() +"/../../../data/" +file;	
       // #elif ROXLU_GL_WRAPPER == ROXLU_GLFW
- #else
+#else
       return getCWD() +"data/" +file;	
- #endif
+#endif
 #elif ROXLU_PLATFORM == ROXLU_IOS
       return getCWD() +file;
 #elif ROXLU_PLATFORM == ROXLU_WINDOWS
@@ -103,7 +104,7 @@ namespace roxlu {
       char path[1024];
       uint32_t size = sizeof(path);
       if (_NSGetExecutablePath(path, &size) != 0) {
-        printf("buffer too small; need size %u\n", size);
+        RX_WARNING(("buffer too small; need size %u", size));
       }
       char res[1024];
       char* clean = realpath(path, res);
@@ -150,7 +151,7 @@ namespace roxlu {
         dir_path += dirs[i];
         if(stat(dir_path.c_str(), &s) != 0) {
           if(!File::createDirectory(dir_path.c_str())) {
-            printf("ERROR: cannot create directory: %s\n", dir_path.c_str());
+            RX_ERROR(("Cannot create directory: %s", dir_path.c_str());
             return false;
           }
         }
@@ -159,15 +160,19 @@ namespace roxlu {
     }
 
     static bool createDirectory(std::string path) {
-      #ifdef _WIN32
-      printf("File::createDirectory(), not implemented yet!\n");
-      return false;
-      #else
-      if(mkdir(path.c_str(), 0777) != 0) {
+#ifdef _WIN32
+      if(_mkdir(path.c_str()) != 0) {
+        RX_ERROR(("Cannot create directory: %s", path.c_str());
         return false;
       }
       return true;
-      #endif
+#else
+      if(mkdir(path.c_str(), 0777) != 0) {
+        RX_ERROR(("Cannot create directory: %s", path.c_str());
+        return false;
+      }
+      return true;
+#endif
     }
     
     static std::vector<std::string> getDirectories(std::string path) {
