@@ -6,6 +6,7 @@
 #include <vector>
 #include <cstdlib>
 #include <roxlu/core/platform/Platform.h>
+#include <roxlu/core/Log.h>
 #include <sys/stat.h>
 
 #if defined(_WIN32)
@@ -14,17 +15,6 @@
 #   include <dirent.h>
 #endif
 
-/*
-#if ROXLU_PLATFORM == ROXLU_APPLE || ROXLU_PLATFORM == ROXLU_IOS
-#include <TargetConditionals.h>
-#include <mach-o/dyld.h>
-#elif ROXLU_PLATFORM == ROXLU_WINDOWS
-#include <windows.h>
-#elif ROXLU_PLATFORM == ROXLU_LINUX
-#include <unistd.h> // getcwd
-#endif
-
-*/
 
 #if ROXLU_PLATFORM == ROXLU_APPLE || ROXLU_PLATFORM == ROXLU_IOS
 #  include <TargetConditionals.h>
@@ -58,7 +48,7 @@ namespace roxlu {
 		
       of.open(file.c_str(), std::ios::out);
       if(!of.is_open()) {
-        printf("File: cannot open file: '%s'\n", file.c_str());
+        RX_ERROR(("File: cannot open file: '%s'", file.c_str()));
         return;
       }
       of.write(contents.c_str(), contents.length());
@@ -73,7 +63,7 @@ namespace roxlu {
       std::string line = "";
       std::ifstream ifs(file.c_str());
       if(!ifs.is_open()) {
-        printf("File: cannot open file: '%s'\n", file.c_str());
+        RX_ERROR(("File: cannot open file: '%s'", file.c_str()));
         return result;
       }
       while(getline(ifs,line)) {
@@ -109,7 +99,7 @@ namespace roxlu {
       if(inDataPath) {
         file = File::toDataPath(file);
       }
-      printf("MUST IMPLEMENT getTimeModified\n");
+      RX_ERROR(("MUST IMPLEMENT getTimeModified"));
       return 0;
     }
 	
@@ -146,7 +136,7 @@ namespace roxlu {
 
     // e.g.: File::createPath("/users/home/roxlu/data/images/2012/12/05/")
     static bool createPath(std::string path) {
-      // win 
+
 #ifdef _WIN32
       std::string drive;
       for(int i = 0; i < path.size()-1; ++i) {
@@ -157,9 +147,8 @@ namespace roxlu {
       }
       path = path.substr(drive.size() + 2);
       drive = drive + ":";
-      printf("path: %s\n", path.c_str());
+
 #endif
-      // -- end win
 
       std::vector<std::string> dirs;
       while(path.length() > 0) {
@@ -170,9 +159,8 @@ namespace roxlu {
 #else
         int index = path.find('/'); // posix
 #endif
-
         std::string dir = (index == -1 ) ? path : path.substr(0, index);
-        printf("# %s\n", dir.c_str());
+
         if(dir.length() > 0) {
           dirs.push_back(dir);
         }
@@ -197,7 +185,7 @@ namespace roxlu {
         dir_path += dirs[i];
         if(stat(dir_path.c_str(), &s) != 0) {
           if(!File::createDirectory(dir_path.c_str())) {
-            printf("ERROR: cannot create directory: %s\n", dir_path.c_str());
+            RX_ERROR(("ERROR: cannot create directory: %s", dir_path.c_str()));
             return false;
           }
         }
