@@ -10,8 +10,16 @@
       <AdditionalIncludeDirectories>$(ROXLU_DIR)\addons\Audio\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(SolutionDir)$(Configuration)\roxlu_audio.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ROXLU_EXTERN_LIB_DIR)\portaudio_x86.lib;$(SolutionDir)$(Configuration)\roxlu_audio.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PreLinkEvent>
+      <Command>xcopy  /y "$(ROXLU_EXTERN_BIN_DIR)portaudio_x86.dll" "$(SolutionDir)bin\" 
+</Command>
+    </PreLinkEvent>
+    <CustomBuildStep>
+      <Command>
+</Command>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup />
 </Project>
