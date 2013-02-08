@@ -3,6 +3,8 @@
 GLuint VideoCaptureGLSurface::prog = 0;
 GLint VideoCaptureGLSurface::u_pm = 0;
 GLint VideoCaptureGLSurface::u_mm = 0;
+GLint VideoCaptureGLSurface::u_rot_matrix = 0;
+GLint VideoCaptureGLSurface::u_scale_matrix = 0;
 GLint VideoCaptureGLSurface::u_tex = 0;
 GLfloat VideoCaptureGLSurface::pm[16] = {0};
 
@@ -19,10 +21,13 @@ VideoCaptureGLSurface::VideoCaptureGLSurface()
   ,read_dx(0)
 {
   memset(mm, 0, sizeof(float) * 16);
-  mm[0] = 1.0f; 
-  mm[5] = 1.0f; 
-  mm[10] = 1.0f;
-  mm[15] = 1.0f;
+  memset(rot_matrix, 0, sizeof(float) * 16);
+  memset(scale_matrix, 0.0, sizeof(float) * 16);
+
+  mm[0]  = rot_matrix[0]  = scale_matrix[0]  = 1.0f; 
+  mm[5]  = rot_matrix[5]  = scale_matrix[5]  = 1.0f; 
+  mm[10] = rot_matrix[10] = scale_matrix[10] = 1.0f;
+  mm[15] = rot_matrix[15] = scale_matrix[15] = 1.0f;
 }
 
 VideoCaptureGLSurface::~VideoCaptureGLSurface() {
@@ -52,6 +57,8 @@ void VideoCaptureGLSurface::setup(int w, int h, VideoCaptureFormat format) {
     
     u_pm = glGetUniformLocation(prog, "u_pm");
     u_mm = glGetUniformLocation(prog, "u_mm");
+    u_rot_matrix = glGetUniformLocation(prog, "u_rot_matrix");
+    u_scale_matrix = glGetUniformLocation(prog, "u_scale_matrix");
     u_tex = glGetUniformLocation(prog, "u_tex");
   }
 
@@ -89,20 +96,22 @@ void VideoCaptureGLSurface::draw(int x, int y, int w, int h) {
     w = surface_w;
     h = surface_h;
   }
-  mm[0] = w; 
-  mm[5] = h; 
-  mm[10] = 1.0f;
-  mm[15] = 1.0f;    
-  mm[12] = x;
-  mm[13] = y;
+  mm[12] = x + w * 0.5;
+  mm[13] = y + h * 0.5;
+
+  scale_matrix[0] = w; 
+  scale_matrix[5] = h; 
 
   glUniformMatrix4fv(u_mm, 1, GL_FALSE, mm);
+  glUniformMatrix4fv(u_scale_matrix, 1, GL_FALSE, scale_matrix);
+  glUniformMatrix4fv(u_rot_matrix, 1, GL_FALSE, rot_matrix);
 
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
 
   glDrawArrays(GL_TRIANGLES, 0, 6);
 }
+
 
 void VideoCaptureGLSurface::setupGL() {
   
@@ -144,17 +153,14 @@ void VideoCaptureGLSurface::setupGL() {
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
 
-  float w = 1.0f; // surface_w;
-  float h = 1.0f; // surface_h;
-  GLfloat vertices[] = {
-    0.0f, 0.0f, 0.0f, 0.0f,
-    w, 0.0f, surface_w, 0.0f, 
-    w, h, surface_w, surface_h,
-    
-    0.0f, 0.0f, 0.0f, 0.0f,
-    w, h, surface_w, surface_h,
-    0.0f, h, 0.0f, surface_h
-  };
+  float w = 0.5f; // surface_w;
+  float h = 0.5f; // surface_h;
+  vertices[0].set(-w, -h, 0.0f, 0.0f);
+  vertices[1].set( w, -h, surface_w, 0.0f);
+  vertices[2].set( w,  h, surface_w, surface_h);
+  vertices[3].set(-w, -h, 0.0f, 0.0f);
+  vertices[4].set( w,  h, surface_w, surface_h);
+  vertices[5].set(-w,  h, 0.0f, surface_h);
   
   glGenBuffers(1, &vbo);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -217,3 +223,53 @@ void VideoCaptureGLSurface::reset() {
   read_dx = 0;
 }
 
+void VideoCaptureGLSurface::flip(bool vert, bool hor) {
+
+  if(vert) { 
+    vertices[0].t = surface_h;
+    vertices[1].t = surface_h;
+    vertices[2].t = 0.0f;
+    vertices[3].t = surface_h;
+    vertices[4].t = 0.0f;
+    vertices[5].t = 0.0f;
+  }
+  else {
+    vertices[0].t = 0.0f;
+    vertices[1].t = 0.0f;
+    vertices[2].t = surface_h;
+    vertices[3].t = 0.0f;
+    vertices[4].t = surface_h;
+    vertices[5].t = surface_h;
+  }
+
+  if(hor) {
+    vertices[0].s = surface_w;
+    vertices[1].s = 0.0f;
+    vertices[2].s = 0.0f;
+    vertices[3].s = surface_w;
+    vertices[4].s = 0.0f;
+    vertices[5].s = surface_w;
+  }
+  else {
+    vertices[0].s = 0.0f;
+    vertices[1].s = surface_w;
+    vertices[2].s = surface_w;
+    vertices[3].s = 0.0f;
+    vertices[4].s = surface_w;
+    vertices[5].s = 0.0f;
+  }
+
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+}
+
+void VideoCaptureGLSurface::rotate(float degrees) {
+  float angle = (VIDEO_CAP_PI / 180.0f) * degrees;
+  float ca = cos(angle);
+  float sa = sin(angle);
+  rot_matrix[0] = ca;
+  rot_matrix[1] = sa;
+  rot_matrix[4] = -sa;
+  rot_matrix[5] = ca;
+}
