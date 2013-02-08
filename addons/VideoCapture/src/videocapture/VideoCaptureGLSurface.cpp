@@ -81,14 +81,12 @@ void VideoCaptureGLSurface::setup(int w, int h, VideoCaptureFormat format) {
   glUniform1i(u_tex, 0);
 
   glBindTexture(GL_TEXTURE_RECTANGLE, 0);
+
+   setupGL();
 }
 
 // @todo we could optimize by not updating the model matrix when it didn't change
 void VideoCaptureGLSurface::draw(int x, int y, int w, int h) {
-  if(vao == 0) {
-    setupGL();
-  }
-
   glBindVertexArray(vao);
   glUseProgram(prog);
 
@@ -98,7 +96,7 @@ void VideoCaptureGLSurface::draw(int x, int y, int w, int h) {
   }
   mm[12] = x + w * 0.5;
   mm[13] = y + h * 0.5;
-
+ 
   scale_matrix[0] = w; 
   scale_matrix[5] = h; 
 
@@ -110,6 +108,7 @@ void VideoCaptureGLSurface::draw(int x, int y, int w, int h) {
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
 
   glDrawArrays(GL_TRIANGLES, 0, 6);
+//  glBindVertexArray(0);
 }
 
 
@@ -165,7 +164,7 @@ void VideoCaptureGLSurface::setupGL() {
   glGenBuffers(1, &vbo);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
-  
+
   glEnableVertexAttribArray(0); 
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)0);
@@ -200,7 +199,6 @@ void VideoCaptureGLSurface::setPixels(unsigned char* pixels, size_t nbytes) {
 
 
 void VideoCaptureGLSurface::reset() {
-  RX_VERBOSE(("reset"));
   if(tex) {
     glDeleteTextures(1, &tex);
     tex = 0;
@@ -224,7 +222,6 @@ void VideoCaptureGLSurface::reset() {
 }
 
 void VideoCaptureGLSurface::flip(bool vert, bool hor) {
-
   if(vert) { 
     vertices[0].t = surface_h;
     vertices[1].t = surface_h;
@@ -260,7 +257,7 @@ void VideoCaptureGLSurface::flip(bool vert, bool hor) {
   }
 
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); //, GL_DYNAMIC_DRAW);
 
 }
 
