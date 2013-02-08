@@ -3,10 +3,9 @@
 #include <sstream>
 
 namespace roxlu {
-
+  
   QueryResult::QueryResult(Database& db) 
     :db(db)
-    ,is_ok(true)
     ,stmt(NULL)
     ,row_index(0)
   {
@@ -19,7 +18,7 @@ namespace roxlu {
 
     db = other.db;
     stmt = other.stmt;
-    is_ok = other.is_ok;
+
     row_index = other.row_index;
     last_result = other.last_result;
     return *this;
@@ -33,12 +32,13 @@ namespace roxlu {
 
   QueryResult::~QueryResult() {
     free();
+    //printf("~QueryResult()\n");
   }
 
   bool QueryResult::free() {
     if(stmt != NULL) {
       if(sqlite3_reset(stmt) != SQLITE_OK) {
-        //printf("ERROR: QueryResult::free(), cannot sqlite3_reset().\n");
+        // printf("ERROR: QueryResult::free(), cannot sqlite3_reset().\n");
         return false;
       }
 
@@ -53,7 +53,12 @@ namespace roxlu {
 
   bool QueryResult::execute(const string& sql, QueryParams& params, int queryType) {
     if(!getDB().prepare(sql, &stmt)) {
-      sqlite3_finalize(stmt);
+      if(sqlite3_reset(stmt) != SQLITE_OK) {
+        printf("error: cannot prepare - and cannot reset\n");
+      }
+      if(sqlite3_finalize(stmt) != SQLITE_OK) {
+        printf("error: cannot prepare - and cannot finalize\n");
+      }
       printf("error: cannot prepare\n");
       return false;
     }
@@ -64,6 +69,26 @@ namespace roxlu {
       return false;
     }
     row_index = 0;
+    return true;
+  }
+
+  bool QueryResult::execute(const string& sql) {
+    if(!getDB().prepare(sql, &stmt)) {
+      if(sqlite3_reset(stmt) != SQLITE_OK) {
+        printf("error: cannot prepare - and cannot reset\n");
+      }
+      if(sqlite3_finalize(stmt) != SQLITE_OK) {
+        printf("error: cannot prepare - and cannot finalize\n");
+      }
+      printf("error: cannot prepare\n");
+      return false;
+    }
+
+    return true;
+  }
+
+  bool QueryResult::finish() { 
+    while(next());
     return true;
   }
 
@@ -99,4 +124,15 @@ namespace roxlu {
     }
     return sqlite3_column_double(stmt, index);
   }
+  
+  std::vector<std::string> QueryResult::getFieldNames() {
+    std::vector<std::string> names;
+    int num_fields = sqlite3_column_count(stmt);
+    for(int i = 0; i < num_fields; ++i) {
+      std::string name = sqlite3_column_name(stmt, i);
+      names.push_back(name);
+    }
+    return names;
+  }
+
 } // roxlu

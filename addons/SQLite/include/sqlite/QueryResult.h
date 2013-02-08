@@ -12,6 +12,8 @@
 #include <stdint.h>
 #include <sqlite3.h>
 #include <sqlite/QueryParams.h>
+#include <vector>
+#include <string>
 
 namespace roxlu {
 
@@ -25,27 +27,25 @@ namespace roxlu {
     ~QueryResult();
 	
     bool execute(const string& sql, QueryParams& params, int queryType);
-    bool isOK();
+    bool execute(const string& sql);                                         /* execute a raw query directly, don't forget to call finish() in case of a delete, insert or update  */
     bool next();
     bool free();
+    bool finish();                                                           /* steps over all entries and finalizes the query. use this when you call: QueryResult.execute("update table set field = 0").finish() */
 	
     string getString(int index);
     int64_t getInt(int index);
     float getFloat(int index);
     bool isLast();
+
+    std::vector<std::string> getFieldNames();                                 /* returns an vector with the column/field names of the current statement */
 	
   private:
     Database& getDB();
     Database& db;
     sqlite3_stmt* stmt;
-    bool is_ok;
     int row_index;
     int last_result;
   };
-
-  inline bool QueryResult::isOK() {
-    return is_ok;
-  }
 
   inline Database& QueryResult::getDB() {
     return db;

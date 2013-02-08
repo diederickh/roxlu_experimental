@@ -34,11 +34,11 @@ KurlConnection::KurlConnection()
   ,complete_callback(NULL)
   ,http_post(NULL)
 {
-  printf("> KurlConnection::KurlConnection()\n");
+  //  printf("> KurlConnection::KurlConnection()\n");
 }
 
 KurlConnection::~KurlConnection() {
-  printf("< KurlConnection::~KurlConnection()\n");
+  //  printf("< KurlConnection::~KurlConnection()\n");
 }
 
 // -----------------------------------
