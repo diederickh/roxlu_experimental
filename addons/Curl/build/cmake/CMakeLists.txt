@@ -28,6 +28,9 @@ if(WIN32)
       ${roxlu_extern_lib_dir}/ssleay32.lib
       ${roxlu_extern_lib_dir}/libeay32.lib
       ${roxlu_extern_lib_dir}/zdll.lib
+      ws2_32.lib
+      Iphlpapi.lib
+      psapi.lib
       )
 
     set(roxlu_install_files
