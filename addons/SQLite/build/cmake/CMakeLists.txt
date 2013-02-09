@@ -25,6 +25,15 @@ set(sqlite_source_files
   ${sqlite_base_dir}/extern/sqlite/sqlite3.c
 )
 
+if(UNIX AND NOT APPLE)
+
+  set(roxlu_addon_libs
+    ${roxlu_addon_libs}
+    pthread
+    dl
+    )
+endif()
+
 set(roxlu_addon_sources 
   ${roxlu_addon_sources} 
   ${sqlite_source_files}
