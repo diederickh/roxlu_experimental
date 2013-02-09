@@ -33,6 +33,7 @@ size_t kurl_callback_write_function(char* data, size_t size, size_t nmemb, void*
 class KurlConnection;
 typedef void (*kurl_cb_on_complete)(KurlConnection* c, void* userdata);
 typedef void (*kurl_cb_on_write)(KurlConnection* c, char* data, size_t count, size_t nmemb, void* userdata);
+typedef int (*kurl_cb_progress)(void* user, double dltotal, double dlnow, double ultotal, double ulnow);  // get info about the upload/donwloaded bytes, see Kurl::setProgresCallback + curl docs. Must return 0 to continue up/download, 1 stops everything :) 
 
 enum KurlTypes {
   KURL_NONE,
@@ -79,8 +80,21 @@ public:
     void* writeData = NULL 
   );
 
-private:
+  void setProgressCallback(kurl_cb_progress progresCB, void* progresUser);
+
+ private: 
+  bool initProgressCallback(CURL* handle);
+
+ private:
   int still_running;
   CURLM* handle;
   std::vector<KurlConnection*> connections;
+
+  kurl_cb_progress cb_progress; // callback that gets called when some network traffic occurs, see http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTPROGRESSFUNCTION for more info
+  void* cb_progress_user;
 };
+
+inline void Kurl::setProgressCallback(kurl_cb_progress progressCB, void* progressUser) {
+  cb_progress = progressCB;
+  cb_progress_user = progressUser;
+}

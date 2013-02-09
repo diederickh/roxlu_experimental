@@ -254,3 +254,16 @@ if(ROXLU_PLATFORM_WIN)
 endif(ROXLU_PLATFORM_WIN)
 
 include_directories(${roxlu_include_dirs})
+
+
+# Use this macro to add addons to your project
+# pass the name of the directory that contains the 
+# addon, for example:
+#
+# add_roxlu_addon(Curl)
+# add_roxlu_addon(SQLite)
+# add_roxlu_addon(FLV)
+# 
+macro(add_roxlu_addon addon)
+  include(${roxlu_addons_dir}/${addon}/build/cmake/CMakeLists.txt) 
+endmacro(add_roxlu_addon)

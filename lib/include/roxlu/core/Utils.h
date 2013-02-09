@@ -229,6 +229,11 @@ static int64_t rx_millis(void) {
   return (mach_absolute_time() * info.numer / info.denom) / 1000000;
 }
 
+/* returns epoch timestamp */
+static time_t rx_time() {
+  return time(NULL);
+}
+
 #endif
 
 static std::string rx_to_data_path(const std::string filename) {
