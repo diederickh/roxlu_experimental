@@ -1,5 +1,7 @@
 #include <videocapture/VideoCaptureGLSurface.h>
 
+// @todo instead of check if setup() is called, add the necessary things to the c'tor.
+
 GLuint VideoCaptureGLSurface::prog = 0;
 GLint VideoCaptureGLSurface::u_pm = 0;
 GLint VideoCaptureGLSurface::u_mm = 0;
@@ -19,6 +21,7 @@ VideoCaptureGLSurface::VideoCaptureGLSurface()
   ,tex(0)
   ,write_dx(0)
   ,read_dx(0)
+  ,is_setup(false)
 {
   memset(mm, 0, sizeof(float) * 16);
   memset(rot_matrix, 0, sizeof(float) * 16);
@@ -82,11 +85,17 @@ void VideoCaptureGLSurface::setup(int w, int h, VideoCaptureFormat format) {
 
   glBindTexture(GL_TEXTURE_RECTANGLE, 0);
 
-   setupGL();
+  is_setup = true;
+  setupGL();
 }
 
 // @todo we could optimize by not updating the model matrix when it didn't change
 void VideoCaptureGLSurface::draw(int x, int y, int w, int h) {
+  if(!is_setup) {
+    RX_ERROR(("cannot draw setup() not called"));
+    return;
+  }
+
   glBindVertexArray(vao);
   glUseProgram(prog);
 
@@ -172,6 +181,11 @@ void VideoCaptureGLSurface::setupGL() {
 }
 
 void VideoCaptureGLSurface::setPixels(unsigned char* pixels, size_t nbytes) {
+  if(!is_setup) {
+    RX_ERROR(("cannot draw setup() not called"));
+    return;
+  }
+
   if(vao == 0) {
     setupGL();
   }
@@ -199,6 +213,11 @@ void VideoCaptureGLSurface::setPixels(unsigned char* pixels, size_t nbytes) {
 
 
 void VideoCaptureGLSurface::reset() {
+  if(is_setup) {
+    RX_ERROR(("cannot reset, first call setup()"));
+    return;
+  }
+
   if(tex) {
     glDeleteTextures(1, &tex);
     tex = 0;
@@ -222,6 +241,11 @@ void VideoCaptureGLSurface::reset() {
 }
 
 void VideoCaptureGLSurface::flip(bool vert, bool hor) {
+  if(vbo == 0) {
+    RX_ERROR(("cannot flip the surface, first call setup()"));
+    return;
+  }
+
   if(vert) { 
     vertices[0].t = surface_h;
     vertices[1].t = surface_h;

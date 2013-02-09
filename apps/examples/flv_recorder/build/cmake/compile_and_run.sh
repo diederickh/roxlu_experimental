@@ -13,7 +13,7 @@ if [ ! -d bin ] ; then
 fi
 
 cd build
-cmake -DCMAKE_BUILD_TYPE=Release ../
+cmake ../
 make install
 cd ${d}
 cd bin

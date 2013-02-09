@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 
 include(${CMAKE_CURRENT_LIST_DIR}/../../../../../lib/build/cmake/CMakeLists.txt) # roxlu cmake
 
-add_roxlu_addon(Curl)
-add_roxlu_addon(SQLite)
+roxlu_add_addon(Curl)
+roxlu_add_addon(SQLite)
 
 set(uploader_base_dir ${CMAKE_CURRENT_LIST_DIR}/../../)
 set(uploader_install_dir ${uploader_base_dir}/bin/)

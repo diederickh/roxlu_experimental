@@ -57,6 +57,7 @@ class VideoCaptureGLSurface {
  private:
   void setupGL();
  private:
+  bool is_setup;
   int surface_w;
   int surface_h;
   int window_w;
