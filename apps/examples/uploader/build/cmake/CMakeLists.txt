@@ -16,19 +16,38 @@ set(uploader_sources
   ${roxlu_sources}
 )
 
-find_library(fr_foundation CoreFoundation)
-find_library(fr_cs CoreServices)
 
-set(uploader_libs
-  ${roxlu_addon_libs}
-  ${roxlu_extern_lib_dir}/libuv.a
-  ${fr_foundation}
-  ${fr_cs}
-)
+if(LINUX)
+  set(uploader_libs
+    ${roxlu_addon_libs}
+    ${roxlu_extern_lib_dir}/libuv.a
+    )
+endif()
+
+if(APPLE)
+  find_library(fr_foundation CoreFoundation)
+  find_library(fr_cs CoreServices)
+  set(uploader_libs
+    ${uploader_libs}
+    ${fr_foundation}
+    ${fr_cs}  
+    )  
+endif()
+
+if(WIN32)
+  set(uploader_libs
+    ${uploader_libs}
+    ${roxlu_addon_libs}
+    ${roxlu_extern_lib_dir}/libuv.lib
+    )
+  
+endif()
+
 
 add_executable(uploader ${uploader_sources})
 target_link_libraries(uploader ${uploader_libs})
 install(TARGETS uploader DESTINATION ${uploader_install_dir})
+install(FILES ${roxlu_install_files} DESTINATION ${uploader_install_dir})
 
 # FAKE INSERTER, inserts entries into the DB
 # --------------------------------------------
