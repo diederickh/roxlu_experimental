@@ -51,20 +51,21 @@ if(ROXLU_PLATFORM_WIN)
     )
 
 elseif(ROXLU_PLATFORM_LINUX)
+
   set(roxlu_addon_libs
     ${roxlu_addon_libs}
     ${roxlu_extern_lib_dir}/libx264.a
     ${roxlu_extern_lib_dir}/libmp3lame.a
-    ${roxlu_extern_lib_dir}/libavutil.a
     ${roxlu_extern_lib_dir}/libswscale.a
+    ${roxlu_extern_lib_dir}/libavutil.a
     )
 elseif(ROXLU_PLATFORM_MAC)
   set(roxlu_addon_libs
     ${roxlu_addon_libs}
 
     ${roxlu_extern_lib_dir}/libmp3lame.a
-    ${roxlu_extern_lib_dir}/libavutil.a
     ${roxlu_extern_lib_dir}/libswscale.a
+    ${roxlu_extern_lib_dir}/libavutil.a
     )
 
   if(CMAKE_BUILD_TYPE STREQUAL Debug)
