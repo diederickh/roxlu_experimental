@@ -8,6 +8,8 @@
  * 
  */
 
+#ifdef ROXLU_GL_WRAPPER
+
 #ifndef ROXLU_TEXT_GL_SURFACE_H
 #define ROXLU_TEXT_GL_SURFACE_H
 
@@ -184,3 +186,4 @@ inline void TextGLSurface::wrapWordChar() {
 
 #endif
 
+#endif // roxlu GL wrapper

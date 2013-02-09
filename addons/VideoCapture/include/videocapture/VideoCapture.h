@@ -19,13 +19,16 @@ class VideoCapture {
   int startCapture();
   void update();
   int isFormatSupported(VideoCaptureFormat fmt, int w, int h, int set = 0); 
-  unsigned char* getPtr(); // get pointer to 'bytes'
+  // CHANGED: see getNewDataPtr()
+  //unsigned char* getPtr(); // get pointer to 'bytes'
   size_t getNumBytes(); // get number of bytes in 'bytes'
   bool hasNewData(); // returns true when we received data from capture device
   void copyData(char* dest); // copies data + sets 'has_new_data' to false. Make sure 'dest' can hold getNumBytes
   int getWidth();
   int getHeight();
-  void resetHasNewData(); // tells us that we've read the last frame
+  // use getNewDataPtr() --> resets automatically!
+  //  void resetHasNewData(); // tells us that we've read the last frame
+  unsigned char* getNewDataPtr();
   VideoCaptureFormat getFormat();
  private: 
   void setupShader();
@@ -41,7 +44,12 @@ class VideoCapture {
   VideoCaptureFormat fmt;
 };
 
-inline unsigned char* VideoCapture::getPtr() {
+//inline unsigned char* VideoCapture::getPtr() {
+//  return bytes;
+//}
+
+inline unsigned char* VideoCapture::getNewDataPtr() {
+  has_new_data = false;
   return bytes;
 }
 
@@ -61,9 +69,9 @@ inline void VideoCapture::copyData(char *dest) {
   memcpy(dest, bytes, nbytes);
 }
 
-inline void VideoCapture::resetHasNewData() {
-  has_new_data = false;
-}
+//inline void VideoCapture::resetHasNewData() {
+//  has_new_data = false;
+//}
 
 inline int VideoCapture::getWidth() {
   return capture.get_width(&capture);

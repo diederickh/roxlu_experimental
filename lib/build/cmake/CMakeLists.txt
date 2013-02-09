@@ -254,3 +254,35 @@ if(ROXLU_PLATFORM_WIN)
 endif(ROXLU_PLATFORM_WIN)
 
 include_directories(${roxlu_include_dirs})
+
+
+# -------------------------------------------------------------------
+# Basic helpers to cleanup the cmakelists.txt files of projects
+#
+#  roxlu_add_addon: 
+#  ----------------
+#  Use this macro to add addons to your project
+#  pass the name of the directory that contains the 
+#  addon.
+#     
+#     examples:
+#     ---------
+#     roxlu_add_addon(Curl)
+#     roxlu_add_addon(SQLite)
+#     roxlu_add_addon(FLV)
+#
+#
+#  roxlu_enable_opengl:
+#  ----------------
+#  Sets up everything you need to use the Simulation.cpp/h files
+#  and can use opengl functions.
+#
+# -------------------------------------------------------------------
+
+macro(roxlu_add_addon addon)
+  include(${roxlu_addons_dir}/${addon}/build/cmake/CMakeLists.txt) 
+endmacro(roxlu_add_addon)
+
+macro(roxlu_enable_opengl)
+  include(${roxlu_base_dir}/apps/external/CMakeLists.txt) # External (glfw)
+endmacro(roxlu_enable_opengl)

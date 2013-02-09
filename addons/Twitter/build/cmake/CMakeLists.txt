@@ -2,7 +2,7 @@
 # Twitter cmakelists.txt
 cmake_minimum_required(VERSION 2.8)
 
-include(${CMAKE_CURRENT_LIST_DIR}/../../lib/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/../../../../lib/build/cmake/CMakeLists.txt)
 
 if(APPLE)
   find_library(fr_corefoundation CoreFoundation)
@@ -14,7 +14,7 @@ if(APPLE)
     )
 endif()
 
-set(twitter_base_dir ${CMAKE_CURRENT_LIST_DIR})
+set(twitter_base_dir ${CMAKE_CURRENT_LIST_DIR}/../../)
 set(twitter_src_dir ${twitter_base_dir}/src)
 set(twitter_include_dir ${twitter_base_dir}/include)
 

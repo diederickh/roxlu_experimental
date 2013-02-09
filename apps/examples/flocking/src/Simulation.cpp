@@ -42,8 +42,14 @@ void Simulation::setup() {
   last_timestep = Timer::now();
   rdrawer.setup();
 
-  if(!recorder.setup(rx_to_data_path("flocking.flv"), window_w, window_h)) {
-    printf("ERROR: cannot setup recorder\n");
+  FLVScreenRecorderSettings settings;
+  settings.vid_in_w = window_w;
+  settings.vid_in_h = window_h;
+  settings.vid_out_w = settings.vid_in_w;
+  settings.vid_out_h = settings.vid_in_h;
+  settings.vid_fps = 60;;
+  if(!recorder.setup(settings)) {
+    RX_ERROR(("ERROR: cannot setup recorder"));
     ::exit(EXIT_FAILURE);
   }
 }
@@ -68,7 +74,6 @@ void Simulation::update() {
 }
 
 void Simulation::draw() {
-  recorder.beginFrame();
   const float* vm = cam.vm().getPtr();
   const float* pm = cam.pm().getPtr();
   const float* nm = cam.nm().getPtr();
@@ -81,7 +86,7 @@ void Simulation::draw() {
   rdrawer.mode = 1;
   rdrawer.draw(pm, vm, nm, ps.predators);
 
-  recorder.endFrame();
+  recorder.grabFrame();
 
   fps.draw();
 }
@@ -112,6 +117,7 @@ void Simulation::onChar(int ch) {
     }
   }
   else if(ch == '1') {
+    recorder.open(rx_to_data_path(rx_strftime("%Y_%m_%d_%H_%M_%S") +".flv"));
     recorder.start();
   }
   else if(ch == '2') {

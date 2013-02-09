@@ -1,6 +1,7 @@
 #include <flv/FLVScreenRecorder.h>
 
-// @todo we probably want a bigger distance between the read and write 
+// @todo we probably want a bigger distance between the read and write  - tested quickly didnt see a difference
+// @todo check if we need to call AV::waitForEncodingThreadToFinish();
 // PBO indices.
 
 FLVScreenRecorder::FLVScreenRecorder() 

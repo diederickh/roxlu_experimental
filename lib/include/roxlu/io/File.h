@@ -8,6 +8,8 @@
 #include <roxlu/core/platform/Platform.h>
 #include <roxlu/core/Log.h>
 #include <sys/stat.h>
+#include <stdio.h>
+#include <errno.h>
 
 #if defined(_WIN32)
 #   include <roxlu/external/dirent.h> 
@@ -95,12 +97,23 @@ namespace roxlu {
 #endif
     }
 	
-    static time_t getTimeModified(string file, bool inDataPath = true) {
-      if(inDataPath) {
-        file = File::toDataPath(file);
+    static rx_int64 getTimeModified(string filepath) {
+      struct stat st;
+      if(stat(filepath.c_str(), &st) == 0) {
+        return st.st_mtime;
       }
-      RX_ERROR(("MUST IMPLEMENT getTimeModified"));
+      else {
+        return 0;
+      }
       return 0;
+    }
+
+    static bool remove(std::string filepath) {
+      if(::remove(filepath.c_str()) != 0) {
+        RX_ERROR(("cannot remove file: %s - %s", filepath.c_str(), strerror(errno)));
+        return false;
+      }
+      return true;
     }
 	
     static string getCWD() {
