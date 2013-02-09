@@ -158,6 +158,12 @@ static rx_int64 rx_millis(void) {
   }
 }
 
+/* returns epoch timestamp */
+static time_t rx_time() {
+  return time(NULL);
+}
+
+
 // -------------------------------------- LINUX -------------------------------------
 #elif defined(__linux) 
 
