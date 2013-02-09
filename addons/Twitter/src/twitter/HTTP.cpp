@@ -325,7 +325,7 @@ namespace roxlu {
     }
 
     void HTTP::update() {
-      uv_run_once(loop);
+      uv_run(loop, UV_RUN_ONCE);
     }
 
     HTTPConnection* HTTP::sendRequest(

@@ -1,3 +1,5 @@
+#ifdef ROXLU_GL_WRAPPER
+
 #include <pango/TextGLSurface.h>
 
 GLuint TextGLSurface::prog = 0;
@@ -228,3 +230,4 @@ void TextGLSurface::setPixels(unsigned char* pixels) {
 }
 
 
+#endif // ROXLU_GL_WRAPPER
