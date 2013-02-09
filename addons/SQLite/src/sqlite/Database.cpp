@@ -1,7 +1,9 @@
 #include <sqlite/Database.h>
 
 int roxlu_database_busy_handler(void* v, int r) {
+#if !defined(NDEBUG)
   printf("sqlite database seems to be locked.\n");
+#endif
   return 1;
 }
 

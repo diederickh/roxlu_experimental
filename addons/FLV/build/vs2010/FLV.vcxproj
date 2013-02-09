@@ -54,6 +54,9 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PreLinkEvent>
+      <Command>xcopy  $(ROXLU_EXTERN_BIN_DIR)libmp3lame.dll $(SolutionDir)bin\   /y /C</Command>
+    </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -68,6 +71,13 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <PreLinkEvent>
+      <Command>xcopy  $(ROXLU_EXTERN_BIN_DIR)libmp3lame.dll $(SolutionDir)bin\   /y /C
+xcopy  $(ROXLU_EXTERN_BIN_DIR)x264.dll $(SolutionDir)bin\   /y /C
+xcopy  $(ROXLU_EXTERN_BIN_DIR)xswscale.dll $(SolutionDir)bin\   /y /C
+xcopy  $(ROXLU_EXTERN_BIN_DIR)swscale-2.dll $(SolutionDir)bin\   /y /C
+xcopy  $(ROXLU_EXTERN_BIN_DIR)avutil-52.dll $(SolutionDir)bin\   /y /C</Command>
+    </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\flv\AV.cpp" />

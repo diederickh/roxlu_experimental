@@ -20,7 +20,8 @@
       <AdditionalDependencies>$(SolutionDir)$(Configuration)\roxlu.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreLinkEvent>
-      <Command>xcopy  "$(ROXLU_EXTERN_BIN_DIR)*.dll" "$(SolutionDir)bin\"  /y /C</Command>
+      <Command>
+      </Command>
     </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
