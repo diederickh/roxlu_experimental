@@ -691,6 +691,7 @@ namespace buttons {
 
   void Buttons::load(const string& file) {
     buttons::Storage storage;
+
     storage.load(file, this);
 
     // notify elements.

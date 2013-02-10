@@ -1,3 +1,13 @@
+/** 
+ * A 2D pad. Draw around to set a value.
+ * If you want to change the ranges, call: setX() and setY()
+ *
+ *        Example:
+ *        --------
+ *        int my_pos[2];
+ *        gui.addInt2("mypos", my_pos).setX(0,100).setY(0.600);
+ *
+ */
 #ifndef ROXLU_PADH
 #define ROXLU_PADH
 
@@ -7,7 +17,7 @@
 namespace buttons {
 
   enum PadValueType {
-    PAD_INT
+     PAD_INT
     ,PAD_FLOAT
   };
 
@@ -81,9 +91,9 @@ namespace buttons {
     ,pad_h(0)
     ,pad_w(0)
     ,min_x_value(0)
-    ,max_x_value(0)
+    ,max_x_value(100)
     ,min_y_value(0)
-    ,max_y_value(0)
+    ,max_y_value(100)
     ,px(0.5f)
     ,py(0.5f)
     ,value(value)
@@ -210,7 +220,6 @@ namespace buttons {
     Pad<T>& Pad<T>::setPercentages(const float percX, const float percY) {
     px = percX;
     py = percY;
-    printf("set percentages: %f, %f\n", px, py);
     return *this;
   }
 

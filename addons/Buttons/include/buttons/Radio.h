@@ -1,3 +1,18 @@
+/**
+ * Radio 
+ * -----
+ * Creates a list of radios that you can toggle. 
+ * 
+ *    Example:
+ *    -------
+ *    vector<string> options;
+ *    options.push_back("Option 1");
+ *    options.push_back("Option 2");
+ *    options.push_back("Option 3");
+ *    gui.addRadio<Simulation>("Options", 1, this, options, test_option); 
+ *    gui.addButton<Simulation>("Button", 0, this);
+ * 
+ */
 #ifndef ROXLU_BRADIOH
 #define ROXLU_BRADIOH
 
@@ -196,11 +211,13 @@ namespace buttons {
 
   template<class T>
     void Radio<T>::onLoaded() {
+
     for(int i = 0; i < toggles.size(); ++i) {
       Toggle& toggle = *toggles[i];
+
       if(toggle.value) {
         selected = i;
-        printf("Loaded radio. selected is: %d\n", selected);
+        //printf("Loaded radio. selected is: %d\n", selected);
         break;
       }
     }

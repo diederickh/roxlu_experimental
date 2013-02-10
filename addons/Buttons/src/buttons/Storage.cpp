@@ -52,6 +52,7 @@ namespace buttons {
   // crashes on windows when you save with 10 elements en load 
   // with 8 for example.
   bool Storage::load(const string& file, Buttons* buttons) {
+
     std::ifstream ifs(file.c_str(), std::ios::out | std::ios::binary);
     if(!ifs.is_open()) {
       printf("Cannot load: %s\n", file.c_str());

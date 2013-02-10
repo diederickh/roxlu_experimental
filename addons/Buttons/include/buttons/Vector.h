@@ -1,3 +1,17 @@
+/**
+ * Vector2 element
+ * ---------------
+ * Creates a vector2 that you can drag around to 
+ * e.g. make a directional force. The vector will always
+ * be normalized, so you need to scale it manually.
+ * 
+ * 
+ *    Example:
+ *    --------
+ *    float vec[2];
+ *    gui.addVec2f("Direction", vec);
+ * 
+ */
 #ifndef ROXLU_VECTORH
 #define ROXLU_VECTORH
 

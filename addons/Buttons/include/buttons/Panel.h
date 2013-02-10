@@ -50,6 +50,11 @@ namespace buttons {
       return active_gui->addButton<T>(label, id, cb);
     }
 
+    template<class T>
+      Radio<T>& addRadio(const string& label, int id, T* cb, vector<string> options, int& value) {
+      return active_gui->addRadio<T>(label, id, cb, options, value);
+    }
+
     Buttons& addButtons(const string& title);
 	
     void save();
