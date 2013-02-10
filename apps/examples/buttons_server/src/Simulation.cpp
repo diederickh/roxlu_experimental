@@ -31,7 +31,7 @@ void Simulation::setup() {
   gui.addButton<Simulation>("Button", 0, this);
   
   gui.setColor(0.3f);
-  gui.load();
+  //  gui.load();
 
   server.addButtons(gui.getButtons("settings"));
   server.start();

@@ -35,11 +35,13 @@ include_directories(
   ${buttons_include_dir}
 )
 
-set(roxlu_addon_libs
-  ${roxlu_addon_libs}
-  ${roxlu_extern_lib_dir}/libuv.a
-  roxlu_buttons  #important to add your lib to the rest of the include libs
+if(UNIX) 
+  set(roxlu_addon_libs
+    ${roxlu_addon_libs}
+    roxlu_buttons  #important to add your lib to the rest of the include libs
+    ${roxlu_extern_lib_dir}/libuv.a
 )
+endif()
 
 add_library(roxlu_buttons STATIC ${buttons_source_files})
 
