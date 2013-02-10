@@ -6,42 +6,44 @@
 
 namespace buttons {
 
-class Toggle : public Element {
-public:	
-	Toggle(bool& val, const string& name);
-	~Toggle();
+  class Toggle : public Element {
+  public:	
+    Toggle(bool& val, const string& name);
+    ~Toggle();
 
-	void generateStaticText();
-	void updateTextPosition();
-	void generateVertices(ButtonVertices& shapeVertices);
+    void generateStaticText();
+    void updateTextPosition();
+    void generateVertices(ButtonVertices& shapeVertices);
 	
-	void onMouseDown(int mx, int my);
-	void onMouseUp(int mx, int my);
-	void onMouseEnter(int mx, int my);
-	void onMouseLeave(int mx, int my);	
-	void onMouseClick(int mx, int my);
+    void onMouseDown(int mx, int my);
+    void onMouseUp(int mx, int my);
+    void onMouseEnter(int mx, int my);
+    void onMouseLeave(int mx, int my);	
+    void onMouseClick(int mx, int my);
 	
-	void save(std::ofstream& ofs);
-	void load(std::ifstream& ifs);
-	bool canSave();
-	bool serializeScheme(ButtonsBuffer& buffer);
+    void save(std::ofstream& ofs);
+    void load(std::ifstream& ifs);
+    bool canSave();
+    bool serializeScheme(ButtonsBuffer& buffer);
 	
-	Toggle& setColor(const float hue, float sat = 0.2f, float bright = 0.27f, float a = 1.0);
-	void hide();
-	void show();
-	void setValue(bool v);
+    Toggle& setColor(const float hue, float sat = 0.2f, float bright = 0.27f, float a = 1.0);
+    void hide();
+    void show();
+    void setValue(bool v);
 
-	bool& value;
+    bool& value;
 	
-	float toggle_off_color[4];
-	float toggle_on_color[4];
-	int label_dx;
-	bool is_radio;
-};
+    float toggle_off_color[4];
+    float toggle_on_color[4];
+    int label_dx;
+    bool is_radio;
+  };
 
-inline void Toggle::setValue(bool v) {
-	value = v;
-}
+  
+
+  inline void Toggle::setValue(bool v) {
+    value = v;
+  }
 
 } // namespace buttons
 

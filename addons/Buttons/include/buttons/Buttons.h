@@ -1,40 +1,17 @@
 #ifndef ROXLU_BUTTONSH
 #define ROXLU_BUTTONSH
 
-/* 
-   OpenFrameworks example:
-   ==========================
-   void testApp::mouseMoved(int x, int y){
-   gui.onMouseMoved(x,y);
-   }
-   void testApp::mouseDragged(int x, int y, int button){
-   cam.onMouseMoved(x,y);
-   }
-   void testApp::mousePressed(int x, int y, int button){
-   gui.onMouseDown(x,y);	
-   }
-   void testApp::mouseReleased(int x, int y, int button){
-   gui.onMouseUp(x,y);
-   }
-   void testApp::update() {
-   gui.update();
-   }
-*/
-
-
 /** 
-
-    Buttons is a simple openGL GUI for tweaking parameters. It's being developed
-    using openFrameworks but my goal is to make this work in any opengl context on 
-    both Windows and Mac. 
-
-    TODO:
-    - All elements use absolute coordinates now. Instead of using absolute vertices
-    we need to check out if it isn't faster to change to a "modelview" approach
-    where all vertices are translated on GPU. We're using absolute coordinates 
-    obecause this makes testing for mouseenter/leave (etc) faster.
-
-*/
+ *  Buttons is a simple openGL GUI for tweaking parameters. It's being developed
+ *  using openFrameworks but my goal is to make this work in any opengl context on 
+ *  both Windows and Mac. 
+ *
+ *   TODO:
+ *   - All elements use absolute coordinates now. Instead of using absolute vertices
+ *   we need to check out if it isn't faster to change to a "modelview" approach
+ *   where all vertices are translated on GPU. We're using absolute coordinates 
+ *   obecause this makes testing for mouseenter/leave (etc) faster.
+ */
 
 #include <vector>
 
@@ -58,8 +35,6 @@
 #include <buttons/Rectangle.h>
 #include <buttons/Vector.h>
 #include <buttons/Storage.h>
-// #include <buttons/Server.h> // NEEDS TO BE UPDATED TO USE LIBUV
-// #include <buttons/Client.h> // NEEDS TO BE UPDATED TO USE LIBUV
 
 using std::vector;
 using namespace roxlu;

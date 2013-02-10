@@ -8,6 +8,11 @@ namespace buttons {
     ,loop(NULL)
   {
     loop = uv_default_loop();
+    sock.data = this;
+    resolver_req.data = this;
+    connect_req.data = this;
+    shutdown_req.data = this;
+    timer_req.data = this;
   }
 
   Client::~Client() {
@@ -20,10 +25,6 @@ namespace buttons {
       RX_ERROR(("uv_tcp_init failed"));
       return false;
     }
-
-    sock.data = this;
-    resolver_req.data = this;
-    connect_req.data = this;
 
     struct addrinfo hints;
     hints.ai_family = PF_INET;
@@ -40,6 +41,17 @@ namespace buttons {
     }
     
     return true;
+  }
+
+  void Client::reconnect() {
+    clear(); // might be redundant (as it's done in the shutdown)
+    int r = uv_timer_init(loop, &timer_req);
+    if(r) {
+      RX_ERROR(("uv_time_init() failed. cannot reconnect"));
+      return;
+    }
+    
+    uv_timer_start(&timer_req, buttons_client_on_reconnect_timer, 1000, 0);
   }
 
   void Client::update() {
@@ -181,6 +193,7 @@ namespace buttons {
           gui->addListener(this);
           gui->setPosition(x,y);
           gui->setColor(col_hue, col_sat, col_bright, col_alpha);
+          gui->id = buttons_id;
           buttons[buttons_id] = gui;
 
           // PARSE ALL ELEMENTS
@@ -212,6 +225,7 @@ namespace buttons {
                   sliderp->setValue(value);
                   gui->setColor(col_hue);
 
+                  sliderp->id = element_id;
                   elements[buttons_id][element_id] = sliderp;
                 }
                 else if(value_type == Slider<float>::SLIDER_INT) {
@@ -226,6 +240,7 @@ namespace buttons {
                   slideri->setValue(value);
                   gui->setColor(col_hue);
 
+                  slideri->id = element_id;
                   elements[buttons_id][element_id] = slideri;
                 }
                 break;
@@ -237,12 +252,16 @@ namespace buttons {
                 value_bools.push_back(dummy_value);
                 Toggle* toggle = &gui->addBool(label, *dummy_value);
                 gui->setColor(col_hue);
+                
+                toggle->id = element_id;
                 elements[buttons_id][element_id] = toggle;
                 break;
               }
               case BTYPE_BUTTON: {
                 unsigned int button_id = cmd.buffer.consumeUI32();
                 Button<Client>* button =  &gui->addButton<Client>(label, button_id, this);
+
+                button->id = element_id;
                 elements[buttons_id][element_id] = button;
                 gui->setColor(col_hue);
                 break;
@@ -263,6 +282,8 @@ namespace buttons {
 
                 // create radio + set selected value
                 Radio<Client>* radio = &gui->addRadio<Client>(label, button_id, this, options, *dummy_value);
+
+                radio->id = element_id;
                 elements[buttons_id][element_id] = radio;
                 gui->setColor(col_hue);
                 break;
@@ -283,6 +304,7 @@ namespace buttons {
                 picker->alpha_slider.setValue(alpha);
                 gui->setColor(col_hue);
 
+                picker->id = element_id;
                 elements[buttons_id][element_id] = picker;
                 break;
               }
@@ -295,7 +317,10 @@ namespace buttons {
                 value_float_arrays.push_back(vec_ptr);
                 Vector<float>* vec = &gui->addVec2f(label, vec_ptr);
                 vec->setValue((void*)vec_ptr);
+
+                vec->id = element_id;
                 elements[buttons_id][element_id] = vec;
+
                 gui->setColor(col_hue);
                 break;
               }
@@ -313,6 +338,7 @@ namespace buttons {
                   pad_ptr[1] = py;
                   value_float_arrays.push_back(pad_ptr);
                   Pad<float>* padf = &gui->addFloat2(label, pad_ptr);
+                  padf->id = element_id;
                   elements[buttons_id][element_id] = padf;
                   padf->setPercentages(px, py);
                   gui->setColor(col_hue);
@@ -329,6 +355,7 @@ namespace buttons {
                   pad_ptr[1] = py;
                   value_int_arrays.push_back(pad_ptr);
                   Pad<int>* padi = &gui->addInt2(label, pad_ptr);
+                  padi->id = element_id;
                   elements[buttons_id][element_id] = padi;
                   padi->setPercentages(px, py);
                   gui->setColor(col_hue);
@@ -389,8 +416,12 @@ namespace buttons {
     for(std::map<unsigned int, buttons::Buttons*>::iterator it = buttons.begin(); it != buttons.end(); ++it) {
       delete it->second; // buttons object deletes all elements
     }
+
+    elements.clear();
     buttons.clear();
     buffer.clear();
+
+    RX_WARNING(("---- ALL CLEAR -------"));
   }
 
   // CLIENT CALLBACKS
@@ -400,6 +431,7 @@ namespace buttons {
     Client* c = static_cast<Client*>(req->data);
     if(status == -1) {
       RX_ERROR(("cannot resolve(): %s", uv_strerror(uv_last_error(c->loop))));
+      c->reconnect();
       return;
     }
 
@@ -418,7 +450,8 @@ namespace buttons {
   void buttons_client_on_connect(uv_connect_t* req, int status) {
     Client* c = static_cast<Client*>(req->data);
     if(status == -1) {
-      RX_ERROR(("cannot resolve(): %s", uv_strerror(uv_last_error(c->loop))));
+      RX_ERROR(("cannot connect: %s", uv_strerror(uv_last_error(c->loop))));
+      c->reconnect();
       return;
     }
     
@@ -433,10 +466,40 @@ namespace buttons {
 
   void buttons_client_on_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
     RX_VERBOSE(("Received data from server, :%ld bytes", nbytes));
-
     Client* c = static_cast<Client*>(handle->data);
+
+    if(nbytes < 0) {
+      uv_err_t err = uv_last_error(handle->loop);
+      if(err.code != UV_EOF) {
+        RX_ERROR(("disconnected from server, but not correctly!"));
+        return;
+      }
+
+      if(buf.base) {
+        delete[] buf.base;
+        buf.base = NULL;
+      }
+
+      int r = uv_shutdown(&c->shutdown_req, handle, buttons_client_on_shutdown);
+      if(r) {
+        RX_ERROR(("error shutting down client. %s", uv_strerror(uv_last_error(handle->loop))));
+        delete c;
+        c = NULL;
+        return;
+      }
+       
+      RX_ERROR(("------- NEED TO RECONNECT TO THE SERVER ------------- "));
+      return;
+      
+    }
+
     c->buffer.addBytes(buf.base, nbytes);
     c->parseBuffer();
+
+    if(buf.base) {
+      delete[] buf.base;
+      buf.base = NULL;
+    }
   }
 
   uv_buf_t buttons_client_on_alloc(uv_handle_t* handle, size_t nbytes) {
@@ -446,8 +509,29 @@ namespace buttons {
   }
 
   void buttons_client_on_write(uv_write_t* req, int status) {
-    RX_VERBOSE(("client on write: %d", status));
     delete req;
+  }
+
+  void buttons_client_on_shutdown(uv_shutdown_t* req, int status) {
+    Client* c = static_cast<Client*>(req->data);
+    uv_close((uv_handle_t*)&c->sock, buttons_client_on_close);
+  }
+
+  void buttons_client_on_close(uv_handle_t* handle) {
+    Client* c = static_cast<Client*>(handle->data);
+    c->clear();
+    c->reconnect();
+  }
+
+  void buttons_client_on_reconnect_timer(uv_timer_t* handle, int status) {
+    Client* c = static_cast<Client*>(handle->data);
+    if(status == -1) {
+      RX_ERROR(("error shutting down client. %s", uv_strerror(uv_last_error(handle->loop))));
+      return;
+    }
+    
+    RX_VERBOSE(("reconnecting"));
+    c->connect();
   }
 
 } // buttons

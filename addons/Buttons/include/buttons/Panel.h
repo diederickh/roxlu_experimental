@@ -1,11 +1,9 @@
 #ifndef ROXLU_BUTTONS_PANELH
 #define ROXLU_BUTTONS_PANELH
 
-
 #include <string>
 #include <vector>
 #include <map>
-
 
 #include <buttons/Types.h>
 #include <buttons/Element.h>

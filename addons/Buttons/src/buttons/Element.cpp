@@ -33,7 +33,6 @@ namespace buttons {
   {
     ++num_created;
     id = num_created;
-    RX_VERBOSE(("ID: %d", id));
 
     setColor(0.13);
     bg_top_color = col_bg_default;

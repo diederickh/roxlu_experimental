@@ -17,7 +17,7 @@ namespace buttons {
   class Element {
   public:	
     Element(int type, const string& name);
-    ~Element();
+    virtual ~Element();
 
     virtual void setup(){}
     virtual void update(){}
@@ -112,9 +112,6 @@ namespace buttons {
   inline void Element::needsTextUpdate() {
     needs_text_update = true;
   }
-
-
-  //, const float sat, const float bright, float a) {
 
   inline Element& Element::setColor(const float hue, float sat, float bright, float a) {
     col_hue = hue;

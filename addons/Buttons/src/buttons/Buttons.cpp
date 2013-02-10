@@ -82,7 +82,7 @@ namespace buttons {
         ++it;
         continue;
       }
-      delete *it;
+      delete el;
       ++it;
     }
   }

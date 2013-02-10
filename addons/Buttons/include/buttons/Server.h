@@ -33,12 +33,6 @@ namespace buttons {
   void buttons_server_on_close(uv_handle_t* handle);
   uv_buf_t buttons_server_on_alloc(uv_handle_t* handle, size_t nbytes);
 
-  void buttons_client_on_resolved(uv_getaddrinfo_t* req, int status, struct addrinfo* res);
-  void buttons_client_on_connect(uv_connect_t* req, int status);
-  void buttons_client_on_read(uv_stream_t* handle, ssize_t read, uv_buf_t buf);
-  uv_buf_t buttons_client_on_alloc(uv_handle_t* handle, size_t nbytes);
-  void buttons_client_on_write(uv_write_t* req, int status);
-
   void buttons_connection_on_write(uv_write_t* req, int status); 
 
   enum CommandDataName {    // Structure which is used to hold deserialized data for gui types

@@ -8,15 +8,15 @@ using std::string;
 
 namespace buttons {
 
-class Buttons;
+  class Buttons;
 
-class Storage {
+  class Storage {
 
-public: 
-	Storage() {}
-	bool save(const string& file, Buttons* b);
-	bool load(const string& file, Buttons* b);
-};
+  public: 
+    Storage() {}
+    bool save(const string& file, Buttons* b);
+    bool load(const string& file, Buttons* b);
+  };
 
 } // namespace buttons
 #endif

@@ -15,7 +15,6 @@ namespace buttons {
     if(!loop) {
       RX_ERROR(("Cannot get default libuv loop for buttons server"));
     }
-
     sock.data = this;
   }
 
@@ -106,7 +105,6 @@ namespace buttons {
 
   void Server::sendScheme(Connection* con) {
     createScheme();
-    RX_VERBOSE(("Scheme size on server: %ld", scheme.getNumBytes()));
 
     ServerCommand cmd(BDATA_SCHEME);
     cmd.setData(scheme.getPtr(), scheme.getNumBytes());
@@ -189,7 +187,6 @@ namespace buttons {
       if(util.deserialize(buffer, deserialized, server.elements)) {
         handleCommand(deserialized);
       }
-      RX_VERBOSE(("DESERIALIZE THE CLIENT COMMAND IN BUFFER: %zu", buffer.size()));
 
     } while(buffer.size() > 0);
   }
@@ -270,7 +267,6 @@ namespace buttons {
   // CONNECTION CALLBACKS
   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   void buttons_connection_on_write(uv_write_t* req, int status) {
-    RX_VERBOSE(("written :%d", status));
     Connection* c = static_cast<Connection*>(req->data);
     delete req;
 
@@ -284,7 +280,6 @@ namespace buttons {
   // SERVER CALLBACKS
   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   void buttons_server_on_new_connection(uv_stream_t* sock, int status) {
-    RX_VERBOSE(("new connection, status: %d", status));
     Server* s = static_cast<Server*>(sock->data);
     if(status == -1) {
       RX_ERROR(("cannot handle new connection"));
@@ -321,24 +316,26 @@ namespace buttons {
   }
 
   uv_buf_t buttons_server_on_alloc(uv_handle_t* handle, size_t nbytes) {
-    RX_ERROR(("need to free this here!"));
     char* buf = new char[nbytes];
     return uv_buf_init(buf, nbytes);
   }
 
   void buttons_server_on_read(uv_stream_t* sock, ssize_t nread, uv_buf_t buf) {
-    RX_VERBOSE(("read from client"));
-
     Connection* c = static_cast<Connection*>(sock->data);
 
     if(nread < 0) {
  
       uv_err_t err = uv_last_error(sock->loop);
       if(err.code != UV_EOF) {
-        RX_ERROR(("client error but not UV_EOF"));
+        c->server.removeConnection(c);
         delete c;
         c = NULL;
         return;
+      }
+
+      if(buf.base) {
+        delete[] buf.base;
+        buf.base = NULL;
       }
  
       int r = uv_shutdown(&c->shutdown_req, sock, buttons_server_on_shutdown);
@@ -351,14 +348,17 @@ namespace buttons {
  
       return;
     }
-    
+
     c->buffer.addBytes(buf.base, nread);
     c->parseBuffer();
+
+    if(buf.base) {
+      delete[] buf.base;
+      buf.base = NULL;
+    }
   }
   
   void buttons_server_on_shutdown(uv_shutdown_t* req, int status) {
-    RX_VERBOSE(("shutdown client, status: %d", status));
-
     Connection* c = static_cast<Connection*>(req->data);
     uv_close((uv_handle_t*)&c->sock, buttons_server_on_close);
   }
@@ -368,7 +368,6 @@ namespace buttons {
     c->server.removeConnection(c);
   }
 
- 
 
   // CLIENT <--> SERVER BUFFER UTILS
   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

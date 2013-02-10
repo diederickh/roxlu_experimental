@@ -6,7 +6,7 @@
 #include <iterator>
 #include <vector>
 #include <cstring> // memcpy
-//((x>=i)   && (x <=(i +w)) && (y >= j) && y <= (j+h))
+
 #define BMOUSE_INSIDE(mx,my,ex,ey,w,h) 	(mx>=ex && mx<=(ex+w) && my >= ey && my <= (ey+h))
 #define BINSIDE_ELEMENT(ptr, mx, my)  BMOUSE_INSIDE(mx, my, ptr->x, ptr->y, ptr->w, ptr->h)
 #define BINSIDE_HEADER(ptr, mx, my)  BMOUSE_INSIDE(mx, my, ptr->x, ptr->y, ptr->w, ptr->header_h)
@@ -56,10 +56,8 @@ namespace buttons {
   // The scheme also uses the ElementTypes to describe the elements 
   // of the gui.
   enum ButtonsScheme {
-    BSCHEME_GUI   // element is a gui
+     BSCHEME_GUI   // element is a gui
     ,BSCHEME_PANEL  // element is a panel 
-    //	 ,BSCHEME_POSITION // followed by two ui32  x/y indicating the position of a buttons/panel
-    //	 ,BSCHEME_SIZE // followed by tw ui32 w/h
   };
 
   class ButtonsListener {
@@ -247,7 +245,6 @@ namespace buttons {
     }
 
     void addFloat(float num) {
-      printf("Add a float... : %f\n", num);
       addBytes((char*)&num, sizeof(num));
     }
 
@@ -344,7 +341,6 @@ namespace buttons {
     char& operator[](const unsigned int dx) { return data[dx]; } 
 
     std::vector<char> data;
-
   };
 
 } // namespace buttons
