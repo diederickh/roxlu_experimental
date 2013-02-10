@@ -68,6 +68,8 @@ namespace buttons {
 
     string label;
     string name;
+    unsigned int id;  // each element is given an ID that is e.g. used int the client server
+    static unsigned int num_created; // keeps track of how manu elements are created. (used to create an id)
 	
     int state;
     bool is_child; // an element (like the color picker) can have children. children needs to be positioned by the parent!

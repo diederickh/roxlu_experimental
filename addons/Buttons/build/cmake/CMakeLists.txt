@@ -17,6 +17,8 @@ file(GLOB_RECURSE buttons_source_files
   ${buttons_src_dir}/Slider.cpp
   ${buttons_src_dir}/Storage.cpp
   ${buttons_src_dir}/Toggle.cpp
+  ${buttons_src_dir}/Server.cpp
+  ${buttons_src_dir}/Client.cpp
 )
 
 set(roxlu_addon_sources
@@ -35,6 +37,7 @@ include_directories(
 
 set(roxlu_addon_libs
   ${roxlu_addon_libs}
+  ${roxlu_extern_lib_dir}/libuv.a
   roxlu_buttons  #important to add your lib to the rest of the include libs
 )
 

@@ -200,7 +200,7 @@ namespace buttons {
     void addListener(ButtonsListener* listener);
     void notifyListeners(ButtonsEventType aboutWhat, const Element* target, void* targetData);
 	
-    int getNumParents();
+    int getNumParents();  // number of parent elements (gui elements which have children)
     int getNumChildren();
 
   private:
@@ -230,6 +230,10 @@ namespace buttons {
     int h;
     int win_w;
     int win_h;
+    float col_hue; // set by setColor, used by client<>server
+    float col_sat; // set by setColor, used by client<>server
+    float col_bright; // set by setColor, used by client<>server
+    float col_alpha; // set by setColor, used by client<>server
     float header_color_top[4];	
     float header_color_bottom[4];
     float shadow_color[4];
@@ -248,6 +252,8 @@ namespace buttons {
     string title;
     string name; // name based on title (cleaned)
     int title_dx; // static text index
+    int id; // unique ID that is used by the client<>server communication to indicate a gui/elements.
+    static unsigned int num_created;  // number of buttons created, used to make unique ids.
     ButtonVertices vd;
     int num_panel_vertices; // number of vertices used by the panel itself
 	
