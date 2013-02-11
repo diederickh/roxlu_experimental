@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <ROXLU_DIR>C:\Users\roxlu\Documents\of\2013_P083_prodemos\apps\prodemos\roxlu\</ROXLU_DIR>
+    <ROXLU_DIR>C:\Users\ProdemosLab\Documents\of_v0073_vs2010_release\apps\prodemos\roxlu\</ROXLU_DIR>
     <ROXLU_OF_DIR>C:\Users\roxlu\Documents\of\2013_P083_prodemos</ROXLU_OF_DIR>
     <ROXLU_EXTERN_LIB_DIR>$(ROXLU_DIR)\extern\lib\win\vs2010\MD\32\</ROXLU_EXTERN_LIB_DIR>
     <ROXLU_EXTERN_BIN_DIR>$(ROXLU_DIR)\extern\bin\win\vs2010\MD\32\</ROXLU_EXTERN_BIN_DIR>

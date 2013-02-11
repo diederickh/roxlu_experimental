@@ -76,7 +76,8 @@
 xcopy  $(ROXLU_EXTERN_BIN_DIR)x264.dll $(SolutionDir)bin\   /y /C
 xcopy  $(ROXLU_EXTERN_BIN_DIR)xswscale.dll $(SolutionDir)bin\   /y /C
 xcopy  $(ROXLU_EXTERN_BIN_DIR)swscale-2.dll $(SolutionDir)bin\   /y /C
-xcopy  $(ROXLU_EXTERN_BIN_DIR)avutil-52.dll $(SolutionDir)bin\   /y /C</Command>
+xcopy  $(ROXLU_EXTERN_BIN_DIR)avutil-52.dll $(SolutionDir)bin\   /y /C
+xcopy  $(ROXLU_EXTERN_BIN_DIR)pthreadGC2.dll $(SolutionDir)bin\   /y /C</Command>
     </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
