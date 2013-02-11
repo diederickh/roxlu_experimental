@@ -44,10 +44,7 @@ namespace buttons {
   }
 
   void Server::update() {
-    RX_VERBOSE(("..."));
-    
     uv_run(loop, UV_RUN_NOWAIT);
-    RX_VERBOSE(("++++"));
   }
 
   void Server::removeConnection(Connection* c) {
