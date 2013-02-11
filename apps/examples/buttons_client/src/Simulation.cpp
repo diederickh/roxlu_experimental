@@ -19,6 +19,7 @@ void Simulation::draw() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   client.draw();
   fps.draw();
+  printf(".\n");
 }
 
 void Simulation::onMouseDown(int x, int y, int button) {
@@ -40,10 +41,10 @@ void Simulation::onMouseMove(int x, int y) {
 
 void Simulation::onChar(int ch) {
   if(ch == 's') {
-
+    gui.save();
   }
   else if(ch == 'l') {
-
+    gui.load();
   }
 }
 
