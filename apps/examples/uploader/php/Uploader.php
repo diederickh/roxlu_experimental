@@ -140,7 +140,7 @@ class Uploader {
       return;
     }
     $msg = date('Y-m-d H:i ', time()) .$s ."\n";
-    file_put_contents($this->config['log_file'], $msg);
+    file_put_contents($this->config['log_file'], $msg, FILE_APPEND);
     if($die) {
       die($s);
     }

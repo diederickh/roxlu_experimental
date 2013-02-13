@@ -37,5 +37,11 @@ int main() {
   // And write to png
   ts.saveAsPNG("pango.png");
 
+  TextSurface ts2;
+  ts2.setup("Arial 50", 700, 128,CAIRO_FORMAT_A8); //CAIRO_FORMAT_RGB24);
+  //ts2.fill(1.0, 1.0, 0.0, 1.0);
+  ts2.setText("Lorem ipsum dolor sit");
+  ts2.render();
+  ts2.saveAsPNG("pango2.png");
   return 0;
 }
