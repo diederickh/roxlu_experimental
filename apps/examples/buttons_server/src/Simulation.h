@@ -21,9 +21,9 @@ public:
   void operator()(unsigned int dx);
  private:
   FPS fps;
-  Panel gui;
-  Server server;
 
+  Server server;
+  Panel gui;
   bool test_enabled;
   float test_slider;
   float test_color[4];
@@ -34,5 +34,4 @@ public:
   float test_rectf[4];
   float test_accelf[2];
   int test_option;
-
 };

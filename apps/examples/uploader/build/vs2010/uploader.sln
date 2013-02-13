@@ -2,6 +2,11 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "uploader", "uploader.vcxproj", "{949E5CEE-8322-490A-A69D-E4AB98DECF5F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9D497541-3D33-4FDF-A744-859F01D334DF} = {9D497541-3D33-4FDF-A744-859F01D334DF}
+		{E9A9CD49-1086-4725-AB1D-3B0B7AB859CA} = {E9A9CD49-1086-4725-AB1D-3B0B7AB859CA}
+		{DFF34DD8-7A48-413F-9F7F-034CD95A0B3F} = {DFF34DD8-7A48-413F-9F7F-034CD95A0B3F}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "roxlu", "..\..\..\..\..\lib\build\vs2010\roxlu.vcxproj", "{E9A9CD49-1086-4725-AB1D-3B0B7AB859CA}"
 EndProject
