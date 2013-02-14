@@ -214,7 +214,7 @@ bool AV::openX264() {
     RX_ERROR(("cannot apply profile."));
     return false;
   }
-#if !defined(NDEBUG) && RX_LOG_LEVEL >= RX_LOG_LEVEL_VERBOSE
+#if defined(NDEBUG)
   p->i_log_level = X264_LOG_DEBUG;
 #endif
   p->i_threads = 1;
@@ -237,23 +237,39 @@ bool AV::openX264() {
   return true;
 }
 
+#define AV_CHECK_MUST_STOP \
+  {                                             \
+    stop_mutex.lock();                          \
+    if(must_stop) {                             \
+      stop_mutex.unlock();                      \
+      break;                                    \
+    }                                           \
+    stop_mutex.unlock();                        \
+  }                                            
+
+
 void AV::run() {
 
   // audio + video 
   if(vid_in_w != 0 && audio_num_channels != 0) {
     std::vector<AVPacket*> work_packets;
     while(true) {
+
       if(!is_initialized) {
         rx_sleep_millis(vid_millis_per_frame);
+        AV_CHECK_MUST_STOP;
         continue;
       }
 
       if(!vid_is_buffer_ready || !audio_is_buffer_ready) {
         rx_sleep_millis(vid_millis_per_frame);
+        AV_CHECK_MUST_STOP;
         continue;
       }
+
       size_t num_packets = packets.size();
       if(num_packets == 0) {
+        AV_CHECK_MUST_STOP;
         continue;
       }
 
@@ -287,12 +303,7 @@ void AV::run() {
       audio_work_buffer.reset();
       video_work_buffer.reset();
 
-      stop_mutex.lock();
-      if(must_stop) {
-        stop_mutex.unlock();
-        break;
-      }
-      stop_mutex.unlock();
+      AV_CHECK_MUST_STOP;
     }
   }
 
@@ -300,13 +311,15 @@ void AV::run() {
   else {
     std::vector<AVPacket*> work_packets;
     while(true) {
-      
+
       if(!is_initialized) {
         rx_sleep_millis(vid_millis_per_frame);
+        AV_CHECK_MUST_STOP;
         continue;
       }
 
       if(!vid_is_buffer_ready) { 
+        AV_CHECK_MUST_STOP;
         continue;
       }
 
@@ -334,15 +347,11 @@ void AV::run() {
 
       video_work_buffer.reset();
 
-      stop_mutex.lock();
-      if(must_stop) {
-        stop_mutex.unlock();
-        break;
-      }
-      stop_mutex.unlock();
+      AV_CHECK_MUST_STOP;
 
     } // video only
   }
+
   reset();
   thread.exit();
 }

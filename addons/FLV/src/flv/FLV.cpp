@@ -493,7 +493,7 @@ size_t flv_file_write(char* data, size_t nbytes, void* user) {
     return 0;
   }
 
-  RX_VERBOSE(("write %d bytes to file.", int(nbytes)));
+  //  RX_VERBOSE(("write %d bytes to file.", int(nbytes)));
   size_t written  = fwrite(data, nbytes, 1, f->fp);
 
   if(written != 1) {

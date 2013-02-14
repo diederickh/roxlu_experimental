@@ -17,6 +17,9 @@ FLVScreenRecorder::FLVScreenRecorder()
 }
 
 FLVScreenRecorder::~FLVScreenRecorder() {
+  stop();
+  av.waitForEncodingThreadToFinish();
+
 #if !defined(SCREEN_RECORDER_USE_PBO) 
   if(pixels != NULL) {
     delete[] pixels;
@@ -27,6 +30,8 @@ FLVScreenRecorder::~FLVScreenRecorder() {
   is_recording = false;
   channels = 0;
   dx = 0;
+
+
 }
 
 bool FLVScreenRecorder::open(std::string filepath) {
@@ -160,6 +165,7 @@ void FLVScreenRecorder::stop() {
 
   RX_VERBOSE(("Stop recording."));
   av.stop();
+
   is_recording = false;
   is_file_opened = false; // av.stop() calls close on the flv writer
   dx = 0;

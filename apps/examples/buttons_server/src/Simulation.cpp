@@ -13,7 +13,9 @@ void Simulation::operator()(unsigned int dx) {
 
 void Simulation::setup() {
   setWindowTitle("Buttons server");
+
   gui.addBool("Enabled", test_enabled);
+
   gui.addFloat("Force", test_slider).setMin(0.0f).setMax(1.0f);
   gui.addColor("Color", test_color);
   gui.addInt("Num elements", test_int).setMin(0).setMax(50);
@@ -32,10 +34,10 @@ void Simulation::setup() {
   
   gui.setColor(0.3f);
   //  gui.load();
-
   server.addButtons(gui.getButtons("settings"));
   server.start();
 }
+
 
 void Simulation::update() {
   gui.update();
@@ -46,6 +48,7 @@ void Simulation::draw() {
   glClearColor(test_color[0], test_color[1], test_color[2], test_color[3]);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   fps.draw();
+
   gui.draw();
 }
 
@@ -66,12 +69,14 @@ void Simulation::onMouseMove(int x, int y) {
 }
 
 void Simulation::onChar(int ch) {
+
   if(ch == 's') {
     gui.save();
   }
   else if(ch == 'l') {
     gui.load(); 
   }
+
 }
 
 void Simulation::onKeyDown(int key) {

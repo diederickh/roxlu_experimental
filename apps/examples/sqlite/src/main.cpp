@@ -9,11 +9,12 @@ int main() {
   // open a database + create a table.
   db.open("test.db");
 
+  QueryResult qr(db);
   db.query(SQL(CREATE TABLE IF NOT EXISTS tweets (
            id INTEGER PRIMARY KEY AUTOINCREMENT,
            name TEXT,
-           score INTEGER)));
-
+           score INTEGER))).execute(qr);
+  qr.finish();
 
   // insert data
   int num = 10;

@@ -18,8 +18,8 @@ void char_callback(GLFWwindow* window, int chr);
 // APPLICATION ENTRY
 // -----------------
 int main() {
-  int width = 390;
-  int height = 1280;
+  int width = 1024;
+  int height = 768;
   sim_ptr = NULL;
 
   int c = 0;
