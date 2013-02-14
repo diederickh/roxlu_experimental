@@ -1,5 +1,5 @@
-#ifndef ROXLU_VPX_H
-#define ROXLU_VPX_H
+#ifndef ROXLU_VPX_ENCODER_H
+#define ROXLU_VPX_ENCODER_H
 
 extern "C" {
 #   define VPX_CODEC_DISABLE_COMPAT 1
@@ -17,10 +17,10 @@ extern "C" {
 
 typedef void(*vpx_write_cb)(const vpx_codec_cx_pkt_t* pkt, int64_t pts, void* user);
 
-class VPX {
+class VPXEncoder {
  public:
-  VPX();
-  ~VPX();
+  VPXEncoder();
+  ~VPXEncoder();
 
   bool setup(int inW,                                /* video input width */
     int inH,                                         /* video input height */
@@ -58,7 +58,7 @@ class VPX {
   int out_h;                                          /* video out height */
   int fps;                                            /* video framerate */
   vpx_img_fmt fmt;                                    /* video input format */
-  SwsContext* sws;                                    /* video conversion context */
+  SwsContext* sws;                                    /* video input conversion context */
   vpx_image_t* pic_in;                                 /* we wrap the input pixels into a vpx_image_t and then convert into with sws into pic_out */
   vpx_image_t* pic_out;                                /* converted pixels, in VPX_IMG_FMT_I420 */
 };

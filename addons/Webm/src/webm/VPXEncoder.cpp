@@ -1,6 +1,6 @@
-#include <webm/VPX.h>
+#include <webm/VPXEncoder.h>
 
-VPX::VPX() 
+VPXEncoder::VPXEncoder() 
   :in_w(0)
   ,in_h(0)
   ,out_w(0)
@@ -17,11 +17,11 @@ VPX::VPX()
 {
 }
 
-VPX::~VPX() {
+VPXEncoder::~VPXEncoder() {
   shutdown();
 }
 
-bool VPX::shutdown() {
+bool VPXEncoder::shutdown() {
   if(in_w == 0 && in_h == 0) {
     return false;
   }
@@ -57,7 +57,7 @@ bool VPX::shutdown() {
   return true;
 }
 
-bool VPX::setup(int inW, 
+bool VPXEncoder::setup(int inW, 
                 int inH, 
                 int outW, 
                 int outH, 
@@ -78,7 +78,7 @@ bool VPX::setup(int inW,
   return true;
 }
 
-bool VPX::initialize() {
+bool VPXEncoder::initialize() {
   if(!configure()) {
     return false;
   }
@@ -107,7 +107,7 @@ bool VPX::initialize() {
   return true;
 }
 
-bool VPX::configure() {
+bool VPXEncoder::configure() {
   assert(in_w != 0);
   assert(in_h != 0);
 
@@ -118,13 +118,14 @@ bool VPX::configure() {
   }
 
   cfg.rc_target_bitrate = out_w * out_h * cfg.rc_target_bitrate / cfg.g_w / cfg.g_h;
+
   cfg.g_w = out_w;
   cfg.g_h = out_h;
   
   return true;
 }
 
-void VPX::die(const char* s) {
+void VPXEncoder::die(const char* s) {
   const char* detail = vpx_codec_error_detail(&ctx);
   RX_ERROR(("%s : %s", s, vpx_codec_error(&ctx)));
   if(detail) {
@@ -133,7 +134,7 @@ void VPX::die(const char* s) {
 }
 
 
-bool VPX::initializeSWS() {
+bool VPXEncoder::initializeSWS() {
   if(sws != NULL) {
     RX_WARNING(("SWS already initialized."));
     return false;
@@ -151,7 +152,7 @@ bool VPX::initializeSWS() {
   return true;
 }
 
-AVPixelFormat VPX::avformat(vpx_img_fmt f) {
+AVPixelFormat VPXEncoder::avformat(vpx_img_fmt f) {
   switch(f) {
     case VPX_IMG_FMT_RGB24: return AV_PIX_FMT_RGB24; 
     case VPX_IMG_FMT_ARGB: return AV_PIX_FMT_ARGB; 
@@ -160,7 +161,7 @@ AVPixelFormat VPX::avformat(vpx_img_fmt f) {
   }
 }
 
-void VPX::encode(unsigned char* data, int64_t pts) {
+void VPXEncoder::encode(unsigned char* data, int64_t pts) {
   if(!rescale(data)) {
     return;
   }
@@ -178,7 +179,7 @@ void VPX::encode(unsigned char* data, int64_t pts) {
   }
 }
 
-bool VPX::rescale(unsigned char* data) {
+bool VPXEncoder::rescale(unsigned char* data) {
 
   vpx_image_t* img_ptr = vpx_img_wrap(pic_in, fmt, in_w, in_h, 0, data);
   if(!img_ptr) {
