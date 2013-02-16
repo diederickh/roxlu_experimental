@@ -25,7 +25,6 @@ struct VPXSettings {
   int out_w;                                         /* video output width */
   int out_h;                                         /* video output height */
   int fps;                                           /* video frame rate */
-  //  vpx_img_fmt fmt;                               
   AVPixelFormat fmt;                                 /* video input format - we convert it to a VPX capable format (I420) */
   vpx_write_cb cb_write;                             /* pointer to the write callback, gets encoded data, from VPXEncoder */
   vpx_read_cb cb_read;                               /* pointer to the read callback, gets decoded data, from VPXDecoder */
@@ -36,16 +35,6 @@ class VPXEncoder {
  public:
   VPXEncoder();
   ~VPXEncoder();
-
-  /* bool setup(int inW,                                /\* video input width *\/ */
-  /*   int inH,                                         /\* video input height *\/ */
-  /*   int outW,                                        /\* video output width *\/ */
-  /*   int outH,                                        /\* video output height *\/ */
-  /*   int fps,                                         /\* video frame rate *\/ */
-  /*   vpx_img_fmt fmt,                                 /\* video input format *\/ */
-  /*   vpx_write_cb writeCB,                            /\* gets called with an encoded packets when calling encode(). *\/ */
-  /*   void* userCB                                     /\* passed into vpx_write_cb *\/ */
-  /* ); */
 
   bool setup(VPXSettings cfg);                        /* setup the encoder */
   bool initialize();                                  /* one time initialization (for multiple recordings) */
@@ -65,25 +54,13 @@ class VPXEncoder {
   vpx_codec_ctx_t ctx;                                /* vpx encoder context */
   const vpx_codec_cx_pkt_t* pkt;                      /* encoded packet, returned by vpx_codec_encode */
   vpx_codec_iter_t iter;                              /* used to iterate over encoded frames */
-  /* vpx_write_cb cb_write;                              /\* write callback, called when we have encoded packets *\/ */
-  /* void* cb_user;                                      /\* gets passed into callback *\/ */
-  
-
-  /* int in_w;                                           /\* video in width *\/ */
-  /* int in_h;                                           /\* video in height *\/ */
-  /* int out_w;                                          /\* video out width *\/ */
-  /* int out_h;                                          /\* video out height *\/ */
-  /* int fps;                                            /\* video framerate *\/ */
-  /* vpx_img_fmt fmt;                                    /\* video input format *\/ */
 
   VPXSettings settings;                               /* video encoder settings */
 
   SwsContext* sws;                                    /* video input conversion context */
-  //  vpx_image_t* pic_in;                                /* we wrap the input pixels into a vpx_image_t and then convert into with sws into pic_out */
   AVPicture pic_in;
   vpx_image_t* pic_out;                               /* converted pixels, in VPX_IMG_FMT_I420 */
   int flags;                                          /* flags used while encoding e.g. to force a keyframe */
-
 };
 
 #endif

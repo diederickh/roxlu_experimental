@@ -1,21 +1,11 @@
 #include <webm/VPXEncoder.h>
 
 VPXEncoder::VPXEncoder() 
-/*  :in_w(0)
-  ,in_h(0)
-  ,out_w(0)
-  ,out_h(0)
-  ,fps(0)
-  ,fmt(VPX_IMG_FMT_NONE)
-*/
   :sws(NULL)
   ,iter(NULL)
   ,pkt(NULL)
-   //  ,pic_in(NULL)
   ,pic_out(NULL)
   ,flags(0)
-   //  ,cb_write(NULL)
-   //  ,cb_user(NULL)
 {
 }
 
@@ -27,7 +17,7 @@ bool VPXEncoder::shutdown() {
   if(settings.in_w == 0 && settings.in_h == 0) {
     return false;
   }
-  //out_h = 0;
+
   settings.fmt = AV_PIX_FMT_NONE;
 
   /*
@@ -52,33 +42,12 @@ bool VPXEncoder::shutdown() {
     die("ERROR: failed to destroy codec.");
   }
   
-  //  cb_user = NULL;
-  //  cb_write = NULL;
-
+  flags = 0;
   return true;
 }
 
-/*
-bool VPXEncoder::setup(int inW, 
-                int inH, 
-                int outW, 
-                int outH, 
-                int frate, 
-                vpx_img_fmt format,
-                vpx_write_cb writeCB,
-                void* userCB
-)
-*/
 bool VPXEncoder::setup(VPXSettings cfg) {
   settings = cfg;
-  // in_w = inW;
-  // in_h = inH;
-  // out_w = outW;
-  // out_h = outH;
-  // fps = frate;
-  // fmt = format;
-  // cb_user = userCB;
-  // cb_write = writeCB;
   return true;
 }
 
@@ -97,17 +66,6 @@ bool VPXEncoder::initialize() {
     die("ERROR: cannot allocate picture.");
     return false;
   }
-
-  //  pic_in = vpx_img_alloc(NULL, settings.fmt, settings.in_w, settings.in_h, 0);
-  /*
-  // @todo we need a libav type here! 
-  RX_VERBOSE(("use a libav type - we need to fix this call to vpx_img_alloc, as the order is wrong now when using VPXScreenGrabber"));
-  pic_in = vpx_img_alloc(NULL, VPX_IMG_FMT_ARGB, settings.in_w, settings.in_h, 0); 
-  if(!pic_in) {
-    die("ERROR: cannot allocate picture.");
-    return false;
-  }
-  */
 
   if(!initializeSWS()) {
     return false;
@@ -197,27 +155,24 @@ void VPXEncoder::encode(unsigned char* data, int64_t pts) {
 
 bool VPXEncoder::rescale(unsigned char* data) {
 
-  //  vpx_image_t* img_ptr = vpx_img_wrap(pic_in, settings.fmt, settings.in_w, settings.in_h, 0, data);
-  // @todo - we need to use a AVFormat solution here!
-  /*
-  vpx_image_t* img_ptr = vpx_img_wrap(pic_in, VPX_IMG_FMT_ARGB, settings.in_w, settings.in_h, 0, data);
+  // vpx way to scale
+#if 0 
+  vpx_image_t* img_ptr = vpx_img_wrap(pic_in, settings.fmt, settings.in_w, settings.in_h, 0, data);
   if(!img_ptr) {
     RX_ERROR(("cannot wrap input image."));
     return false;
   }
-
-  
   int h = sws_scale(sws, 
                     pic_in->planes, pic_in->stride, 0, settings.in_h, 
                     pic_out->planes, pic_out->stride);
-  */
+  
   
   if(!sws) {
     RX_ERROR(("sws not initialized"));
     return false;
   }
+#endif
 
-  //int h = sws_scale(sws, &data, &settings.in_w, 0, settings.in_h, pic_out->planes, pic_out->stride);
   int img_nbytes = avpicture_fill(&pic_in, data, settings.fmt, settings.in_w, settings.in_h);
 
   int h = sws_scale(sws, 

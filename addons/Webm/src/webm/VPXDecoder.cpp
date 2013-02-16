@@ -1,10 +1,7 @@
 #include <webm/VPXDecoder.h>
 
 VPXDecoder::VPXDecoder() 
-//  :millis_per_frame(0)
-   //  ,frame_timeout(0)
   :pixels(NULL)
-   //  ,num_frames_encoded(0)
   ,num_frames_decoded(0)
   ,sws(NULL)
 {
@@ -26,12 +23,7 @@ VPXDecoder::~VPXDecoder() {
   }
 
   vpx_img_free(&img_out);
-
-  ///  millis_per_frame = 0;
-  //  frame_timeout = 0;
-  //  num_frames_encoded = 0;
   num_frames_decoded = 0;
-
 }
 
 bool VPXDecoder::setup(VPXSettings cfg) {
@@ -39,12 +31,6 @@ bool VPXDecoder::setup(VPXSettings cfg) {
   RX_ERROR(("TODO: use VPXSettings.cb_write/cb_user + check if it's set, for the callback which is called when we have decoded data "));
   settings = cfg;
   bool result = false;
-  /*
-  if(settings.fmt != VPX_IMG_FMT_RGB24) {
-    RX_ERROR(("For now we only support the VPX_IMG_FMT_RGB24 type"));
-    return false;
-  }
-  */
   result = initializeDecoder();
   if(!result) {
     RX_ERROR(("Cannot initialize decoder"));
@@ -61,7 +47,6 @@ bool VPXDecoder::setup(VPXSettings cfg) {
     return false;
   }
 
-  //  num_bytes_per_frame = settings.in_w * settings.in_h * 3;
   num_bytes_per_frame = settings.out_w * settings.out_h * 3;
   pixels = new unsigned char[num_bytes_per_frame];
   memset(pixels, 0, num_bytes_per_frame);
@@ -70,10 +55,6 @@ bool VPXDecoder::setup(VPXSettings cfg) {
     RX_ERROR(("Out of memory.. can't allocate buffer for read buffer"));
     return false;
   }
-
-  //  millis_per_frame = (1.0f/settings.fps) * 1000;
-  //  frame_timeout = rx_millis() + millis_per_frame;
-  
   return true;
 }
 
@@ -109,7 +90,7 @@ bool VPXDecoder::initializeSWS() {
 
 
 void VPXDecoder::decodeFrame(unsigned char* data, int nbytes) {
-  // debug 
+
 #if 0
   unsigned char* p = data;
     for(int i = 0; i < nbytes; ++i) {
@@ -119,7 +100,6 @@ void VPXDecoder::decodeFrame(unsigned char* data, int nbytes) {
       printf("%02X ", *(p+i));
     }
     printf("\n");
-    // debug end
 #endif
 
   RX_WARNING(("decode: %d bytes", nbytes));
@@ -145,28 +125,7 @@ void VPXDecoder::rescale(vpx_image_t* in, vpx_image_t* out) {
   if(settings.cb_read) {
     settings.cb_read(out->planes[0], settings.out_w * settings.out_h * 3, settings.cb_user);
   }
-  /*
-  char filename[512];
-  sprintf(filename, "img_%d.png", rx_millis());
-
-  Image img;
-  img.copyPixels(out->planes[0], settings.out_w, settings.out_h, 3);
-  img.save(rx_to_data_path(filename));
-  */
 }
-
-/*
-
-AVPixelFormat VPXDecoder::avformat(vpx_img_fmt f) {
-  switch(f) {
-    case VPX_IMG_FMT_RGB24: return AV_PIX_FMT_RGB24; 
-    case VPX_IMG_FMT_ARGB: return AV_PIX_FMT_ARGB; 
-    case VPX_IMG_FMT_I420: return AV_PIX_FMT_YUV420P;
-    default: { return AV_PIX_FMT_NONE; }
-  }
-}
-*/
-
 
 void VPXDecoder::die() {
   const char* msg = vpx_codec_error_detail(&codec);
