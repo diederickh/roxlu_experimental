@@ -7,7 +7,9 @@ EBML::EBML()
   ,cb_user(NULL)
   ,cb_write(NULL)
   ,cb_close(NULL)
+  ,cb_bytes_left(NULL)
   ,time_cluster_started(0)
+  ,parse_state(EBML_STATE_NONE)
 {
 
 }
@@ -21,6 +23,8 @@ void EBML::setCallbacks(ebml_write_cb writeCB,
                         ebml_peek_cb peekCB, 
                         ebml_read_cb readCB, 
                         ebml_skip_cb skipCB,
+                        ebml_bytes_left_cb leftCB,
+                        ebml_parse_cb parseCB,
                         void* user) 
 {
   cb_write = writeCB;
@@ -28,6 +32,8 @@ void EBML::setCallbacks(ebml_write_cb writeCB,
   cb_peek = peekCB;
   cb_read = readCB;
   cb_skip = skipCB;
+  cb_bytes_left = leftCB;
+  cb_parse = parseCB;
   cb_user = user;
 }
 
@@ -216,94 +222,109 @@ void EBML::printElement(uint64_t id,
 
 // @todo cleanup
 void EBML::parse() {
-  char buffer[EBML_TMP_BUFFER_SIZE]; 
-  bool must_parse = true;
-  int count = 0;
-
-  uint64_t id = readID();
-  uint64_t size = readDataSize();
-  /*
-  unsigned char* p = (unsigned char*)&size;
-  for(int i = 0; i < 8; ++i) {
-    printf("%02X ", p[i]);
+  
+  size_t bytes_left = cb_bytes_left(cb_user);
+  if(bytes_left == 0) {
+    return;
   }
-  printf(" <---\n");
-  */
 
-  unsigned char* id_ptr = (unsigned char*)&id;
-  switch(id) {
-    case ID_EBML:                     { printElement(id, size, EBML_NONE, buffer);    return parse(); }
-    case ID_EBML_VERSION:             { printElement(id, size, EBML_HEX, buffer);     return parse(); }
-    case ID_EBML_READ_VERSION:        { printElement(id, size, EBML_HEX, buffer);     return parse(); }
-    case ID_EBML_MAX_ID_LENGTH:       { printElement(id, size, EBML_HEX, buffer);     return parse(); }
-    case ID_EBML_MAX_SIZE_LENGTH:     { printElement(id, size, EBML_HEX, buffer);     return parse(); }
-    case ID_DOCTYPE:                  { printElement(id, size, EBML_CHAR, buffer);    return parse(); }
-    case ID_DOCTYPE_VERSION:          { printElement(id, size, EBML_HEX, buffer);     return parse(); }
-    case ID_DOCTYPE_READ_VERSION:     { printElement(id, size, EBML_HEX, buffer);     return parse(); }
-    case ID_VOID:                     { printElement(id, size, EBML_HEX, buffer);     return parse(); }
-    case ID_SEGMENT:                  { printElement(id, size, EBML_NONE, buffer);    return parse(); }
-    case ID_SEGMENT_UID:              { printElement(id, size, EBML_HEX, buffer);     return parse(); }
-    case ID_TITLE:                    { printElement(id, size, EBML_CHAR, buffer);    return parse(); }
-    case ID_SEEK_HEAD:                { printElement(id, size, EBML_NONE, buffer);    return parse(); }
-    case ID_SEEK:                     { printElement(id, size, EBML_NONE, buffer);    return parse(); }
-    case ID_SEEK_ID:                  { printElement(id, size, EBML_INT, buffer);     return parse(); }
-    case ID_SEEK_POSITION:            { printElement(id, size, EBML_HEX, buffer);     return parse(); }
-    case ID_INFO:                     { printElement(id, size, EBML_NONE, buffer);    return parse(); }
-    case ID_TIMECODE_SCALE:           { printElement(id, size, EBML_HEX, buffer);     return parse(); }
-    case ID_DURATION:                 { printElement(id, size, EBML_HEX, buffer);     return parse(); }
-    case ID_DATE_UTC:                 { printElement(id, size, EBML_HEX, buffer);     return parse(); }
-    case ID_MUXING_APP:               { printElement(id, size, EBML_CHAR, buffer);    return parse(); }
-    case ID_WRITING_APP:              { printElement(id, size, EBML_CHAR, buffer);    return parse(); }
-    case ID_TRACKS:                   { printElement(id, size, EBML_NONE, buffer);    return parse(); }
-    case ID_TRACK_ENTRY:              { printElement(id, size, EBML_NONE, buffer);    return parse(); }
-    case ID_TRACK_NUMBER:             { printElement(id, size, EBML_INT, buffer);     return parse(); }
-    case ID_TRACK_UID:                { printElement(id, size, EBML_HEX, buffer);     return parse(); }
-    case ID_TRACK_TYPE:               { printElement(id, size, EBML_INT, buffer);     return parse(); }
-    case ID_TRACK_DEFAULT_DURATION:   { printElement(id, size, EBML_INT, buffer);     return parse(); }
-    case ID_TRACK_TIMECODE_SCALE:     { printElement(id, size, EBML_INT, buffer);     return parse(); }
-    case ID_CODEC_ID:                 { printElement(id, size, EBML_CHAR, buffer);    return parse(); }
-    case ID_CODEC_PRIVATE:            { printElement(id, size, EBML_SKIP, buffer);    return parse(); }
-    case ID_CODEC_NAME:               { printElement(id, size, EBML_CHAR, buffer);    return parse(); }
-    case ID_VIDEO:                    { printElement(id, size, EBML_NONE, buffer);    return parse(); }
-    case ID_PIXEL_WIDTH:              { printElement(id, size, EBML_HEX, buffer);     return parse(); }
-    case ID_PIXEL_HEIGHT:             { printElement(id, size, EBML_HEX, buffer);     return parse(); }
-    case ID_AUDIO:                    { printElement(id, size, EBML_NONE, buffer);    return parse(); }
-    case ID_SAMPLING_FREQUENCY:       { printElement(id, size, EBML_HEX, buffer);     return parse(); }
-    case ID_CHANNELS:                 { printElement(id, size, EBML_HEX, buffer);     return parse(); }
-    case ID_BIT_DEPTH:                { printElement(id, size, EBML_HEX, buffer);     return parse(); }
-    case ID_CUES:                     { printElement(id, size, EBML_NONE, buffer);    return parse(); }
-    case ID_CUE_POINT:                { printElement(id, size, EBML_NONE, buffer);    return parse(); }
-    case ID_CUE_TIME:                 { printElement(id, size, EBML_HEX, buffer);     return parse(); }
-    case ID_CUE_TRACK_POSITIONS:      { printElement(id, size, EBML_HEX, buffer);     return parse(); }
-    case ID_CLUSTER:                  { printElement(id, size, EBML_NONE, buffer);    return parse(); }
-    case ID_TIMECODE:                 { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+  int bytes_read = 0;
+  
+  switch(parse_state) {
 
-    case ID_SIMPLE_BLOCK: {
-      // @todo, we assume track size is always stored in one byte
-      printf("ID_SIMPLE_BLOCK, size: %llu\n", size);
-      uint64_t bytes_to_skip = size;
-      uint64_t track = readDataSize();
-      bytes_to_skip -= 1; 
-      int16_t timecode = ru16();
-      bytes_to_skip -= 2;
-      uint8_t flags = ru8();
-      bytes_to_skip -= 1;
-      cb_skip(bytes_to_skip, cb_user);
-      printf(" - TRACK: %llu\n", track);
-      printf(" - TIMECODE: %d\n", timecode);
-      printf(" - FLAGS: %02X\n", flags);
-      printf(" - DATA SIZE: : %llu\n", bytes_to_skip);
-      return parse();
-    }
-    default: {
-      printf("Unhandled id: ");
-      for(int i = 0; i < 8; ++i) {
-        printf("%02X ", id_ptr[7-i]);
+    case EBML_STATE_NONE: {
+      parse_id = readID(&bytes_read);
+      if(bytes_read > 0) {
+        parse_state = EBML_STATE_ID;
+        return parse();
       }
-      printf("\n");
-      return;
-    };
-  };
+      break;
+    }
+
+    case EBML_STATE_ID: { 
+      parse_data_size = readDataSize(&bytes_read);
+      if(bytes_read != 0 ) {
+        parse_state = EBML_STATE_DATA_SIZE;
+        return parse();
+      }
+      break;
+    }
+
+    case EBML_STATE_DATA_SIZE: {
+      {
+
+        if(bytes_left < parse_data_size && parse_data_size != EBML_DATA_SIZE_UNKNOWN) {
+          return;
+        }
+
+        switch(parse_id) {
+          case ID_SIMPLE_BLOCK:
+          case ID_TIMECODE:
+          case ID_CLUSTER:
+          case ID_CUE_TRACK_POSITIONS:
+          case ID_CUE_TIME:
+          case ID_CUE_POINT:
+          case ID_CUES:
+          case ID_BIT_DEPTH:
+          case ID_CHANNELS:
+          case ID_SAMPLING_FREQUENCY:
+          case ID_AUDIO:
+          case ID_PIXEL_HEIGHT:
+          case ID_PIXEL_WIDTH:
+          case ID_VIDEO:
+          case ID_CODEC_NAME:
+          case ID_CODEC_PRIVATE:
+          case ID_CODEC_ID:
+          case ID_TRACK_TIMECODE_SCALE:
+          case ID_TRACK_DEFAULT_DURATION:
+          case ID_TRACK_TYPE:
+          case ID_TRACK_UID:
+          case ID_TRACK_NUMBER:
+          case ID_TRACK_ENTRY:
+          case ID_TRACKS:
+          case ID_WRITING_APP:
+          case ID_MUXING_APP:
+          case ID_DATE_UTC:
+          case ID_DURATION:
+          case ID_TIMECODE_SCALE:
+          case ID_INFO:
+          case ID_SEEK_POSITION:
+          case ID_SEEK:
+          case ID_SEEK_HEAD:
+          case ID_TITLE:
+          case ID_SEGMENT_UID:
+          case ID_SEGMENT:
+          case ID_VOID: 
+          case ID_DOCTYPE_READ_VERSION:
+          case ID_DOCTYPE_VERSION:
+          case ID_DOCTYPE:
+          case ID_EBML_MAX_SIZE_LENGTH:
+          case ID_EBML_MAX_ID_LENGTH:
+          case ID_EBML_READ_VERSION:
+          case ID_EBML_VERSION:
+          case ID_EBML: { 
+            if(cb_parse(parse_id, parse_data_size, cb_user)) { 
+              parse_state = EBML_STATE_NONE;
+              parse();
+            }
+            break;
+          }
+          default: {
+            unsigned char* id_ptr = (unsigned char*)&parse_id;
+            printf("Unhandled id: ");
+            for(int i = 0; i < 8; ++i) {
+              printf("%02X ", id_ptr[7-i]);
+            }
+            printf("\n");
+            break;
+          }
+        }
+      }
+      break;
+    }
+
+    default: break;
+  }
 }
 
 
@@ -373,9 +394,9 @@ EBMLFile::~EBMLFile() {
 }
 
 bool EBMLFile::open(const std::string filepath) {
-  fp = fopen(filepath.c_str(), "r+b");
+  fp = fopen(filepath.c_str(), "w+b");
   if(!fp) {
-    RX_ERROR(("Cannot open: %s", filepath.c_str()));
+    RX_ERROR(("Cannot open: %s, error: %d (%s)", filepath.c_str(), errno, strerror(errno)));
     return false;
   }
   return true;
@@ -450,3 +471,140 @@ size_t ebml_file_skip(size_t nbytes, void* user) {
   }
   return nbytes;
 }
+
+  /*
+  char buffer[EBML_TMP_BUFFER_SIZE]; 
+  bool must_parse = true;
+  int count = 0;
+  int bytes_read = 0;
+  size_t bytes_left = cb_bytes_left(cb_user);
+  uint64_t size = 0;
+  uint64_t id = 0;
+  while(bytes_left > 0) {
+
+    id = readID(&bytes_read);
+    if(bytes_read == 0) {
+      RX_VERBOSE(("not enough bytes in buffer to read ID"));
+      return;
+    }
+
+    size = readDataSize(&bytes_read);
+    if(bytes_read == 0) {
+      RX_VERBOSE(("not enough bytes in buffer to read data size"));
+      return;
+    }
+    
+    RX_VERBOSE(("data size: %lld", size));
+    switch(id) {
+      case ID_EBML: {
+        break;
+      }
+      case ID_EBML_VERSION: {
+        RX_VERBOSE(("EBML_VERSION"));
+        bytes_read = readData(buffer, size);
+        RX_VERBOSE(("EBML_VERBION READ: %zu", bytes_read));
+
+        break;
+      }
+      default: {
+        unsigned char* id_ptr = (unsigned char*)&id;
+        printf("Unhandled id: ");
+        for(int i = 0; i < 8; ++i) {
+          printf("%02X ", id_ptr[7-i]);
+        }
+        printf("\n");
+        return;
+      }
+    };
+    RX_VERBOSE(("read: %u bytes", bytes_read));
+  }
+  */
+
+  // RX_WARNING(("ID: %lld", id));
+  // uint64_t size = readDataSize();
+
+
+
+  /*
+    unsigned char* p = (unsigned char*)&size;
+    for(int i = 0; i < 8; ++i) {
+    printf("%02X ", p[i]);
+    }
+    printf(" <---\n");
+  */
+  /*
+  unsigned char* id_ptr = (unsigned char*)&id;
+  switch(id) {
+    case ID_EBML:                     { printElement(id, size, EBML_NONE, buffer);    return parse(); }
+    case ID_EBML_VERSION:             { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+    case ID_EBML_READ_VERSION:        { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+    case ID_EBML_MAX_ID_LENGTH:       { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+    case ID_EBML_MAX_SIZE_LENGTH:     { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+    case ID_DOCTYPE:                  { printElement(id, size, EBML_CHAR, buffer);    return parse(); }
+    case ID_DOCTYPE_VERSION:          { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+    case ID_DOCTYPE_READ_VERSION:     { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+    case ID_VOID:                     { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+    case ID_SEGMENT:                  { printElement(id, size, EBML_NONE, buffer);    return parse(); }
+    case ID_SEGMENT_UID:              { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+    case ID_TITLE:                    { printElement(id, size, EBML_CHAR, buffer);    return parse(); }
+    case ID_SEEK_HEAD:                { printElement(id, size, EBML_NONE, buffer);    return parse(); }
+    case ID_SEEK:                     { printElement(id, size, EBML_NONE, buffer);    return parse(); }
+    case ID_SEEK_ID:                  { printElement(id, size, EBML_INT, buffer);     return parse(); }
+    case ID_SEEK_POSITION:            { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+    case ID_INFO:                     { printElement(id, size, EBML_NONE, buffer);    return parse(); }
+    case ID_TIMECODE_SCALE:           { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+    case ID_DURATION:                 { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+    case ID_DATE_UTC:                 { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+    case ID_MUXING_APP:               { printElement(id, size, EBML_CHAR, buffer);    return parse(); }
+    case ID_WRITING_APP:              { printElement(id, size, EBML_CHAR, buffer);    return parse(); }
+    case ID_TRACKS:                   { printElement(id, size, EBML_NONE, buffer);    return parse(); }
+    case ID_TRACK_ENTRY:              { printElement(id, size, EBML_NONE, buffer);    return parse(); }
+    case ID_TRACK_NUMBER:             { printElement(id, size, EBML_INT, buffer);     return parse(); }
+    case ID_TRACK_UID:                { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+    case ID_TRACK_TYPE:               { printElement(id, size, EBML_INT, buffer);     return parse(); }
+    case ID_TRACK_DEFAULT_DURATION:   { printElement(id, size, EBML_INT, buffer);     return parse(); }
+    case ID_TRACK_TIMECODE_SCALE:     { printElement(id, size, EBML_INT, buffer);     return parse(); }
+    case ID_CODEC_ID:                 { printElement(id, size, EBML_CHAR, buffer);    return parse(); }
+    case ID_CODEC_PRIVATE:            { printElement(id, size, EBML_SKIP, buffer);    return parse(); }
+    case ID_CODEC_NAME:               { printElement(id, size, EBML_CHAR, buffer);    return parse(); }
+    case ID_VIDEO:                    { printElement(id, size, EBML_NONE, buffer);    return parse(); }
+    case ID_PIXEL_WIDTH:              { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+    case ID_PIXEL_HEIGHT:             { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+    case ID_AUDIO:                    { printElement(id, size, EBML_NONE, buffer);    return parse(); }
+    case ID_SAMPLING_FREQUENCY:       { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+    case ID_CHANNELS:                 { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+    case ID_BIT_DEPTH:                { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+    case ID_CUES:                     { printElement(id, size, EBML_NONE, buffer);    return parse(); }
+    case ID_CUE_POINT:                { printElement(id, size, EBML_NONE, buffer);    return parse(); }
+    case ID_CUE_TIME:                 { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+    case ID_CUE_TRACK_POSITIONS:      { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+    case ID_CLUSTER:                  { printElement(id, size, EBML_NONE, buffer);    return parse(); }
+    case ID_TIMECODE:                 { printElement(id, size, EBML_HEX, buffer);     return parse(); }
+
+    case ID_SIMPLE_BLOCK: {
+      // @todo, we assume track size is always stored in one byte
+      printf("ID_SIMPLE_BLOCK, size: %llu\n", size);
+      uint64_t bytes_to_skip = size;
+      uint64_t track = readDataSize();
+      bytes_to_skip -= 1; 
+      int16_t timecode = ru16();
+      bytes_to_skip -= 2;
+      uint8_t flags = ru8();
+      bytes_to_skip -= 1;
+      cb_skip(bytes_to_skip, cb_user);
+      printf(" - TRACK: %llu\n", track);
+      printf(" - TIMECODE: %d\n", timecode);
+      printf(" - FLAGS: %02X\n", flags);
+      printf(" - DATA SIZE: : %llu\n", bytes_to_skip);
+      return parse();
+    }
+    default: {
+      printf("Unhandled id: ");
+      for(int i = 0; i < 8; ++i) {
+        printf("%02X ", id_ptr[7-i]);
+      }
+      printf("\n");
+      return;
+    };
+    };
+*/

@@ -8,8 +8,9 @@
 
 #define RX_LOG_LEVEL_NONE 0 
 
-//#define RX_LOG_LEVEL RX_LOG_LEVEL_VERBOSE
-#define RX_LOG_LEVEL RX_LOG_LEVEL_NONE
+#if !defined(RX_LOG_LEVEL)
+#  define RX_LOG_LEVEL RX_LOG_LEVEL_VERBOSE
+#endif
 
 
 #if defined(_MSC_VER)

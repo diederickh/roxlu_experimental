@@ -289,24 +289,27 @@ int FLV::close(FLVCloseParams p) {
   double d = 0.0;
   rx_uint64 v = 0.0;
 
-  // framerate
-  double framerate = double(last_video_timestamp) / total_num_frames;
-  v = swapDouble(framerate);
-  cb_rewrite((char*)&v, sizeof(rx_uint64), framerate_pos, cb_user);
 
-  // duration
-  d = double(last_video_timestamp) / 1000.0;
-  v = swapDouble(d);
-  cb_rewrite((char*)&v, sizeof(rx_uint64), duration_pos, cb_user);
+  if(total_num_frames > 0) {
+    // framerate
+    double framerate = double(last_video_timestamp) / total_num_frames;
+    v = swapDouble(framerate);
+    cb_rewrite((char*)&v, sizeof(rx_uint64), framerate_pos, cb_user);
 
-  // filesize
-  v = swapDouble(bytes_flushed);
-  cb_rewrite((char*)&v, sizeof(rx_uint64), filesize_pos, cb_user);
+    // duration
+    d = double(last_video_timestamp) / 1000.0;
+    v = swapDouble(d);
+    cb_rewrite((char*)&v, sizeof(rx_uint64), duration_pos, cb_user);
 
-  // datarate
-  d = (bytes_flushed * 8) / last_video_timestamp;
-  v = swapDouble(d);
-  cb_rewrite((char*)&v, sizeof(rx_uint64), datarate_pos, cb_user);
+    // filesize
+    v = swapDouble(bytes_flushed);
+    cb_rewrite((char*)&v, sizeof(rx_uint64), filesize_pos, cb_user);
+
+    // datarate
+    d = (bytes_flushed * 8) / last_video_timestamp;
+    v = swapDouble(d);
+    cb_rewrite((char*)&v, sizeof(rx_uint64), datarate_pos, cb_user);
+  }
 
   cb_close(cb_user);
 
@@ -490,7 +493,7 @@ size_t flv_file_write(char* data, size_t nbytes, void* user) {
     return 0;
   }
 
-  RX_VERBOSE(("write %d bytes to file.", int(nbytes)));
+  //  RX_VERBOSE(("write %d bytes to file.", int(nbytes)));
   size_t written  = fwrite(data, nbytes, 1, f->fp);
 
   if(written != 1) {

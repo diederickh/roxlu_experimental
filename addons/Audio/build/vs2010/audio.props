@@ -13,12 +13,12 @@
       <AdditionalDependencies>$(ROXLU_EXTERN_LIB_DIR)\portaudio_x86.lib;$(SolutionDir)$(Configuration)\roxlu_audio.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreLinkEvent>
-      <Command>xcopy  /y "$(ROXLU_EXTERN_BIN_DIR)portaudio_x86.dll" "$(SolutionDir)bin\" 
+      <Command>
 </Command>
     </PreLinkEvent>
     <CustomBuildStep>
       <Command>
-</Command>
+      </Command>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup />

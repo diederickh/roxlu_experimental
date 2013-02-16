@@ -1,11 +1,14 @@
 #include <flv/FLVScreenRecorder.h>
 
-// @todo we probably want a bigger distance between the read and write 
+// @todo we probably want a bigger distance between the read and write  - tested quickly didnt see a difference
+// @todo check if we need to call AV::waitForEncodingThreadToFinish();
 // PBO indices.
 
 FLVScreenRecorder::FLVScreenRecorder() 
   :channels(4)
+#if !defined(SCREEN_RECORDER_USE_PBO)
   ,pixels(NULL)
+#endif
   ,dx(0)
   ,is_recording(false)
   ,is_file_opened(false)
@@ -14,6 +17,9 @@ FLVScreenRecorder::FLVScreenRecorder()
 }
 
 FLVScreenRecorder::~FLVScreenRecorder() {
+  stop();
+  av.waitForEncodingThreadToFinish();
+
 #if !defined(SCREEN_RECORDER_USE_PBO) 
   if(pixels != NULL) {
     delete[] pixels;
@@ -24,6 +30,8 @@ FLVScreenRecorder::~FLVScreenRecorder() {
   is_recording = false;
   channels = 0;
   dx = 0;
+
+
 }
 
 bool FLVScreenRecorder::open(std::string filepath) {
@@ -37,30 +45,30 @@ bool FLVScreenRecorder::open(std::string filepath) {
 }
 
 bool FLVScreenRecorder::setup(FLVScreenRecorderSettings cfg) {
-	assert(cfg.vid_in_w != 0);
-	assert(cfg.vid_in_h != 0);
+  assert(cfg.vid_in_w != 0);
+  assert(cfg.vid_in_h != 0);
 	
-	settings = cfg;
+  settings = cfg;
 
   av.setVerticalFlip(true);
 
   bool r = av.setupVideo(settings.vid_in_w, settings.vid_in_h, 
-												 settings.vid_out_w, settings.vid_out_h, settings.vid_fps, 
-												 AV_FMT_BGRA32, &flv);
+                         settings.vid_out_w, settings.vid_out_h, settings.vid_fps, 
+                         AV_FMT_BGRA32, &flv);
 
-	if(!r) {
-		RX_ERROR(("cannot setup video"));
+  if(!r) {
+    RX_ERROR(("cannot setup video"));
     return false;
   }
 
-	if(settings.audio_num_channels != 0 && settings.audio_max_samples != 0) {
-		r = av.setupAudio(settings.audio_num_channels, settings.audio_samplerate, 
-											settings.audio_max_samples, settings.audio_format);
-		if(!r) {
-			RX_ERROR(("cannot setup audio"));
-			return false;
-		}
-	}
+  if(settings.audio_num_channels != 0 && settings.audio_max_samples != 0) {
+    r = av.setupAudio(settings.audio_num_channels, settings.audio_samplerate, 
+                      settings.audio_max_samples, settings.audio_format);
+    if(!r) {
+      RX_ERROR(("cannot setup audio"));
+      return false;
+    }
+  }
 
   flv.setCallbacks(flv_file_write,
                    flv_file_rewrite,
@@ -100,7 +108,7 @@ void FLVScreenRecorder::grabFrame() {
 
 #if !defined(SCREEN_RECORDER_USE_PBO)
   if(av.wantsNewVideoFrame()) {
-    glReadPixels(0, 0, settings.vid_in_w, settings.vid_in_h, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+    glReadPixels(0, 0, settings.vid_in_w, settings.vid_in_h, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
     av.addVideoFrame(pixels);
   }
 #else
@@ -127,7 +135,7 @@ void FLVScreenRecorder::grabFrame() {
 }
 
 void FLVScreenRecorder::addAudio(void* input, int nframes) {
-	av.addAudioFrame(input, nframes);
+  av.addAudioFrame(input, nframes);
 }
 
 void FLVScreenRecorder::start() {
@@ -135,6 +143,14 @@ void FLVScreenRecorder::start() {
     RX_WARNING(("already started."));
     return;
   }
+
+#if defined(SCREEN_RECORDER_USE_PBO)
+  for(int i = 0; i < SCREEN_RECORDER_NUM_PBOS; ++i ) {
+    glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[i]);
+    glReadPixels(0,0,settings.vid_in_w, settings.vid_in_h, GL_BGRA, GL_UNSIGNED_BYTE, 0);
+  }
+  glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+#endif  
 
   RX_VERBOSE(("Start recording."));
   is_recording = true;
@@ -149,25 +165,39 @@ void FLVScreenRecorder::stop() {
 
   RX_VERBOSE(("Stop recording."));
   av.stop();
+
   is_recording = false;
   is_file_opened = false; // av.stop() calls close on the flv writer
+  dx = 0;
+  RX_ERROR(("WE NEED TO RESET THE PBOS!"));
+
+  // reset pixel buffers
+#if defined(SCREEN_RECORDER_USE_PBO)
+
+  for(int i = 0; i < SCREEN_RECORDER_NUM_PBOS; ++i) {
+    glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[i]);
+    glBufferData(GL_PIXEL_PACK_BUFFER, settings.vid_in_w * settings.vid_in_h * channels, pixels, GL_STREAM_READ);
+  }
+  glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+
+#endif
 }
 
 FLVScreenRecorderSettings::FLVScreenRecorderSettings() {
-	reset();
+  reset();
 }
 FLVScreenRecorderSettings::~FLVScreenRecorderSettings() {
-	reset();
+  reset();
 }
 
 void FLVScreenRecorderSettings::reset() {
-	vid_in_w = 0;
-	vid_in_h = 0;
-	vid_out_w = 0;
-	vid_out_h = 0;
-	vid_fps = 0;
-	audio_num_channels = 0;
-	audio_samplerate = 0;
-	audio_max_samples = 0;
-	audio_format = AV_FMT_INT16;
+  vid_in_w = 0;
+  vid_in_h = 0;
+  vid_out_w = 0;
+  vid_out_h = 0;
+  vid_fps = 0;
+  audio_num_channels = 0;
+  audio_samplerate = 0;
+  audio_max_samples = 0;
+  audio_format = AV_FMT_INT16;
 }

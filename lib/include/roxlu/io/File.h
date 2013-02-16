@@ -6,7 +6,11 @@
 #include <vector>
 #include <cstdlib>
 #include <roxlu/core/platform/Platform.h>
+#include <roxlu/core/Log.h>
 #include <sys/stat.h>
+#include <stdio.h>
+#include <errno.h>
+#include <string.h> /* errno on linux */
 
 #if defined(_WIN32)
 #   include <roxlu/external/dirent.h> 
@@ -14,13 +18,18 @@
 #   include <dirent.h>
 #endif
 
+
 #if ROXLU_PLATFORM == ROXLU_APPLE || ROXLU_PLATFORM == ROXLU_IOS
-#include <TargetConditionals.h>
-#include <mach-o/dyld.h>
+#  include <TargetConditionals.h>
+#  include <mach-o/dyld.h>
+
 #elif ROXLU_PLATFORM == ROXLU_WINDOWS
-#include <windows.h>
+#  include <windows.h>
+#  include <direct.h> // _mkdir
+
 #elif ROXLU_PLATFORM == ROXLU_LINUX
-#include <unistd.h> // getcwd
+#  include <unistd.h> // getcwd
+
 #endif
 
 using std::string;
@@ -42,7 +51,7 @@ namespace roxlu {
 		
       of.open(file.c_str(), std::ios::out);
       if(!of.is_open()) {
-        printf("File: cannot open file: '%s'\n", file.c_str());
+        RX_ERROR(("File: cannot open file: '%s'", file.c_str()));
         return;
       }
       of.write(contents.c_str(), contents.length());
@@ -57,7 +66,7 @@ namespace roxlu {
       std::string line = "";
       std::ifstream ifs(file.c_str());
       if(!ifs.is_open()) {
-        printf("File: cannot open file: '%s'\n", file.c_str());
+        RX_ERROR(("File: cannot open file: '%s'", file.c_str()));
         return result;
       }
       while(getline(ifs,line)) {
@@ -89,12 +98,23 @@ namespace roxlu {
 #endif
     }
 	
-    static time_t getTimeModified(string file, bool inDataPath = true) {
-      if(inDataPath) {
-        file = File::toDataPath(file);
+    static rx_int64 getTimeModified(string filepath) {
+      struct stat st;
+      if(stat(filepath.c_str(), &st) == 0) {
+        return st.st_mtime;
       }
-      printf("MUST IMPLEMENT getTimeModified\n");
+      else {
+        return 0;
+      }
       return 0;
+    }
+
+    static bool remove(std::string filepath) {
+      if(::remove(filepath.c_str()) != 0) {
+        RX_ERROR(("cannot remove file: %s - %s", filepath.c_str(), strerror(errno)));
+        return false;
+      }
+      return true;
     }
 	
     static string getCWD() {
@@ -130,10 +150,31 @@ namespace roxlu {
 
     // e.g.: File::createPath("/users/home/roxlu/data/images/2012/12/05/")
     static bool createPath(std::string path) {
+
+#ifdef _WIN32
+      std::string drive;
+      for(int i = 0; i < path.size()-1; ++i) {
+        if(path[i] == ':' && path[i + 1] == '\\') {
+          break;
+        }
+        drive.push_back(path[i]);
+      }
+      path = path.substr(drive.size() + 2);
+      drive = drive + ":";
+
+#endif
+
       std::vector<std::string> dirs;
       while(path.length() > 0) {
-        int index = path.find('/');
+
+     
+#ifdef _WIN32
+        int index = path.find('\\'); // win 
+#else
+        int index = path.find('/'); // posix
+#endif
         std::string dir = (index == -1 ) ? path : path.substr(0, index);
+
         if(dir.length() > 0) {
           dirs.push_back(dir);
         }
@@ -145,12 +186,20 @@ namespace roxlu {
     
       struct stat s;
       std::string dir_path;
+#ifdef _WIN32
+      dir_path = drive;
+#endif
       for(unsigned int i = 0; i < dirs.size(); i++) {
+#ifdef _WIN32
+        dir_path += "\\";
+#else
         dir_path += "/";
+#endif
+
         dir_path += dirs[i];
         if(stat(dir_path.c_str(), &s) != 0) {
           if(!File::createDirectory(dir_path.c_str())) {
-            printf("ERROR: cannot create directory: %s\n", dir_path.c_str());
+            RX_ERROR(("ERROR: cannot create directory: %s", dir_path.c_str()));
             return false;
           }
         }
@@ -158,16 +207,26 @@ namespace roxlu {
       return true;
     }
 
+
     static bool createDirectory(std::string path) {
-      #ifdef _WIN32
-      printf("File::createDirectory(), not implemented yet!\n");
-      return false;
-      #else
+#ifdef _WIN32
+      if(_mkdir(path.c_str()) != 0) {
+        if(errno == ENOENT) { 
+          RX_ERROR(("Cannot create directory: %s (ENOENT)", path.c_str()));
+          return false;
+        }
+        else if(errno == EEXIST) {
+          RX_ERROR(("Cannot create directory: %s (EEXIST)", path.c_str()));
+        }
+      }
+      return true;
+
+#else
       if(mkdir(path.c_str(), 0777) != 0) {
         return false;
       }
       return true;
-      #endif
+#endif
     }
     
     static std::vector<std::string> getDirectories(std::string path) {

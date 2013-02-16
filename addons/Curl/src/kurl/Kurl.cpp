@@ -34,17 +34,19 @@ KurlConnection::KurlConnection()
   ,complete_callback(NULL)
   ,http_post(NULL)
 {
-  printf("> KurlConnection::KurlConnection()\n");
+  //  printf("> KurlConnection::KurlConnection()\n");
 }
 
 KurlConnection::~KurlConnection() {
-  printf("< KurlConnection::~KurlConnection()\n");
+  //  printf("< KurlConnection::~KurlConnection()\n");
 }
 
 // -----------------------------------
 Kurl::Kurl() 
   :handle(NULL)
   ,still_running(0)
+  ,cb_progress(NULL)
+  ,cb_progress_user(NULL)
 {
   handle = curl_multi_init();
   if(handle == NULL) {
@@ -61,7 +63,7 @@ Kurl::~Kurl() {
 
 void Kurl::update() {
   curl_multi_perform(handle, &still_running);  
-  
+
   int q = 0;
   CURLMsg* msg = NULL;
   while((msg = curl_multi_info_read(handle, &q)) != NULL) {
@@ -127,6 +129,9 @@ bool Kurl::download(
   curl_easy_setopt(c->handle, CURLOPT_FOLLOWLOCATION, 1);
   
   curl_multi_add_handle(handle, c->handle);
+
+  initProgressCallback(c->handle);
+
   connections.push_back(c);
   return true;
 }
@@ -191,7 +196,35 @@ bool Kurl::post(Form& f,
 
   c->http_post = post_curr;
 
+  initProgressCallback(c->handle);
+
   connections.push_back(c);
+
   //result = curl_easy_setopt(c->handle, CURLOPT_TIMEOUT, 1000);
+  return true;
+}
+
+
+bool Kurl::initProgressCallback(CURL* handle) {
+  if(!cb_progress) {
+    return false;
+  }
+
+  if(!handle) {
+    return false;
+  }
+
+  char* fake = NULL;
+  CURLcode result;
+
+  result = curl_easy_setopt(handle, CURLOPT_NOPROGRESS, false);
+  RETURN_CURLCODE(result, "ERROR: Failed to enable progress monitoring", false, fake);
+
+  result = curl_easy_setopt(handle, CURLOPT_PROGRESSFUNCTION, cb_progress);
+  RETURN_CURLCODE(result, "ERROR: Failed to set progress function", false, fake);
+
+  curl_easy_setopt(handle, CURLOPT_PROGRESSDATA, cb_progress_user);
+  RETURN_CURLCODE(result, "ERROR: Failed to set progress data", false, fake);
+  
   return true;
 }

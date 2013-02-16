@@ -17,6 +17,8 @@ file(GLOB_RECURSE buttons_source_files
   ${buttons_src_dir}/Slider.cpp
   ${buttons_src_dir}/Storage.cpp
   ${buttons_src_dir}/Toggle.cpp
+  ${buttons_src_dir}/Server.cpp
+  ${buttons_src_dir}/Client.cpp
 )
 
 set(roxlu_addon_sources
@@ -33,10 +35,28 @@ include_directories(
   ${buttons_include_dir}
 )
 
-set(roxlu_addon_libs
-  ${roxlu_addon_libs}
-  roxlu_buttons  #important to add your lib to the rest of the include libs
+if(UNIX) 
+  set(roxlu_addon_libs
+    ${roxlu_addon_libs}
+    roxlu_buttons  #important to add your lib to the rest of the include libs
+    ${roxlu_extern_lib_dir}/libuv.a
 )
+endif()
+
+if(WIN32) 
+  # We need to do this because windows.h will include winsock.h which results in redefinitions
+  add_definitions(
+    -DWIN32_LEAN_AND_MEAN
+    )
+  set(roxlu_addon_libs
+    ${roxlu_addon_lib}
+    roxlu_buttons
+    ${roxlu_extern_lib_dir}/libuv.lib
+    ws2_32.lib
+    psapi.lib
+    iphlpapi.lib
+    )
+endif()
 
 add_library(roxlu_buttons STATIC ${buttons_source_files})
 

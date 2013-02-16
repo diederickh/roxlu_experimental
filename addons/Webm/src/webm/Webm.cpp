@@ -1,13 +1,17 @@
 #include <webm/Webm.h>
 
 void webm_vpx_write_cb(const vpx_codec_cx_pkt_t* pkt, int64_t pts, void* user) {
+
   Webm& webm = *(static_cast<Webm*>(user));
 
   EBMLSimpleBlock b;
-  b.track_number = 1; /* hardcoded: track 1 = video */
+  b.track_number = 1; // hardcoded: track 1 = video 
   //b.timestamp = pkt->data.frame.pts;
   b.timestamp = pts; // uv_hrtime();
   b.flags = 0;
+  if(pkt->data.frame.flags & VPX_FRAME_IS_KEY) {
+    b.flags |= 0x80;
+  }
   b.nbytes = pkt->data.frame.sz;
   b.data = (char*)pkt->data.frame.buf;
 
@@ -57,12 +61,6 @@ void webm_encoder_thread(void* user) {
 
 Webm::Webm(EBML* ebml) 
   :ebml(ebml)
-  ,vid_in_w(0)
-  ,vid_in_h(0)
-  ,vid_out_w(0)
-  ,vid_out_h(0)
-  ,vid_fps(0)
-  ,vid_fmt(VPX_IMG_FMT_NONE)
   ,vid_num_frames(0)
   ,vid_timeout(0)
   ,vid_millis_per_frame(0)
@@ -74,34 +72,20 @@ Webm::~Webm() {
   shutdown();
 }
 
-bool Webm::setupVideo(int inW, 
-                      int inH, 
-                      int outW,
-                      int outH,
-                      int fps,
-                      vpx_img_fmt fmt)
-{
-  vid_in_w = inW;
-  vid_in_h = inH;
-  vid_out_w = outW;
-  vid_out_h = outH;
-  vid_fps = fps;
-  vid_fmt = fmt;
-  vid_millis_per_frame = (1.0f/fps) * 1000;
+bool Webm::setup(VPXSettings cfg) {
 
+  settings = cfg;
+  settings.cb_write = webm_vpx_write_cb;
+  settings.cb_user = this;
+
+  vid_millis_per_frame = (1.0f/settings.fps) * 1000;
   vid_timeout = 0;
-  bool is_setup = vid_enc.setup(vid_in_w, vid_in_h, vid_out_w, 
-                                vid_out_h, vid_fps, vid_fmt,
-                                webm_vpx_write_cb, this);
 
-  if(!is_setup) {
+  bool r = vid_enc.setup(settings);
+  if(!r) {
     return false;
   }
-
   return true;
-}
-
-bool Webm::setupAudio() {
   return true;
 }
 
@@ -127,6 +111,7 @@ bool Webm::open() {
 }
 
 bool Webm::openEBML() {
+
   assert(ebml != NULL);
 
   EBMLHeader h;
@@ -144,7 +129,7 @@ bool Webm::openEBML() {
   }
 
   EBMLSegmentInfo info;
-  info.title = "roxlu live stream";
+  info.title = "roxlu";
   info.muxing_app = "roxlu"; 
   info.writing_app = "roxlu";
   info.timecode_scale = 1000000;
@@ -159,8 +144,8 @@ bool Webm::openEBML() {
   vid_track.number = 1;
   vid_track.uid = ebml->generateUID(vid_track.number);
   vid_track.codec_id = "V_VP8";
-  vid_track.vid_pix_width = vid_out_w;
-  vid_track.vid_pix_height = vid_out_h;
+  vid_track.vid_pix_width = settings.out_w;
+  vid_track.vid_pix_height = settings.out_h;
 
   std::vector<EBMLTrack> tracks;
   tracks.push_back(vid_track);
@@ -169,6 +154,7 @@ bool Webm::openEBML() {
     RX_ERROR(("Cannot write tracks"));
     return false;
   }
+
   return true;
 }
 
@@ -201,14 +187,17 @@ bool Webm::stopThread() {
 }
 
 bool Webm::shutdown() {
+
   vid_millis_per_frame = 0;
   vid_timeout = 0;
 
   stopThread();
+
   return true;
 }
 
 bool Webm::initializeThread() {
+
   if(uv_mutex_init(&stop_mutex) != 0) {
     return false;
   }
@@ -216,10 +205,12 @@ bool Webm::initializeThread() {
   if(uv_mutex_init(&packets_mutex) != 0) {
     return false;
   }
+
   return true;
 }
 
 void Webm::addVideoFrame(unsigned char* data, int nbytes) {
+
   {
     bool stop = false;
     uv_mutex_lock(&stop_mutex);
@@ -257,5 +248,4 @@ void Webm::addVideoFrame(unsigned char* data, int nbytes) {
     vid_num_frames++;
   }
 }
-
 

@@ -16,6 +16,8 @@ include_directories(
 )
 
 if(ROXLU_PLATFORM_MAC)
+  find_library(fr_cf CoreFoundation)
+  find_library(fr_as ApplicationServices)
 
   set(pango_libs
     ${roxlu_extern_lib_dir}/libglib-2.0.a
@@ -36,6 +38,8 @@ if(ROXLU_PLATFORM_MAC)
     ${roxlu_extern_lib_dir}/libxml2.a
     -lbz2
     -lexpat
+    ${fr_cf}
+    ${fr_as}
     )
 
 endif()

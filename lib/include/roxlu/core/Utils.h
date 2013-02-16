@@ -158,6 +158,12 @@ static rx_int64 rx_millis(void) {
   }
 }
 
+/* returns epoch timestamp */
+static time_t rx_time() {
+  return time(NULL);
+}
+
+
 // -------------------------------------- LINUX -------------------------------------
 #elif defined(__linux) 
 
@@ -227,6 +233,11 @@ static int64_t rx_millis(void) {
     abort();
   }
   return (mach_absolute_time() * info.numer / info.denom) / 1000000;
+}
+
+/* returns epoch timestamp */
+static time_t rx_time() {
+  return time(NULL);
 }
 
 #endif

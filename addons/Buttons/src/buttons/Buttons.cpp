@@ -5,6 +5,7 @@ namespace buttons {
   Shader Buttons::gui_shader = Shader();
   bool Buttons::shaders_initialized = false;
   BitmapFont* Buttons::bmf = NULL;
+  unsigned int Buttons::num_created = 0;
 
   Buttons::Buttons(const string& title, int w)
     :is_mouse_down(false)
@@ -35,6 +36,10 @@ namespace buttons {
     ,allocated_bytes(0)
     ,is_open(true)
     ,name(title)
+    ,col_hue(0.0f)
+    ,col_sat(0.0f)
+    ,col_bright(0.0f)
+    ,col_alpha(0.0f)
   {
 
     if(!shaders_initialized) {
@@ -64,6 +69,9 @@ namespace buttons {
 	
     title_dx = static_text->add(x+5, y+2, title);
     name = createCleanName(title);
+
+    ++num_created;
+    id = num_created;
   }
 
   Buttons::~Buttons() {
@@ -74,7 +82,7 @@ namespace buttons {
         ++it;
         continue;
       }
-      delete *it;
+      delete el;
       ++it;
     }
   }
@@ -683,6 +691,7 @@ namespace buttons {
 
   void Buttons::load(const string& file) {
     buttons::Storage storage;
+
     storage.load(file, this);
 
     // notify elements.
@@ -711,6 +720,11 @@ namespace buttons {
 
 
   void Buttons::setColor(const float hue, float sat, float bright, float a) {
+    col_hue = hue;
+    col_sat = sat;
+    col_bright = bright;
+    col_alpha = a;
+
     for(vector<Element*>::iterator it = elements.begin(); it != elements.end(); ++it) {
       Element& el = **it;
       el.setColor(hue, sat, bright, a);

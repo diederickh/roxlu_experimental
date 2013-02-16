@@ -1,3 +1,65 @@
+/*
+WebmScreenRecorder
+------------------
+
+This class is used to grab screen pixels and encode them into a Webm file.
+You need to specify quite some settings before you can call the setup() function. 
+
+This class makes use of the EBML buffer which stores data according to the 
+EBML standard. The VPX encoder gives encoded data to the WebmScreenRecorder which
+then muxes it into a .webm file using ebml. 
+
+Sometime you want to write this ebml/webm bitstream to a socket and sometimes,
+just to a file. To make this class reusable for different bitstreams you need to 
+set a couple of EBML-callbacks in the 'WebmScreenRecorderSettings' variable you
+pass into setup().
+
+We created a basic helper to write webm to a file. This helper is called 'EBMLFile', and
+some callback handlers:
+
+     - ebml_file_write
+     - ebml_file_close
+     - ebml_file_peek
+     - ebml_file_read
+     - ebml_file_skip
+
+So if you want to record to a file, you use:
+
+       WebmScreenRecorder rec;
+       EBMLFile efile;
+       WebmScreenRecorderSettings c;
+     
+       c.use_video = true;
+     
+       c.cb_write = ebml_file_write;
+       c.cb_close = ebml_file_close;
+       c.cb_peek = ebml_file_peek;
+       c.cb_read = ebml_file_read;
+       c.cb_skip = ebml_file_skip;
+       c.cb_user = &efile;
+     
+       c.vid_in_w = VIDEO_W;
+       c.vid_in_h = VIDEO_H;
+       c.vid_out_w = VIDEO_W;
+       c.vid_out_h = VIDEO_H;
+       c.vid_fps = VIDEO_FPS;
+     
+       if(!rec.setup(c)) {
+         RX_ERROR(("cannot setup screen recorder"));
+         ::exit(0);
+       }
+  
+Then every frame/draw you call: rec.grabFrame(), the grabFrame() function
+will make sure that we only grab a frame each time it's necessary (at the 
+rate of 'vid_fps'.
+
+We won't encode anything before you call 'start()' to start the encoding 
+thread and 'stop()' to stop the encoding thread.
+
+ */
+
+#ifdef ROXLU_GL_WRAPPER
+
 #ifndef ROXLU_WEBM_SCREENRECORDER_H
 #define ROXLU_WEBM_SCREENRECORDER_H
 
@@ -30,7 +92,7 @@ struct WebmScreenRecorderSettings {
   int vid_out_w;                                           /* video output width */
   int vid_out_h;                                           /* video output height */
   int vid_fps;                                             /* video frame rate */
-  vpx_img_fmt vid_fmt;                                     /* video input format, probably VPX_IMG_FMT_RGB24, if not set we use this one */
+  AVPixelFormat vid_fmt;                                   /* video input format, probably VPX_IMG_FMT_RGB24, if not set we use this one */
 };
 
 class WebmScreenRecorder {
@@ -67,7 +129,7 @@ inline WebmScreenRecorderSettings::WebmScreenRecorderSettings()
                                   vid_in_h(0),
                                   vid_out_w(0),
                                   vid_out_h(0),
-                                  vid_fmt(VPX_IMG_FMT_NONE)
+                                  vid_fmt(AV_PIX_FMT_NONE)
 {
 
 }
@@ -85,9 +147,9 @@ inline WebmScreenRecorderSettings::~WebmScreenRecorderSettings() {
   vid_in_h = 0;
   vid_out_w = 0;
   vid_out_h = 0;
-  vid_fmt = VPX_IMG_FMT_NONE;
+  vid_fmt = AV_PIX_FMT_NONE;
 }
 
 #endif
 
-
+#endif // ROXLU_GL_WRAPPER

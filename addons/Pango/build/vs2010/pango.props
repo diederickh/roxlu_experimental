@@ -13,17 +13,8 @@
       <AdditionalDependencies>$(SolutionDir)$(Configuration)\roxlu_pango.lib;$(ROXLU_EXTERN_LIB_DIR)\pango-1.0.lib;$(ROXLU_EXTERN_LIB_DIR)\pangocairo-1.0.lib;$(ROXLU_EXTERN_LIB_DIR)\cairo.lib;$(ROXLU_EXTERN_LIB_DIR)\glib-2.0.lib;$(ROXLU_EXTERN_LIB_DIR)\gobject-2.0.lib;$(ROXLU_EXTERN_LIB_DIR)\pixman-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreLinkEvent>
-      <Command>copy  "$(ROXLU_EXTERN_BIN_DIR)\pango-1.dll" "$(SolutionDir)bin\" 
-copy  "$(ROXLU_EXTERN_BIN_DIR)\pangocairo-1.dll" "$(SolutionDir)bin\" 
-copy  "$(ROXLU_EXTERN_BIN_DIR)\cairo.dll" "$(SolutionDir)bin\" 
-copy  "$(ROXLU_EXTERN_BIN_DIR)\gmodule-2.dll" "$(SolutionDir)bin\" 
-copy  "$(ROXLU_EXTERN_BIN_DIR)\glib-2.dll" "$(SolutionDir)bin\" 
-copy  "$(ROXLU_EXTERN_BIN_DIR)\gobject-2.dll" "$(SolutionDir)bin\" 
-copy  "$(ROXLU_EXTERN_BIN_DIR)\libintl.dll" "$(SolutionDir)bin\" 
-copy  "$(ROXLU_EXTERN_BIN_DIR)\iconv.dll" "$(SolutionDir)bin\" 
-copy  "$(ROXLU_EXTERN_BIN_DIR)\libpng15.dll" "$(SolutionDir)bin\" 
-copy  "$(ROXLU_EXTERN_BIN_DIR)\zlib1.dll" "$(SolutionDir)bin\" 
-copy  "$(ROXLU_EXTERN_BIN_DIR)\pangowin32-1.dll" "$(SolutionDir)bin\" </Command>
+      <Command>
+      </Command>
     </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup />

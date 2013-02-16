@@ -11,12 +11,19 @@
 using namespace std;
 
 struct INIEntry {
-INIEntry(string sKey, string sVal, string sSection = "")
-:key(sKey)
-,value(sVal)
-    ,section(sSection) 
+   INIEntry(string sKey, string sVal, string sSection = "")
+       :key(sKey)
+       ,value(sVal)
+       ,section(sSection) 
   {
   }
+
+#if !defined(NDEBUG)
+  ~INIEntry() {
+    printf("~INIEntry()\n");
+  }
+#endif
+
   string key;
   string value;
   string section;
@@ -30,11 +37,18 @@ enum INITypes {
 };
 
 struct INISortedEntry {
-INISortedEntry(string sValue, int nType)
-:value(sValue)
-,type(nType)
+  INISortedEntry(string sValue, int nType)
+     :value(sValue)
+     ,type(nType)
   {
   }
+
+#if !defined(NDEBUG)
+  ~INISortedEntry() {
+    printf("~INISortedEntry()\n");
+  }
+#endif
+
   string value;
   int type;
 };
@@ -43,10 +57,12 @@ class INI {
  public:	
   INI();
   INI(string sFile);
-	
+  ~INI();
+
   // storage
   bool load(string sFile);
   bool save(string sFile);
+  bool reload();
 	
   // retrieve settings
   string getString(string sKey, string sDefault = "");
@@ -61,7 +77,10 @@ class INI {
   void	setFloat(string sKey, float nValue);
   void	setDouble(string sKey, double nValue);
   void	setBool(string sKey, bool nValue);
-	
+
+  // free all heap memory (some member won't be cleared)
+  void reset(); 
+  
   // helpers
   // -------------------------------------------------------------------------
   inline bool get(string sKey, string& rFound) {
@@ -108,6 +127,7 @@ class INI {
  private: 
   map<string, INIEntry*> dict;
   vector<INISortedEntry*> sorted_entries;
+  std::string filepath;
 };
 
 

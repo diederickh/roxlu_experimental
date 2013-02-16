@@ -1,40 +1,17 @@
 #ifndef ROXLU_BUTTONSH
 #define ROXLU_BUTTONSH
 
-/* 
-   OpenFrameworks example:
-   ==========================
-   void testApp::mouseMoved(int x, int y){
-   gui.onMouseMoved(x,y);
-   }
-   void testApp::mouseDragged(int x, int y, int button){
-   cam.onMouseMoved(x,y);
-   }
-   void testApp::mousePressed(int x, int y, int button){
-   gui.onMouseDown(x,y);	
-   }
-   void testApp::mouseReleased(int x, int y, int button){
-   gui.onMouseUp(x,y);
-   }
-   void testApp::update() {
-   gui.update();
-   }
-*/
-
-
 /** 
-
-    Buttons is a simple openGL GUI for tweaking parameters. It's being developed
-    using openFrameworks but my goal is to make this work in any opengl context on 
-    both Windows and Mac. 
-
-    TODO:
-    - All elements use absolute coordinates now. Instead of using absolute vertices
-    we need to check out if it isn't faster to change to a "modelview" approach
-    where all vertices are translated on GPU. We're using absolute coordinates 
-    obecause this makes testing for mouseenter/leave (etc) faster.
-
-*/
+ *  Buttons is a simple openGL GUI for tweaking parameters. It's being developed
+ *  using openFrameworks but my goal is to make this work in any opengl context on 
+ *  both Windows and Mac. 
+ *
+ *   TODO:
+ *   - All elements use absolute coordinates now. Instead of using absolute vertices
+ *   we need to check out if it isn't faster to change to a "modelview" approach
+ *   where all vertices are translated on GPU. We're using absolute coordinates 
+ *   obecause this makes testing for mouseenter/leave (etc) faster.
+ */
 
 #include <vector>
 
@@ -58,8 +35,6 @@
 #include <buttons/Rectangle.h>
 #include <buttons/Vector.h>
 #include <buttons/Storage.h>
-// #include <buttons/Server.h> // NEEDS TO BE UPDATED TO USE LIBUV
-// #include <buttons/Client.h> // NEEDS TO BE UPDATED TO USE LIBUV
 
 using std::vector;
 using namespace roxlu;
@@ -200,7 +175,7 @@ namespace buttons {
     void addListener(ButtonsListener* listener);
     void notifyListeners(ButtonsEventType aboutWhat, const Element* target, void* targetData);
 	
-    int getNumParents();
+    int getNumParents();  // number of parent elements (gui elements which have children)
     int getNumChildren();
 
   private:
@@ -230,6 +205,10 @@ namespace buttons {
     int h;
     int win_w;
     int win_h;
+    float col_hue; // set by setColor, used by client<>server
+    float col_sat; // set by setColor, used by client<>server
+    float col_bright; // set by setColor, used by client<>server
+    float col_alpha; // set by setColor, used by client<>server
     float header_color_top[4];	
     float header_color_bottom[4];
     float shadow_color[4];
@@ -248,6 +227,8 @@ namespace buttons {
     string title;
     string name; // name based on title (cleaned)
     int title_dx; // static text index
+    int id; // unique ID that is used by the client<>server communication to indicate a gui/elements.
+    static unsigned int num_created;  // number of buttons created, used to make unique ids.
     ButtonVertices vd;
     int num_panel_vertices; // number of vertices used by the panel itself
 	

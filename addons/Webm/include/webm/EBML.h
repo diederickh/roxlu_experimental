@@ -10,6 +10,7 @@ extern "C" {
 }
 #include <stdlib.h> /* rand() */
 #include <time.h> /* time() */
+#include <errno.h>
 #include <stdio.h>
 #include <inttypes.h>
 #include <assert.h>
@@ -151,14 +152,15 @@ struct EBMLCluster {
 typedef size_t(*ebml_write_cb)(char* data, size_t nbytes, void* user);              /* output: write data */
 typedef void(*ebml_close_cb)(void* user);                                           /* output: close  */
 typedef size_t(*ebml_peek_cb)(char* dest, void* user);                              /* input: peek the next byte */
-typedef size_t(*ebml_read_cb)(char* dest, size_t nbytes, void* user);               /* input: read nbyte sinto dest */
+typedef size_t(*ebml_read_cb)(char* dest, size_t nbytes, void* user);               /* input: read nbytes into dest and return how  many bytes were read; if there are no bytes left in buffer, return 0, this should only read when you can read the whole chunk*/
 typedef size_t(*ebml_skip_cb)(size_t nbytes, void* user);                           /* input: skip nbytes from current pos */
-
+typedef size_t(*ebml_bytes_left_cb)(void* user);                                    /* input: return the number of bytes which can be from the buffer, is called multiple times */
+typedef size_t(*ebml_parse_cb)(uint64_t id, uint64_t nbytes, void* user);              /* input: called when we got enough data to parse an element, the callback should read or flush the buffer and parse the element, we only continue when the return value is the same as the nbytes */
 
 size_t ebml_file_write(char* data, size_t nbytes, void* user);
 void ebml_file_close(void* user);
 size_t ebml_file_peek(char* dest, void* user);
-size_t ebml_file_read(char*dest, size_t nbytes, void* user);
+size_t ebml_file_read(char* dest, size_t nbytes, void* user);
 size_t ebml_file_skip(size_t nbytes, void* user);
 
 struct EBMLFile {                                                                   /* EBML file stream, used as a helper to write/read ebml to/from a file */
@@ -166,6 +168,13 @@ struct EBMLFile {                                                               
   ~EBMLFile();
   bool open(const std::string filepath);
   FILE* fp;
+};
+
+enum EBMLParseStates {
+  EBML_STATE_NONE, /* no state set yet */
+  EBML_STATE_ID, /* we're reading the ID */
+  EBML_STATE_DATA_SIZE, /* we're reading the data size */
+  EBML_STATE_DATA /* we're reading the data (when we have enough bytes) */
 };
 
 class EBML {
@@ -192,6 +201,8 @@ class EBML {
     ebml_peek_cb peekCB,
     ebml_read_cb readCB,
     ebml_skip_cb skipCB,
+    ebml_bytes_left_cb leftCB,
+    ebml_parse_cb parseCB,
     void* user);
 
   /* parses a read buffer */
@@ -226,16 +237,16 @@ class EBML {
   uint8_t ru8();
   int decodeSize(uint8_t b);                                                       /* returns how many number of bytes need to be read */
   int encodeSize(uint64_t b);                                                      /* based on value stored in 'b' return the number of bytes that you need to store */
-  uint64_t readID();
-  uint64_t readDataSize();
+  uint64_t readID(int* read);
+  uint64_t readDataSize(int* read);
   size_t readData(char* dest, size_t nbytes);
 
   /* utils */
   uint64_t generateUID(int num);
+  std::string idToString(uint64_t id);
 
  private:
   void printElement(uint64_t id, uint64_t dataSize, int dataType, char* buffer, size_t bufferSize = EBML_TMP_BUFFER_SIZE);
-  std::string idToString(uint64_t id);
 
  private:
   void* cb_user;
@@ -244,12 +255,18 @@ class EBML {
   ebml_peek_cb cb_peek;
   ebml_write_cb cb_write;
   ebml_close_cb cb_close;
+  ebml_bytes_left_cb cb_bytes_left;
+  ebml_parse_cb cb_parse;
 
   std::vector<char> buffer;                                                       /* our main write buffer */
   std::vector<char> tmp_buffer;                                                   /* because we can't predict the size of some elements we use a intermediate buffer to store data */
 
   uint64_t time_cluster_started;                                                  /* timestamp in nanoseconds when the last cluster started. all simpleblocks base their relative time on this */
   uint64_t time_stream_started;                                                   /* time we first received a simpleblock */
+
+  int parse_state;                                                                /* current parse state */
+  uint64_t parse_id;                                                              /* last parsed id, or 0 */
+  uint64_t parse_data_size;                                                       /* last parsed data size */
 };
 
 inline uint64_t EBML::ru64() {
@@ -302,11 +319,9 @@ inline uint32_t EBML::ru32() {
 }
 
 inline uint32_t EBML::ru24() {
-
   uint32_t result = 0;
   readData((char*)&result, 3);
   result = ((result >> 16) & 0x000000FF) | (result & 0x0000FF00) | ((result << 16) & 0x00FF0000); //| ((result << 16) & 0x00FF0000);
-  RX_VERBOSE(("reading 3 bytes of size, which gives -> %d", result));
   return result;
 }
 
@@ -399,9 +414,23 @@ inline int EBML::encodeSize(uint64_t number) {
   return num_bytes;
 }
 
-inline uint64_t EBML::readID() {
+inline uint64_t EBML::readID(int* read) {
+
+  size_t to_read = cb_bytes_left(cb_user);
+  if(to_read == 0) {
+    *read = 0;
+    return 0;
+  }
+
   uint8_t size = peek();
   int num_bytes = decodeSize(size);
+
+  if(to_read < num_bytes) {
+    *read = 0;
+    return 0;
+  }
+
+  *read = num_bytes;
 
   switch(num_bytes) {
     case 1: { 
@@ -438,9 +467,21 @@ inline uint64_t EBML::readID() {
   return 0;
 }
 
-inline uint64_t EBML::readDataSize() {
+inline uint64_t EBML::readDataSize(int* read) {
+  size_t to_read = cb_bytes_left(cb_user);
+  if(to_read == 0) {
+    *read = 0;
+    return 0;
+  }
+
   uint8_t size = peek();
   int num_bytes = decodeSize(size);
+  if(to_read < num_bytes) {
+    *read = 0;
+    return 0;
+  }
+  
+  *read = num_bytes;
 
   switch(num_bytes) {
     case 1: { 
@@ -450,7 +491,6 @@ inline uint64_t EBML::readDataSize() {
       return (ru16() & 0x3FFF); // @todo need to test this
     }
     case 3: { 
-      RX_WARNING(("TODO: Need to read 3 bytes, @todo validate."));
       return (ru24() & 0x1FFFFF); // @todo need to test this
     }
     case 4: { 

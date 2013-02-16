@@ -1,6 +1,7 @@
 #ifndef ROXLU_BUTTONS_CLIENTH
 #define ROXLU_BUTTONS_CLIENTH
 
+#include <buttons/Buttons.h>
 #include <buttons/Types.h>
 #include <buttons/Element.h>
 #include <buttons/Server.h>
@@ -11,88 +12,69 @@
 #include <map>
 #include <roxlu/Roxlu.h> 
 
-// @todo set nodelay on socket
-
 namespace buttons {
-	/*
-	enum ClientTaskName {
-		 BCLIENT_PARSE_SCHEME
-		 ,BCLIENT_SEND_TO_SERVER
-			 ,BCLIENT_VALUE_CHANGED_SLIDERI
-		 ,BCLIENT_VALUE_CHANGED_SLIDERF
 
-	};
+  void buttons_client_on_resolved(uv_getaddrinfo_t* req, int status, struct addrinfo* res);
+  void buttons_client_on_connect(uv_connect_t* req, int status);
+  void buttons_client_on_read(uv_stream_t* handle, ssize_t read, uv_buf_t buf);
+  uv_buf_t buttons_client_on_alloc(uv_handle_t* handle, size_t nbytes);
+  void buttons_client_on_write(uv_write_t* req, int status);
+  void buttons_client_on_shutdown(uv_shutdown_t* req, int status);
+  void buttons_client_on_close(uv_handle_t* handle);
+  void buttons_client_on_reconnect_timer(uv_timer_t* handle, int status);
+
+  class Client : public ButtonsListener {
+  public:
+    Client(std::string host, std::string port);                                   /* Client which connects to a server on the given port */
+    ~Client();                                                                
+    bool connect();                                                               /* Conect with gui sever */
+    void reconnect();                                                             /* (private) Restarts the reconnect sequence when we get disconnected or can't connect to the server. Do not call this manually; is handled internally but we need it to be public for our callbacks */
+    void update();                                                                /* Call this repeatetly */
+    void draw();                                                                  /* Draw the retrieved guis */
+    void onMouseMoved(int x, int y);                                          
+    void onMouseUp(int x, int y);                                             
+    void onMouseDown(int x, int y);                                           
+                                                                              
+    void sendCommand(CommandData cmd);                                            /* Send a command to the gui server */ 
+    void write(char* data, size_t nbytes);                                        /* Send data over socket */
+    void parseBuffer();                                                           /* Parses the incoming bitstream */ 
+    void handleCommand(CommandData& cmd);                                         /* Handles the commands we find in parseBuffer() */
+    void getScheme();                                                             /* Ask the remove server for the gui scheme */
+    void operator()(unsigned int dx);                                             /* operator for button clicks */
+    void clear();                                                                 /* (private) Deallocates and destroys all created guis + elements */
 
 
-	struct ClientTask {
-		ClientTask(ClientTaskName name)
-			:name(name)
-			,sliderf_value(0.0f)
-			,slideri_value(0)
-			,element(NULL)
-			,sliderf(NULL)
-			,buttons(NULL)
-		{
-		}
+  public:
+    void onEvent(ButtonsEventType event, 
+                 const Buttons& buttons, 
+                 const Element* target, 
+                 void* targetData);
 
-		ClientTaskName name;
-		ButtonsBuffer buffer;
-		Element* element;
-		Sliderf* sliderf;
-		Buttons* buttons;
+  private:
+    void parseScheme(CommandData& cmd);                                          /* Decodes a serialized scheme and creates the necessary gui elements on the client */
 
-		float sliderf_value;
-		int slideri_value;
-	};
-	*/
-	class Client : public roxlu::Runnable, public ButtonsListener {
-	public:
-		Client(const std::string ip, int port);
-		~Client();
-		void start();
-		void run();
+                                                                             
+  public:        
+    ButtonsBuffer buffer;                                                        /* Stores incoming data from the server. These are commands + schemes */
+    ClientServerUtils util;                                                      /* Used to parse the incoming commands */
+    uv_loop_t* loop;                                                             /* The UV loop handle, which "runs" everything */
+    uv_tcp_t sock;                                                               /* The uv socket wrapper */
+    uv_getaddrinfo_t resolver_req;                                               /* Used to resolve the DNS to get to the IP of the server */
+    uv_connect_t connect_req;                                                    /* Connect request context */
+    uv_shutdown_t shutdown_req;                                                  /* Used to shutdown the connection with the server (when server disconnects us) */
+    uv_timer_t timer_req;                                                        /* When we can't connect or get disconnected we start the reconnect sequence using this timer */
+    std::string host;                                                            /* Host on which the gui server runs */
+    std::string port;                                                            /* Port we connect to on the gui sever */
+    std::map<unsigned int, std::map<unsigned int, buttons::Element*> > elements; /* Indexed by buttons-id with all elements */
+    std::map<unsigned int, buttons::Buttons*> buttons;                           /* The buttons/gui objects, indexed by ID */
 
-		void update();
-		void draw();
-
-		void onMouseDown(int x, int y);
-		void onMouseUp(int x, int y);
-		void onMouseMoved(int x, int y);
-
-		void onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target, void* targetData);
-		void operator()(unsigned int dx); // operator for button clicks
-	private:
-		void clear(); // deletes all allocated guis and widgets and references
-		bool connect();
-		void parseBuffer();
-		void getScheme(); // sends the command to retrieve the scheme
-		void parseScheme(CommandData& cmd);
-
-		void addInCommand(CommandData task);
-		void addOutCommand(CommandData task); // will be name: addSendTask or something.
-
-		void send(const char* buffer, size_t len); // send data to server
-	private:
-		bool is_connected;
-		Socket sock;
-		roxlu::Thread thread;
-		roxlu::Mutex mutex;
-		int port;
-		std::string ip;
-		ButtonsBuffer buffer;
-		ClientServerUtils util;
-		std::vector<CommandData> out_commands; // used for Client --> Server communication
-		std::vector<CommandData> in_commands; // must be handle in own thread
-		std::map<unsigned int, buttons::Buttons*> buttons; 
-		std::map<unsigned int, std::map<unsigned int, buttons::Element*> > elements;
-
-		// used on guis @todo when destrying deallocate thse
-		std::vector<float*> value_floats;
-		std::vector<int*> value_ints;
-		std::vector<bool*> value_bools;
-		std::vector<float*> value_float_arrays;
-		std::vector<int*> value_int_arrays;
-	};
+    /* these represent the 'properties' on the server */
+    std::vector<float*> value_floats;
+    std::vector<int*> value_ints;
+    std::vector<bool*> value_bools;
+    std::vector<float*> value_float_arrays;
+    std::vector<int*> value_int_arrays;
+  };
 
 } // buttons
 #endif

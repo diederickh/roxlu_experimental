@@ -12,7 +12,7 @@ extern "C" {
 }
 
 #include <webm/EBML.h>
-#include <webm/VPX.h>
+#include <webm/VPXEncoder.h>
 
 #define TIMER_START uint64_t timer_time_start = uv_hrtime();
 #define TIMER_PRINT(x) printf("[TIMER] %s : %lld\n", x, (uv_hrtime() - timer_time_start));
@@ -39,14 +39,7 @@ class Webm {
 
   void setEBML(EBML* ebml);
 
-  bool setupVideo(int inW,               /* video in width */
-    int inH,                             /* video in height */
-    int outW,                            /* video out width */
-    int outH,                            /* video out height */
-    int fps,                             /* video fps */
-    vpx_img_fmt fmt);                    /* video pixel format */
-
-  bool setupAudio(); // todo
+  bool setup(VPXSettings cfg);
 
   bool initialize();
   bool shutdown();
@@ -70,15 +63,10 @@ class Webm {
  public:
   EBML* ebml;
 
-  /* video */
-  int vid_in_w;                         /* video input width */
-  int vid_in_h;                         /* video input height */
-  int vid_out_w;                        /* video output width */
-  int vid_out_h;                        /* video output height */
-  int vid_fps;                          /* video frames per second */
+  VPXSettings settings;
   int64_t vid_num_frames;               /* number of encoded/added frames */
   vpx_img_fmt vid_fmt;                  /* video input pixel format */
-  VPX vid_enc;                          /* video encoder; wrapper around libvpx */
+  VPXEncoder vid_enc;                   /* video encoder; wrapper around libvpx */
   std::vector<WebmPacket*> packets;     /* contains video/audio packets that needs to be encoded */
   uint64_t vid_timeout;                 /* time out when we want an new video frame */
   uint64_t vid_millis_per_frame;        /* how many millis per frame */
@@ -108,7 +96,6 @@ inline bool Webm::wantsNewVideoFrame() {
   }
 
   return false;
-
 }
 
 inline void Webm::freePackets() {

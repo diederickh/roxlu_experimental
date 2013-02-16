@@ -11,7 +11,18 @@ INI::INI(string sFile) {
   load(sFile);
 }
 
+INI::~INI() {
+  reset();
+}
+
+bool INI::reload() {
+  reset();
+  return load(filepath);
+}
+
+
 bool INI::load(string sFile) {
+  filepath = sFile;
   ifstream ifs(sFile.c_str());
   if(!ifs.is_open()) {
     cout << "error: cannot load ini file:" << sFile << endl;
@@ -168,4 +179,24 @@ void INI::setDouble(string sKey, double nValue) {
 
 void INI::setBool(string sKey, bool nValue) {
   setValue<bool>(sKey, nValue);
+}
+
+void INI::reset() {
+  for(std::map<std::string, INIEntry*>::iterator it = dict.begin(); it != dict.end(); ++it) {
+    INIEntry* p = it->second;
+    if(p) {
+      delete p;
+      p = NULL;
+    }
+  }
+  dict.clear();
+  
+  for(std::vector<INISortedEntry*>::iterator it = sorted_entries.begin(); it != sorted_entries.end(); ++it) {
+    INISortedEntry* se = *it;
+    if(se) {
+      delete se;
+      se = NULL;
+    }
+  }
+  sorted_entries.clear();
 }

@@ -46,5 +46,9 @@ inline void RingBuffer::reset() {
   write_index = 0;
   read_index = 0;
   bytes_stored = 0;
+
+  if(buffer) {
+    memset(buffer, 0x00, capacity);
+  }
 }
 #endif

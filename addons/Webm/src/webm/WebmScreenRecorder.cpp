@@ -1,3 +1,5 @@
+#ifdef ROXLU_GL_WRAPPER
+
 #include <webm/WebmScreenRecorder.h>
 #include <roxlu/Roxlu.h>
 
@@ -5,6 +7,7 @@ WebmScreenRecorder::WebmScreenRecorder()
   :webm(&ebml),
    nbytes_per_video_frame(0)
 {
+  RX_WARNING(("@todo - implement the pbos"));
 }
 
 WebmScreenRecorder::~WebmScreenRecorder() {
@@ -34,17 +37,26 @@ bool WebmScreenRecorder::setup(WebmScreenRecorderSettings cfg) {
                     settings.cb_peek,
                     settings.cb_read,
                     settings.cb_skip,
+                    NULL,
+                    NULL,
                     settings.cb_user);
 
-  if(settings.vid_fmt == VPX_IMG_FMT_NONE) {
-    settings.vid_fmt = VPX_IMG_FMT_RGB24;
+
+  if(settings.vid_fmt == AV_PIX_FMT_NONE) {
+    settings.vid_fmt = AV_PIX_FMT_RGB24;
   }
 
-  if(settings.use_video) {
-    bool r = webm.setupVideo(settings.vid_in_w, settings.vid_in_h, 
-                             settings.vid_out_w, settings.vid_out_h, 
-                             settings.vid_fps, settings.vid_fmt);
 
+  if(settings.use_video) {
+    VPXSettings cfg;
+    cfg.in_w = settings.vid_in_w;
+    cfg.in_h = settings.vid_in_h;
+    cfg.out_w = settings.vid_out_w;
+    cfg.out_h = settings.vid_out_h;
+    cfg.fps = settings.vid_fps;
+    cfg.fmt = settings.vid_fmt;
+
+    bool r = webm.setup(cfg);
     if(!r) {
       RX_ERROR(("cannot setup webm video"));
       return false;
@@ -56,7 +68,7 @@ bool WebmScreenRecorder::setup(WebmScreenRecorderSettings cfg) {
     return false;
   }
 
-  if(settings.vid_fmt == VPX_IMG_FMT_RGB24) { 
+  if(settings.vid_fmt == AV_PIX_FMT_RGB24) { 
     nbytes_per_video_frame = settings.vid_in_w * settings.vid_in_h * 3;
   }
   else {
@@ -102,3 +114,4 @@ void WebmScreenRecorder::grabFrame() {
 }
 
 
+#endif // ROXLU_GL_WRAPPER

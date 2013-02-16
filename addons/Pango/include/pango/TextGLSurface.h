@@ -8,6 +8,8 @@
  * 
  */
 
+#ifdef ROXLU_GL_WRAPPER
+
 #ifndef ROXLU_TEXT_GL_SURFACE_H
 #define ROXLU_TEXT_GL_SURFACE_H
 
@@ -128,6 +130,7 @@ inline void TextGLSurface::setText(const std::string str, float r, float g, floa
 
 inline void TextGLSurface::setMarkup(const std::string str) {
   text.setMarkup(str);
+  has_text = true;
   needs_update = true;
 }
 
@@ -183,3 +186,4 @@ inline void TextGLSurface::wrapWordChar() {
 
 #endif
 
+#endif // roxlu GL wrapper

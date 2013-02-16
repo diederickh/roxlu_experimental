@@ -10,12 +10,11 @@
       <AdditionalIncludeDirectories>$(ROXLU_DIR)\addons\VideoCapture\include\win\;$(ROXLU_DIR)\addons\VideoCapture\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(SolutionDir)$(Configuration)\roxlu_videocapture.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)$(Configuration)\roxlu_videocapture.lib;strmiids.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreLinkEvent>
       <Command>
-
-</Command>
+      </Command>
     </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup />

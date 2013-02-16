@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "uploader", "uploader.vcxproj", "{949E5CEE-8322-490A-A69D-E4AB98DECF5F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9D497541-3D33-4FDF-A744-859F01D334DF} = {9D497541-3D33-4FDF-A744-859F01D334DF}
+		{E9A9CD49-1086-4725-AB1D-3B0B7AB859CA} = {E9A9CD49-1086-4725-AB1D-3B0B7AB859CA}
+		{DFF34DD8-7A48-413F-9F7F-034CD95A0B3F} = {DFF34DD8-7A48-413F-9F7F-034CD95A0B3F}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "roxlu", "..\..\..\..\..\lib\build\vs2010\roxlu.vcxproj", "{E9A9CD49-1086-4725-AB1D-3B0B7AB859CA}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "roxlu_curl", "..\..\..\..\..\addons\Curl\build\vs2010\Curl.vcxproj", "{DFF34DD8-7A48-413F-9F7F-034CD95A0B3F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "roxlu_sqlite", "..\..\..\..\..\addons\SQLite\build\vs2010\SQLite.vcxproj", "{9D497541-3D33-4FDF-A744-859F01D334DF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{949E5CEE-8322-490A-A69D-E4AB98DECF5F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{949E5CEE-8322-490A-A69D-E4AB98DECF5F}.Debug|Win32.Build.0 = Debug|Win32
+		{949E5CEE-8322-490A-A69D-E4AB98DECF5F}.Release|Win32.ActiveCfg = Release|Win32
+		{949E5CEE-8322-490A-A69D-E4AB98DECF5F}.Release|Win32.Build.0 = Release|Win32
+		{E9A9CD49-1086-4725-AB1D-3B0B7AB859CA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E9A9CD49-1086-4725-AB1D-3B0B7AB859CA}.Debug|Win32.Build.0 = Debug|Win32
+		{E9A9CD49-1086-4725-AB1D-3B0B7AB859CA}.Release|Win32.ActiveCfg = Release|Win32
+		{E9A9CD49-1086-4725-AB1D-3B0B7AB859CA}.Release|Win32.Build.0 = Release|Win32
+		{DFF34DD8-7A48-413F-9F7F-034CD95A0B3F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DFF34DD8-7A48-413F-9F7F-034CD95A0B3F}.Debug|Win32.Build.0 = Debug|Win32
+		{DFF34DD8-7A48-413F-9F7F-034CD95A0B3F}.Release|Win32.ActiveCfg = Release|Win32
+		{DFF34DD8-7A48-413F-9F7F-034CD95A0B3F}.Release|Win32.Build.0 = Release|Win32
+		{9D497541-3D33-4FDF-A744-859F01D334DF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9D497541-3D33-4FDF-A744-859F01D334DF}.Debug|Win32.Build.0 = Debug|Win32
+		{9D497541-3D33-4FDF-A744-859F01D334DF}.Release|Win32.ActiveCfg = Release|Win32
+		{9D497541-3D33-4FDF-A744-859F01D334DF}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

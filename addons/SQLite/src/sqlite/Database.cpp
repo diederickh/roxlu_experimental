@@ -1,6 +1,15 @@
 #include <sqlite/Database.h>
 
+int roxlu_database_busy_handler(void* v, int r) {
+#if !defined(NDEBUG)
+  printf("sqlite database seems to be locked.\n");
+#endif
+  return 1;
+}
+
 namespace roxlu  {
+
+
 
   Database::Database()
     :file("")
@@ -9,36 +18,34 @@ namespace roxlu  {
   }
 
   Database::~Database() {
+    if(opened) {
+      printf("closing database.\n");
+      sqlite3_close(db);
+    }
   }
 
   //http://icculus.org/~chunky/stuff/sqlite3_example/sqlite3_example_bind.c
   bool Database::open(const string& fileName) {
     file = fileName;
-    if(SQLITE_OK !=  sqlite3_open(file.c_str(), &db)) {
+    if(SQLITE_OK != sqlite3_open(file.c_str(), &db)) {
       printf("Error: %s\n", sqlite3_errmsg(db));
       sqlite3_close(db);
       return false;
     }
+    sqlite3_busy_handler(db, roxlu_database_busy_handler, NULL);
     opened = true;
     return true;
   }
 
-  bool Database::query(const string& sql) {
+  Query Database::query(const string& sql) {
+    Query q(*this, sql);
+
     if(!opened) {
       printf("Warning query(): db not opened\n");
-      return false;
+      return q;
     }
-    sqlite3_stmt* statement;
-    if (SQLITE_OK != sqlite3_prepare_v2(db, sql.c_str(),-1, &statement, 0)) {
-      printf("Error: %s with: %s\n", sqlite3_errmsg(db), sql.c_str());
-      return false;
-    }
-	
-    while(SQLITE_ROW == sqlite3_step(statement));
-    if(SQLITE_OK != sqlite3_finalize(statement)) {
-      return false;
-    }
-    return true;
+
+    return q;
   }
 
   bool Database::beginTransaction() {

@@ -1,7 +1,7 @@
 #include <glfw_wrapper/SimulationBase.h>
 #include <buttons/Buttons.h>
 #include <roxlu/Roxlu.h>
-#include <flv/ScreenRecorder.h>
+#include <flv/FLVScreenRecorder.h>
 #include <pbd/PBD.h>
 
 #include "RParticles.h"
@@ -36,5 +36,5 @@ public:
   double last_timestep;
   double time_accum;
 
-  ScreenRecorder recorder;
+  FLVScreenRecorder recorder;
 };

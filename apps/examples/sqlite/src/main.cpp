@@ -8,10 +8,13 @@ int main() {
   
   // open a database + create a table.
   db.open("test.db");
-  db.query("CREATE TABLE IF NOT EXISTS tweets (" \
-           "id INTEGER PRIMARY KEY AUTOINCREMENT, " \
-           "name TEXT, " \
-           "score INTEGER);");
+
+  QueryResult qr(db);
+  db.query(SQL(CREATE TABLE IF NOT EXISTS tweets (
+           id INTEGER PRIMARY KEY AUTOINCREMENT,
+           name TEXT,
+           score INTEGER))).execute(qr);
+  qr.finish();
 
   // insert data
   int num = 10;
@@ -24,20 +27,18 @@ int main() {
       .execute();
   }
   
-
   // Retrieve data
   roxlu::QueryResult result(db);
   db.select("id,name,score")
     .from("tweets")
     .execute(result);
 
-  if(result.isOK()) {
-    while(result.next()) {
-      printf("Name: %s, Score: %lld, ID: %lld\n", result.getString(1).c_str(), result.getInt(2), result.getInt(0));
-    }
+  while(result.next()) {
+    printf("Name: %s, Score: %lld, ID: %lld\n", result.getString(1).c_str(), result.getInt(2), result.getInt(0));
   }
-  
+
   // IMPORTANT: call QueryResult.free() when you're done with the result.
-  reuslt.free();
+  result.free();
+
   return 1;
 };
