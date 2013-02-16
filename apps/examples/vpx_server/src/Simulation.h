@@ -17,9 +17,7 @@ class Simulation : public SimulationBase {
   void onKeyUp(int key);
   void onWindowClose();
  private:
-  //  VPXScreenGrabber grabber;
   VPXOutStream out_stream;
-  // VPXInStream in_stream;
   FPS fps;
   EasyCam cam;
   Axis ax;

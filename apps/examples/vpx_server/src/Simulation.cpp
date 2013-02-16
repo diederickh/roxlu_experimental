@@ -3,20 +3,7 @@
 Simulation::Simulation()
   :SimulationBase()
   ,out_stream(3344)
-   //  ,in_stream("localhost", "3344")
 {
-  /*
-  VPXStreamSettings s;
-  s.in_w = 1024;
-  s.in_h = 768;
-  s.out_w = s.in_w;
-  s.out_h = s.in_h;
-  s.fps = 30;
-  s.fmt = VPX_IMG_FMT_RGB24;
-
-  stream.setup(s);
-  */
-
 
   VPXSettings s;
   s.in_w = 1024;
@@ -24,10 +11,6 @@ Simulation::Simulation()
   s.out_w = s.in_w;
   s.out_h = s.in_h;
   s.fps = 30;
-  //  s.fmt = VPX_IMG_FMT_ARGB24;
-  //s.fmt = VPX_IMG_FMT_ARGB;
-  //s.fmt = AV_PIX_FMT_ARGB;
-  //s.fmt = AV_PIX_FMT_RGBA;
   s.fmt = AV_PIX_FMT_BGRA; // <-- we grab in this fmt.
   out_stream.setup(s);
 
@@ -35,7 +18,6 @@ Simulation::Simulation()
     RX_ERROR(("Cannot start out server"));
   }
   ax.setup(10);
-  //  cam.setup(window_w, window_h);
   cam.setup(1024, 768);
 }
 
@@ -52,9 +34,6 @@ void Simulation::draw() {
   fps.draw();
   ax.draw(cam.pm().getPtr(), cam.vm().getPtr());
   out_stream.grabFrame();
-  
-  //  grabber.grabFrame();
-  //  stream.grabFrame();
 }
 
 void Simulation::onMouseUp(int x, int y, int button) {
