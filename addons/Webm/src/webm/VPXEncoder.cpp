@@ -20,14 +20,6 @@ bool VPXEncoder::shutdown() {
 
   settings.fmt = AV_PIX_FMT_NONE;
 
-  /*
-  if(pic_in) {
-    vpx_img_free(pic_in);
-    pic_in = NULL;
-  }
-  */
-  RX_ERROR(("cleanup pic_in if necessary"));
-
   if(pic_out) {
     vpx_img_free(pic_out);
     pic_out = NULL;
@@ -52,6 +44,9 @@ bool VPXEncoder::setup(VPXSettings cfg) {
 }
 
 bool VPXEncoder::initialize() {
+  assert(settings.out_w != 0);
+  assert(settings.out_h != 0);
+
   if(!configure()) {
     return false;
   }
@@ -134,6 +129,9 @@ void VPXEncoder::forceKeyFrame() {
 }
 
 void VPXEncoder::encode(unsigned char* data, int64_t pts) {
+  assert(settings.cb_user != NULL);
+  assert(settings.cb_write != NULL);
+
   if(!rescale(data)) {
     return;
   }
@@ -154,6 +152,8 @@ void VPXEncoder::encode(unsigned char* data, int64_t pts) {
 }
 
 bool VPXEncoder::rescale(unsigned char* data) {
+  assert(settings.in_w != 0);
+  assert(settings.in_h != 0);
 
   // vpx way to scale
 #if 0 
