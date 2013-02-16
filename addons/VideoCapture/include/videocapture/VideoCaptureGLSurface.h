@@ -48,7 +48,12 @@ class VideoCaptureGLSurface {
  public:
   VideoCaptureGLSurface();
   ~VideoCaptureGLSurface();
-  void setup(int w, int h, VideoCaptureFormat fmt);
+  //  void setup(int w, int h, VideoCaptureFormat fmt = VC_NONE);
+#if defined(__APPLE__)
+  void setup(int w, int h, GLenum internalFormat = GL_RGBA, GLenum format = GL_YCBCR_422_APPLE, GLenum type = GL_UNSIGNED_SHORT_8_8_APPLE);
+#else
+  void setup(int w, int h, GLenum internalFormat = GL_RGB, GLenum format = GL_RGB, GLenum type = GL_UNSIGNED_BYTE);
+#endif
   void setPixels(unsigned char* pixels, size_t nbytes);
   void draw(int x, int y, int width = 0, int height = 0);
   void reset();
@@ -62,7 +67,7 @@ class VideoCaptureGLSurface {
   int surface_h;
   int window_w;
   int window_h;
-  VideoCaptureFormat fmt;
+  //  VideoCaptureFormat fmt;
   
   static GLuint prog;
   static GLint u_pm;
@@ -71,6 +76,10 @@ class VideoCaptureGLSurface {
   static GLint u_scale_matrix;
   static GLint u_tex;
   static GLfloat pm[16];
+
+  GLenum tex_internal_format;
+  GLenum tex_format;
+  GLenum tex_type;
 
   GLuint vbo;
   GLuint vao;

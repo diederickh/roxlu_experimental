@@ -15,7 +15,7 @@ VideoCaptureGLSurface::VideoCaptureGLSurface()
   ,surface_h(0)
   ,window_w(0)
   ,window_h(0)
-  ,fmt(VC_NONE)
+   //  ,fmt(VC_NONE)
   ,vbo(0)
   ,vao(0)
   ,tex(0)
@@ -38,11 +38,15 @@ VideoCaptureGLSurface::~VideoCaptureGLSurface() {
 }
 
 
-void VideoCaptureGLSurface::setup(int w, int h, VideoCaptureFormat format) {
-  fmt = format;
+//void VideoCaptureGLSurface::setup(int w, int h, VideoCaptureFormat format) {
+void VideoCaptureGLSurface::setup(int w, int h, GLenum internalFormat, GLenum format, GLenum type) { 
+  //  fmt = format;
   surface_w = w;
   surface_h = h;
   num_bytes = w * h * 4; // when using yuv, we allocate a bit too much
+  tex_internal_format = internalFormat;
+  tex_format = format;
+  tex_type = type;
 
   if(prog == 0) {
     GLuint vs = glCreateShader(GL_VERTEX_SHADER);
@@ -68,11 +72,14 @@ void VideoCaptureGLSurface::setup(int w, int h, VideoCaptureFormat format) {
   glGenTextures(1, &tex);
 
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
+  /*
 #if defined(__APPLE__)
   glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, surface_w, surface_h, 0, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, NULL);
 #elif defined(_WIN32)
   glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGB, surface_w, surface_h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 #endif
+  */
+  glTexImage2D(GL_TEXTURE_RECTANGLE, 0, internalFormat, surface_w, surface_h, 0, format, type, NULL);
   glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -156,8 +163,8 @@ void VideoCaptureGLSurface::setupGL() {
     glGetIntegerv(GL_VIEWPORT, viewport);
 
     float l = 0;
-    float r = 768;//viewport[2];
-    float b = 1366;//viewport[3];
+    float r = viewport[2];
+    float b = viewport[3];
     float n = -1.0;
     float f = 1.0;
     float t = 0.0;
@@ -218,11 +225,15 @@ void VideoCaptureGLSurface::setPixels(unsigned char* pixels, size_t nbytes) {
 
   glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos[read_dx]);
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
+  /*
 #if defined(__APPLE__)
   glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, surface_w, surface_h, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, 0);
 #elif defined(_WIN32)
   glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, surface_w, surface_h, GL_RGB, GL_UNSIGNED_BYTE, 0);
-#endif
+  #endif
+  */
+
+  glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, surface_w, surface_h, tex_format, tex_type, 0);
 
   glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos[write_dx]);
   glBufferData(GL_PIXEL_UNPACK_BUFFER, nbytes, NULL, GL_STREAM_DRAW); 
@@ -258,7 +269,7 @@ void VideoCaptureGLSurface::reset() {
 
   vbo = 0;
   vao = 0;
-  fmt = VC_NONE;
+  //  fmt = VC_NONE;
   write_dx = 0;
   read_dx = 0;
 }

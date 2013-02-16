@@ -324,7 +324,16 @@ namespace buttons {
     Connection* c = static_cast<Connection*>(sock->data);
 
     if(nread < 0) {
- 
+      int r = uv_read_stop(sock);
+      if(r) {
+        RX_ERROR(("error shutting down client. %s", uv_strerror(uv_last_error(sock->loop))));
+      }
+
+      if(buf.base) {
+        delete[] buf.base;
+        buf.base = NULL;
+      }
+
       uv_err_t err = uv_last_error(sock->loop);
       if(err.code != UV_EOF) {
         c->server.removeConnection(c);
@@ -332,13 +341,8 @@ namespace buttons {
         c = NULL;
         return;
       }
-
-      if(buf.base) {
-        delete[] buf.base;
-        buf.base = NULL;
-      }
  
-      int r = uv_shutdown(&c->shutdown_req, sock, buttons_server_on_shutdown);
+      r = uv_shutdown(&c->shutdown_req, sock, buttons_server_on_shutdown);
       if(r) {
         RX_ERROR(("error shutting down client. %s", uv_strerror(uv_last_error(sock->loop))));
         delete c;

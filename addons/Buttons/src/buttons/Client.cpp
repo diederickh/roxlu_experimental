@@ -469,10 +469,9 @@ namespace buttons {
     Client* c = static_cast<Client*>(handle->data);
 
     if(nbytes < 0) {
-      uv_err_t err = uv_last_error(handle->loop);
-      if(err.code != UV_EOF) {
-        RX_ERROR(("disconnected from server, but not correctly!"));
-        return;
+      int r = uv_read_stop(handle);
+      if(r) {
+        RX_ERROR(("error uv_read_stop on client. %s", uv_strerror(uv_last_error(handle->loop))));
       }
 
       if(buf.base) {
@@ -480,7 +479,13 @@ namespace buttons {
         buf.base = NULL;
       }
 
-      int r = uv_shutdown(&c->shutdown_req, handle, buttons_client_on_shutdown);
+      uv_err_t err = uv_last_error(handle->loop);
+      if(err.code != UV_EOF) {
+        RX_ERROR(("disconnected from server, but not correctly!"));
+        return;
+      }
+
+      r = uv_shutdown(&c->shutdown_req, handle, buttons_client_on_shutdown);
       if(r) {
         RX_ERROR(("error shutting down client. %s", uv_strerror(uv_last_error(handle->loop))));
         delete c;

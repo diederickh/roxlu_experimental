@@ -1,10 +1,11 @@
 #include <webm/Webm.h>
 
 void webm_vpx_write_cb(const vpx_codec_cx_pkt_t* pkt, int64_t pts, void* user) {
+  /*
   Webm& webm = *(static_cast<Webm*>(user));
 
   EBMLSimpleBlock b;
-  b.track_number = 1; /* hardcoded: track 1 = video */
+  b.track_number = 1; // hardcoded: track 1 = video 
   //b.timestamp = pkt->data.frame.pts;
   b.timestamp = pts; // uv_hrtime();
   b.flags = 0;
@@ -16,10 +17,11 @@ void webm_vpx_write_cb(const vpx_codec_cx_pkt_t* pkt, int64_t pts, void* user) {
   b.data = (char*)pkt->data.frame.buf;
 
   webm.ebml->addSimpleBlock(b);
+  */
 }
 
 void webm_encoder_thread(void* user) {
-
+  /*
   Webm& webm = *(static_cast<Webm*>(user));
   std::vector<WebmPacket*> work_packets;
   WebmPacket* pkt = NULL;
@@ -56,6 +58,7 @@ void webm_encoder_thread(void* user) {
   }
 
   webm.close();
+  */
 }
 
 
@@ -85,6 +88,7 @@ bool Webm::setupVideo(int inW,
                       int fps,
                       vpx_img_fmt fmt)
 {
+  /*
   vid_in_w = inW;
   vid_in_h = inH;
   vid_out_w = outW;
@@ -101,7 +105,7 @@ bool Webm::setupVideo(int inW,
   if(!is_setup) {
     return false;
   }
-
+  */
   return true;
 }
 
@@ -131,6 +135,7 @@ bool Webm::open() {
 }
 
 bool Webm::openEBML() {
+  /*
   assert(ebml != NULL);
 
   EBMLHeader h;
@@ -173,13 +178,16 @@ bool Webm::openEBML() {
     RX_ERROR(("Cannot write tracks"));
     return false;
   }
+  */
   return true;
 }
 
 
 bool Webm::close() {
+  /*
   closeEBML();
   vid_num_frames = 0;
+  */
   return true;
 }
 
@@ -194,25 +202,28 @@ bool Webm::startThread() {
 }
 
 bool Webm::stopThread() {
-
+  /*
   uv_mutex_lock(&stop_mutex);
   must_stop = true;
   uv_mutex_unlock(&stop_mutex);
 
   uv_thread_join(&thread);
-
+  */
   return true;
 }
 
 bool Webm::shutdown() {
+  /*
   vid_millis_per_frame = 0;
   vid_timeout = 0;
 
   stopThread();
+  */
   return true;
 }
 
 bool Webm::initializeThread() {
+  /*
   if(uv_mutex_init(&stop_mutex) != 0) {
     return false;
   }
@@ -220,10 +231,12 @@ bool Webm::initializeThread() {
   if(uv_mutex_init(&packets_mutex) != 0) {
     return false;
   }
+  */
   return true;
 }
 
 void Webm::addVideoFrame(unsigned char* data, int nbytes) {
+  /*
   {
     bool stop = false;
     uv_mutex_lock(&stop_mutex);
@@ -260,6 +273,6 @@ void Webm::addVideoFrame(unsigned char* data, int nbytes) {
 
     vid_num_frames++;
   }
+  */
 }
-
 
