@@ -12,7 +12,9 @@ include_directories(
   ${roxlu_extern_include_dir}/pango-1.0/
   ${roxlu_extern_include_dir}/glib-2.0/
   ${roxlu_extern_include_dir}/cairo/
+  ${roxlu_extern_include_dir}/freetype2/          # experimental
   ${roxlu_extern_lib_dir}/glib-2.0/include/
+
 )
 
 if(ROXLU_PLATFORM_MAC)
@@ -74,10 +76,12 @@ if(ROXLU_PLATFORM_WIN)
   set(pango_libs
     ${roxlu_extern_lib_dir}/pango-1.0.lib
     ${roxlu_extern_lib_dir}/pangocairo-1.0.lib
+    ${roxlu_extern_lib_dir}/pangoft2-1.0.lib
     ${roxlu_extern_lib_dir}/cairo.lib
     ${roxlu_extern_lib_dir}/glib-2.0.lib
     ${roxlu_extern_lib_dir}/gobject-2.0.lib
     ${roxlu_extern_lib_dir}/pixman-1.lib
+    ${roxlu_extern_lib_dir}/fontconfig.lib
     )
   set(roxlu_install_files
     ${roxlu_install_files}
@@ -92,6 +96,7 @@ if(ROXLU_PLATFORM_WIN)
     ${roxlu_extern_bin_dir}/libpng15.dll
     ${roxlu_extern_bin_dir}/zlib1.dll
     ${roxlu_extern_bin_dir}/pangowin32-1.dll
+    ${roxlu_extern_bin_dir}/fontconfig.dll
     )
 endif()
 
