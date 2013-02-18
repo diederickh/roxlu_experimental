@@ -46,9 +46,10 @@ Step 1: Create a SSL private key
       
 Step 2: Get a access token:
 ----------------------------
-- See the example application: examples/twitter_get_tokens/ 
-  You should run this application from the command line. It will ask you to 
-  open an url from twitter. When you open this link you need to 
+- See the example application in `roxlu/apps/examples/twitter_get_tokens/`.
+  This is a plain simple c++ application that you can compile directly using 
+  gcc/g++ or XCode. You should run this application from the command line. It 
+  will ask you to open an url from twitter. When you open this link you need to 
   grant the application so it can use your account to connect to the twitter 
   servers.
 
