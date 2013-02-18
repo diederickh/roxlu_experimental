@@ -16,7 +16,13 @@ Standalone minimal twitter library for C++ using the fast libuv library and open
 How to use this library
 ========================
 
-Step 1: Create a SSL private key
+Step 1: Create an Twitter application
+--------------------------------------
+- Go to http://dev.twitter.com/ and follow the steps to create a new application. If you follow the example applications
+from `roxlu/apps/examples/twitter_get_tokens` then you need to change the values passed into `tw.setConsumer()` and `tw.setConsumerSecrect`
+with the values of the application you created on http://dev.twitter.com
+
+Step 2: Create a SSL private key
 ---------------------------------
 
 - First you need to create a private key for SSL, follow these steps (self signed certificate): Create a key for the Certificate Authority certificate (CA-certificate)
@@ -44,7 +50,7 @@ Step 1: Create a SSL private key
 
 **Use the `client-key.pem` for your twitter applications**
       
-Step 2: Get a access token:
+Step 3: Get a access token:
 ----------------------------
 - See the example application in `roxlu/apps/examples/twitter_get_tokens/`.
   This is a plain simple c++ application that you can compile directly using 
@@ -68,7 +74,7 @@ tw.setTokenSecret("SOME_TOKEN_SECRET");
 </pre>
 
 
-Step 3: Use your access tokens to make API calls
+Step 4: Use your access tokens to make API calls
 -------------------------------------------------
 - Make sure you've created a ssl key and use this in you application 
 - Once you've got an access token you can start using the library and 
