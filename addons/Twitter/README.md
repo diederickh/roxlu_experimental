@@ -54,10 +54,10 @@ Step 2: Get a access token:
   tokens. See the main.cpp file comments about creating a twitter_tokens.h 
   file, with this contents:
 
-<code>
-         tw.setToken("TOKEN");
-         tw.setTokenSecret("SOME_TOKEN_SECRET");
-</code>
+<pre>
+tw.setToken("TOKEN");
+tw.setTokenSecret("SOME_TOKEN_SECRET");
+</pre>
 
 
 Step 3: Use your access tokens to make API calls
