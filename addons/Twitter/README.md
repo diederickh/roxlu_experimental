@@ -4,7 +4,14 @@ Standalone minimal twitter library for C++ using the fast libuv library and open
   This library only has two dependencies for which static libraries are included.
   - OpenSSL 1.01
   - libuv, hash: 149b16f1232d8fdcf5436534d6ade6f9877e1b8f 
-  - Make sure that you add the sources of the Twitter addon to your project. These are `Twitter/src/twitter/*.cpp` and `Twitter/extern/format/*.*`
+  - To compile add an include path to: `addons/Twitter/include` and ...
+  - .. make sure that you add the sources of the Twitter addon to your project. These are 
+  
+    - `Twitter/src/twitter/*.cpp`
+    - `Twitter/extern/format/*.*`
+  
+
+  
     
 How to use this library
 ========================
