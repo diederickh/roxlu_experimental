@@ -5,6 +5,7 @@
 int main() {
   
   // Create surface with default arial font
+  /*
   TextSurface ts;
   ts.setup("Nimbus Mono 15", 500, 550);
   ts.fill(1.0, 0.3, 0.3, .1);
@@ -35,7 +36,7 @@ int main() {
   printf("Dimensions of last render (x/y do not include move() calls)\nx: %d, y: %d, w: %d, h: %d\n", r.x, r.y, r.width, r.height);
 
   // And write to png
-  ts.saveAsPNG("pango.png");
+  ts.saveAsPNG("pango1.png");
 
   TextSurface ts2;
   ts2.setup("Arial 50", 700, 128,CAIRO_FORMAT_A8); //CAIRO_FORMAT_RGB24);
@@ -43,5 +44,32 @@ int main() {
   ts2.setText("Lorem ipsum dolor sit");
   ts2.render();
   ts2.saveAsPNG("pango2.png");
+  */
+  {
+    TextSurface ts;
+    ts.setup("Arial 50", 700, 128);
+    ts.fill(1.0, 1.0, 0.0, 0.5);
+    ts.setText("Lorem ipsum dolor sit");
+    ts.render();
+    ts.saveAsPNG("pango3.png");
+  }
+
+  {
+    TextSurface ts;
+    ts.setup("sans-serif 50", 700, 128);
+    ts.fill(1.0, 1.0, 0.0, 0.0);
+    ts.setText("Lorem ipsum dolor sit");
+    ts.render();
+    ts.saveAsPNG("pango4.png");
+  }
+
+  {
+    TextSurface ts;
+    ts.setup("Arial 50", 700, 128);
+    ts.fill(1.0, 0.0, 0.0, 0.0);
+    ts.setText("Lorem ipsum dolor sit", 1.0f, 1.0f, 1.0f);
+    ts.render();
+    ts.saveAsPNG("pango5.png");
+  }
   return 0;
 }

@@ -76,7 +76,7 @@ void VideoCaptureGLSurface::setup(int w, int h, GLenum internalFormat, GLenum fo
 #if defined(__APPLE__)
   glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, surface_w, surface_h, 0, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, NULL);
 #elif defined(_WIN32)
-  glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGB, surface_w, surface_h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+  glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, surface_w, surface_h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 #endif
   */
   glTexImage2D(GL_TEXTURE_RECTANGLE, 0, internalFormat, surface_w, surface_h, 0, format, type, NULL);

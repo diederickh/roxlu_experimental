@@ -1,5 +1,5 @@
 #include <pango/TextSurface.h>
-
+#include <pango/pangoft2.h>
 TextSurface::TextSurface() 
   :cr(NULL)
   ,surface(NULL)
@@ -19,6 +19,18 @@ TextSurface::~TextSurface() {
 }
 
 bool TextSurface::setup(const std::string& font, int w, int h, cairo_format_t fmt) {
+
+  //  PangoFontMap* pfm = pango_cairo_font_map_new_for_font_type(CAIRO_FONT_TYPE_FT);
+  // PangoFontMap* pfm = pango_cairo_font_map_new_for_font_type(CAIRO_FONT_TYPE_WIN32);
+  //printf("---------> %p\n", pfm);
+  //pango_cairo_font_map_set_default((PangoCairoFontMap*)pfm);
+  
+
+#if defined(PANGO_TYPE_FT2_FONT)
+  printf("---------------- YES YES -----------\n");
+#else
+  printf("---------------- NO NO -----------\n");
+#endif
   width = w;
   height = h;
 
@@ -34,11 +46,24 @@ bool TextSurface::setup(const std::string& font, int w, int h, cairo_format_t fm
     return false;
   }
 
+  //cairo_set_antialias(cr, CAIRO_ANTIALIAS_BEST);
+
   layout = pango_cairo_create_layout(cr);
   if(layout == NULL) {
     printf("ERROR: Cannot pango_cairo_create_layout()\n");
     return false;
   }
+
+  // -- test
+  PangoContext* c = pango_layout_get_context(layout);
+  cairo_font_options_t* fo = cairo_font_options_create();
+  cairo_font_options_set_antialias(fo, CAIRO_ANTIALIAS_GRAY);
+  pango_cairo_context_set_font_options(c, fo);
+  //const cairo_font_options_t* fo = pango_cairo_context_get_font_options(c);
+  printf("%p ==\n", fo);
+  //  cairo_font_options_set_antialias
+  //pango_cairo_context_set_resolution(c, 16);
+  // -- end test
 
   font_desc = pango_font_description_from_string(font.c_str());
   if(font_desc == NULL) {
@@ -48,7 +73,7 @@ bool TextSurface::setup(const std::string& font, int w, int h, cairo_format_t fm
 
   pango_layout_set_font_description(layout, font_desc);
   pango_font_description_free(font_desc);
-  
+
   setTextWidth(w);
   setTextHeight(h);
 
