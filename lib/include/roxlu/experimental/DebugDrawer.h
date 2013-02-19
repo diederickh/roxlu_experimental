@@ -45,11 +45,12 @@ const std::string DEBUG_TEX_FS = ""
   "void main() { "
   "  vec4 col = texture2D(u_tex, v_tex); "
   "  gl_FragColor = col; "
+  "  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); "
   "}";
-//   "  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); "
+
 struct DrawEntry {
-  size_t start_dx;
-  size_t num_elements;
+  int start_dx;
+  int num_elements;
   GLenum type;
 };
 
@@ -59,6 +60,7 @@ class DebugDrawer {
   ~DebugDrawer();
   void begin(GLenum type);
   void end();
+  void addVertex(const Vec3 pos);
   void addVertex(const Vec3 pos, const Vec4 col);
   void addVertex(const float x, const float y, const float z, float r = 1.0f, float g = 0.0f, float b = 0.0f);
   void draw(const float* pm, const float* vm);

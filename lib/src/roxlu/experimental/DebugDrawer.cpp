@@ -172,7 +172,17 @@ void DebugDrawer::checkSize() {
 
 void DebugDrawer::begin(GLenum type) {
   entry.type = type;
-  entry.start_dx = vertices.size() - 1;
+  entry.start_dx = vertices.size() ;
+  /*
+  if(entry.start_dx < 0) {
+    entry.start_dx = 0;
+  }
+  */
+}
+
+void DebugDrawer::addVertex(const Vec3 pos) {
+  Vec4 col(1.0f);
+  addVertex(pos, col);
 }
 
 void DebugDrawer::addVertex(const Vec3 pos, const Vec4 col) {

@@ -154,9 +154,9 @@ template<class P, class C, class V, class H>
 
   time_to_emit = now + emit_time;
 
-  float	size = random(min_particle_size, max_particle_size);
-  float	lifetime = random(min_particle_lifetime, max_particle_lifetime);
-  float mass = random(min_particle_mass, max_particle_mass);
+  float	size = rx_random(min_particle_size, max_particle_size);
+  float	lifetime = rx_random(min_particle_lifetime, max_particle_lifetime);
+  float mass = rx_random(min_particle_mass, max_particle_mass);
   V pos = helper.getPosition();
   V vel = helper.getVelocity(particle_x_vel, particle_y_vel, particle_z_vel);
   vel += helper.getRandomVelocity(min_particle_random_x_vel
@@ -270,7 +270,7 @@ inline EmitterHelper::EmitterHelper(const float x0, const float y0, const float 
 }
 
 inline Vec2 EmitterHelper::getPosition() {
-  return Vec2(random(area[0], area[2]), random(area[1], area[3]));
+  return Vec2(rx_random(area[0], area[2]), rx_random(area[1], area[3]));
 }
 
 
@@ -287,7 +287,7 @@ inline Vec2 EmitterHelper::getVelocity(const float vx, const float vy, const flo
 }
 
 inline Vec2 EmitterHelper::getRandomVelocity(const float minx, const float maxx, const float miny, const float maxy, const float minz, const float maxz) {
-  return Vec2(random(minx, maxx), random(miny, maxy));
+  return Vec2(rx_random(minx, maxx), rx_random(miny, maxy));
 }
 
 inline Particle<Vec2>* EmitterHelper::createParticle(Vec2 pos, float mass) {
@@ -327,7 +327,7 @@ inline EmitterHelper3::EmitterHelper3(const float x0, const float y0, const floa
 }
 
 inline Vec3 EmitterHelper3::getPosition() {
-  return Vec3(random(area[0], area[2]), random(area[1], area[3]), 0.0f);
+  return Vec3(rx_random(area[0], area[2]), rx_random(area[1], area[3]), 0.0f);
 }
 
 inline Vec3 EmitterHelper3::getVelocity(const float vx, const float vy, const float vz) {
@@ -335,7 +335,7 @@ inline Vec3 EmitterHelper3::getVelocity(const float vx, const float vy, const fl
 }
 
 inline Vec3 EmitterHelper3::getRandomVelocity(const float minx, const float maxx, const float miny, const float maxy, const float minz, const float maxz) {
-  return Vec3(random(minx, maxx), random(miny, maxy), random(minz, maxz));
+  return Vec3(rx_random(minx, maxx), rx_random(miny, maxy), rx_random(minz, maxz));
 }
 
 inline Particle<Vec3>* EmitterHelper3::createParticle(Vec3 pos, float mass) {

@@ -19,8 +19,8 @@ void Simulation::setup() {
   int num = 750;
   for(int i = 0; i < num; ++i) {
     RParticle p;
-    p.pos.set(random(-r, r),random(-r,r), random(-r,r));
-    p.vel.set(random(-v,v),random(-v,v),random(-v,v));
+    p.pos.set(rx_random(-r, r),rx_random(-r,r), rx_random(-r,r));
+    p.vel.set(rx_random(-v,v),rx_random(-v,v),rx_random(-v,v));
     p.vel_norm = p.vel;
     p.vel_norm.normalize();
     p.forces.set(0,0,1);
@@ -31,8 +31,8 @@ void Simulation::setup() {
   int num_predators = 10;
   for(int i = 0; i < num_predators; ++i) {
     RParticle p;
-    p.pos.set(random(-r, r),random(-r,r), random(-r,r));
-    p.vel.set(random(-v,v),random(-v,v),random(-v,v));
+    p.pos.set(rx_random(-r, r),rx_random(-r,r), rx_random(-r,r));
+    p.vel.set(rx_random(-v,v),rx_random(-v,v),rx_random(-v,v));
     p.vel_norm = p.vel;
     p.vel_norm.normalize();
     ps.predators.push_back(p);
@@ -110,8 +110,8 @@ void Simulation::onChar(int ch) {
     float r = 1.3;
     float v = 0.1;
     for(size_t i = 0; i < ps.particles.size(); ++i) {
-      ps.particles[i].pos.set(random(-r,r), random(-r,r), random(-r,r));
-      ps.particles[i].vel.set(random(-v,v), random(-v,v), random(-v,v));
+      ps.particles[i].pos.set(rx_random(-r,r), rx_random(-r,r), rx_random(-r,r));
+      ps.particles[i].vel.set(rx_random(-v,v), rx_random(-v,v), rx_random(-v,v));
       ps.particles[i].vel_norm = ps.particles[i].vel; 
       ps.particles[i].vel_norm.normalize();
     }
