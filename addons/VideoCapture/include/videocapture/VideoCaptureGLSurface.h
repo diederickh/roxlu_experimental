@@ -51,7 +51,7 @@ class VideoCaptureGLSurface {
 #if defined(__APPLE__)
   void setup(int w, int h, GLenum internalFormat = GL_RGBA, GLenum format = GL_YCBCR_422_APPLE, GLenum type = GL_UNSIGNED_SHORT_8_8_APPLE);
 #else
-  void setup(int w, int h, GLenum internalFormat = GL_RGB, GLenum format = GL_RGB, GLenum type = GL_UNSIGNED_BYTE);
+  void setup(int w, int h, GLenum internalFormat = GL_RGBA, GLenum format = GL_RGB, GLenum type = GL_UNSIGNED_BYTE);
 #endif
   void setPixels(unsigned char* pixels, size_t nbytes);
   void draw(int x, int y, int width = 0, int height = 0);
