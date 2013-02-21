@@ -4,6 +4,7 @@
 
 DebugDrawer::DebugDrawer()
   :is_initialized(false)
+  ,must_fill(true)
   ,bytes_allocated(0)
   ,pos_id(0)
   ,col_id(0)
@@ -206,6 +207,7 @@ void DebugDrawer::draw(const float* pm, const float* vm) {
     setupOpenGL();
   }
 
+  glPolygonMode(GL_FRONT_AND_BACK, must_fill ? GL_FILL : GL_LINE);
 
   glUseProgram(prog_id);
   glUniformMatrix4fv(projection_matrix_id, 1, GL_FALSE, pm);
@@ -274,6 +276,10 @@ size_t DebugDrawer::getNumBytes() {
 
 const float* DebugDrawer::getPtr() {
   return vertices[0].getPtr();
+}
+
+void DebugDrawer::setFill(bool f) {
+  must_fill = f;
 }
 
 #endif // ROXLU_GL_WRAPPER

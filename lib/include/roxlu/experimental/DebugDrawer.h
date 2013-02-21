@@ -65,6 +65,7 @@ class DebugDrawer {
   void addVertex(const float x, const float y, const float z, float r = 1.0f, float g = 0.0f, float b = 0.0f);
   void draw(const float* pm, const float* vm);
   void drawTexture(GLuint tex, const float x, const float y, const float w, const float h);
+  void setFill(bool mustFill);
  private: 
   void checkSize();
   void createOrtho(int ww, int wh);
@@ -73,6 +74,7 @@ class DebugDrawer {
   const float* getPtr();
                  
  private:
+  bool must_fill;
   bool is_initialized;
   bool needs_update;
   std::vector<VertexPC> vertices;
