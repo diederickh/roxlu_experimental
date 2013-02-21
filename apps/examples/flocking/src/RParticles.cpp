@@ -4,9 +4,9 @@ RParticle::RParticle()
 {
   inverse_mass = 1.0f; 
   float r = 0.1;
-  vel.x = random(-r, r);
-  vel.y = random(-r, r);
-  vel.z = random(-r, r);
+  vel.x = rx_random(-r, r);
+  vel.y = rx_random(-r, r);
+  vel.z = rx_random(-r, r);
   vel_norm = 0.0f;
   forces = 0.0f;
 }

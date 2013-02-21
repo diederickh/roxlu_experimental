@@ -8,7 +8,7 @@
 #include "float.h"
 
 
-static void initRandom() {
+static void rx_init_random() {
 #if ROXLU_PLATFORM == ROXLU_APPLE || ROXLU_PLATFORM == ROXLU_IOS || ROXLU_PLATFORM == ROXLU_LINUX
   struct timeval tv;
   gettimeofday(&tv, 0);
@@ -21,15 +21,15 @@ static void initRandom() {
 #endif
 }
 
-static void initRandom(int val) {
+static void rx_init_random(int val) {
   srand((long) val);
 }
 
-static float random(float max) {
+static float rx_random(float max) {
   return max * rand() / (RAND_MAX + 1.0f);
 }
 
-static float random(float x, float y) {
+static float rx_random(float x, float y) {
   float high = 0;
   float low = 0;
   float result = 0;
@@ -40,23 +40,23 @@ static float random(float x, float y) {
   return result;
 }
 
-static float randomf() {
+static float rx_randomf() {
   float rand_num = 0;
   rand_num = (rand()/(RAND_MAX + 1.0)) * 2.0 - 1.0;
   return rand_num;
 }
 
-static float randomuf() {
+static float rx_randomuf() {
   float rand_num = 0;
   rand_num = rand()/(RAND_MAX + 1.0);
   return rand_num;
 }
 
 
-static roxlu::Vec3 randomVec3() {
+static roxlu::Vec3 rx_random_vec3() {
   roxlu::Vec3 r;
-  float phi = random(3.1415f * 2.0f);
-  float costheta = random(-1.0f, 1.0f);
+  float phi = rx_random(3.1415f * 2.0f);
+  float costheta = rx_random(-1.0f, 1.0f);
 
   float rho = sqrt(1.0f - costheta * costheta);
   r.x = rho * cos(phi);
@@ -65,10 +65,10 @@ static roxlu::Vec3 randomVec3() {
   return r;
 }
 
-static roxlu::Vec2 randomVec2() {
+static roxlu::Vec2 rx_random_vec2() {
   roxlu::Vec2 r;
-  float phi = random(3.1415f * 2.0f);
-  float costheta = random(-1.0f, 1.0f);
+  float phi = rx_random(3.1415f * 2.0f);
+  float costheta = rx_random(-1.0f, 1.0f);
   float rho = sqrt(1.0f - costheta * costheta);
   r.x = rho * cos(phi);
   r.y = rho * sin(phi);
