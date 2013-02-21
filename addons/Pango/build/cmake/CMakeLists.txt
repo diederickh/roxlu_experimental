@@ -76,12 +76,12 @@ if(ROXLU_PLATFORM_WIN)
   set(pango_libs
     ${roxlu_extern_lib_dir}/pango-1.0.lib
     ${roxlu_extern_lib_dir}/pangocairo-1.0.lib
-    ${roxlu_extern_lib_dir}/pangoft2-1.0.lib
+#   ${roxlu_extern_lib_dir}/pangoft2-1.0.lib
     ${roxlu_extern_lib_dir}/cairo.lib
     ${roxlu_extern_lib_dir}/glib-2.0.lib
     ${roxlu_extern_lib_dir}/gobject-2.0.lib
     ${roxlu_extern_lib_dir}/pixman-1.lib
-    ${roxlu_extern_lib_dir}/fontconfig.lib
+#    ${roxlu_extern_lib_dir}/fontconfig.lib
     )
   set(roxlu_install_files
     ${roxlu_install_files}

@@ -30,6 +30,8 @@ class TextSurface {
   void wrapChar(); /* wrap on character boundaries */
   void wrapWordChar();  /* wrap on word boundaries, but fallback on char boundaries */
   unsigned char* getPixels(); 
+  int getNumBytes(); /* get the number of bytes in the pixel array */
+  //  unsigned char* getPixelsForPixelExtends(PangoRectangle rect); /* get only the pixels for the given area: IMPORTANT we allocate but YOU need to delete[] the allocated pixels! */
   int getWidth();
   int getHeight();
  public:
@@ -83,10 +85,12 @@ inline void TextSurface::wrapWordChar() {
 }
 
 // PangoRectangle has: x, y, width, height (all ints);
+// The logical extents (l) gives a bigger area then the ink extent; when using the ink extents (r), some chars didn't fit in the returned rectangle.
 inline PangoRectangle TextSurface::getPixelExtents() { 
   assert(layout);
   PangoRectangle r;
-  pango_layout_get_pixel_extents(layout, &r, NULL);
+  PangoRectangle l;
+  pango_layout_get_pixel_extents(layout, &r, &l);
   return r;
 }
 
@@ -109,5 +113,23 @@ inline int TextSurface::getWidth() {
 
 inline int TextSurface::getHeight() {
   return height;
+}
+
+inline int TextSurface::getNumBytes() {
+  cairo_format_t fmt = cairo_image_surface_get_format(surface);
+  if(fmt == CAIRO_FORMAT_RGB24) {
+    return width * height * 3;
+  }
+  else if(fmt == CAIRO_FORMAT_ARGB32) {
+    return width * height * 4;
+  }
+  else if(fmt == CAIRO_FORMAT_A8) {
+    return width * height;
+  }
+  else {
+   printf("cannot calculate num of bytes, need to add this format\n");
+  }
+
+  return 0;
 }
 #endif
