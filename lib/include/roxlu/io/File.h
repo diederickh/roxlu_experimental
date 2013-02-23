@@ -42,7 +42,8 @@ namespace roxlu {
   public:
     File();
     ~File();
-	
+    
+    
     static void putFileContents(string file, string contents, bool inDataPath = true) {
       ofstream of;
       if(inDataPath) {
@@ -57,7 +58,8 @@ namespace roxlu {
       of.write(contents.c_str(), contents.length());
       of.close();
     }
-	
+
+    // @todo > switch over to rx_get_file_contents
     static string getFileContents(string file, bool inDataPath = true) {
       if(inDataPath) {
         file = File::toDataPath(file);

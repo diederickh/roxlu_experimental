@@ -2,11 +2,13 @@
 #define ROXLU_UTILSH
 
 #include <roxlu/core/Constants.h>
+#include <roxlu/core/Log.h>
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
 #include <vector>
 #include <sstream>
+#include <fstream>
 
 
 #ifdef ROXLU_GL_WRAPPER
@@ -250,6 +252,20 @@ static std::string rx_to_data_path(const std::string filename) {
 
 static std::string rx_to_exe_path(std::string filename) {
   return rx_get_exe_path() +filename;
+}
+
+static std::string rx_get_file_contents(std::string filepath) {
+  std::string result = "";
+  std::string line = "";
+  std::ifstream ifs(filepath.c_str());
+  if(!ifs.is_open()) {
+    RX_ERROR(("Cannot open file: '%s'", filepath.c_str()));
+    return result;
+  }
+  while(getline(ifs,line)) {
+    result += line +"\n";
+  }
+  return result;
 }
 
 /* 

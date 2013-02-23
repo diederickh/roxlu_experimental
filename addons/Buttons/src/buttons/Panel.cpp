@@ -176,7 +176,7 @@ namespace buttons {
     for(vector<Buttons*>::iterator it = guis.begin(); it != guis.end(); ++it) {
       Buttons& b = **it;
       string filename = "gui_" +b.getName() +".bin";
-      b.save(File::toDataPath(filename));
+      b.save(rx_to_exe_path(filename));
     }
   }
 
@@ -184,7 +184,7 @@ namespace buttons {
     for(vector<Buttons*>::iterator it = guis.begin(); it != guis.end(); ++it) {
       Buttons& b = **it;
       string filename = "gui_" +b.getName() +".bin";
-      b.load(File::toDataPath(filename));
+      b.load(rx_to_exe_path(filename));
     }
   }
 

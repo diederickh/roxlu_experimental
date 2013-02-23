@@ -17,6 +17,7 @@
 #include <buttons/Rectangle.h>
 #include <buttons/Storage.h>
 #include <buttons/Buttons.h>
+#include <roxlu/core/Utils.h>
 
 using std::string;
 using std::vector;
