@@ -29,8 +29,8 @@ Using roxlu lib with openFrameworks and XCode
   - Select `Build Phases > Link Binary With Libraries`. Press the `+` button  and select `libroxlu.a`
   - Select `Target Dependencies`. Press the `+` button and select the `roxlu` target.
   - Select `Build Settings` (still while the emptyExample target is selected), search for `Header search paths`, and double click to add a new entry. Drag & drop the following directories:
-    - `roxlu/lib/include/`
-    - `roxlu/extern/include/`
+      - `roxlu/lib/include/`
+      - `roxlu/extern/include/`
   - Select `Build Settings`, search for `Preprocessor Macros` and add `ROXLU_GL_WRAPPER`
 
   
