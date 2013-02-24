@@ -16,36 +16,32 @@ set(uploader_sources
   ${roxlu_sources}
 )
 
-
-if(LINUX)
-  set(uploader_libs
-    ${roxlu_addon_libs}
-    ${roxlu_extern_lib_dir}/libuv.a
-    )
+if(UNIX AND NOT APPLE)
+  roxlu_add_extern_lib(libuv.a)
 endif()
 
 if(APPLE)
   find_library(fr_foundation CoreFoundation)
   find_library(fr_cs CoreServices)
-  set(uploader_libs
-    ${uploader_libs}
-    ${fr_foundation}
-    ${fr_cs}  
-    )  
+  roxlu_add_lib(${fr_foundation})
+  roxlu_add_lib(${fr_cs})
+  roxlu_add_extern_lib(libuv.a)
 endif()
 
 if(WIN32)
-  set(uploader_libs
-    ${uploader_libs}
-    ${roxlu_addon_libs}
-    ${roxlu_extern_lib_dir}/libuv.lib
-    )
+  roxlu_add_extern_lib(libuv.lib)
   
+#  set(uploader_libs
+#    ${uploader_libs}
+#    ${roxlu_addon_libs}
+#    ${roxlu_extern_lib_dir}/libuv.lib
+#    )
+
 endif()
 
 
 add_executable(uploader ${uploader_sources})
-target_link_libraries(uploader ${uploader_libs})
+target_link_libraries(uploader ${roxlu_libs})
 install(TARGETS uploader DESTINATION ${uploader_install_dir})
 install(FILES ${roxlu_install_files} DESTINATION ${uploader_install_dir})
 
@@ -57,9 +53,6 @@ set(uploader_fake_inserter_sources
   ${roxlu_sources}
 )
 
-find_library(fr_foundation CoreFoundation)
-find_library(fr_cs CoreServices)
-
 add_executable(uploader_fake_inserter ${uploader_fake_inserter_sources})
-target_link_libraries(uploader_fake_inserter ${uploader_libs})
+target_link_libraries(uploader_fake_inserter ${roxlu_libs})
 install(TARGETS uploader_fake_inserter DESTINATION ${uploader_install_dir})

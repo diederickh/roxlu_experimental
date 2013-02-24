@@ -15,8 +15,7 @@ set(simulation_include_dir ${simulation_base_dir}src/)
 set(CMAKE_INSTALL_PREFIX ${simulation_install_dir})
 
 set(simulation_libs
-  ${roxlu_addon_libs}
-  ${glfw_libs}
+  ${roxlu_libs}
 )
 
 set(simulation_name webm_recorder)
@@ -24,8 +23,6 @@ set(simulation_name webm_recorder)
 set(simulation_sources 
   ${simulation_base_dir}/src/main.cpp
   ${simulation_base_dir}/src/Simulation.cpp
-#  ${simulation_base_dir}/src/IcecastConnection.cpp
-#  ${simulation_base_dir}/src/StreamingConnection.cpp
 )
 
 set(compile_sources 

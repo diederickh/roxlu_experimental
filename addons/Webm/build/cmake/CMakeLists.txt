@@ -13,18 +13,26 @@ include_directories(
 )
 
 if(APPLE)
-	find_library(fr_foundation CoreFoundation)
-	find_library(fr_services CoreServices)
+  find_library(fr_foundation CoreFoundation)
+  find_library(fr_services CoreServices)
 
-  set(webm_libs
-    ${roxlu_extern_lib_dir}/libswscale.a
-    ${roxlu_extern_lib_dir}/libavutil.a
-    ${roxlu_extern_lib_dir}/libavcodec.a
-    ${roxlu_extern_lib_dir}/libuv.a
-    ${roxlu_extern_lib_dir}/libvpx.a
-		${fr_foundation}
-		${fr_services}
-    )
+  roxlu_add_extern_lib(libswscale.a)
+  roxlu_add_extern_lib(libavutil.a)
+  roxlu_add_extern_lib(libavcodec.a)
+  roxlu_add_extern_lib(libuv.a)
+  roxlu_add_extern_lib(libvpx.a)
+  roxlu_add_lib(${fr_foundation})
+  roxlu_add_lib(${fr_services})
+
+#  set(webm_libs
+#    ${roxlu_extern_lib_dir}/libswscale.a
+#    ${roxlu_extern_lib_dir}/libavutil.a
+#    ${roxlu_extern_lib_dir}/libavcodec.a
+#    ${roxlu_extern_lib_dir}/libuv.a
+#    ${roxlu_extern_lib_dir}/libvpx.a
+#    ${fr_foundation}
+#    ${fr_services}
+#    )
 	
 endif()
 

@@ -41,12 +41,10 @@ if(WIN32)
       )
 
 else()
-  set(curl_libs
-    ${roxlu_extern_lib_dir}/libcurl.a
-    ${roxlu_extern_lib_dir}/libssl.a
-    ${roxlu_extern_lib_dir}/libcrypto.a
-    ${roxlu_extern_lib_dir}/libz.a
-    )
+  roxlu_add_extern_lib(libcurl.a)
+  roxlu_add_extern_lib(libssl.a)
+  roxlu_add_extern_lib(libcrypto.a)
+  roxlu_add_extern_lib(libz.a)
 endif()
 
 if(UNIX AND NOT APPLE)
@@ -57,10 +55,10 @@ if(UNIX AND NOT APPLE)
     )
 endif()
 
-set(roxlu_addon_libs
-  ${roxlu_addon_libs}
-  ${curl_libs}
-)
+#set(roxlu_addon_libs
+#  ${roxlu_addon_libs}
+#  ${curl_libs}
+#)
 
 add_library(roxlu_curl STATIC ${curl_source_files})
 

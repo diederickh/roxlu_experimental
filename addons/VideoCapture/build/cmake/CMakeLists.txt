@@ -26,6 +26,7 @@ if(APPLE)
     ${videocapture_src_platform_dir}/videocapture/rx_capture_mac.mm
     ${videocapture_src_platform_dir}/videocapture/VideoCaptureAVFoundation.mm
   )
+  add_library(rx_capture ${rxcapture_source_files})
 
   find_library(fr_core_foundation CoreFoundation)
   find_library(fr_cocoa Cocoa)
@@ -33,18 +34,14 @@ if(APPLE)
   find_library(fr_core_video CoreVideo)
   find_library(fr_core_media CoreMedia)
   find_library(fr_core_media_io CoreMediaIO)
-  
-  set(roxlu_addon_libs
-    ${roxlu_addon_libs}
-    ${fr_core_foundation}
-    ${fr_cocoa}
-    ${fr_avfoundation}
-    ${fr_core_video}
-    ${fr_core_media}
-    ${fr_core_media_io}
-    )
-
-  add_library(rx_capture ${rxcapture_source_files})
+ 
+  roxlu_add_lib(${fr_core_foundation})
+  roxlu_add_lib(${fr_cocoa})
+  roxlu_add_lib(${fr_avfoundation})
+  roxlu_add_lib(${fr_core_video})
+  roxlu_add_lib(${fr_core_media})
+  roxlu_add_lib(${fr_core_media_io})
+  roxlu_add_lib(rx_capture)
 
 endif(APPLE)
 
@@ -76,8 +73,6 @@ if(WIN32)
 endif()
 
 
-set(roxlu_addon_libs ${roxlu_addon_libs} rx_capture)
- 
 set(roxlu_addon_sources  ${roxlu_addon_sources}  ${videocapture_source_files} )
 
 add_library(roxlu_videocapture STATIC ${videocapture_source_files})

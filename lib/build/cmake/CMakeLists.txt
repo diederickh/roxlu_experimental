@@ -295,10 +295,20 @@ macro(roxlu_add_dll dll)
 endmacro(roxlu_add_dll)
 
 macro(roxlu_add_extern_lib lib)
-  set(roxlu_libs
-    ${roxlu_libs}
-    ${roxlu_extern_lib_dir}/${lib}
-    )
+
+  if(CMAKE_BUILD_TYPE STREQUAL Debug AND EXISTS ${roxlu_extern_lib_debug_dir}/${lib})
+    # If we have a debug lib, link with that for debug builds
+    set(roxlu_libs
+      ${roxlu_libs}
+      ${roxlu_extern_lib_debug_dir}/${lib}
+      )
+  else()
+    # else link with the release version
+    set(roxlu_libs
+      ${roxlu_libs}
+      ${roxlu_extern_lib_dir}/${lib}
+      )
+  endif()
 endmacro(roxlu_add_extern_lib)
 
 macro(roxlu_add_lib lib)

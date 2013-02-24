@@ -4,16 +4,6 @@ cmake_minimum_required(VERSION 2.8)
 
 include(${CMAKE_CURRENT_LIST_DIR}/../../../../lib/build/cmake/CMakeLists.txt)
 
-if(APPLE)
-  find_library(fr_corefoundation CoreFoundation)
-  find_library(fr_core_services CoreServices)
-  set(roxlu_addon_libs
-    ${roxlu_addon_libs}
-    ${fr_corefoundation}
-    ${fr_core_services}
-    )
-endif()
-
 set(twitter_base_dir ${CMAKE_CURRENT_LIST_DIR}/../../)
 set(twitter_src_dir ${twitter_base_dir}/src)
 set(twitter_include_dir ${twitter_base_dir}/include)
@@ -43,18 +33,23 @@ set(roxlu_addon_sources
 )
 
 if(APPLE) 
-  set(twitter_libs
-    ${roxlu_extern_lib_dir}/libcrypto.a
-    ${roxlu_extern_lib_dir}/libssl.a
-    ${roxlu_extern_lib_dir}/libuv.a
-    )
+  find_library(fr_corefoundation CoreFoundation)
+  find_library(fr_core_services CoreServices)
+
+  roxlu_add_lib(${fr_corefoundation})
+  roxlu_add_lib(${fr_core_services})
+
+  roxlu_add_extern_lib(libcrypto.a)
+  roxlu_add_extern_lib(libssl.a)
+  roxlu_add_extern_lib(libuv.a)
+
 
 elseif(WIN32)
-
   roxlu_add_extern_lib(ssleay32.lib)
   roxlu_add_extern_lib(libeay32.lib)
   roxlu_add_extern_lib(zlib.lib)
   roxlu_add_extern_lib(libuv.lib)
+
   roxlu_add_lib(ws2_32.lib)
   roxlu_add_lib(psapi.lib)
   roxlu_add_lib(iphlpapi.lib)
@@ -66,20 +61,21 @@ elseif(WIN32)
 endif()
 
 if(NOT APPLE AND UNIX)
-    set(twitter_libs
-
-      ${roxlu_extern_lib_dir}/libssl.a
-      ${roxlu_extern_lib_dir}/libuv.a
-      ${roxlu_extern_lib_dir}/libcrypto.a
-      dl
-      pthread 
-      rt
-    )
+  roxlu_add_extern_lib(libssl.a)
+  roxlu_add_extern_lib(libuv.a)
+  roxlu_add_extern_lib(libcrypto.a)
+  roxlu_add_lib(dl)
+  roxlu_add_lib(pthread)
+  roxlu_add_lib(rt)
+   
+#  set(twitter_libs
+#    ${roxlu_extern_lib_dir}/libssl.a
+#    ${roxlu_extern_lib_dir}/libuv.a
+#    ${roxlu_extern_lib_dir}/libcrypto.a
+#    dl
+#    pthread 
+#    rt
+#    )
 endif()
-
-set(roxlu_addon_libs
-  ${roxlu_addon_libs}
-  ${twitter_libs}
-)
 
 add_library(roxlu_twitter STATIC ${twitter_source_files})

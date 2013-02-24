@@ -69,7 +69,7 @@ void Simulation::setupCapture() {
     ::exit(EXIT_FAILURE);
   }
 
-  cap_surf.setup(VIDEO_W, VIDEO_H, VC_FMT_YUYV422);
+  cap_surf.setup(VIDEO_W, VIDEO_H);
   cap_surf.flip(false, true);
 }
 

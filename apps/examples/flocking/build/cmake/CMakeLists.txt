@@ -16,8 +16,7 @@ set(simulation_include_dir ${simulation_base_dir}src/)
 set(CMAKE_INSTALL_PREFIX ${simulation_install_dir})
 
 set(simulation_libs
-  ${roxlu_addon_libs}
-  ${glfw_libs}
+  ${roxlu_libs}
 )
 
 set(simulation_name flocking)

@@ -36,11 +36,8 @@ include_directories(
 )
 
 if(UNIX) 
-  set(roxlu_addon_libs
-    ${roxlu_addon_libs}
-    roxlu_buttons  #important to add your lib to the rest of the include libs
-    ${roxlu_extern_lib_dir}/libuv.a
-)
+  roxlu_add_extern_lib(libuv.a)
+  roxlu_add_lib(roxlu_buttons)
 endif()
 
 if(WIN32) 

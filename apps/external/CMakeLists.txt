@@ -13,10 +13,8 @@ set(glfw_wrapper_sources ${glfw_base_dir}/glfw_wrapper/SimulationBase.cpp)
 
 # GLEW
 if(NOT ROXLU_PLATFORM_WIN)
-  set(glfw_libs 
-    ${roxlu_extern_lib_dir}/libglfw3.a
-    ${roxlu_extern_lib_dir}/libGLEW.a
-    )
+  roxlu_add_extern_lib(libglfw3.a)
+  roxlu_add_extern_lib(libGLEW.a)
   add_definitions("-DGLEW_STATIC")
 endif()
 
@@ -25,48 +23,35 @@ if(ROXLU_PLATFORM_WIN)
   roxlu_add_extern_lib(glew32.lib)
   roxlu_add_extern_lib(glfw3.lib)
   roxlu_add_dll(glew32.dll)
-
-#  set(glfw_libs
-#    opengl32.lib
-#    ${roxlu_extern_lib_dir}/glew32.lib
-#    ${roxlu_extern_lib_dir}/glfw3.lib
-#    )
-#
-#  set(roxlu_install_files
-#    ${roxlu_install_files}
-#    ${roxlu_extern_bin_dir}/glew32.dll
-#    )
-
 endif(ROXLU_PLATFORM_WIN)
-
-
 
 if(APPLE)
   find_library(fr_corefoundation CoreFoundation)
   find_library(fr_cocoa Cocoa)
   find_library(fr_opengl OpenGL)
   find_library(fr_iokit IOKit)
-
-  set(glfw_libs
-    ${glfw_libs}
-    ${fr_corefoundation}
-    ${fr_cocoa}
-    ${fr_opengl}
-    ${fr_iokit}
-    )
-
+  
+  roxlu_add_lib(${fr_corefoundation})
+  roxlu_add_lib(${fr_cocoa})
+  roxlu_add_lib(${fr_opengl})
+  roxlu_add_lib(${fr_iokit})
 endif()
 
 # Platform specifics
 if(ROXLU_PLATFORM_LINUX)
-  set(glfw_libs
-    ${glfw_libs}
-    GL
-    X11
-    Xxf86vm
-    rt
-    /usr/lib/x86_64-linux-gnu/libXrandr.so
-)
+  roxlu_add_lib(GL)
+  roxlu_add_lib(X11)
+  roxlu_add_lib(Xxf86vm)
+  roxlu_add_lib(rt)
+  roxlu_add_lib(/usr/lib/x86_64-linux-gnu/libXrandr.so)
+#  set(glfw_libs
+#    ${glfw_libs}
+#    GL
+#    X11
+#    Xxf86vm
+#    rt
+#    /usr/lib/x86_64-linux-gnu/libXrandr.so
+#)
 endif(ROXLU_PLATFORM_LINUX)
 
 set(roxlu_include_dirs
