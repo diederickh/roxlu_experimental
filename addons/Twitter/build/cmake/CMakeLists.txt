@@ -51,22 +51,18 @@ if(APPLE)
 
 elseif(WIN32)
 
-  set(twitter_libs
-    ${roxlu_extern_lib_dir}/ssleay32.lib
-    ${roxlu_extern_lib_dir}/libeay32.lib
-    ${roxlu_extern_lib_dir}/zdll.lib
-    ${roxlu_extern_lib_dir}/libuv.lib
-    ws2_32.lib
-    psapi.lib
-    iphlpapi
-    )
+  roxlu_add_extern_lib(ssleay32.lib)
+  roxlu_add_extern_lib(libeay32.lib)
+  roxlu_add_extern_lib(zlib.lib)
+  roxlu_add_extern_lib(libuv.lib)
+  roxlu_add_lib(ws2_32.lib)
+  roxlu_add_lib(psapi.lib)
+  roxlu_add_lib(iphlpapi.lib)
 
-  set(roxlu_install_files
-    ${roxlu_install_files}
-    ${roxlu_extern_bin_dir}/libcurl.dll
-    ${roxlu_extern_bin_dir}/libeay32.dll
-    ${roxlu_extern_bin_dir}/ssleay32.dll
-    )
+  roxlu_add_dll(libcurl.dll)
+  roxlu_add_dll(libeay32.dll)
+  roxlu_add_dll(ssleay32.dll)
+
 endif()
 
 if(NOT APPLE AND UNIX)

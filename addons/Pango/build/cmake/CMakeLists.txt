@@ -73,31 +73,25 @@ if(ROXLU_PLATFORM_LINUX)
 endif()
 
 if(ROXLU_PLATFORM_WIN) 
-  set(pango_libs
-    ${roxlu_extern_lib_dir}/pango-1.0.lib
-    ${roxlu_extern_lib_dir}/pangocairo-1.0.lib
-#   ${roxlu_extern_lib_dir}/pangoft2-1.0.lib
-    ${roxlu_extern_lib_dir}/cairo.lib
-    ${roxlu_extern_lib_dir}/glib-2.0.lib
-    ${roxlu_extern_lib_dir}/gobject-2.0.lib
-    ${roxlu_extern_lib_dir}/pixman-1.lib
-#    ${roxlu_extern_lib_dir}/fontconfig.lib
-    )
-  set(roxlu_install_files
-    ${roxlu_install_files}
-    ${roxlu_extern_bin_dir}/pango-1.dll
-    ${roxlu_extern_bin_dir}/pangocairo-1.dll
-    ${roxlu_extern_bin_dir}/cairo.dll
-    ${roxlu_extern_bin_dir}/gmodule-2.dll
-    ${roxlu_extern_bin_dir}/glib-2.dll
-    ${roxlu_extern_bin_dir}/gobject-2.dll
-    ${roxlu_extern_bin_dir}/libintl.dll
-    ${roxlu_extern_bin_dir}/iconv.dll
-    ${roxlu_extern_bin_dir}/libpng15.dll
-    ${roxlu_extern_bin_dir}/zlib1.dll
-    ${roxlu_extern_bin_dir}/pangowin32-1.dll
-    ${roxlu_extern_bin_dir}/fontconfig.dll
-    )
+  roxlu_add_extern_lib(pango-1.0.lib)
+  roxlu_add_extern_lib(pangocairo-1.0.lib)
+  roxlu_add_extern_lib(cairo.lib)
+  roxlu_add_extern_lib(glib-2.0.lib)
+  roxlu_add_extern_lib(gobject-2.0.lib)
+  roxlu_add_extern_lib(pixman-1.lib)
+  
+  roxlu_add_dll(pango-1.dll)
+  roxlu_add_dll(pangocairo-1.dll)
+  roxlu_add_dll(cairo.dll)
+
+  roxlu_add_dll(gmodule-2.dll)
+  roxlu_add_dll(glib-2.dll)
+  roxlu_add_dll(gobject-2.dll)
+  roxlu_add_dll(libintl.dll)
+  roxlu_add_dll(iconv.dll)
+  roxlu_add_dll(libpng15.dll)
+  roxlu_add_dll(zlib1.dll)
+  roxlu_add_dll(pangowin32-1.dll)
 endif()
 
 set(pango_source_files

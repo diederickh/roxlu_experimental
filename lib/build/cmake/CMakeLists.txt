@@ -283,6 +283,32 @@ macro(roxlu_add_addon addon)
   include(${roxlu_addons_dir}/${addon}/build/cmake/CMakeLists.txt) 
 endmacro(roxlu_add_addon)
 
+macro(roxlu_add_dll dll)
+
+  if(WIN32)
+    set(roxlu_install_files
+      ${roxlu_install_files}
+      ${roxlu_extern_bin_dir}/${dll}
+      )
+  endif()
+
+endmacro(roxlu_add_dll)
+
+macro(roxlu_add_extern_lib lib)
+  set(roxlu_libs
+    ${roxlu_libs}
+    ${roxlu_extern_lib_dir}/${lib}
+    )
+endmacro(roxlu_add_extern_lib)
+
+macro(roxlu_add_lib lib)
+  set(roxlu_libs
+    ${roxlu_libs}
+    ${lib}
+    )
+endmacro(roxlu_add_lib)
+
 macro(roxlu_enable_opengl)
   include(${roxlu_base_dir}/apps/external/CMakeLists.txt) # External (glfw)
+  roxlu_add_dll(glew32.dll)
 endmacro(roxlu_enable_opengl)

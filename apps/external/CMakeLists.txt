@@ -21,16 +21,21 @@ if(NOT ROXLU_PLATFORM_WIN)
 endif()
 
 if(ROXLU_PLATFORM_WIN)
-  set(glfw_libs
-    opengl32.lib
-    ${roxlu_extern_lib_dir}/glew32.lib
-    ${roxlu_extern_lib_dir}/glfw3.lib
-    )
+  roxlu_add_lib(opengl32.lib)
+  roxlu_add_extern_lib(glew32.lib)
+  roxlu_add_extern_lib(glfw3.lib)
+  roxlu_add_dll(glew32.dll)
 
-  set(roxlu_install_files
-    ${roxlu_install_files}
-    ${roxlu_extern_bin_dir}/glew32.dll
-    )
+#  set(glfw_libs
+#    opengl32.lib
+#    ${roxlu_extern_lib_dir}/glew32.lib
+#    ${roxlu_extern_lib_dir}/glfw3.lib
+#    )
+#
+#  set(roxlu_install_files
+#    ${roxlu_install_files}
+#    ${roxlu_extern_bin_dir}/glew32.dll
+#    )
 
 endif(ROXLU_PLATFORM_WIN)
 
