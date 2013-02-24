@@ -14,7 +14,6 @@ include_directories(
   ${roxlu_extern_include_dir}/cairo/
   ${roxlu_extern_include_dir}/freetype2/          # experimental
   ${roxlu_extern_lib_dir}/glib-2.0/include/
-
 )
 
 if(ROXLU_PLATFORM_MAC)
@@ -123,6 +122,8 @@ set(pango_source_files
   ${pango_src_dir}/pango/TextSurface.cpp
   ${pango_src_dir}/pango/TextGLSurface.cpp
 )
+
+source_group("src\\pango" FILES ${pango_source_files})
 
 set(roxlu_addon_sources
   ${roxlu_addon_sources}

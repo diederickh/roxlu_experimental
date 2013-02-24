@@ -134,6 +134,15 @@ set(roxlu_sources
   ${roxlu_extern_sources_c}
 )
 
+source_group("src\\roxlu\\3d" FILES ${roxlu_3d_sources})
+source_group("src\\roxlu\\core" FILES ${roxlu_core_sources})
+source_group("src\\roxlu\\experimental" FILES ${roxlu_experimental_sources})
+source_group("src\\roxlu\\external" FILES ${roxlu_external_sources_c} ${roxlu_external_source_cpp})
+source_group("src\\roxlu\\io" FILES ${roxlu_io_sources})
+source_group("src\\roxlu\\math" FILES ${roxlu_math_sources})
+source_group("src\\roxlu\\opengl" FILES ${roxlu_opengl_sources})
+source_group("src\\extern" FILES ${roxlu_extern_sources_c})
+
 # get roxlu include dir
 set(roxlu_include_dirs 
   ${roxlu_include_dirs}
