@@ -18,6 +18,8 @@ set(audio_source_files
   ${audio_src_dir}/audio/PCMWriter.cpp
 )
 
+source_group("src\\audio" FILES ${audio_source_files})
+
 set(roxlu_addon_sources 
   ${roxlu_addon_sources} 
   ${audio_source_files}

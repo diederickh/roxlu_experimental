@@ -22,6 +22,8 @@ set(roxlu_addon_sources
   ${curl_source_files}
 )
 
+source_group("src\\curl" FILES ${curl_source_files})
+
 if(WIN32)
   roxlu_add_extern_lib(libcurl.lib)
   roxlu_add_extern_lib(ssleay32.lib)

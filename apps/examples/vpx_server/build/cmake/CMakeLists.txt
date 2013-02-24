@@ -24,6 +24,8 @@ set(simulation_sources
   ${simulation_src_dir}/Simulation.cpp
 )
 
+source_group("src\\simulation" FILES ${simulation_sources})
+
 set(compile_sources 
   ${simulation_sources}
   ${glfw_wrapper_sources}

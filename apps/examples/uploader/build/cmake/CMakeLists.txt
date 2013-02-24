@@ -39,6 +39,7 @@ if(WIN32)
 
 endif()
 
+source_group("src\\uploader" FILES ${uploader_sources})
 
 add_executable(uploader ${uploader_sources})
 target_link_libraries(uploader ${roxlu_libs})

@@ -1,7 +1,6 @@
 # There are a couple of global variables that can be used in 
 # addon or simulatin/example CMakelists.txt files:
 # - roxlu_addon_sources (addons should append their sources to this list, see Twitter addon)
-# - roxlu_addon_libs (addons should append their libs to this list, see Twitter addon)
 # - for windows builds you can use ${roxlu_win_runtime} which is set to MT, MTd, MD, MDd (MD is used for import libs)
 #
 #
@@ -14,7 +13,7 @@
 # - roxlu_install_files:     Files you want to move to the install directory
 #                            for example with ROXLU_WIN_LIB_DYNAMIC is set to TRUE
 #                            you might want to copy the DLL files to the install dir.
-# - roxlu_addon_libs:        If you need to link with additional libraries you can 
+# - roxlu_libs:              If you need to link with additional libraries you can 
 #                            add them to this collection.
 # - roxlu_extern_lib_dir:    path to the "extern/lib/[OS]/[platform/compiler]/[arch]/ 
 #                            so you can directly use something like:

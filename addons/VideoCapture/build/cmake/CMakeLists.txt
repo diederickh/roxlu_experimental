@@ -72,6 +72,8 @@ set(roxlu_addon_sources  ${roxlu_addon_sources}  ${videocapture_source_files} )
 
 add_library(roxlu_videocapture STATIC ${videocapture_source_files})
 
+source_group("src\\videocapture" FILES ${rxcapture_source_files})
+source_group("src\\videocapture" FILES ${videocapture_source_files})
 
 if(APPLE)
   set_target_properties(roxlu_videocapture PROPERTIES COMPILE_FLAGS "-ObjC++")

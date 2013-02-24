@@ -23,6 +23,8 @@ set(roxlu_addon_sources
    ${flv_source_files}
 )
 
+source_group("src\\flv" FILES ${flv_source_files})
+
 if(ROXLU_PLATFORM_WIN)
     roxlu_add_extern_lib(libuv.lib)
     roxlu_add_extern_lib(avutil.lib)
