@@ -4,6 +4,10 @@ cmake_minimum_required(VERSION 2.8)
 
 include(${CMAKE_CURRENT_LIST_DIR}/../../../../../lib/build/cmake/CMakeLists.txt) # roxlu cmake
 
+if(WIN32)
+  message(FATAL_ERROR "The streaming example will work on windows, but I need to find a replacement for unistd.h")
+endif()
+
 roxlu_add_addon(Twitter)
 
 set(simulation_base_dir ${CMAKE_CURRENT_LIST_DIR}/../../)

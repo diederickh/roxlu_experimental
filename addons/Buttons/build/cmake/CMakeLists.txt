@@ -41,18 +41,12 @@ if(UNIX)
 endif()
 
 if(WIN32) 
-  # We need to do this because windows.h will include winsock.h which results in redefinitions
-  add_definitions(
-    -DWIN32_LEAN_AND_MEAN
-    )
-  set(roxlu_addon_libs
-    ${roxlu_addon_lib}
-    roxlu_buttons
-    ${roxlu_extern_lib_dir}/libuv.lib
-    ws2_32.lib
-    psapi.lib
-    iphlpapi.lib
-    )
+  add_definitions( -DWIN32_LEAN_AND_MEAN )   # We need to do this because windows.h will include winsock.h which results in redefinitions
+  roxlu_add_extern_lib(libuv.lib)
+  roxlu_add_lib(ws2_32.lib)
+  roxlu_add_lib(psapi.lib)
+  roxlu_add_lib(iphlpapi.lib)
+  roxlu_add_lib(roxlu_buttons)
 endif()
 
 add_library(roxlu_buttons STATIC ${buttons_source_files})

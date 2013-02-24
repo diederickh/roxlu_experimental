@@ -26,22 +26,8 @@ set(roxlu_addon_sources
 if(ROXLU_PLATFORM_WIN) 
   roxlu_add_extern_lib(portaudio_x86.lib)
   roxlu_add_dll(portaudio_x86.dll)
-
-#  set(audio_libs 
-#    ${roxlu_extern_lib_dir}/portaudio_x86.lib
-#    )
-#
-#  set(roxlu_install_files
-#    ${roxlu_install_files}
-#    ${roxlu_extern_bin_dir}/portaudio_x86.dll
-#    )
-
 else() 
   roxlu_add_extern_lib(libportaudio.a)
-#  set(audio_libs
-#    ${roxlu_extern_lib_dir}/libportaudio.a
-#    )
-#
 endif(ROXLU_PLATFORM_WIN)
 
 if(APPLE)
@@ -55,20 +41,7 @@ if(APPLE)
  roxlu_add_lib(${fr_audio_toolbox})
  roxlu_add_lib(${fr_core_services})
 
-# set(audio_libs
-#   ${audio_libs}
-#   ${fr_audio}
-#   ${fr_audio_unit}
-#   ${fr_audio_toolbox}
-#   ${fr_core_services}
-#   )
-
 endif(APPLE)
-
-#set(roxlu_addon_libs
-#  ${roxlu_addon_libs}
-#  ${audio_libs}
-#)
 
 add_library(roxlu_audio STATIC ${audio_source_files})
 

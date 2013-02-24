@@ -23,22 +23,18 @@ set(roxlu_addon_sources
 )
 
 if(WIN32)
-    set(curl_libs
-      ${roxlu_extern_lib_dir}/libcurl.lib
-      ${roxlu_extern_lib_dir}/ssleay32.lib
-      ${roxlu_extern_lib_dir}/libeay32.lib
-      ${roxlu_extern_lib_dir}/zdll.lib
-      ws2_32.lib
-      Iphlpapi.lib
-      psapi.lib
-      )
+  roxlu_add_extern_lib(libcurl.lib)
+  roxlu_add_extern_lib(ssleay32.lib)
+  roxlu_add_extern_lib(libeay32.lib)
+  roxlu_add_extern_lib(zlib.lib)
+  roxlu_add_lib(ws2_32.lib)
+  roxlu_add_lib(iphlpapi.lib)
+  roxlu_add_lib(psapi.lib)
 
-    set(roxlu_install_files
-      ${roxlu_install_files}
-      ${roxlu_extern_bin_dir}/libcurl.dll
-      ${roxlu_extern_bin_dir}/libeay32.dll
-      ${roxlu_extern_bin_dir}/ssleay32.dll
-      )
+  roxlu_add_dll(libcurl.dll)
+  roxlu_add_dll(libeay32.dll)
+  roxlu_add_dll(ssleay32.dll)
+  roxlu_add_dll(zlib.dll)
 
 else()
   roxlu_add_extern_lib(libcurl.a)
@@ -48,18 +44,9 @@ else()
 endif()
 
 if(UNIX AND NOT APPLE)
-  set(curl_libs
-    ${curl_libs}
-    dl
-    rt
-    )
+  roxlu_add_lib(dl)
+  roxlu_add_lib(rt)
 endif()
-
-#set(roxlu_addon_libs
-#  ${roxlu_addon_libs}
-#  ${curl_libs}
-#)
 
 add_library(roxlu_curl STATIC ${curl_source_files})
 
-#add_subdirectory(tests)

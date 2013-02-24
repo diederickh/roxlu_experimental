@@ -19,8 +19,7 @@ set(videocapture_source_files
   ${videocapture_src_dir}/videocapture/VideoCaptureGLSurface.cpp
 )
 
-# APPLE
-# ------------------------
+
 if(APPLE) 
   set(rxcapture_source_files
     ${videocapture_src_platform_dir}/videocapture/rx_capture_mac.mm
@@ -45,8 +44,6 @@ if(APPLE)
 
 endif(APPLE)
 
-# LINUX
-# ------------------------
 if(UNIX AND NOT APPLE)
 
   set(rxcapture_source_files
@@ -65,17 +62,16 @@ if(WIN32)
     ${videocapture_src_platform_dir}/videocapture/rx_capture_win.cpp
     ${videocapture_src_platform_dir}/videocapture/VideoCaptureDirectShow.cpp
     )
-  set(roxlu_addon_libs
-    ${roxlu_addon_libs}
-    strmiids.lib
-    )
   add_library(rx_capture ${rxcapture_source_files})
-endif()
 
+  roxlu_add_lib(strmiids.lib)
+  roxlu_add_lib(rx_capture)
+endif()
 
 set(roxlu_addon_sources  ${roxlu_addon_sources}  ${videocapture_source_files} )
 
 add_library(roxlu_videocapture STATIC ${videocapture_source_files})
+
 
 if(APPLE)
   set_target_properties(roxlu_videocapture PROPERTIES COMPILE_FLAGS "-ObjC++")

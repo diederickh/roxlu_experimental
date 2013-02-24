@@ -1,7 +1,10 @@
 #include <iostream>
 #include <twitter/Twitter.h>
 #include <formats/json.h>
-#include <unistd.h> // getpwd on linux
+
+#if defined(linux)
+# include <unistd.h> // getpwd on linux
+#endif
 
 // Our callbacks
 void on_filter_update_callback(const char* data, size_t len, void* user);

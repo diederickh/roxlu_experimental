@@ -23,16 +23,6 @@ if(APPLE)
   roxlu_add_extern_lib(libvpx.a)
   roxlu_add_lib(${fr_foundation})
   roxlu_add_lib(${fr_services})
-
-#  set(webm_libs
-#    ${roxlu_extern_lib_dir}/libswscale.a
-#    ${roxlu_extern_lib_dir}/libavutil.a
-#    ${roxlu_extern_lib_dir}/libavcodec.a
-#    ${roxlu_extern_lib_dir}/libuv.a
-#    ${roxlu_extern_lib_dir}/libvpx.a
-#    ${fr_foundation}
-#    ${fr_services}
-#    )
 	
 endif()
 
@@ -41,6 +31,7 @@ if(LINUX AND NOT APPLE)
 endif()
 
 if(WIN32)
+  message(FATAL_ERROR Webm addon is not yet ported to windows)
 endif()
 
 set(webm_source_files
