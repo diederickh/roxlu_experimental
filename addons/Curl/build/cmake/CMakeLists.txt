@@ -7,19 +7,12 @@ set(curl_base_dir ${CMAKE_CURRENT_LIST_DIR}/../../)
 set(curl_src_dir ${curl_base_dir}/src/kurl/)
 set(curl_include_dir ${curl_base_dir}/include)
 
-include_directories(
-  ${curl_include_dir}
-  ${curl_base_dir}/extern/include/
-  ${curl_src_dir}
-)
+roxlu_add_include_dir(${curl_include_dir})
+roxlu_add_include_dir(${curl_base_dir}/extern/include/)
+roxlu_add_include_dir(${curl_src_dir})
 
 set(curl_source_files
   ${curl_src_dir}/Kurl.cpp
-)
-
-set(roxlu_addon_sources 
-  ${roxlu_addon_sources} 
-  ${curl_source_files}
 )
 
 source_group("src\\curl" FILES ${curl_source_files})
@@ -51,4 +44,4 @@ if(UNIX AND NOT APPLE)
 endif()
 
 add_library(roxlu_curl STATIC ${curl_source_files})
-
+roxlu_add_lib(roxlu_curl)

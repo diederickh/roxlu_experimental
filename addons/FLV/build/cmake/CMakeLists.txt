@@ -17,11 +17,6 @@ set(flv_source_files
   ${flv_src_dir}/flv/FLV.cpp
   ${flv_src_dir}/flv/FLVScreenRecorder.cpp
 )
- 
-set(roxlu_addon_sources
-   ${roxlu_addon_sources}
-   ${flv_source_files}
-)
 
 source_group("src\\flv" FILES ${flv_source_files})
 
@@ -67,5 +62,5 @@ elseif(ROXLU_PLATFORM_MAC)
   roxlu_add_extern_lib(libx264.a)
 endif()
 
-
 add_library(roxlu_flv STATIC ${flv_source_files})
+roxlu_add_lib(roxlu_flv)

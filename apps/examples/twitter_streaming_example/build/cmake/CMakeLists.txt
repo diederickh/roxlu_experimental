@@ -10,45 +10,9 @@ endif()
 
 roxlu_add_addon(Twitter)
 
-set(simulation_base_dir ${CMAKE_CURRENT_LIST_DIR}/../../)
-set(simulation_install_dir ${simulation_base_dir}bin/)
-set(simulation_include_dir ${simulation_base_dir}src/)
-set(CMAKE_INSTALL_PREFIX ${simulation_install_dir})
+roxlu_app_initialize("twitter_streaming_example")
+roxlu_app_add_source_file(main.cpp)
 
-set(simulation_libs
-  ${roxlu_libs}
-)
+roxlu_install_app()
 
-set(simulation_name twitter_streaming_example)
-
-set(simulation_sources 
-  ${simulation_base_dir}/src/main.cpp
-)
-
-source_group("src\\simulation" FILES ${simulation_sources})
-
-set(compile_sources 
-  ${simulation_sources}
-  ${glfw_wrapper_sources}
-  ${roxlu_sources}
-  ${roxlu_addon_sources}
-)
-
-include_directories(
-  ${glfw_include_dir} 
-  ${external_include_dir}
-  ${simulation_include_dir}
-  ${roxlu_include_dirs}
-)
-
-add_executable(${simulation_name} ${compile_sources})
-target_link_libraries(${simulation_name} ${simulation_libs})
-
-install(TARGETS ${simulation_name} DESTINATION ${simulation_install_dir})
-install(FILES ${roxlu_install_files} DESTINATION ${simulation_install_dir})
-
-if(WIN32)
-  install(FILES ${roxlu_install_files} DESTINATION ${simulation_install_dir_windows}/Release)
-  install(FILES ${roxlu_install_files} DESTINATION ${simulation_install_dir_windows}/Debug)
-endif()
 
