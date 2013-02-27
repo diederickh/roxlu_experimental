@@ -18,6 +18,7 @@
   #undef glBindVertexArray
   #define glGenVertexArrays glGenVertexArraysAPPLE
   #define glBindVertexArray glBindVertexArrayAPPLE
+
  #elif ROXLU_PLATFORM == ROXLU_WINDOWS
   #include <GL/glew.h>
   #include <GL/glfw3.h>
