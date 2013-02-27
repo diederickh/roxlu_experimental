@@ -125,16 +125,8 @@ set(pango_source_files
 
 source_group("src\\pango" FILES ${pango_source_files})
 
-set(roxlu_addon_sources
-  ${roxlu_addon_sources}
-  ${pango_source_files}
-)
-
-#set(roxlu_addon_libs
-#  ${roxlu_addon_libs}
-#  ${pango_libs}
-#)
-
 add_library(roxlu_pango STATIC ${pango_source_files})
+
+roxlu_add_lib(roxlu_pango)
 
 

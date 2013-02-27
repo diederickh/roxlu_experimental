@@ -91,3 +91,4 @@ if(NOT APPLE AND UNIX)
 endif()
 
 add_library(roxlu_twitter STATIC ${twitter_source_files})
+roxlu_add_lib(roxlu_twitter)

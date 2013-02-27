@@ -31,7 +31,6 @@
 
 cmake_minimum_required(VERSION 2.8)
 
-
 # if(CMAKE_BUILD_TYPE STREQUAL Debug)
 #   if(CMAKE_COMPILER_IS_GNUCXX)
 #     add_definitions("-ggdb")
@@ -40,6 +39,108 @@ cmake_minimum_required(VERSION 2.8)
 #     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUGS} /Od /ZI")
 #     endif()
 # endif()
+
+
+# -------------------------------------------------------------------
+# Basic helpers to cleanup the cmakelists.txt files of projects
+#
+#  roxlu_add_addon: 
+#  ----------------
+#  Use this macro to add addons to your project
+#  pass the name of the directory that contains the 
+#  addon.
+#     
+#     examples:
+#     ---------
+#     roxlu_add_addon(Curl)
+#     roxlu_add_addon(SQLite)
+#     roxlu_add_addon(FLV)
+#
+#
+#  roxlu_enable_opengl:
+#  ----------------
+#  Sets up everything you need to use the Simulation.cpp/h files
+#  and can use opengl functions.
+#
+# -------------------------------------------------------------------
+
+macro(roxlu_add_addon addon)
+  include(${roxlu_addons_dir}/${addon}/build/cmake/CMakeLists.txt) 
+endmacro(roxlu_add_addon)
+
+macro(roxlu_add_dll dll)
+
+  if(WIN32)
+    list(APPEND roxlu_install_files ${roxlu_extern_bin_dir}/${dll})
+  endif()
+
+endmacro(roxlu_add_dll)
+
+macro(roxlu_add_extern_lib lib)
+
+  if(CMAKE_BUILD_TYPE STREQUAL Debug AND EXISTS ${roxlu_extern_lib_debug_dir}/${lib})
+    list(APPEND roxlu_libs ${roxlu_extern_lib_debug_dir}/${lib})
+  else()
+    list(APPEND roxlu_libs ${roxlu_extern_lib_dir}/${lib})
+  endif()
+endmacro(roxlu_add_extern_lib)
+
+macro(roxlu_add_lib lib)
+  list(APPEND roxlu_libs ${lib})
+endmacro(roxlu_add_lib)
+
+macro(roxlu_add_source_file src_file)
+  list(APPEND roxlu_source_files ${src_file})
+endmacro(roxlu_add_source_file)
+
+macro(roxlu_addon_add_source_file addon_name src_file)
+  roxlu_add_source_file(${src_file})
+  source_group("src\\${addon_name}" FILES ${src_file})
+endmacro(roxlu_addon_add_source_file)
+
+macro(roxlu_add_include_dir dir)
+  include_directories(${dir})
+endmacro(roxlu_add_include_dir)
+
+macro(roxlu_enable_opengl)
+  include(${roxlu_base_dir}/apps/external/CMakeLists.txt) # External (glfw)
+  roxlu_add_dll(glew32.dll)
+endmacro(roxlu_enable_opengl)
+
+macro(roxlu_app_initialize app_name)
+  set(roxlu_app_name ${app_name})
+  set(roxlu_app_base_dir ${CMAKE_CURRENT_LIST_DIR}/../..)
+  set(roxlu_app_install_dir ${roxlu_app_base_dir}/bin)
+  set(roxlu_app_include_dir ${roxlu_app_base_dir}/src)
+  set(roxlu_app_src_dir ${roxlu_app_base_dir}/src)
+  set(CMAKE_INSTALL_PREFIX ${roxlu_app_install_dir})
+
+  roxlu_add_include_dir(${roxlu_app_include_dir})
+
+endmacro(roxlu_app_initialize)
+
+macro(roxlu_app_add_source_file file)
+  roxlu_add_source_file(${roxlu_app_src_dir}/${file})
+  source_group("src\\simulation" FILES ${file})
+endmacro(roxlu_app_add_source_file)
+
+macro(roxlu_install_app)
+  add_executable(${roxlu_app_name} ${roxlu_source_files} ${roxlu_sources})
+  target_link_libraries(${roxlu_app_name} ${roxlu_libs})
+
+  install(TARGETS ${roxlu_app_name} DESTINATION ${roxlu_app_install_dir})
+  install(FILES ${roxlu_install_files} DESTINATION ${roxlu_app_install_dir})
+
+  if(WIN32)
+    install(FILES ${roxlu_install_files} DESTINATION ${roxlu_app_install_dir_windows}/Release)
+    install(FILES ${roxlu_install_files} DESTINATION ${roxlu_app_install_dir_windows}/Debug)
+  endif()
+
+endmacro(roxlu_install_app)
+
+# --------------------------------------------------------------------------------
+# R O X L U   
+# --------------------------------------------------------------------------------
 
 option(ROXLU_32BIT "Build 32bit version" OFF)
 option(ROXLU_64BIT "Build 64bit version" ON)
@@ -251,7 +352,7 @@ if(ROXLU_PLATFORM_WIN)
   include_directories(${roxlu_base_dir}/extern/include/msinttypes/)
 
   add_definitions( "/wd4995 /wd4244 /wd4305 /D_CRT_SECURE_NO_WARNINGS /W3")
-
+  
   set(roxlu_include_dirs
     ${roxlu_include_dirs}
     ${roxlu_extern_lib_dir}/curl/
@@ -263,70 +364,3 @@ endif(ROXLU_PLATFORM_WIN)
 
 include_directories(${roxlu_include_dirs})
 
-
-# -------------------------------------------------------------------
-# Basic helpers to cleanup the cmakelists.txt files of projects
-#
-#  roxlu_add_addon: 
-#  ----------------
-#  Use this macro to add addons to your project
-#  pass the name of the directory that contains the 
-#  addon.
-#     
-#     examples:
-#     ---------
-#     roxlu_add_addon(Curl)
-#     roxlu_add_addon(SQLite)
-#     roxlu_add_addon(FLV)
-#
-#
-#  roxlu_enable_opengl:
-#  ----------------
-#  Sets up everything you need to use the Simulation.cpp/h files
-#  and can use opengl functions.
-#
-# -------------------------------------------------------------------
-
-macro(roxlu_add_addon addon)
-  include(${roxlu_addons_dir}/${addon}/build/cmake/CMakeLists.txt) 
-endmacro(roxlu_add_addon)
-
-macro(roxlu_add_dll dll)
-
-  if(WIN32)
-    set(roxlu_install_files
-      ${roxlu_install_files}
-      ${roxlu_extern_bin_dir}/${dll}
-      )
-  endif()
-
-endmacro(roxlu_add_dll)
-
-macro(roxlu_add_extern_lib lib)
-
-  if(CMAKE_BUILD_TYPE STREQUAL Debug AND EXISTS ${roxlu_extern_lib_debug_dir}/${lib})
-    # If we have a debug lib, link with that for debug builds
-    set(roxlu_libs
-      ${roxlu_libs}
-      ${roxlu_extern_lib_debug_dir}/${lib}
-      )
-  else()
-    # else link with the release version
-    set(roxlu_libs
-      ${roxlu_libs}
-      ${roxlu_extern_lib_dir}/${lib}
-      )
-  endif()
-endmacro(roxlu_add_extern_lib)
-
-macro(roxlu_add_lib lib)
-  set(roxlu_libs
-    ${roxlu_libs}
-    ${lib}
-    )
-endmacro(roxlu_add_lib)
-
-macro(roxlu_enable_opengl)
-  include(${roxlu_base_dir}/apps/external/CMakeLists.txt) # External (glfw)
-  roxlu_add_dll(glew32.dll)
-endmacro(roxlu_enable_opengl)

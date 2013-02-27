@@ -43,16 +43,7 @@ set(webm_source_files
   ${webm_src_dir}/webm/WebmScreenRecorder.cpp
 )
 
-set(roxlu_addon_sources
-  ${roxlu_addon_sources}
-  ${webm_source_files}
-)
-
-set(roxlu_addon_libs
-  ${roxlu_addon_libs}
-  ${webm_libs}
-)
-
 add_library(roxlu_webm STATIC ${webm_source_files})
+roxlu_add_lib(roxlu_webm)
 
 
