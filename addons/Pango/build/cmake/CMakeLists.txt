@@ -36,6 +36,7 @@ if(ROXLU_PLATFORM_MAC)
   roxlu_add_extern_lib(libfreetype.a)
   roxlu_add_extern_lib(libz.a)
   roxlu_add_extern_lib(libxml2.a)
+  roxlu_add_extern_lib(libharfbuzz.a)
   
   roxlu_add_lib(-lbz2)
   roxlu_add_lib(-lexpat)
