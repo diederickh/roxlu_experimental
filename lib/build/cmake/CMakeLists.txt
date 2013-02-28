@@ -1,6 +1,5 @@
 # There are a couple of global variables that can be used in 
 # addon or simulatin/example CMakelists.txt files:
-# - roxlu_addon_sources (addons should append their sources to this list, see Twitter addon)
 # - for windows builds you can use ${roxlu_win_runtime} which is set to MT, MTd, MD, MDd (MD is used for import libs)
 #
 #
@@ -93,6 +92,7 @@ macro(roxlu_add_source_file src_file)
 endmacro(roxlu_add_source_file)
 
 macro(roxlu_addon_add_source_file addon_name src_file)
+  message(FATAL_ERROR "someone called roxlu_addon_sdd_source_file which we're not using!!")
   roxlu_add_source_file(${src_file})
   source_group("src\\${addon_name}" FILES ${src_file})
 endmacro(roxlu_addon_add_source_file)

@@ -19,17 +19,6 @@ TextSurface::~TextSurface() {
 }
 
 bool TextSurface::setup(const std::string& font, int w, int h, cairo_format_t fmt) {
-
-  //  PangoFontMap* pfm = pango_cairo_font_map_new_for_font_type(CAIRO_FONT_TYPE_FT);
-  // PangoFontMap* pfm = pango_cairo_font_map_new_for_font_type(CAIRO_FONT_TYPE_WIN32);
-  //printf("---------> %p\n", pfm);
-  //pango_cairo_font_map_set_default((PangoCairoFontMap*)pfm);
-  
-#if defined(PANGO_TYPE_FT2_FONT)
-  printf("---------------- YES YES -----------\n");
-#else
-  printf("---------------- NO NO -----------\n");
-#endif
   width = w;
   height = h;
 
