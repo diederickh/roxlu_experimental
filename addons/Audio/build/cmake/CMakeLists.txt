@@ -26,9 +26,11 @@ set(roxlu_addon_sources
 if(ROXLU_PLATFORM_WIN) 
   roxlu_add_extern_lib(portaudio_x86.lib)
   roxlu_add_dll(portaudio_x86.dll)
-else() 
+endif()
+
+if(UNIX)
   roxlu_add_extern_lib(libportaudio.a)
-endif(ROXLU_PLATFORM_WIN)
+endif()
 
 if(APPLE)
  find_library(fr_audio CoreAudio)

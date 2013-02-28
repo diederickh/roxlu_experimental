@@ -32,7 +32,6 @@
 
 cmake_minimum_required(VERSION 2.8)
 
-
 # if(CMAKE_BUILD_TYPE STREQUAL Debug)
 #   if(CMAKE_COMPILER_IS_GNUCXX)
 #     add_definitions("-ggdb")
@@ -297,6 +296,7 @@ endmacro(roxlu_add_dll)
 macro(roxlu_add_extern_lib lib)
 
   if(CMAKE_BUILD_TYPE STREQUAL Debug AND EXISTS ${roxlu_extern_lib_debug_dir}/${lib})
+
     # If we have a debug lib, link with that for debug builds
     set(roxlu_libs
       ${roxlu_libs}
@@ -320,5 +320,7 @@ endmacro(roxlu_add_lib)
 
 macro(roxlu_enable_opengl)
   include(${roxlu_base_dir}/apps/external/CMakeLists.txt) # External (glfw)
-  roxlu_add_dll(glew32.dll)
+  if(WIN32)
+    roxlu_add_dll(glew32.dll)
+  endif()
 endmacro(roxlu_enable_opengl)
