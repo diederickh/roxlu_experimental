@@ -15,22 +15,34 @@ include_directories(
   ${roxlu_extern_src_dir} # for http_parser
 )
 
-set(twitter_source_files
+set(twitter_extern_source_files
+  ${twitter_base_dir}/extern/src/formats/hmac_sha1.c
+  ${twitter_base_dir}/extern/src/formats/json.c
+  ${twitter_base_dir}/extern/src/formats/Base64Encoder.cpp
+)
+
+set(twitter_addon_source_files
   ${twitter_src_dir}/twitter/OAuth.cpp 
   ${twitter_src_dir}/twitter/HTTP.cpp 
   ${twitter_src_dir}/twitter/Twitter.cpp 
   ${twitter_src_dir}/twitter/Buffer.cpp 
   ${twitter_src_dir}/twitter/SSLBuffer.cpp 
   ${twitter_src_dir}/twitter/PercentEncode.cpp
-  ${twitter_base_dir}/extern/src/formats/hmac_sha1.c
-  ${twitter_base_dir}/extern/src/formats/json.c
-  ${twitter_base_dir}/extern/src/formats/Base64Encoder.cpp
+)
+  
+set(twitter_source_files
+  ${twitter_addon_source_files}
+  ${twitter_extern_source_files}
 )
 
 set(roxlu_addon_sources 
   ${twitter_source_files}
   ${roxlu_addon_sources} 
 )
+
+source_group("src\\twitter" FILES ${twitter_addon_source_files})
+source_group("src\\extern" FILES ${twitter_extern_source_files})
+
 
 if(APPLE) 
   find_library(fr_corefoundation CoreFoundation)
@@ -79,3 +91,4 @@ if(NOT APPLE AND UNIX)
 endif()
 
 add_library(roxlu_twitter STATIC ${twitter_source_files})
+roxlu_add_lib(roxlu_twitter)

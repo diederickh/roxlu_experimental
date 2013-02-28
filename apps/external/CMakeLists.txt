@@ -11,6 +11,10 @@ set(glfw_base_dir ${CMAKE_CURRENT_LIST_DIR}/)
 set(glfw_include_dir ${glfw_base_dir}/glfw/include/)
 set(glfw_wrapper_sources ${glfw_base_dir}/glfw_wrapper/SimulationBase.cpp)
 
+roxlu_add_source_file(${glfw_wrapper_sources})
+
+source_group("src\\simulation" FILES ${glfw_wrapper_sources})
+
 # GLEW
 if(NOT ROXLU_PLATFORM_WIN)
   roxlu_add_extern_lib(libglfw3.a)
@@ -54,11 +58,5 @@ if(ROXLU_PLATFORM_LINUX)
 #)
 endif(ROXLU_PLATFORM_LINUX)
 
-set(roxlu_include_dirs
-  ${roxlu_include_dirs}
-  ${glfw_include_dir}
-  ${glew_include_dir}
-  ${CMAKE_CURRENT_LIST_DIR}/
-)
-
-
+roxlu_add_include_dir(${glfw_include_dir})
+roxlu_add_include_dir(${CMAKE_CURRENT_LIST_DIR})

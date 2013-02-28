@@ -14,7 +14,6 @@ include_directories(
   ${roxlu_extern_include_dir}/cairo/
   ${roxlu_extern_include_dir}/freetype2/          # experimental
   ${roxlu_extern_lib_dir}/glib-2.0/include/
-
 )
 
 if(ROXLU_PLATFORM_MAC)
@@ -37,6 +36,7 @@ if(ROXLU_PLATFORM_MAC)
   roxlu_add_extern_lib(libfreetype.a)
   roxlu_add_extern_lib(libz.a)
   roxlu_add_extern_lib(libxml2.a)
+  roxlu_add_extern_lib(libharfbuzz.a)
   
   roxlu_add_lib(-lbz2)
   roxlu_add_lib(-lexpat)
@@ -124,16 +124,10 @@ set(pango_source_files
   ${pango_src_dir}/pango/TextGLSurface.cpp
 )
 
-set(roxlu_addon_sources
-  ${roxlu_addon_sources}
-  ${pango_source_files}
-)
-
-#set(roxlu_addon_libs
-#  ${roxlu_addon_libs}
-#  ${pango_libs}
-#)
+source_group("src\\pango" FILES ${pango_source_files})
 
 add_library(roxlu_pango STATIC ${pango_source_files})
+
+roxlu_add_lib(roxlu_pango)
 
 

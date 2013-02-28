@@ -28,21 +28,7 @@ set(sqlite_source_files
 if(UNIX AND NOT APPLE)
   roxlu_add_lib(pthread)
   roxlu_add_lib(dl)
-
-#  set(roxlu_addon_libs
-#    ${roxlu_addon_libs}
-#    pthread
-#    dl
-#    )
 endif()
 
-set(roxlu_addon_sources 
-  ${roxlu_addon_sources} 
-  ${sqlite_source_files}
-)
-
-set(roxlu_addon_libs
-  ${roxlu_addon_libs}
-)
-
 add_library(roxlu_sqlite STATIC ${sqlite_source_files})
+roxlu_add_lib(roxlu_sqlite)
