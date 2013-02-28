@@ -77,7 +77,6 @@ macro(roxlu_add_dll dll)
 endmacro(roxlu_add_dll)
 
 macro(roxlu_add_extern_lib lib)
-
   if(CMAKE_BUILD_TYPE STREQUAL Debug AND EXISTS ${roxlu_extern_lib_debug_dir}/${lib})
     list(APPEND roxlu_libs ${roxlu_extern_lib_debug_dir}/${lib})
   else()
@@ -107,6 +106,10 @@ macro(roxlu_enable_opengl)
   roxlu_add_dll(glew32.dll)
 endmacro(roxlu_enable_opengl)
 
+# --------------------------------------------------------------------------------
+# A P P L I C A T I O N 
+# --------------------------------------------------------------------------------
+
 macro(roxlu_app_initialize app_name)
   set(roxlu_app_name ${app_name})
   set(roxlu_app_base_dir ${CMAKE_CURRENT_LIST_DIR}/../..)
@@ -114,7 +117,6 @@ macro(roxlu_app_initialize app_name)
   set(roxlu_app_include_dir ${roxlu_app_base_dir}/src)
   set(roxlu_app_src_dir ${roxlu_app_base_dir}/src)
   set(CMAKE_INSTALL_PREFIX ${roxlu_app_install_dir})
-
   roxlu_add_include_dir(${roxlu_app_include_dir})
 
 endmacro(roxlu_app_initialize)
@@ -125,7 +127,8 @@ macro(roxlu_app_add_source_file file)
 endmacro(roxlu_app_add_source_file)
 
 macro(roxlu_install_app)
-  add_executable(${roxlu_app_name} ${roxlu_source_files} ${roxlu_sources})
+  message(${roxlu_source_files})
+  add_executable(${roxlu_app_name} ${roxlu_source_files} ${roxlu_lib_source_files})
   target_link_libraries(${roxlu_app_name} ${roxlu_libs})
 
   install(TARGETS ${roxlu_app_name} DESTINATION ${roxlu_app_install_dir})
@@ -138,12 +141,44 @@ macro(roxlu_install_app)
 
 endmacro(roxlu_install_app)
 
+
+# --------------------------------------------------------------------------------
+# A D D O N 
+# --------------------------------------------------------------------------------
+
+macro(roxlu_addon_begin name)
+  set(roxlu_addon_name ${name})
+  set(roxlu_addon_base_dir ${CMAKE_CURRENT_LIST_DIR}/../../)
+  set(roxlu_addon_include_dir ${roxlu_addon_base_dir}/include/)
+  set(roxlu_addon_src_dir ${roxlu_addon_base_dir}/src/)
+  include_directories(${roxlu_addon_include_dir})
+endmacro()
+
+macro(roxlu_addon_add_source_file file)
+  list(APPEND roxlu_addon_source_files ${roxlu_addon_src_dir}/${file})
+endmacro()
+
+macro(roxlu_addon_add_source_files glob) 
+  file(GLOB_RECURSE addon_source_files ${roxlu_addon_src_dir}/*.cpp)
+  list(APPEND roxlu_addon_source_files ${addon_source_files})
+  message(${roxlu_addon_source_files})
+endmacro()
+
+macro(roxlu_addon_end)
+  add_library("roxlu_${roxlu_addon_name}" STATIC ${roxlu_addon_source_files})
+  set(roxlu_addon_source_files "")
+  set(roxlu_addon_name "")
+  set(roxlu_addon_base_dir "")
+  set(roxlu_addon_include_dir "")
+  set(roxlu_addon_src_dir "")
+endmacro()
+
 # --------------------------------------------------------------------------------
 # R O X L U   
 # --------------------------------------------------------------------------------
 
-option(ROXLU_32BIT "Build 32bit version" OFF)
-option(ROXLU_64BIT "Build 64bit version" ON)
+#option(ROXLU_32BIT "Build 32bit version" OFF)
+#option(ROXLU_64BIT "Build 64bit version" ON)
 
 set(roxlu_base_dir ${CMAKE_CURRENT_LIST_DIR}/../../../)
 set(roxlu_src_dir ${roxlu_base_dir}lib/src/roxlu/)
@@ -210,10 +245,6 @@ set(roxlu_opengl_sources
   ${roxlu_src_dir}/opengl/MatrixStack.cpp
 )
 
-set(roxlu_external_sources_cpp 
- 
-)
-
 # 3rd party, used by addons
 set(roxlu_extern_sources_c 
   ${roxlu_src_dir}/external/http_parser.c
@@ -222,7 +253,7 @@ set(roxlu_extern_sources_c
   ${roxlu_src_dir}/external/stb_truetype.c
 ) 
 
-set(roxlu_sources
+set(roxlu_lib_source_files
   ${roxlu_3d_sources}
   ${roxlu_core_sources}
   ${roxlu_experimental_sources}
@@ -233,6 +264,9 @@ set(roxlu_sources
   ${roxlu_opengl_sources}
   ${roxlu_extern_sources_c}
 )
+
+#add_library(roxlu static ${roxlu_base_source_files})
+#roxlu_add_lib(roxlu)
 
 source_group("src\\roxlu\\3d" FILES ${roxlu_3d_sources})
 source_group("src\\roxlu\\core" FILES ${roxlu_core_sources})
@@ -250,6 +284,10 @@ set(roxlu_include_dirs
   ${roxlu_extern_include_dir}
 )
 
+if(NOT ROXLU_32BIT AND NOT ROXLU_64BIT)
+  set(ROXLU_64BIT ON)
+endif()
+
 # On windows we build 32bit (msvc2012 is 32bit by default)
 if(WIN32)
   set(ROXLU_32BIT ON)
@@ -264,6 +302,7 @@ endif(ROXLU_32BIT)
 if(ROXLU_64BIT)
   set(roxlu_bits "64")
 endif(ROXLU_64BIT)
+
 
 if(APPLE)
   set(roxlu_platform "mac") 
@@ -318,6 +357,7 @@ add_definitions(
 )
 endif(NOT ROXLU_PLATFORM_WIN)
 
+message("______" ${roxlu_bits})
 set(roxlu_extern_lib_dir ${roxlu_base_dir}/extern/lib/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}/)
 set(roxlu_extern_lib_debug_dir ${roxlu_base_dir}/extern/lib/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}d/)
 set(roxlu_extern_bin_dir ${roxlu_base_dir}/extern/bin/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}/)

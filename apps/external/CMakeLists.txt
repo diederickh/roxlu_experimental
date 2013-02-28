@@ -59,14 +59,4 @@ if(ROXLU_PLATFORM_LINUX)
 endif(ROXLU_PLATFORM_LINUX)
 
 roxlu_add_include_dir(${glfw_include_dir})
-#roxlu_add_include_dir(${glew_include_dir})
 roxlu_add_include_dir(${CMAKE_CURRENT_LIST_DIR})
-
-#set(roxlu_include_dirs
-#  ${roxlu_include_dirs}
-#  ${glfw_include_dir}
-#  ${glew_include_dir}
-#  ${CMAKE_CURRENT_LIST_DIR}/
-#)
-
-
