@@ -86,7 +86,7 @@ namespace roxlu {
       }
     }
 
-    glGenVertexArrays(1, &vao);
+
     glBindVertexArray(vao);
     shader.enable();
     shader.uniformMat4fv("u_pm", pm);
@@ -114,6 +114,7 @@ namespace roxlu {
     shader.create(FPS_VS, FPS_FS);
     shader.a("a_pos", 0);
     shader.link();
+    shader.enable();
     shader.u("u_mm").u("u_pm").u("u_col");
 
     // VBO + VAO
@@ -192,6 +193,8 @@ namespace roxlu {
       0.0f, 4.0f, 4.0f, 4.0f,
     };
 
+
+    glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
