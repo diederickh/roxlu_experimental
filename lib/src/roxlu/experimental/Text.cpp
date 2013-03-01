@@ -201,7 +201,7 @@ namespace roxlu {
       updateBuffer();
     }
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArrayAPPLE(0); // @todo commented but one isn't supposed to call this anyway
+    // glBindVertexArrayAPPLE(0); // @todo commented but one isn't supposed to call this anyway
     glUseProgram(0);
 	
     glMatrixMode(GL_TEXTURE);
