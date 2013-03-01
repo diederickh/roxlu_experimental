@@ -5,6 +5,7 @@ extern "C" {
 #  include <uv.h>
 }
 
+#include <iterator> /* std::back_inserter */
 #include <vector>
 #include <string>
 #include <roxlu/core/Log.h>
