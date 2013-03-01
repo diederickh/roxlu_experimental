@@ -57,3 +57,20 @@ void SimulationBase::onWindowResize(int w, int h) {
 void SimulationBase::onWindowClose() {
 }
 
+void SimulationBase::showCursor() {
+  glfwSetInputMode(window, GLFW_CURSOR_MODE, GLFW_CURSOR_NORMAL);
+}
+
+void SimulationBase::hideCursor() {
+  glfwSetInputMode(window, GLFW_CURSOR_MODE, GLFW_CURSOR_CAPTURED);
+}
+
+void SimulationBase::toggleCursor() {
+  int curr_cursor_mode = glfwGetInputMode(window, GLFW_CURSOR_MODE);
+  if(curr_cursor_mode == GLFW_CURSOR_NORMAL) {
+    hideCursor();
+  }
+  else {
+    showCursor();
+  }
+}

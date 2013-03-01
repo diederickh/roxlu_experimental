@@ -43,7 +43,6 @@ namespace buttons {
       ,bt_dec_bottom_color_ptr(NULL)
       ,stepv(0)
       ,bt_mouse_down(-1)
-      ,bt_frames_down(0)
       {
         h = 22;
         bt_inc_top_color_ptr = bt_top_col;
@@ -142,22 +141,16 @@ namespace buttons {
     }
 
     void update() {
-      // when you press the + or - buttons for several frames we auto inc/decr
+      // when you press the + or -, inc/dec
       if(bt_mouse_down == 0) {
-        ++bt_frames_down;
-        if(bt_frames_down > 10) {
-          setValue(value + stepv);
-          bt_frames_down = 0;
-          needsRedraw();
-        }
+        setValue(value + stepv);
+        needsRedraw();
+        bt_mouse_down = -1;
       }
       else if(bt_mouse_down == 1) {
-        ++bt_frames_down;
-        if(bt_frames_down > 10) {
-          setValue(value - stepv);
-          bt_frames_down = 0;
-          needsRedraw();
-        }
+        setValue(value - stepv);
+        needsRedraw();
+        bt_mouse_down = -1;
       }
     }
 
@@ -196,7 +189,6 @@ namespace buttons {
           flagValueChanged();
         }
       }
-      bt_frames_down = 0;
       bt_mouse_down = -1;
     }
 	
@@ -349,7 +341,6 @@ namespace buttons {
 
     // increment/decrement buttons
     int bt_mouse_down; // 0 = inc, 1 = decr, -1 not in button
-    int bt_frames_down; // we count the number of frames the used pressed, after X-frames we auto increment
     float bt_dec_x;
     float bt_inc_x;
     float bt_y;
