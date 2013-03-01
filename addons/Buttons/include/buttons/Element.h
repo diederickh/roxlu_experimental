@@ -6,6 +6,7 @@
 #include <buttons/Types.h>
 #include <string>
 #include <fstream>
+#include <libconfig.h>
 
 using namespace roxlu;
 using std::string;
@@ -43,7 +44,9 @@ namespace buttons {
 	
     virtual bool canSave() = 0;
     virtual void save(std::ofstream& ofs) = 0; 	// each element which stores something must write a size_t with the amount of data it stores
+    virtual void save(config_setting_t* setting) {}
     virtual void load(std::ifstream& ifs) = 0;
+    virtual void load(config_setting_t* setting) {}
 	
     virtual void onSaved(){}  // gets called once all data has been saved
     virtual void onLoaded(){}  // gets called once all data has been loaded 

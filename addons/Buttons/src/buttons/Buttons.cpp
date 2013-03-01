@@ -343,19 +343,19 @@ namespace buttons {
   }
 
   Vector<float>& Buttons::addVec2f(const string& label, float* value) {
-    buttons::Vector<float>* el = new Vector<float>(value, label);
+    buttons::Vector<float>* el = new Vector<float>(value, label, VEC_FLOAT);
     addElement(el, label);
     return *el;
   }
 
   Rectangle<int>& Buttons::addRectanglei(const string& label, int* value) {
-    buttons::Rectangle<int>* el = new Rectangle<int>(value, label);
+    buttons::Rectangle<int>* el = new Rectangle<int>(value, label, RECT_INT);
     addElement(el, label);
     return *el;
   }
 
   Rectangle<float>& Buttons::addRectanglef(const string& label, float* value) {
-    buttons::Rectangle<float>* el = new Rectangle<float>(value, label);
+    buttons::Rectangle<float>* el = new Rectangle<float>(value, label, RECT_FLOAT);
     addElement(el, label);
     return *el;
   }

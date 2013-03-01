@@ -5,11 +5,15 @@
 #include <buttons/Element.h>
 
 namespace buttons {
+  enum RectangleValueType {
+    RECT_INT,
+    RECT_FLOAT
+  };
 
   template<class T>
     class Rectangle : public Element {
   public:	
-    Rectangle(T* value, const string& name);
+    Rectangle(T* value, const string& name, RectangleValueType valueType);
     ~Rectangle();
 
     void generateStaticText();
@@ -25,7 +29,9 @@ namespace buttons {
     void onMouseClick(int mx, int my);
 	
     void save(std::ofstream& ofs);
+    void save(config_setting_t* setting);
     void load(std::ifstream& ifs);
+    void load(config_setting_t* setting);
     bool canSave();
 	
     Rectangle<T>& setColor(const float hue, float sat = 0.2f, float bright = 0.27f, float a = 1.0);
@@ -42,7 +48,7 @@ namespace buttons {
     bool inside_rect;
 
   public:
-	
+    int value_type;
     int label_dx;
     T* value;
 	
@@ -80,9 +86,10 @@ namespace buttons {
   };
 
   template<class T>
-    Rectangle<T>::Rectangle(T* value, const string& name)
+    Rectangle<T>::Rectangle(T* value, const string& name, RectangleValueType valueType )
     :Element(BTYPE_RECTANGLE, name)
     ,label_dx(0)
+    ,value_type(valueType)
     ,bg_x(0)
     ,bg_y(0)
     ,bg_h(0)
@@ -313,6 +320,24 @@ namespace buttons {
   }
 
   template<class T>
+    void Rectangle<T>::save(config_setting_t* setting) {
+    if(value_type == RECT_INT) {
+      config_setting_t* cfg_el = config_setting_add(setting, buttons_create_clean_name(name).c_str(), CONFIG_TYPE_ARRAY);
+      config_setting_set_int_elem(cfg_el, -1, value[0]);
+      config_setting_set_int_elem(cfg_el, -1, value[1]);
+      config_setting_set_int_elem(cfg_el, -1, value[2]);
+      config_setting_set_int_elem(cfg_el, -1, value[3]);
+    }
+    else if(value_type == RECT_FLOAT) {
+      config_setting_t* cfg_el = config_setting_add(setting, buttons_create_clean_name(name).c_str(), CONFIG_TYPE_ARRAY);
+      config_setting_set_float_elem(cfg_el, -1, value[0]);
+      config_setting_set_float_elem(cfg_el, -1, value[1]);
+      config_setting_set_float_elem(cfg_el, -1, value[2]);
+      config_setting_set_float_elem(cfg_el, -1, value[3]);
+    }
+  }
+
+  template<class T>
     void Rectangle<T>::load(std::ifstream& ifs) {
     ifs.read((char*)value, sizeof(T) * 4);
     perc_top_left[0] = calculatePercentage(*(value), min_x_value, max_x_value);
@@ -320,6 +345,33 @@ namespace buttons {
     perc_bottom_right[0] = calculatePercentage(*(value+2), min_x_value, max_x_value);
     perc_bottom_right[1] = calculatePercentage(*(value+3), min_y_value, max_y_value);
     needsRedraw();
+  }
+
+  template<class T> 
+    void Rectangle<T>::load(config_setting_t* setting) {
+      std::string cname = buttons_create_clean_name(name);
+      config_setting_t* cfg = config_setting_get_member(setting, cname.c_str());
+      if(!cfg) {
+        printf("ERROR: cannot find setting for: %s\n", cname.c_str());
+        return;
+      }
+      if(value_type == RECT_INT) {
+        value[0] = config_setting_get_int_elem(cfg, 0);
+        value[1] = config_setting_get_int_elem(cfg, 1);
+        value[2] = config_setting_get_int_elem(cfg, 2);
+        value[3] = config_setting_get_int_elem(cfg, 3);
+      }
+      else if(value_type == RECT_FLOAT) {
+        value[0] = config_setting_get_float_elem(cfg, 0);
+        value[1] = config_setting_get_float_elem(cfg, 1);
+        value[2] = config_setting_get_float_elem(cfg, 2);
+        value[3] = config_setting_get_float_elem(cfg, 3);
+      } 
+
+      perc_top_left[0] = calculatePercentage(*(value), min_x_value, max_x_value);
+      perc_top_left[1] = calculatePercentage(*(value+1), min_y_value, max_y_value);
+      perc_bottom_right[0] = calculatePercentage(*(value+2), min_x_value, max_x_value);
+      perc_bottom_right[1] = calculatePercentage(*(value+3), min_y_value, max_y_value);
   }
 
   template<class T>

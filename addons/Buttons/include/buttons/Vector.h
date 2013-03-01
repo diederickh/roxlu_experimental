@@ -19,11 +19,16 @@
 #include <buttons/Element.h>
 
 namespace buttons {
+  
+  enum VectorValueType {
+    VEC_INT,
+    VEC_FLOAT
+  };
 
   template<class T>
     class Vector : public Element {
   public:	
-    Vector(T* value, const string& name);
+    Vector(T* value, const string& name, VectorValueType valueType);
     ~Vector();
 
     void generateStaticText();
@@ -39,7 +44,9 @@ namespace buttons {
     void onMouseClick(int mx, int my);
 	
     void save(std::ofstream& ofs);
+    void save(config_setting_t* setting);
     void load(std::ifstream& ifs);
+    void load(config_setting_t* setting);
     bool canSave();
 	
     void setValue(void* v); // used by e.g. client<->server
@@ -67,7 +74,7 @@ namespace buttons {
     bool is_rotating;
 
   public:
-	
+    int value_type;
     int label_dx;
     T* value;
 
@@ -79,9 +86,10 @@ namespace buttons {
   };
 
   template<class T>
-    Vector<T>::Vector(T* value, const string& name)
+    Vector<T>::Vector(T* value, const string& name, VectorValueType valueType)
     :Element(BTYPE_VECTOR, name)
     ,label_dx(0)
+    ,value_type(valueType)
     ,bg_x(0)
     ,bg_y(0)
     ,bg_h(0)
@@ -246,11 +254,50 @@ namespace buttons {
   }
 
   template<class T>
+    void Vector<T>::save(config_setting_t* setting) {
+    if(value_type == VEC_INT) {
+      config_setting_t* cfg_el = config_setting_add(setting, buttons_create_clean_name(name).c_str(), CONFIG_TYPE_ARRAY);
+      config_setting_set_int_elem(cfg_el, -1, value[0]);
+      config_setting_set_int_elem(cfg_el, -1, value[1]);
+    }
+    else if(value_type == VEC_FLOAT) {
+      config_setting_t* cfg_el = config_setting_add(setting, buttons_create_clean_name(name).c_str(), CONFIG_TYPE_ARRAY);
+      config_setting_set_float_elem(cfg_el, -1, value[0]);
+      config_setting_set_float_elem(cfg_el, -1, value[1]);      
+    }
+  }
+
+  template<class T>
     void Vector<T>::load(std::ifstream& ifs) {
     ifs.read((char*)value, sizeof(T) * 2);
     cos_a = *value;
     sin_a = *(value+1);
     needsRedraw();
+  }
+
+  template<class T>
+    void Vector<T>::load(config_setting_t* setting) {
+    std::string cname = buttons_create_clean_name(name);
+    config_setting_t* cfg = config_setting_get_member(setting, cname.c_str());
+    if(!cfg) {
+      printf("ERROR: cannot find setting for: %s\n", cname.c_str());
+      return;
+    }
+
+    if(value_type == VEC_INT) {
+      printf("ERROR: we did not yet implement the INT vec type for loading.\n");
+    }
+    else if(value_type == VEC_FLOAT) {
+      double tmp_value = 0;
+      value[0] = config_setting_get_float_elem(cfg, 0);
+      value[1] = config_setting_get_float_elem(cfg, 1);
+      cos_a = *value;
+      sin_a = *(value+1);
+    }
+
+    needsRedraw();
+    needsTextUpdate();
+
   }
 
   template<class T>

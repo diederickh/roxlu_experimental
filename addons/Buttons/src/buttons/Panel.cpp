@@ -175,7 +175,7 @@ namespace buttons {
   void Panel::save() {
     for(vector<Buttons*>::iterator it = guis.begin(); it != guis.end(); ++it) {
       Buttons& b = **it;
-      string filename = "gui_" +b.getName() +".bin";
+      string filename = "gui_" +b.getName() +".cfg";
       b.save(rx_to_exe_path(filename));
     }
   }
@@ -183,7 +183,7 @@ namespace buttons {
   void Panel::load() {
     for(vector<Buttons*>::iterator it = guis.begin(); it != guis.end(); ++it) {
       Buttons& b = **it;
-      string filename = "gui_" +b.getName() +".bin";
+      string filename = "gui_" +b.getName() +".cfg";
       b.load(rx_to_exe_path(filename));
     }
   }

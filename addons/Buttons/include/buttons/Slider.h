@@ -4,6 +4,7 @@
 #include <buttons/Types.h>
 #include <buttons/Element.h>
 #include <sstream>
+#include <libconfig.h>
 
 namespace buttons {
 
@@ -285,7 +286,7 @@ namespace buttons {
       ofs.write((char*)&value_type, sizeof(int));
       ofs.write((char*)&value, sizeof(T));
     }
-	
+
     void load(std::ifstream& ifs) {
       ifs.read((char*)&value_type, sizeof(int));
       ifs.read((char*)&value, sizeof(T));
@@ -293,7 +294,43 @@ namespace buttons {
       needsRedraw();
       needsTextUpdate();
     }
+
+    void save(config_setting_t* setting) {
+      if(value_type == SLIDER_INT) {
+        config_setting_t* cfg_el = config_setting_add(setting, buttons_create_clean_name(name).c_str(), CONFIG_TYPE_INT);
+        config_setting_set_int(cfg_el, value);
+      }
+      else if(value_type == SLIDER_FLOAT) {
+        config_setting_t* cfg_el = config_setting_add(setting, buttons_create_clean_name(name).c_str(), CONFIG_TYPE_FLOAT);
+        config_setting_set_float(cfg_el, value);
+      }
+    }
 	
+    void load(config_setting_t* setting) {
+      std::string cname = buttons_create_clean_name(name);
+      if(value_type == SLIDER_INT) {
+        int r = config_setting_lookup_int((const config_setting_t*)setting, cname.c_str(), (int*)&value);
+        if(r == CONFIG_FALSE) {
+          printf("ERROR: wront setting for: %s\n", cname.c_str());
+        }
+        else {
+          setValue(value);
+        }
+      }
+      else if(value_type == SLIDER_FLOAT) {
+        double tmp_value = 0.0; 
+        int r = config_setting_lookup_float((const config_setting_t*)setting, cname.c_str(), &tmp_value);
+        if(r == CONFIG_FALSE) {
+          printf("ERROR: wront setting for: %s\n", cname.c_str());
+        }
+        else {
+          setValue(tmp_value);
+        }
+      }
+
+      needsRedraw();
+      needsTextUpdate();
+    }
 	
     void hide() {
       this->is_visible = false;
