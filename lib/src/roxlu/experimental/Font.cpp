@@ -110,7 +110,9 @@ namespace roxlu {
     shader.u("u_projection_matrix").u("u_model_matrix").u("u_font_texture");
 
     // BUFFERS
-    vao.bind();
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    //vao.bind();
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
   
@@ -213,7 +215,7 @@ namespace roxlu {
     }
 
     // do we need to realloacate our buffer?
-    vao.bind();
+    glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     size_t needed = getNumBytes();
     if(needed > allocated_bytes) {
@@ -229,7 +231,6 @@ namespace roxlu {
     }
     glBufferSubData(GL_ARRAY_BUFFER, 0, needed, getPtr());
     needs_update = false;
-    //    vao.unbind();
   }
 
   void Font::draw() {
@@ -245,7 +246,8 @@ namespace roxlu {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   
-    vao.bind();
+    glBindVertexArray(vao);
+    //vao.bind();
     shader.enable();
 
     shader.uniformMat4fv("u_projection_matrix", pm);

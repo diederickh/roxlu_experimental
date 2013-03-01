@@ -29,7 +29,10 @@
 #                              include debug libs on windows.
 
 cmake_minimum_required(VERSION 2.8)
-
+if(NOT roxlu_libs)
+ message("-------------------------------------")
+  set(roxlu_libs "")
+endif()
 # if(CMAKE_BUILD_TYPE STREQUAL Debug)
 #   if(CMAKE_COMPILER_IS_GNUCXX)
 #     add_definitions("-ggdb")
@@ -91,11 +94,11 @@ macro(roxlu_add_source_file src_file)
   list(APPEND roxlu_source_files ${src_file})
 endmacro(roxlu_add_source_file)
 
-macro(roxlu_addon_add_source_file addon_name src_file)
-  message(FATAL_ERROR "someone called roxlu_addon_sdd_source_file which we're not using!!")
-  roxlu_add_source_file(${src_file})
-  source_group("src\\${addon_name}" FILES ${src_file})
-endmacro(roxlu_addon_add_source_file)
+#macro(roxlu_addon_add_source_file addon_name src_file)
+#  message(FATAL_ERROR "someone called roxlu_addon_sdd_source_file which we're not using!!")
+#  roxlu_add_source_file(${src_file})
+#  source_group("src\\${addon_name}" FILES ${src_file})
+#endmacro(roxlu_addon_add_source_file)
 
 macro(roxlu_add_include_dir dir)
   include_directories(${dir})
@@ -127,7 +130,7 @@ macro(roxlu_app_add_source_file file)
 endmacro(roxlu_app_add_source_file)
 
 macro(roxlu_install_app)
-  message(${roxlu_source_files})
+
   add_executable(${roxlu_app_name} ${roxlu_source_files} ${roxlu_lib_source_files})
   target_link_libraries(${roxlu_app_name} ${roxlu_libs})
 
@@ -152,20 +155,35 @@ macro(roxlu_addon_begin name)
   set(roxlu_addon_include_dir ${roxlu_addon_base_dir}/include/)
   set(roxlu_addon_src_dir ${roxlu_addon_base_dir}/src/)
   include_directories(${roxlu_addon_include_dir})
+  roxlu_add_lib("roxlu_${roxlu_addon_name}")
 endmacro()
 
 macro(roxlu_addon_add_source_file file)
   list(APPEND roxlu_addon_source_files ${roxlu_addon_src_dir}/${file})
 endmacro()
 
+macro(roxlu_addon_add_include_dir dir)
+  include_directories(${roxlu_addon_include_dir}/${dir})
+endmacro()
+
+macro(roxlu_addon_add_extern_include_dir dir)
+  include_directories(${roxlu_addon_base_dir}/extern/${dir})
+endmacro()
+
+macro(roxlu_addon_add_extern_source_file file)
+  list(APPEND roxlu_addon_source_files ${roxlu_addon_base_dir}/extern/${file})
+endmacro()
+
 macro(roxlu_addon_add_source_files glob) 
   file(GLOB_RECURSE addon_source_files ${roxlu_addon_src_dir}/*.cpp)
   list(APPEND roxlu_addon_source_files ${addon_source_files})
-  message(${roxlu_addon_source_files})
 endmacro()
 
 macro(roxlu_addon_end)
+
   add_library("roxlu_${roxlu_addon_name}" STATIC ${roxlu_addon_source_files})
+
+
   set(roxlu_addon_source_files "")
   set(roxlu_addon_name "")
   set(roxlu_addon_base_dir "")
@@ -205,15 +223,15 @@ set(roxlu_core_sources
 
 set(roxlu_experimental_sources 
   ${roxlu_src_dir}/experimental/Image.cpp
-  ${roxlu_src_dir}/experimental/StereoCam.cpp
+#  ${roxlu_src_dir}/experimental/StereoCam.cpp
   ${roxlu_src_dir}/experimental/DebugDrawer.cpp
-  ${roxlu_src_dir}/experimental/Tweens.cpp
+#  ${roxlu_src_dir}/experimental/Tweens.cpp
   ${roxlu_src_dir}/experimental/BitmapFont.cpp
   ${roxlu_src_dir}/experimental/Font.cpp
-  ${roxlu_src_dir}/experimental/SimpleAnim.cpp
-  ${roxlu_src_dir}/experimental/Tween.cpp
-  ${roxlu_src_dir}/experimental/TGA.cpp
-  ${roxlu_src_dir}/experimental/TGARecorder.cpp
+#  ${roxlu_src_dir}/experimental/SimpleAnim.cpp
+#  ${roxlu_src_dir}/experimental/Tween.cpp
+#  ${roxlu_src_dir}/experimental/TGA.cpp
+#  ${roxlu_src_dir}/experimental/TGARecorder.cpp
   ${roxlu_src_dir}/experimental/Text.cpp
 )
 
@@ -235,14 +253,14 @@ set(roxlu_math_sources
 )
 
 set(roxlu_opengl_sources 
-  ${roxlu_src_dir}/opengl/FBO.cpp
-  ${roxlu_src_dir}/opengl/Texture.cpp
+#  ${roxlu_src_dir}/opengl/FBO.cpp
+#  ${roxlu_src_dir}/opengl/Texture.cpp
   ${roxlu_src_dir}/opengl/FPS.cpp
   ${roxlu_src_dir}/opengl/Shader.cpp
-  ${roxlu_src_dir}/opengl/PBO.cpp
+#  ${roxlu_src_dir}/opengl/PBO.cpp
   ${roxlu_src_dir}/opengl/Billboard.cpp
-  ${roxlu_src_dir}/opengl/VAO.cpp
-  ${roxlu_src_dir}/opengl/MatrixStack.cpp
+#  ${roxlu_src_dir}/opengl/VAO.cpp
+#  ${roxlu_src_dir}/opengl/MatrixStack.cpp
 )
 
 # 3rd party, used by addons
@@ -340,13 +358,6 @@ if(ROXLU_64BIT)
   set(CMAKE_OSX_ARCHITECTURES "x86_64")
 endif(ROXLU_64BIT)
 
-if(ROXLU_PLATFORM_LINUX)
-  set(roxlu_libs
-    "pthread"
-    "rt"
-  )
-
-endif(ROXLU_PLATFORM_LINUX)
 
 if(NOT ROXLU_PLATFORM_WIN)
 # http://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
@@ -357,7 +368,6 @@ add_definitions(
 )
 endif(NOT ROXLU_PLATFORM_WIN)
 
-message("______" ${roxlu_bits})
 set(roxlu_extern_lib_dir ${roxlu_base_dir}/extern/lib/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}/)
 set(roxlu_extern_lib_debug_dir ${roxlu_base_dir}/extern/lib/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}d/)
 set(roxlu_extern_bin_dir ${roxlu_base_dir}/extern/bin/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}/)

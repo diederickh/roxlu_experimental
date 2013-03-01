@@ -1,82 +1,52 @@
-# VideoCapture 
-cmake_minimum_required(VERSION 2.8)
+# videocapture
 
-include(${CMAKE_CURRENT_LIST_DIR}/../../../../lib/build/cmake/CMakeLists.txt) # roxlu
+roxlu_addon_begin("videocapture")
 
-set(videocapture_base_dir ${CMAKE_CURRENT_LIST_DIR}/../../)
-set(videocapture_src_dir ${videocapture_base_dir}/src/)
-set(videocapture_src_platform_dir ${videocapture_src_dir}/${roxlu_platform}/)
-set(videocapture_include_dir ${videocapture_base_dir}/include/)
-set(videocapture_include_platform_dir ${videocapture_include_dir}/${roxlu_platform})
+  # --------------------------------------------------------------------------------------
+  roxlu_addon_add_include_dir(${roxlu_platform})
+  roxlu_addon_add_source_file(videocapture/VideoCapture.cpp)
+  roxlu_addon_add_source_file(videocapture/VideoCaptureGLSurface.cpp)
 
-include_directories(
-  ${videocapture_include_dir}
-  ${videocapture_include_platform_dir}
-)
+  if(APPLE) 
+     roxlu_addon_add_source_file(${roxlu_platform}/videocapture/rx_capture_mac.mm)
+     roxlu_addon_add_source_file(${roxlu_platform}/videocapture/VideoCaptureAVFoundation.mm)
 
-set(videocapture_source_files
-  ${videocapture_src_dir}/videocapture/VideoCapture.cpp
-  ${videocapture_src_dir}/videocapture/VideoCaptureGLSurface.cpp
-)
+     find_library(fr_core_foundation CoreFoundation)
+     find_library(fr_cocoa Cocoa)
+     find_library(fr_avfoundation AVFoundation)
+     find_library(fr_core_video CoreVideo)
+     find_library(fr_core_media CoreMedia)
+     find_library(fr_core_media_io CoreMediaIO)
+     
+     roxlu_add_lib(${fr_core_foundation})
+     roxlu_add_lib(${fr_cocoa})
+     roxlu_add_lib(${fr_avfoundation})
+     roxlu_add_lib(${fr_core_video})
+     roxlu_add_lib(${fr_core_media})
+     roxlu_add_lib(${fr_core_media_io})
+     roxlu_add_lib(rx_capture)
+  endif(APPLE)
 
-
-if(APPLE) 
-  set(rxcapture_source_files
-    ${videocapture_src_platform_dir}/videocapture/rx_capture_mac.mm
-    ${videocapture_src_platform_dir}/videocapture/VideoCaptureAVFoundation.mm
-  )
-  add_library(rx_capture ${rxcapture_source_files})
-
-  find_library(fr_core_foundation CoreFoundation)
-  find_library(fr_cocoa Cocoa)
-  find_library(fr_avfoundation AVFoundation)
-  find_library(fr_core_video CoreVideo)
-  find_library(fr_core_media CoreMedia)
-  find_library(fr_core_media_io CoreMediaIO)
- 
-  roxlu_add_lib(${fr_core_foundation})
-  roxlu_add_lib(${fr_cocoa})
-  roxlu_add_lib(${fr_avfoundation})
-  roxlu_add_lib(${fr_core_video})
-  roxlu_add_lib(${fr_core_media})
-  roxlu_add_lib(${fr_core_media_io})
-  roxlu_add_lib(rx_capture)
-
-endif(APPLE)
-
-if(UNIX AND NOT APPLE)
-
-  set(rxcapture_source_files
-    ${videocapture_src_platform_dir}/videocapture/rx_capture_linux.cpp
-    ${videocapture_src_platform_dir}/videocapture/VideoCaptureV4L2.cpp
-    )
-
-  add_library(rx_capture ${rxcapture_source_files})
-  target_link_libraries(rx_capture "udev")
-
-endif(UNIX AND NOT APPLE)
+  if(UNIX AND NOT APPLE)
+    roxlu_addon_add_source_file(${roxlu_platform}/videocapture/rx_capture_linux.cpp)
+    roxlu_addon_add_source_file(${roxlu_platform}/videocapture/VideoCaptureV4L2.cpp)
+    roxlu_add_lib(udev)
+  endif(UNIX AND NOT APPLE)
 
 
-if(WIN32) 
-  set(rxcapture_source_files
-    ${videocapture_src_platform_dir}/videocapture/rx_capture_win.cpp
-    ${videocapture_src_platform_dir}/videocapture/VideoCaptureDirectShow.cpp
-    )
-  add_library(rx_capture ${rxcapture_source_files})
+  if(WIN32) 
+    roxlu_addon_add_source_file(${roxlu_platform}/videocapture/rx_capture_win.cpp)
+    roxlu_addon_add_source_file(${roxlu_platform}/videocapture/VideoCaptureDirectShow.cpp)
+    roxlu_add_lib(strmiids.lib)
+    roxlu_add_lib(rx_capture)
+  endif()
 
-  roxlu_add_lib(strmiids.lib)
-  roxlu_add_lib(rx_capture)
-endif()
+  if(APPLE)
+     set_target_properties(roxlu_videocapture PROPERTIES COMPILE_FLAGS "-ObjC++")
+     set_target_properties(rx_capture PROPERTIES COMPILE_FLAGS "-ObjC++")
+  endif()
+  # --------------------------------------------------------------------------------------
 
+roxlu_addon_end()
 
-add_library(roxlu_videocapture STATIC ${videocapture_source_files})
-roxlu_add_lib(roxlu_videocapture)
-
-source_group("src\\videocapture" FILES ${rxcapture_source_files})
-source_group("src\\videocapture" FILES ${videocapture_source_files})
-
-if(APPLE)
-  set_target_properties(roxlu_videocapture PROPERTIES COMPILE_FLAGS "-ObjC++")
-  set_target_properties(rx_capture PROPERTIES COMPILE_FLAGS "-ObjC++")
-endif()
 

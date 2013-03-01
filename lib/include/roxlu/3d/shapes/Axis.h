@@ -49,7 +49,7 @@ namespace roxlu {
     void draw(const float* pm, const float* vm);
   private:
     GLuint vbo;
-    VAO vao;
+    GLuint vao;
     Shader shader;
     size_t nvertices;
   };

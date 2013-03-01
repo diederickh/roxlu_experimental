@@ -28,7 +28,7 @@ extern "C" {
 #include <stdio.h>
 #include <string>
 #include <roxlu/Roxlu.h>
-#include <kurl/Kurl.h>
+#include <curl/Kurl.h>
 #include <sqlite/Database.h>
 
 /* settings, uploader, db */

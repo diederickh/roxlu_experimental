@@ -16,4 +16,5 @@ fi
 cd build
 # cmake -DCMAKE_BUILD_TYPE=Debug ../
 cmake -DCMAKE_BUILD_TYPE=Release ../
+make VERBOSE=1
 make install

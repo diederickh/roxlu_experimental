@@ -43,7 +43,8 @@ namespace buttons {
   {
 
     if(!shaders_initialized) {
-      vao.create();
+      //vao.create();
+      glGenVertexArrays(1, &vao);
       bmf = new BitmapFont();
       gui_shader.create(BUTTONS_VS, BUTTONS_FS);
       gui_shader.link();
@@ -56,7 +57,7 @@ namespace buttons {
 	
     static_text = new Text(*bmf);	
     dynamic_text = new Text(*bmf);
-    vao.bind();
+    glBindVertexArray(vao);
     glGenBuffers(1, &vbo); eglGetError();
     glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
 
@@ -187,7 +188,8 @@ namespace buttons {
         allocated_bytes = std::max<size_t>(allocated_bytes * 2, 256);
       }
       first_run = false; // we don't need this one anymore @todo cleanup
-      vao.bind();
+      //vao.bind();
+      glBindVertexArray(vao);
       glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
       glBufferData(GL_ARRAY_BUFFER, allocated_bytes, NULL, GL_DYNAMIC_DRAW); eglGetError();
 		
@@ -202,7 +204,8 @@ namespace buttons {
     }
 	
     // And update the vbo.
-    vao.bind(); // roxlu (added)
+    //    vao.bind(); // roxlu (added)
+    glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError(); // roxlu
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(ButtonVertex)*vd.size(), (GLvoid*)vd.getPtr()); eglGetError();
     //glBindBuffer(GL_ARRAY_BUFFER, 0); // roxlu
@@ -297,7 +300,8 @@ namespace buttons {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     gui_shader.enable();
-    vao.bind();
+    glBindVertexArray(vao);
+    //vao.bind();
 	
     gui_shader.uniformMat4fv("projection_matrix", &ortho[0]);
 	
@@ -305,14 +309,14 @@ namespace buttons {
       ButtonDrawArray& bda = vd.draw_arrays[i];
       glDrawArrays(bda.mode, bda.start, bda.count);
     }
-    vao.unbind();
+    glBindVertexArray(0); // @todo we might remove this
 
     static_text->draw();
     dynamic_text->draw();
 	
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindTexture(GL_TEXTURE_2D, 0);	
-    VAO::unbind();
+    glBindVertexArray(0);
     glUseProgram(0);
 
     // Allow custom drawing.
@@ -328,7 +332,8 @@ namespace buttons {
 
   void Buttons::debugDraw() {
     gui_shader.disable();
-    vao.unbind();
+    //vao.unbind();
+    glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
 

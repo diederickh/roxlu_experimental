@@ -70,7 +70,9 @@ namespace roxlu {
     shader.link();
     shader.u("u_projection_matrix").u("u_view_matrix");
     
-    vao.bind();
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    // vao.bind();
     
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -83,7 +85,7 @@ namespace roxlu {
   }
 
   void Axis::draw(const float* pm, const float* vm) {
-    vao.bind();
+    glBindVertexArray(vao);
     shader.enable();
     shader.uniformMat4fv("u_projection_matrix", pm);
     shader.uniformMat4fv("u_view_matrix", vm);

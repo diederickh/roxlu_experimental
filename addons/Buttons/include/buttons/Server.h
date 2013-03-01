@@ -13,6 +13,7 @@ extern "C" {
 #include <buttons/Radio.h>
 #include <buttons/Pad.h>
 
+#include <assert.h>
 #include <string>
 #include <vector>
 #include <deque>

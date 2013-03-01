@@ -120,7 +120,7 @@ namespace roxlu {
     float pm[16];
     Shader shader;
     GLuint tex;
-    VAO vao;
+    GLuint vao;
     GLuint vbo;
     std::vector<FontEntry> entries;
     std::vector<CharVertex> vertices;

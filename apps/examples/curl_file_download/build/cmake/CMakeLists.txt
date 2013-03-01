@@ -9,4 +9,5 @@ roxlu_add_addon(Curl)
 
 roxlu_app_initialize("curl_file_download")
 roxlu_app_add_source_file(main.cpp)
+
 roxlu_install_app()

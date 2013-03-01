@@ -24,6 +24,8 @@ namespace roxlu {
     ,scale(scale)
     ,x(0)
     ,y(0)
+    ,vao(0)
+    ,vbo(0)
   {
     memset(pm, 0, sizeof(float) * 16);
     memset(mm, 0, sizeof(float) * 16);
@@ -84,7 +86,8 @@ namespace roxlu {
       }
     }
 
-    vao.bind();
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
     shader.enable();
     shader.uniformMat4fv("u_pm", pm);
   
@@ -189,7 +192,7 @@ namespace roxlu {
       0.0f, 4.0f, 4.0f, 4.0f,
     };
 
-    vao.bind();
+    glBindVertexArray(vao);
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);

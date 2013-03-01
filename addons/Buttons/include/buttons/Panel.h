@@ -1,6 +1,7 @@
 #ifndef ROXLU_BUTTONS_PANELH
 #define ROXLU_BUTTONS_PANELH
 
+#include <assert.h>
 #include <string>
 #include <vector>
 #include <map>

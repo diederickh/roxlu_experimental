@@ -1,6 +1,7 @@
 #ifndef ROXLU_BCOLORH
 #define ROXLU_BCOLORH
 
+#include <roxlu/core/Constants.h>
 #include <buttons/Types.h>
 #include <buttons/Slider.h>
 #include <buttons/Element.h>

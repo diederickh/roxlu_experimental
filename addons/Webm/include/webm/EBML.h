@@ -10,6 +10,7 @@ extern "C" {
 }
 #include <stdlib.h> /* rand() */
 #include <time.h> /* time() */
+#include <string.h> /* strerror() */
 #include <errno.h>
 #include <stdio.h>
 #include <inttypes.h>

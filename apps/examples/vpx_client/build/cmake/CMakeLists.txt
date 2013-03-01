@@ -11,4 +11,5 @@ roxlu_add_addon(VideoCapture)
 roxlu_app_initialize("vpx_client")
 roxlu_app_add_source_file(main.cpp)
 roxlu_app_add_source_file(Simulation.cpp)
+
 roxlu_install_app()

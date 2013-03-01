@@ -13,7 +13,7 @@ set(uploader_install_dir ${uploader_base_dir}/bin/)
 set(uploader_sources
   ${uploader_base_dir}src/uploader.cpp
   ${roxlu_addon_sources}
-  ${roxlu_sources}
+  ${roxlu_lib_source_files}
 )
 
 if(UNIX AND NOT APPLE)
@@ -51,7 +51,7 @@ install(FILES ${roxlu_install_files} DESTINATION ${uploader_install_dir})
 set(uploader_fake_inserter_sources
   ${uploader_base_dir}src/uploader_fake_inserter.cpp
   ${roxlu_addon_sources}
-  ${roxlu_sources}
+  ${roxlu_lib_source_files}
 )
 
 add_executable(uploader_fake_inserter ${uploader_fake_inserter_sources})

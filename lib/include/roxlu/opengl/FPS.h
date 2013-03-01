@@ -49,7 +49,7 @@ namespace roxlu {
     unsigned int frame_count;
     rx_uint64 timeout;
     Shader shader;
-    VAO vao;
+    GLuint vao;
     GLuint vbo;
     FPS_Element elements[20];
     float pm[16];

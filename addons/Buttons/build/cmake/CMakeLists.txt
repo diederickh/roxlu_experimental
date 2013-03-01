@@ -1,9 +1,7 @@
 # buttons 
-cmake_minimum_required(VERSION 2.8)
-
-include(${CMAKE_CURRENT_LIST_DIR}/../../../../lib/build/cmake/CMakeLists.txt) # roxlu cmake
 
 roxlu_addon_begin("buttons")
+
   # --------------------------------------------------------------------------------------
   roxlu_addon_add_source_file(buttons/Button.cpp)
   roxlu_addon_add_source_file(buttons/Buttons.cpp)  
@@ -30,4 +28,5 @@ roxlu_addon_begin("buttons")
     roxlu_add_lib(roxlu_buttons)
   endif()
   # --------------------------------------------------------------------------------------
+
 roxlu_addon_end()

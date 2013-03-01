@@ -1,5 +1,5 @@
 #include <iostream>
-#include <kurl/Kurl.h>
+#include <curl/Kurl.h>
 
 class MyApp {
 public:

@@ -8,7 +8,6 @@
 #include <roxlu/opengl/Error.h>
 #include <roxlu/opengl/Shader.h>
 #include <roxlu/opengl/Texture.h>
-#include <roxlu/opengl/VAO.h>
 
 const std::string BILLBOARD_VS = " \
 	uniform mat4 u_projection_matrix; \
@@ -35,53 +34,51 @@ const std::string BILLBOARD_FS = " \
 
 namespace roxlu {
 
-struct BillboardVertex {
-	float pos[3];
-	float tex[2];
+  struct BillboardVertex {
+    float pos[3];
+    float tex[2];
 	
-	void set(const float& x, const float& y, const float& s, const float& t) {
-		pos[0] = x;
-		pos[1] = y;
-		pos[2] = 0.0;
-		tex[0] = s;
-		tex[1] = t;
-	}
-};
+    void set(const float& x, const float& y, const float& s, const float& t) {
+      pos[0] = x;
+      pos[1] = y;
+      pos[2] = 0.0;
+      tex[0] = s;
+      tex[1] = t;
+    }
+  };
 
-enum BillboardDrawModes {
-	 BILLBOARD_NONE // this billboard class is also used to draw simple quadds
-	,BILLBOARD_PERSPECTIVE
-};
+  enum BillboardDrawModes {
+    BILLBOARD_NONE // this billboard class is also used to draw simple quadds
+    ,BILLBOARD_PERSPECTIVE
+  };
 
-class Billboard {
-public:	
-	Billboard();
+  class Billboard {
+  public:	
+    Billboard();
 
-	void setTexture(const GLuint& id);
-	//void bind(const float* pm, const float* vm, const Vec3& right, const Vec3& up);
-	void bind(const float* pm, const float* vm, const float* right, const float* up);
-	void bind(const float* pm, const float* vm);
-	void draw(const Vec3& position, const float scale, const float rotationDegrees, float alpha = 1.0);
-	void unbind(); 
+    void setTexture(const GLuint& id);
+    void bind(const float* pm, const float* vm, const float* right, const float* up);
+    void bind(const float* pm, const float* vm);
+    void draw(const Vec3& position, const float scale, const float rotationDegrees, float alpha = 1.0);
+    void unbind(); 
 
-private:
-	void initBillboard();
+  private:
+    void initBillboard();
 	
-	int mode;
-	bool texture_set;
-	GLuint tex;
-	//const Vec3* right;
-	//const Vec3* up;
-	const float* right;
-	const float* up;
-	const float* pm;
-	const float* vm;
-	const Texture* texture;
-	static bool created;
-	static Shader shader;
-	static GLuint vbo;
-	static VAO vao;
-};
+    int mode;
+    bool texture_set;
+    GLuint tex;
+    const float* right;
+    const float* up;
+    const float* pm;
+    const float* vm;
+    const Texture* texture;
+    static bool created;
+    static Shader shader;
+    static GLuint vbo;
+    static GLuint vao;
+
+  };
 
 } // roxlu
 

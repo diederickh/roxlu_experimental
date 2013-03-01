@@ -196,6 +196,10 @@ static int64_t rx_millis() {
   return n;
 }
 
+/* returns epoch timestamp */
+static time_t rx_time() {
+  return time(NULL);
+}
 
 // -------------------------------------- OSX ---------------------------------------
 #elif defined(__APPLE__)

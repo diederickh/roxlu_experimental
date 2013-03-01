@@ -1,7 +1,4 @@
 # external cmakelist.txt
-cmake_minimum_required(VERSION 2.8)
-
-include(${CMAKE_CURRENT_LIST_DIR}/../../lib/build/cmake/CMakeLists.txt)
 
 # 1 = GLFW, 2 = OPENFRAMEWORKS, 3 = CINDER, 4 = COCOA
 add_definitions("-DROXLU_GL_WRAPPER=1") 
@@ -16,18 +13,18 @@ roxlu_add_source_file(${glfw_wrapper_sources})
 source_group("src\\simulation" FILES ${glfw_wrapper_sources})
 
 # GLEW
-if(NOT ROXLU_PLATFORM_WIN)
+if(UNIX)
   roxlu_add_extern_lib(libglfw3.a)
   roxlu_add_extern_lib(libGLEW.a)
   add_definitions("-DGLEW_STATIC")
 endif()
 
-if(ROXLU_PLATFORM_WIN)
+if(WIN32)
   roxlu_add_lib(opengl32.lib)
   roxlu_add_extern_lib(glew32.lib)
   roxlu_add_extern_lib(glfw3.lib)
   roxlu_add_dll(glew32.dll)
-endif(ROXLU_PLATFORM_WIN)
+endif()
 
 if(APPLE)
   find_library(fr_corefoundation CoreFoundation)
@@ -42,21 +39,13 @@ if(APPLE)
 endif()
 
 # Platform specifics
-if(ROXLU_PLATFORM_LINUX)
+if(NOT APPLE AND UNIX)
   roxlu_add_lib(GL)
   roxlu_add_lib(X11)
   roxlu_add_lib(Xxf86vm)
   roxlu_add_lib(rt)
   roxlu_add_lib(/usr/lib/x86_64-linux-gnu/libXrandr.so)
-#  set(glfw_libs
-#    ${glfw_libs}
-#    GL
-#    X11
-#    Xxf86vm
-#    rt
-#    /usr/lib/x86_64-linux-gnu/libXrandr.so
-#)
-endif(ROXLU_PLATFORM_LINUX)
+endif()
 
 roxlu_add_include_dir(${glfw_include_dir})
 roxlu_add_include_dir(${CMAKE_CURRENT_LIST_DIR})

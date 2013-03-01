@@ -1,18 +1,9 @@
 #ifndef ROXLU_TEXTH
 #define ROXLU_TEXTH
 
-//#include "ofMain.h"  // tmp
-/*
-#include "Mat4.h"
-#include "OpenGL.h"
-#include "Shader.h"
-#include "VAO.h"
-#include "BitmapFont.h"
-*/
 #include <roxlu/math/Mat4.h>	
 #include <roxlu/opengl/OpenGLInit.h>
 #include <roxlu/opengl/Shader.h>
-#include <roxlu/opengl/VAO.h>
 #include <roxlu/experimental/BitmapFont.h>
 
 #include <vector>
@@ -21,41 +12,41 @@ using std::vector;
 
 namespace roxlu {
 
-enum TextAlign {
- 	 TEXT_ALIGN_LEFT
-	,TEXT_ALIGN_RIGHT
-};
+  enum TextAlign {
+    TEXT_ALIGN_LEFT
+    ,TEXT_ALIGN_RIGHT
+  };
 
-struct TextEntry {
-	TextEntry() 
-		:start_dx(0)
-		,end_dx(0)
-		,align(TEXT_ALIGN_LEFT)
-		,maxx(0)
-		,is_visible(true)
-	{
-		pos[0] = 0;
-		pos[1] = 0;
-		col[0] = 1;
-		col[1] = 1;
-		col[2] = 1;
-		col[3] = 1;
-	}
+  struct TextEntry {
+  TextEntry() 
+  :start_dx(0)
+  ,end_dx(0)
+      ,align(TEXT_ALIGN_LEFT)
+      ,maxx(0)
+      ,is_visible(true)
+    {
+      pos[0] = 0;
+      pos[1] = 0;
+      col[0] = 1;
+      col[1] = 1;
+      col[2] = 1;
+      col[3] = 1;
+    }
 	
-	TextVertices vertices;
-	float pos[2];
-	float col[4];
-	int start_dx;
-	int end_dx;
-	int align;
-	int w; // text width;
-	int maxx; // when align == TEXT_ALIGN_RIGHT, this is the "space" that is used to align the text.
-	bool is_visible;
-}; 
+    TextVertices vertices;
+    float pos[2];
+    float col[4];
+    int start_dx;
+    int end_dx;
+    int align;
+    int w; // text width;
+    int maxx; // when align == TEXT_ALIGN_RIGHT, this is the "space" that is used to align the text.
+    bool is_visible;
+  }; 
 
 
 #if ROXLU_GL_WRAPPER == ROXLU_IOS
-const string TEXT_VS = "  \
+  const string TEXT_VS = "  \
 	uniform mat4 projection_matrix; \
 	uniform mat4 model_matrix; \
 	attribute highp vec4 pos; \
@@ -67,7 +58,7 @@ const string TEXT_VS = "  \
 	}\
 ";
 
-const string TEXT_FS =  " \
+  const string TEXT_FS =  " \
 	uniform sampler2D font_texture; \
 	uniform highp vec4 txtcol; \
 	varying highp vec2 texcoord; \
@@ -80,7 +71,7 @@ const string TEXT_FS =  " \
 
 #else 
 
-const string TEXT_VS = "  \
+  const string TEXT_VS = "  \
 	uniform mat4 projection_matrix; \
 	uniform mat4 model_matrix; \
 	attribute vec4 pos; \
@@ -92,7 +83,7 @@ const string TEXT_VS = "  \
 	}\
 ";
 
-const string TEXT_FS =  " \
+  const string TEXT_FS =  " \
 	uniform sampler2D font_texture; \
 	uniform vec4 txtcol; \
 	varying vec2 texcoord; \
@@ -106,41 +97,41 @@ const string TEXT_FS =  " \
 
 #endif 
 
-class Text {
-public:
-	Text(BitmapFont& bmfont);
-	~Text();
-	int add(const float tx, const float ty, const string& text, float r = 1.0, float g = 1.0, float b = 1.0, float a = 0.9);
-	int updateText(const int textIndex, const string& str,float r = 1.0, float g = 1.0, float b = 1.0, float a = 0.9);
-	void setTextPosition(const int textIndex, const float tx, const float ty);
-	void setTextAlign(const int textIndex, int align, int maxx = 0); // mx is max X when alignment is RIGHT
-	void setTextVisible(const int textIndex, bool visible);
-	void translate(const int tx, const int ty);
-	void setPosition(const int tx, const int ty);
-	void updateBuffer();
-	void draw();
-	void debugDraw();
-	void createOrtho(float winW, float winH);
-	void setVertexAttributes();
+  class Text {
+  public:
+    Text(BitmapFont& bmfont);
+    ~Text();
+    int add(const float tx, const float ty, const string& text, float r = 1.0, float g = 1.0, float b = 1.0, float a = 0.9);
+    int updateText(const int textIndex, const string& str,float r = 1.0, float g = 1.0, float b = 1.0, float a = 0.9);
+    void setTextPosition(const int textIndex, const float tx, const float ty);
+    void setTextAlign(const int textIndex, int align, int maxx = 0); // mx is max X when alignment is RIGHT
+    void setTextVisible(const int textIndex, bool visible);
+    void translate(const int tx, const int ty);
+    void setPosition(const int tx, const int ty);
+    void updateBuffer();
+    void draw();
+    void debugDraw();
+    void createOrtho(float winW, float winH);
+    void setVertexAttributes();
 	
-	GLuint vbo;
-	VAO vao;
+    GLuint vbo;
+    GLuint vao;
 	
-	static bool initialized;
-	static Shader shader;
-	bool is_changed;
-	BitmapFont& bmfont;
-	vector<TextEntry> texts;
-	TextVertices vertices;
-	size_t buffer_size;
+    static bool initialized;
+    static Shader shader;
+    bool is_changed;
+    BitmapFont& bmfont;
+    vector<TextEntry> texts;
+    TextVertices vertices;
+    size_t buffer_size;
 	
-	float model[16];
-	float ortho[16];
-	int x; 
-	int y;
-	int win_w;
-	int win_h;
-};
+    float model[16];
+    float ortho[16];
+    int x; 
+    int y;
+    int win_w;
+    int win_h;
+  };
 
 } // roxlu
 

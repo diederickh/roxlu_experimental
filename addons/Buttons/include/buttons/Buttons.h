@@ -19,7 +19,6 @@
 #include <roxlu/experimental/BitmapFont.h>
 #include <roxlu/experimental/Text.h>
 #include <roxlu/opengl/OpenGLInit.h>
-#include <roxlu/opengl/VAO.h>
 #include <roxlu/opengl/Error.h>
 #include <roxlu/graphics/Color.h>
 
@@ -244,7 +243,7 @@ namespace buttons {
 	
     float ortho[16];
 
-    VAO vao;
+    GLuint vao;
     GLuint vbo;
     bool first_run;
   };
