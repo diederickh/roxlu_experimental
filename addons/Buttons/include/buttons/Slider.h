@@ -4,6 +4,7 @@
 #include <buttons/Types.h>
 #include <buttons/Element.h>
 #include <sstream>
+#include <libconfig.h>
 
 namespace buttons {
 
@@ -43,7 +44,6 @@ namespace buttons {
       ,bt_dec_bottom_color_ptr(NULL)
       ,stepv(0)
       ,bt_mouse_down(-1)
-      ,bt_frames_down(0)
       {
         h = 22;
         bt_inc_top_color_ptr = bt_top_col;
@@ -142,22 +142,16 @@ namespace buttons {
     }
 
     void update() {
-      // when you press the + or - buttons for several frames we auto inc/decr
+      // when you press the + or -, inc/dec
       if(bt_mouse_down == 0) {
-        ++bt_frames_down;
-        if(bt_frames_down > 10) {
-          setValue(value + stepv);
-          bt_frames_down = 0;
-          needsRedraw();
-        }
+        setValue(value + stepv);
+        needsRedraw();
+        bt_mouse_down = -1;
       }
       else if(bt_mouse_down == 1) {
-        ++bt_frames_down;
-        if(bt_frames_down > 10) {
-          setValue(value - stepv);
-          bt_frames_down = 0;
-          needsRedraw();
-        }
+        setValue(value - stepv);
+        needsRedraw();
+        bt_mouse_down = -1;
       }
     }
 
@@ -196,7 +190,6 @@ namespace buttons {
           flagValueChanged();
         }
       }
-      bt_frames_down = 0;
       bt_mouse_down = -1;
     }
 	
@@ -293,7 +286,7 @@ namespace buttons {
       ofs.write((char*)&value_type, sizeof(int));
       ofs.write((char*)&value, sizeof(T));
     }
-	
+
     void load(std::ifstream& ifs) {
       ifs.read((char*)&value_type, sizeof(int));
       ifs.read((char*)&value, sizeof(T));
@@ -301,7 +294,43 @@ namespace buttons {
       needsRedraw();
       needsTextUpdate();
     }
+
+    void save(config_setting_t* setting) {
+      if(value_type == SLIDER_INT) {
+        config_setting_t* cfg_el = config_setting_add(setting, buttons_create_clean_name(name).c_str(), CONFIG_TYPE_INT);
+        config_setting_set_int(cfg_el, value);
+      }
+      else if(value_type == SLIDER_FLOAT) {
+        config_setting_t* cfg_el = config_setting_add(setting, buttons_create_clean_name(name).c_str(), CONFIG_TYPE_FLOAT);
+        config_setting_set_float(cfg_el, value);
+      }
+    }
 	
+    void load(config_setting_t* setting) {
+      std::string cname = buttons_create_clean_name(name);
+      if(value_type == SLIDER_INT) {
+        int r = config_setting_lookup_int((const config_setting_t*)setting, cname.c_str(), (int*)&value);
+        if(r == CONFIG_FALSE) {
+          printf("ERROR: wront setting for: %s\n", cname.c_str());
+        }
+        else {
+          setValue(value);
+        }
+      }
+      else if(value_type == SLIDER_FLOAT) {
+        double tmp_value = 0.0; 
+        int r = config_setting_lookup_float((const config_setting_t*)setting, cname.c_str(), &tmp_value);
+        if(r == CONFIG_FALSE) {
+          printf("ERROR: wront setting for: %s\n", cname.c_str());
+        }
+        else {
+          setValue(tmp_value);
+        }
+      }
+
+      needsRedraw();
+      needsTextUpdate();
+    }
 	
     void hide() {
       this->is_visible = false;
@@ -349,7 +378,6 @@ namespace buttons {
 
     // increment/decrement buttons
     int bt_mouse_down; // 0 = inc, 1 = decr, -1 not in button
-    int bt_frames_down; // we count the number of frames the used pressed, after X-frames we auto increment
     float bt_dec_x;
     float bt_inc_x;
     float bt_y;

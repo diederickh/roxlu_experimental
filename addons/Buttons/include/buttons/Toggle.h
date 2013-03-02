@@ -22,7 +22,9 @@ namespace buttons {
     void onMouseClick(int mx, int my);
 	
     void save(std::ofstream& ofs);
+    void save(config_setting_t* setting);
     void load(std::ifstream& ifs);
+    void load(config_setting_t* setting);
     bool canSave();
     bool serializeScheme(ButtonsBuffer& buffer);
 	

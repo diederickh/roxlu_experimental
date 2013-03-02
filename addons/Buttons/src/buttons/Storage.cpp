@@ -4,26 +4,26 @@
 namespace buttons {
 
   bool Storage::save(const string& file, Buttons* buttons) {
-    std::ofstream ofs(file.c_str(), std::ios::out | std::ios::binary);
-    if(!ofs.is_open()) {
-      printf("Cannot save: %s\n", file.c_str());
-      return false;
-    }
-	
-    // Panel specific settings.
-    Buttons& b = *buttons;
-    ofs.write((char *)&b.x, sizeof(int));
-    ofs.write((char *)&b.y, sizeof(int));
-    ofs.write((char *)&b.w, sizeof(int));
-	
-    int is_open = b.isOpen() ? 1 : 0;
-    ofs.write((char*)&is_open, sizeof(int));
-	
-    // Write number of elements.
-    size_t num_els = b.elements.size();
-    ofs.write((char*)&num_els, sizeof(size_t));
-	
-    // Elements
+    config_init(&cfg);
+
+    Buttons& b = *buttons;    
+    config_setting_t* gui_setting;
+    config_setting_t* el_setting;
+    config_setting_t* el_group;
+    config_setting_t* root = config_root_setting(&cfg);
+    config_setting_t* gui = config_setting_add(root, "gui", CONFIG_TYPE_GROUP);
+    
+    gui_setting = config_setting_add(gui, "x", CONFIG_TYPE_INT);
+    config_setting_set_int(gui_setting, b.x);
+
+    gui_setting = config_setting_add(gui, "y", CONFIG_TYPE_INT);
+    config_setting_set_int(gui_setting, b.y);
+
+    gui_setting = config_setting_add(gui, "w", CONFIG_TYPE_INT);
+    config_setting_set_int(gui_setting, b.w);
+    
+    el_group = config_setting_add(root, "elements", CONFIG_TYPE_GROUP);
+
     vector<Element*>::iterator it = b.elements.begin();
     while(it != b.elements.end()) {
       Element& e = *(*it);
@@ -31,81 +31,47 @@ namespace buttons {
         ++it;
         continue;
       }
-		
-      // store type
-      ofs.write((char*)&e.type, sizeof(int));
-		
-      // store name.
-      size_t name_size = e.name.length()+1;
-      ofs.write((char*)&name_size, sizeof(size_t));
-      ofs.write((char*)e.name.c_str(), name_size);
-		
-      e.save(ofs);
-		
+      e.save(el_group);
       ++it;
     }
-    ofs.close();
+		
+    if(!config_write_file(&cfg, file.c_str())) {
+      printf("ERROR: cannot save settings file");
+    }
+    config_destroy(&cfg);
     return true;
   }
 
-  // @todo make this work when one adds/removes elements to gui! 
-  // crashes on windows when you save with 10 elements en load 
-  // with 8 for example.
   bool Storage::load(const string& file, Buttons* buttons) {
+    config_t cfg;
 
-    std::ifstream ifs(file.c_str(), std::ios::out | std::ios::binary);
-    if(!ifs.is_open()) {
-      printf("Cannot load: %s\n", file.c_str());
+    config_init(&cfg);
+    if(!config_read_file(&cfg, file.c_str())) {
+      printf("ERROR: cannot load config file: %s\n", file.c_str());
       return false;
     }
 
-    // Panel specific settings.
     Buttons& b = *buttons;
-    int x, y, w;
-    ifs.read((char*)&x, sizeof(int));
-    ifs.read((char*)&y, sizeof(int));
-    ifs.read((char*)&w, sizeof(int));
-    b.setPosition(x,y);
+    config_lookup_int(&cfg, "gui.x", &b.x);
+    config_lookup_int(&cfg, "gui.y", &b.y);
+    config_lookup_int(&cfg, "gui.w", &b.w);
 
-    int is_open = 0;
-    ifs.read((char*)&is_open, sizeof(int));
-    if(is_open == 0) {
-      b.close();
+    config_setting_t* el_group = config_lookup(&cfg, "elements");
+    if(!el_group) {
+      printf("WARNING: cannot find elements\n");
+      return true;
     }
-
-    // Number of elements.
-    size_t num_els = 0;
-    ifs.read((char*)&num_els, sizeof(size_t));	
-
-    // Load elements.
-    char name_buf[1024];
-    for(int i = 0; i < num_els; ++i) {
-      int type = 0;
-      ifs.read((char*)&type, sizeof(int));
-      if(!ifs) {
-        printf("ERROR: Error while reading from gui settings file.\n");
+    
+    vector<Element*>::iterator it = b.elements.begin();
+    while(it != b.elements.end()) {
+      Element& e = *(*it);
+      if(!e.canSave()) {
+        ++it;
         continue;
       }
-
-      // retrieve name.
-      size_t name_size;
-      ifs.read((char*)&name_size, sizeof(size_t));
-      ifs.read((char*)name_buf, name_size);
-		
-      Element* el = buttons->getElement(name_buf);
-
-      size_t data_size;
-      ifs.read((char*)&data_size, sizeof(size_t));
-      if(el == NULL) {
-        printf("%s not found, forgetting about value...\n", name_buf);
-        ifs.seekg(data_size, std::ios_base::cur);
-      }
-      else {
-        el->load(ifs);
-      }
-
+      e.load(el_group);
+      ++it;
     }
-    ifs.close();
     return true;
   }
 

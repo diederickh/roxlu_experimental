@@ -182,14 +182,14 @@ namespace buttons {
     }
 
     // do we need to grow our buffer?
+    glBindVertexArray(vao);
     size_t size_needed = vd.size() * sizeof(ButtonVertex);
     if(size_needed > allocated_bytes) {
       while(allocated_bytes < size_needed) {
         allocated_bytes = std::max<size_t>(allocated_bytes * 2, 256);
       }
       first_run = false; // we don't need this one anymore @todo cleanup
-      //vao.bind();
-      glBindVertexArray(vao);
+      
       glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
       glBufferData(GL_ARRAY_BUFFER, allocated_bytes, NULL, GL_DYNAMIC_DRAW); eglGetError();
 		
@@ -198,31 +198,13 @@ namespace buttons {
       glEnableVertexAttribArray(gui_shader.getAttribute("col")); eglGetError();
       glVertexAttribPointer(gui_shader.getAttribute("pos"), 2, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), (GLvoid*)offsetof(ButtonVertex,pos));
       glVertexAttribPointer(gui_shader.getAttribute("col"), 4, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), (GLvoid*)offsetof(ButtonVertex,col));
-	
-      //vao.unbind(); // roxlu
-      //glBindBuffer(GL_ARRAY_BUFFER, 0);	 // roxlu
     }
 	
     // And update the vbo.
-    //    vao.bind(); // roxlu (added)
-    glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError(); // roxlu
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(ButtonVertex)*vd.size(), (GLvoid*)vd.getPtr()); eglGetError();
-    //glBindBuffer(GL_ARRAY_BUFFER, 0); // roxlu
+    glBindVertexArray(0);
 
-    /*
-      if(first_run) {
-      first_run = false;
-      glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
-      glBufferData(GL_ARRAY_BUFFER, sizeof(ButtonVertex)*vd.size(), vd.getPtr(), GL_DYNAMIC_DRAW); eglGetError();
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-      }
-      else {
-      glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
-      glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(ButtonVertex)*vd.size(), (GLvoid*)vd.getPtr()); eglGetError();
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-      }
-    */
   }
 
   void Buttons::generateVertices() {
@@ -309,14 +291,14 @@ namespace buttons {
       ButtonDrawArray& bda = vd.draw_arrays[i];
       glDrawArrays(bda.mode, bda.start, bda.count);
     }
-    glBindVertexArray(0); // @todo we might remove this
+    //    glBindVertexArray(0); // @todo we might remove this
 
     static_text->draw();
     dynamic_text->draw();
 	
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindTexture(GL_TEXTURE_2D, 0);	
-    glBindVertexArray(0);
+    //    glBindVertexArray(0);
     glUseProgram(0);
 
     // Allow custom drawing.
@@ -332,7 +314,6 @@ namespace buttons {
 
   void Buttons::debugDraw() {
     gui_shader.disable();
-    //vao.unbind();
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
@@ -362,19 +343,19 @@ namespace buttons {
   }
 
   Vector<float>& Buttons::addVec2f(const string& label, float* value) {
-    buttons::Vector<float>* el = new Vector<float>(value, label);
+    buttons::Vector<float>* el = new Vector<float>(value, label, VEC_FLOAT);
     addElement(el, label);
     return *el;
   }
 
   Rectangle<int>& Buttons::addRectanglei(const string& label, int* value) {
-    buttons::Rectangle<int>* el = new Rectangle<int>(value, label);
+    buttons::Rectangle<int>* el = new Rectangle<int>(value, label, RECT_INT);
     addElement(el, label);
     return *el;
   }
 
   Rectangle<float>& Buttons::addRectanglef(const string& label, float* value) {
-    buttons::Rectangle<float>* el = new Rectangle<float>(value, label);
+    buttons::Rectangle<float>* el = new Rectangle<float>(value, label, RECT_FLOAT);
     addElement(el, label);
     return *el;
   }

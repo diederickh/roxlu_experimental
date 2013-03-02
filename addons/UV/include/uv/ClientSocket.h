@@ -2,9 +2,11 @@
 #define ROXLU_CLIENT_SOCKET_H
 
 extern "C" {
+#  include <stdio.h>
 #  include <uv.h>
 }
 
+#include <iterator> /* std::back_inserter */
 #include <vector>
 #include <string>
 #include <roxlu/core/Log.h>

@@ -20,6 +20,9 @@ public:
   virtual void onWindowResize(int w, int h);
   virtual void onWindowClose();
   void setWindowTitle(const char* title);
+  void showCursor();
+  void hideCursor();
+  void toggleCursor();
 
 public:
   unsigned int window_w;

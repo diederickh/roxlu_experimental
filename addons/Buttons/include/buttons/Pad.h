@@ -13,6 +13,7 @@
 
 #include <buttons/Types.h>
 #include <buttons/Element.h>
+#include <libconfig.h>
 
 namespace buttons {
 
@@ -39,7 +40,9 @@ namespace buttons {
     void onMouseClick(int mx, int my);
 	
     void save(std::ofstream& ofs);
+    void save(config_setting_t* setting);
     void load(std::ifstream& ifs);
+    void load(config_setting_t* setting);
     bool canSave();
     float calculatePercentage(float value, float minv, float maxv); 
     void calculateValues(); // calculate resluting x/y values;
@@ -199,9 +202,47 @@ namespace buttons {
     ofs.write((char*)value, sizeof(T) * 2);
   }
 
+  template<class T> 
+    void Pad<T>::save(config_setting_t* setting) {
+    if(value_type == PAD_INT) {
+      config_setting_t* cfg_el = config_setting_add(setting, buttons_create_clean_name(name).c_str(), CONFIG_TYPE_ARRAY);
+      config_setting_set_int_elem(cfg_el, -1, value[0]);
+      config_setting_set_int_elem(cfg_el, -1, value[1]);
+    }
+    else if(value_type == PAD_FLOAT) {
+      config_setting_t* cfg_el = config_setting_add(setting, buttons_create_clean_name(name).c_str(), CONFIG_TYPE_ARRAY);
+      config_setting_set_float_elem(cfg_el, -1, value[0]);
+      config_setting_set_float_elem(cfg_el, -1, value[1]);
+    }
+  }
+
   template<class T>
     void Pad<T>::load(std::ifstream& ifs) {
     ifs.read((char*)value, sizeof(T) * 2);
+    px = calculatePercentage(float(*(value)), min_x_value, max_x_value);
+    py = calculatePercentage(float(*(value+1)), min_y_value, max_y_value);
+    needsRedraw();
+  }
+  
+  template<class T> 
+    void Pad<T>::load(config_setting_t* setting) {
+    std::string cname = buttons_create_clean_name(name);
+
+    config_setting_t* cfg = config_setting_get_member(setting, cname.c_str());
+    if(!cfg) {
+      printf("ERROR: cannot find pad setting.\n");
+      return;
+    }
+
+    if(value_type == PAD_INT) {
+      value[0] = config_setting_get_int_elem(cfg, 0);
+      value[1] = config_setting_get_int_elem(cfg, 1);
+    }
+    else if(value_type == PAD_FLOAT) {
+      value[0] = config_setting_get_float_elem(cfg, 0);
+      value[1] = config_setting_get_float_elem(cfg, 1);
+    }
+
     px = calculatePercentage(float(*(value)), min_x_value, max_x_value);
     py = calculatePercentage(float(*(value+1)), min_y_value, max_y_value);
     needsRedraw();

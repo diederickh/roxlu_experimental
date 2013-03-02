@@ -16,6 +16,7 @@ roxlu_addon_begin("buttons")
   
   if(UNIX) 
     roxlu_add_extern_lib(libuv.a)
+    roxlu_add_extern_lib(libconfig.a)
     roxlu_add_lib(roxlu_buttons)
   endif()
   
@@ -26,6 +27,8 @@ roxlu_addon_begin("buttons")
     roxlu_add_lib(psapi.lib)
     roxlu_add_lib(iphlpapi.lib)
     roxlu_add_lib(roxlu_buttons)
+    roxlu_add_extern_lib(libconfig.lib)
+    roxlu_add_dll(libconfig.dll)
   endif()
   # --------------------------------------------------------------------------------------
 

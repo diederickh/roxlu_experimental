@@ -76,11 +76,27 @@ namespace buttons {
     ofs.write((char*)&data_size, sizeof(data_size));
     ofs.write(&stored_data, 1);
   }
+  
+  void Toggle::save(config_setting_t* setting) {
+    config_setting_t* cfg_el = config_setting_add(setting, buttons_create_clean_name(name).c_str(), CONFIG_TYPE_BOOL);
+    config_setting_set_bool(cfg_el, value);
+  }
 
   void Toggle::load(std::ifstream& ifs) {
     char stored_data = '?';
     ifs.read(&stored_data, 1);
     value = (stored_data == 'y');
+    needsRedraw();
+  }
+
+  void Toggle::load(config_setting_t* setting) {
+    std::string cname = buttons_create_clean_name(name);
+    config_setting_t* cfg = config_setting_get_member(setting, cname.c_str());
+    if(!cfg) {
+      printf("ERROR: cannot find toggle setting value: %s\n", cname.c_str());
+      return;
+    }
+    value = config_setting_get_bool(cfg);
     needsRedraw();
   }
 

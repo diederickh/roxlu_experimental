@@ -203,6 +203,9 @@ namespace buttons {
       if(isalnum(ugly[i])) {
         clean_name.push_back(tolower(ugly[i]));
       }
+      else if(isspace(ugly[i]) || ugly[i] == '.' || ugly[i] == '_' || ugly[i] == '-') {
+        clean_name.push_back('_');
+      }
     }
     return clean_name;
   }
