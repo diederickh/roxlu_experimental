@@ -169,7 +169,6 @@ void FLVScreenRecorder::stop() {
   is_recording = false;
   is_file_opened = false; // av.stop() calls close on the flv writer
   dx = 0;
-  RX_ERROR(("WE NEED TO RESET THE PBOS!"));
 
   // reset pixel buffers
 #if defined(SCREEN_RECORDER_USE_PBO)

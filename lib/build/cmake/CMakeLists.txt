@@ -29,10 +29,7 @@
 #                              include debug libs on windows.
 
 cmake_minimum_required(VERSION 2.8)
-if(NOT roxlu_libs)
- message("-------------------------------------")
-  set(roxlu_libs "")
-endif()
+
 # if(CMAKE_BUILD_TYPE STREQUAL Debug)
 #   if(CMAKE_COMPILER_IS_GNUCXX)
 #     add_definitions("-ggdb")
