@@ -22,6 +22,7 @@
 #if ROXLU_PLATFORM == ROXLU_APPLE || ROXLU_PLATFORM == ROXLU_IOS
 #  include <TargetConditionals.h>
 #  include <mach-o/dyld.h>
+#  include <unistd.h> // getcwd(), access()
 
 #elif ROXLU_PLATFORM == ROXLU_WINDOWS
 #  include <windows.h>
@@ -231,8 +232,9 @@ namespace roxlu {
 #endif
     }
 
+
     static bool exists(std::string filepath) {
-       /*
+#if defined(_WIN32)
       WIN32_FIND_DATA find_file_data;
       HANDLE handle = FindFirstFile(filepath.c_str(), &find_file_data) ;
       int found = handle != INVALID_HANDLE_VALUE;
@@ -240,7 +242,14 @@ namespace roxlu {
         FindClose(&handle);
       }
       return found;
-      */
+
+#elif defined(__APPLE__)
+      int res = access(filepath.c_str(), R_OK);
+      if(res < 0) {
+        return false;
+      }
+#endif
+
       return true;
     }
       
