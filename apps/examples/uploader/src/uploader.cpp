@@ -30,17 +30,18 @@ extern "C" {
 #include <roxlu/Roxlu.h>
 #include <curl/Kurl.h>
 #include <sqlite/Database.h>
+#include <libconfig.h++>
 
 /* settings, uploader, db */
-INI uploader_ini;
+libconfig::Config config;                               /* we use libconfig for configuration settings */
 Kurl uploader_kurl;
 Database uploader_db;
 uv_loop_t* loop;
 uv_tty_t tty;
 rx_int64 delete_timeout;                                /* we check every X-millis for files that we need to remove; we don't need to perform this operation all the time */
 rx_int64 delete_delay;                                  /* the time in millis that we check files that need to be deleted */
-rx_int64 delete_after_days;                             /* set int the settings, delete files older then X-days */
-rx_int64 delete_after_hours;                            /* added to the delete_after_days, delete files older then X-hours */
+int delete_after_days;                                  /* set int the settings, delete files older then X-days */
+int delete_after_hours;                                 /* added to the delete_after_days, delete files older then X-hours */
 bool must_delete;                                       /* set in the settings, if you want to delete files, set it to 1 in the settings */
 bool test_mode;                                         /* when you start this app with --test [filename], this is set to true and we will test a file upload */
 bool test_in_progress;                                  /* set to true when we're actually uploading */
@@ -123,6 +124,8 @@ int main(int argc, char** argv) {
   uv_tty_init(loop, &tty, 1, 0);
   uv_tty_set_mode(&tty, 0);
   
+  // INPUT / PARAMETER HANDLING
+  // --------------------------
   if(uv_guess_handle(1) != UV_TTY) {
     printf("Not a compatibly TTY terminal; expect some wierd output\n");
   }
@@ -143,21 +146,34 @@ int main(int argc, char** argv) {
 
   log("uploader v.0.0.1\n", RED);
 
+  // LOAD CONFIG FILE
+  // --------------------------------
   ini_path = argv[1];
-  if(!uploader_ini.load(ini_path)) {
-    ini_path = rx_to_exe_path(argv[1]);
-    if(!uploader_ini.load(ini_path)) {
-      log("ERROR: cannot open ini file", RED);
+  if(!File::exists(ini_path)) {
+    if(!File::exists(rx_to_exe_path(ini_path))) {
+      return EXIT_FAILURE;
     }
-    return EXIT_FAILURE;
+    else{
+      ini_path = rx_to_exe_path(ini_path);
+    }
   }
 
+  try {
+    config.readFile(ini_path.c_str());
+  }
+  catch(libconfig::ConfigException& ex) {
+    log(ex.what(), RED);
+    return EXIT_FAILURE;
+  }
   if(load_settings() == EXIT_FAILURE) {
     return EXIT_FAILURE;
   }
 
   print_settings();
 
+
+  // OPEN DATABASE
+  // -------------
   if(!uploader_db.open(database_path)) {
     log("ERROR: cannot open database.", RED); log(database_path, RED);  log("\n", BLACK);
     return EXIT_FAILURE;
@@ -287,8 +303,6 @@ void delete_files() {
   rx_int64 now = rx_millis();
   time_t epoch = rx_time();
   
-  //  rx_int64 delete_days = 0;
-  //  rx_int64 delete_hours = 5;
   rx_int64 delete_seconds = (delete_after_days * 24 * 60 * 60) + (delete_after_hours * 60 * 60);
   rx_int64 delete_before = epoch - delete_seconds;
 
@@ -324,83 +338,50 @@ int cb_progress(void* user, double dltotal, double dlnow, double ultotal, double
   return 0;
 }
 
-
+#define LS_RETURN(result, msg) if(!result) { log(msg, RED); return EXIT_FAILURE; } 
+  
 int load_settings() {
-  upload_url = uploader_ini.getString("upload_url", "none");
-  if(upload_url == "none") {
-    log("ERROR: cannot find the upload_url in uploader.ini", RED);
-    return EXIT_FAILURE;
-  }
+  try {
+    bool r = false;
+    r = config.lookupValue("upload_url",upload_url);
+    LS_RETURN(r, "ERROR: cannot find the upload_url in uploader.ini\n");
 
-  src_files_path = uploader_ini.getString("src_files_path", "none");
-  if(src_files_path == "none") {
-    log("ERROR: cannot find the src_files_path in uploader.ini", RED);
-    return EXIT_FAILURE;
-  }
-  
-  database_path = uploader_ini.getString("database_path", "none");
-  if(database_path == "none") {
-    log("ERROR: cannot get database path.\n", RED);
-    return EXIT_FAILURE;
-  }
-  
-  get_total_entries_to_upload_query = uploader_ini.getString("get_total_entries_to_upload_query", "none");
-  if(get_total_entries_to_upload_query == "none") {
-    log("ERROR: cannot get ini field: get_total_entries_to_upload_query  .\n", RED);
-    return EXIT_FAILURE;
-  }
+    r = config.lookupValue("src_files_path", src_files_path);
+    LS_RETURN(r, "ERROR: cannot find the src_files_path in uploader.ini\n");
 
-  get_entries_to_upload_query = uploader_ini.getString("get_entries_to_upload_query", "none");
-  if(get_entries_to_upload_query == "none") {
-    log("ERROR: cannot get ini field: get_entries_to_upload_query  .\n", RED);
+    r = config.lookupValue("database_path", database_path);
+    LS_RETURN(r, "ERROR: cannot get database path.\n");
+
+    r = config.lookupValue("get_total_entries_to_upload_query", get_total_entries_to_upload_query);
+    LS_RETURN(r, "ERROR: cannot find get_total_entries_to_upload_query\n");
+
+    r = config.lookupValue("get_entries_to_upload_query", get_entries_to_upload_query);
+    LS_RETURN(r, "ERROR: cannot get get_total_entries_to_upload_query.\n");
+    
+    r = config.lookupValue("set_upload_state_query", set_upload_state_query);
+    LS_RETURN(r, "ERROR: cannot find set_upload_state_query\n");
+
+    r = config.lookupValue("reset_upload_state_query", reset_upload_state_query);
+    LS_RETURN(r, "ERROR: cannot find reset_upload_state_query\n");
+    
+    r = config.lookupValue("file_field", file_field);
+    LS_RETURN(r, "ERROR: cannot find file_field\n");
+
+    r = config.lookupValue("id_field", id_field);
+    LS_RETURN(r, "ERROR: cannot find id_field\n");
+
+    r = config.lookupValue("delete_files_query", delete_files_query);
+    LS_RETURN(r, "ERROR: cannot find delete_files_query\n");
+
+    config.lookupValue("delete_after_days", delete_after_days);
+    config.lookupValue("delete_after_hours", delete_after_hours);
+    config.lookupValue("must_delete", must_delete);
+
+  }
+  catch(libconfig::ConfigException& ex) {
+    RX_ERROR(("%s", ex.what()));
     return EXIT_FAILURE;
   }
-
-  set_upload_state_query = uploader_ini.getString("set_upload_state_query", "none");
-  if(set_upload_state_query == "none") {
-    log("ERROR: cannot get ini field: set_upload_state_query  .\n", RED);
-    return EXIT_FAILURE;
-  }
-
-  reset_upload_state_query = uploader_ini.getString("reset_upload_state_query", "none");
-  if(reset_upload_state_query == "none") {
-    log("ERROR: cannot get ini field: reset_upload_state_query.\n", RED);
-    return EXIT_FAILURE;
-  }
-
-  file_field = uploader_ini.getString("file_field", "none");
-  if(file_field == "none") {
-    log("ERROR: cannot get ini field: file_field\n", RED);
-    return EXIT_FAILURE;
-  }
-
-  id_field = uploader_ini.getString("id_field", "none");
-  if(id_field == "none") {
-    log("ERROR: cannot get ini field: id_field\n", RED);
-    return EXIT_FAILURE;
-  }
-
-  delete_files_query = uploader_ini.getString("delete_files_query", "none");
-  if(delete_files_query == "none") {
-    log("ERROR: cannot get ini field: delete_files_query\n", RED);
-    return EXIT_FAILURE;
-  }
-
-  delete_after_days = uploader_ini.getInt("delete_after_days", -1);
-  if(delete_after_days == -1) {
-    log("ERROR: cannot get ini field: delete_after_days (or dit you use -1?)");
-    return EXIT_FAILURE;
-  }
-
-  delete_after_hours = uploader_ini.getInt("delete_after_hours", -1);
-  if(delete_after_hours == -1) {
-    log("ERROR: cannot get ini field: delete_after_hours (or dit you use -1?)");
-    return EXIT_FAILURE;
-  }
-  
-  must_delete = uploader_ini.getBool("must_delete", false);
-  
-
   return EXIT_SUCCESS;
 }
 
