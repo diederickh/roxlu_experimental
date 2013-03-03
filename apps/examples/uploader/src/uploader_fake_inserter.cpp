@@ -5,6 +5,9 @@
 #include <curl/Kurl.h>
 #include <sqlite/Database.h>
 
+#if defined(NDEBUG)
+#error NONONONO
+#endif
 
 /**
  * UPLOAD TEST APPLICATION

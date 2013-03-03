@@ -181,7 +181,7 @@ int main(int argc, char** argv) {
         upload_entry* e = new upload_entry();
         e->id = 0;
         e->filepath = rx_to_exe_path(argv[3]);
-        log("VERBOSE: uploading: ", YELLOW);  log(e->filepath.c_str(), RED); log("\n", BLACK);
+        log("TEST: uploading: ", YELLOW);  log(e->filepath.c_str(), RED); log("\n", BLACK);
 
         Form f;
         f.setURL(upload_url);
