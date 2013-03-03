@@ -68,13 +68,6 @@ Kurl::Kurl()
     RX_ERROR(("ERROR: cannot curl_multi_init"));
     ::exit(0);
   }
-  curl_version_info_data* info = curl_version_info(CURLVERSION_NOW);
-  RX_VERBOSE(("CURL version: %s", info->version));
-  int i = 0;
-  while(info->protocols[i] != NULL) {
-    RX_VERBOSE(("- %s", info->protocols[i]));
-      ++i;
-  }
 }
 
 Kurl::~Kurl() {
@@ -279,4 +272,14 @@ bool Kurl::setDebugCallback(CURL* handle) {
     return false;
   }
   return true;
+}
+
+void Kurl::printSupportedProtocols() {
+  curl_version_info_data* info = curl_version_info(CURLVERSION_NOW);
+  RX_VERBOSE(("CURL version: %s", info->version));
+  int i = 0;
+  while(info->protocols[i] != NULL) {
+    RX_VERBOSE(("- %s", info->protocols[i]));
+      ++i;
+  }
 }

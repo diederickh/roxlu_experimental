@@ -87,6 +87,7 @@ public:
   void setProgressCallback(kurl_cb_progress progresCB, void* progresUser);
   void setVerbose(bool verb);
   bool isVerbose();
+  void printSupportedProtocols();
  private: 
   bool initProgressCallback(CURL* handle);
   bool setDebugCallback(CURL* handle);
