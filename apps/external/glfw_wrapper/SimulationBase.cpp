@@ -74,3 +74,11 @@ void SimulationBase::toggleCursor() {
     showCursor();
   }
 }
+
+void SimulationBase::setClipboardString(std::string str) {
+  glfwSetClipboardString(window, str.c_str());
+}
+
+std::string SimulationBase::getClipboardString() {
+  return glfwGetClipboardString(window);
+}
