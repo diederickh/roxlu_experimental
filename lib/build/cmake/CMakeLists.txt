@@ -126,7 +126,19 @@ macro(roxlu_app_add_source_file file)
   source_group("src\\simulation" FILES ${file})
 endmacro(roxlu_app_add_source_file)
 
+function(JOIN VALUES GLUE OUTPUT)
+  string (REPLACE ";" "${GLUE}" _TMP_STR "${VALUES}")
+  set (${OUTPUT} "${_TMP_STR}" PARENT_SCOPE)
+endfunction()
+
 macro(roxlu_install_app)
+  if(WIN32)
+    # make sure the exe is stored in /bin/
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${roxlu_app_install_dir})
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${roxlu_app_install_dir})
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${roxlu_app_install_dir})
+
+  endif()
 
   add_executable(${roxlu_app_name} ${roxlu_source_files} ${roxlu_lib_source_files})
   target_link_libraries(${roxlu_app_name} ${roxlu_libs})
@@ -135,9 +147,24 @@ macro(roxlu_install_app)
   install(FILES ${roxlu_install_files} DESTINATION ${roxlu_app_install_dir})
 
   if(WIN32)
-    install(FILES ${roxlu_install_files} DESTINATION ${roxlu_app_install_dir_windows}/Release)
-    install(FILES ${roxlu_install_files} DESTINATION ${roxlu_app_install_dir_windows}/Debug)
-  endif()
+    set_target_properties(${roxlu_app_name} PROPERTIES OUTPUT_NAME_DEBUG ${roxlu_app_name}_debug)
+
+    # copy command, copy all DLLs we need
+    list(LENGTH roxlu_install_files roxlu_install_files_count)
+    math(EXPR roxlu_install_files_iter ${roxlu_install_files_count}-1)
+
+    foreach(i RANGE ${roxlu_install_files_iter})
+      list(GET roxlu_install_files ${i} roxlu_file_to_copy)
+      file(TO_NATIVE_PATH ${roxlu_file_to_copy} fcopy_from)
+      file(TO_NATIVE_PATH ${roxlu_app_install_dir} fcopy_to)
+      ADD_CUSTOM_COMMAND( TARGET ${roxlu_app_name} POST_BUILD
+        COMMAND xcopy "${fcopy_from}" "${fcopy_to}" /y /C
+        COMMENT "copying dlls ."
+      )
+    endforeach(i)
+
+
+endif()
 
 endmacro(roxlu_install_app)
 
