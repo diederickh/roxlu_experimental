@@ -59,6 +59,7 @@ Kurl::Kurl()
   ,still_running(0)
   ,cb_progress(NULL)
   ,cb_progress_user(NULL)
+  ,is_verbose(false)
 {
   handle = curl_multi_init();
   if(handle == NULL) {
@@ -265,6 +266,10 @@ bool Kurl::initProgressCallback(CURL* handle) {
 }
 
 bool Kurl::setDebugCallback(CURL* handle) {
+  if(!is_verbose) {
+    return true;
+  }
+
   CURLcode result = curl_easy_setopt(handle, CURLOPT_DEBUGFUNCTION, kurl_libcurl_debug_callback);
   if(result != CURLE_OK) {
     RX_ERROR(("ERROR: failed to set debug callback"));

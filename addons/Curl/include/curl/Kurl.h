@@ -85,12 +85,14 @@ public:
   );
 
   void setProgressCallback(kurl_cb_progress progresCB, void* progresUser);
+  void setVerbose(bool verb);
 
  private: 
   bool initProgressCallback(CURL* handle);
   bool setDebugCallback(CURL* handle);
 
  private:
+  bool is_verbose;
   int still_running;
   CURLM* handle;
   std::vector<KurlConnection*> connections;
@@ -102,4 +104,8 @@ public:
 inline void Kurl::setProgressCallback(kurl_cb_progress progressCB, void* progressUser) {
   cb_progress = progressCB;
   cb_progress_user = progressUser;
+}
+
+inline void Kurl::setVerbose(bool verb) {
+  is_verbose = verb;
 }
