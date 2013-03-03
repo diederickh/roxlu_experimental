@@ -26,8 +26,10 @@ size_t kurl_callback_write_function(char* data, size_t size, size_t nmemb, void*
         }
       }
       else if(kc->type == KURL_FORM) {
-        for(size_t i = 0; i < nmemb; ++i) {
-         printf("%c", data[i]);
+        if(kc->kurl->isVerbose()) {
+          for(size_t i = 0; i < nmemb; ++i) {
+            printf("%c", data[i]);
+          }
         }
       }
       else {
@@ -224,8 +226,10 @@ bool Kurl::post(Form& f,
   result = curl_easy_setopt(c->handle, CURLOPT_WRITEDATA, c);
   RETURN_CURLCODE(result, "ERROR: Failed to set curopt_writedata for form.\n", false, c);
 
-  result = curl_easy_setopt(c->handle, CURLOPT_VERBOSE, TRUE);
-  RETURN_CURLCODE(result, "ERROR: Failed to set verbose option for form.\n", false, c);
+  if(is_verbose) {
+    result = curl_easy_setopt(c->handle, CURLOPT_VERBOSE, TRUE);
+    RETURN_CURLCODE(result, "ERROR: Failed to set verbose option for form.\n", false, c);
+  }
 
 
   curl_multi_add_handle(handle, c->handle); // @todo add error check

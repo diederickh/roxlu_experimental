@@ -86,7 +86,7 @@ public:
 
   void setProgressCallback(kurl_cb_progress progresCB, void* progresUser);
   void setVerbose(bool verb);
-
+  bool isVerbose();
  private: 
   bool initProgressCallback(CURL* handle);
   bool setDebugCallback(CURL* handle);
@@ -108,4 +108,8 @@ inline void Kurl::setProgressCallback(kurl_cb_progress progressCB, void* progres
 
 inline void Kurl::setVerbose(bool verb) {
   is_verbose = verb;
+}
+
+inline bool Kurl::isVerbose() {
+  return is_verbose;
 }
