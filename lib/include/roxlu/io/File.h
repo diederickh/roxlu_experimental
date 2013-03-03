@@ -230,6 +230,21 @@ namespace roxlu {
       return true;
 #endif
     }
+
+    static bool exists(std::string filepath) {
+       /*
+      WIN32_FIND_DATA find_file_data;
+      HANDLE handle = FindFirstFile(filepath.c_str(), &find_file_data) ;
+      int found = handle != INVALID_HANDLE_VALUE;
+      if(found) {
+        FindClose(&handle);
+      }
+      return found;
+      */
+      return true;
+    }
+      
+
     
     static std::vector<std::string> getDirectories(std::string path) {
       std::vector<std::string> result;

@@ -6,7 +6,8 @@
 #include <cstdlib>
 #include <vector>
 
-#include  <curl/Form.h>
+#include <roxlu/Roxlu.h>
+#include <curl/Form.h>
 
 #define RETURN_CURLCODE(result, msg, rvalue, ptr )      \
   if(result != CURLE_OK) {                              \

@@ -53,6 +53,13 @@ Kurl::Kurl()
     printf("ERROR: cannot curl_multi_init\n");
     ::exit(0);
   }
+  curl_version_info_data* info = curl_version_info(CURLVERSION_NOW);
+  RX_VERBOSE(("CURL version: %s", info->version));
+  int i = 0;
+  while(info->protocols[i] != NULL) {
+    RX_VERBOSE(("- %s", info->protocols[i]));
+      ++i;
+  }
 }
 
 Kurl::~Kurl() {
@@ -175,6 +182,7 @@ bool Kurl::post(Form& f,
   }
 
   for(std::vector<FormFile>::iterator it = f.files.begin(); it != f.files.end(); ++it) {
+    printf("FILE: %s\n", (*it).filepath.c_str());
     form_result = curl_formadd(&post_curr, &post_last, CURLFORM_COPYNAME, (*it).name.c_str(), 
                                CURLFORM_FILE, (*it).filepath.c_str(), CURLFORM_END);
     RETURN_CURLCODE(form_result, "ERROR: cannot add file to form.\n", false, c);
@@ -191,6 +199,10 @@ bool Kurl::post(Form& f,
 
   result = curl_easy_setopt(c->handle, CURLOPT_WRITEDATA, c);
   RETURN_CURLCODE(result, "ERROR: Failed to set curopt_writedata for form.\n", false, c);
+
+  result = curl_easy_setopt(c->handle, CURLOPT_VERBOSE, TRUE);
+  RETURN_CURLCODE(result, "ERROR: Failed to set verbose option for form.\n", false, c);
+
 
   curl_multi_add_handle(handle, c->handle); // @todo add error check
 
