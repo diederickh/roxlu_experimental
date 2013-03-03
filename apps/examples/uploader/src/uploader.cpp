@@ -42,6 +42,8 @@ rx_int64 delete_delay;                                  /* the time in millis th
 rx_int64 delete_after_days;                             /* set int the settings, delete files older then X-days */
 rx_int64 delete_after_hours;                            /* added to the delete_after_days, delete files older then X-hours */
 bool must_delete;                                       /* set in the settings, if you want to delete files, set it to 1 in the settings */
+bool test_mode;                                         /* when you start this app with --test [filename], this is set to true and we will test a file upload */
+bool test_in_progress;                                  /* set to true when we're actually uploading */
 
 rx_int64 total_kbytes_to_upload;                        /* total number of kilo bytes in to upload */
 rx_int64 total_kbytes_uploaded;                         /* total bytes uploaded */
@@ -110,11 +112,14 @@ void cb_post_complete(KurlConnection* c, void *user) {
 }
 
 int main(int argc, char** argv) {
+  test_mode = false;
+  test_in_progress = false;
   total_kbytes_to_upload = 0;
   total_kbytes_uploaded = 0;
   delete_delay = 4 * 1000;
   delete_timeout = rx_millis() + delete_delay;
   loop = uv_default_loop();
+
   uv_tty_init(loop, &tty, 1, 0);
   uv_tty_set_mode(&tty, 0);
   
@@ -122,9 +127,18 @@ int main(int argc, char** argv) {
     printf("Not a compatibly TTY terminal; expect some wierd output\n");
   }
 
-  if(argc != 2) {
+  if(argc != 2 && argc != 4) {
     log("ERROR: usage: ./uploader settings.ini\n", RED);
+    log("ERROR: usage: ./uploader settings.ini --test somefile.png\n", RED);
     return EXIT_FAILURE;
+  }
+  
+  if(argc > 2 && strcmp(argv[2], "--test") == 0) {
+    if(argc != 4) {
+      log("ERROR: when using the --test flag, make sure to pass a filename to test with\n", RED);
+      return EXIT_FAILURE;
+    }
+    test_mode = true;
   }
 
   log("uploader v.0.0.1\n", RED);
@@ -161,6 +175,30 @@ int main(int argc, char** argv) {
   log("> reset previously failed upload entries\n", MAGENTA);
 
   while(true) {
+    // TEST MODE
+    if(test_mode) {
+      if(!test_in_progress) {
+        upload_entry* e = new upload_entry();
+        e->id = 0;
+        e->filepath = rx_to_exe_path(argv[3]);
+        log("VERBOSE: uploading: ", YELLOW);  log(e->filepath.c_str(), RED); log("\n", BLACK);
+
+        Form f;
+        f.setURL(upload_url);
+        f.addFile("file", rx_to_exe_path(argv[3]));
+        if(!uploader_kurl.post(f, cb_post_complete, e)) {
+          log("ERROR: cannot perform test upload\n", RED);
+          return EXIT_FAILURE;
+        }
+        test_in_progress = true;
+      }
+      else {
+        uploader_kurl.update();
+      }
+      continue;
+    }
+
+    // PRODUCTION
     QueryResult rows_result(uploader_db);
     r =  uploader_db.query(get_total_entries_to_upload_query).execute(rows_result);
     if(!r) {
