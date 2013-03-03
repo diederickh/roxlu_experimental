@@ -1,5 +1,17 @@
 #include <curl/Kurl.h>
 
+int kurl_libcurl_debug_callback(CURL* handle, 
+                                curl_infotype info, 
+                                char* data, 
+                                size_t nchars, 
+                                void* user) 
+{
+  std::string str;
+  std::copy(data, data+nchars, std::back_inserter(str));
+  RX_VERBOSE(("%s", str.c_str()));
+  return 0;
+}
+
 size_t kurl_callback_write_function(char* data, size_t size, size_t nmemb, void* userdata) {
   if(nmemb > 0) {
     KurlConnection* kc = static_cast<KurlConnection*>(userdata);
@@ -10,16 +22,16 @@ size_t kurl_callback_write_function(char* data, size_t size, size_t nmemb, void*
       if(kc->type == KURL_FILE_DOWNLOAD) {
         kc->ofs.write(data, nmemb);
         if(!kc->ofs) {
-          printf("ERROR: cannot write to file in Kurl.\n");
+          RX_ERROR(("ERROR: cannot write to file in Kurl."));
         }
       }
       else if(kc->type == KURL_FORM) {
         for(size_t i = 0; i < nmemb; ++i) {
-          printf("%c", data[i]);
+         printf("%c", data[i]);
         }
       }
       else {
-        printf("VERBOSE: no callback for this type of connection (Kurl) \n");
+        RX_VERBOSE(("VERBOSE: no callback for this type of connection (Kurl) "));
       }
     }
   }
@@ -50,7 +62,7 @@ Kurl::Kurl()
 {
   handle = curl_multi_init();
   if(handle == NULL) {
-    printf("ERROR: cannot curl_multi_init\n");
+    RX_ERROR(("ERROR: cannot curl_multi_init"));
     ::exit(0);
   }
   curl_version_info_data* info = curl_version_info(CURLVERSION_NOW);
@@ -111,15 +123,21 @@ bool Kurl::download(
   c->handle = curl_easy_init();
 
   if(!c->handle) {
-    printf("ERROR: cannot curl_easy_init()\n");
+    RX_ERROR(("ERROR: cannot curl_easy_init()"));
+    delete c;
     return false;
   }
   
+  if(!setDebugCallback(c->handle)) {
+    delete c;
+    return false;
+  }
+
   // Only open a file when no writeCB is given
   if(writeCB == NULL) {
     c->ofs.open(filename, std::ios::out | std::ios::binary);
     if(!c->ofs.is_open()) {
-      printf("ERROR: Kurl::download, ofs.is_open() failed\n");
+      RX_ERROR(("ERROR: Kurl::download, ofs.is_open() failed\n"));
       return false;
     }
   }
@@ -151,7 +169,7 @@ bool Kurl::post(Form& f,
                 void* writeData
 ) {
   if(!f.isSetup()) {
-    printf("WARNING: given form is not setup/complete.\n");
+    RX_WARNING(("WARNING: given form is not setup/complete."));
     return false;
   }
 
@@ -164,7 +182,7 @@ bool Kurl::post(Form& f,
 
   c->handle = curl_easy_init();
   if(!c->handle) {
-    printf("ERROR: cannot curl_easy_init() for form.\n");
+    RX_ERROR(("ERROR: cannot curl_easy_init() for form.\n"));
     delete c;
     return false;
   }
@@ -174,6 +192,11 @@ bool Kurl::post(Form& f,
   c->complete_callback = completeCB;
   c->write_callback = writeCB;
   c->write_data = writeData;
+
+  if(!setDebugCallback(c->handle)) {
+    delete c;
+    return false;
+  }
 
   for(std::vector<FormInput>::iterator it = f.inputs.begin(); it != f.inputs.end(); ++it) {
     form_result = curl_formadd(&post_curr, &post_last, CURLFORM_COPYNAME, (*it).name.c_str(), 
@@ -238,5 +261,14 @@ bool Kurl::initProgressCallback(CURL* handle) {
   curl_easy_setopt(handle, CURLOPT_PROGRESSDATA, cb_progress_user);
   RETURN_CURLCODE(result, "ERROR: Failed to set progress data", false, fake);
   
+  return true;
+}
+
+bool Kurl::setDebugCallback(CURL* handle) {
+  CURLcode result = curl_easy_setopt(handle, CURLOPT_DEBUGFUNCTION, kurl_libcurl_debug_callback);
+  if(result != CURLE_OK) {
+    RX_ERROR(("ERROR: failed to set debug callback"));
+    return false;
+  }
   return true;
 }

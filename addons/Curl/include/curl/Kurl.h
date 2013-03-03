@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <vector>
 
+#include <iterator>
 #include <roxlu/Roxlu.h>
 #include <curl/Form.h>
 
@@ -28,6 +29,8 @@
     }                                                 \
     return rvalue;                                    \
  }
+
+int kurl_libcurl_debug_callback(CURL* handle, curl_infotype info, char* data, size_t nchars, void* user);
 
 size_t kurl_callback_write_function(char* data, size_t size, size_t nmemb, void* userdata); // writes to file, or calls callback 
 
@@ -76,7 +79,7 @@ public:
 
   bool post(Form& fm,
     kurl_cb_on_complete completeCB, 
-    void* completeData,
+    void* completeData = NULL,
     kurl_cb_on_write writeCB = NULL, // when given you need to store the data yourself!
     void* writeData = NULL 
   );
@@ -85,6 +88,7 @@ public:
 
  private: 
   bool initProgressCallback(CURL* handle);
+  bool setDebugCallback(CURL* handle);
 
  private:
   int still_running;
