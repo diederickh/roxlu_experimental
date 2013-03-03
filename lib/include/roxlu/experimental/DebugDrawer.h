@@ -45,9 +45,9 @@ const std::string DEBUG_TEX_FS = ""
   "void main() { "
   "  vec4 col = texture2D(u_tex, v_tex); "
   "  gl_FragColor = col; "
-  "  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); "
-  "}";
 
+  "}";
+//  "  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); "
 struct DrawEntry {
   int start_dx;
   int num_elements;
