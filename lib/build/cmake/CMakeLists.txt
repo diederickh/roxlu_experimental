@@ -137,7 +137,6 @@ macro(roxlu_install_app)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${roxlu_app_install_dir})
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${roxlu_app_install_dir})
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${roxlu_app_install_dir})
-
   endif()
 
   add_executable(${roxlu_app_name} ${roxlu_source_files} ${roxlu_lib_source_files})

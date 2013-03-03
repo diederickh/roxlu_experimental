@@ -41,10 +41,20 @@ endif()
 
 source_group("src\\uploader" FILES ${uploader_sources})
 
+if(WIN32)
+  # make sure the exe is stored in /bin/
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${uploader_install_dir}) 
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${uploader_install_dir}) 
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${uploader_install_dir}) 
+endif()
+
+
 add_executable(uploader ${uploader_sources})
 target_link_libraries(uploader ${roxlu_libs})
 install(TARGETS uploader DESTINATION ${uploader_install_dir})
 install(FILES ${roxlu_install_files} DESTINATION ${uploader_install_dir})
+
+
 
 # FAKE INSERTER, inserts entries into the DB
 # --------------------------------------------
