@@ -32,7 +32,9 @@ namespace buttons {
   public:
     Panel(const string& defaultGuiName, int w, int h);
     ~Panel();
-	
+
+    void setDataPath(std::string path);  // set the path into which we will store the GUI settings. if not set we use the executable path 
+    std::string getDataPath(); // returns the path where the save data will be stored
     void update();
     void draw();
 	
@@ -86,10 +88,34 @@ namespace buttons {
 	
     vector<Buttons*> guis;
     Buttons* active_gui;
+    std::string data_path;
   };
 
+  inline void Panel::setDataPath(std::string path) {
 
+#if !defined(_WIN32) 
+    if(path[path.size()-1] != '/') {
+      path.push_back('/');
+    }
+#else
+    if(path[path.size()-1] != '\\') {
+      path.push_back('\\');
+    }
+#endif
 
+    data_path = path;
+  }
+
+  inline std::string Panel::getDataPath() {
+    std::string filepath = "";
+    if(data_path.size()) {
+      filepath = data_path;
+    }
+    else {
+      filepath = rx_to_data_path("./");
+    }
+    return filepath;
+  }
 } // buttons
 
 #endif

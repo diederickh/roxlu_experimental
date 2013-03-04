@@ -12,7 +12,14 @@ ClientSocket::ClientSocket(std::string host, std::string port)
   ,cb_read(NULL)
 {
   loop = uv_default_loop();
-  sock.data = this;
+
+  sock = new uv_tcp_t();
+  int r = uv_tcp_init(loop, sock);
+  if(r) {
+    RX_ERROR(("uv_tcp_init failed"));
+  }
+  sock->data = this;
+
   resolver_req.data = this;
   connect_req.data = this;
   shutdown_req.data = this;
@@ -41,12 +48,7 @@ void ClientSocket::setup(client_socket_on_connected_cb conCB,
 }
 
 bool ClientSocket::connect() {
-  int r = uv_tcp_init(loop, &sock);
-  if(r) {
-    RX_ERROR(("uv_tcp_init failed"));
-    return false;
-  }
-
+  int r = 0;
   struct addrinfo hints;
   hints.ai_family = PF_INET;
   hints.ai_socktype = SOCK_STREAM;
@@ -84,14 +86,14 @@ void ClientSocket::write(char* data, size_t nbytes) {
   uv_write_t* wreq = new uv_write_t();
   wreq->data = this;
 
-  int r = uv_write(wreq, (uv_stream_t*)&sock, &buf, 1, client_socket_on_write);
+  int r = uv_write(wreq, (uv_stream_t*)sock, &buf, 1, client_socket_on_write);
   if(r) {
     RX_ERROR(("uv_write() to server failed."));
   }
 }
 
 void ClientSocket::close() {
-  uv_close((uv_handle_t*)&sock, NULL); // client_socket_on_close);
+  uv_close((uv_handle_t*)sock, client_socket_on_close_delete);
 }
 
 // CALLBACKS
@@ -109,7 +111,7 @@ void client_socket_on_resolved(uv_getaddrinfo_t* req, int status, struct addrinf
   uv_ip4_name((struct sockaddr_in*)res->ai_addr, ip, 16);
   RX_VERBOSE(("resolved server: %s", ip));
  
-  int r = uv_tcp_connect(&c->connect_req, &c->sock, 
+  int r = uv_tcp_connect(&c->connect_req, c->sock, 
                          *(struct sockaddr_in*)res->ai_addr, 
                          client_socket_on_connect);
  
@@ -199,6 +201,11 @@ void client_socket_on_close(uv_handle_t* handle) {
   ClientSocket* c = static_cast<ClientSocket*>(handle->data);
   c->clear();
   c->reconnect();
+}
+
+void client_socket_on_close_delete(uv_handle_t* handle) {
+  delete handle;
+  handle = NULL;
 }
 
 void client_socket_on_reconnect_timer(uv_timer_t* handle, int status) {

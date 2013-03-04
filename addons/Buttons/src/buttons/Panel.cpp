@@ -173,18 +173,21 @@ namespace buttons {
   }
 
   void Panel::save() {
+    std::string filepath = getDataPath();;
+
     for(vector<Buttons*>::iterator it = guis.begin(); it != guis.end(); ++it) {
       Buttons& b = **it;
       string filename = "gui_" +b.getName() +".cfg";
-      b.save(rx_to_exe_path(filename));
+      b.save(filepath + filename);
     }
   }
 
   void Panel::load() {
+    std::string filepath = getDataPath();;
     for(vector<Buttons*>::iterator it = guis.begin(); it != guis.end(); ++it) {
       Buttons& b = **it;
       string filename = "gui_" +b.getName() +".cfg";
-      b.load(rx_to_exe_path(filename));
+      b.load(filepath + filename);
     }
   }
 

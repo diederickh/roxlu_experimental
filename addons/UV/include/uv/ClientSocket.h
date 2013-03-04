@@ -23,6 +23,7 @@ uv_buf_t client_socket_on_alloc(uv_handle_t* handle, size_t nbytes);
 void client_socket_on_write(uv_write_t* req, int status);
 void client_socket_on_shutdown(uv_shutdown_t* req, int status);
 void client_socket_on_close(uv_handle_t* req);
+void client_socket_on_close_delete(uv_handle_t* req);
 void client_socket_on_reconnect_timer(uv_timer_t* handle, int status);
 
 class ClientSocket {
@@ -42,7 +43,7 @@ class ClientSocket {
   void close();                                                 /* shuts down the connection */
  public:
   uv_loop_t* loop;
-  uv_tcp_t sock;
+  uv_tcp_t* sock;
   uv_getaddrinfo_t resolver_req;
   uv_connect_t connect_req;
   uv_shutdown_t shutdown_req;

@@ -94,12 +94,6 @@ macro(roxlu_add_source_file src_file)
   list(APPEND roxlu_source_files ${src_file})
 endmacro(roxlu_add_source_file)
 
-#macro(roxlu_addon_add_source_file addon_name src_file)
-#  message(FATAL_ERROR "someone called roxlu_addon_sdd_source_file which we're not using!!")
-#  roxlu_add_source_file(${src_file})
-#  source_group("src\\${addon_name}" FILES ${src_file})
-#endmacro(roxlu_addon_add_source_file)
-
 macro(roxlu_add_include_dir dir)
   include_directories(${dir})
 endmacro(roxlu_add_include_dir)
@@ -114,7 +108,13 @@ endmacro(roxlu_enable_opengl)
 # --------------------------------------------------------------------------------
 
 macro(roxlu_app_initialize app_name)
-  set(roxlu_app_name ${app_name})
+
+  if(CMAKE_BUILD_TYPE STREQUAL Debug)
+    set(roxlu_app_name ${app_name}_debug)
+  else()
+    set(roxlu_app_name ${app_name})
+  endif()
+
   set(roxlu_app_base_dir ${CMAKE_CURRENT_LIST_DIR}/../..)
   set(roxlu_app_install_dir ${roxlu_app_base_dir}/bin)
   set(roxlu_app_include_dir ${roxlu_app_base_dir}/src)
