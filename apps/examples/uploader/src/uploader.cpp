@@ -45,6 +45,7 @@ int delete_after_hours;                                 /* added to the delete_a
 bool must_delete;                                       /* set in the settings, if you want to delete files, set it to 1 in the settings */
 bool test_mode;                                         /* when you start this app with --test [filename], this is set to true and we will test a file upload */
 bool test_in_progress;                                  /* set to true when we're actually uploading */
+bool is_verbose;                                        /* make everything verbose for debugging */
 
 rx_int64 total_kbytes_to_upload;                        /* total number of kilo bytes in to upload */
 rx_int64 total_kbytes_uploaded;                         /* total bytes uploaded */
@@ -113,6 +114,7 @@ void cb_post_complete(KurlConnection* c, void *user) {
 }
 
 int main(int argc, char** argv) {
+  is_verbose = false;
   test_mode = false;
   test_in_progress = false;
   total_kbytes_to_upload = 0;
@@ -186,7 +188,9 @@ int main(int argc, char** argv) {
   }
   state_result.finish();
 
+  uploader_kurl.setVerbose(is_verbose);
   uploader_kurl.setProgressCallback(cb_progress, NULL);
+
 
   log("> reset previously failed upload entries\n", MAGENTA);
 
@@ -372,6 +376,9 @@ int load_settings() {
 
     r = config.lookupValue("delete_files_query", delete_files_query);
     LS_RETURN(r, "ERROR: cannot find delete_files_query\n");
+
+    r = config.lookupValue("verbose", is_verbose);
+    LS_RETURN(r, "ERROR: cannot find verbose\n");
 
     config.lookupValue("delete_after_days", delete_after_days);
     config.lookupValue("delete_after_hours", delete_after_hours);
