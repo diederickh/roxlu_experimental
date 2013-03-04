@@ -8,7 +8,7 @@ if not exist "%d%\build" (
 
 cd %d%\build
 cmake -G "Visual Studio 10" ..\
-cmake --build . --target install 
+cmake --build . --target install -- /p:Configuration=Release
 :: -- /p:Configuration=Release /v:q
 :: %d%\bin\011_windows.exe
 :: cmake --build . --target install -- /p:Configuration=Debug

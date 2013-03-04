@@ -16,7 +16,7 @@ roxlu_addon_begin("curl")
     roxlu_add_dll(libcurl.dll)
     roxlu_add_dll(libeay32.dll)
     roxlu_add_dll(ssleay32.dll)
-    roxlu_add_dll(zlib.dll)
+    roxlu_add_dll(zlib1.dll)
   
   else()
     roxlu_add_extern_lib(libcurl.a)

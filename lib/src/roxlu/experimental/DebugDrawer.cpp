@@ -123,6 +123,16 @@ void DebugDrawer::setupOpenGL() {
   float th = 1.0f;
   float tex_verts[] = {
 
+    0.0f, th,   0.0f, 1.0f,
+    tw,   th,   1.0f, 1.0f, 
+    tw,   0.0f, 1.0f, 0.0f, 
+
+    0.0f, th,   0.0f, 1.0f,
+    tw,   0.0f, 1.0f, 0.0f, 
+    0.0f, 0.0f, 0.0f, 0.0f, 
+  };
+
+  /*
     0.0f, th,   0.0f, 0.0f,
     tw,   th,   1.0f, 0.0f, 
     tw,   0.0f, 1.0f, 1.0f, 
@@ -130,8 +140,7 @@ void DebugDrawer::setupOpenGL() {
     0.0f, th,   0.0f, 0.0f,
     tw,   0.0f, 1.0f, 1.0f, 
     0.0f, 0.0f, 0.0f, 1.0f, 
-  };
-
+*/
   glGenBuffers(1, &vbo_tex);
   glBindBuffer(GL_ARRAY_BUFFER, vbo_tex);
   glBufferData(GL_ARRAY_BUFFER, sizeof(tex_verts), tex_verts, GL_STATIC_DRAW);

@@ -2,6 +2,7 @@
 //#define GLEW_STATIC
 #include <GL/glew.h>
 #include <GL/glfw3.h>
+#include <string>
 
 class SimulationBase {
 public:
@@ -23,6 +24,8 @@ public:
   void showCursor();
   void hideCursor();
   void toggleCursor();
+  std::string getClipboardString();
+  void setClipboardString(std::string str);
 
 public:
   unsigned int window_w;

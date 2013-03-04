@@ -89,8 +89,8 @@ namespace roxlu {
   void Text::setVertexAttributes() {
     glEnableVertexAttribArray(shader.getAttribute("pos")); eglGetError();
     glEnableVertexAttribArray(shader.getAttribute("tex")); eglGetError();
-    glVertexAttribPointer(shader.getAttribute("pos"), 2, GL_FLOAT, GL_FALSE, sizeof(TextVertex), offsetof(TextVertex, pos)); eglGetError();
-    glVertexAttribPointer(shader.getAttribute("tex"), 2, GL_FLOAT, GL_FALSE, sizeof(TextVertex), (GLvoid*)offsetof(TextVertex, uv)); eglGetError();
+    glVertexAttribPointer(shader.getAttribute("pos"), 2, GL_FLOAT, GL_FALSE, sizeof(TextVertex), (GLvoid*)0); eglGetError();
+    glVertexAttribPointer(shader.getAttribute("tex"), 2, GL_FLOAT, GL_FALSE, sizeof(TextVertex), (GLvoid*)8); eglGetError();
   }
 
 

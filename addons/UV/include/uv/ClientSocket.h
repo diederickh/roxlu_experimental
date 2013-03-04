@@ -2,6 +2,7 @@
 #define ROXLU_CLIENT_SOCKET_H
 
 extern "C" {
+#  include <stdio.h>
 #  include <uv.h>
 }
 

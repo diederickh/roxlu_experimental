@@ -20,7 +20,7 @@ struct INIEntry {
 
 #if !defined(NDEBUG)
   ~INIEntry() {
-    printf("~INIEntry()\n");
+    //  printf("~INIEntry()\n");
   }
 #endif
 
@@ -45,7 +45,7 @@ struct INISortedEntry {
 
 #if !defined(NDEBUG)
   ~INISortedEntry() {
-    printf("~INISortedEntry()\n");
+    //printf("~INISortedEntry()\n");
   }
 #endif
 

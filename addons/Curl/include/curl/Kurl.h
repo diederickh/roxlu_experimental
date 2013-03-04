@@ -6,7 +6,9 @@
 #include <cstdlib>
 #include <vector>
 
-#include  <curl/Form.h>
+#include <iterator>
+#include <roxlu/Roxlu.h>
+#include <curl/Form.h>
 
 #define RETURN_CURLCODE(result, msg, rvalue, ptr )      \
   if(result != CURLE_OK) {                              \
@@ -27,6 +29,8 @@
     }                                                 \
     return rvalue;                                    \
  }
+
+int kurl_libcurl_debug_callback(CURL* handle, curl_infotype info, char* data, size_t nchars, void* user);
 
 size_t kurl_callback_write_function(char* data, size_t size, size_t nmemb, void* userdata); // writes to file, or calls callback 
 
@@ -75,17 +79,21 @@ public:
 
   bool post(Form& fm,
     kurl_cb_on_complete completeCB, 
-    void* completeData,
+    void* completeData = NULL,
     kurl_cb_on_write writeCB = NULL, // when given you need to store the data yourself!
     void* writeData = NULL 
   );
 
   void setProgressCallback(kurl_cb_progress progresCB, void* progresUser);
-
+  void setVerbose(bool verb);
+  bool isVerbose();
+  void printSupportedProtocols();
  private: 
   bool initProgressCallback(CURL* handle);
+  bool setDebugCallback(CURL* handle);
 
  private:
+  bool is_verbose;
   int still_running;
   CURLM* handle;
   std::vector<KurlConnection*> connections;
@@ -97,4 +105,12 @@ public:
 inline void Kurl::setProgressCallback(kurl_cb_progress progressCB, void* progressUser) {
   cb_progress = progressCB;
   cb_progress_user = progressUser;
+}
+
+inline void Kurl::setVerbose(bool verb) {
+  is_verbose = verb;
+}
+
+inline bool Kurl::isVerbose() {
+  return is_verbose;
 }

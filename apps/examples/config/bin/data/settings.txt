@@ -1,0 +1,21 @@
+# CONFIGURATION
+# ------------
+# This is a basic example of what kind of configuration settings you can store
+# using libconfig. Comments can either start with '#' or ...
+
+/*
+
+   Comments can be C-style
+   to span multiple lines 
+   of comment.
+
+*/
+
+upload_url="http://www.google.com"
+
+src_path="c:\\projects\\roxlu\\app\\upload\\"
+
+delete_after_days = 5
+
+must_delete = true
+

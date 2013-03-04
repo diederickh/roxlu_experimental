@@ -22,10 +22,12 @@
 #if ROXLU_PLATFORM == ROXLU_APPLE || ROXLU_PLATFORM == ROXLU_IOS
 #  include <TargetConditionals.h>
 #  include <mach-o/dyld.h>
+#  include <unistd.h> // getcwd(), access()
 
 #elif ROXLU_PLATFORM == ROXLU_WINDOWS
 #  include <windows.h>
 #  include <direct.h> // _mkdir
+#  include <Shlwapi.h>
 
 #elif ROXLU_PLATFORM == ROXLU_LINUX
 #  include <unistd.h> // getcwd
@@ -230,6 +232,29 @@ namespace roxlu {
       return true;
 #endif
     }
+
+    // GetFileAttributes may want a wide char as param which obviously is not what we support.
+#if defined(_MSC_VER) && defined(UNICODE)
+#  error "Your project is setup for unicode builds which is not supported. Change your project settings: Configuration Properties > General > Character Set: Not Set "
+#endif
+
+    static bool exists(std::string filepath) {
+#if defined(_WIN32)
+      char* lptr = (char*)filepath.c_str();
+      DWORD dwattrib = GetFileAttributes(lptr);
+      return (dwattrib != INVALID_FILE_ATTRIBUTES && !(dwattrib & FILE_ATTRIBUTE_DIRECTORY));
+
+#elif defined(__APPLE__)
+      int res = access(filepath.c_str(), R_OK);
+      if(res < 0) {
+        return false;
+      }
+#endif
+
+      return true;
+    }
+      
+
     
     static std::vector<std::string> getDirectories(std::string path) {
       std::vector<std::string> result;
