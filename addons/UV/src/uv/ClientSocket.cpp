@@ -21,6 +21,8 @@ ClientSocket::ClientSocket(std::string host, std::string port)
 
 ClientSocket::~ClientSocket() {
   clear();
+  close();
+
   user = NULL;
   cb_connected = NULL;
   cb_read = NULL;
@@ -88,6 +90,9 @@ void ClientSocket::write(char* data, size_t nbytes) {
   }
 }
 
+void ClientSocket::close() {
+  uv_close((uv_handle_t*)&sock, NULL); // client_socket_on_close);
+}
 
 // CALLBACKS
 // ------------------------------------------

@@ -28,15 +28,17 @@ class ClientSocket {
  public:
   ClientSocket(std::string host, std::string port);
   ~ClientSocket();
+
   void setup(client_socket_on_connected_cb conCB, 
              client_socket_on_read_cb readCB,
              void* user);
-  void update();
-  bool connect();
-  void reconnect();
-  void write(char* data, size_t nbytes);
-  void clear();
 
+  void update();                                                /* you must call this repeatetly! each time you call update() we process a bit of socket data */
+  bool connect();                                               /* connect to the server */
+  void reconnect();                                             /* used internally; when disconnected we try to reconnect on a given time interval */
+  void write(char* data, size_t nbytes);                        /* write data over sockets */
+  void clear();                                                 /* clears the buffer */
+  void close();                                                 /* shuts down the connection */
  public:
   uv_loop_t* loop;
   uv_tcp_t sock;
