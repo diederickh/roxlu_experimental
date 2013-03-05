@@ -148,7 +148,7 @@ macro(roxlu_install_app)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${roxlu_app_install_dir})
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${roxlu_app_install_dir})
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${roxlu_app_install_dir})
-    roxlu_app_add_source_file(${roxlu_app_build_dir}/icon.rc)
+    #roxlu_app_add_source_file(${roxlu_app_build_dir}/icon.rc)
   endif()
 
   if(APPLE)

@@ -22,9 +22,11 @@ endif()
 
 if(WIN32)
   roxlu_add_lib(opengl32.lib)
-  roxlu_add_extern_lib(glew32.lib)
+#  roxlu_add_extern_lib(glew32.lib)
   roxlu_add_extern_lib(glfw3.lib)
-  roxlu_add_dll(glew32.dll)
+  #  roxlu_add_dll(glew32.dll)
+  roxlu_add_extern_lib(glxw.lib)
+  roxlu_add_extern_lib(glxw_wgl.lib)
 endif()
 
 if(APPLE)
