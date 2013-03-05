@@ -98,6 +98,7 @@ macro(roxlu_add_include_dir dir)
   include_directories(${dir})
 endmacro(roxlu_add_include_dir)
 
+
 macro(roxlu_enable_opengl3)
   add_definitions(-DROXLU_GL_CORE3)
   include(${roxlu_base_dir}/apps/external/CMakeLists.txt) # External (glfw)
