@@ -15,8 +15,9 @@ source_group("src\\simulation" FILES ${glfw_wrapper_sources})
 # GLEW
 if(UNIX)
   roxlu_add_extern_lib(libglfw3.a)
-  roxlu_add_extern_lib(libGLEW.a)
-  add_definitions("-DGLEW_STATIC")
+  roxlu_add_extern_lib(libglxw.a)
+#  roxlu_add_extern_lib(libGLEW.a)
+#  add_definitions("-DGLEW_STATIC")
 endif()
 
 if(WIN32)

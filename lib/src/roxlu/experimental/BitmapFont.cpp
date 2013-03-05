@@ -159,7 +159,7 @@ bool BitmapFont::generate(const unsigned char* src, int imgW, int imgH) {
     cw[c] = cw[undef]/2.0f;
   }
 
-  //glEnable(GL_TEXTURE_2D); eglGetError();
+  //glEnable(GL_TEXTURE_2D); eglGetError();
   glGenTextures(1, &tex); eglGetError();
   glBindTexture(GL_TEXTURE_2D, tex); eglGetError();
 	
@@ -167,6 +167,7 @@ bool BitmapFont::generate(const unsigned char* src, int imgW, int imgH) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); eglGetError(); // @todo while making this compatible with OpenGL ES I had to change GL_CLAMP to GL_CLAMP_TO_EDGE
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); eglGetError();
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); eglGetError();
+#if 0 
   glTexImage2D(
                GL_TEXTURE_2D
                ,0
@@ -178,6 +179,21 @@ bool BitmapFont::generate(const unsigned char* src, int imgW, int imgH) {
                ,GL_UNSIGNED_BYTE
                ,buffer
                ); eglGetError();
+#endif
+#if defined(ROXLU_GL_CORE3) 
+  // 2013.03 - testing GL 3.2 core profile
+  glTexImage2D(
+               GL_TEXTURE_2D
+               ,0
+               ,GL_RED
+               ,tw
+               ,th
+               ,0
+               ,GL_RED
+               ,GL_UNSIGNED_BYTE
+               ,buffer
+               ); eglGetError();
+#endif
   return true;
 }
 

@@ -5,6 +5,26 @@
 #include <string>
 
 namespace roxlu { 
+#if defined(ROXLU_GL_CORE3)
+  static const char* FPS_VS = GLSL(150, 
+                                   uniform mat4 u_pm;
+                                   uniform mat4 u_vm;
+                                   in vec4 a_pos;
+                                   void main() {
+                                     gl_Position = u_pm * u_vm * a_pos;
+                                   }
+  );
+
+  static const char* FPS_FS = GLSL(150, 
+                                   uniform vec4 u_col;
+                                   out vec4 outcol;
+                                   void main() {
+                                     outcol = u_col;
+                                     outcol = vec4(1.0, 0.0, 0.0, 1.0);
+                                   }
+  );
+
+#else 
   const std::string FPS_VS = ""
     "uniform mat4 u_pm;"
     "uniform mat4 u_mm;"
@@ -19,6 +39,7 @@ namespace roxlu {
     "void main() {"
     "   gl_FragColor = u_col; "
     "}";
+#endif
 
   struct FPS_Element {
     FPS_Element();

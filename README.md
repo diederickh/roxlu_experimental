@@ -21,6 +21,12 @@ You might need to install some additional developer packages:
 - apt-get install libudev-dev
 
 
+Compiler flags
+==============
+
+- `ROXLU_GL_CORE3`: if you want to target openGL 3.2 core profile, forward compat.
+        
+
 Using roxlu lib with openFrameworks and XCode
 =============================================
 - Open you XCode project

@@ -96,7 +96,7 @@ namespace roxlu {
     mm[14] = -0.4f;
     mm[0] = mm[5] = mm[10] = scale;
 
-    glLineWidth(2.0f);
+    //glLineWidth(2.0f);
     shader.uniform4fv("u_col", fg_col);
     shader.uniformMat4fv("u_mm", mm);
     for(int i = 0; i < 4; ++i) {
@@ -116,6 +116,10 @@ namespace roxlu {
     shader.link();
     shader.enable();
     shader.u("u_mm").u("u_pm").u("u_col");
+
+#if defined(ROXLU_GL_CORE3)
+    // glBindFragDataLocation(shader.getProgID(), 0, "outcol");
+#endif
 
     // VBO + VAO
     elements[0].set(0,10);
