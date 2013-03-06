@@ -1,11 +1,10 @@
 #!/bin/sh
-
 d=${PWD}
 bd=${d}/../../bin
 app=${PWD##*/}
 
-if [ ! -d ${b}/build ] ; then
-   mkdir ${d}/build
+if [ ! -d ${b}/build.release ] ; then
+   mkdir ${d}/build.release
 fi
 
 if [ ! -d ${bd} ] ; then 
@@ -13,6 +12,7 @@ if [ ! -d ${bd} ] ; then
    mkdir ${bd}/data
 fi
 
-cd build
-cmake -DCMAKE_BUILD_TYPE=Debug ../
+cd build.release
+cmake -DCMAKE_BUILD_TYPE=Release ../
+make 
 make install
