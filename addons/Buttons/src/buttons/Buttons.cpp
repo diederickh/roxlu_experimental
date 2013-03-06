@@ -43,7 +43,6 @@ namespace buttons {
   {
 
     if(!shaders_initialized) {
-      //vao.create();
       glGenVertexArrays(1, &vao);
       bmf = new BitmapFont();
       gui_shader.create(BUTTONS_VS, BUTTONS_FS);

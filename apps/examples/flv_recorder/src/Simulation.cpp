@@ -15,7 +15,6 @@ Simulation::~Simulation() {
 }
 
 void Simulation::setup() {
-
   setWindowTitle("FLV recorder");
 
   setupCapture();
@@ -24,6 +23,7 @@ void Simulation::setup() {
 
   recorder.open(rx_to_data_path(rx_strftime("%Y_%m_%d_%H_%M_%S") +".flv"));
   recorder.start();
+
 }
 
 void Simulation::update() {
@@ -54,10 +54,10 @@ void Simulation::setupAudio() {
 }
 
 void Simulation::setupCapture() {
-
   cap.listDevices();
 
   bool r = cap.openDevice(0, VIDEO_W, VIDEO_H, VC_FMT_YUYV422); //  VC_FMT_YUYV422); // format might differ on windows (VC_FMT_UYVY422)
+
   if(!r) {
     RX_ERROR(("ERROR: cannot open video capture device."));
     ::exit(EXIT_FAILURE);
@@ -68,7 +68,6 @@ void Simulation::setupCapture() {
     RX_ERROR(("ERROR: cannot start video capture.n"));
     ::exit(EXIT_FAILURE);
   }
-
   cap_surf.setup(VIDEO_W, VIDEO_H);
   cap_surf.flip(false, true);
 }

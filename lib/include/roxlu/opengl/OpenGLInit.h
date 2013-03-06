@@ -11,6 +11,12 @@
 #else 
 #  include <GL/glew.h>
 #  include <GL/glfw3.h>
+#  if defined(__APPLE__)
+#     undef glGenVertexArrays
+#     define glGenVertexArrays glGenVertexArraysAPPLE
+#     undef glBindVertexArray
+#     define glBindVertexArray glBindVertexArrayAPPLE
+#  endif
 #endif
 
 
