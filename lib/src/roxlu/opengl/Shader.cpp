@@ -62,12 +62,12 @@ namespace roxlu {
     //std::cout << fragmentSource << std::endl;
 	
     // create shader.
-    vert_id = glCreateShader(GL_VERTEX_SHADER); eglGetError();
-    frag_id = glCreateShader(GL_FRAGMENT_SHADER); eglGetError();
+    vert_id = glCreateShader(GL_VERTEX_SHADER); // eglGetError();
+    frag_id = glCreateShader(GL_FRAGMENT_SHADER); // eglGetError();
 
     // set shader source.
-    glShaderSource(vert_id, 1, &vss_ptr, NULL); eglGetError();
-    glShaderSource(frag_id, 1, &fss_ptr, NULL); eglGetError();
+    glShaderSource(vert_id, 1, &vss_ptr, NULL); // eglGetError();
+    glShaderSource(frag_id, 1, &fss_ptr, NULL); // eglGetError();
 	
     // compile
     glCompileShader(vert_id); eglGetShaderInfoLog(vert_id);

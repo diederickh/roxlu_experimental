@@ -37,6 +37,10 @@ namespace buttons {
     std::string getDataPath(); // returns the path where the save data will be stored
     void update();
     void draw();
+
+    void toggleVisible();
+    void hide();
+    void show();
 	
     Toggle& addBool(const string& label, bool& value);
     Slideri& addInt(const string& label, int& value);

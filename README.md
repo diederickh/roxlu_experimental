@@ -26,6 +26,7 @@ Compiler flags
 ==============
 
 - `ROXLU_GL_CORE3`: if you want to target openGL 3.2 core profile, forward compat.
+- `ROXLU_DEBUG:` enable verbose output for e.g. opengl shaders
 - `GLEW_STATIC`: when using the cmake files this set for you. when you target < 3.x, make sure to 
                  define this in you preprocessor settings.
         

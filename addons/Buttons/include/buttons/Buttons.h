@@ -38,37 +38,67 @@
 using std::vector;
 using namespace roxlu;
 
-const string BUTTONS_VS = " \
-	uniform mat4 projection_matrix; \
-	attribute vec4 pos; \
-	attribute vec4 col; \
-	varying vec4 vcol; \
-	void main() { \
-		vcol = col; \
-		gl_Position = projection_matrix * pos; \
-	} \
-";
+#if defined(ROXLU_GL_CORE3)
 
+static const char* BUTTONS_VS = GLSL(150, 
+                                     uniform mat4 projection_matrix;    
+                                     in vec4 pos;                
+                                     in vec4 col;                
+                                     out vec4 vcol;                 
+                                     void main() {                      
+                                       vcol = col;                      
+                                       gl_Position = projection_matrix * pos; 
+                                     }                           
+);
 
-#if ROXLU_GL_WRAPPER == ROXLU_IOS
+static const char* BUTTONS_FS = GLSL(150, 
+                                     out vec4 outcol;
+                                     in vec4 vcol; 
+                                     void main() {      
+                                       outcol = vcol;
+                                     }                          
+);
 
-const string BUTTONS_FS = "  \
-	varying highp vec4 vcol; \
-	void main() { \
-		gl_FragColor = vcol; \
-	}\
-";
+#elif ROXLU_GL_WRAPPER == ROXLU_IOS
 
-#else 
+static const char* BUTTONS_VS = GLSL(120, 
+                                     uniform mat4 projection_matrix;    
+                                     attribute vec4 pos;                
+                                     attribute vec4 col;                
+                                     varying vec4 vcol;                 
+                                     void main() {                      
+                                       vcol = col;                      
+                                       gl_Position = projection_matrix * pos; 
+                                     }                           
+);
 
-const string BUTTONS_FS = "  \
-	varying vec4 vcol; \
-	void main() { \
-		gl_FragColor = vcol; \
-	}\
-";
+static const char* BUTTONS_FS = GLSL(120, 
+                                     varying highp vec4 vcol; 
+                                     void main() { 
+                                       gl_FragColor = vcol; 
+                                     }
+);
 
-#endif 
+#else
+static const char* BUTTONS_VS = GLSL(120, 
+                                     uniform mat4 projection_matrix;    
+                                     attribute vec4 pos;                
+                                     attribute vec4 col;                
+                                     varying vec4 vcol;                 
+                                     void main() {                      
+                                       vcol = col;                      
+                                       gl_Position = projection_matrix * pos; 
+                                     }                           
+);
+
+static const char* BUTTONS_FS = GLSL(120, 
+                                     varying vec4 vcol; 
+                                     void main() {      
+                                       gl_FragColor = vcol;     
+                                     }                          
+);
+
+#endif
 
 namespace buttons {
 
@@ -167,6 +197,9 @@ namespace buttons {
     void setLock(bool yn);
     void close();
     void open();
+    void toggleVisible();
+    void hide();
+    void show();
     bool isOpen();
     void setColor(const float hue, float sat = 0.2f, float bright = 0.27f, float a = 1.0f);
     string getName();
@@ -219,6 +252,7 @@ namespace buttons {
     bool is_mouse_inside_panel;
     bool triggered_drag;
     bool is_open; // mimized or maximized
+    bool is_visible; // if true, the gui processes input/draw. see toggleVisible()
     int mdx; // drag x
     int mdy; // drag y
     int pmx; // prev mouse x
@@ -295,6 +329,18 @@ namespace buttons {
       }
     }
     return num_children;
+  }
+
+  inline void Buttons::toggleVisible() {
+    is_visible = !is_visible;
+  }
+
+  inline void Buttons::show() {
+    is_visible = true;
+  }
+
+  inline void Buttons::hide() {
+    is_visible = false;
   }
 
 } // buttons

@@ -55,12 +55,31 @@ namespace buttons {
     for(vector<Buttons*>::iterator it = guis.begin(); it != guis.end(); ++it) {
       (*it)->onMouseDown(mx, my);
     }
-
   }
 
   void Panel::onMouseUp(int mx, int my) {
     for(vector<Buttons*>::iterator it = guis.begin(); it != guis.end(); ++it) {
       (*it)->onMouseUp(mx, my);
+    }
+  }
+
+  // -----------------------------------------------------------------------------
+
+  void Panel::toggleVisible() {
+    for(vector<Buttons*>::iterator it = guis.begin(); it != guis.end(); ++it) {
+      (*it)->toggleVisible();
+    }
+  }
+
+  void Panel::hide() {
+    for(vector<Buttons*>::iterator it = guis.begin(); it != guis.end(); ++it) {
+      (*it)->hide();
+    }
+  }
+
+  void Panel::show() {
+    for(vector<Buttons*>::iterator it = guis.begin(); it != guis.end(); ++it) {
+      (*it)->show();
     }
   }
 

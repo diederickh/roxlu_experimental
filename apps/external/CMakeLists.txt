@@ -15,7 +15,7 @@ source_group("src\\simulation" FILES ${glfw_wrapper_sources})
 if(UNIX)
 
   roxlu_add_extern_lib(libglfw3.a)
-  if(roxlu_gl_version EQUAL 3)
+  if(${roxlu_gl_version} EQUAL 3)
     roxlu_add_extern_lib(libglxw.a)
   else()
     add_definitions(-DGLEW_STATIC)

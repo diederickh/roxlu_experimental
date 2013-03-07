@@ -35,6 +35,7 @@ namespace buttons {
     ,dynamic_text(NULL)
     ,allocated_bytes(0)
     ,is_open(true)
+    ,is_visible(true)
     ,name(title)
     ,col_hue(0.0f)
     ,col_sat(0.0f)
@@ -113,6 +114,10 @@ namespace buttons {
   }
 
   void Buttons::update() {
+    if(!is_visible) {
+      return;
+    }
+
     h = 0;
     bool needs_redraw = false;
     bool needs_text_update = false;
@@ -256,6 +261,10 @@ namespace buttons {
   }
 
   void Buttons::draw() {
+    if(!is_visible) {
+      return;
+    }
+
     // update projection matrix when viewport size changes.
     GLint vp[4];
     glGetIntegerv(GL_VIEWPORT, vp);
@@ -409,6 +418,10 @@ namespace buttons {
   }
 
   void Buttons::onMouseMoved(int mx, int my) {
+    if(!is_visible) {
+      return;
+    }
+
     mdx = mx - pmx;
     mdy = my - pmy;
 	
@@ -487,6 +500,10 @@ namespace buttons {
   }
 
   void Buttons::onMouseDown(int mx, int my) {
+    if(!is_visible) {
+      return;
+    }
+
     if(!is_locked && BINSIDE_HEADER(this, mx, my)) {
       triggered_drag = true; // the drag was triggered by the gui
     }
@@ -534,6 +551,10 @@ namespace buttons {
   }
 
   void Buttons::onMouseUp(int mx, int my) {
+    if(!is_visible) {
+      return;
+    }
+
     triggered_drag = false;
     is_mouse_down = false;
 	
@@ -577,6 +598,10 @@ namespace buttons {
   }
 
   void Buttons::onMouseDragged(int dx, int dy) {
+    if(!is_visible) {
+      return;
+    }
+
     if(triggered_drag) {
       setPosition(x+dx, y+dy);
     }

@@ -52,6 +52,9 @@ namespace roxlu {
     void translate(const Vec3& v);
     void translate(float x, float y, float z);
     void rotate(float angle, float x, float y, float z);
+    void rotateX(float angle);
+    void rotateY(float angle);
+    void rotateZ(float angle);
 
     void scale(float s);
     void scale(float x, float y, float z);
@@ -354,6 +357,18 @@ namespace roxlu {
     m[8] = ax[0];
     m[9] = ax[1];
     m[10] = ax[2];
+  }
+
+  inline void Mat4::rotateX(float angle) {
+    rotate(angle, 1.0f, 0.0f, 0.0f);
+  }
+
+  inline void Mat4::rotateY(float angle) {
+    rotate(angle, 0.0f, 1.0f, 0.0f);
+  }
+
+  inline void Mat4::rotateZ(float angle) {
+    rotate(angle, 0.0f, 0.0f, 1.0f);
   }
 
   // set the billboard vectors (you can retrieve the right and up by using the inverse rotation of the view matrix, see Camera.h)

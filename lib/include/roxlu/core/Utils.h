@@ -258,7 +258,11 @@ static std::string rx_to_exe_path(std::string filename) {
   return rx_get_exe_path() +filename;
 }
 
-static std::string rx_get_file_contents(std::string filepath) {
+static std::string rx_get_file_contents(std::string filepath, bool datapath = false) {
+  if(datapath) {
+    filepath = rx_to_data_path(filepath);
+  }
+
   std::string result = "";
   std::string line = "";
   std::ifstream ifs(filepath.c_str());
