@@ -35,7 +35,6 @@ int main() {
   // glfwWindowHint(GLFW_DEPTH_BITS, 16);
   // glfwWindowHint(GLFW_FSAA_SAMPLES, 4);
 
-  //GLFWwindow window = glfwCreateWindow(width, height, GLFW_WINDOWED, "Simulation", NULL);
   GLFWwindow* window = glfwCreateWindow(width, height, "Simulation", NULL, NULL);
   if(!window) {
     printf("ERROR: cannot open window.\n");
@@ -58,7 +57,7 @@ int main() {
     return EXIT_FAILURE;
   }
 #else
-   glewExperimental = true;
+  glewExperimental = true;
   GLenum err = glewInit();
   if (GLEW_OK != err) {
     fprintf(stderr, "GLEW Error: %s\n", glewGetErrorString(err));

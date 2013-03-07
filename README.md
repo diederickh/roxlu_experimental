@@ -19,12 +19,15 @@ Install Ubuntu/linux
 =====================
 You might need to install some additional developer packages:
 - apt-get install libudev-dev
+- apt-get install glu
 
 
 Compiler flags
 ==============
 
 - `ROXLU_GL_CORE3`: if you want to target openGL 3.2 core profile, forward compat.
+- `GLEW_STATIC`: when using the cmake files this set for you. when you target < 3.x, make sure to 
+                 define this in you preprocessor settings.
         
 
 Using roxlu lib with openFrameworks and XCode

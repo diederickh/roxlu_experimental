@@ -18,8 +18,8 @@ void char_callback(GLFWwindow* window, int chr);
 // APPLICATION ENTRY
 // -----------------
 int main() {
-  int width = 480;
-  int height = 320;
+  int width = 1024;
+  int height = 768;
   sim_ptr = NULL;
 
   int c = 0;
@@ -34,9 +34,7 @@ int main() {
 
   // glfwWindowHint(GLFW_DEPTH_BITS, 16);
   // glfwWindowHint(GLFW_FSAA_SAMPLES, 4);
-  glfwWindowHint(GLFW_POSITION_X, 1500);
-  glfwWindowHint(GLFW_POSITION_Y, 10);
-  //GLFWwindow window = glfwCreateWindow(width, height, GLFW_WINDOWED, "Simulation", NULL);
+
   GLFWwindow* window = glfwCreateWindow(width, height, "Simulation", NULL, NULL);
   if(!window) {
     printf("ERROR: cannot open window.\n");
@@ -53,12 +51,19 @@ int main() {
 
   glfwMakeContextCurrent(window);
 
-  //  glewExperimental = true;
+#if defined(ROXLU_GL_CORE3)
+  if(glxwInit() != 0) {
+    printf("ERROR: cannot init glxw\n");
+    return EXIT_FAILURE;
+  }
+#else
+  glewExperimental = true;
   GLenum err = glewInit();
   if (GLEW_OK != err) {
     fprintf(stderr, "GLEW Error: %s\n", glewGetErrorString(err));
     exit(EXIT_FAILURE);
   }
+#endif
 
   Simulation sim;
   sim_ptr = &sim;

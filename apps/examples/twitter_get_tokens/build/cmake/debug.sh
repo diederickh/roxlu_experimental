@@ -8,22 +8,16 @@ appdir=${bd}/../
 cd ${appdir}
 app=${PWD##*/}
 
-# make sure we have the build + data dirs
-cd ${d}
-if [ ! -d ${b}/build ] ; then
-   mkdir ${d}/build
-fi
-
 if [ ! -d ${bd} ] ; then 
    mkdir ${bd}
    mkdir ${bd}/data
 fi
 
-cd build
-make install
+cd ${d}
+./build_debug.sh
 
 cd ${bd}
 
-lldb ./${app}
+lldb ./${app}_debug
 
 

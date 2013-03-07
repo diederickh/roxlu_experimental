@@ -12,21 +12,30 @@ roxlu_add_source_file(${glfw_wrapper_sources})
 
 source_group("src\\simulation" FILES ${glfw_wrapper_sources})
 
-# GLEW
 if(UNIX)
+
   roxlu_add_extern_lib(libglfw3.a)
-  roxlu_add_extern_lib(libglxw.a)
-#  roxlu_add_extern_lib(libGLEW.a)
-#  add_definitions("-DGLEW_STATIC")
+  if(roxlu_gl_version EQUAL 3)
+    roxlu_add_extern_lib(libglxw.a)
+  else()
+    add_definitions(-DGLEW_STATIC)
+    roxlu_add_extern_lib(libGLEW.a)
+  endif()
+
 endif()
 
 if(WIN32)
   roxlu_add_lib(opengl32.lib)
-#  roxlu_add_extern_lib(glew32.lib)
   roxlu_add_extern_lib(glfw3.lib)
-  #  roxlu_add_dll(glew32.dll)
-  roxlu_add_extern_lib(glxw.lib)
-  roxlu_add_extern_lib(glxw_wgl.lib)
+
+  if(roxlu_gl_version EQUAL 3)
+    roxlu_add_extern_lib(glxw.lib)
+    roxlu_add_extern_lib(glxw_wgl.lib)
+  else()
+    roxlu_add_dll(glew32.dll)
+    roxlu_add_extern_lib(glew32.lib)
+  endif()
+
 endif()
 
 if(APPLE)
