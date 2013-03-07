@@ -3,6 +3,8 @@
 roxlu_addon_begin("audio")
   # --------------------------------------------------------------------------------------
   roxlu_addon_add_source_file(audio/Audio.cpp)
+  roxlu_addon_add_source_file(audio/AudioFile.cpp)
+  roxlu_addon_add_source_file(audio/AudioPlayer.cpp)
   roxlu_addon_add_source_file(audio/PCMWriter.cpp)
   
   if(WIN32)
@@ -12,6 +14,7 @@ roxlu_addon_begin("audio")
 
   if(UNIX)
     roxlu_add_extern_lib(libportaudio.a)
+    roxlu_add_extern_lib(libsndfile.a)
   endif()
 
   if(APPLE)

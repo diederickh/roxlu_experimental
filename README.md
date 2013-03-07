@@ -44,3 +44,7 @@ Using roxlu lib with openFrameworks and XCode
   - Select `Build Settings`, search for `Preprocessor Macros` and add `ROXLU_GL_WRAPPER`
 
   
+Conventions
+===========
+- all saving and loading use load and save functions with a parameter to  
+  load/save from the data path `load(std::string filepath, bool datapath = false)` and `save(std::string filepath, bool datapath = false)`
