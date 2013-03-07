@@ -101,12 +101,13 @@ endmacro(roxlu_add_include_dir)
 
 macro(roxlu_enable_opengl3)
   add_definitions(-DROXLU_GL_CORE3)
+  set(roxlu_gl_version 3)
   include(${roxlu_base_dir}/apps/external/CMakeLists.txt) # External (glfw)
 endmacro()
 
 macro(roxlu_enable_opengl)
+  set(roxlu_gl_version 2)
   include(${roxlu_base_dir}/apps/external/CMakeLists.txt) # External (glfw)
-  #roxlu_add_dll(glew32.dll)
 endmacro(roxlu_enable_opengl)
 
 # --------------------------------------------------------------------------------

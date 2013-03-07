@@ -1,10 +1,15 @@
 #include <iostream>
-#include <GLXW/glxw.h>
 #include <GL/glfw3.h>
+
+//#if defined(ROXLU
+//#include <GLXW/glxw.h>
+//#include <GL/glfw3.h>
+
+#include <roxlu/gl/OpenGLInit.h>
 
 //#define GLEW_STATIC
 //#include <GL/glew.h>
-//#include <GL/glfw3.h>
+
 #include <string>
 
 class SimulationBase {

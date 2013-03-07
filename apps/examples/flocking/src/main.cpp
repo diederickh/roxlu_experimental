@@ -52,12 +52,19 @@ int main() {
 
   glfwMakeContextCurrent(window);
 
-  //  glewExperimental = true;
+#if defined(ROXLU_GL_CORE3)
+  if(glxwInit() != 0) {
+    printf("ERROR: cannot init glxw\n");
+    return EXIT_FAILURE;
+  }
+#else
+   glewExperimental = true;
   GLenum err = glewInit();
   if (GLEW_OK != err) {
     fprintf(stderr, "GLEW Error: %s\n", glewGetErrorString(err));
     exit(EXIT_FAILURE);
   }
+#endif
 
   Simulation sim;
   sim_ptr = &sim;
