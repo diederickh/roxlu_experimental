@@ -9,7 +9,9 @@ roxlu_addon_begin("audio")
   
   if(WIN32)
     roxlu_add_extern_lib(portaudio_x86.lib)
+    roxlu_add_extern_lib(libsndfile-1.lib)
     roxlu_add_dll(portaudio_x86.dll)
+    roxlu_add_dll(libsndfile-1.dll)
   endif()
 
   if(UNIX)
