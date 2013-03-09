@@ -42,6 +42,7 @@ class TextSurface {
   PangoFontDescription* font_desc;
   int width;
   int height;
+  static bool is_init;
 };
 
 inline void TextSurface::alignLeft() {

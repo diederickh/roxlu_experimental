@@ -117,6 +117,7 @@ macro(roxlu_app_initialize app_name)
 
   if(CMAKE_BUILD_TYPE STREQUAL Debug)
     set(roxlu_app_name ${app_name}_debug)
+    message("-------------------------------------- ${roxlu_app_name} =========================")
   else()
     set(roxlu_app_name ${app_name})
   endif()

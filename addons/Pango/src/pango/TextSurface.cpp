@@ -1,5 +1,8 @@
 #include <pango/TextSurface.h>
 #include <pango/pangoft2.h>
+
+bool TextSurface::is_init = false;
+
 TextSurface::TextSurface() 
   :cr(NULL)
   ,surface(NULL)
@@ -8,7 +11,10 @@ TextSurface::TextSurface()
   ,width(0)
   ,height(0)
 {
-  g_type_init();
+  if(!is_init) {
+    g_type_init();
+    is_init = true;
+  }
 }
 
 TextSurface::~TextSurface() {
