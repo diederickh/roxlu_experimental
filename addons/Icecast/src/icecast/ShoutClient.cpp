@@ -1,5 +1,72 @@
 #include <icecast/ShoutClient.h>
 
+// -------------------------------------
+
+ShoutClientParams::ShoutClientParams() 
+  :icecast_port(0)
+  ,lame_num_channels(0)
+  ,lame_samplerate(SC_SAMPLERATE_NOT_SET)
+  ,lame_mode(SC_MODE_NOT_SET)
+{
+}
+
+ShoutClientParams::~ShoutClientParams() {
+  icecast_port = 0;
+  icecast_ip = "";
+  icecast_username = "";
+  icecast_password = "";
+  icecast_mount = "";
+  lame_num_channels = 0;
+  lame_samplerate = SC_SAMPLERATE_NOT_SET;
+  lame_mode = SC_MODE_NOT_SET;
+}
+
+bool ShoutClientParams::validate() {
+  if(!icecast_port) {
+    RX_ERROR((ICE_ERR_PORT));
+    return false;
+  }
+
+  if(!icecast_ip.size()) {
+    RX_ERROR((ICE_ERR_IP));
+    return false;
+  }
+
+  if(!icecast_username.size()) {
+    RX_ERROR((ICE_ERR_USERNAME));
+    return false;
+  }
+
+  if(!icecast_password.size()) {
+    RX_ERROR((ICE_ERR_PASSWORD));
+    return false;
+  }
+
+  if(!icecast_mount.size()) {
+    RX_ERROR((ICE_ERR_MOUNT));
+    return false;
+  }
+  
+  if(!lame_num_channels) {
+    RX_ERROR((ICE_ERR_NUM_CHANNELS));
+    return false;
+  }
+
+  if(lame_samplerate == SC_SAMPLERATE_NOT_SET) {
+    RX_ERROR((ICE_ERR_SAMPLERATE));
+    return false;
+  }
+
+  if(lame_mode == SC_MODE_NOT_SET) {
+    RX_ERROR((ICE_ERR_MODE));
+    return false;
+  }
+
+  return true;
+}
+
+// -------------------------------------
+
 ShoutClient::ShoutClient() {
 }
 

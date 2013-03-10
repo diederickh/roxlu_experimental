@@ -1,4 +1,4 @@
-#include <Simulation.h>
+p#include <Simulation.h>
 #include <iostream>
 
 Simulation* sim_ptr;
@@ -33,7 +33,14 @@ int main() {
   }
 
   // glfwWindowHint(GLFW_DEPTH_BITS, 16);
-  // glfwWindowHint(GLFW_FSAA_SAMPLES, 4);
+  glfwWindowHint(GLFW_SAMPLES, 4);;
+
+#if defined(ROXLU_GL_CORE3)
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, 1);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#endif
 
   GLFWwindow* window = glfwCreateWindow(width, height, "Simulation", NULL, NULL);
   if(!window) {
