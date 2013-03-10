@@ -88,7 +88,6 @@ bool FreetypeFont::setup(std::string filename, unsigned int size,
   rect_w = 0;
   rect_h = 0;
 
-  printf("SETUP!\n");
   if(!is_initialized) {
     RX_ERROR((FF_ERR_NOT_INIT));
     return false;

@@ -195,7 +195,7 @@ namespace buttons {
       first_run = false; // we don't need this one anymore @todo cleanup
       
       glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
-      glBufferData(GL_ARRAY_BUFFER, allocated_bytes, NULL, GL_DYNAMIC_DRAW); eglGetError();
+      glBufferData(GL_ARRAY_BUFFER, allocated_bytes, NULL, GL_STREAM_DRAW); eglGetError();
 		
 
       glEnableVertexAttribArray(gui_shader.getAttribute("pos")); eglGetError();
