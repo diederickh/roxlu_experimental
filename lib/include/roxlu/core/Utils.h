@@ -301,4 +301,21 @@ static void rx_ortho(float l, float r, float b, float t, float n, float f, float
   dest[14] = - ((f + n) / (f - n));
   dest[15] = 1.0f;
 }
+
+static size_t rx_string_to_sizet(std::string str) {
+  size_t result = 0;
+  std::stringstream ss;
+  ss << str;
+  ss >>  result;
+  return result;
+}
+
+static int rx_string_to_int(std::string str) {
+  int result = 0;
+  std::stringstream ss;
+  ss << str;
+  ss >>  result;
+  return result;
+}
+
 #endif // ROXLU_UTILSH
