@@ -3,10 +3,10 @@
 
 #include <string>
 
-struct BVertex {
-  BVertex();
-  BVertex(float x, float y, float s, float t);
-  ~BVertex();
+struct BMFVertex {
+  BMFVertex();
+  BMFVertex(float x, float y, float s, float t);
+  ~BMFVertex();
 
   void set(float x, float y, float s, float t);
   void setColor(float r, float g, float b, float a = 1.0);
@@ -20,9 +20,9 @@ struct BVertex {
   float color[4];
 };
 
-struct BChar {
-  BChar();
-  ~BChar();
+struct BMFChar {
+  BMFChar();
+  ~BMFChar();
   void clear();
 
   size_t id;

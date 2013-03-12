@@ -18,5 +18,5 @@ class Simulation : public SimulationBase {
   void onWindowClose();
  public:
   FPS fps;
-  BMFont font;
+  BMFont<> font;
 };

@@ -1,15 +1,15 @@
-#include <bmfont/BMTypes.h>
+#include <bmfont/BMFTypes.h>
 
 // -------------------------------------------
-BChar::BChar() {
+BMFChar::BMFChar() {
   clear();
 }
 
-BChar::~BChar() {
+BMFChar::~BMFChar() {
   clear();
 }
 
-void BChar::clear() {
+void BMFChar::clear() {
   id = 0;
   x = 0;
   y = 0;
@@ -22,44 +22,44 @@ void BChar::clear() {
 
 // -------------------------------------------
 
-BVertex::BVertex() {
+BMFVertex::BMFVertex() {
   clear();
 }
 
-BVertex::BVertex(float x, float y, float s, float t) {
+BMFVertex::BMFVertex(float x, float y, float s, float t) {
   clear();
   set(x, y, s, t);
 }
 
-BVertex::~BVertex() {
+BMFVertex::~BMFVertex() {
   clear();
 }
 
-void BVertex::clear() {
+void BMFVertex::clear() {
   position[0] = position[1] = 0.0f;
   texcoord[0] = texcoord[1] = 0;
   color[0] = color[1] = color[2] = color[3] = 1.0f;
 }
 
-void BVertex::set(float x, float y, float s, float t) {
+void BMFVertex::set(float x, float y, float s, float t) {
   position[0] = x;
   position[1] = y;
   texcoord[0] = s;
   texcoord[1] = t;
 }
 
-void BVertex::setColor(float r, float g, float b, float a) {
+void BMFVertex::setColor(float r, float g, float b, float a) {
   color[0] = r;
   color[1] = g;
   color[2] = b;
   color[3] = a;
 }
 
-void BVertex::setColor4fv(float* v) {
+void BMFVertex::setColor4fv(float* v) {
   setColor(v[0], v[1], v[2], v[3]);
 }
 
-char* BVertex::getPtr() {
+char* BMFVertex::getPtr() {
   return (char*)&position[0];
 }
 

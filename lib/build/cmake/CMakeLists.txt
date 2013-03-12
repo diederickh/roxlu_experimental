@@ -221,9 +221,7 @@ macro(roxlu_addon_add_source_files glob)
 endmacro()
 
 macro(roxlu_addon_end)
-
   add_library("roxlu_${roxlu_addon_name}" STATIC ${roxlu_addon_source_files})
-
 
   set(roxlu_addon_source_files "")
   set(roxlu_addon_name "")

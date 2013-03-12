@@ -1,17 +1,23 @@
-#ifndef ROXLU_BMFONT_RENDERER_H
-#define ROXLU_BMFONT_RENDERER_H
+/* 
 
-#include <vector>
-#include <iterator>
-#include <roxlu/Roxlu.h>
-#include <bmfont/BMTypes.h>
+   BMFShader
+   ---------
+   The BMFShader class is used to setup a VAO and shader for the 
+   used vertex type. Note that all the BMF* types are temlated on 
+   the vertex type because this allows you to use the BMFont type 
+   for other kind of vertices if you would need that.
 
-#define BMF_ERR_NOT_SETUP "You didn't call setup so we cant render the BMFont"
-#define BMF_ERR_NOT_ALLOC "We havent allocated any data for the GPU yet, did you call update() and added vertices?"
-#define BMF_ERR_NO_IMAGE "The given BMFontLoader object couldnt find the font image. Dit you call BMFontLoader::load() before calling BMFontRenderer::setup()"
-#define BMF_ERR_NO_IMAGE_FOUND "Cannot find the image file."
-#define BMF_ERR_WRONG_NCOMPONENTS "Wrong number of image channels in image file."
-#define BMF_ERR_IMAGE_SIZE "The loaded image width/height is not the same as defined in the font"
+   By default, when you don't explicitly pass the shader to `BMFFont::setup()`
+   we will allocate this BMFShader() for you and handle all memory management.
+   The default `BMFShader` can be used for both GL 2.x and 3.x
+   
+ */
+#ifndef ROXLU_BMFONT_SHADER_H
+#define ROXLU_BMFONT_SHADER_H
+
+#include <roxlu/opengl/OpenGLInit.h>
+#include <roxlu/core/Utils.h>
+#include <bmfont/BMFTypes.h>
 
 #if defined(ROXLU_GL_CORE3)
 
@@ -78,37 +84,23 @@ static const char* BMFONT_FS = GLSL(120,
 
 #endif
 
-class BMFontLoader;
+// ---------------------------------------
 
-class BMFontRenderer {
+class BMFShader {
  public:
-  BMFontRenderer(BMFontLoader& font);
-  ~BMFontRenderer();
-  void setup(int windowW, int windowH);                                   /* setup the renderer; we need to the windowW/H for the ortho graphic projection matrix */
-  void update();                                                          /* updates the VBO if needed */
-  void addVertices(std::vector<BVertex>& vertices);                       /* add vertices to the VBO */
-  void draw();                                                            /* render all strings */
-  void reset();                                                           /* reset the VBO, call this when you are updating the text repeatedly */
- private:          
-  void clear();                                                           /* deallocates everything and resets the complete state; */
-  
- private:
-  bool is_setup;
-  BMFontLoader& font;
+  BMFShader();
+  ~BMFShader();
 
+  virtual void setup(GLuint vbo, GLuint tex);
+  virtual void draw(const float* projectMatrix); 
+
+ public:
   static GLuint prog;
   static GLuint vao;
   static GLint u_projection_matrix;
   static GLint u_tex;
-
-  GLuint vbo;
   GLuint tex;
-
-  float projection_matrix[16];
-  std::vector<GLint> multi_firsts;
-  std::vector<GLsizei> multi_counts;
-  std::vector<BVertex> vertices;
-  size_t bytes_allocated;
 };
 
-#endif
+#endif 
+
