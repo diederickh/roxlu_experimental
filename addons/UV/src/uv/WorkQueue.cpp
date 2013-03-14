@@ -37,7 +37,7 @@ WorkQueue::~WorkQueue() {
 }
 
 void WorkQueue::update() {
-  uv_run(loop, UV_RUN_ONCE);
+  uv_run(loop, UV_RUN_NOWAIT);
 }
 
 void WorkQueue::addWorker(work_queue_callback workerCB, work_queue_callback readyCB, void* user) {
