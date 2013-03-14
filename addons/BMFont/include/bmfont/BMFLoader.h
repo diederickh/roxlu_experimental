@@ -165,8 +165,11 @@ bool BMFLoader<T>::load(std::string filename, bool datapath) {
   }
 
   image_path = attr->value();
+
   if(datapath) {
-    image_path = rx_to_data_path(image_path);
+    std::string xml_path = rx_to_data_path(filename);
+    std::string base_dir = rx_strip_filename(xml_path);
+    image_path = base_dir + image_path;
   }
 
   // CHARS

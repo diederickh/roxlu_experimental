@@ -41,11 +41,14 @@ class BMFFont {
   ~BMFFont();
   bool setup(std::string filename, int windowW, int windowH, bool datapath = false);     
   void setColor(float r, float g, float b, float a = 1.0);
-  void addText(std::string str, float x, float y);
+  size_t addText(std::string str, float x, float y);                                    /* add a new text and return indices to the offsets and vertex counts of the BMFRenderer, see BMFRenderer for more info */
+  void update();                                                                        /* only call update when you're using the drawText() function. draw() will call update for you. Only call update() once after changing your texts */
   void draw();
+  void bind();                                                                          /* bind the GL objects used for drawing; only call this manually when you're using `drawText()`, when  you use only `draw()` don't call this. Only call bind() once per frame. */
+  void drawText(size_t index);                                                          /* only draw a specific text entry */
   void reset();
   void print();
- private:
+ public:
   BMFLoader<T> loader;
   BMFRenderer<T> renderer;
 };
@@ -74,15 +77,25 @@ inline void BMFFont<T>::setColor(float r, float g, float b, float a) {
 }
 
 template<class T>
-inline void BMFFont<T>::addText(std::string str, float x, float y) {
+inline size_t BMFFont<T>::addText(std::string str, float x, float y) {
   std::vector<T> vertices = loader.generateVertices(str, x, y);
-  renderer.addVertices(vertices);
+  return renderer.addVertices(vertices);
+}
+
+template<class T>
+inline void BMFFont<T>::update() {
+  renderer.update();
 }
 
 template<class T>
 inline void BMFFont<T>::draw() {
   renderer.update();
   renderer.draw();
+}
+
+template<class T>
+inline void BMFFont<T>::drawText(size_t text) {
+  renderer.drawText(text);
 }
 
 template<class T>
@@ -94,5 +107,11 @@ template<class T>
 inline void BMFFont<T>::reset() {
   renderer.reset();
 }
+
+template<class T>
+inline void BMFFont<T>::bind() {
+  renderer.bind();
+}
+
 
 #endif

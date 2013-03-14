@@ -143,6 +143,7 @@ void TextGLSurface::setup(const std::string font, unsigned int surfaceW, unsigne
   glEnableVertexAttribArray(1); // tex
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)0);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)8);
+
   
 }
 

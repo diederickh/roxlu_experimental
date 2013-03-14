@@ -1,6 +1,6 @@
 #include <glfw_wrapper/SimulationBase.h>
 #include <roxlu/Roxlu.h>
-#include <bmfont/BMFont.h>
+#include <bmfont/BMFFont.h>
 
 class Simulation : public SimulationBase {
  public:
@@ -18,5 +18,5 @@ class Simulation : public SimulationBase {
   void onWindowClose();
  public:
   FPS fps;
-  BMFont<> font;
+  BMFFont<> font;
 };

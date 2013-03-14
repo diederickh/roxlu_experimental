@@ -23,7 +23,7 @@
 #define BMF_ERR_NOT_SETUP "You didn't call setup so we cant render the BMFont"
 #define BMF_ERR_NOT_ALLOC "We havent allocated any data for the GPU yet, did you call update() and added vertices?"
 #define BMF_ERR_NO_IMAGE "The given BMFLoader object couldnt find the font image. Dit you call BMFLoader::load() before calling BMFRenderer::setup()"
-#define BMF_ERR_NO_IMAGE_FOUND "Cannot find the image file."
+#define BMF_ERR_NO_IMAGE_FOUND "Cannot find the image file: %s"
 #define BMF_ERR_WRONG_NCOMPONENTS "Wrong number of image channels in image file."
 #define BMF_ERR_IMAGE_SIZE "The loaded image width/height is not the same as defined in the font"
 
@@ -37,10 +37,11 @@ class BMFRenderer {
   ~BMFRenderer();
   void setup(int windowW, int windowH, BMFShader* shader = NULL);         /* setup the renderer; we need to the windowW/H for the ortho graphic projection matrix */
   void update();                                                          /* updates the VBO if needed */
-  void addVertices(std::vector<T>& vertices);                             /* add vertices to the VBO */
+  size_t addVertices(std::vector<T>& vertices);                           /* add vertices to the VBO and returns the index into multi_counts and multi_firsts. See glMultiDrawArrays for info on these members */
   void draw();                                                            /* render all strings */
+  void drawText(size_t index);                                            /* draw only a specific entry. pass a value you got from addVertices().. also make sure you call bind() before drawing single instances of vertices */
   void reset();                                                           /* reset the VBO, call this when you are updating the text repeatedly */
-
+  void bind();                                                            /* bind the specific GL objects we use to render the text. only call this when you are using drawText(). Call bind() once per frame. */
  protected:
   void clear();                                                           /* deallocates everything and resets the complete state; */
 
@@ -53,6 +54,7 @@ class BMFRenderer {
   GLuint tex;                                                             /* the font texture */
   GLuint vbo;                                                             /* the BMFRenderer takes care of all buffer handling */
 
+ public:
   float projection_matrix[16];
   std::vector<GLint> multi_firsts;
   std::vector<GLsizei> multi_counts;
@@ -131,7 +133,7 @@ void BMFRenderer<T>::setup(int windowW, int windowH, BMFShader* useShader) {
 
   Image img;
   if(!img.load(font.getImagePath())) {
-    RX_ERROR((BMF_ERR_NO_IMAGE_FOUND));
+    RX_ERROR((BMF_ERR_NO_IMAGE_FOUND, font.getImagePath().c_str()));
     ::exit(EXIT_FAILURE);
   }
 
@@ -145,6 +147,7 @@ void BMFRenderer<T>::setup(int windowW, int windowH, BMFShader* useShader) {
     ::exit(EXIT_FAILURE);
   }
 
+  //  glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
   glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RED, img.getWidth(), img.getHeight(), 0, GL_RED, GL_UNSIGNED_BYTE, img.getPixels());
   is_setup = true;
@@ -160,11 +163,13 @@ void BMFRenderer<T>::setup(int windowW, int windowH, BMFShader* useShader) {
 }
 
 template<class T>
-void BMFRenderer<T>::addVertices(std::vector<T>& in) {
+size_t BMFRenderer<T>::addVertices(std::vector<T>& in) {
+  size_t index = multi_firsts.size();
   multi_firsts.push_back(vertices.size());
   multi_counts.push_back(in.size());
 
   std::copy(in.begin(), in.end(), std::back_inserter(vertices));
+  return index;
 }
 
 template<class T>
@@ -182,15 +187,13 @@ void BMFRenderer<T>::update() {
   glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_needed, vertices[0].getPtr());
 }
 
-
 template<class T>
-void BMFRenderer<T>::draw() {
+inline void BMFRenderer<T>::bind() {
   if(!is_setup) {
     RX_ERROR((BMF_ERR_NOT_SETUP));
     return;
   }
   if(!bytes_allocated) { 
-    RX_ERROR((BMF_ERR_NOT_ALLOC));
     return ;
   }
   if(!vertices.size()) {
@@ -198,6 +201,12 @@ void BMFRenderer<T>::draw() {
   }
 
   shader->draw(projection_matrix);
+}
+
+template<class T>
+void BMFRenderer<T>::draw() {
+
+  bind();
 
 #if defined(ROXLU_GL_CORE3)
   glMultiDrawArrays(GL_TRIANGLES, &multi_firsts[0], &multi_counts[0], multi_counts.size());
@@ -206,6 +215,11 @@ void BMFRenderer<T>::draw() {
     glDrawArrays(GL_TRIANGLES, multi_firsts[i], multi_counts[i]);
   }
 #endif
+}
+
+template<class T>
+inline void BMFRenderer<T>::drawText(size_t dx) {
+  glDrawArrays(GL_TRIANGLES, multi_firsts[dx], multi_counts[dx]);
 }
 
 #endif

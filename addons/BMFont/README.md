@@ -34,10 +34,20 @@ how you vertex should look like, if  you want to use your own vertex types.
 
 
 Limitations
-===========
+-----------
 
 - We only support BMFonts with one page image.
 
 - You must export the .fnt file from `BMFont` in XML format
 
 
+Code snippets
+-------------
+
+- Make sure you enable blending:
+
+<pre>
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_ONE, GL_ONE);
+  font.draw();
+</pre>

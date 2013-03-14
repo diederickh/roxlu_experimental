@@ -318,4 +318,20 @@ static int rx_string_to_int(std::string str) {
   return result;
 }
 
+static std::string rx_strip_filename(std::string path) {
+  std::string directory;
+
+#if defined(_WIN32)
+  const size_t last_slash_idx = path.rfind('\\');
+#else
+  const size_t last_slash_idx = path.rfind('/');
+#endif
+
+  if(std::string::npos != last_slash_idx) {
+    directory = path.substr(0, last_slash_idx + 1);
+  }
+
+  return directory;
+}
+
 #endif // ROXLU_UTILSH
