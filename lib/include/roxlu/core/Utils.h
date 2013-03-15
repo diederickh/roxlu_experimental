@@ -9,6 +9,7 @@
 #include <vector>
 #include <sstream>
 #include <fstream>
+#include <algorithm> /* std::replace() */
 
 
 #ifdef ROXLU_GL_WRAPPER
@@ -318,18 +319,24 @@ static int rx_string_to_int(std::string str) {
   return result;
 }
 
+
+static std::string rx_string_replace(std::string str, char from, char to) {
+  std::replace(str.begin(), str.end(), from, to);
+  return str;
+}
+
 static std::string rx_strip_filename(std::string path) {
   std::string directory;
-
-#if defined(_WIN32)
-  const size_t last_slash_idx = path.rfind('\\');
-#else
+  path = rx_string_replace(path, '\\', '/');
   const size_t last_slash_idx = path.rfind('/');
-#endif
 
   if(std::string::npos != last_slash_idx) {
     directory = path.substr(0, last_slash_idx + 1);
   }
+
+#if defined(_WIN32)
+  directory = rx_string_replace(directory, '/', '\\');
+#endif
 
   return directory;
 }

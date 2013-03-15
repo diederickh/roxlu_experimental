@@ -164,7 +164,7 @@ macro(roxlu_install_app)
   install(FILES ${roxlu_install_files} DESTINATION ${roxlu_app_install_dir})
 
   if(WIN32)
-    set_target_properties(${roxlu_app_name} PROPERTIES OUTPUT_NAME_DEBUG ${roxlu_app_name}_debug)
+    set_target_properties(${roxlu_app_name} PROPERTIES OUTPUT_NAME_DEBUG ${roxlu_app_name})
 
     # copy command, copy all DLLs we need
     list(LENGTH roxlu_install_files roxlu_install_files_count)
