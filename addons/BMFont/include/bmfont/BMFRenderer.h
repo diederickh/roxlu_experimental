@@ -40,6 +40,8 @@ class BMFRenderer {
   size_t addVertices(std::vector<T>& vertices);                           /* add vertices to the VBO and returns the index into multi_counts and multi_firsts. See glMultiDrawArrays for info on these members */
   void draw();                                                            /* render all strings */
   void drawText(size_t index);                                            /* draw only a specific entry. pass a value you got from addVertices().. also make sure you call bind() before drawing single instances of vertices */
+  void drawText(size_t index, const float* modelMatrix);                  /* draw only a specific entry + custom model matrix. pass a value you got from addVertices().. also make sure you call bind() before drawing single instances of vertices */
+  void setModelMatrix(const float* mm);
   void reset();                                                           /* reset the VBO, call this when you are updating the text repeatedly */
   void bind();                                                            /* bind the specific GL objects we use to render the text. only call this when you are using drawText(). Call bind() once per frame. */
  protected:
@@ -56,6 +58,7 @@ class BMFRenderer {
 
  public:
   float projection_matrix[16];
+  float model_matrix[16];
   std::vector<GLint> multi_firsts;
   std::vector<GLsizei> multi_counts;
   std::vector<T> vertices;
@@ -79,6 +82,10 @@ BMFRenderer<T>::BMFRenderer(BMFLoader<T>& font)
   glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  
+  float* mm = model_matrix;
+  memset(mm, 0x00, sizeof(float) * 16);
+  mm[0] = mm[5] = mm[10] = mm[15] = 1.0f;
 }
 
 
@@ -200,7 +207,9 @@ inline void BMFRenderer<T>::bind() {
     return ;
   }
 
-  shader->draw(projection_matrix);
+  shader->setProjectMatrix(projection_matrix);
+  shader->setModelMatrix(model_matrix);
+  shader->draw();
 }
 
 template<class T>
@@ -220,6 +229,17 @@ void BMFRenderer<T>::draw() {
 template<class T>
 inline void BMFRenderer<T>::drawText(size_t dx) {
   glDrawArrays(GL_TRIANGLES, multi_firsts[dx], multi_counts[dx]);
+}
+
+template<class T>
+inline void BMFRenderer<T>::drawText(size_t dx, const float* modelMatrix) {
+  shader->setModelMatrix(modelMatrix);
+  glDrawArrays(GL_TRIANGLES, multi_firsts[dx], multi_counts[dx]);
+}
+
+template<class T>
+inline void BMFRenderer<T>::setModelMatrix(const float* modelMatrix) {
+  memcpy(model_matrix, modelMatrix, sizeof(float) * 16);
 }
 
 #endif

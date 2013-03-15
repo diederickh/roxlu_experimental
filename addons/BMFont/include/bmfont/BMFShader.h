@@ -23,6 +23,7 @@
 
 static const char* BMFONT_VS = GLSL(150, 
                                     uniform mat4 u_projection_matrix;
+                                    uniform mat4 u_model_matrix;
                                     in vec4 a_pos;
                                     in vec2 a_tex;
                                     in vec4 a_fg_color;
@@ -31,7 +32,7 @@ static const char* BMFONT_VS = GLSL(150,
                                     out vec4 v_fg_color;
 
                                     void main() {
-                                      gl_Position = u_projection_matrix * a_pos;
+                                      gl_Position = u_projection_matrix * u_model_matrix * a_pos;
                                       v_tex = a_tex;
                                       v_fg_color = a_fg_color;
                                     }
@@ -92,15 +93,28 @@ class BMFShader {
   ~BMFShader();
 
   virtual void setup(GLuint vbo, GLuint tex);
-  virtual void draw(const float* projectMatrix); 
+  virtual void setModelMatrix(const float* modelMatrix);
+  virtual void setProjectMatrix(const float* projectionMatrix);
+  virtual void draw();
 
  public:
   static GLuint prog;
   static GLuint vao;
   static GLint u_projection_matrix;
+  static GLint u_model_matrix;
   static GLint u_tex;
   GLuint tex;
 };
+
+inline void BMFShader::setModelMatrix(const float* mm) {
+  glUseProgram(prog);
+  glUniformMatrix4fv(u_model_matrix, 1, GL_FALSE, mm);
+}
+
+inline void BMFShader::setProjectMatrix(const float* pm) {
+  glUseProgram(prog);
+  glUniformMatrix4fv(u_projection_matrix, 1, GL_FALSE, pm);
+}
 
 #endif 
 
