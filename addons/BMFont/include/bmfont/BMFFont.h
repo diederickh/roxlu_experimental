@@ -46,6 +46,7 @@ class BMFFont {
   void draw();
   void bind();                                                                          /* bind the GL objects used for drawing; only call this manually when you're using `drawText()`, when  you use only `draw()` don't call this. Only call bind() once per frame. */
   void drawText(size_t index);                                                          /* only draw a specific text entry */
+  void drawText(size_t index, const float* modelMatrix);                                 /* only draw a specific text entry + with the given model matrix */
   void reset();
   void print();
   void getStringSize(std::string str, int& w, int& h);                                   /* get the width and max height for the given string */
@@ -98,6 +99,11 @@ inline void BMFFont<T>::draw() {
 template<class T>
 inline void BMFFont<T>::drawText(size_t text) {
   renderer.drawText(text);
+}
+
+template<class T>
+inline void BMFFont<T>::drawText(size_t text, const float* mm) {
+  renderer.drawText(text, mm);
 }
 
 template<class T>

@@ -3,6 +3,7 @@
 GLuint BMFShader::prog = 0;
 GLuint BMFShader::vao = 0;
 GLint BMFShader::u_projection_matrix = -1;
+GLint BMFShader::u_model_matrix = -1;
 GLint BMFShader::u_tex = -1;
 
 BMFShader::BMFShader()
@@ -25,6 +26,7 @@ void BMFShader::setup(GLuint vbo, GLuint tex) {
     
     glUseProgram(prog);
     u_projection_matrix = glGetUniformLocation(prog, "u_projection_matrix");
+    u_model_matrix = glGetUniformLocation(prog, "u_model_matrix");
     u_tex = glGetUniformLocation(prog, "u_tex");
 
     glGenVertexArrays(1, &vao);
@@ -44,14 +46,12 @@ void BMFShader::setup(GLuint vbo, GLuint tex) {
   this->tex = tex;
 }
 
-void BMFShader::draw(const float* projectionMatrix) {
+void BMFShader::draw() {
   glBindVertexArray(vao);
   glUseProgram(prog);
 
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
   glUniform1i(u_tex, 0);
-
-  glUniformMatrix4fv(u_projection_matrix, 1, GL_FALSE, projectionMatrix);
 }
 
