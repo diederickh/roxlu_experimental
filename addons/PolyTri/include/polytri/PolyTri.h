@@ -1,11 +1,10 @@
 #ifndef ROLXU_POLYTRIH
 #define ROLXU_POLYTRIH
 
+#include <roxlu/opengl/GL.h>
 #include <poly2tri.h>
-#include <roxlu/opengl/OpenGLInit.h>
 #include <vector>
 #include <list>
-
 
 using std::vector;
 
@@ -30,8 +29,6 @@ public:
 
 	std::list<p2t::Triangle*> map;
 	vector<p2t::Triangle*> triangles;
-//	float min_x, min_y;
-//	float max_x, max_y;
 };
 
 #endif

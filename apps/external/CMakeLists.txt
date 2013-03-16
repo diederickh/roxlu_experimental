@@ -1,7 +1,5 @@
 # external cmakelist.txt
 
-# 1 = GLFW, 2 = OPENFRAMEWORKS, 3 = CINDER, 4 = COCOA
-add_definitions("-DROXLU_GL_WRAPPER=1") 
 
 # GLFW
 set(glfw_base_dir ${CMAKE_CURRENT_LIST_DIR}/)
@@ -18,7 +16,6 @@ if(UNIX)
   if(${roxlu_gl_version} EQUAL 3)
     roxlu_add_extern_lib(libglxw.a)
   else()
-    add_definitions(-DGLEW_STATIC)
     roxlu_add_extern_lib(libGLEW.a)
   endif()
 
@@ -56,7 +53,6 @@ if(NOT APPLE AND UNIX)
   roxlu_add_lib(X11)
   roxlu_add_lib(Xxf86vm)
   roxlu_add_lib(rt)
-  #roxlu_add_lib(/usr/lib/x86_64-linux-gnu/libXrandr.so)
   roxlu_add_lib(libXrandr.so)
 endif()
 

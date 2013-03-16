@@ -1,6 +1,6 @@
-#ifdef ROXLU_GL_WRAPPER
-
 #include <roxlu/3d/shapes/Axis.h>
+
+#ifdef ROXLU_WITH_OPENGL
 
 namespace roxlu {
 
@@ -95,4 +95,4 @@ namespace roxlu {
 
 } // roxlu
 
-#endif // ROXLU_GL_WRAPPER
+#endif // ROXLU_WITH_OPENGL

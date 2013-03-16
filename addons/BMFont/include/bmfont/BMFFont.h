@@ -48,6 +48,8 @@ class BMFFont {
   void drawText(size_t index);                                                          /* only draw a specific text entry */
   void reset();
   void print();
+  void getStringSize(std::string str, int& w, int& h);                                   /* get the width and max height for the given string */
+
  public:
   BMFLoader<T> loader;
   BMFRenderer<T> renderer;
@@ -111,6 +113,11 @@ inline void BMFFont<T>::reset() {
 template<class T>
 inline void BMFFont<T>::bind() {
   renderer.bind();
+}
+
+template<class T>
+inline void BMFFont<T>::getStringSize(std::string str, int& w, int& h) {
+  loader.getStringSize(str, w, h);
 }
 
 

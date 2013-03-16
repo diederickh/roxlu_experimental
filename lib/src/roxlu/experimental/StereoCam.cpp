@@ -1,6 +1,6 @@
-#ifdef ROXLU_GL_WRAPPER
-
 #include <roxlu/experimental/StereoCam.h>
+
+#ifdef ROXLU_WITH_OPENGL
 
 StereoCam::StereoCam() 
 	:fov(45.0f * DEG_TO_RAD)
@@ -90,14 +90,4 @@ void StereoCam::placeRight() {
 	setupRight();
 }
 	
-#endif // ROXLU_GL_WRAPPER
-	
-	/*
-	:fov(60.0f)
-,aspect(4.0f/3.0f)
-,near(1.0f)
-,far(600.0f)
-,screen_width(0)
-,screen_height(0)
-,projection_type(PERSPECTIVE)
-	*/
+#endif // ROXLU_WITH_OPENGL

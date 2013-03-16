@@ -1,7 +1,7 @@
 #ifndef ROXLU_FBOH
 #define ROXLU_FBOH
 
-#include <roxlu/opengl/OpenGLInit.h>
+#include <roxlu/opengl/GL.h>
 #include <map>
 #include <utility>
 #include <stdio.h>

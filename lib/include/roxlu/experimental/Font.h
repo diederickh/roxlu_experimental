@@ -1,7 +1,9 @@
 #ifndef ROXLU_STB_FONTH
 #define ROXLU_STB_FONTH
 
-#ifdef ROXLU_GL_WRAPPER
+#include <roxlu/opengl/GL.h>
+
+#ifdef ROXLU_WITH_OPENGL
 
 /*
 Status: 
@@ -153,5 +155,5 @@ namespace roxlu {
 
 } // roxlu
 
-#endif // ROXLU_GL_WRAPPER
+#endif // ROXLU_WITH_OPENGL
 #endif

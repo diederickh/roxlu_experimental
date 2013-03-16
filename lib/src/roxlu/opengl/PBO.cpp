@@ -1,6 +1,6 @@
-#ifdef ROXLU_GL_WRAPPER
-
 #include <roxlu/opengl/PBO.h>
+
+#ifdef ROXLU_WITH_OPENGL
 
 PBO::PBO(GLuint nTarget)
 :target(nTarget)
@@ -82,4 +82,4 @@ PBO& PBO::unbind() {
 	return *this;
 }
 
-#endif // ROXLU_GL_WRAPPER
+#endif // ROXLU_WITH_OPENGL

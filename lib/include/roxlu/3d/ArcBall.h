@@ -1,9 +1,9 @@
 #ifndef ROXLU_ARCBALLH
 #define ROXLU_ARCBALLH
 
+#include <roxlu/opengl/GL.h>
 #include <roxlu/math/Quat.h>
 #include <roxlu/3d/Camera.h>
-#include <roxlu/opengl/OpenGLInit.h>
 
 namespace roxlu {
 

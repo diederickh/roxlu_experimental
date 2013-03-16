@@ -1,7 +1,9 @@
-#ifdef ROXLU_GL_WRAPPER
-
 #ifndef ROXLU_AXISH
 #define ROXLU_AXISH
+
+#include <roxlu/opengl/GL.h>
+
+#if defined(ROXLU_WITH_OPENGL)
 
 #include <string>
 #include <roxlu/Roxlu.h>
@@ -57,4 +59,4 @@ namespace roxlu {
 } // roxlu
 #endif
 
-#endif // ROXLU_GL_WRAPPER
+#endif // ROXLU_WITH_OPENGL

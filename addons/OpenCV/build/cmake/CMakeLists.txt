@@ -1,39 +1,33 @@
-# OpenCV cmakelists.txt
-cmake_minimum_required(VERSION 2.8)
+# bmfont
 
-include(${CMAKE_CURRENT_LIST_DIR}/../../lib/CMakeLists.txt)
+roxlu_addon_begin("opencv")
 
-set(opencv_base_dir ${CMAKE_CURRENT_LIST_DIR})
-set(opencv_src_dir ${opencv_base_dir}/src)
-set(opencv_include_dir ${opencv_base_dir}/include)
-set(opencv_lib_dir ${opencv_base_dir}/lib/${roxlu_platform}/${roxlu_bits})
+ # --------------------------------------------------------------------------------------
+ roxlu_addon_add_source_file(cv/Contour.cpp)
 
-include_directories(
-  ${opencv_include_dir}
-  ${opencv_base_dir}/extern/include/
-  ${opencv_src_dir}
-)
+ roxlu_add_include_dir(${roxlu_extern_include_dir}/opencv/)
+ roxlu_add_include_dir(${roxlu_extern_include_dir}/opencv2/)
 
-set(opencv_source_files
-  ${opencv_src_dir}/cv/VideoGrabber.cpp
-)
-
-set(roxlu_addon_sources 
-  ${roxlu_addon_sources} 
-  ${opencv_source_files}
-)
-
-set(opencv_libs
-  ${opencv_lib_dir}/libopencv_core.a
-  ${opencv_lib_dir}/libopencv_highgui.a
-  ${opencv_lib_dir}/libopencv_imgproc.a
-  ${opencv_lib_dir}/libopencv_objdetect.a
-  ${opencv_lib_dir}/libopencv_video.a
-)
-
-set(roxlu_addon_libs
-  ${roxlu_addon_libs}
-  ${opencv_libs}
-)
-
-add_library(roxlu_opencv STATIC ${opencv_source_files})
+ if(UNIX)
+   roxlu_add_extern_lib(libopencv_stitching.a)
+   roxlu_add_extern_lib(libopencv_ts.a)
+   roxlu_add_extern_lib(libopencv_videostab.a)
+   roxlu_add_extern_lib(libopencv_contrib.a)
+   roxlu_add_extern_lib(libopencv_gpu.a)
+   roxlu_add_extern_lib(libopencv_legacy.a)
+   roxlu_add_extern_lib(libopencv_nonfree.a)
+   roxlu_add_extern_lib(libopencv_photo.a)
+   roxlu_add_extern_lib(libopencv_calib3d.a)
+   roxlu_add_extern_lib(libopencv_features2d.a)
+   roxlu_add_extern_lib(libopencv_ml.a)
+   roxlu_add_extern_lib(libopencv_objdetect.a)
+   roxlu_add_extern_lib(libopencv_video.a)
+   roxlu_add_extern_lib(libopencv_core.a)
+   roxlu_add_extern_lib(libopencv_flann.a)
+   roxlu_add_extern_lib(libopencv_highgui.a)
+   roxlu_add_extern_lib(libopencv_imgproc.a)
+   roxlu_add_lib(-lz)
+ endif()
+   
+ # --------------------------------------------------------------------------------------
+roxlu_addon_end()

@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <roxlu/opengl/GL.h>
 #include <videocapture/Types.h>
-#include <roxlu/opengl/OpenGLInit.h>
 #include <roxlu/opengl/Error.h>
 #include <roxlu/core/Log.h>
 

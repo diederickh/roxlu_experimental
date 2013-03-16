@@ -2,7 +2,7 @@
 #define ROXLU_3D_INCLUDEDH
 
 
-#ifdef ROXLU_GL_WRAPPER
+#ifdef ROXLU_WITH_OPENGL
 #include <roxlu/3d/ArcBall.h>
 #include <roxlu/3d/Camera.h>
 #include <roxlu/3d/EasyCam.h>

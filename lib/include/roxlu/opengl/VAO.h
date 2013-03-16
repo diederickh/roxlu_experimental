@@ -1,7 +1,7 @@
 #ifndef ROXLU_VAOH
 #define ROXLU_VAOH
 
-#include <roxlu/opengl/OpenGLInit.h>
+#include <roxlu/opengl/GL.h>
 #include <roxlu/opengl/Error.h>
 #include <roxlu/core/Constants.h>
 

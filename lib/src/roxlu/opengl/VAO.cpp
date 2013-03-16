@@ -1,4 +1,6 @@
-#ifdef ROXLU_GL_WRAPPER
+#include <roxlu/opengl/GL.h>
+
+#ifdef ROXLU_WITH_OPENGL
 
 #include <roxlu/opengl/VAO.h>
 #include <roxlu/core/platform/Platform.h>
@@ -26,4 +28,4 @@ namespace roxlu {
 
 } // roxlu
 
-#endif // ROXLU_GL_WRAPPER
+#endif // ROXLU_WITH_OPENGL

@@ -15,10 +15,10 @@
 
 #include <vector>
 
+#include <roxlu/opengl/GL.h>
 #include <roxlu/opengl/Shader.h>
 #include <roxlu/experimental/BitmapFont.h>
 #include <roxlu/experimental/Text.h>
-#include <roxlu/opengl/OpenGLInit.h>
 #include <roxlu/opengl/Error.h>
 #include <roxlu/graphics/Color.h>
 

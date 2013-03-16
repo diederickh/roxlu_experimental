@@ -41,10 +41,4 @@
 #include <roxlu/core/platform/linux/LinuxPlatform.h>
 #endif
 
-// Set creative lib specifics (e.g. used for datapath in io/File.h)
-#ifndef ROXLU_GL_WRAPPER
-//#define ROXLU_GL_WRAPPER ROXLU_OPENFRAMEWORKS
-#endif
-
-
 #endif

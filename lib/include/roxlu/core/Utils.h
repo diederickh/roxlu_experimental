@@ -1,6 +1,8 @@
 #ifndef ROXLU_UTILSH
 #define ROXLU_UTILSH
 
+#include <roxlu/opengl/GL.h>
+#include <roxlu/opengl/Error.h>
 #include <roxlu/core/Constants.h>
 #include <roxlu/core/Log.h>
 #include <stdio.h>
@@ -10,11 +12,13 @@
 #include <sstream>
 #include <fstream>
 
-
-#ifdef ROXLU_GL_WRAPPER
-#include <roxlu/opengl/OpenGLInit.h>
-#include <roxlu/opengl/Error.h>
+#if defined(_WIN32)
+#   include <roxlu/external/dirent.h> /* for stat() */  
+#else
+#   include <dirent.h> /* for stat() */
+#   include <errno.h> /* for errno */
 #endif
+
 
 // @todo maybe add this stuff to "Platform.h" 
 #if defined(__APPLE__)
@@ -25,6 +29,7 @@
 #  include <mach-o/dyld.h> /* _NSGetExecutablePath */
 #  include <sys/resource.h>
 #  include <sys/sysctl.h>
+#  include <sys/stat.h> /* stat() */
 #  include <unistd.h>  /* sysconf */
 #elif defined(__linux) 
 #  include <unistd.h> /* readlink */
@@ -112,7 +117,7 @@ static std::string rx_join(const std::vector<T>& entries, std::string sep) {
 }
 
 
-#ifdef ROXLU_GL_WRAPPER
+#ifdef ROXLU_WITH_OPENGL
 
 // Creates a vertex + frag shader and a program. 
 // We do not yet link the program so you can set attribute locations
@@ -248,9 +253,63 @@ static time_t rx_time() {
 
 #endif
 
+// ---------------------------------------------------------------------------------
+static bool rx_is_dir(std::string filepath) {
+  struct stat st;
+  int result = stat(filepath.c_str(), &st);
+
+  if(result < 0) {
+    if(errno == EACCES) {
+      RX_ERROR(("EACCESS: no permission for: %s", filepath.c_str()));
+    }
+    else if(errno == EFAULT) {
+      RX_ERROR(("EFAULT: bad address, for: %s", filepath.c_str()));
+    }
+    else if(errno == ELOOP) {
+      RX_ERROR(("ELOOP: too many links, for: %s", filepath.c_str()));
+    }
+    else if(errno == ENAMETOOLONG) {
+      RX_ERROR(("ENAMETOOLONG: for: %s", filepath.c_str()));
+    }
+    else if(errno == ENOENT) {
+      // we expect this when the dir doesn't exist
+      return false;
+    }
+    else if(errno == ENOMEM) {
+      RX_ERROR(("ENOMEM: for: %s", filepath.c_str()));
+    }
+    else if(errno == ENOTDIR) {
+      RX_ERROR(("ENOTDIR: for: %s", filepath.c_str()));
+    }
+    else if(errno == EOVERFLOW) {
+      RX_ERROR(("EOVERFLOW: for: %s", filepath.c_str()));
+    }
+
+    return false;
+  }
+
+#if defined(__APPLE__) or defined(__linux__)
+  return S_ISDIR(st.st_mode);
+#else 
+  return result == 0;
+#endif  
+
+}
+
 static std::string rx_to_data_path(const std::string filename) {
   std::string exepath = rx_get_exe_path();
+
+#if defined(__APPLE__)
+  if(rx_is_dir(exepath +"data")) {
+    exepath += "data/" +filename;
+  }
+  else if(rx_is_dir(exepath +"../MacOS")) {
+    exepath += "../../../data/" +filename;
+  }
+#else 
   exepath += "data/" +filename;
+#endif  
+
   return exepath;
 }
 
@@ -316,6 +375,13 @@ static int rx_string_to_int(std::string str) {
   ss << str;
   ss >>  result;
   return result;
+}
+
+static std::string rx_int_to_string(int num) {
+  std::string str;
+  std::stringstream ss;
+  ss << num;
+  return ss.str();
 }
 
 static std::string rx_strip_filename(std::string path) {

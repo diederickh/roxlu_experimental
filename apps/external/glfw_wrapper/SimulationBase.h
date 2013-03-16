@@ -1,5 +1,5 @@
+#include <roxlu/opengl/GL.h>
 #include <iostream>
-#include <roxlu/opengl/OpenGLInit.h>
 #include <string>
 
 class SimulationBase {

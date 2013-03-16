@@ -67,9 +67,9 @@ thread and 'stop()' to stop the encoding thread.
 #define WEBM_SCREENREC_NUM_PBOS
 
 #include <string>
+#include <roxlu/opengl/GL.h>
 #include <webm/EBML.h>
 #include <webm/Webm.h>
-#include <roxlu/opengl/OpenGLInit.h>
 
 extern "C" {
 #  include <vpx/vpx_encoder.h>

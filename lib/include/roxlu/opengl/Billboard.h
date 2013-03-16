@@ -1,13 +1,15 @@
 #ifndef ROXLU_BILLBOARDH
 #define ROXLU_BILLBOARDH
 
+#include <roxlu/opengl/GL.h>
 #include <roxlu/math/Mat4.h>
 #include <roxlu/math/Vec3.h>
 #include <roxlu/math/Quat.h>
-#include <roxlu/opengl/OpenGLInit.h>
 #include <roxlu/opengl/Error.h>
 #include <roxlu/opengl/Shader.h>
 #include <roxlu/opengl/Texture.h>
+
+#if defined(ROXLU_WITH_OPENGL)
 
 const std::string BILLBOARD_VS = " \
 	uniform mat4 u_projection_matrix; \
@@ -82,4 +84,5 @@ namespace roxlu {
 
 } // roxlu
 
+#endif // ROXLU_WITH_OPENGL
 #endif

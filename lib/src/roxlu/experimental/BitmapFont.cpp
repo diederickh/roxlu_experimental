@@ -1,6 +1,6 @@
-#ifdef ROXLU_GL_WRAPPER
-
 #include <roxlu/experimental/BitmapFont.h>
+
+#if defined(ROXLU_WITH_OPENGL)
 
 BitmapFont::BitmapFont() {
   for(int i = 0; i < 256; ++i) {
@@ -233,4 +233,4 @@ void BitmapFont::buildText(TextVertices& vertices, const std::string& text, floa
   outWidth = max_x - min_x;
 }
 
-#endif // ROXLU_GL_WRAPPER
+#endif // ROXLU_WITH_OPENGL

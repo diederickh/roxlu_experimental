@@ -1,13 +1,7 @@
 #ifndef ROXLU_PBOH
 #define ROXLU_PBOH
 
-/*
-#include "OpenGL.h"
-#include "Error.h"
-#include "Constants.h"
-*/
-
-#include <roxlu/opengl/OpenGLInit.h>
+#include <roxlu/opengl/GL.h>
 #include <roxlu/opengl/Error.h>
 #include <roxlu/core/Constants.h>
 

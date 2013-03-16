@@ -1,8 +1,7 @@
 #ifndef ROXLU_CAMERAH
 #define ROXLU_CAMERAH
 
-
-#include <roxlu/opengl/OpenGLInit.h>
+#include <roxlu/opengl/GL.h>
 #include <roxlu/math/Mat3.h>
 #include <roxlu/math/Mat4.h>
 #include <roxlu/math/Vec3.h>
@@ -60,9 +59,6 @@ namespace roxlu {
     Mat4& vm(); // view matrix
     Mat4& pm(); // projection matrix
     Mat3 nm(); // normal matrix
-    /* const Mat4& vm() const; */
-    /* const Mat4& pm() const; */
-    /* const Mat3 nm() const; */
 	
     // internally used for caching
     void updateViewMatrix();

@@ -124,6 +124,7 @@ void BMFRenderer<T>::reset() {
 
 template<class T>
 void BMFRenderer<T>::setup(int windowW, int windowH, BMFShader* useShader) {
+
   rx_ortho(0, windowW, windowH, 0.0, -1.0, 1.0, projection_matrix);
 
   if(!font.getImageWidth() || !font.getImageHeight() || !font.getImagePath().size()) {
@@ -177,6 +178,7 @@ void BMFRenderer<T>::update() {
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
   size_t bytes_needed = vertices.size() * sizeof(T);
+
   if(bytes_needed > bytes_allocated) {
     while(bytes_allocated < bytes_needed) {
       bytes_allocated = std::max<size_t>(bytes_allocated * 2, 1024);
@@ -205,6 +207,10 @@ inline void BMFRenderer<T>::bind() {
 
 template<class T>
 void BMFRenderer<T>::draw() {
+
+  if(!multi_counts.size()) {
+    return;
+  }
 
   bind();
 

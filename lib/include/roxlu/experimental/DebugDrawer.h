@@ -1,9 +1,12 @@
 #ifndef ROXLU_DEBUG_DRAWERH
 #define ROXLU_DEBUG_DRAWERH
 
-#ifdef ROXLU_GL_WRAPPER 
+#include <roxlu/opengl/GL.h>
+
+#ifdef ROXLU_WITH_OPENGL
 
 #include <roxlu/Roxlu.h>
+#include <roxlu/3d/VertexTypes.h>
 #include <string>
 
 const std::string DEBUG_VS = ""
@@ -14,7 +17,7 @@ const std::string DEBUG_VS = ""
   "varying vec4 v_col; "
   ""
   "void main() { "
-  "  gl_Position = u_projection_matrix * u_view_matrix  * a_pos; "
+  "  gl_Position = u_projection_matrix * u_view_matrix *  a_pos; "
   "  v_col = a_col; "
   " } ";
 
@@ -45,9 +48,9 @@ const std::string DEBUG_TEX_FS = ""
   "void main() { "
   "  vec4 col = texture2D(u_tex, v_tex); "
   "  gl_FragColor = col; "
-
+  "  gl_FragColor.r += 0.2; "
   "}";
-//  "  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); "
+
 struct DrawEntry {
   int start_dx;
   int num_elements;
@@ -63,6 +66,9 @@ class DebugDrawer {
   void addVertex(const Vec3 pos);
   void addVertex(const Vec3 pos, const Vec4 col);
   void addVertex(const float x, const float y, const float z, float r = 1.0f, float g = 0.0f, float b = 0.0f);
+  void drawCircle(float x, float y, float radius, bool filled = true, float r = 1.0f, float g = 1.0f, float b = 1.0f, float a = 1.0f);
+  void drawRectangle(float x, float y, float w, float h, bool filled, float r = 1.0f, float g = 1.0f, float b = 1.0f, float a = 1.0f);
+  void draw();
   void draw(const float* pm, const float* vm);
   void drawTexture(GLuint tex, const float x, const float y, const float w, const float h);
   void setFill(bool mustFill);
@@ -79,6 +85,7 @@ class DebugDrawer {
   bool needs_update;
   std::vector<VertexPC> vertices;
   std::vector<DrawEntry> entries;
+  std::vector<VertexPC> circle;                                            /* vertices of a unit circle */
   DrawEntry entry;
   VertexPC vertex;
 
@@ -90,11 +97,12 @@ class DebugDrawer {
   GLuint vbo_tex;
   GLuint vao_tex;
   GLuint prog_tex;
-  GLuint pm_id_tex; /* proj matrix */
-  GLuint mm_id_tex; /* model matrix */
-  GLuint tex_uniform; /* texture uniform id */
-  float ortho_pm[16];
-  float mm_tex[16]; /* texture model matrix */
+  GLuint pm_id_tex;                                                        /* proj matrix */
+  GLuint mm_id_tex;                                                        /* model matrix */
+  GLuint tex_uniform;                                                      /* texture uniform id */
+  float ortho_matrix[16];
+  float view_matrix[16];
+  float tex_matrix[16];                                                    /* texture model matrix */
 
   // Generic drawing members
   // --------
@@ -109,5 +117,5 @@ class DebugDrawer {
   GLuint frag_id;
   GLuint prog_id;
 };
-#endif // ROXLU_GL_WRAPPER
+#endif // ROXLU_WITH_OPENGL
 #endif

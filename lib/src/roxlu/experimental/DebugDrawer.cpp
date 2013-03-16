@@ -1,6 +1,6 @@
 #include <roxlu/experimental/DebugDrawer.h>
 
-#ifdef ROXLU_GL_WRAPPER
+#ifdef ROXLU_WITH_OPENGL
 
 DebugDrawer::DebugDrawer()
   :is_initialized(false)
@@ -25,9 +25,21 @@ DebugDrawer::DebugDrawer()
   ,mm_id_tex(0)
   ,tex_uniform(0)
 {
-  memset(ortho_pm, 0, sizeof(float) * 16);
-  memset(mm_tex, 0, sizeof(float) * 16);
-  mm_tex[0] = mm_tex[5] = mm_tex[10] = mm_tex[15] = 1.0f;
+  memset(ortho_matrix, 0, sizeof(float) * 16);
+  memset(tex_matrix, 0, sizeof(float) * 16);
+  memset(view_matrix, 0, sizeof(float) * 16);
+  tex_matrix[0] = tex_matrix[5] = tex_matrix[10] = tex_matrix[15] = 1.0f;
+  view_matrix[0] = view_matrix[5] = view_matrix[10] = view_matrix[15] = 1.0f;
+
+  int circle_resolution = 64;
+  float rad = TWO_PI / circle_resolution;
+
+  for(int i = 0; i < circle_resolution; ++i) {
+    VertexPC v;
+    v.setPos(cos(i * rad), sin(i * rad), 0.0f);
+    v.setCol(1.0f, 1.0f, 1.0f, 1.0f);
+    circle.push_back(v);
+  }
 }
 
 DebugDrawer::~DebugDrawer() {
@@ -66,13 +78,9 @@ void DebugDrawer::setupOpenGL() {
   view_matrix_id = glGetUniformLocation(prog_id, "u_view_matrix");
     
   // Buffers
-//#ifdef __APPLE__
- // glGenVertexArraysAPPLE(1, &vao);
- // glBindVertexArrayAPPLE(vao);
-//#else
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
-//#endif  
+
   glGenBuffers(1, &vbo);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
@@ -83,8 +91,6 @@ void DebugDrawer::setupOpenGL() {
   glEnableVertexAttribArray(col_id);
   glVertexAttribPointer(pos_id, 3, GL_FLOAT, GL_FALSE, sizeof(VertexPC), (GLvoid*)offsetof(VertexPC, pos));
   glVertexAttribPointer(col_id, 4, GL_FLOAT, GL_FALSE, sizeof(VertexPC), (GLvoid*)offsetof(VertexPC, col));
-  printf("%d, %d\n", pos_id, col_id);
-  
 
   // ---------------------------------------------------------
   // TEXTURE DRAWING OPENGL SETUP
@@ -110,14 +116,8 @@ void DebugDrawer::setupOpenGL() {
   mm_id_tex= glGetUniformLocation(prog_tex, "u_model_matrix");
   tex_uniform = glGetUniformLocation(prog_tex, "u_tex");
   
-  // -- 
-//#ifdef __APPLE__
- // glGenVertexArraysAPPLE(1, &vao_tex);
-  //glBindVertexArrayAPPLE(vao_tex);
-//#else 
   glGenVertexArrays(1, &vao_tex);
   glBindVertexArray(vao_tex);
-//#endif
 
   float tw = 1.0f;
   float th = 1.0f;
@@ -132,15 +132,6 @@ void DebugDrawer::setupOpenGL() {
     0.0f, 0.0f, 0.0f, 0.0f, 
   };
 
-  /*
-    0.0f, th,   0.0f, 0.0f,
-    tw,   th,   1.0f, 0.0f, 
-    tw,   0.0f, 1.0f, 1.0f, 
-
-    0.0f, th,   0.0f, 0.0f,
-    tw,   0.0f, 1.0f, 1.0f, 
-    0.0f, 0.0f, 0.0f, 1.0f, 
-*/
   glGenBuffers(1, &vbo_tex);
   glBindBuffer(GL_ARRAY_BUFFER, vbo_tex);
   glBufferData(GL_ARRAY_BUFFER, sizeof(tex_verts), tex_verts, GL_STATIC_DRAW);
@@ -150,44 +141,43 @@ void DebugDrawer::setupOpenGL() {
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)0);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)8);
 
-  // -- ortho pm
+
+
+  checkSize();
 
   is_initialized = true;
 }
 
 void DebugDrawer::createOrtho(int winWidth, int winHeight) {
-  float n = 0.0;
+  float n = -1.0;
   float f = 1.0;
   float ww = winWidth;
   float hh = winHeight;
   float fmn = f - n;
-  ortho_pm[15] = 1.0f;
-  ortho_pm[0]  = 2.0f / ww;
-  ortho_pm[5]  = 2.0f / -hh;
-  ortho_pm[10] = -2.0f / fmn;
-  ortho_pm[12] = -(ww)/ww;
-  ortho_pm[13] = -(hh)/-hh;
-  ortho_pm[14] = -(f+n)/fmn;
+  ortho_matrix[15] = 1.0f;
+  ortho_matrix[0]  = 2.0f / ww;
+  ortho_matrix[5]  = 2.0f / -hh;
+  ortho_matrix[10] = -2.0f / fmn;
+  ortho_matrix[12] = -(ww)/ww;
+  ortho_matrix[13] = -(hh)/-hh;
+  ortho_matrix[14] = -(f+n)/fmn;
 }
 
 void DebugDrawer::checkSize() {
   GLint vp[4];
   glGetIntegerv(GL_VIEWPORT, vp);
+
   if(vp[2] != win_w || vp[3] != win_h) {
     win_w = vp[2];
     win_h = vp[3];
     createOrtho(win_w, win_h);
   }
+
 }
 
 void DebugDrawer::begin(GLenum type) {
   entry.type = type;
   entry.start_dx = vertices.size() ;
-  /*
-  if(entry.start_dx < 0) {
-    entry.start_dx = 0;
-  }
-  */
 }
 
 void DebugDrawer::addVertex(const Vec3 pos) {
@@ -211,6 +201,10 @@ void DebugDrawer::end() {
   entries.push_back(entry);
 }
 
+void DebugDrawer::draw() {
+  draw(ortho_matrix, view_matrix);
+}
+
 void DebugDrawer::draw(const float* pm, const float* vm) {
   if(!is_initialized) {
     setupOpenGL();
@@ -221,11 +215,7 @@ void DebugDrawer::draw(const float* pm, const float* vm) {
   glUseProgram(prog_id);
   glUniformMatrix4fv(projection_matrix_id, 1, GL_FALSE, pm);
   glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, vm);
-//#ifdef __APPLE__
-//  glBindVertexArrayAPPLE(vao);
-//#else
   glBindVertexArray(vao);
-//#endif
 
   if(needs_update) {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -237,7 +227,7 @@ void DebugDrawer::draw(const float* pm, const float* vm) {
       glBufferData(GL_ARRAY_BUFFER, bytes_allocated, NULL, GL_STREAM_DRAW);
     }
     glBufferSubData(GL_ARRAY_BUFFER, 0, needed, getPtr());
-   }
+  }
  
   size_t dx = 0;
   for(std::vector<DrawEntry>::iterator it = entries.begin(); it != entries.end(); ++it) {
@@ -256,23 +246,20 @@ void DebugDrawer::drawTexture(GLuint tex, const float x, const float y, const fl
   }
 
   checkSize();
-  mm_tex[12] = x;
-  mm_tex[13] = y;
-  mm_tex[0] = w;
-  mm_tex[5] = h;
+  tex_matrix[12] = x;
+  tex_matrix[13] = y;
+  tex_matrix[0] = w;
+  tex_matrix[5] = h;
 
   glUseProgram(prog_tex);
-  glUniformMatrix4fv(pm_id_tex, 1, GL_FALSE, ortho_pm);
-  glUniformMatrix4fv(mm_id_tex, 1, GL_FALSE, mm_tex);
+  glUniformMatrix4fv(pm_id_tex, 1, GL_FALSE, ortho_matrix);
+  glUniformMatrix4fv(mm_id_tex, 1, GL_FALSE, tex_matrix);
 
   glActiveTexture(GL_TEXTURE3);
   glBindTexture(GL_TEXTURE_2D, tex);
   glUniform1i(tex_uniform, 3);
-//#ifdef __APPLE__
-//  glBindVertexArrayAPPLE(vao_tex);
-//#else
+
   glBindVertexArray(vao_tex);
-//#endif
   glDrawArrays(GL_TRIANGLES, 0, 6);
   
   glBindTexture(GL_TEXTURE_2D, 0);
@@ -291,4 +278,23 @@ void DebugDrawer::setFill(bool f) {
   must_fill = f;
 }
 
-#endif // ROXLU_GL_WRAPPER
+void DebugDrawer::drawCircle(float x,  float y, float radius, bool filled, float r, float g, float b, float a) {
+  begin((filled) ? GL_POLYGON : GL_LINE_LOOP);
+  for(size_t i = 0; i < circle.size(); ++i) {
+    VertexPC v = circle[i];
+    Vec3 pos(x + v.pos.x * radius, y + v.pos.y * radius, 0.0f);
+    Vec4 col(r, g, b, a);
+    addVertex(pos, col);
+  }
+  end();
+}
+
+void DebugDrawer::drawRectangle(float x, float y, float w, float h, bool filled, float r, float g, float b, float a) {
+  begin((filled) ? GL_POLYGON : GL_LINE_LOOP);
+  addVertex(x, y, 0, r, g, b);         // top left
+  addVertex(x + w, y, 0, r, g, b);     // top right 
+  addVertex(x + w, y + h, 0, r, g, b); // bottom right
+  addVertex(x, y + h, 0, r, g, b); // bottom left
+  end();
+}
+#endif // ROXLU_WITH_OPENGL

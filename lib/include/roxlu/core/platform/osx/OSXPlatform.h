@@ -5,6 +5,7 @@
 
 #include <sys/time.h>
 #include <stdint.h>
+#include <unistd.h> /* for getpid() in random.h */
 
 typedef int8_t rx_int8;
 typedef int16_t rx_int16;

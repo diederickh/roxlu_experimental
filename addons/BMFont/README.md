@@ -51,3 +51,13 @@ Code snippets
   glBlendFunc(GL_ONE, GL_ONE);
   font.draw();
 </pre>
+
+
+Using BMFont with XCode
+------------------------
+- Include paths:
+  - `addons/BMFont/include/`
+
+- Source files
+  - `addons/BMFont/include/bmfont/*.h`
+  - `addons/BMFont/src/bmfont/*.cpp`

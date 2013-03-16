@@ -1,8 +1,10 @@
 #ifndef ROXLU_TEXTUREH
 #define ROXLU_TEXTUREH
 
+#include <roxlu/opengl/GL.h>
 #include <string>
-#include <roxlu/opengl/OpenGLInit.h>
+
+#if defined(ROXLU_WITH_OPENGL)
 
 using std::string;
 
@@ -68,4 +70,6 @@ namespace roxlu {
   }
 
 }; // roxlu
+
+#endif // ROXLU_WITH_OPENGL
 #endif

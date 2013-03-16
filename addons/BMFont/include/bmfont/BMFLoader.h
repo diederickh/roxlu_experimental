@@ -47,6 +47,7 @@ class BMFLoader {
   std::string getImagePath();                                                    /* get the path of the image that is used by this the BMFont renderer. The image is stored in the xml file. */
   int getImageWidth();                                                           /* get the image width as defined in the xml file */ 
   int getImageHeight();                                                          /* get the image height ad defined in the xml file */
+  void getStringSize(std::string& str, int& w, int &h);                          /* get the max width and max height for the given string */
 
  private:
   void clear();                                                                  /* resets state; deallocs all allocated data */
@@ -170,7 +171,6 @@ bool BMFLoader<T>::load(std::string filename, bool datapath) {
     std::string xml_path = rx_to_data_path(filename);
     std::string base_dir = rx_strip_filename(xml_path);
     image_path = base_dir + image_path;
-
   }
 
   // CHARS
@@ -260,6 +260,28 @@ std::vector<T> BMFLoader<T>::generateVertices(std::string str, float x, float y)
     
   }
   return result;
+}
+
+template<class T>
+void BMFLoader<T>::getStringSize(std::string& str, int& w, int &h) {
+  w = 0;
+  h = 0;
+
+  for(size_t i = 0; i < str.size(); ++i) {
+    std::map<size_t, BMFChar>::iterator it = chars.find(str[i]);
+    if(it == chars.end()) {
+      RX_ERROR((BMF_ERR_CHAR_NOT_FOUND, str[i]));
+      continue;
+    }
+    
+    BMFChar& bchar = it->second;
+    w += bchar.xoffset + bchar.xadvance;
+
+    if(bchar.height > h) {
+      h = bchar.height;
+    }
+  }
+  
 }
 
 

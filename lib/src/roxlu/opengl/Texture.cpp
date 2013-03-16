@@ -1,8 +1,8 @@
-#ifdef ROXLU_GL_WRAPPER
-
 #include <roxlu/opengl/Texture.h>
 #include <roxlu/opengl/Error.h>
 #include <roxlu/io/File.h>
+
+#ifdef ROXLU_WITH_OPENGL
 
 namespace roxlu {
 
@@ -22,7 +22,6 @@ namespace roxlu {
 
   void Texture::setParams() {
     bind();
-    //glEnable(GL_TEXTURE_2D); eglGetError();
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_s); eglGetError(); // or GL_CLAMP (=> clamp give artifacts with uvsphere) ?
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_t); eglGetError();
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter); eglGetError();
@@ -32,7 +31,6 @@ namespace roxlu {
   }
 
   void Texture::setPixels(const unsigned char* pixels, int width, int height, GLenum format) {
-    //printf("format=%d, GL_RGB=%d, GL_RGBA=%d\n", format, GL_RGB, GL_RGBA);
     bind();
     glTexImage2D(
 		 GL_TEXTURE_2D
@@ -63,11 +61,10 @@ namespace roxlu {
     glBindTexture(GL_TEXTURE_2D,0); 
   }
 
-
   GLuint Texture::getID() {
     return texture_id;
   }
 
 }; // roxlu
 
-#endif // ROXLU_GL_WRAPPER
+#endif // ROXLU_WITH_OPENGL

@@ -23,9 +23,9 @@ extern "C" {
 #  include <uv.h>
 }
 
+#include <roxlu/opengl/GL.h>
 #include <stdio.h>
 #include <roxlu/core/Log.h>
-#include <roxlu/opengl/OpenGLInit.h>
 #include <webm/VPXEncoder.h>
 #include <webm/VPXDecoder.h>
 #include <algorithm>

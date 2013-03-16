@@ -1,6 +1,6 @@
-#ifdef ROXLU_GL_WRAPPER
-
 #include <roxlu/experimental/TGARecorder.h>
+
+#ifdef ROXLU_WITH_OPENGL
 
 // create video: ffmpeg -i small_%04d.tga -r 60 -s 640x480 -vcodec libx264 -vpre hq -b 2000k flock.mov
 
@@ -43,4 +43,4 @@ void TGARecorder::addFrame(const std::string& name) {
 	tga.save(roxlu::File::toDataPath(fname), pixels, w, h);
 }
 
-#endif // ROXLU_GL_WRAPPER
+#endif // ROXLU_WITH_OPENGL

@@ -2,11 +2,13 @@
 #define ROXLU_TEXTH
 
 #include <roxlu/math/Mat4.h>	
-#include <roxlu/opengl/OpenGLInit.h>
+#include <roxlu/opengl/GL.h>
 #include <roxlu/opengl/Shader.h>
 #include <roxlu/experimental/BitmapFont.h>
 
 #include <vector>
+
+#if defined(ROXLU_WITH_OPENGL) 
 
 using std::vector;
 
@@ -211,4 +213,5 @@ static const char* TEXT_VS = GLSL(120,
 
 } // roxlu
 
+#endif // ROXLU_WITH_OPENGL
 #endif

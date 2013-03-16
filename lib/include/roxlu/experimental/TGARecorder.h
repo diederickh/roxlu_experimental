@@ -1,8 +1,8 @@
 #ifndef ROXLU_TGA_RECORDERH
 #define ROXLU_TGA_RECORDERH
 
+#include <roxlu/opengl/GL.h>
 #include <roxlu/experimental/TGA.h>
-#include <roxlu/opengl/OpenGLInit.h>
 #include <roxlu/io/File.h>
 #include <string>
 

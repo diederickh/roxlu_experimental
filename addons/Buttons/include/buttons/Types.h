@@ -1,7 +1,7 @@
 #ifndef ROXLU_RTYPESH
 #define ROXLU_RTYPESH
 
-#include <roxlu/opengl/OpenGLInit.h>
+#include <roxlu/opengl/GL.h>
 #include <roxlu/math/Vec2.h>
 #include <iterator>
 #include <vector>

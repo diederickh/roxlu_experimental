@@ -1,16 +1,11 @@
 #ifndef ROXLU_STEREO_CAMERAH
 #define ROXLU_STEREO_CAMERAH
 
-/*
-#include "Constants.h"
-#include "Mat4.h"
-#include "Vec3.h"
-#include "OpenGL.h"
-*/
+#include <roxlu/opengl/GL.h>
 #include <roxlu/core/Constants.h>
 #include <roxlu/math/Mat4.h>
 #include <roxlu/math/Vec3.h>
-#include <roxlu/opengl/OpenGLInit.h>
+
 
 // http://quiescentspark.blogspot.nl/2011/05/rendering-3d-anaglyph-in-opengl.html
 
@@ -32,6 +27,7 @@ if(anaglyphic) {
 	glColorMask(true, true, true, true);
 }
 */
+#ifdef ROXLU_WITH_OPENGL
 
 using namespace roxlu;
 
@@ -106,5 +102,5 @@ inline const Mat4& StereoCam::vm() {
 	return view_matrix;
 }
 
-
+#endif // ROXLU_WITH_OPENGL
 #endif

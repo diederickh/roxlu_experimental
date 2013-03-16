@@ -1,6 +1,6 @@
 #include <roxlu/experimental/Font.h>
 
-#ifdef ROXLU_GL_WRAPPER
+#ifdef ROXLU_WITH_OPENGL
 
 namespace roxlu {
   // -----------------------------------------------------------------------------
@@ -350,4 +350,4 @@ namespace roxlu {
 
 } // roxlu
 
-#endif // ROXLU_GL_WRAPPER
+#endif // ROXLU_WITH_OPENGL

@@ -1,8 +1,11 @@
 #ifndef ROXLU_FPS_H
 #define ROXLU_FPS_H
 
+#include <roxlu/opengl/GL.h>
 #include <roxlu/Roxlu.h>
 #include <string>
+
+#if defined(ROXLU_WITH_OPENGL)
 
 namespace roxlu { 
 #if defined(ROXLU_GL_CORE3)
@@ -93,4 +96,6 @@ namespace roxlu {
   }
   
 } // roxlu
+
+#endif // ROXLU_WITH_OPENGL
 #endif

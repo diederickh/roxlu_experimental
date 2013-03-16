@@ -12,10 +12,11 @@
    The default `BMFShader` can be used for both GL 2.x and 3.x
    
  */
+
 #ifndef ROXLU_BMFONT_SHADER_H
 #define ROXLU_BMFONT_SHADER_H
 
-#include <roxlu/opengl/OpenGLInit.h>
+#include <roxlu/opengl/GL.h>
 #include <roxlu/core/Utils.h>
 #include <bmfont/BMFTypes.h>
 

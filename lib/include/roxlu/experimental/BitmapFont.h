@@ -1,7 +1,10 @@
 #ifndef ROXLU_BITMAP_FONTH
 #define ROXLU_BITMAP_FONTH
 
-#include <roxlu/opengl/OpenGLInit.h>
+#include <roxlu/opengl/GL.h>
+
+#if defined(ROXLU_WITH_OPENGL)
+
 #include <roxlu/opengl/Error.h>
 
 #include <string>
@@ -1757,5 +1760,7 @@ inline int BitmapFont::getHeight() {
 inline unsigned char* BitmapFont::getPixels() {
 	return buffer;
 }
+
+#endif // ROXLU_WITH_OPENGL
 
 #endif

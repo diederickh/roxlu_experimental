@@ -1,6 +1,6 @@
-#ifdef ROXLU_GL_WRAPPER
-
 #include <roxlu/opengl/FPS.h>
+
+#ifdef ROXLU_WITH_OPENGL
 
 namespace roxlu {
   FPS_Element::FPS_Element()
@@ -109,17 +109,13 @@ namespace roxlu {
 
   void FPS::setupGL() {
     is_setup = true;
-  
+
     // SHADER
     shader.create(FPS_VS, FPS_FS);
     shader.a("a_pos", 0);
     shader.link();
     shader.enable();
     shader.u("u_mm").u("u_pm").u("u_col");
-
-#if defined(ROXLU_GL_CORE3)
-    // glBindFragDataLocation(shader.getProgID(), 0, "outcol");
-#endif
 
     // VBO + VAO
     elements[0].set(0,10);
@@ -224,4 +220,4 @@ namespace roxlu {
   }
 }
 
-#endif // ROXLU_GL_WRAPPER
+#endif // ROXLU_WITH_OPENGL

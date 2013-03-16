@@ -1,8 +1,7 @@
 #ifndef ROXLU_SHADERH
 #define ROXLU_SHADERH
 
-//#include "OpenGL.h"
-#include <roxlu/opengl/OpenGLInit.h>
+#include <roxlu/opengl/GL.h>
 #include <roxlu/opengl/Error.h>
 #include <roxlu/io/File.h>
 
@@ -14,6 +13,8 @@
 using std::string;
 using std::cout;
 using std::endl;
+
+#if defined(ROXLU_WITH_OPENGL)
 
 typedef std::map<std::string, GLint> ShaderMap;
 
@@ -112,6 +113,6 @@ namespace roxlu {
     return prog_id;
   }
 
-
 } // roxlu
+#endif // ROXLU_WITH_OPENGL
 #endif

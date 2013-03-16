@@ -2,6 +2,7 @@
 #define ROXLU_VERTEXTYPESH
 
 #include <vector>
+#include <roxlu/opengl/GL.h>
 #include <roxlu/math/Vec3.h>
 #include <roxlu/math/Vec4.h>
 #include <roxlu/math/Vec2.h>
