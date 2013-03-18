@@ -1,5 +1,5 @@
 Roxlu lib 0.0.0.0.1
-===================
+-------------------
 This is a experimental, personal library used for creative simulations. As 
 you can see from the version it's not yet meant to be a stable version and it's
 still changing.
@@ -37,8 +37,9 @@ Compiler flags
   addons all need openGL features we need to include the correct openGL headers and
   enable extensions (through the frameworks). Therefore all code in the lib that needs
   openGL features uses `#include <roxlu/opengl/GL.h>` which includes the correct header
-  files to make opengl available. **You should define one of the options below as a 
-  global preprocessor flag**
+  files to make opengl available. 
+
+  **You should define one of the options below as a   global preprocessor flag**
 
   - `ROXLU_WITH_GLFW3_AND_GLEW`
   - `ROXLU_WITH_GLFW3_AND_GLXW`
@@ -46,29 +47,27 @@ Compiler flags
   - `ROXLU_WITH_OSX_NATIVE`
 
 
-- `ROXLU_GL_CORE3`: if you want to target openGL 3.2 core profile, forward compat.
-- `ROXLU_DEBUG:` enable verbose output for e.g. opengl shaders @todo maybe just use NDEBUG
-- `GLEW_STATIC`: when using the cmake files this set for you. when you target < 3.x, make sure to 
-                 define this in you preprocessor settings. @todo: this will be set in the GL header
-                 depending on the set ROXLU_WITH_* preprocessor flag
+- Some defines are set based on the `ROXLU_WITH_*` define you're using. These are
+
+  - `ROXLU_GL_CORE3`   if you want to target openGL 3.2 core profile, forward compat.
+  - `GLEW_STATIC`      when using the cmake files this set for you. when you target < 3.x, make sure to 
+                       define this in you preprocessor settings. @todo: this will be set in the GL header
+                       depending on the set ROXLU_WITH_* preprocessor flag
 
 
 Using roxlu lib and the addons
 ------------------------------
 - Preprocessor flags (choose the one which fits your project)
-
   - `ROXLU_WITH_OPENFRAMEWORKS`
   - `ROXLU_WITH_GLFW3_AND_GLXW`
   - `ROXLU_WITH_OPENFRAMEWORKS`
   - `ROXLU_WITH_OSX_NATIVE`
 
 - Include paths:
-
-`roxlu/lib/include/`
+  - `roxlu/lib/include/`
 
 - Source files:
-
-`roxlu/lib/src/*.cpp`
+  - `roxlu/lib/src/*.cpp`
 
 Dependencies
 ============
@@ -81,11 +80,10 @@ Linux
 On linux we depend on a couple of system libraries which you need to install for your 
 specific distribution. I test this library on Ubuntu and Arch Linux.
 
-      Install dependencies for Ubuntu
-      -------------------------------
+/Install dependencies for Ubuntu/
 
-      - apt-get install libudev-dev
-      - apt-get install glu
+   - apt-get install libudev-dev
+   - apt-get install glu
         
 
 Code Conventions
@@ -98,3 +96,5 @@ TODO
 ----
 - [ ] Remove all unused #defines and use compiler preprocessor flag if possible:
   -  Eg. opengl/error.h uses ROXLU_DEBUG, use NDEBUG
+
+- `ROXLU_DEBUG:` enable verbose output for e.g. opengl shaders @todo maybe just use NDEBUG
