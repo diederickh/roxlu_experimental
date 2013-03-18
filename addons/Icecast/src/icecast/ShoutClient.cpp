@@ -221,7 +221,7 @@ bool ShoutClient::startStreaming() {
   
   lame_set_num_channels(lame_flags, params.lame_num_channels);
   lame_set_in_samplerate(lame_flags, l_samplerate);
-  lame_set_brate(lame_flags, 94); // in kilobits, 94 = 94 kbps
+  lame_set_brate(lame_flags, 96); // in kilobits, 96 = 96 kbps
   lame_set_mode(lame_flags, l_mode);
   lame_set_quality(lame_flags, 5); // 2: near best, not too slow, 5: good, fast, 7: ok, really fast 
 

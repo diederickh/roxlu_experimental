@@ -6,6 +6,7 @@ roxlu_addon_begin("audio")
   roxlu_addon_add_source_file(audio/AudioFile.cpp)
   roxlu_addon_add_source_file(audio/AudioPlayer.cpp)
   roxlu_addon_add_source_file(audio/PCMWriter.cpp)
+  roxlu_addon_add_source_file(audio/MP3Writer.cpp)
   
   if(WIN32)
     roxlu_add_extern_lib(portaudio_x86.lib)
