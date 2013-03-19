@@ -32,5 +32,6 @@ int main() {
   while(!app.downloaded) {
     k.update(); // we need to call update as we're using non-blocking sockets. 
   }
+
   return 1;
 };

@@ -97,6 +97,9 @@ macro(roxlu_add_include_dir dir)
   include_directories(${dir})
 endmacro(roxlu_add_include_dir)
 
+macro(roxlu_add_extern_include_dir dir)
+  include_directories(${roxlu_extern_include_dir}/${dir})
+endmacro()
 
 macro(roxlu_enable_opengl3)
   add_definitions(-DROXLU_WITH_GLFW3_AND_GLXW)

@@ -11,7 +11,7 @@ int main() {
   Kurl kurl;
 
   Form form;
-  form.setURL("http://video.democratielab.prodemos.nl?act=poster");
+  form.setURL("http://www.sometestdomainyouwanttouse.com?act=post");
   form.addInput("name", "roxlu");
   form.addInput("email", "diederick@apollomedia.nl");
   form.addFile("logo", rx_to_data_path("apollo.png"));
