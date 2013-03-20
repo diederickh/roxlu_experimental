@@ -153,6 +153,7 @@ namespace roxlu {
     }
 
     // e.g.: File::createPath("/users/home/roxlu/data/images/2012/12/05/")
+    // @deprecated use rx_create_path
     static bool createPath(std::string path) {
 
 #ifdef _WIN32
@@ -211,7 +212,7 @@ namespace roxlu {
       return true;
     }
 
-
+    // @deprecated use rx_create_dir()
     static bool createDirectory(std::string path) {
 #ifdef _WIN32
       if(_mkdir(path.c_str()) != 0) {
@@ -254,7 +255,6 @@ namespace roxlu {
       return true;
     }
       
-
     
     static std::vector<std::string> getDirectories(std::string path) {
       std::vector<std::string> result;

@@ -104,9 +104,6 @@ struct KurlConnectionGet : public KurlConnection {
   std::string buffer;
 };
 
-
-
-
 class Kurl {
 public:
   Kurl();

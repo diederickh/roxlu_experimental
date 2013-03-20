@@ -336,6 +336,33 @@ static std::string rx_get_file_contents(std::string filepath, bool datapath = fa
   return result;
 }
 
+static bool rx_file_exists(std::string filepath) {
+#if defined(_WIN32)
+  char* lptr = (char*)filepath.c_str();
+  DWORD dwattrib = GetFileAttributes(lptr);
+  return (dwattrib != INVALID_FILE_ATTRIBUTES && !(dwattrib & FILE_ATTRIBUTE_DIRECTORY));
+
+#elif defined(__APPLE__)
+  int res = access(filepath.c_str(), R_OK);
+  if(res < 0) {
+    return false;
+  }
+#endif
+
+  return true;
+}
+
+static bool rx_file_remove(std::string filepath) {
+  if(!rx_file_exists(filepath)) {
+    return false;
+  }
+  if(::remove(filepath.c_str()) != 0) {
+    RX_ERROR(("cannot remove file: %s - %s", filepath.c_str(), strerror(errno)));
+    return false;
+  }
+  return true;
+}
+
 /* 
    double check that your window is really APP_WIDTH and APP_HEIGHT!
    rx_ortho(0, APP_WIDTH, APP_HEIGHT, 0, -1.0, 1.0, pm);
@@ -406,5 +433,92 @@ static std::string rx_strip_filename(std::string path) {
 
   return directory;
 }
+
+
+static bool rx_create_dir(std::string path) {
+#ifdef _WIN32
+  if(_mkdir(path.c_str()) != 0) {
+    if(errno == ENOENT) { 
+      RX_ERROR(("Cannot create directory: %s (ENOENT)", path.c_str()));
+      return false;
+    }
+    else if(errno == EEXIST) {
+      RX_ERROR(("Cannot create directory: %s (EEXIST)", path.c_str()));
+    }
+  }
+  return true;
+
+#else
+  if(mkdir(path.c_str(), 0777) != 0) {
+    return false;
+  }
+  return true;
+#endif
+}
+
+
+// e.g.: rx_create_path(/home/roxlu/data/images/2012/12/05/")
+static bool rx_create_path(std::string path) {
+
+#ifdef _WIN32
+  std::string drive;
+  for(int i = 0; i < path.size()-1; ++i) {
+    if(path[i] == ':' && path[i + 1] == '\\') {
+      break;
+    }
+    drive.push_back(path[i]);
+  }
+  path = path.substr(drive.size() + 2);
+  drive = drive + ":";
+
+#endif
+
+  std::vector<std::string> dirs;
+  while(path.length() > 0) {
+
+     
+#ifdef _WIN32
+    int index = path.find('\\'); // win 
+#else
+    int index = path.find('/'); // posix
+#endif
+    std::string dir = (index == -1 ) ? path : path.substr(0, index);
+
+    if(dir.length() > 0) {
+      dirs.push_back(dir);
+    }
+    if(index + 1 >= path.length() || index == -1) {
+      break;
+    }
+    path = path.substr(index + 1);
+  }
+    
+  struct stat s;
+  std::string dir_path;
+#ifdef _WIN32
+  dir_path = drive;
+#endif
+  for(unsigned int i = 0; i < dirs.size(); i++) {
+#ifdef _WIN32
+    dir_path += "\\";
+#else
+    dir_path += "/";
+#endif
+
+    dir_path += dirs[i];
+    if(stat(dir_path.c_str(), &s) != 0) {
+      if(!rx_create_dir(dir_path.c_str())) {
+        RX_ERROR(("ERROR: cannot create directory: %s", dir_path.c_str()));
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+
+
+
+
 
 #endif // ROXLU_UTILSH
