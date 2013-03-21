@@ -100,10 +100,10 @@ class BMFShader {
 
  public:
   static GLuint prog;
-  static GLuint vao;
   static GLint u_projection_matrix;
   static GLint u_model_matrix;
   static GLint u_tex;
+  GLuint vao;
   GLuint tex;
 };
 

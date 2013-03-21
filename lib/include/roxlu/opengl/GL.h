@@ -46,10 +46,12 @@
 
 // FIXES
 #if defined(__APPLE__)
-#  undef glGenVertexArrays
-#  define glGenVertexArrays glGenVertexArraysAPPLE
-#  undef glBindVertexArray
-#  define glBindVertexArray glBindVertexArrayAPPLE
+#  if !defined(ROXLU_WITH_GLFW3_AND_GLXW)
+#    undef glGenVertexArrays
+#    define glGenVertexArrays glGenVertexArraysAPPLE
+#    undef glBindVertexArray
+#    define glBindVertexArray glBindVertexArrayAPPLE
+#  endif
 #endif
 
 #if defined(ROXLU_WITH_OSX_NATIVE)

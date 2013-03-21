@@ -1,7 +1,7 @@
+#include <roxlu/opengl/GL.h>
 #include <bmfont/BMFShader.h>
 
 GLuint BMFShader::prog = 0;
-GLuint BMFShader::vao = 0;
 GLint BMFShader::u_projection_matrix = -1;
 GLint BMFShader::u_model_matrix = -1;
 GLint BMFShader::u_tex = -1;
@@ -28,10 +28,9 @@ void BMFShader::setup(GLuint vbo, GLuint tex) {
     u_projection_matrix = glGetUniformLocation(prog, "u_projection_matrix");
     u_model_matrix = glGetUniformLocation(prog, "u_model_matrix");
     u_tex = glGetUniformLocation(prog, "u_tex");
-
-    glGenVertexArrays(1, &vao);
   }
 
+  glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
 

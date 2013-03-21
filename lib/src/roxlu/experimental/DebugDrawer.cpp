@@ -279,6 +279,8 @@ void DebugDrawer::setFill(bool f) {
 }
 
 void DebugDrawer::drawCircle(float x,  float y, float radius, bool filled, float r, float g, float b, float a) {
+  // @todo for 3.2 we should draw triangles
+#if !defined(ROXLU_GL_CORE3)
   begin((filled) ? GL_POLYGON : GL_LINE_LOOP);
   for(size_t i = 0; i < circle.size(); ++i) {
     VertexPC v = circle[i];
@@ -287,14 +289,18 @@ void DebugDrawer::drawCircle(float x,  float y, float radius, bool filled, float
     addVertex(pos, col);
   }
   end();
+#endif
 }
 
 void DebugDrawer::drawRectangle(float x, float y, float w, float h, bool filled, float r, float g, float b, float a) {
+  // @todo for 3.2 we should draw triangles
+#if !defined(ROXLU_GL_CORE3)
   begin((filled) ? GL_POLYGON : GL_LINE_LOOP);
   addVertex(x, y, 0, r, g, b);         // top left
   addVertex(x + w, y, 0, r, g, b);     // top right 
   addVertex(x + w, y + h, 0, r, g, b); // bottom right
   addVertex(x, y + h, 0, r, g, b); // bottom left
   end();
+#endif
 }
 #endif // ROXLU_WITH_OPENGL
