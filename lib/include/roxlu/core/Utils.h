@@ -33,9 +33,10 @@
 #  include <sys/stat.h> /* stat() */
 #  include <unistd.h>  /* sysconf */
 #elif defined(__linux) 
-#  include <unistd.h> /* readlink */
+#  include <unistd.h> /* readlink(), getcwd() */
 #  include <sys/time.h> /* timeofday */
 #  include <libgen.h> /* dirname */
+#  include <sys/stat.h>
 #  define MAX_PATH 4096
 #elif defined(_WIN32)
 #  include <roxlu/core/platform/Platform.h>
