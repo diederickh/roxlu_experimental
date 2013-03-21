@@ -182,6 +182,11 @@ size_t BMFRenderer<T>::addVertices(std::vector<T>& in) {
 
 template<class T>
 void BMFRenderer<T>::update() {
+
+  if(!vertices.size()) {
+    return;
+  }
+
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
   size_t bytes_needed = vertices.size() * sizeof(T);

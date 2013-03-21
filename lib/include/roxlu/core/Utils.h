@@ -14,10 +14,12 @@
 #include <algorithm> /* std::replace() */
 
 #if defined(_WIN32)
-#   include <roxlu/external/dirent.h> /* for stat() */  
+#  include <roxlu/external/dirent.h> /* for stat() */  
+#  include <direct.h> // _mkdir
+#  include <Shlwapi.h>
 #else
-#   include <dirent.h> /* for stat() */
-#   include <errno.h> /* for errno */
+#  include <dirent.h> /* for stat() */
+#  include <errno.h> /* for errno */
 #endif
 
 
