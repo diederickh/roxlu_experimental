@@ -1,8 +1,10 @@
 #ifndef ROXLU_FPS_H
 #define ROXLU_FPS_H
 
+#include <roxlu/opengl/Shader.h>
 #include <roxlu/opengl/GL.h>
 #include <roxlu/Roxlu.h>
+
 #include <string>
 
 #if defined(ROXLU_WITH_OPENGL)

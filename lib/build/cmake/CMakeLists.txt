@@ -258,10 +258,9 @@ set(roxlu_3d_sources
 )
 
 set(roxlu_core_sources 
-  ${roxlu_src_dir}/core/Thread.cpp
+#  ${roxlu_src_dir}/core/Thread.cpp
   ${roxlu_src_dir}/core/Utils.cpp
   ${roxlu_src_dir}/core/StringUtil.cpp
-  ${roxlu_src_dir}/core/Noise.cpp
 )
 
 set(roxlu_experimental_sources 
@@ -293,6 +292,7 @@ set(roxlu_math_sources
   ${roxlu_src_dir}/math/Vec2.cpp
   ${roxlu_src_dir}/math/Vec3.cpp
   ${roxlu_src_dir}/math/Vec4.cpp
+  ${roxlu_src_dir}/math/Noise.cpp
 )
 
 set(roxlu_opengl_sources 
@@ -301,7 +301,7 @@ set(roxlu_opengl_sources
   ${roxlu_src_dir}/opengl/FPS.cpp
   ${roxlu_src_dir}/opengl/Shader.cpp
 #  ${roxlu_src_dir}/opengl/PBO.cpp
-  ${roxlu_src_dir}/opengl/Billboard.cpp
+#  ${roxlu_src_dir}/opengl/Billboard.cpp
 #  ${roxlu_src_dir}/opengl/VAO.cpp
 #  ${roxlu_src_dir}/opengl/MatrixStack.cpp
 )
