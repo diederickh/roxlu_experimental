@@ -72,6 +72,9 @@ class DebugDrawer {
   void draw(const float* pm, const float* vm);
   void drawTexture(GLuint tex, const float x, const float y, const float w, const float h);
   void setFill(bool mustFill);
+
+  GLuint createTexture(unsigned char* pixels, int w, int h, GLenum format = GL_RGBA); /* just a basic wrapper which generates a texture + uploads the passed pixels */
+  float* pm();                                                              /* returns the projection (ortho graphic) matrix */
  private: 
   void checkSize();
   void createOrtho(int ww, int wh);
@@ -117,5 +120,10 @@ class DebugDrawer {
   GLuint frag_id;
   GLuint prog_id;
 };
+
+inline float* DebugDrawer::pm() {
+  return ortho_matrix;
+}
+
 #endif // ROXLU_WITH_OPENGL
 #endif
