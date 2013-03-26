@@ -72,7 +72,11 @@ endmacro(roxlu_add_addon)
 macro(roxlu_add_dll dll)
 
   if(WIN32)
-    list(APPEND roxlu_install_files ${roxlu_extern_bin_dir}/${dll})
+    if(CMAKE_BUILD_TYPE STREQUAL Debug AND EXISTS ${roxlu_extern_bin_debug_dir}/${dll})
+      list(APPEND roxlu_install_files ${roxlu_extern_bin_debug_dir}/${dll})
+    else()
+      list(APPEND roxlu_install_files ${roxlu_extern_bin_dir}/${dll})
+    endif()
   endif()
 
 endmacro(roxlu_add_dll)
@@ -121,7 +125,6 @@ macro(roxlu_app_initialize app_name)
 
   if(CMAKE_BUILD_TYPE STREQUAL Debug)
     set(roxlu_app_name ${app_name}_debug)
-    message("-------------------------------------- ${roxlu_app_name} =========================")
   else()
     set(roxlu_app_name ${app_name})
   endif()
@@ -414,6 +417,7 @@ endif(NOT ROXLU_PLATFORM_WIN)
 set(roxlu_extern_lib_dir ${roxlu_base_dir}/extern/lib/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}/)
 set(roxlu_extern_lib_debug_dir ${roxlu_base_dir}/extern/lib/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}d/)
 set(roxlu_extern_bin_dir ${roxlu_base_dir}/extern/bin/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}/)
+set(roxlu_extern_bin_debug_dir ${roxlu_base_dir}/extern/bin/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}d/)
 
 set(roxlu_include_dirs
   ${roxlu_include_dirs}
