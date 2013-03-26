@@ -132,6 +132,7 @@ public:
   void setVerbose(bool verb);
   bool isVerbose();
   void printSupportedProtocols();
+  bool isStillRunning();
  private: 
   bool initProgressCallback(CURL* handle);
   bool setDebugCallback(CURL* handle);
@@ -157,4 +158,8 @@ inline void Kurl::setVerbose(bool verb) {
 
 inline bool Kurl::isVerbose() {
   return is_verbose;
+}
+
+inline bool Kurl::isStillRunning() {
+  return still_running;
 }

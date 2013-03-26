@@ -122,17 +122,17 @@ Kurl::~Kurl() {
   if(handle) {
     curl_multi_cleanup(handle);
   }
+  handle = NULL;
 }
 
 void Kurl::update() {
   curl_multi_perform(handle, &still_running);  
-
+  
   int q = 0;
   CURLMsg* msg = NULL;
   while((msg = curl_multi_info_read(handle, &q)) != NULL) {
 
     if(msg->msg == CURLMSG_DONE) {
-
       std::vector<KurlConnection*>::iterator it = connections.begin();
       while(it != connections.end()) {
         KurlConnection* c = *it;
@@ -141,7 +141,7 @@ void Kurl::update() {
           ++it;
           continue;
         }
-        
+
         // DOWNLOAD
         if(c->type == KURL_FILE_DOWNLOAD) {
           KurlConnectionDownload* cd = static_cast<KurlConnectionDownload*>(*it);
@@ -174,8 +174,13 @@ void Kurl::update() {
 
         // GET
         else if(c->type == KURL_GET) {
+
           KurlConnectionGet* kg = static_cast<KurlConnectionGet*>(*it);
-          kg->request_callback(kg->buffer, kg->user);
+
+          if(kg->request_callback) {
+            kg->request_callback(kg->buffer, kg->user);
+          }
+
           delete kg;
           connections.erase(it);
           break;
@@ -230,6 +235,9 @@ bool Kurl::download(std::string url,
   initProgressCallback(c->handle);
 
   connections.push_back(c);
+
+  update(); // we directly start the request so 'isStillRunning()' returns a valid result
+
   return true;
 }
 
@@ -266,6 +274,9 @@ bool Kurl::get(std::string url,
   initProgressCallback(c->handle);
 
   connections.push_back(c);
+
+  update(); // we directly start the request so 'isStillRunning()' returns a valid result
+
   return true;
 }
 
@@ -342,6 +353,8 @@ bool Kurl::post(Form& f,
   initProgressCallback(c->handle);
 
   connections.push_back(c);
+
+  update(); // we directly start the request so 'isStillRunning()' returns a valid result
 
   return true;
 }
