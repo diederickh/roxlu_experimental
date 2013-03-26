@@ -85,6 +85,9 @@ macro(roxlu_app_iconify)
   if(APPLE)
     set(roxlu_app_icon_file "icon.icns")
   endif()
+  if(WIN32) 
+    set(roxlu_app_icon_file "icon.ico")
+  endif()
 endmacro()
 
 macro(roxlu_add_extern_lib lib)
@@ -173,10 +176,32 @@ macro(roxlu_install_app)
     else()
       add_executable(${roxlu_app_name} ${roxlu_source_files} ${roxlu_lib_source_files})
     endif()
-  else()
+  endif()
+
+  if(WIN32)
+
+    if(DEFINED roxlu_app_icon_file)
+      # Create icon resource file
+      include_directories(${roxlu_app_cmake_dir})
+      add_custom_command(OUTPUT ${roxlu_app_cmake_dir}/icon.o COMMAND windres.exe -I${roxlu_app_cmake_dir} -I${roxlu_cmake_dir}  -i${roxlu_cmake_dir}/win/icon.rc -o ${roxlu_app_cmake_dir}/icon.o)
+      list(APPEND roxlu_source_files ${roxlu_cmake_dir}/win/icon.rc)
+    endif()
+
+    add_executable(${roxlu_app_name} ${roxlu_source_files} ${roxlu_lib_source_files})
+    
+    if(DEFINED roxlu_app_icon_file)
+      # Remove the console 
+      # set_target_properties(${roxlu_app_name} PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+    endif()
+    
+  endif()
+
+  if(UNIX AND NOT APPLE)
     add_executable(${roxlu_app_name} ${roxlu_source_files} ${roxlu_lib_source_files})
   endif()
+
   target_link_libraries(${roxlu_app_name} ${roxlu_libs})
+
 
   install(TARGETS ${roxlu_app_name} DESTINATION ${roxlu_app_install_dir})
   install(FILES ${roxlu_install_files} DESTINATION ${roxlu_app_install_dir})

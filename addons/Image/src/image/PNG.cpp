@@ -65,6 +65,11 @@ PNG::~PNG() {
 }
 
 bool PNG::load(std::string filename, bool datapath) {
+
+#if defined(_WIN32) && defined(ROXLU_DEBUG)
+  RX_VERBOSE(("The png library results in wierd behaviour when compiling on windows in debug mode"));
+#endif  
+
   png_structp png_ptr;
   png_infop info_ptr; 
 
