@@ -18,6 +18,12 @@ void MP3WriterConfig::clear() {
   quality = 0;
   mode = MP3_WR_MODE_NOT_SET;
   samplerate = MP3_WR_SAMPLERATE_NOT_SET;
+  id3_title.clear();
+  id3_artist.clear();
+  id3_album.clear();
+  id3_year.clear();
+  id3_comment.clear();
+  id3_track.clear();
 }
 
 bool MP3WriterConfig::validate() {
@@ -60,8 +66,12 @@ bool MP3WriterConfig::validate() {
     quality = 5;
   }
 
-
   return true;
+}
+
+bool MP3WriterConfig::hasID3() {
+  return id3_title.size() || id3_artist.size() || id3_album.size()
+    || id3_year.size() || id3_comment.size() || id3_track.size();
 }
 
 // -----------------------------------------
@@ -138,6 +148,40 @@ bool MP3Writer::begin() {
   lame_set_mode(lame_flags, mode);
   lame_set_quality(lame_flags, config.quality); 
 
+  if(config.hasID3()) {
+    id3tag_init(lame_flags);
+  }
+
+  if(config.id3_title.size()) {
+    id3tag_set_title(lame_flags, config.id3_title.c_str());
+  }
+
+  if(config.id3_artist.size()) {
+    id3tag_set_artist(lame_flags, config.id3_artist.c_str());
+  }
+  
+  if(config.id3_album.size()) {
+    id3tag_set_album(lame_flags, config.id3_album.c_str());
+  }
+
+  if(config.id3_year.size()) {
+    id3tag_set_year(lame_flags, config.id3_year.c_str());
+  }
+
+  if(config.id3_comment.size()) {
+    id3tag_set_comment(lame_flags, config.id3_comment.c_str());
+  }
+
+  if(config.id3_track.size()) {
+    int r = id3tag_set_track(lame_flags, config.id3_track.c_str());
+    if(r == -1) {
+      RX_ERROR((MP3_WRERR_ID3_TRACK_OOR));
+    }
+    else if(r == -2) {
+      RX_ERROR((MP3_WRERR_ID3_TRACK_INVALID));
+    }
+  }
+
   if(lame_init_params(lame_flags) < 0) {
     RX_ERROR((MP3_WRERR_LAME_PARAMS));
     return false;
@@ -160,6 +204,14 @@ bool MP3Writer::end() {
     return false;
   }
   
+  int written = lame_encode_flush(lame_flags, (unsigned char*)mp3_buffer, MP3_WRITER_BUFFER_SIZE);
+  if(written < 0) {
+    RX_ERROR((MP3_WRERR_CANNOT_FLUSH));
+  }
+  else if(config.cb_data) {
+    config.cb_data((const char*)mp3_buffer, written, config.user);
+  }
+
   lame_close(lame_flags);
   
   config.cb_close(config.user);
@@ -172,26 +224,18 @@ bool MP3Writer::end() {
 
 
 void MP3Writer::addAudioInterleaved(const short int* data, size_t nbytes, int nsamples) {
+
   if(!is_setup) {
     return;
   }
+
   if(!is_started) {
     return;
   }
 
   int written = lame_encode_buffer_interleaved(lame_flags, (short int*)data, nsamples, mp3_buffer, MP3_WRITER_BUFFER_SIZE);
-  if(written > 0) {
+  if(written > 0 && config.cb_data) {
     config.cb_data((const char*)mp3_buffer, written, config.user);
-    /*
-    int ret = shout_send(shout, mp3_buffer, written);
-    if(ret != SHOUTERR_SUCCESS) {
-      RX_ERROR((ICE_ERR_SHOUT_SEND, shout_get_error(shout)));
-    }
-    else {
-      shout_sync(shout);
-    }
-    */
   }
-
 
 }
