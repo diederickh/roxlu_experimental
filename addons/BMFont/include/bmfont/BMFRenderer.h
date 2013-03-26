@@ -157,7 +157,8 @@ void BMFRenderer<T>::setup(int windowW, int windowH, BMFShader* useShader) {
 
   glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
-  glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RED, img.getWidth(), img.getHeight(), 0, GL_RED, GL_UNSIGNED_BYTE, img.getPixels());
+  //glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RED, img.getWidth(), img.getHeight(), 0, GL_RED, GL_UNSIGNED_BYTE, img.getPixels());
+  glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_R8, img.getWidth(), img.getHeight(), 0, GL_RED, GL_UNSIGNED_BYTE, img.getPixels());
   is_setup = true;
 
   glGenBuffers(1, &vbo);

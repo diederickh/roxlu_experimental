@@ -92,6 +92,13 @@ Code Conventions
   load/save from the data path `load(std::string filepath, bool datapath = false)` and `save(std::string filepath, bool datapath = false)`
 
 
+Tips & Tricks
+-------------
+- You can add a icon and create application bundle by calling the `roxlu_app_iconify()` macro. For 
+  now this only works on Mac. If you called `roxlu_app_iconify()` an application bundle will be created
+  on Mac and the file `[yourapp]/build/cmake/icon.icns` will be used. Checkout http://www.img2icnsapp.com/ 
+  to create icon files.
+
 TODO
 ----
 - [ ] Remove all unused #defines and use compiler preprocessor flag if possible:
