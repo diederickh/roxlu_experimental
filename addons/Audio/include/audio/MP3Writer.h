@@ -3,6 +3,7 @@
 
 #include <roxlu/core/Log.h>
 #include <lame/lame.h>
+#include <string>
 
 #define MP3_WRITER_BUFFER_SIZE 8192
 #define MP3_WRERR_NOT_SETUP "Cannot begin with encoding MP3 as we havent been setup. Call setup() first"
@@ -16,6 +17,9 @@
 #define MP3_WRERR_NO_BITRATE "Cannot validate because not bitrate is set int the config. Use e.g. 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 192, 224, 256, 320"
 #define MP3_WRERR_LAME_INIT "Cannot initialize lame"
 #define MP3_WRERR_LAME_PARAMS "Cannot initialze parameters"
+#define MP3_WRERR_CANNOT_FLUSH "Something went wrong while flushing the mp3 buffer."
+#define MP3_WRERR_ID3_TRACK_OOR "The given id3 track number is out of range"
+#define MP3_WRERR_ID3_TRACK_INVALID "The given id3 track number is invalid"
 
 typedef void(*mp3_writer_open_callback)(void* user);
 typedef void(*mp3_writer_data_callback)(const char* data, size_t nbytes, void* user);
@@ -37,6 +41,7 @@ struct MP3WriterConfig {
   ~MP3WriterConfig();
   void clear();
   bool validate();
+  bool hasID3();                                                          /* returns true if one of the id3_* field has a value */
 
   int bitrate;                                                            /* the bitrate in kilo bits */
   int num_channels;                                                       /* number of channels in the incoming audio stream */
@@ -46,7 +51,14 @@ struct MP3WriterConfig {
   mp3_writer_open_callback cb_open;                                       /* the mp3 writer only encodes audio and passes state changes into the callbacks */
   mp3_writer_data_callback cb_data;                                       /* gets called when new data is received */
   mp3_writer_close_callback cb_close;                                     /* gets called when we close the mp3 stream */
+  std::string id3_title;                                                  /* id3 tag: title of the song */
+  std::string id3_artist;                                                 /* id3 tag: name of the artist */
+  std::string id3_album;                                                  /* id3 tag: album of the song */
+  std::string id3_year;                                                   /* id3 tag: year of recording */
+  std::string id3_comment;                                                /* id3 tag: additional comments */
+  std::string id3_track;                                                  /* id3 tag: track number */
   void* user;                                                             /* gets passed into the callback functions */                     
+
 };
 
 class MP3Writer {
