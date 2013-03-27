@@ -37,9 +37,12 @@ if(CMAKE_BUILD_TYPE STREQUAL Debug)
   if(CMAKE_COMPILER_IS_GNUCXX)
     add_definitions("-ggdb")
   endif()
+
   if(MSVC)
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUGS} /Od /ZI")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Od /Z7")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEGUG} /Od /Z7")
   endif()
+
 endif()
 
 # -------------------------------------------------------------------
@@ -478,11 +481,10 @@ if(ROXLU_PLATFORM_WIN)
 
   endif()
 
-  set(CMAKE_C_FLAGS_DEBUG "/${roxlu_win_runtime_project}")
-  set(CMAKE_C_FLAGS_RELEASE "/${roxlu_win_runtime_project}")
-  set(CMAKE_CXX_FLAGS_DEBUG "/${roxlu_win_runtime_project}")
-  set(CMAKE_CXX_FLAGS_RELEASE "/${roxlu_win_runtime_project}")
-
+  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /${roxlu_win_runtime_project}")
+  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /${roxlu_win_runtime_project}")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /${roxlu_win_runtime_project}")
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /${roxlu_win_runtime_project}")
   
   include_directories(${roxlu_base_dir}/extern/include/msinttypes/)
 
