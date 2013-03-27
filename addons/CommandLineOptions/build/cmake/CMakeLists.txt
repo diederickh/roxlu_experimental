@@ -6,7 +6,7 @@ roxlu_addon_begin("command_line_options")
   roxlu_addon_add_source_file(cmo/CommandLineOptions.cpp)
 
   if(UNIX)
-    roxlu_add_extern_lib(argtable2.a)
+    roxlu_add_extern_lib(libargtable2.a)
   endif()
 
   if(WIN32)

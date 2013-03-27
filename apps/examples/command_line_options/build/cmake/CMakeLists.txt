@@ -10,10 +10,6 @@ roxlu_app_initialize("command_line_options")
 
 # -----------------------------------------------
   roxlu_app_add_source_file(main.cpp)
-  
-  if(UNIX)
-    roxlu_add_extern_lib(libargtable2.a)
-  endif()
 # -----------------------------------------------
 
 roxlu_install_app()
