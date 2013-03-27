@@ -2,13 +2,18 @@
 
 set d=%CD%
 
-if not exist "%d%\build" (
-   mkdir %d%\build
+if not exist "%d%\build.debug" (
+   mkdir %d%\build.debug
 )
 
-cd %d%\build
-cmake -G "Visual Studio 10" ..\
-cmake --build . --target install 
+if not exist "%d%\..\..\bin\data" (
+   mkdir %d%\..\..\bin\data
+)
+
+cd %d%\build.debug
+cmake -DCMAKE_BUILD_TYPE=Debug -G "Visual Studio 10" ..\
+cmake --build . --target install -- /p:Configuration=Debug
+
 :: -- /p:Configuration=Release /v:q
 :: %d%\bin\011_windows.exe
 :: cmake --build . --target install -- /p:Configuration=Debug
