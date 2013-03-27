@@ -1,0 +1,2 @@
+/Volumes/projects/homerecordings/roxlu/apps/examples/buttons_server/build/cmake/build.debug/CMakeFiles/buttons_server_debug.dir
+/Volumes/projects/homerecordings/roxlu/apps/examples/buttons_server/build/cmake/build.debug/CMakeFiles/roxlu_buttons.dir
