@@ -18,10 +18,10 @@
 #include <inttypes.h>
 
 extern "C" {
+#  include <uv.h>
 #  include <x264.h>
 #  include <libswscale/swscale.h>
 #  include <lame/lame.h>
-#  include <uv.h>
 }
 
 #include <roxlu/Roxlu.h>

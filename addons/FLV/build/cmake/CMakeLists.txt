@@ -27,6 +27,8 @@ roxlu_addon_begin("flv")
       roxlu_add_dll(avutil-52.dll)
       roxlu_add_dll(x264.dll)
       roxlu_add_dll(libmp3lame.dll)
+
+      add_definitions( -DWIN32_LEAN_AND_MEAN )   
   
   elseif(UNIX AND NOT APPLE)
     roxlu_add_extern_lib(libx264.a)

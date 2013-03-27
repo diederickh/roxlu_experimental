@@ -5,8 +5,8 @@ include(${CMAKE_CURRENT_LIST_DIR}/../../../../../lib/build/cmake/CMakeLists.txt)
 roxlu_enable_opengl()
 
 roxlu_app_initialize("empty")
-# ---------------------------------------------------------
-  roxlu_app_add_source_file(main.cpp)
-  roxlu_app_add_source_file(Simulation.cpp)
-# ---------------------------------------------------------
+   # ---------------------------------------------
+   roxlu_app_add_source_file(main.cpp)
+   roxlu_app_add_source_file(Simulation.cpp)
+   # ---------------------------------------------
 roxlu_install_app()
