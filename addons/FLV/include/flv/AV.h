@@ -18,9 +18,10 @@
 #include <inttypes.h>
 
 extern "C" {
-#include <x264.h>
-#include <libswscale/swscale.h>
-#include <lame/lame.h>
+#  include <x264.h>
+#  include <libswscale/swscale.h>
+#  include <lame/lame.h>
+#  include <uv.h>
 }
 
 #include <roxlu/Roxlu.h>
@@ -59,7 +60,9 @@ struct AVPacketSorter {
   }
 };
 
-class AV : public Runnable {
+void av_thread_function(void* av); // calls AV::run() in a separate thread
+
+class AV {
  public: 
   AV();
   ~AV();
@@ -81,7 +84,8 @@ class AV : public Runnable {
   void setVerticalFlip(bool flip);  // enable or disable vertical flip of video input, must be called before setupVideo()  (handy when recording downloaded pixels from opengl)
 
   void reset(); // do not call yourself, use stop(): resets the encoders. is called for you when the thread stops. (call stop() to stop the thread)
-  void run();  // do not call yourself, threaded function
+  //  void run();  // do not call yourself, threaded function
+  void run();
  private:
   bool initializeVideo(); // initializes video codecs, called by initialize()
   bool initializeAudio(); // initializes audio codecs, called by initialize(), for now we do not need to ininitialize anything here; see start() which creates a lame instance when necessary
@@ -138,10 +142,8 @@ class AV : public Runnable {
 
   /* muxer */
   bool is_initialized;
-
   FLV* flv;
-  Mutex mutex;
-  Mutex stop_mutex;
+
   std::vector<AVPacket*> packets;
   RingBuffer audio_ring_buffer;
   RingBuffer video_ring_buffer;
@@ -150,7 +152,11 @@ class AV : public Runnable {
 
   /* thread */
   bool must_stop; // when called stop(), we stop our threaded function.
-  Thread thread; // thread handle, see start(), stop
+  uv_thread_t thread;
+  uv_mutex_t mutex;
+  uv_mutex_t stop_mutex;
+
+  //Thread thread; // thread handle, see start(), stop
 };
 
 inline void AV::addVideoFrame(const void* data) {
@@ -162,7 +168,7 @@ inline void AV::addVideoFrame(const void* data) {
       vid_time_started = rx_millis();
     }
 
-    mutex.lock();
+    uv_mutex_lock(&mutex);
     {
       AVPacket* p = new AVPacket();
       p->type = AV_VIDEO;
@@ -173,9 +179,8 @@ inline void AV::addVideoFrame(const void* data) {
 
       video_ring_buffer.write((char*)data, p->num_bytes);
       packets.push_back(p);
-
     }
-    mutex.unlock();
+    uv_mutex_unlock(&mutex);
   }
   vid_is_buffer_ready = true;
 }
@@ -190,7 +195,7 @@ inline void AV::addAudioFrame(const void* data, int nframes) {
 
   audio_total_samples += nframes;
 
-  mutex.lock();
+  uv_mutex_lock(&mutex);
   {
     if(!audio_time_started) {
       audio_time_started = rx_millis();
@@ -205,7 +210,7 @@ inline void AV::addAudioFrame(const void* data, int nframes) {
     audio_ring_buffer.write((char*)data, p->num_bytes);
     packets.push_back(p);
   }
-  mutex.unlock();
+  uv_mutex_unlock(&mutex);
 
   audio_is_buffer_ready = true;
 }
@@ -246,17 +251,17 @@ inline void AV::start() {
     RX_ERROR(("ERROR: cannot open FLV."));
     return;
   }
-  thread.create(*this);
+  uv_thread_create(&thread, av_thread_function, (void*)this);
 }
 
 inline void AV::stop() {
-  stop_mutex.lock();
+  uv_mutex_lock(&stop_mutex);
   must_stop = true;
-  stop_mutex.unlock();
+  uv_mutex_unlock(&stop_mutex);
 }
 
 inline void AV::waitForEncodingThreadToFinish() {
-  thread.join();
+  uv_thread_join(&thread);
 }
 
 inline AVPixelFormat AV::videoFormatToAVPixelFormat(AVVideoFormat f) {

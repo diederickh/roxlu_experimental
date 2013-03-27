@@ -7,7 +7,7 @@ roxlu_addon_begin("flv")
   roxlu_addon_add_source_file(flv/FLVScreenRecorder.cpp)
 
 
-  if(ROXLU_PLATFORM_WIN)
+  if(WIN32)
       roxlu_add_extern_lib(libuv.lib)
       roxlu_add_extern_lib(avutil.lib)
       roxlu_add_extern_lib(swscale.lib)
@@ -28,17 +28,19 @@ roxlu_addon_begin("flv")
       roxlu_add_dll(x264.dll)
       roxlu_add_dll(libmp3lame.dll)
   
-  elseif(ROXLU_PLATFORM_LINUX)
+  elseif(UNIX AND NOT APPLE)
     roxlu_add_extern_lib(libx264.a)
     roxlu_add_extern_lib(libmp3lame.a)
     roxlu_add_extern_lib(libswscale.a)
     roxlu_add_extern_lib(libavutil.a)
+    roxlu_add_extern_lib(libuv.a)
   
-  elseif(ROXLU_PLATFORM_MAC)
+  elseif(APPLE)
     roxlu_add_extern_lib(libmp3lame.a)
     roxlu_add_extern_lib(libswscale.a)
     roxlu_add_extern_lib(libavutil.a)
     roxlu_add_extern_lib(libx264.a)
+    roxlu_add_extern_lib(libuv.a)
   endif()
   
   # --------------------------------------------------------------------------------------
