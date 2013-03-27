@@ -5,8 +5,8 @@ Simple wrapper around [argtable](http://argtable.sourceforge.net/), to add comma
 options to your application. I use this when I need to load different configuration files
 for debug and production applications.
 
-//Simple usage (pseudo code)://
-<pre>
+_Simple usage (pseudo code):_
+```C++
 
 #include <cmo/CommandLineOptions.h>
 
@@ -35,5 +35,4 @@ int main(int argc, char* argv[]) {
     }
 
 }    
-        
-</pre>
+```        
