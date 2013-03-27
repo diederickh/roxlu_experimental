@@ -18,6 +18,8 @@ roxlu_addon_begin("audio")
   if(UNIX)
     roxlu_add_extern_lib(libportaudio.a)
     roxlu_add_extern_lib(libsndfile.a)
+    roxlu_add_extern_lib(libid3.a)
+    roxlu_add_extern_lib(libiconv.a)  # iconv
   endif()
 
   if(APPLE)

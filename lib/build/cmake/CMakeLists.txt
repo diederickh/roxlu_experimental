@@ -448,6 +448,7 @@ add_definitions(
   "-Wno-invalid-offsetof"
   "-Wreturn-type"
   "-Werror=return-type"
+  "-Wno-deprecated-writable-strings"
 )
 endif(NOT ROXLU_PLATFORM_WIN)
 

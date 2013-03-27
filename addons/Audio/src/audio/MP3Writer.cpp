@@ -74,6 +74,14 @@ bool MP3WriterConfig::hasID3() {
     || id3_year.size() || id3_comment.size() || id3_track.size();
 }
 
+int MP3WriterConfig::samplerateToInt() {
+  if(samplerate == MP3_WR_SAMPLERATE_44100) {
+    return 44100;
+  }
+
+  return 0;
+}
+
 // -----------------------------------------
 
 MP3Writer::MP3Writer() 
@@ -132,9 +140,7 @@ bool MP3Writer::begin() {
     mode = MONO;
   }
 
-  if(config.samplerate == MP3_WR_SAMPLERATE_44100) {
-    samplerate = 44100;
-  }
+  samplerate = config.samplerateToInt();
 
   lame_flags = lame_init();
   if(!lame_flags) {

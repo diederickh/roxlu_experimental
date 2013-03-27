@@ -41,6 +41,7 @@ struct MP3WriterConfig {
   ~MP3WriterConfig();
   void clear();
   bool validate();
+  int samplerateToInt();
   bool hasID3();                                                          /* returns true if one of the id3_* field has a value */
 
   int bitrate;                                                            /* the bitrate in kilo bits */
