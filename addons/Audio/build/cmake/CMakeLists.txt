@@ -11,8 +11,10 @@ roxlu_addon_begin("audio")
   if(WIN32)
     roxlu_add_extern_lib(portaudio_x86.lib)
     roxlu_add_extern_lib(libsndfile-1.lib)
+    roxlu_add_extern_lib(libmp3lame.lib)
     roxlu_add_dll(portaudio_x86.dll)
     roxlu_add_dll(libsndfile-1.dll)
+    roxlu_add_dll(libmp3lame.dll)
   endif()
 
   if(UNIX)
@@ -20,6 +22,7 @@ roxlu_addon_begin("audio")
     roxlu_add_extern_lib(libsndfile.a)
     roxlu_add_extern_lib(libid3.a)
     roxlu_add_extern_lib(libiconv.a)  # iconv
+    roxlu_add_extern_lib(libmp3lame.a)
   endif()
 
   if(APPLE)
