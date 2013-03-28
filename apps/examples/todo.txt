@@ -1,0 +1,32 @@
+Which app runs on which platform
+--------------------------------
+x = YEP runs
+- = NOPE 
+  = not tested yet
+
+Win, Mac, Linux
+------------------------------
+x    x           audio_recorder
+x    x           bmfont
+x    x           buttons_client
+x    x           buttons_server
+x    x           command_line_options
+x                config
+x                curl_file_download
+x                curl_form_post
+x                curl_http_request
+x                empty
+x    x           flocking
+-                flv_recorder                    # windows needs to convert the colors
+x                noise
+x                pango
+x                sqlite
+x                twitter_get_tokens
+x                twitter_streaming_example
+x                twitter_streaming_user_example
+x                uploader
+x                uv_client_socket
+x                uv_threads
+-                vpx_client                       # webm addon is not yet supported on windows
+-                vpx_server                       # webm addon is not yet supported on windows
+-                webm_recorder                    # webm addon is not yet supported on windows

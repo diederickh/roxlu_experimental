@@ -33,6 +33,8 @@ AV::AV()
   ,is_initialized(false)
   ,must_stop(false)
 {
+  uv_mutex_init(&mutex);
+  uv_mutex_init(&stop_mutex);
 }
 
 AV::~AV() {
@@ -239,14 +241,20 @@ bool AV::openX264() {
 
 #define AV_CHECK_MUST_STOP \
   {                                             \
-    stop_mutex.lock();                          \
+    uv_mutex_lock(&stop_mutex);                 \
     if(must_stop) {                             \
-      stop_mutex.unlock();                      \
+       uv_mutex_unlock(&stop_mutex);            \
       break;                                    \
     }                                           \
-    stop_mutex.unlock();                        \
+    uv_mutex_unlock(&stop_mutex);               \
   }                                            
 
+
+
+void av_thread_function(void* user) {
+  AV* av_ptr = static_cast<AV*>(user);
+  av_ptr->run();
+}
 
 void AV::run() {
 
@@ -273,7 +281,7 @@ void AV::run() {
         continue;
       }
 
-      mutex.lock();
+      uv_mutex_lock(&mutex);
       {
         std::copy(packets.begin(), packets.end(), std::back_inserter(work_packets));
         audio_work_buffer.write(audio_ring_buffer.getReadPtr(), audio_ring_buffer.size());
@@ -282,7 +290,7 @@ void AV::run() {
         video_ring_buffer.reset();
         packets.clear();
       }
-      mutex.unlock();
+      uv_mutex_unlock(&mutex);
 
       for(std::vector<AVPacket*>::iterator it = work_packets.begin(); it != work_packets.end(); ++it) {
         AVPacket* p = *it;
@@ -323,14 +331,14 @@ void AV::run() {
         continue;
       }
 
-      mutex.lock();
+      uv_mutex_lock(&mutex);
       {
         std::copy(packets.begin(), packets.end(), std::back_inserter(work_packets));
         video_work_buffer.write(video_ring_buffer.getReadPtr(), video_ring_buffer.size());
         packets.clear();
         video_ring_buffer.reset();
       }
-      mutex.unlock();
+      uv_mutex_unlock(&mutex);
 
       for(std::vector<AVPacket*>::iterator it = work_packets.begin(); it != work_packets.end(); ++it) {
         AVPacket* p = *it;
@@ -351,9 +359,7 @@ void AV::run() {
 
     } // video only
   }
-
   reset();
-  thread.exit();
 }
 
 void AV::encodeAudioPacket(AVPacket* p) {
@@ -513,6 +519,9 @@ void AV::shutdown() {
     audio_lame_flags = NULL;
   }
   
+  uv_mutex_destroy(&mutex);
+  uv_mutex_destroy(&stop_mutex);
+
   vid_sws = NULL;
   vid_encoder = NULL;
 }
@@ -527,7 +536,6 @@ void AV::reset() {
   flv->close(p);
 
   if(audio_lame_flags) {
-    printf("----- LAME FLAGS HAVE BEEN SET ----------\n");
     //lame_encode_finish(audio_lame_flags, audio_tmp_in_buffer, MP3_BUFFER_SIZE);
     lame_close(audio_lame_flags);
     audio_lame_flags = NULL;
@@ -554,9 +562,9 @@ void AV::reset() {
   audio_work_buffer.reset();
   video_work_buffer.reset();
 
-  stop_mutex.lock();
+  uv_mutex_lock(&stop_mutex);
   must_stop = false;
-  stop_mutex.unlock();
+  uv_mutex_unlock(&stop_mutex);
 
   x264_encoder_close(vid_encoder);
 
@@ -565,7 +573,6 @@ void AV::reset() {
     *it = NULL;
   }
   packets.clear();
-
 }
 
 FLVAudioSampleRate AV::audioSampleRateToFLVSampleRate(int rate) {

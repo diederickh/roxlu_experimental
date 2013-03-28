@@ -37,9 +37,12 @@ if(CMAKE_BUILD_TYPE STREQUAL Debug)
   if(CMAKE_COMPILER_IS_GNUCXX)
     add_definitions("-ggdb")
   endif()
+
   if(MSVC)
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUGS} /Od /ZI")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Od /Z7")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEGUG} /Od /Z7")
   endif()
+
 endif()
 
 # -------------------------------------------------------------------
@@ -72,10 +75,23 @@ endmacro(roxlu_add_addon)
 macro(roxlu_add_dll dll)
 
   if(WIN32)
-    list(APPEND roxlu_install_files ${roxlu_extern_bin_dir}/${dll})
+    if(CMAKE_BUILD_TYPE STREQUAL Debug AND EXISTS ${roxlu_extern_bin_debug_dir}/${dll})
+      list(APPEND roxlu_install_files ${roxlu_extern_bin_debug_dir}/${dll})
+    else()
+      list(APPEND roxlu_install_files ${roxlu_extern_bin_dir}/${dll})
+    endif()
   endif()
 
 endmacro(roxlu_add_dll)
+
+macro(roxlu_app_iconify)
+  if(APPLE)
+    set(roxlu_app_icon_file "icon.icns")
+  endif()
+  if(WIN32) 
+    set(roxlu_app_icon_file "icon.ico")
+  endif()
+endmacro()
 
 macro(roxlu_add_extern_lib lib)
   if(CMAKE_BUILD_TYPE STREQUAL Debug AND EXISTS ${roxlu_extern_lib_debug_dir}/${lib})
@@ -121,11 +137,11 @@ macro(roxlu_app_initialize app_name)
 
   if(CMAKE_BUILD_TYPE STREQUAL Debug)
     set(roxlu_app_name ${app_name}_debug)
-    message("-------------------------------------- ${roxlu_app_name} =========================")
   else()
     set(roxlu_app_name ${app_name})
   endif()
 
+  set(roxlu_app_cmake_dir ${CMAKE_CURRENT_LIST_DIR})
   set(roxlu_app_base_dir ${CMAKE_CURRENT_LIST_DIR}/../..)
   set(roxlu_app_build_dir ${CMAKE_CURRENT_LIST_DIR}/)
   set(roxlu_app_install_dir ${roxlu_app_base_dir}/bin)
@@ -157,12 +173,38 @@ macro(roxlu_install_app)
   endif()
 
   if(APPLE)
-    #add_executable(${roxlu_app_name} MACOSX_BUNDLE ${roxlu_source_files} ${roxlu_lib_source_files})
+    if(DEFINED roxlu_app_icon_file)
+      add_executable(${roxlu_app_name} MACOSX_BUNDLE ${roxlu_source_files} ${roxlu_lib_source_files} ${roxlu_app_cmake_dir}/${roxlu_app_icon_file})
+      set_target_properties(${roxlu_app_name} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${roxlu_cmake_dir}/osx/Info.plist") 
+    else()
+      add_executable(${roxlu_app_name} ${roxlu_source_files} ${roxlu_lib_source_files})
+    endif()
+  endif()
+
+  if(WIN32)
+
+    if(DEFINED roxlu_app_icon_file)
+      # Create icon resource file
+      include_directories(${roxlu_app_cmake_dir})
+      add_custom_command(OUTPUT ${roxlu_app_cmake_dir}/icon.o COMMAND windres.exe -I${roxlu_app_cmake_dir} -I${roxlu_cmake_dir}  -i${roxlu_cmake_dir}/win/icon.rc -o ${roxlu_app_cmake_dir}/icon.o)
+      list(APPEND roxlu_source_files ${roxlu_cmake_dir}/win/icon.rc)
+    endif()
+
     add_executable(${roxlu_app_name} ${roxlu_source_files} ${roxlu_lib_source_files})
-  else()
+    
+    if(DEFINED roxlu_app_icon_file)
+      # Remove the console 
+      # set_target_properties(${roxlu_app_name} PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+    endif()
+    
+  endif()
+
+  if(UNIX AND NOT APPLE)
     add_executable(${roxlu_app_name} ${roxlu_source_files} ${roxlu_lib_source_files})
   endif()
+
   target_link_libraries(${roxlu_app_name} ${roxlu_libs})
+
 
   install(TARGETS ${roxlu_app_name} DESTINATION ${roxlu_app_install_dir})
   install(FILES ${roxlu_install_files} DESTINATION ${roxlu_app_install_dir})
@@ -241,6 +283,7 @@ endmacro()
 #option(ROXLU_32BIT "Build 32bit version" OFF)
 #option(ROXLU_64BIT "Build 64bit version" ON)
 
+set(roxlu_cmake_dir ${CMAKE_CURRENT_LIST_DIR})
 set(roxlu_base_dir ${CMAKE_CURRENT_LIST_DIR}/../../../)
 set(roxlu_src_dir ${roxlu_base_dir}lib/src/roxlu/)
 set(roxlu_include_dir ${roxlu_base_dir}lib/include/)
@@ -408,12 +451,14 @@ add_definitions(
   "-Wno-invalid-offsetof"
   "-Wreturn-type"
   "-Werror=return-type"
+  "-Wno-deprecated-writable-strings"
 )
 endif(NOT ROXLU_PLATFORM_WIN)
 
 set(roxlu_extern_lib_dir ${roxlu_base_dir}/extern/lib/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}/)
 set(roxlu_extern_lib_debug_dir ${roxlu_base_dir}/extern/lib/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}d/)
 set(roxlu_extern_bin_dir ${roxlu_base_dir}/extern/bin/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}/)
+set(roxlu_extern_bin_debug_dir ${roxlu_base_dir}/extern/bin/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}d/)
 
 set(roxlu_include_dirs
   ${roxlu_include_dirs}
@@ -436,11 +481,10 @@ if(ROXLU_PLATFORM_WIN)
 
   endif()
 
-  set(CMAKE_C_FLAGS_DEBUG "/${roxlu_win_runtime_project}")
-  set(CMAKE_C_FLAGS_RELEASE "/${roxlu_win_runtime_project}")
-  set(CMAKE_CXX_FLAGS_DEBUG "/${roxlu_win_runtime_project}")
-  set(CMAKE_CXX_FLAGS_RELEASE "/${roxlu_win_runtime_project}")
-
+  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /${roxlu_win_runtime_project}")
+  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /${roxlu_win_runtime_project}")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /${roxlu_win_runtime_project}")
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /${roxlu_win_runtime_project}")
   
   include_directories(${roxlu_base_dir}/extern/include/msinttypes/)
 

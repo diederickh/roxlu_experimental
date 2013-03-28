@@ -65,6 +65,11 @@ PNG::~PNG() {
 }
 
 bool PNG::load(std::string filename, bool datapath) {
+
+#if defined(_WIN32) && defined(ROXLU_DEBUG)
+  RX_VERBOSE(("The png library results in wierd behaviour when compiling on windows in debug mode"));
+#endif  
+
   png_structp png_ptr;
   png_infop info_ptr; 
 
@@ -78,7 +83,6 @@ bool PNG::load(std::string filename, bool datapath) {
   }
 
   FILE* fp = fopen(filename.c_str(), "rb");
-
   if(!fp) {
     RX_ERROR((PNG_ERR_LOAD_NO_FILE, filename.c_str()));
     fp = NULL;
@@ -101,7 +105,7 @@ bool PNG::load(std::string filename, bool datapath) {
     fp = NULL;
     return false;
   }
-
+  
   png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
   if(!png_ptr) {
     RX_ERROR((PNG_ERR_CREATE_READ_ST));
@@ -119,19 +123,21 @@ bool PNG::load(std::string filename, bool datapath) {
     return false;
   }
 
+  #if !defined(_WIN32)
   if(setjmp(png_jmpbuf(png_ptr))) {
     png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
     fclose(fp);
     fp = NULL;
     return false;
   }
+  #endif
 
   // @TODO - add option to rescale to 8bit color info or 16bit
   // @TODO - add option to strip the alpha (not recommended in the example)
   png_init_io(png_ptr, fp);
   png_set_sig_bytes(png_ptr, 8);
   png_read_info(png_ptr, info_ptr);
-  
+
   width = png_get_image_width(png_ptr, info_ptr);
   height = png_get_image_height(png_ptr, info_ptr);
   bit_depth = png_get_bit_depth(png_ptr, info_ptr);

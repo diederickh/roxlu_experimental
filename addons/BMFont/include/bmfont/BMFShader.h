@@ -76,10 +76,8 @@ static const char* BMFONT_FS = GLSL(120,
                                     
 
                                     void main() {
-                                      vec4 col = texture2DRect(u_tex, v_tex);
-                                      gl_FragColor = col.r * v_fg_color; 
-                                      gl_FragColor.a = 1.0;
-
+                                      float intensity = texture2DRect(u_tex, v_tex).r;
+                                      gl_FragColor = vec4(v_fg_color.rgb, intensity);
                                     }
 );
 

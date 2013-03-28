@@ -1,7 +1,12 @@
 @echo off
 
-if exist build (
-   rd /s/q build
+if exist build.debug (
+   rd /s/q build.debug
 )
 
-mkdir build
+if exist build.release (
+   rd /s/q build.release
+)
+
+mkdir build.release
+mkdir build.debug

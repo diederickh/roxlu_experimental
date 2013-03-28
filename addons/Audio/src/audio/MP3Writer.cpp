@@ -1,4 +1,6 @@
 #include <audio/MP3Writer.h>
+#include <roxlu/core/Utils.h>
+
 
 MP3WriterConfig::MP3WriterConfig() {
   clear();
@@ -18,6 +20,12 @@ void MP3WriterConfig::clear() {
   quality = 0;
   mode = MP3_WR_MODE_NOT_SET;
   samplerate = MP3_WR_SAMPLERATE_NOT_SET;
+  id3_title.clear();
+  id3_artist.clear();
+  id3_album.clear();
+  id3_year.clear();
+  id3_comment.clear();
+  id3_track.clear();
 }
 
 bool MP3WriterConfig::validate() {
@@ -60,8 +68,77 @@ bool MP3WriterConfig::validate() {
     quality = 5;
   }
 
-
   return true;
+}
+
+bool MP3WriterConfig::hasID3() {
+  return id3_title.size() || id3_artist.size() || id3_album.size()
+    || id3_year.size() || id3_comment.size() || id3_track.size();
+}
+
+int MP3WriterConfig::samplerateToInt() {
+  if(samplerate == MP3_WR_SAMPLERATE_44100) {
+    return 44100;
+  }
+  else if(samplerate == MP3_WR_SAMPLERATE_16000) {
+    return 16000;
+  }
+
+  return 0;
+}
+
+// -----------------------------------------
+
+void mp3_writer_default_open(void* user) {
+  MP3FileWriter* f = static_cast<MP3FileWriter*>(user);
+  if(!f->ofs.is_open()) {
+    return;
+  }
+}
+
+void mp3_writer_default_close(void* user) {
+  MP3FileWriter* f = static_cast<MP3FileWriter*>(user);
+  if(!f->ofs.is_open()) {
+    return;
+  }
+
+  f->ofs.close();
+}
+
+void mp3_writer_default_data(const char* data, size_t nbytes, void* user) {
+  MP3FileWriter* f = static_cast<MP3FileWriter*>(user);
+  if(!f->ofs.is_open()) {
+    return;
+  }
+
+  f->ofs.write((char*)data, nbytes);
+}
+
+MP3FileWriter::MP3FileWriter(std::string filename, bool datapath) 
+  :cb_open(NULL)
+  ,cb_data(NULL)
+  ,cb_close(NULL)
+{
+  if(datapath) {
+    filename = rx_to_data_path(filename);
+  }
+
+  ofs.open(filename.c_str(), std::ios::binary);
+
+  if(!ofs.is_open()) {
+    RX_ERROR((MP3_WRERR_FILE_OPEN, filename.c_str()));
+  }
+  else {
+    cb_open = mp3_writer_default_open;
+    cb_close = mp3_writer_default_close;
+    cb_data = mp3_writer_default_data;
+  }
+}
+
+MP3FileWriter::~MP3FileWriter() {
+  cb_open = NULL;
+  cb_close = NULL;
+  cb_data = NULL;
 }
 
 // -----------------------------------------
@@ -122,9 +199,7 @@ bool MP3Writer::begin() {
     mode = MONO;
   }
 
-  if(config.samplerate == MP3_WR_SAMPLERATE_44100) {
-    samplerate = 44100;
-  }
+  samplerate = config.samplerateToInt();
 
   lame_flags = lame_init();
   if(!lame_flags) {
@@ -137,6 +212,40 @@ bool MP3Writer::begin() {
   lame_set_brate(lame_flags, config.bitrate);
   lame_set_mode(lame_flags, mode);
   lame_set_quality(lame_flags, config.quality); 
+
+  if(config.hasID3()) {
+    id3tag_init(lame_flags);
+  }
+
+  if(config.id3_title.size()) {
+    id3tag_set_title(lame_flags, config.id3_title.c_str());
+  }
+
+  if(config.id3_artist.size()) {
+    id3tag_set_artist(lame_flags, config.id3_artist.c_str());
+  }
+  
+  if(config.id3_album.size()) {
+    id3tag_set_album(lame_flags, config.id3_album.c_str());
+  }
+
+  if(config.id3_year.size()) {
+    id3tag_set_year(lame_flags, config.id3_year.c_str());
+  }
+
+  if(config.id3_comment.size()) {
+    id3tag_set_comment(lame_flags, config.id3_comment.c_str());
+  }
+
+  if(config.id3_track.size()) {
+    int r = id3tag_set_track(lame_flags, config.id3_track.c_str());
+    if(r == -1) {
+      RX_ERROR((MP3_WRERR_ID3_TRACK_OOR));
+    }
+    else if(r == -2) {
+      RX_ERROR((MP3_WRERR_ID3_TRACK_INVALID));
+    }
+  }
 
   if(lame_init_params(lame_flags) < 0) {
     RX_ERROR((MP3_WRERR_LAME_PARAMS));
@@ -160,6 +269,14 @@ bool MP3Writer::end() {
     return false;
   }
   
+  int written = lame_encode_flush(lame_flags, (unsigned char*)mp3_buffer, MP3_WRITER_BUFFER_SIZE);
+  if(written < 0) {
+    RX_ERROR((MP3_WRERR_CANNOT_FLUSH));
+  }
+  else if(config.cb_data) {
+    config.cb_data((const char*)mp3_buffer, written, config.user);
+  }
+
   lame_close(lame_flags);
   
   config.cb_close(config.user);
@@ -172,26 +289,35 @@ bool MP3Writer::end() {
 
 
 void MP3Writer::addAudioInterleaved(const short int* data, size_t nbytes, int nsamples) {
+
   if(!is_setup) {
     return;
   }
+
   if(!is_started) {
     return;
   }
 
   int written = lame_encode_buffer_interleaved(lame_flags, (short int*)data, nsamples, mp3_buffer, MP3_WRITER_BUFFER_SIZE);
-  if(written > 0) {
+  if(written > 0 && config.cb_data) {
     config.cb_data((const char*)mp3_buffer, written, config.user);
-    /*
-    int ret = shout_send(shout, mp3_buffer, written);
-    if(ret != SHOUTERR_SUCCESS) {
-      RX_ERROR((ICE_ERR_SHOUT_SEND, shout_get_error(shout)));
-    }
-    else {
-      shout_sync(shout);
-    }
-    */
   }
 
+}
 
+void MP3Writer::addAudioMono(const short int* data, size_t nbytes, int nsamples) {
+
+ if(!is_setup) {
+    return;
+  }
+
+  if(!is_started) {
+    return;
+  }
+
+  int written = lame_encode_buffer(lame_flags, data, NULL, nsamples, mp3_buffer, MP3_WRITER_BUFFER_SIZE);
+  if(written > 0 && config.cb_data) {
+    config.cb_data((const char*)mp3_buffer, written, config.user);
+  }
+ 
 }

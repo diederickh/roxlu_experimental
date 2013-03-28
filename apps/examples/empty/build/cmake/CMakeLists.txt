@@ -1,7 +1,6 @@
-# Empty example, which compiles some addons too
 cmake_minimum_required(VERSION 2.8)
 
-include(${CMAKE_CURRENT_LIST_DIR}/../../../roxlu/lib/build/cmake/CMakeLists.txt) # roxlu cmake
+include(${CMAKE_CURRENT_LIST_DIR}/../../../../../lib/build/cmake/CMakeLists.txt) # roxlu cmake
 
 roxlu_enable_opengl()
 
