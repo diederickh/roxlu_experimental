@@ -451,8 +451,8 @@ add_definitions(
   "-Wno-invalid-offsetof"
   "-Wreturn-type"
   "-Werror=return-type"
-  "-Wno-deprecated-writable-strings"
 )
+#  "-Wno-deprecated-writable-strings"
 endif(NOT ROXLU_PLATFORM_WIN)
 
 set(roxlu_extern_lib_dir ${roxlu_base_dir}/extern/lib/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}/)
