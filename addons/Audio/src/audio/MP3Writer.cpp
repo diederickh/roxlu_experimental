@@ -1,4 +1,6 @@
 #include <audio/MP3Writer.h>
+#include <roxlu/core/Utils.h>
+
 
 MP3WriterConfig::MP3WriterConfig() {
   clear();
@@ -74,6 +76,71 @@ bool MP3WriterConfig::hasID3() {
     || id3_year.size() || id3_comment.size() || id3_track.size();
 }
 
+int MP3WriterConfig::samplerateToInt() {
+  if(samplerate == MP3_WR_SAMPLERATE_44100) {
+    return 44100;
+  }
+  else if(samplerate == MP3_WR_SAMPLERATE_16000) {
+    return 16000;
+  }
+
+  return 0;
+}
+
+// -----------------------------------------
+
+void mp3_writer_default_open(void* user) {
+  MP3FileWriter* f = static_cast<MP3FileWriter*>(user);
+  if(!f->ofs.is_open()) {
+    return;
+  }
+}
+
+void mp3_writer_default_close(void* user) {
+  MP3FileWriter* f = static_cast<MP3FileWriter*>(user);
+  if(!f->ofs.is_open()) {
+    return;
+  }
+
+  f->ofs.close();
+}
+
+void mp3_writer_default_data(const char* data, size_t nbytes, void* user) {
+  MP3FileWriter* f = static_cast<MP3FileWriter*>(user);
+  if(!f->ofs.is_open()) {
+    return;
+  }
+
+  f->ofs.write((char*)data, nbytes);
+}
+
+MP3FileWriter::MP3FileWriter(std::string filename, bool datapath) 
+  :cb_open(NULL)
+  ,cb_data(NULL)
+  ,cb_close(NULL)
+{
+  if(datapath) {
+    filename = rx_to_data_path(filename);
+  }
+
+  ofs.open(filename.c_str(), std::ios::binary);
+
+  if(!ofs.is_open()) {
+    RX_ERROR((MP3_WRERR_FILE_OPEN, filename.c_str()));
+  }
+  else {
+    cb_open = mp3_writer_default_open;
+    cb_close = mp3_writer_default_close;
+    cb_data = mp3_writer_default_data;
+  }
+}
+
+MP3FileWriter::~MP3FileWriter() {
+  cb_open = NULL;
+  cb_close = NULL;
+  cb_data = NULL;
+}
+
 // -----------------------------------------
 
 MP3Writer::MP3Writer() 
@@ -132,9 +199,7 @@ bool MP3Writer::begin() {
     mode = MONO;
   }
 
-  if(config.samplerate == MP3_WR_SAMPLERATE_44100) {
-    samplerate = 44100;
-  }
+  samplerate = config.samplerateToInt();
 
   lame_flags = lame_init();
   if(!lame_flags) {
@@ -238,4 +303,21 @@ void MP3Writer::addAudioInterleaved(const short int* data, size_t nbytes, int ns
     config.cb_data((const char*)mp3_buffer, written, config.user);
   }
 
+}
+
+void MP3Writer::addAudioMono(const short int* data, size_t nbytes, int nsamples) {
+
+ if(!is_setup) {
+    return;
+  }
+
+  if(!is_started) {
+    return;
+  }
+
+  int written = lame_encode_buffer(lame_flags, data, NULL, nsamples, mp3_buffer, MP3_WRITER_BUFFER_SIZE);
+  if(written > 0 && config.cb_data) {
+    config.cb_data((const char*)mp3_buffer, written, config.user);
+  }
+ 
 }

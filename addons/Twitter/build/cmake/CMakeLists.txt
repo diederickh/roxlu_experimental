@@ -29,6 +29,9 @@ roxlu_addon_begin("twitter")
   
   
   elseif(WIN32)
+
+    add_definitions( -DWIN32_LEAN_AND_MEAN ) 
+
     roxlu_add_extern_lib(ssleay32.lib)
     roxlu_add_extern_lib(libeay32.lib)
     roxlu_add_extern_lib(zlib.lib)

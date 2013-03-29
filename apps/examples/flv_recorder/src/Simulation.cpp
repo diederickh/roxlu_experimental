@@ -63,6 +63,8 @@ void Simulation::setupCapture() {
     ::exit(EXIT_FAILURE);
   }
 
+  // cap.printVerboseInfo();
+
   r = cap.startCapture();
   if(!r) {
     RX_ERROR(("ERROR: cannot start video capture.n"));

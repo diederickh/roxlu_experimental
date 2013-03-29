@@ -20,6 +20,8 @@ void char_callback(GLFWwindow* window, int chr);
 int main() {
   int width = 1024;
   int height = 768;
+  width = 640;
+  height = 480;
   sim_ptr = NULL;
 
   int c = 0;
