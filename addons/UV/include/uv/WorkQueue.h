@@ -10,6 +10,10 @@ typedef void(*work_queue_callback) (void* user);
 extern void work_queue_worker(uv_work_t* req);
 extern void work_queue_ready(uv_work_t* req, int status);
 
+#define WQ_ERR_STILL_RUNNING "There are still workers running.. waiting for them to finish"
+
+class WorkQueue;
+
 struct WorkQueueReq {
   WorkQueueReq();
   ~WorkQueueReq();
@@ -17,6 +21,7 @@ struct WorkQueueReq {
   work_queue_callback cb_worker;
   work_queue_callback cb_ready;
   void* user;
+  WorkQueue* work_queue;
 };
 
 class WorkQueue {
@@ -25,6 +30,10 @@ class WorkQueue {
   ~WorkQueue();
   void addWorker(work_queue_callback workerCB, work_queue_callback readCB, void* user);
   void update();
+  size_t count();
+
+  size_t num_workers;
   uv_loop_t* loop;
+  uv_mutex_t mutex;
 };
 #endif

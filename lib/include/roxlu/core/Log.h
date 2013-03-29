@@ -1,6 +1,8 @@
 #ifndef ROXLU_LOG_H
 #define ROXLU_LOG_H
 
+#include <iostream>
+
 #define RX_LOG_NO_COLOR
 #define RX_LOG_LEVEL_ALL 4
 #define RX_LOG_LEVEL_ERROR  1
