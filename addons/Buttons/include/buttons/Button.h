@@ -6,15 +6,17 @@
 
 namespace buttons {
 
+  typedef void(*button_on_click_callback)(int id, void* user);
+
   class Buttons;
 
-  template<class T>
-    class Button : public Element {
+  class Button : public Element {
   public:
-  Button(unsigned int id, T* cb, const string& name) 
+  Button(unsigned int id, button_on_click_callback clickCallback, void* user, const string& name) 
     :Element(BTYPE_BUTTON, name)
       ,id(id)
-      ,cb(cb)
+      ,cb_click(clickCallback)
+      ,cb_user(user)
       ,label_dx(0)
       {
         h = 20;		
@@ -38,6 +40,7 @@ namespace buttons {
     void generateStaticText() {
       label_dx = static_text->add(x+4, y+2, label, 0.9, 0.9, 0.9, 0.9);
     }
+
     void updateTextPosition() {
       static_text->setTextPosition(label_dx, x+4, y+2);
     }
@@ -80,27 +83,39 @@ namespace buttons {
     }
 	
     void onMouseClick(int mx, int my) {
-      (*cb)(id);
+      if(is_enabled && cb_click) {
+        cb_click(id, cb_user);
+      }
+
       flagValueChanged();
     }
 
     void setValue(void* v) {
-      (*cb)(id);
+      if(is_enabled && cb_click) {
+        cb_click(id, cb_user);
+      }
     }
 	
-    void save(std::ofstream& ofs) {	}
-    void load(std::ifstream& ifs) { }
-    bool canSave() { return false; }
-	
-	
-    void hide() {
+    void save(std::ofstream& ofs) {	
+    }
+
+    void load(std::ifstream& ifs) { 
+    }
+
+    bool canSave() { 
+      return false;
+    }
+		
+    Button& hide() {
       is_visible = false;
       static_text->setTextVisible(label_dx, false);
+      return *this;
     }
 	
-    void show() {
+    Button& show() {
       is_visible = true;
       static_text->setTextVisible(label_dx, true);
+      return *this;
     }
 
     bool serializeScheme(ButtonsBuffer& buffer) {
@@ -113,7 +128,9 @@ namespace buttons {
     float toggle_off_color[4];
     float button_bg_color[4];	
     unsigned int id;
-    T* cb;
+    button_on_click_callback cb_click;
+    void* cb_user;
+
   };
 
 } // namespace buttons

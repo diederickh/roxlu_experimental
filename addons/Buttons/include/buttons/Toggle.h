@@ -29,8 +29,8 @@ namespace buttons {
     bool serializeScheme(ButtonsBuffer& buffer);
 	
     Toggle& setColor(const float hue, float sat = 0.2f, float bright = 0.27f, float a = 1.0);
-    void hide();
-    void show();
+    Toggle& hide();
+    Toggle& show();
     void setValue(bool v);
 
     bool& value;

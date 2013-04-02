@@ -332,17 +332,19 @@ namespace buttons {
       needsTextUpdate();
     }
 	
-    void hide() {
+    Slider<T>& hide() {
       this->is_visible = false;
       static_text->setTextVisible(label_dx, false);
       dynamic_text->setTextVisible(txtval_dx, false);
+      return *this;
     }
 	
-    void show() {
+    Slider<T>& show() {
       this->is_visible = true;
       static_text->setTextVisible(label_dx, true);
       dynamic_text->setTextVisible(txtval_dx, true);
       updateTextPosition();
+      return *this;
     }
 
     bool serializeScheme(ButtonsBuffer& buffer) {

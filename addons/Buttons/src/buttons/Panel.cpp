@@ -141,12 +141,27 @@ namespace buttons {
     return active_gui->addBool(label, value);
   }
 
+  Button& Panel::addButton(const std::string& label, int id, button_on_click_callback cb, void* user) {
+    assert(active_gui != NULL);
+    return active_gui->addButton(label, id, cb, user);
+    //buttons::Button<T>* el = new Button<T>(id, cb, createCleanName(label));
+    //buttons::Button* el = new Button(id, cb, user, createCleanName(label));
+    //addElement(el, label);
+    //return *el;
+  }
+
   // get a Buttons
   Buttons& Panel::getButtons(const string& name) {
     vector<Buttons*>::iterator it = std::find_if(guis.begin(), guis.end(), ButtonsFindByName(name));
     assert(it != guis.end());
     return **it;
   }
+  
+  Element* Panel::getElement(const string label) {
+    assert(active_gui != NULL);
+    return active_gui->getElement(label);
+  }
+
   // set the current active gui
   void Panel::select(const string& name) {
     assert(active_gui != NULL);

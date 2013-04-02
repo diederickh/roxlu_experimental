@@ -52,12 +52,14 @@ namespace buttons {
     virtual void onLoaded(){}  // gets called once all data has been loaded 
     virtual bool serializeScheme(ButtonsBuffer& buffer){ return true; }; // serialize all data necessasry to "rebuild" this widget. client<->server
 	
-    virtual void hide();
-    virtual void show();
+    virtual Element& hide();
+    virtual Element& show();
+
+    virtual Element& enable();
+    virtual Element& disable();
 		
     virtual Element& setColor(const float hue, float sat = 0.2, float bright = 0.27, float a = 1.0f);
     virtual void setValue(void* v) {}  // added this for client/sever model where the value (or template type) can't be known.
-  
 	
     void needsRedraw();
     void needsTextUpdate(); // when you want to change the dynamic text
@@ -83,6 +85,7 @@ namespace buttons {
     bool needs_text_update;
     bool value_changed;
     bool drag_inside; // did the drag started from inside the element.
+    bool is_enabled; /* when disabled the element shouldn't respond to mouse events (but it's up to the element to implement this) */
 	
     float* bg_top_color;
     float* bg_bottom_color;
@@ -139,12 +142,24 @@ namespace buttons {
     return *this;
   }
 
-  inline void Element::show() {
+  inline Element& Element::show() {
     is_visible = true;
+    return *this;
   }
 
-  inline void Element::hide() {
+  inline Element& Element::hide() {
     is_visible = false;
+    return *this;
+  }
+
+  inline Element& Element::enable() {
+    is_enabled = true;
+    return *this;
+  }
+  
+  inline Element& Element::disable() {
+    is_enabled = false;
+    return *this;
   }
 
 

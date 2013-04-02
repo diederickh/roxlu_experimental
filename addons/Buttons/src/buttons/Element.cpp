@@ -30,6 +30,7 @@ namespace buttons {
     ,col_hue(0.5)
     ,event_data(NULL)
     ,parent(NULL)
+    ,is_enabled(true)
   {
     ++num_created;
     id = num_created;

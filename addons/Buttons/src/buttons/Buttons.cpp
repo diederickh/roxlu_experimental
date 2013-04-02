@@ -128,11 +128,11 @@ namespace buttons {
         Element& el = *(*it);
         el.update();
 			
-        if(el.is_child) {
+        if(el.is_child || !el.is_visible) {
           ++it;
           continue;
         }
-			
+
         h += el.h;
         ++it;
       }
@@ -197,7 +197,6 @@ namespace buttons {
       glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
       glBufferData(GL_ARRAY_BUFFER, allocated_bytes, NULL, GL_STREAM_DRAW); eglGetError();
 		
-
       glEnableVertexAttribArray(gui_shader.getAttribute("pos")); eglGetError();
       glEnableVertexAttribArray(gui_shader.getAttribute("col")); eglGetError();
       glVertexAttribPointer(gui_shader.getAttribute("pos"), 2, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), (GLvoid*)offsetof(ButtonVertex,pos));
@@ -386,6 +385,7 @@ namespace buttons {
     el->w = w;
     el->static_text = static_text;
     el->dynamic_text = dynamic_text;
+    el->setColor(col_hue, col_sat, col_bright, col_alpha);
     el->needsRedraw();
 	
     elements.push_back(el);
@@ -712,8 +712,11 @@ namespace buttons {
     }
   }
 
-  Element* Buttons::getElement(const string& name) {
-    vector<Element*>::iterator it = std::find_if(elements.begin(), elements.end(), ElementByName(name));
+  Element* Buttons::getElement(const string name) {
+
+    std::string clean_name = createCleanName(name);
+
+    vector<Element*>::iterator it = std::find_if(elements.begin(), elements.end(), ElementByName(clean_name));
     if(it == elements.end()) {
       return NULL;
     }

@@ -37,8 +37,8 @@ namespace buttons {
     Rectangle<T>& setColor(const float hue, float sat = 0.2f, float bright = 0.27f, float a = 1.0);
     Rectangle<T>& setX(const float min, const float max); // set min/max x
     Rectangle<T>& setY(const float min, const float max); // set min/max y
-    void hide();
-    void show();
+    Rectangle<T>& hide();
+    Rectangle<T>& show();
 	
   private:
     void calculateCoordinates();
@@ -397,15 +397,17 @@ namespace buttons {
   }
 
   template<class T>
-    void Rectangle<T>::hide() {
+    Rectangle<T>& Rectangle<T>::hide() {
     this->is_visible = false;
     this->static_text->setTextVisible(label_dx, false);
+    return *this;
   }
 
   template<class T>
-    void Rectangle<T>::show() {
+    Rectangle<T>& Rectangle<T>::show() {
     this->is_visible = true;
     this->static_text->setTextVisible(label_dx, true);
+    return *this;
   }
 	
   template<class T>

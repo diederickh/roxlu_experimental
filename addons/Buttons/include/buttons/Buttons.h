@@ -169,13 +169,13 @@ namespace buttons {
       return *el;
     }
 	
-    // Button
-    template<class T>
-      Button<T>& addButton(const std::string& label, int id,  T* cb) {
-      buttons::Button<T>* el = new Button<T>(id, cb, createCleanName(label));
+    //  Button
+    Button& addButton(const std::string& label, int id,  button_on_click_callback cb, void* user) {
+      buttons::Button* el = new Button(id, cb, user, createCleanName(label));
       addElement(el, label);
       return *el;
     }
+
 	
     void createOrtho(float w, float h);
     int getElementsHeight();
@@ -192,7 +192,7 @@ namespace buttons {
     void setPosition(int x, int y);
     void getPosition(int& x, int& y);
     friend class Storage; 
-    Element* getElement(const string& name);
+    Element* getElement(const string label);  /* we convert the given label into a internally used "clean name", so make sure that you pass in the same title as you did for the Buttons::add*() functions */
 	
     void setLock(bool yn);
     void close();

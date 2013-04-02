@@ -75,8 +75,8 @@ namespace buttons {
     bool canSave();
     bool serializeScheme(ButtonsBuffer& buffer);
 	
-    void hide();
-    void show();
+    ColorT<T>&  hide();
+    ColorT<T>&  show();
 
     void setValue(void* data); // used by e.g. client-server 
 
@@ -419,16 +419,17 @@ namespace buttons {
   } 
 
   template<class T>
-    void ColorT<T>::hide() {
+    ColorT<T>& ColorT<T>::hide() {
     this->is_visible = false;
     this->static_text->setTextVisible(this->label_dx, false);
+    return *this;
   }
 
   template<class T>
-    void ColorT<T>::show() {
+    ColorT<T>& ColorT<T>::show() {
     this->is_visible = true;
     this->static_text->setTextVisible(this->label_dx, true);
-
+    return *this;
   }
 
   template<class T>

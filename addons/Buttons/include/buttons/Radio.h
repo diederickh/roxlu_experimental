@@ -58,8 +58,8 @@ namespace buttons {
     bool canSave();
     bool serializeScheme(ButtonsBuffer& buffer);
 	
-    void hide();
-    void show();
+    Radio<T>& hide();
+    Radio<T>& show();
 
     bool updateSelected();
     void setValue(void* v); // see client/server
@@ -259,15 +259,17 @@ namespace buttons {
   }
 
   template<class T>
-    void Radio<T>::hide() {
+    Radio<T>& Radio<T>::hide() {
     is_visible = false;
     static_text->setTextVisible(label_dx, false);
+    return *this;
   }
 
   template<class T>
-    void Radio<T>::show() {
+    Radio<T>& Radio<T>::show() {
     is_visible = true;
     static_text->setTextVisible(label_dx, true);
+    return *this;
   }
 
   template<class T>

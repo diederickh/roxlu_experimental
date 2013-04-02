@@ -100,14 +100,16 @@ namespace buttons {
     needsRedraw();
   }
 
-  void Toggle::hide() {
+  Toggle& Toggle::hide() {
     is_visible = false;
     static_text->setTextVisible(label_dx, false);
+    return *this;
   }
 
-  void Toggle::show() {
+  Toggle& Toggle::show() {
     is_visible = true;
     static_text->setTextVisible(label_dx, true);
+    return *this;
   }
 
   Toggle& Toggle::setColor(const float hue, float sat, float bright, float a) {

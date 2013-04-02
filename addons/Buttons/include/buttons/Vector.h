@@ -53,8 +53,8 @@ namespace buttons {
     bool serializeScheme(ButtonsBuffer& buffer);
 	
     Vector<T>& setColor(const float hue, float sat = 0.2f , float bright = 0.27f, float a = 1.0);
-    void hide();
-    void show();
+    Vector<T>& hide();
+    Vector<T>& show();
 	
   private:
     void calculateCoordinates();
@@ -330,15 +330,17 @@ namespace buttons {
   }
 
   template<class T>
-    void Vector<T>::hide() {
+    Vector<T>& Vector<T>::hide() {
     this->is_visible = false;
     this->static_text->setTextVisible(label_dx, false);
+    return *this;
   }
 
   template<class T>
-    void Vector<T>::show() {
+    Vector<T>& Vector<T>::show() {
     this->is_visible = true;
     this->static_text->setTextVisible(label_dx, true);
+    return *this;
   }
 
   template<class T>

@@ -55,8 +55,8 @@ namespace buttons {
     void setValue(void* v); // client <-> server
     bool serializeScheme(ButtonsBuffer& buffer);
 
-    void hide();
-    void show();
+    Pad<T>& hide();
+    Pad<T>& show();
 	
     int label_dx;
     T* value;
@@ -284,15 +284,17 @@ namespace buttons {
   }
 
   template<class T>
-    void Pad<T>::hide() {
+    Pad<T>& Pad<T>::hide() {
     this->is_visible = false;
     this->static_text->setTextVisible(label_dx, false);
+    return *this;
   }
 
   template<class T>
-    void Pad<T>::show() {
+    Pad<T>& Pad<T>::show() {
     this->is_visible = true;
     this->static_text->setTextVisible(label_dx, true);
+    return *this;
   }
 	
   template<class T>

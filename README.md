@@ -103,5 +103,5 @@ TODO
 ----
 - [ ] Remove all unused #defines and use compiler preprocessor flag if possible:
   -  Eg. opengl/error.h uses ROXLU_DEBUG, use NDEBUG
-
+- [ ] All the build scripts should use the `make -j#` option for parallel builds
 - `ROXLU_DEBUG:` enable verbose output for e.g. opengl shaders @todo maybe just use NDEBUG

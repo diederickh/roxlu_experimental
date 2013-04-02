@@ -51,12 +51,8 @@ namespace buttons {
     Rectangle<int>& addRectanglei(const string& label, int* value); // pointer to array with 4 entries (topleft, bottomright)
     Rectangle<float>& addRectanglef(const string& label, float* value); // pointer to array with 4 entries (topleft, bottomright)
     Vector<float>& addVec2f(const string& label, float* value);
+    Button& addButton(const std::string& label, int id, button_on_click_callback cb, void* user);
 
-    // Button
-    template<class T>
-      Button<T>& addButton(const std::string& label, int id, T* cb) {
-      return active_gui->addButton<T>(label, id, cb);
-    }
 
     template<class T>
       Radio<T>& addRadio(const string& label, int id, T* cb, vector<string> options, int& value) {
@@ -64,6 +60,7 @@ namespace buttons {
     }
 
     Buttons& addButtons(const string& title);
+    Element* getElement(const string label);
 	
     void save();
     void load();

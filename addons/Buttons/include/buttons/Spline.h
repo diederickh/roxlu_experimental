@@ -77,8 +77,8 @@ namespace buttons {
     void load(std::ifstream& ifs);
     bool canSave();
 	
-    void hide();
-    void show();
+    SplineEditor<S, V>& hide();
+    SplineEditor<S, V>& show();
 	
     SplineEditor<S, V>& setColor(const float hue, float sat = 0.2f, float bright = 0.27f, float a = 1.0f);
 	
@@ -320,16 +320,17 @@ namespace buttons {
 
 
   template<class S, class V> 
-    void SplineEditor<S, V>::hide() {
+    SplineEditor<S, V>&  SplineEditor<S, V>::hide() {
     this->is_visible = false;
     this->static_text->setTextVisible(this->label_dx, false);
-
+    return *this;
   }
 
   template<class S, class V> 
-    void SplineEditor<S, V>::show() {
+    SplineEditor<S, V>&  SplineEditor<S, V>::show() {
     this->is_visible = true;
     this->static_text->setTextVisible(this->label_dx, true);
+    return *this;
   }
 
   //typedef SplineEditor<Spline> SplineEditor;

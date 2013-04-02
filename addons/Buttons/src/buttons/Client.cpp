@@ -258,12 +258,15 @@ namespace buttons {
                 break;
               }
               case BTYPE_BUTTON: {
+                printf("TODO: we need to fix the callback of a button. we changed from a functor() to a plain C-style callback\n");
+                /*
                 unsigned int button_id = cmd.buffer.consumeUI32();
                 Button<Client>* button =  &gui->addButton<Client>(label, button_id, this);
 
                 button->id = element_id;
                 elements[buttons_id][element_id] = button;
                 gui->setColor(col_hue);
+                */
                 break;
               }
               case BTYPE_RADIO: {
