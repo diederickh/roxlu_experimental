@@ -105,9 +105,14 @@ namespace roxlu {
     if(l->use_colors) {
         ss_tty << "\x1b[0m";
     }
-
+    
+#if defined(_WIN32)
+    ss_tty << "\r\n";
+    ss_file << "\r\n";
+#else
     ss_tty << "\n";
     ss_file << "\n";
+#endif
 
     msg.tty_message = ss_tty.str();
     msg.file_message = ss_file.str();

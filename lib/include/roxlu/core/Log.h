@@ -3,6 +3,10 @@
 
 #include <iostream>
 
+#if defined(_WIN32) 
+#  include <stdarg.h>
+#endif
+
 #define RX_LOG_NO_COLOR
 #define RX_LOG_LEVEL_ALL 4
 #define RX_LOG_LEVEL_ERROR  1
@@ -26,8 +30,12 @@ void rx_verbose(int line, const char* function, const char* fmt, ...);
 void rx_warning(int line, const char* function, const char* fmt, ...);
 void rx_error(int line, const char* function, const char* fmt, ...);
 
-                                                                             
-#define RX_VERBOSE(fmt, ...) { rx_verbose(__LINE__, __PRETTY_FUNCTION__, fmt, ##__VA_ARGS__); } 
+
+#if defined(_MSC_VER)
+#  define RX_VERBOSE(fmt, ...) { rx_verbose(__LINE__, __FUNCSIG__, fmt, ##__VA_ARGS__); } 
+#else                                                                             
+#  define RX_VERBOSE(fmt, ...) { rx_verbose(__LINE__, __PRETTY_FUNCTION__, fmt, ##__VA_ARGS__); } 
+#endif
 //#define RX_VERBOSE(fmt, ...) { rx_verbose(__LINE__, __PRETTY_FUNCTION__, fmt, ##__VA_ARGS__); } 
 //#define RX_VERBOSE(fmt, ...) { rx_verbose(__LINE__, __PRETTY_FUNCTION__, fmt, ##__VA_ARGS__); } 
 
