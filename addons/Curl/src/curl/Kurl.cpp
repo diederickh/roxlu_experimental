@@ -8,7 +8,7 @@ int kurl_libcurl_debug_callback(CURL* handle,
 {
   std::string str;
   std::copy(data, data+nchars, std::back_inserter(str));
-  RX_VERBOSE(("%s", str.c_str()));
+  RX_VERBOSE("%s", str.c_str());
   return 0;
 }
 
@@ -399,10 +399,10 @@ bool Kurl::setDebugCallback(CURL* handle) {
 
 void Kurl::printSupportedProtocols() {
   curl_version_info_data* info = curl_version_info(CURLVERSION_NOW);
-  RX_VERBOSE((KURL_VERB_VERSION, info->version));
+  RX_VERBOSE(KURL_VERB_VERSION, info->version);
   int i = 0;
   while(info->protocols[i] != NULL) {
-    RX_VERBOSE(("- %s", info->protocols[i]));
-      ++i;
+    RX_VERBOSE("- %s", info->protocols[i]);
+    ++i;
   }
 }

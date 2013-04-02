@@ -447,20 +447,20 @@ inline uint64_t EBML::readID(int* read) {
       return ru32();
     }
     case 5: { 
-      RX_WARNING(("ID - TODO: Need to read 5 bytes."));
+      RX_WARNING("ID - TODO: Need to read 5 bytes.");
       return ru40();
     }
     case 6: { 
-      RX_WARNING(("ID - TODO: Need to read 6 bytes."));
+      RX_WARNING("ID - TODO: Need to read 6 bytes.");
       break;
     }
     case 7:  { 
-      RX_WARNING(("ID - TODO: Need to read 7 bytes."));
+      RX_WARNING("ID - TODO: Need to read 7 bytes.");
 
       break;
     }
     case 8: {
-      RX_VERBOSE(("Reading u64"));
+      RX_VERBOSE("Reading u64");
       return ru64();
     }
   };
@@ -531,42 +531,42 @@ inline void EBML::writeID(uint64_t id, std::vector<char>* dest) {
 
 inline void EBML::writeDataSize(uint64_t size, std::vector<char>* dest) {
   if(size < 0x7F) {
-    RX_VERBOSE(("Data size: 1 bytes: %lld.", size));
+    RX_VERBOSE("Data size: 1 bytes: %lld.", size);
     size = 0x80 | size;
     write((char*)&size, 1, dest);
   }
   else if(size < 0x7FF) {
-    RX_VERBOSE(("Data size: 2 bytes: %lld.", size));
+    RX_VERBOSE("Data size: 2 bytes: %lld.", size);
     size = 0x0000000000004000 | size;
     writeReversed((char*)&size, 2, dest);
   }
   else if(size < 0x7FFFFF) {
-    RX_VERBOSE(("Data size: 3 bytes: %lld.", size));
+    RX_VERBOSE("Data size: 3 bytes: %lld.", size);
     size = 0x0000000000200000 | size;
     writeReversed((char*)&size, 3, dest);
   }
   else if(size < 0x7FFFFFFF) {
-    RX_ERROR(("@todo Data size: 4 bytes."));
+    RX_ERROR(("@todo Data size: 4 bytes.");
     ::exit(0);
   }
   else if(size < 0x7FFFFFFFFF) {
-    RX_ERROR(("@todo Data size: 5 bytes."));
+    RX_ERROR(("@todo Data size: 5 bytes.");
     ::exit(0);
   }
   else if(size < 0x7FFFFFFFFFFF) {
-    RX_ERROR(("@todo Data size: 6 bytes."));
+    RX_ERROR(("@todo Data size: 6 bytes.");
     ::exit(0);
   }
   else if(size < 0x7FFFFFFFFFFFFF) {
-    RX_ERROR(("@todo Data size: 7 bytes."));
+    RX_ERROR(("@todo Data size: 7 bytes.");
     ::exit(0);
   }
   else if(size < 0x7FFFFFFFFFFFFFFF) {
-    RX_ERROR(("@todo Data size: 8 bytes."));
+    RX_ERROR(("@todo Data size: 8 bytes.");
     ::exit(0);
   }
   else {
-    RX_ERROR(("WARNING: Data size, not handled"));
+    RX_ERROR(("WARNING: Data size, not handled");
   }
 }
 

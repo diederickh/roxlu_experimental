@@ -479,7 +479,7 @@ void AV::encodeVideoPacket(AVPacket* p) {
 
 void AV::shutdown() {
   if(!is_initialized) {
-    RX_VERBOSE(("we're not yet initialized so cannot shutdown."));
+    RX_VERBOSE("we're not yet initialized so cannot shutdown.");
     return;
   }
 
@@ -528,7 +528,7 @@ void AV::shutdown() {
 
 void AV::reset() {
   if(!is_initialized) {
-    RX_VERBOSE(("we're not yet initialized, so cannot reset()."));
+    RX_VERBOSE("we're not yet initialized, so cannot reset().");
     return;
   }
 
@@ -589,58 +589,58 @@ FLVAudioSampleRate AV::audioSampleRateToFLVSampleRate(int rate) {
 }
 
 void AV::printX264Params(x264_param_t* p) {
-  RX_VERBOSE(("--------------------------------------------------"));
-  RX_VERBOSE(("x264_param_t.i_threads: %d", p->i_threads));
-  RX_VERBOSE(("x264_param_t.i_lookahead_threads: %d", p->i_lookahead_threads));
-  RX_VERBOSE(("x264_param_t.b_sliced_threads: %d", p->b_sliced_threads));
-  RX_VERBOSE(("x264_param_t.b_deterministic: %d ", p->b_deterministic));
-  RX_VERBOSE(("x264_param_t.b_cpu_independent: %d ", p->b_cpu_independent));
-  RX_VERBOSE(("x264_param_t.i_sync_lookahead: %d", p->i_sync_lookahead));
-  RX_VERBOSE(("x264_param_t.i_width: %d", p->i_width));
-  RX_VERBOSE(("x264_param_t.i_height: %d", p->i_height));
-  RX_VERBOSE(("x264_param_t.i_csp: %d ", p->i_csp));
-  RX_VERBOSE(("x264_param_t.i_level_idc: %d", p->i_level_idc));
-  RX_VERBOSE(("x264_param_t.i_frame_total: %d ", p->i_frame_total));
-  RX_VERBOSE(("x264_param_t.i_nal_hrd: %d ", p->i_nal_hrd));
+  RX_VERBOSE("--------------------------------------------------");
+  RX_VERBOSE("x264_param_t.i_threads: %d", p->i_threads);
+  RX_VERBOSE("x264_param_t.i_lookahead_threads: %d", p->i_lookahead_threads);
+  RX_VERBOSE("x264_param_t.b_sliced_threads: %d", p->b_sliced_threads);
+  RX_VERBOSE("x264_param_t.b_deterministic: %d ", p->b_deterministic);
+  RX_VERBOSE("x264_param_t.b_cpu_independent: %d ", p->b_cpu_independent);
+  RX_VERBOSE("x264_param_t.i_sync_lookahead: %d", p->i_sync_lookahead);
+  RX_VERBOSE("x264_param_t.i_width: %d", p->i_width);
+  RX_VERBOSE("x264_param_t.i_height: %d", p->i_height);
+  RX_VERBOSE("x264_param_t.i_csp: %d ", p->i_csp);
+  RX_VERBOSE("x264_param_t.i_level_idc: %d", p->i_level_idc);
+  RX_VERBOSE("x264_param_t.i_frame_total: %d ", p->i_frame_total);
+  RX_VERBOSE("x264_param_t.i_nal_hrd: %d ", p->i_nal_hrd);
   // skipping vui
-  RX_VERBOSE(("--"));
-  RX_VERBOSE(("x264_param_t.i_frame_reference: %d", p->i_frame_reference));
-  RX_VERBOSE(("x264_param_t.i_dpb_size: %d ", p->i_dpb_size));
-  RX_VERBOSE(("x264_param_t.i_keyint_max: %d ", p->i_keyint_max));
-  RX_VERBOSE(("x264_param_t.i_keyint_min: %d ", p->i_keyint_min));
-  RX_VERBOSE(("x264_param_t.i_scenecut_threshold: %d: ", p->i_scenecut_threshold));
-  RX_VERBOSE(("x264_param_t.b_intra_refresh: %d", p->b_intra_refresh));
-  RX_VERBOSE(("x264_param_t.i_bframe: %d", p->i_bframe));
-  RX_VERBOSE(("x264_param_t.i_bframe_adaptive: %d", p->i_bframe_adaptive));
+  RX_VERBOSE("--");
+  RX_VERBOSE("x264_param_t.i_frame_reference: %d", p->i_frame_reference);
+  RX_VERBOSE("x264_param_t.i_dpb_size: %d ", p->i_dpb_size);
+  RX_VERBOSE("x264_param_t.i_keyint_max: %d ", p->i_keyint_max);
+  RX_VERBOSE("x264_param_t.i_keyint_min: %d ", p->i_keyint_min);
+  RX_VERBOSE("x264_param_t.i_scenecut_threshold: %d: ", p->i_scenecut_threshold);
+  RX_VERBOSE("x264_param_t.b_intra_refresh: %d", p->b_intra_refresh);
+  RX_VERBOSE("x264_param_t.i_bframe: %d", p->i_bframe);
+  RX_VERBOSE("x264_param_t.i_bframe_adaptive: %d", p->i_bframe_adaptive);
   // skipping a lot..
-  RX_VERBOSE(("--"));
-  RX_VERBOSE(("x264_param_t.i_rc_method: %d", p->rc.i_rc_method));
-  RX_VERBOSE(("x264_param_t.i_qp_constant: %d", p->rc.i_qp_constant));
-  RX_VERBOSE(("x264_param_t.i_qp_min: %d", p->rc.i_qp_min));
-  RX_VERBOSE(("x264_param_t.i_qp_max: %d ", p->rc.i_qp_max));
-  RX_VERBOSE(("x264_param_t.i_qp_step: %d ", p->rc.i_qp_step));
-  RX_VERBOSE(("x264_param_t.i_bitrate: %d ", p->rc.i_bitrate));
+  RX_VERBOSE("--");
+  RX_VERBOSE("x264_param_t.i_rc_method: %d", p->rc.i_rc_method);
+  RX_VERBOSE("x264_param_t.i_qp_constant: %d", p->rc.i_qp_constant);
+  RX_VERBOSE("x264_param_t.i_qp_min: %d", p->rc.i_qp_min);
+  RX_VERBOSE("x264_param_t.i_qp_max: %d ", p->rc.i_qp_max);
+  RX_VERBOSE("x264_param_t.i_qp_step: %d ", p->rc.i_qp_step);
+  RX_VERBOSE("x264_param_t.i_bitrate: %d ", p->rc.i_bitrate);
   // skipping .. 
-  RX_VERBOSE(("--"));
-  RX_VERBOSE(("x264_param_t.b_aud: %d", p->b_aud));
-  RX_VERBOSE(("x264_param_t.b_repeat_headers: %d ", p->b_repeat_headers));
-  RX_VERBOSE(("x264_param_t.b_annexb: %d (flv does not support annexb)", p->b_annexb));
-  RX_VERBOSE(("x264_param_t.i_sps_id: %d ", p->i_sps_id));
-  RX_VERBOSE(("x264_param_t.b_vfr_input: %d", p->b_vfr_input));
-  RX_VERBOSE(("x264_param_t.b_pulldown: %d", p->b_pulldown));
-  RX_VERBOSE(("x264_param_t.i_fps_num: %d", p->i_fps_num));
-  RX_VERBOSE(("x264_param_t.i_fps_den: %d", p->i_fps_den));
-  RX_VERBOSE(("x264_param_t.i_timebase_num: %d ", p->i_timebase_num));
-  RX_VERBOSE(("x264_param_t.i_timebase_den: %d", p->i_timebase_den));
-  RX_VERBOSE(("--------------------------------------------------"));
+  RX_VERBOSE("--");
+  RX_VERBOSE("x264_param_t.b_aud: %d", p->b_aud);
+  RX_VERBOSE("x264_param_t.b_repeat_headers: %d ", p->b_repeat_headers);
+  RX_VERBOSE("x264_param_t.b_annexb: %d (flv does not support annexb)", p->b_annexb);
+  RX_VERBOSE("x264_param_t.i_sps_id: %d ", p->i_sps_id);
+  RX_VERBOSE("x264_param_t.b_vfr_input: %d", p->b_vfr_input);
+  RX_VERBOSE("x264_param_t.b_pulldown: %d", p->b_pulldown);
+  RX_VERBOSE("x264_param_t.i_fps_num: %d", p->i_fps_num);
+  RX_VERBOSE("x264_param_t.i_fps_den: %d", p->i_fps_den);
+  RX_VERBOSE("x264_param_t.i_timebase_num: %d ", p->i_timebase_num);
+  RX_VERBOSE("x264_param_t.i_timebase_den: %d", p->i_timebase_den);
+  RX_VERBOSE("--------------------------------------------------");
 }
 
 void AV::printX264Headers(x264_nal_t* nal) {
-  RX_VERBOSE(("--"));
-  RX_VERBOSE(("sps_size: %d", nal[0].i_payload));
-  RX_VERBOSE(("pps_size: %d", nal[1].i_payload));
-  RX_VERBOSE(("sei_size: %d", nal[2].i_payload));
-  RX_VERBOSE(("--"));
+  RX_VERBOSE("--");
+  RX_VERBOSE("sps_size: %d", nal[0].i_payload);
+  RX_VERBOSE("pps_size: %d", nal[1].i_payload);
+  RX_VERBOSE("sei_size: %d", nal[2].i_payload);
+  RX_VERBOSE("--");
 }
 
 void AV::printAVPixelFormat(AVPixelFormat p) {
@@ -650,5 +650,5 @@ void AV::printAVPixelFormat(AVPixelFormat p) {
     case PIX_FMT_BGRA: str = "PIX_FMT_BGRA"; break;
     default: str = "PIX_FMT_NONE"; break;
   }
-  RX_VERBOSE(("AVPixelFormat: %s\n", str.c_str()));
+  RX_VERBOSE("AVPixelFormat: %s\n", str.c_str());
 }

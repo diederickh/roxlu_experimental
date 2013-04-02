@@ -473,7 +473,7 @@ FLVFileWriter::~FLVFileWriter() {
 }
 
 bool FLVFileWriter::open(std::string filepath) {
-  RX_VERBOSE(("open file: %s", filepath.c_str()));
+  RX_VERBOSE("open file: %s", filepath.c_str());
 
   fp = fopen(filepath.c_str(), "wb");
   if(!fp) {
@@ -493,7 +493,6 @@ size_t flv_file_write(char* data, size_t nbytes, void* user) {
     return 0;
   }
 
-  //  RX_VERBOSE(("write %d bytes to file.", int(nbytes)));
   size_t written  = fwrite(data, nbytes, 1, f->fp);
 
   if(written != 1) {
@@ -510,7 +509,7 @@ void flv_file_rewrite(char* data, size_t nbytes, size_t pos, void* user) {
     return ;
   }
 
-  RX_VERBOSE(("rewrite at %d.", int(pos)));
+  RX_VERBOSE("rewrite at %d.", int(pos));
   long int curr_pos = ftell(f->fp);
   fseek(f->fp, pos, SEEK_SET);
 
@@ -529,7 +528,7 @@ void flv_file_flush(void* user) {
     return;
   }
 
-  RX_VERBOSE(("flush data"));
+  RX_VERBOSE("flush data");
   fflush(f->fp);
 }
 
@@ -540,7 +539,7 @@ void flv_file_close(void* user) {
     return;
   }
 
-  RX_VERBOSE(("close flv file."));
+  RX_VERBOSE("close flv file.");
   fclose(f->fp);
   f->fp = NULL;
 }

@@ -99,7 +99,7 @@ void ClientSocket::close() {
 // CALLBACKS
 // ------------------------------------------
 void client_socket_on_resolved(uv_getaddrinfo_t* req, int status, struct addrinfo* res) {
-  RX_VERBOSE(("resolved with status: %d", status));
+  RX_VERBOSE("resolved with status: %d", status);
   ClientSocket* c = static_cast<ClientSocket*>(req->data);
   if(status == -1) {
     RX_ERROR(("cannot resolve(): %s", uv_strerror(uv_last_error(c->loop))));
@@ -109,7 +109,7 @@ void client_socket_on_resolved(uv_getaddrinfo_t* req, int status, struct addrinf
 
   char ip[17] = {0};
   uv_ip4_name((struct sockaddr_in*)res->ai_addr, ip, 16);
-  RX_VERBOSE(("resolved server: %s", ip));
+  RX_VERBOSE("resolved server: %s", ip);
  
   int r = uv_tcp_connect(&c->connect_req, c->sock, 
                          *(struct sockaddr_in*)res->ai_addr, 
@@ -139,7 +139,7 @@ void client_socket_on_connect(uv_connect_t* req, int status) {
 
 
 void client_socket_on_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
-  RX_VERBOSE(("Received data from server, :%ld bytes", nbytes));
+  RX_VERBOSE("Received data from server, :%ld bytes", nbytes);
   ClientSocket* c = static_cast<ClientSocket*>(handle->data);
 
   if(nbytes < 0) {
@@ -215,6 +215,6 @@ void client_socket_on_reconnect_timer(uv_timer_t* handle, int status) {
     return;
   }
     
-  RX_VERBOSE(("reconnecting"));
+  RX_VERBOSE("reconnecting");
   c->connect();
 }

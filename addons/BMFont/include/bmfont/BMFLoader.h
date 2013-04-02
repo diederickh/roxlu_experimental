@@ -287,9 +287,9 @@ void BMFLoader<T>::getStringSize(std::string& str, int& w, int &h) {
 
 template<class T>
 void BMFLoader<T>::print() {
-  RX_VERBOSE(("bm_font.image_width: %d", image_width));
-  RX_VERBOSE(("bm_font.image_height: %d", image_height));
-  RX_VERBOSE(("bm_font.image_path: %s", image_path.c_str()));
+  RX_VERBOSE("bm_font.image_width: %d", image_width);
+  RX_VERBOSE("bm_font.image_height: %d", image_height);;
+  RX_VERBOSE("bm_font.image_path: %s", image_path.c_str());
 }
 
 

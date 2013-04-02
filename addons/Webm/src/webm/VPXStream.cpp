@@ -184,7 +184,7 @@ void VPXInStream::parseBuffer() {
     uint32_t nbytes = buffer.pu32(1);
 
     if(buffer.size() < (nbytes + 5)) {
-      RX_VERBOSE(("buffer not big enough, we have: %ld but need: %d", buffer.size(), nbytes));
+      RX_VERBOSE("buffer not big enough, we have: %ld but need: %d", buffer.size(), nbytes);
       return;
     }
 
@@ -202,10 +202,10 @@ void VPXInStream::parseBuffer() {
 
         buffer.flush(nbytes);
 
-        RX_VERBOSE(("version: %d, in_w: %d, in_h: %d, out_w: %d, out_h: %d, fps: %d, bytes left: %ld", 
+        RX_VERBOSE("version: %d, in_w: %d, in_h: %d, out_w: %d, out_h: %d, fps: %d, bytes left: %ld", 
                     proto_version, settings.in_w, settings.in_h, 
                     settings.out_w, settings.out_h,
-                    settings.fps, buffer.size()));
+                    settings.fps, buffer.size());
 
         if(settings.in_w != 0 && settings.in_h != 0 
            && settings.out_w != 0 && settings.out_h != 0)
@@ -257,7 +257,7 @@ VPXOutStream::VPXOutStream(int port)
   ,is_setup(false)
   ,num_frames(0)
 {
-  RX_VERBOSE(("VPXOutStream()"));
+  RX_VERBOSE("VPXOutStream()");
   sock.data = this;
 }
 
@@ -339,7 +339,7 @@ void VPXOutStream::removeConnection(VPXConnection* c) {
 }
 
 void VPXOutStream::writeHeader(VPXConnection* c) {
-  RX_VERBOSE(("send header to client: in_w: %d, in_h: %d, fps: %d ", settings.out_w, settings.out_h, settings.fps));
+  RX_VERBOSE("send header to client: in_w: %d, in_h: %d, fps: %d ", settings.out_w, settings.out_h, settings.fps);
   VPXBuffer buf;
   buf.wu8(1); // version
   buf.wu16(settings.out_w);
@@ -467,7 +467,7 @@ VPXConnection::~VPXConnection() {
 }
 
 void VPXConnection::parseBuffer() {
-  RX_VERBOSE(("Parse connection buffer - for now we don't really do anything here...."));
+  RX_VERBOSE("Parse connection buffer - for now we don't really do anything here....");
 }
 
 void VPXConnection::writeCommand(VPXCommands cmd, VPXBuffer& buf) {
@@ -685,7 +685,7 @@ void vpx_client_on_resolved(uv_getaddrinfo_t* req, int status, struct addrinfo* 
   
   char ip[17] = {0};
   uv_ip4_name((struct sockaddr_in*)res->ai_addr, ip, 16);
-  RX_VERBOSE(("resolved server: %s", ip));
+  RX_VERBOSE("resolved server: %s", ip);
  
   int r = uv_tcp_connect(&s->connect_req, &s->sock, 
                          *(struct sockaddr_in*)res->ai_addr, 

@@ -67,7 +67,7 @@ PNG::~PNG() {
 bool PNG::load(std::string filename, bool datapath) {
 
 #if defined(_WIN32) && defined(ROXLU_DEBUG)
-  RX_VERBOSE(("The png library results in wierd behaviour when compiling on windows in debug mode"));
+  RX_VERBOSE("The png library results in wierd behaviour when compiling on windows in debug mode");
 #endif  
 
   png_structp png_ptr;
@@ -325,11 +325,11 @@ bool PNG::setPixels(unsigned char* pix, png_uint_32 w, png_uint_32 h, png_uint_3
 
 
 void PNG::print() {
-  RX_VERBOSE((PNG_V_WIDTH, width));
-  RX_VERBOSE((PNG_V_HEIGHT, height));
-  RX_VERBOSE((PNG_V_BITDEPTH, bit_depth));
-  RX_VERBOSE((PNG_V_NCHANNELS, num_channels));
-  RX_VERBOSE((PNG_V_COLORTYPE, colorTypeToString(color_type).c_str()));
-  RX_VERBOSE((PNG_V_NUMBYTES, num_bytes));
+  RX_VERBOSE(PNG_V_WIDTH, width);
+  RX_VERBOSE(PNG_V_HEIGHT, height);
+  RX_VERBOSE(PNG_V_BITDEPTH, bit_depth);
+  RX_VERBOSE(PNG_V_NCHANNELS, num_channels);
+  RX_VERBOSE(PNG_V_COLORTYPE, colorTypeToString(color_type).c_str());
+  RX_VERBOSE(PNG_V_NUMBYTES, num_bytes);
 }
 

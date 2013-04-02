@@ -355,6 +355,15 @@ static bool rx_file_exists(std::string filepath) {
   return true;
 }
 
+static size_t rx_get_file_size(std::string filepath) {
+  if(!rx_file_exists(filepath)) {
+    return 0;
+  }
+  struct stat stat_buf;
+  int rc = stat(filepath.c_str(), &stat_buf);
+  return rc == 0 ? stat_buf.st_size : 0;
+} 
+
 static bool rx_file_remove(std::string filepath) {
   if(!rx_file_exists(filepath)) {
     return false;
@@ -364,6 +373,10 @@ static bool rx_file_remove(std::string filepath) {
     return false;
   }
   return true;
+}
+
+static bool rx_rename_file(std::string from, std::string to) {
+  return rename(from.c_str(), to.c_str()) == 0;
 }
 
 /* 

@@ -27,7 +27,7 @@ VPXDecoder::~VPXDecoder() {
 }
 
 bool VPXDecoder::setup(VPXSettings cfg) {
-  RX_VERBOSE(("------------------------- SETUP DECODER -------------------------"));
+  RX_VERBOSE("------------------------- SETUP DECODER -------------------------");
   RX_ERROR(("TODO: use VPXSettings.cb_write/cb_user + check if it's set, for the callback which is called when we have decoded data "));
   settings = cfg;
   bool result = false;
@@ -59,7 +59,7 @@ bool VPXDecoder::setup(VPXSettings cfg) {
 }
 
 bool VPXDecoder::initializeDecoder() {
-  RX_VERBOSE(("VPXDecoder usees decoder: %s", vpx_codec_iface_name(decode_interface) ));
+  RX_VERBOSE("VPXDecoder usees decoder: %s", vpx_codec_iface_name(decode_interface) );
 
   int flags = 0;
   if(vpx_codec_dec_init(&codec, decode_interface, NULL, flags)) {

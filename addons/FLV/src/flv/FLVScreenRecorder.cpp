@@ -35,7 +35,7 @@ FLVScreenRecorder::~FLVScreenRecorder() {
 }
 
 bool FLVScreenRecorder::open(std::string filepath) {
-  RX_VERBOSE(("Open file: %s", filepath.c_str()));
+  RX_VERBOSE("Open file: %s", filepath.c_str());
 
   if(!flv_writer.open(filepath)) {
     return false;
@@ -113,7 +113,7 @@ void FLVScreenRecorder::grabFrame() {
   }
 #else
   if(av.wantsNewVideoFrame()) {
-    RX_VERBOSE(("Grab a frame."));
+    RX_VERBOSE("Grab a frame.");
     rx_int64 now = rx_millis();
     int write_dx = (dx++) % SCREEN_RECORDER_NUM_PBOS;
     int read_dx = (write_dx + 1) % SCREEN_RECORDER_NUM_PBOS;
@@ -152,7 +152,7 @@ void FLVScreenRecorder::start() {
   glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 #endif  
 
-  RX_VERBOSE(("Start recording."));
+  RX_VERBOSE("Start recording.");
   is_recording = true;
   av.start();
 }
@@ -163,7 +163,7 @@ void FLVScreenRecorder::stop() {
     return;
   }
 
-  RX_VERBOSE(("Stop recording."));
+  RX_VERBOSE("Stop recording.");
   av.stop();
 
   is_recording = false;

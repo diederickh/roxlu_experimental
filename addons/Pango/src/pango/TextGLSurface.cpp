@@ -222,7 +222,7 @@ void TextGLSurface::setPixels(unsigned char* pixels) {
   glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
   TEXT_GL_SURFACE_TIMER_END
 #else 
-  RX_VERBOSE(("Not using pbos to render"));
+  RX_VERBOSE("Not using pbos to render");
   TEXT_GL_SURFACE_TIMER_START
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
   glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, surface_w, surface_h, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, pixels);

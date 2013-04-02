@@ -94,7 +94,7 @@ namespace buttons {
 
       unsigned int command_size = buffer.getUI32(1); // peek the command size
       if(buffer.size() < command_size) {
-        RX_VERBOSE(("buffer not complete - we need more bytes, received: %ld but need %d", buffer.size(), command_size));
+        RX_VERBOSE("buffer not complete - we need more bytes, received: %ld but need %d", buffer.size(), command_size);
         return;
       }
 
@@ -430,7 +430,7 @@ namespace buttons {
   // CLIENT CALLBACKS
   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   void buttons_client_on_resolved(uv_getaddrinfo_t* req, int status, struct addrinfo* res) {
-    RX_VERBOSE(("resolved with status: %d", status));
+    RX_VERBOSE("resolved with status: %d", status);
     Client* c = static_cast<Client*>(req->data);
     if(status == -1) {
       RX_ERROR(("cannot resolve(): %s", uv_strerror(uv_last_error(c->loop))));
@@ -440,7 +440,7 @@ namespace buttons {
 
     char ip[17] = {0};
     uv_ip4_name((struct sockaddr_in*)res->ai_addr, ip, 16);
-    RX_VERBOSE(("resolved server: %s", ip));
+    RX_VERBOSE("resolved server: %s", ip);
  
     int r = uv_tcp_connect(&c->connect_req, &c->sock, 
                            *(struct sockaddr_in*)res->ai_addr, 
@@ -468,7 +468,7 @@ namespace buttons {
   }
 
   void buttons_client_on_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
-    RX_VERBOSE(("Received data from server, :%ld bytes", nbytes));
+    RX_VERBOSE("Received data from server, :%ld bytes", nbytes);
     Client* c = static_cast<Client*>(handle->data);
 
     if(nbytes < 0) {
@@ -538,7 +538,7 @@ namespace buttons {
       return;
     }
     
-    RX_VERBOSE(("reconnecting"));
+    RX_VERBOSE("reconnecting");
     c->connect();
   }
 

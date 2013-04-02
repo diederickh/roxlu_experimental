@@ -303,6 +303,7 @@ set(roxlu_3d_sources
 set(roxlu_core_sources 
 #  ${roxlu_src_dir}/core/Thread.cpp
   ${roxlu_src_dir}/core/Utils.cpp
+  ${roxlu_src_dir}/core/Log.cpp
   ${roxlu_src_dir}/core/StringUtil.cpp
 )
 

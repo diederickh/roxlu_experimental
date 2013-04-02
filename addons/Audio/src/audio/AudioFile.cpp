@@ -64,9 +64,9 @@ void AudioFile::print() {
     return;
   }
 
-  RX_VERBOSE(("Samplerate: %d", info.samplerate));
-  RX_VERBOSE(("Channels: %d", info.channels));
-  RX_VERBOSE(("Frames: %lld", info.frames));
-  RX_VERBOSE(("Format: %d", info.format));
-  RX_VERBOSE(("Sections: %d", info.sections));
+  RX_VERBOSE("Samplerate: %d", info.samplerate);
+  RX_VERBOSE("Channels: %d", info.channels);
+  RX_VERBOSE("Frames: %lld", info.frames);
+  RX_VERBOSE("Format: %d", info.format);
+  RX_VERBOSE("Sections: %d", info.sections);
 }

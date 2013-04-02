@@ -171,14 +171,14 @@ namespace buttons {
     do {
       // check minimum size of a command.
       if(buffer.size() < 5) { 
-        RX_VERBOSE(("Buffer is too small, must be at least 5 bytes for a command"));
+        RX_VERBOSE("Buffer is too small, must be at least 5 bytes for a command");
         return;
       }
       
       // peek, and check if the buffer contains a complete command
       unsigned int command_size = buffer.getUI32(1); // peek
       if(buffer.size() < command_size) {
-        RX_VERBOSE(("Buffer has only %zu bytes, and the command consists of: %u bytes.\n", buffer.size(), command_size));
+        RX_VERBOSE("Buffer has only %zu bytes, and the command consists of: %u bytes.\n", buffer.size(), command_size);
         return;
       }
 

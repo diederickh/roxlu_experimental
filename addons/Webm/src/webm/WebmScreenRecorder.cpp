@@ -13,7 +13,7 @@ WebmScreenRecorder::WebmScreenRecorder()
 WebmScreenRecorder::~WebmScreenRecorder() {
   stop();
 
-  RX_VERBOSE(("~WebmScreenRecorder()"));
+  RX_VERBOSE("~WebmScreenRecorder()");
   nbytes_per_video_frame = 0;
 
 #if !defined(WEBM_SCREENREC_USE_PBOS)

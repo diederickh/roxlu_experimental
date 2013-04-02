@@ -345,9 +345,9 @@ void FreetypeFont::fill(float rr, float gg, float bb, float aa) {
 }
 
 void FreetypeFont::print() {
-  RX_VERBOSE((FF_VERB_NUM_GLYPHS, face->num_glyphs));
-  RX_VERBOSE((FF_VERB_EM, face->units_per_EM));
-  RX_VERBOSE((FF_VERB_FIXED_SIZES, face->num_fixed_sizes));
+  RX_VERBOSE(FF_VERB_NUM_GLYPHS, face->num_glyphs);
+  RX_VERBOSE(FF_VERB_EM, face->units_per_EM);
+  RX_VERBOSE(FF_VERB_FIXED_SIZES, face->num_fixed_sizes);
 }
 
 bool FreetypeFont::save(std::string filename, bool datapath) {
