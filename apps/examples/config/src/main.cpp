@@ -11,7 +11,7 @@ int main() {
     config.readFile(rx_to_data_path("settings.txt").c_str());
   }
   catch(libconfig::ConfigException& ex) {
-    RX_ERROR(("Error loading settings file: %s", ex.what()));
+    RX_ERROR("Error loading settings file: %s", ex.what());
     return EXIT_FAILURE;
   }
 
@@ -30,7 +30,7 @@ int main() {
     config.lookupValue("must_delete", must_delete);
   }
   catch(libconfig::ConfigException& ex) {
-    RX_ERROR(("Error getting settings: %s", ex.what()));
+    RX_ERROR("Error getting settings: %s", ex.what());
     return EXIT_FAILURE;
   }
 

@@ -15,7 +15,7 @@ Simulation::Simulation()
   out_stream.setup(s);
 
   if(!out_stream.start()) {
-    RX_ERROR(("Cannot start out server"));
+    RX_ERROR("Cannot start out server");
   }
   ax.setup(10);
   cam.setup(1024, 768);

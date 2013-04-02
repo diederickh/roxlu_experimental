@@ -14,5 +14,6 @@ fi
 
 cd build.debug
 cmake -DCMAKE_BUILD_TYPE=Debug ../
-make 
+#make VERBOSE=1
+make -j4
 make install

@@ -59,7 +59,7 @@ void Simulation::setupCapture() {
   bool r = cap.openDevice(0, VIDEO_W, VIDEO_H, VC_FMT_YUYV422); //  VC_FMT_YUYV422); // format might differ on windows (VC_FMT_UYVY422)
 
   if(!r) {
-    RX_ERROR(("ERROR: cannot open video capture device."));
+    RX_ERROR("ERROR: cannot open video capture device.");
     ::exit(EXIT_FAILURE);
   }
 
@@ -67,7 +67,7 @@ void Simulation::setupCapture() {
 
   r = cap.startCapture();
   if(!r) {
-    RX_ERROR(("ERROR: cannot start video capture.n"));
+    RX_ERROR("ERROR: cannot start video capture.n"));
     ::exit(EXIT_FAILURE);
   }
   cap_surf.setup(VIDEO_W, VIDEO_H);
@@ -88,7 +88,7 @@ void Simulation::setupRecorder() {
   settings.audio_format = AV_FMT_INT16;
 
   if(!recorder.setup(settings)) {
-    RX_ERROR(("ERROR: cannot setup recorder"));
+    RX_ERROR("ERROR: cannot setup recorder");
     ::exit(EXIT_FAILURE);
   }
 }

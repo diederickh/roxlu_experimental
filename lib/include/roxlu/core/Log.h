@@ -30,11 +30,12 @@ void rx_verbose(int line, const char* function, const char* fmt, ...);
 void rx_warning(int line, const char* function, const char* fmt, ...);
 void rx_error(int line, const char* function, const char* fmt, ...);
 
-
 #if defined(_MSC_VER)
 #  define RX_VERBOSE(fmt, ...) { rx_verbose(__LINE__, __FUNCSIG__, fmt, ##__VA_ARGS__); } 
 #else                                                                             
 #  define RX_VERBOSE(fmt, ...) { rx_verbose(__LINE__, __PRETTY_FUNCTION__, fmt, ##__VA_ARGS__); } 
+#  define RX_WARNING(fmt, ...) { rx_warning(__LINE__, __PRETTY_FUNCTION__, fmt, ##__VA_ARGS__); } 
+#  define RX_ERROR(fmt, ...) { rx_error(__LINE__, __PRETTY_FUNCTION__, fmt, ##__VA_ARGS__); } 
 #endif
 //#define RX_VERBOSE(fmt, ...) { rx_verbose(__LINE__, __PRETTY_FUNCTION__, fmt, ##__VA_ARGS__); } 
 //#define RX_VERBOSE(fmt, ...) { rx_verbose(__LINE__, __PRETTY_FUNCTION__, fmt, ##__VA_ARGS__); } 
@@ -45,7 +46,7 @@ void rx_error(int line, const char* function, const char* fmt, ...);
 
 #if defined(_MSC_VER) 
 //#  define RX_VERBOSE(x) { printf("[verbose] [%s L%d] - ", __FUNCSIG__, __LINE__); printf x; printf("\n"); }
-#  define RX_WARNING(x) { printf("[warning] [%s L%d] - ", __FUNCSIG__, __LINE__); printf x; printf("\n"); }
+//#  define RX_WARNING(x) { printf("[warning] [%s L%d] - ", __FUNCSIG__, __LINE__); printf x; printf("\n"); }
 #  define RX_ERROR(x) { printf("[error] [%s L%d] - ", __FUNCSIG__, __LINE__); printf x; printf("\n"); }
 #else 
 #  if RX_LOG_LEVEL >= RX_LOG_LEVEL_VERBOSE 
@@ -60,22 +61,22 @@ void rx_error(int line, const char* function, const char* fmt, ...);
 
 #  if RX_LOG_LEVEL >= RX_LOG_LEVEL_WARNING
 #    if defined(RX_LOG_NO_COLOR)
-#      define RX_WARNING(x) { printf("[%s L%d] - ", __PRETTY_FUNCTION__, __LINE__); printf x; printf("\n"); }
+//#      define RX_WARNING(x) { printf("[%s L%d] - ", __PRETTY_FUNCTION__, __LINE__); printf x; printf("\n"); }
 #    else 
-#      define RX_WARNING(x) { printf("\x1b[35m[warning] \x1b[36m" "[%s L%d] - " "\x1b[33m", __PRETTY_FUNCTION__, __LINE__); printf x; printf("\x1b[0m\n"); }
+//#      define RX_WARNING(x) { printf("\x1b[35m[warning] \x1b[36m" "[%s L%d] - " "\x1b[33m", __PRETTY_FUNCTION__, __LINE__); printf x; printf("\x1b[0m\n"); }
 #    endif
 #  else 
-#    define RX_WARNING(x) { }
+//#    define RX_WARNING(x) { }
 #  endif
 
 #  if RX_LOG_LEVEL >= RX_LOG_LEVEL_ERROR
 #    if defined(RX_LOG_NO_COLOR)
-#      define RX_ERROR(x) { printf("[%s L%d] - ", __PRETTY_FUNCTION__, __LINE__); printf x; printf("\n"); }
+//#      define RX_ERROR(x) { printf("[%s L%d] - ", __PRETTY_FUNCTION__, __LINE__); printf x; printf("\n"); }
 #    else
-#      define RX_ERROR(x) { printf("\x1b[31m[error] \x1b[36m" "[%s L%d] - " "\x1b[31m", __PRETTY_FUNCTION__, __LINE__); printf x; printf("\x1b[0m\n"); }
+//#      define RX_ERROR(x) { printf("\x1b[31m[error] \x1b[36m" "[%s L%d] - " "\x1b[31m", __PRETTY_FUNCTION__, __LINE__); printf x; printf("\x1b[0m\n"); }
 #    endif
 #  else 
-#    define RX_ERROR(x) {}
+//#    define RX_ERROR(x) {}
 #  endif
 #endif // MSVC
 

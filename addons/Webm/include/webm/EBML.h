@@ -293,19 +293,19 @@ inline uint64_t EBML::ru64() {
 }
 
 inline uint64_t EBML::ru56() {
-  RX_ERROR(("FIX - validate"));
+  RX_ERROR("FIX - validate");
   uint64_t result = 0;
   return result;
 }
 
 inline uint64_t EBML::ru48() {
-  RX_ERROR(("FIX - validate"));
+  RX_ERROR("FIX - validate");
   uint64_t result = 0;
   return result;
 }
 
 inline uint64_t EBML::ru40() {
-  RX_ERROR(("FIX - validate"));
+  RX_ERROR("FIX - validate");
   uint64_t result = 0;
   result = ((result >> 32) & 0x00000000000000FF);
   return result;
@@ -371,7 +371,7 @@ inline int EBML::decodeSize(uint8_t b) {
     return 8;
   }
   else {
-    RX_ERROR(("ERROR: canot decode size: %02X.", b));
+    RX_ERROR("ERROR: canot decode size: %02X.", b);
     return 0;
   }
 }
@@ -546,27 +546,27 @@ inline void EBML::writeDataSize(uint64_t size, std::vector<char>* dest) {
     writeReversed((char*)&size, 3, dest);
   }
   else if(size < 0x7FFFFFFF) {
-    RX_ERROR(("@todo Data size: 4 bytes.");
+    RX_ERROR("@todo Data size: 4 bytes.");
     ::exit(0);
   }
   else if(size < 0x7FFFFFFFFF) {
-    RX_ERROR(("@todo Data size: 5 bytes.");
+    RX_ERROR("@todo Data size: 5 bytes.");
     ::exit(0);
   }
   else if(size < 0x7FFFFFFFFFFF) {
-    RX_ERROR(("@todo Data size: 6 bytes.");
+    RX_ERROR("@todo Data size: 6 bytes.");
     ::exit(0);
   }
   else if(size < 0x7FFFFFFFFFFFFF) {
-    RX_ERROR(("@todo Data size: 7 bytes.");
+    RX_ERROR("@todo Data size: 7 bytes.");
     ::exit(0);
   }
   else if(size < 0x7FFFFFFFFFFFFFFF) {
-    RX_ERROR(("@todo Data size: 8 bytes.");
+    RX_ERROR("@todo Data size: 8 bytes.");
     ::exit(0);
   }
   else {
-    RX_ERROR(("WARNING: Data size, not handled");
+    RX_ERROR("WARNING: Data size, not handled");
   }
 }
 

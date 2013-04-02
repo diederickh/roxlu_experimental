@@ -8,7 +8,7 @@ Simulation::Simulation()
 }
 
 void Simulation::operator()(unsigned int dx) {
-  RX_VERBOSE(("Pressed/Selected: %d", dx));
+  RX_VERBOSE("Pressed/Selected: %d", dx);
 }
 
 void Simulation::setup() {

@@ -135,23 +135,23 @@ void BMFRenderer<T>::setup(int windowW, int windowH, BMFShader* useShader) {
   rx_ortho(0, windowW, windowH, 0.0, -1.0, 1.0, projection_matrix);
 
   if(!font.getImageWidth() || !font.getImageHeight() || !font.getImagePath().size()) {
-    RX_ERROR((BMF_ERR_NO_IMAGE));
+    RX_ERROR(BMF_ERR_NO_IMAGE);
     ::exit(EXIT_FAILURE);
   }
 
   Image img;
   if(!img.load(font.getImagePath())) {
-    RX_ERROR((BMF_ERR_NO_IMAGE_FOUND, font.getImagePath().c_str()));
+    RX_ERROR(BMF_ERR_NO_IMAGE_FOUND, font.getImagePath().c_str());
     ::exit(EXIT_FAILURE);
   }
 
   if(img.getComponents() != 1) {
-    RX_ERROR((BMF_ERR_WRONG_NCOMPONENTS));
+    RX_ERROR(BMF_ERR_WRONG_NCOMPONENTS);
     ::exit(EXIT_FAILURE);
   }
 
   if(img.getWidth() != font.getImageWidth() || img.getHeight() != font.getImageHeight()) {
-    RX_ERROR((BMF_ERR_IMAGE_SIZE));
+    RX_ERROR(BMF_ERR_IMAGE_SIZE);
     ::exit(EXIT_FAILURE);
   }
 
@@ -205,7 +205,7 @@ void BMFRenderer<T>::update() {
 template<class T>
 inline void BMFRenderer<T>::bind() {
   if(!is_setup) {
-    RX_ERROR((BMF_ERR_NOT_SETUP));
+    RX_ERROR(BMF_ERR_NOT_SETUP);
     return;
   }
   if(!bytes_allocated) { 

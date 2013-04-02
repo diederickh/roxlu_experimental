@@ -42,6 +42,29 @@ void rx_verbose(int line, const char* function, const char* fmt, ...) {
   va_end(args);
 }
 
+void rx_warning(int line, const char* function, const char* fmt, ...) {
+  if(!roxlu_log_cb) {
+    return;
+  }
+
+  va_list args;
+  va_start(args, fmt);
+  roxlu_log_cb(RX_LOG_LEVEL_WARNING, roxlu_log_user, line, function, fmt, args);
+  va_end(args);
+}
+
+void rx_error(int line, const char* function, const char* fmt, ...) {
+  if(!roxlu_log_cb) {
+    return;
+  }
+
+  va_list args;
+  va_start(args, fmt);
+  roxlu_log_cb(RX_LOG_LEVEL_ERROR, roxlu_log_user, line, function, fmt, args);
+  va_end(args);
+}
+
+
 void rx_log_set_callback(roxlu_log_callback cb, void* user) {
   roxlu_log_cb = cb;
   roxlu_log_user = user;

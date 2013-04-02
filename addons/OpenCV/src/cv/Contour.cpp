@@ -43,7 +43,7 @@ namespace roxlu {
       cvtColor(mat_original, mat_gray, CV_RGBA2GRAY);
     }
     else {
-      RX_ERROR(("CANNOT HANDLE COMPONENTS! %d", imageComponents));
+      RX_ERROR("CANNOT HANDLE COMPONENTS! %d", imageComponents);
       return false;
     }
     

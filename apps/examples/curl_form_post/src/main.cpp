@@ -4,7 +4,7 @@
 
 
 void on_post_complete(KurlConnection* c, void* user) {
-  RX_VERBOSE(("upload ready."));
+  RX_VERBOSE("upload ready.");
 }
 
 int main() {

@@ -34,8 +34,8 @@ extern "C" {
 
 #define VPX_UV_ERR(r, okval, msg, ret)      \
   if(r != okval) { \
-     RX_ERROR((msg));  \
-     RX_ERROR(("uv error: %s", uv_strerror(uv_last_error(uv_default_loop())))) \
+     RX_ERROR(msg);  \
+     RX_ERROR("uv error: %s", uv_strerror(uv_last_error(uv_default_loop()))) \
      return ret; \
   }
 

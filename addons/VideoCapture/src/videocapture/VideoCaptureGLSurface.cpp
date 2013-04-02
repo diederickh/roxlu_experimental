@@ -99,7 +99,7 @@ void VideoCaptureGLSurface::setup(int w, int h, GLenum internalFormat, GLenum fo
 // @todo we could optimize by not updating the model matrix when it didn't change
 void VideoCaptureGLSurface::draw(int x, int y, int w, int h) {
   if(!is_setup) {
-    RX_ERROR(("cannot draw setup() not called"));
+    RX_ERROR("cannot draw setup() not called");
     return;
   }
 
@@ -154,7 +154,7 @@ void VideoCaptureGLSurface::draw(int x, int y, int w, int h) {
 void VideoCaptureGLSurface::setupGL() {
   
   if(vao != 0) {
-    RX_ERROR(("cannot re-setup GL.. already initialized.\n"));
+    RX_ERROR("cannot re-setup GL.. already initialized.\n");
     return;
   }
   
@@ -212,7 +212,7 @@ void VideoCaptureGLSurface::setupGL() {
 
 void VideoCaptureGLSurface::setPixels(unsigned char* pixels, size_t nbytes) {
   if(!is_setup) {
-    RX_ERROR(("cannot draw setup() not called"));
+    RX_ERROR("cannot draw setup() not called");
     return;
   }
 
@@ -248,7 +248,7 @@ void VideoCaptureGLSurface::setPixels(unsigned char* pixels, size_t nbytes) {
 
 void VideoCaptureGLSurface::reset() {
   if(is_setup) {
-    RX_ERROR(("cannot reset, first call setup()"));
+    RX_ERROR("cannot reset, first call setup()");
     return;
   }
 
@@ -276,7 +276,7 @@ void VideoCaptureGLSurface::reset() {
 
 void VideoCaptureGLSurface::flip(bool vert, bool hor) {
   if(vbo == 0) {
-    RX_ERROR(("cannot flip the surface, first call setup()"));
+    RX_ERROR("cannot flip the surface, first call setup()");
     return;
   }
 

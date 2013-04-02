@@ -153,7 +153,7 @@ bool VPXInStream::connect(vpx_read_cb decodeCB, void* user) {
   cb_user = user;
   int r = uv_tcp_init(loop, &sock);
   if(r) {
-    RX_ERROR(("uv_tcp_init failed"));
+    RX_ERROR("uv_tcp_init failed");
     return false;
   }
 
@@ -167,7 +167,7 @@ bool VPXInStream::connect(vpx_read_cb decodeCB, void* user) {
                      host.c_str(), port.c_str(), &hints);
 
   if(r) {
-    RX_ERROR(("cannot uv_tcp_init(): %s", uv_strerror(uv_last_error(loop))));
+    RX_ERROR("cannot uv_tcp_init(): %s", uv_strerror(uv_last_error(loop)));
     return false;
   }
 
@@ -215,7 +215,7 @@ void VPXInStream::parseBuffer() {
             decoder.setup(settings);
         }
         else {
-          RX_ERROR(("The received encoder settings don't contain a valid frame size"));
+          RX_ERROR("The received encoder settings don't contain a valid frame size");
         }
         break;
       };
@@ -225,7 +225,7 @@ void VPXInStream::parseBuffer() {
         break;
       }
       default: {
-        RX_WARNING(("Unhandled command in VPXInstream: %d", cmd)); 
+        RX_WARNING("Unhandled command in VPXInstream: %d", cmd); 
         break;
       }
     }
@@ -237,7 +237,7 @@ void VPXInStream::reconnect() {
 
   int r = uv_timer_init(loop, &timer_req);
   if(r) {
-    RX_ERROR(("uv_timer_init() failed. cannot reconnect"));
+    RX_ERROR("uv_timer_init() failed. cannot reconnect");
     return;
   }
 
@@ -269,23 +269,23 @@ VPXOutStream::~VPXOutStream() {
 }
 
 bool VPXOutStream::setup(VPXSettings cfg) {
-  RX_ERROR(("we need to enforce the AV_PIX_FMT_BGRA format as we're grabbing in this format"));
+  RX_ERROR("we need to enforce the AV_PIX_FMT_BGRA format as we're grabbing in this format");
   settings = cfg;
 
   if(!grabber.setup(settings, vpx_server_on_grabber_cb, this)) {
-    RX_ERROR(("cannot setup grabber"));
+    RX_ERROR("cannot setup grabber");
     return false;
   }
 
   settings.cb_user = this;
   settings.cb_write = vpx_server_on_vpx_write;
   if(!encoder.setup(settings)) {
-    RX_ERROR(("cannot setup encoder"));
+    RX_ERROR("cannot setup encoder");
     return false;
   }
 
   if(!encoder.initialize()) {
-    RX_ERROR(("cannot initailize encoder"));
+    RX_ERROR("cannot initailize encoder");
     return false;
   }
 
@@ -295,13 +295,13 @@ bool VPXOutStream::setup(VPXSettings cfg) {
 
 bool VPXOutStream::start() {
   if(!is_setup) {
-    RX_ERROR(("first call setup()"));
+    RX_ERROR("first call setup()");
     return false;
   }
 
   loop = uv_default_loop();
   if(!loop) {
-    RX_ERROR(("Cannot create loop"));
+    RX_ERROR("Cannot create loop");
     return false;
   }
 
@@ -321,7 +321,7 @@ bool VPXOutStream::start() {
 
 void VPXOutStream::update() {
   if(!is_setup) {
-    RX_ERROR(("not setup!"));
+    RX_ERROR("not setup!");
     return;
   }
   uv_run(loop, UV_RUN_NOWAIT);
@@ -393,7 +393,7 @@ bool VPXScreenGrabber::setup(VPXSettings cfg, vpx_screengrabber_cb grabCB, void*
 
   num_bytes = settings.in_w * settings.in_h * 4; // we grab in BGRA, gpu default
   if(num_bytes == 0) {
-    RX_ERROR(("Unsupported image format"));
+    RX_ERROR("Unsupported image format");
     return false;
   }
 
@@ -409,7 +409,7 @@ bool VPXScreenGrabber::setup(VPXSettings cfg, vpx_screengrabber_cb grabCB, void*
 
 void VPXScreenGrabber::grabFrame() {
   if(!is_setup) {
-    RX_ERROR(("not setup, cannot grab"));
+    RX_ERROR("not setup, cannot grab");
     return;
   }
 
@@ -491,7 +491,7 @@ void VPXConnection::write(char* data, size_t nbytes) {
 
   int r = uv_write(req, (uv_stream_t*)&sock, &buf, 1, vpx_connection_on_write);
   if(r) {
-    RX_ERROR(("cannot uv_write(): %s", uv_strerror(uv_last_error(sock.loop))));
+    RX_ERROR("cannot uv_write(): %s", uv_strerror(uv_last_error(sock.loop)));
   }
 }
 
@@ -561,7 +561,7 @@ void vpx_connection_on_write(uv_write_t* req, int status) {
   delete req;
 
   if(status == -1) {
-    RX_ERROR(("error while trying to uv_write: %s", uv_strerror(uv_last_error(c->sock.loop))));
+    RX_ERROR("error while trying to uv_write: %s", uv_strerror(uv_last_error(c->sock.loop)));
   }
 
 }
@@ -571,7 +571,7 @@ void vpx_connection_on_write(uv_write_t* req, int status) {
 void vpx_server_on_new_connection(uv_stream_t* sock, int status) {
   VPXOutStream* s = static_cast<VPXOutStream*>(sock->data);
   if(status == -1) {
-    RX_ERROR(("cannot handle connection (?)"));
+    RX_ERROR("cannot handle connection (?)");
     return;
   }
 
@@ -580,7 +580,7 @@ void vpx_server_on_new_connection(uv_stream_t* sock, int status) {
 
   r = uv_tcp_init(s->loop, &con->sock);
   if(r) {
-    RX_ERROR(("uv_tcp_init failed for new connection."));
+    RX_ERROR("uv_tcp_init failed for new connection.");
     delete con;
     con = NULL;
     return;
@@ -588,7 +588,7 @@ void vpx_server_on_new_connection(uv_stream_t* sock, int status) {
 
   r = uv_accept(sock, (uv_stream_t*)&con->sock);
   if(r) {
-    RX_ERROR(("uv_accept failed for new connection."));
+    RX_ERROR("uv_accept failed for new connection.");
     delete con;
     con = NULL;
     return;
@@ -596,7 +596,7 @@ void vpx_server_on_new_connection(uv_stream_t* sock, int status) {
 
   r = uv_read_start((uv_stream_t*)&con->sock, vpx_server_on_alloc, vpx_server_on_read);
   if(r) {
-    RX_ERROR(("uv_read_start failed for new connection."));
+    RX_ERROR("uv_read_start failed for new connection.");
     delete con;
     con = NULL;
     return;
@@ -610,7 +610,7 @@ void vpx_server_on_new_connection(uv_stream_t* sock, int status) {
 uv_buf_t vpx_server_on_alloc(uv_handle_t* handle, size_t nbytes) {
   char* buf = new char[nbytes];
   if(!buf) {
-    RX_ERROR(("ERROR - OUT OF MEMORY IN VPX STREAM"));
+    RX_ERROR("ERROR - OUT OF MEMORY IN VPX STREAM");
   }
   return uv_buf_init(buf, nbytes);
 }
@@ -623,7 +623,7 @@ void vpx_server_on_read(uv_stream_t* sock, ssize_t nread, uv_buf_t buf) {
 
     int r = uv_read_stop(sock);
     if(r) {
-      RX_ERROR(("failed to uv_read_stop() after client disconnected: %s", uv_strerror(uv_last_error(sock->loop))));
+      RX_ERROR("failed to uv_read_stop() after client disconnected: %s", uv_strerror(uv_last_error(sock->loop)));
     }
 
     if(buf.base) {
@@ -642,7 +642,7 @@ void vpx_server_on_read(uv_stream_t* sock, ssize_t nread, uv_buf_t buf) {
 
     r = uv_shutdown(&c->shutdown_req, sock, vpx_server_on_shutdown);
     if(r) {
-      RX_ERROR(("failed to uv_shutdown() after client disconnected: %s", uv_strerror(uv_last_error(sock->loop))));
+      RX_ERROR("failed to uv_shutdown() after client disconnected: %s", uv_strerror(uv_last_error(sock->loop)));
       delete c;
       c = NULL;
       return;
@@ -678,7 +678,7 @@ void vpx_client_on_resolved(uv_getaddrinfo_t* req, int status, struct addrinfo* 
   VPXInStream* s = static_cast<VPXInStream*>(req->data);
 
   if(status == -1) {
-      RX_ERROR(("cannot resolve(): %s RECONNECT!", uv_strerror(uv_last_error(s->loop))));
+      RX_ERROR("cannot resolve(): %s RECONNECT!", uv_strerror(uv_last_error(s->loop)));
       s->reconnect();
       return;
   }
@@ -698,14 +698,14 @@ void vpx_client_on_connect(uv_connect_t* req, int status) {
 
   VPXInStream* s = static_cast<VPXInStream*>(req->data);
   if(status == -1) {
-    RX_ERROR(("cannot connect: %s RECONNECT!", uv_strerror(uv_last_error(s->loop))));
+    RX_ERROR("cannot connect: %s RECONNECT!", uv_strerror(uv_last_error(s->loop)));
     s->reconnect();
     return;
   }
     
   int r = uv_read_start((uv_stream_t*)&s->sock, vpx_client_on_alloc, vpx_client_on_read);
   if(r) {
-    RX_ERROR(("uv_read_start() failed %s", uv_strerror(uv_last_error(s->loop))));
+    RX_ERROR("uv_read_start() failed %s", uv_strerror(uv_last_error(s->loop)));
     return;
   }
 }
@@ -716,12 +716,12 @@ void vpx_client_on_read(uv_stream_t* handle, ssize_t nread, uv_buf_t buf) {
   if(nread < 0) {
     int r = uv_read_stop(handle);
     if(r) {
-      RX_ERROR(("failed to uv_read_stop() after client disconnected: %s", uv_strerror(uv_last_error(handle->loop))));
+      RX_ERROR("failed to uv_read_stop() after client disconnected: %s", uv_strerror(uv_last_error(handle->loop)));
     }
 
     uv_err_t err = uv_last_error(handle->loop);
     if(err.code != UV_EOF) {
-      RX_ERROR(("disconnected from server, but not correctly!"));
+      RX_ERROR("disconnected from server, but not correctly!");
       return;
     }
 
@@ -732,12 +732,12 @@ void vpx_client_on_read(uv_stream_t* handle, ssize_t nread, uv_buf_t buf) {
 
     r = uv_shutdown(&s->shutdown_req, handle, vpx_client_on_shutdown);
     if(r) {
-      RX_ERROR(("error shutting down client. %s", uv_strerror(uv_last_error(handle->loop))));
+      RX_ERROR("error shutting down client. %s", uv_strerror(uv_last_error(handle->loop)));
       delete s;
       s = NULL;
       return;
     }
-    RX_ERROR(("------- NEED TO RECONNECT TO THE SERVER ------------- "));
+    RX_ERROR("------- NEED TO RECONNECT TO THE SERVER ------------- ");
     return;
       
   }
@@ -752,7 +752,7 @@ void vpx_client_on_read(uv_stream_t* handle, ssize_t nread, uv_buf_t buf) {
 }
 
 void vpx_client_on_write(uv_write_t* req, int status) {
-  RX_ERROR(("- need to implement + free req "));
+  RX_ERROR("- need to implement + free req ");
 }
 
 void vpx_client_on_shutdown(uv_shutdown_t* req, int status) {
@@ -769,7 +769,7 @@ void vpx_client_on_close(uv_handle_t* handle) {
 void vpx_client_on_reconnect_timer(uv_timer_t* handle, int status) {
   VPXInStream* s = static_cast<VPXInStream*>(handle->data);
   if(status == -1) {
-    RX_ERROR(("error in reconnect timer. %s", uv_strerror(uv_last_error(handle->loop))));
+    RX_ERROR("error in reconnect timer. %s", uv_strerror(uv_last_error(handle->loop)));
     return;
   }
   s->connect(s->cb_decode, s->cb_user);
@@ -778,7 +778,7 @@ void vpx_client_on_reconnect_timer(uv_timer_t* handle, int status) {
 uv_buf_t vpx_client_on_alloc(uv_handle_t* handle, size_t nbytes) {
   char* buf = new char[nbytes];
   if(!buf) {
-    RX_ERROR(("Cannot allocate memory for uv_buf_t, client stream"));
+    RX_ERROR("Cannot allocate memory for uv_buf_t, client stream");
   }
   return uv_buf_init(buf, nbytes);
 }

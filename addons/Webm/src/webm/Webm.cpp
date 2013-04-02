@@ -124,7 +124,7 @@ bool Webm::openEBML() {
   h.doctype_read_version = 2;
 
   if(!ebml->open(h)) {
-    RX_ERROR(("canot open ebml stream"));
+    RX_ERROR("canot open ebml stream");
     return false;
   }
 
@@ -135,7 +135,7 @@ bool Webm::openEBML() {
   info.timecode_scale = 1000000;
   
   if(!ebml->openSegment(info)) {
-    RX_ERROR(("cannot write segment"));
+    RX_ERROR("cannot write segment");
     return false;
   }
 
@@ -151,7 +151,7 @@ bool Webm::openEBML() {
   tracks.push_back(vid_track);
   
   if(!ebml->openTracks(tracks)) {
-    RX_ERROR(("Cannot write tracks"));
+    RX_ERROR("Cannot write tracks");
     return false;
   }
 
@@ -225,13 +225,13 @@ void Webm::addVideoFrame(unsigned char* data, int nbytes) {
   {
     WebmPacket* p = new WebmPacket();
     if(!p) {
-      RX_ERROR(("out of mem"));
+      RX_ERROR("out of mem");
       return;
     }
 
     p->buf = new unsigned char[nbytes];
     if(!p->buf) {
-      RX_ERROR(("out of mem"));
+      RX_ERROR("out of mem");
       return;
     }
 

@@ -386,7 +386,7 @@ int load_settings() {
 
   }
   catch(libconfig::ConfigException& ex) {
-    RX_ERROR(("%s", ex.what()));
+    RX_ERROR("%s", ex.what());
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

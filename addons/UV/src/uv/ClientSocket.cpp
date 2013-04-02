@@ -16,7 +16,7 @@ ClientSocket::ClientSocket(std::string host, std::string port)
   sock = new uv_tcp_t();
   int r = uv_tcp_init(loop, sock);
   if(r) {
-    RX_ERROR(("uv_tcp_init failed"));
+    RX_ERROR("uv_tcp_init failed");
   }
   sock->data = this;
 
@@ -59,7 +59,7 @@ bool ClientSocket::connect() {
                      host.c_str(), port.c_str(), &hints);
  
   if(r) {
-    RX_ERROR(("cannot uv_tcp_init(): %s", uv_strerror(uv_last_error(loop))));
+    RX_ERROR("cannot uv_tcp_init(): %s", uv_strerror(uv_last_error(loop)));
     return false;
   }
     
@@ -70,7 +70,7 @@ void ClientSocket::reconnect() {
   clear(); 
   int r = uv_timer_init(loop, &timer_req);
   if(r) {
-    RX_ERROR(("uv_time_init() failed. cannot reconnect"));
+    RX_ERROR("uv_time_init() failed. cannot reconnect");
     return;
   }
     
@@ -88,7 +88,7 @@ void ClientSocket::write(char* data, size_t nbytes) {
 
   int r = uv_write(wreq, (uv_stream_t*)sock, &buf, 1, client_socket_on_write);
   if(r) {
-    RX_ERROR(("uv_write() to server failed."));
+    RX_ERROR("uv_write() to server failed.");
   }
 }
 
@@ -102,7 +102,7 @@ void client_socket_on_resolved(uv_getaddrinfo_t* req, int status, struct addrinf
   RX_VERBOSE("resolved with status: %d", status);
   ClientSocket* c = static_cast<ClientSocket*>(req->data);
   if(status == -1) {
-    RX_ERROR(("cannot resolve(): %s", uv_strerror(uv_last_error(c->loop))));
+    RX_ERROR("cannot resolve(): %s", uv_strerror(uv_last_error(c->loop)));
     c->reconnect();
     return;
   }
@@ -121,14 +121,14 @@ void client_socket_on_resolved(uv_getaddrinfo_t* req, int status, struct addrinf
 void client_socket_on_connect(uv_connect_t* req, int status) {
   ClientSocket* c = static_cast<ClientSocket*>(req->data);
   if(status == -1) {
-    RX_ERROR(("cannot connect: %s", uv_strerror(uv_last_error(c->loop))));
+    RX_ERROR("cannot connect: %s", uv_strerror(uv_last_error(c->loop)));
     c->reconnect();
     return;
   }
     
   int r = uv_read_start((uv_stream_t*)&c->sock, client_socket_on_alloc, client_socket_on_read);
   if(r) {
-    RX_ERROR(("uv_read_start() failed %s", uv_strerror(uv_last_error(c->loop))));
+    RX_ERROR("uv_read_start() failed %s", uv_strerror(uv_last_error(c->loop)));
     return;
   }
 
@@ -145,7 +145,7 @@ void client_socket_on_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
   if(nbytes < 0) {
     int r = uv_read_stop(handle);
     if(r) {
-      RX_ERROR(("error uv_read_stop on client. %s", uv_strerror(uv_last_error(handle->loop))));
+      RX_ERROR("error uv_read_stop on client. %s", uv_strerror(uv_last_error(handle->loop)));
     }
 
     if(buf.base) {
@@ -155,19 +155,19 @@ void client_socket_on_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
 
     uv_err_t err = uv_last_error(handle->loop);
     if(err.code != UV_EOF) {
-      RX_ERROR(("disconnected from server, but not correctly!"));
+      RX_ERROR("disconnected from server, but not correctly!");
       return;
     }
 
     r = uv_shutdown(&c->shutdown_req, handle, client_socket_on_shutdown);
     if(r) {
-      RX_ERROR(("error shutting down client. %s", uv_strerror(uv_last_error(handle->loop))));
+      RX_ERROR("error shutting down client. %s", uv_strerror(uv_last_error(handle->loop)));
       delete c;
       c = NULL;
       return;
     }
        
-    RX_ERROR(("------- NEED TO RECONNECT TO THE SERVER ------------- "));
+    RX_ERROR("------- NEED TO RECONNECT TO THE SERVER ------------- ");
     return;
       
   }
@@ -211,7 +211,7 @@ void client_socket_on_close_delete(uv_handle_t* handle) {
 void client_socket_on_reconnect_timer(uv_timer_t* handle, int status) {
   ClientSocket* c = static_cast<ClientSocket*>(handle->data);
   if(status == -1) {
-    RX_ERROR(("error shutting down client. %s", uv_strerror(uv_last_error(handle->loop))));
+    RX_ERROR("error shutting down client. %s", uv_strerror(uv_last_error(handle->loop)));
     return;
   }
     

@@ -32,7 +32,7 @@ bool AudioFile::load(std::string filename, bool datapath) {
   handle = sf_open(filename.c_str(), SFM_READ, &info);
 
   if(!handle) {
-    RX_ERROR(("Error loading: %s - %s", filename.c_str(), sf_strerror(NULL)));
+    RX_ERROR("Error loading: %s - %s", filename.c_str(), sf_strerror(NULL));
     return false;
   }
 
@@ -41,7 +41,7 @@ bool AudioFile::load(std::string filename, bool datapath) {
 
   if(!buffer) {
     buffer = NULL;
-    RX_ERROR(("Cannot allocate audio buffer"));
+    RX_ERROR("Cannot allocate audio buffer");
     return false;
   }
    

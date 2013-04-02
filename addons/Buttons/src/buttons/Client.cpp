@@ -22,7 +22,7 @@ namespace buttons {
   bool Client::connect() {
     int r = uv_tcp_init(loop, &sock);
     if(r) {
-      RX_ERROR(("uv_tcp_init failed"));
+      RX_ERROR("uv_tcp_init failed");
       return false;
     }
 
@@ -36,7 +36,7 @@ namespace buttons {
                        host.c_str(), port.c_str(), &hints);
  
     if(r) {
-      RX_ERROR(("cannot uv_tcp_init(): %s", uv_strerror(uv_last_error(loop))));
+      RX_ERROR("cannot uv_tcp_init(): %s", uv_strerror(uv_last_error(loop)));
       return false;
     }
     
@@ -47,7 +47,7 @@ namespace buttons {
     clear(); // might be redundant (as it's done in the shutdown)
     int r = uv_timer_init(loop, &timer_req);
     if(r) {
-      RX_ERROR(("uv_time_init() failed. cannot reconnect"));
+      RX_ERROR("uv_time_init() failed. cannot reconnect");
       return;
     }
     
@@ -388,7 +388,7 @@ namespace buttons {
 
     int r = uv_write(wreq, (uv_stream_t*)&sock, &buf, 1, buttons_client_on_write);
     if(r) {
-      RX_ERROR(("uv_write() to server failed."));
+      RX_ERROR("uv_write() to server failed.");
     }
   }
 
@@ -424,7 +424,7 @@ namespace buttons {
     buttons.clear();
     buffer.clear();
 
-    RX_WARNING(("---- ALL CLEAR -------"));
+    RX_WARNING("---- ALL CLEAR -------");
   }
 
   // CLIENT CALLBACKS
@@ -433,7 +433,7 @@ namespace buttons {
     RX_VERBOSE("resolved with status: %d", status);
     Client* c = static_cast<Client*>(req->data);
     if(status == -1) {
-      RX_ERROR(("cannot resolve(): %s", uv_strerror(uv_last_error(c->loop))));
+      RX_ERROR("cannot resolve(): %s", uv_strerror(uv_last_error(c->loop)));
       c->reconnect();
       return;
     }
@@ -453,14 +453,14 @@ namespace buttons {
   void buttons_client_on_connect(uv_connect_t* req, int status) {
     Client* c = static_cast<Client*>(req->data);
     if(status == -1) {
-      RX_ERROR(("cannot connect: %s", uv_strerror(uv_last_error(c->loop))));
+      RX_ERROR("cannot connect: %s", uv_strerror(uv_last_error(c->loop)));
       c->reconnect();
       return;
     }
     
     int r = uv_read_start((uv_stream_t*)&c->sock, buttons_client_on_alloc, buttons_client_on_read);
     if(r) {
-      RX_ERROR(("uv_read_start() failed %s", uv_strerror(uv_last_error(c->loop))));
+      RX_ERROR("uv_read_start() failed %s", uv_strerror(uv_last_error(c->loop)));
       return;
     }
 
@@ -474,7 +474,7 @@ namespace buttons {
     if(nbytes < 0) {
       int r = uv_read_stop(handle);
       if(r) {
-        RX_ERROR(("error uv_read_stop on client. %s", uv_strerror(uv_last_error(handle->loop))));
+        RX_ERROR("error uv_read_stop on client. %s", uv_strerror(uv_last_error(handle->loop)));
       }
 
       if(buf.base) {
@@ -484,19 +484,19 @@ namespace buttons {
 
       uv_err_t err = uv_last_error(handle->loop);
       if(err.code != UV_EOF) {
-        RX_ERROR(("disconnected from server, but not correctly!"));
+        RX_ERROR("disconnected from server, but not correctly!");
         return;
       }
 
       r = uv_shutdown(&c->shutdown_req, handle, buttons_client_on_shutdown);
       if(r) {
-        RX_ERROR(("error shutting down client. %s", uv_strerror(uv_last_error(handle->loop))));
+        RX_ERROR("error shutting down client. %s", uv_strerror(uv_last_error(handle->loop)));
         delete c;
         c = NULL;
         return;
       }
        
-      RX_ERROR(("------- NEED TO RECONNECT TO THE SERVER ------------- "));
+      RX_ERROR("------- NEED TO RECONNECT TO THE SERVER ------------- ");
       return;
       
     }
@@ -511,7 +511,7 @@ namespace buttons {
   }
 
   uv_buf_t buttons_client_on_alloc(uv_handle_t* handle, size_t nbytes) {
-    RX_ERROR(("we need to free this buffer!"));
+    RX_ERROR("we need to free this buffer!");
     char* buf = new char[nbytes];
     return uv_buf_init(buf, nbytes);
   }
@@ -534,7 +534,7 @@ namespace buttons {
   void buttons_client_on_reconnect_timer(uv_timer_t* handle, int status) {
     Client* c = static_cast<Client*>(handle->data);
     if(status == -1) {
-      RX_ERROR(("error shutting down client. %s", uv_strerror(uv_last_error(handle->loop))));
+      RX_ERROR("error shutting down client. %s", uv_strerror(uv_last_error(handle->loop)));
       return;
     }
     

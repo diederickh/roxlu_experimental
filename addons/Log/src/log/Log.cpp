@@ -13,6 +13,10 @@ namespace roxlu {
                               va_list args)
   {
 
+    if(level > roxlu_log_level) {
+      return;
+    }
+
     Log* l = static_cast<Log*>(user);
     std::stringstream ss_tty;
     std::stringstream ss_file;
@@ -36,7 +40,7 @@ namespace roxlu {
       }
       else if(level == RX_LOG_LEVEL_WARNING) {
         if(l->use_colors) {
-          ss_tty << "\x1b[36m";
+          ss_tty << "\x1b[36m"; // 35 - magenta
         }
 
         ss_tty << "[warning] ";
@@ -44,11 +48,11 @@ namespace roxlu {
       }
       else if(level == RX_LOG_LEVEL_ERROR) {
         if(l->use_colors) {
-          ss_tty << "\x1b[36m";
+          ss_tty << "\x1b[36m"; // 31 - red
         }
                 
         ss_tty << "[error] ";
-        ss_file << "[warning] ";
+        ss_file << "[error] ";
       }
       else {
         printf("Unsupported log level.\n");
@@ -87,7 +91,10 @@ namespace roxlu {
           ss_tty << "\x1b[32m";
         }
         else if(level == RX_LOG_LEVEL_WARNING) {
-          ss_tty << "\x1b[33m";
+          ss_tty << "\x1b[35m";
+        }
+        else if(level == RX_LOG_LEVEL_ERROR) {
+          ss_tty << "\x1b[31m";
         }
 
       }
@@ -152,6 +159,13 @@ namespace roxlu {
     logLineNumber(false);
     logTime(false);
     logLevel(false);
+  }
+
+  void Log::maxi() {
+    logFunctionName(true);
+    logLineNumber(true);
+    logTime(true);
+    logLevel(true);
   }
 
   bool Log::setup(std::string name, std::string path) {

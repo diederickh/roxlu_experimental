@@ -54,7 +54,7 @@ namespace roxlu {
 		
       of.open(file.c_str(), std::ios::out);
       if(!of.is_open()) {
-        RX_ERROR(("File: cannot open file: '%s'", file.c_str()));
+        RX_ERROR("File: cannot open file: '%s'", file.c_str());
         return;
       }
       of.write(contents.c_str(), contents.length());
@@ -70,7 +70,7 @@ namespace roxlu {
       std::string line = "";
       std::ifstream ifs(file.c_str());
       if(!ifs.is_open()) {
-        RX_ERROR(("File: cannot open file: '%s'", file.c_str()));
+        RX_ERROR("File: cannot open file: '%s'", file.c_str());
         return result;
       }
       while(getline(ifs,line)) {
@@ -115,7 +115,7 @@ namespace roxlu {
 
     static bool remove(std::string filepath) {
       if(::remove(filepath.c_str()) != 0) {
-        RX_ERROR(("cannot remove file: %s - %s", filepath.c_str(), strerror(errno)));
+        RX_ERROR("cannot remove file: %s - %s", filepath.c_str(), strerror(errno));
         return false;
       }
       return true;
@@ -204,7 +204,7 @@ namespace roxlu {
         dir_path += dirs[i];
         if(stat(dir_path.c_str(), &s) != 0) {
           if(!File::createDirectory(dir_path.c_str())) {
-            RX_ERROR(("ERROR: cannot create directory: %s", dir_path.c_str()));
+            RX_ERROR("ERROR: cannot create directory: %s", dir_path.c_str());
             return false;
           }
         }
@@ -217,11 +217,11 @@ namespace roxlu {
 #ifdef _WIN32
       if(_mkdir(path.c_str()) != 0) {
         if(errno == ENOENT) { 
-          RX_ERROR(("Cannot create directory: %s (ENOENT)", path.c_str()));
+          RX_ERROR("Cannot create directory: %s (ENOENT)", path.c_str());
           return false;
         }
         else if(errno == EEXIST) {
-          RX_ERROR(("Cannot create directory: %s (EEXIST)", path.c_str()));
+          RX_ERROR("Cannot create directory: %s (EEXIST)", path.c_str());
         }
       }
       return true;

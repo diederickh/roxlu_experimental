@@ -103,7 +103,7 @@ int EBML::openTracks(std::vector<EBMLTrack> tracks) {
         eu16(ID_PIXEL_HEIGHT, tr.vid_pix_height, &spec_buffer);
       }
       else if(tr.type == EBML_TRACK_TYPE_AUDIO) {
-        RX_ERROR(("@todo we need to encode the audio specs"));
+        RX_ERROR("@todo we need to encode the audio specs");
       }
 
       writeID(ID_VIDEO, &track_buffer);
@@ -396,7 +396,7 @@ EBMLFile::~EBMLFile() {
 bool EBMLFile::open(const std::string filepath) {
   fp = fopen(filepath.c_str(), "w+b");
   if(!fp) {
-    RX_ERROR(("Cannot open: %s, error: %d (%s)", filepath.c_str(), errno, strerror(errno)));
+    RX_ERROR("Cannot open: %s, error: %d (%s)", filepath.c_str(), errno, strerror(errno));
     return false;
   }
   return true;
@@ -405,13 +405,13 @@ bool EBMLFile::open(const std::string filepath) {
 size_t ebml_file_write(char* data, size_t nbytes, void* user) {
   EBMLFile* w = static_cast<EBMLFile*>(user);
   if(!w->fp) {
-    RX_ERROR(("cannot write, file not handle not valid"));
+    RX_ERROR("cannot write, file not handle not valid");
     return 0;
   }
 
   int r = fwrite(data, nbytes, 1, w->fp);
   if(r != 1) {
-    RX_ERROR(("Cannot write data to ebml file."));
+    RX_ERROR("Cannot write data to ebml file.");
     return 0;
   }
 
@@ -421,7 +421,7 @@ size_t ebml_file_write(char* data, size_t nbytes, void* user) {
 void ebml_file_close(void* user) {
   EBMLFile* w = static_cast<EBMLFile*>(user);
   if(w->fp == NULL) {
-    RX_WARNING(("already closed."));
+    RX_WARNING("already closed.");
     return;
   }
 
@@ -433,7 +433,7 @@ void ebml_file_close(void* user) {
 size_t ebml_file_peek(char* dest, void* user) {
   EBMLFile* w = static_cast<EBMLFile*>(user);
   if(!w->fp) {
-    RX_ERROR(("cannot peek, file not handle not valid"));
+    RX_ERROR("cannot peek, file not handle not valid");
     return 0;
   }
 
@@ -446,13 +446,13 @@ size_t ebml_file_peek(char* dest, void* user) {
 size_t ebml_file_read(char* dest, size_t nbytes, void* user) {
   EBMLFile* w = static_cast<EBMLFile*>(user);
   if(!w->fp) {
-    RX_ERROR(("cannot read, file not handle not valid"));
+    RX_ERROR("cannot read, file not handle not valid");
     return 0;
   }
 
   int r = fread(dest, nbytes, 1, w->fp);
   if(r != 1) {
-    RX_ERROR(("cannot read from file."));
+    RX_ERROR("cannot read from file.");
     return 0;
   }
   return nbytes;
@@ -461,12 +461,12 @@ size_t ebml_file_read(char* dest, size_t nbytes, void* user) {
 size_t ebml_file_skip(size_t nbytes, void* user) {
   EBMLFile* w = static_cast<EBMLFile*>(user);
   if(!w->fp) {
-    RX_ERROR(("cannot skip, file not handle not valid"));
+    RX_ERROR("cannot skip, file not handle not valid");
     return 0;
   }
 
   if(fseek(w->fp, nbytes, SEEK_CUR) != 0) {
-    RX_ERROR(("cannot fseek()."));
+    RX_ERROR("cannot fseek().");
     return 0;
   }
   return nbytes;

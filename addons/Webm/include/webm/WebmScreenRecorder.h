@@ -45,7 +45,7 @@ So if you want to record to a file, you use:
        c.vid_fps = VIDEO_FPS;
      
        if(!rec.setup(c)) {
-         RX_ERROR(("cannot setup screen recorder"));
+         RX_ERROR("cannot setup screen recorder");
          ::exit(0);
        }
   

@@ -28,6 +28,7 @@ namespace roxlu {
     void addMessage(LogMessage msg);                          /* gets called indirectly by RX_VERBOSE/RX_WARNING/RX_ERROR */
 
     void mini();                                              /* log minimal info, just the message */
+    void maxi();                                              /* log maximum info */
 
     void logFunctionName(bool flag);                          /* log the function name of the caller */
     void logLineNumber(bool flag);                            /* log the line number of the caller */

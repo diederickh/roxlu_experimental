@@ -43,7 +43,7 @@ size_t kurl_callback_download_write_function(char* data, size_t size, size_t nme
 
   kc->ofs.write(data, nmemb);
   if(!kc->ofs) {
-    RX_ERROR((KURL_ERR_FILE_WRITE));
+    RX_ERROR(KURL_ERR_FILE_WRITE);
   }
   
   return size * nmemb;
@@ -113,7 +113,7 @@ Kurl::Kurl()
 {
   handle = curl_multi_init();
   if(handle == NULL) {
-    RX_ERROR((KURL_ERR_MULTI_INIT));
+    RX_ERROR(KURL_ERR_MULTI_INIT);
     ::exit(0);
   }
 }
@@ -204,7 +204,7 @@ bool Kurl::download(std::string url,
   c->handle = curl_easy_init();
 
   if(!c->handle) {
-    RX_ERROR((KURL_ERR_EASY_INIT));
+    RX_ERROR(KURL_ERR_EASY_INIT);
     delete c;
     return false;
   }
@@ -217,7 +217,7 @@ bool Kurl::download(std::string url,
   if(writeCB == NULL) {
     c->ofs.open(filename.c_str(), std::ios::out | std::ios::binary);
     if(!c->ofs.is_open()) {
-      RX_ERROR((KURL_ERR_DOWNLOAD_FILE, filename.c_str()));
+      RX_ERROR(KURL_ERR_DOWNLOAD_FILE, filename.c_str());
       return false;
     }
   }
@@ -251,7 +251,7 @@ bool Kurl::get(std::string url,
   c->handle = curl_easy_init();
 
   if(!c->handle) {
-    RX_ERROR((KURL_ERR_EASY_INIT));
+    RX_ERROR(KURL_ERR_EASY_INIT);
     delete c;
     return false;
   }
@@ -289,7 +289,7 @@ bool Kurl::post(Form& f,
 {
 
   if(!f.isSetup()) {
-    RX_WARNING((KURL_ERR_FORM_NOT_SETUP));
+    RX_WARNING(KURL_ERR_FORM_NOT_SETUP);
     return false;
   }
 
@@ -302,7 +302,7 @@ bool Kurl::post(Form& f,
 
   c->handle = curl_easy_init();
   if(!c->handle) {
-    RX_ERROR((KURL_ERR_EASY_INIT));
+    RX_ERROR(KURL_ERR_EASY_INIT);
     delete c;
     return false;
   }
@@ -391,7 +391,7 @@ bool Kurl::setDebugCallback(CURL* handle) {
 
   CURLcode result = curl_easy_setopt(handle, CURLOPT_DEBUGFUNCTION, kurl_libcurl_debug_callback);
   if(result != CURLE_OK) {
-    RX_ERROR((KURL_ERR_DEBUG_FUNC));
+    RX_ERROR(KURL_ERR_DEBUG_FUNC);
     return false;
   }
   return true;

@@ -28,12 +28,12 @@ VPXDecoder::~VPXDecoder() {
 
 bool VPXDecoder::setup(VPXSettings cfg) {
   RX_VERBOSE("------------------------- SETUP DECODER -------------------------");
-  RX_ERROR(("TODO: use VPXSettings.cb_write/cb_user + check if it's set, for the callback which is called when we have decoded data "));
+  RX_ERROR("TODO: use VPXSettings.cb_write/cb_user + check if it's set, for the callback which is called when we have decoded data ");
   settings = cfg;
   bool result = false;
   result = initializeDecoder();
   if(!result) {
-    RX_ERROR(("Cannot initialize decoder"));
+    RX_ERROR("Cannot initialize decoder");
     return false;
   }
 
@@ -43,7 +43,7 @@ bool VPXDecoder::setup(VPXSettings cfg) {
   }
 
   if(!vpx_img_alloc(&img_out, VPX_IMG_FMT_RGB24, settings.out_w, settings.out_h, 1)) {
-    RX_ERROR(("Cannot allocate the out image"));
+    RX_ERROR("Cannot allocate the out image");
     return false;
   }
 
@@ -52,7 +52,7 @@ bool VPXDecoder::setup(VPXSettings cfg) {
   memset(pixels, 0, num_bytes_per_frame);
 
   if(!pixels) {
-    RX_ERROR(("Out of memory.. can't allocate buffer for read buffer"));
+    RX_ERROR("Out of memory.. can't allocate buffer for read buffer");
     return false;
   }
   return true;
@@ -81,7 +81,7 @@ bool VPXDecoder::initializeSWS() {
                        SWS_FAST_BILINEAR, NULL, NULL, NULL);
 
   if(!sws) {
-    RX_ERROR(("Cannot initialize sws decoder."));
+    RX_ERROR("Cannot initialize sws decoder.");
     return false;
   }
 
@@ -102,7 +102,7 @@ void VPXDecoder::decodeFrame(unsigned char* data, int nbytes) {
     printf("\n");
 #endif
 
-  RX_WARNING(("decode: %d bytes", nbytes));
+  RX_WARNING("decode: %d bytes", nbytes);
   vpx_codec_iter_t iter = NULL;
   vpx_image_t* img;
   

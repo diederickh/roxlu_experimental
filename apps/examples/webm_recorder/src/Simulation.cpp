@@ -15,7 +15,7 @@ void Simulation::setup() {
 
   // open the file to which we write the webm video
   if(!efile.open(rx_to_exe_path("recording_test.webm"))) {
-    RX_ERROR(("cannot open ebml destination file"));
+    RX_ERROR("cannot open ebml destination file");
     ::exit(0);
   }
 
@@ -37,18 +37,18 @@ void Simulation::setup() {
   c.vid_fps = VIDEO_FPS;
 
   if(!rec.setup(c)) {
-    RX_ERROR(("cannot setup screen recorder"));
+    RX_ERROR("cannot setup screen recorder");
     ::exit(0);
   }
   
   // we use a capture device (only tested on mac)
   if(!cap.openDevice(0, 640, 480, VC_FMT_YUYV422)) {
-    RX_ERROR(("cannot open webcam"));
+    RX_ERROR("cannot open webcam");
     ::exit(0);
   }
 
   if(!cap.startCapture()) {
-    RX_ERROR(("cannot start capture"));
+    RX_ERROR("cannot start capture");
     ::exit(0);
   }
 
@@ -88,7 +88,7 @@ void Simulation::onMouseMove(int x, int y) {
 
 void Simulation::onKeyDown(int key) {
   if(key == 'S') {
-    RX_VERBOSE(("start stream"));
+    RX_VERBOSE("start stream");
     rec.start();
   }
 }

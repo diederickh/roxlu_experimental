@@ -236,19 +236,19 @@ inline void AV::setFLV(FLV* f) {
 
 inline void AV::start() {
   if(!is_initialized) {
-    RX_ERROR(("cannot start AV because we're not initialized."));
+    RX_ERROR("cannot start AV because we're not initialized.");
     return;
   }
   if(!openX264()) {
-    RX_ERROR(("ERROR: cannot open X264"));
+    RX_ERROR("ERROR: cannot open X264");
     return;
   }
 	if(!openLame()) {
-		RX_ERROR(("cannot create lame mp3 encoder"));
+		RX_ERROR("cannot create lame mp3 encoder");
 		return;
 	}
   if(!openFLV()) {
-    RX_ERROR(("ERROR: cannot open FLV."));
+    RX_ERROR("ERROR: cannot open FLV.");
     return;
   }
   uv_thread_create(&thread, av_thread_function, (void*)this);

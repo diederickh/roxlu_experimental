@@ -9,7 +9,6 @@ roxlu_addon_begin("log")
 
   if(UNIX) 
     roxlu_add_extern_lib(libuv.a)
-    roxlu_add_lib(roxlu_uv)
   endif()
   
   if(APPLE)
@@ -25,7 +24,7 @@ roxlu_addon_begin("log")
     roxlu_add_lib(ws2_32.lib)
     roxlu_add_lib(psapi.lib)
     roxlu_add_lib(iphlpapi.lib)
-    roxlu_add_lib(roxlu_uv)
+
   endif()
 
   # --------------------------------------------------------------------------------------

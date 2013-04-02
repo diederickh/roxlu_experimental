@@ -49,7 +49,7 @@ void Simulation::setup() {
   settings.vid_out_h = settings.vid_in_h;
   settings.vid_fps = 30;
   if(!recorder.setup(settings)) {
-    RX_ERROR(("ERROR: cannot setup recorder"));
+    RX_ERROR("ERROR: cannot setup recorder");
     ::exit(EXIT_FAILURE);
   }
 }

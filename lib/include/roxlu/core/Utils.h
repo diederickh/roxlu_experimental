@@ -264,29 +264,29 @@ static bool rx_is_dir(std::string filepath) {
 
   if(result < 0) {
     if(errno == EACCES) {
-      RX_ERROR(("EACCESS: no permission for: %s", filepath.c_str()));
+      RX_ERROR("EACCESS: no permission for: %s", filepath.c_str());
     }
     else if(errno == EFAULT) {
-      RX_ERROR(("EFAULT: bad address, for: %s", filepath.c_str()));
+      RX_ERROR("EFAULT: bad address, for: %s", filepath.c_str());
     }
     else if(errno == ELOOP) {
-      RX_ERROR(("ELOOP: too many links, for: %s", filepath.c_str()));
+      RX_ERROR("ELOOP: too many links, for: %s", filepath.c_str());
     }
     else if(errno == ENAMETOOLONG) {
-      RX_ERROR(("ENAMETOOLONG: for: %s", filepath.c_str()));
+      RX_ERROR("ENAMETOOLONG: for: %s", filepath.c_str());
     }
     else if(errno == ENOENT) {
       // we expect this when the dir doesn't exist
       return false;
     }
     else if(errno == ENOMEM) {
-      RX_ERROR(("ENOMEM: for: %s", filepath.c_str()));
+      RX_ERROR("ENOMEM: for: %s", filepath.c_str());
     }
     else if(errno == ENOTDIR) {
-      RX_ERROR(("ENOTDIR: for: %s", filepath.c_str()));
+      RX_ERROR("ENOTDIR: for: %s", filepath.c_str());
     }
     else if(errno == EOVERFLOW) {
-      RX_ERROR(("EOVERFLOW: for: %s", filepath.c_str()));
+      RX_ERROR("EOVERFLOW: for: %s", filepath.c_str());
     }
 
     return false;
@@ -330,7 +330,7 @@ static std::string rx_get_file_contents(std::string filepath, bool datapath = fa
   std::string line = "";
   std::ifstream ifs(filepath.c_str());
   if(!ifs.is_open()) {
-    RX_ERROR(("Cannot open file: '%s'", filepath.c_str()));
+    RX_ERROR("Cannot open file: '%s'", filepath.c_str());
     return result;
   }
   while(getline(ifs,line)) {
@@ -369,7 +369,7 @@ static bool rx_file_remove(std::string filepath) {
     return false;
   }
   if(::remove(filepath.c_str()) != 0) {
-    RX_ERROR(("cannot remove file: %s - %s", filepath.c_str(), strerror(errno)));
+    RX_ERROR("cannot remove file: %s - %s", filepath.c_str(), strerror(errno));
     return false;
   }
   return true;
@@ -455,11 +455,11 @@ static bool rx_create_dir(std::string path) {
 #ifdef _WIN32
   if(_mkdir(path.c_str()) != 0) {
     if(errno == ENOENT) { 
-      RX_ERROR(("Cannot create directory: %s (ENOENT)", path.c_str()));
+      RX_ERROR("Cannot create directory: %s (ENOENT)", path.c_str());
       return false;
     }
     else if(errno == EEXIST) {
-      RX_ERROR(("Cannot create directory: %s (EEXIST)", path.c_str()));
+      RX_ERROR("Cannot create directory: %s (EEXIST)", path.c_str());
     }
   }
   return true;
@@ -524,7 +524,7 @@ static bool rx_create_path(std::string path) {
     dir_path += dirs[i];
     if(stat(dir_path.c_str(), &s) != 0) {
       if(!rx_create_dir(dir_path.c_str())) {
-        RX_ERROR(("ERROR: cannot create directory: %s", dir_path.c_str()));
+        RX_ERROR("ERROR: cannot create directory: %s", dir_path.c_str());
         return false;
       }
     }

@@ -112,7 +112,7 @@ template<class T>
 bool BMFLoader<T>::load(std::string filename, bool datapath) {
   std::string str = rx_get_file_contents(filename, datapath);
   if(!str.size()) {
-    RX_ERROR((BMF_ERR_FILE));
+    RX_ERROR(BMF_ERR_FILE);
     return false;
   }
 
@@ -122,7 +122,7 @@ bool BMFLoader<T>::load(std::string filename, bool datapath) {
     doc.parse<0>((char*)str.c_str());
   }
   catch(std::exception& ex) {
-    RX_ERROR((BMF_ERR_PARSE, ex.what()));
+    RX_ERROR(BMF_ERR_PARSE, ex.what());
     return false;
   }
   
@@ -132,14 +132,14 @@ bool BMFLoader<T>::load(std::string filename, bool datapath) {
   xml_attribute<>* attr = NULL;
   
   if(!common_node) {
-    RX_ERROR((BMF_ERR_NO_COMMON));
+    RX_ERROR(BMF_ERR_NO_COMMON);
     return false;
   }
 
   // IMAGE WIDTH
   attr = common_node->first_attribute("scaleW");
   if(!attr) {
-    RX_ERROR((BMF_ERR_NO_SCALEW));
+    RX_ERROR(BMF_ERR_NO_SCALEW);
     return false;
   }
   image_width = rx_string_to_int(attr->value());
@@ -147,7 +147,7 @@ bool BMFLoader<T>::load(std::string filename, bool datapath) {
   // IMAGE HEIGHT
   attr = common_node->first_attribute("scaleH");
   if(!attr) {
-    RX_ERROR((BMF_ERR_NO_SCALEW));
+    RX_ERROR(BMF_ERR_NO_SCALEW);
     return false;
   }
   image_height = rx_string_to_int(attr->value());
@@ -155,13 +155,13 @@ bool BMFLoader<T>::load(std::string filename, bool datapath) {
 
   // IMAGE PATH
   if(!page_node) {
-    RX_ERROR((BMF_ERR_NO_PAGE_NODE));
+    RX_ERROR(BMF_ERR_NO_PAGE_NODE);
     return false;
   }
 
   attr = page_node->first_attribute("file");
   if(!attr) {
-    RX_ERROR((BMF_ERR_NO_FILE_ATTR));
+    RX_ERROR(BMF_ERR_NO_FILE_ATTR);
     return false;
   }
 
@@ -227,7 +227,7 @@ std::vector<T> BMFLoader<T>::generateVertices(std::string str, float x, float y)
   for(size_t i = 0; i < str.size(); ++i) {
     std::map<size_t, BMFChar>::iterator it = chars.find(str[i]);
     if(it == chars.end()) {
-      RX_ERROR((BMF_ERR_CHAR_NOT_FOUND, str[i]));
+      RX_ERROR(BMF_ERR_CHAR_NOT_FOUND, str[i]);
       continue;
     }
     
@@ -270,7 +270,7 @@ void BMFLoader<T>::getStringSize(std::string& str, int& w, int &h) {
   for(size_t i = 0; i < str.size(); ++i) {
     std::map<size_t, BMFChar>::iterator it = chars.find(str[i]);
     if(it == chars.end()) {
-      RX_ERROR((BMF_ERR_CHAR_NOT_FOUND, str[i]));
+      RX_ERROR(BMF_ERR_CHAR_NOT_FOUND, str[i]);
       continue;
     }
     

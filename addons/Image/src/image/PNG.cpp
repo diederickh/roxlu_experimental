@@ -74,7 +74,7 @@ bool PNG::load(std::string filename, bool datapath) {
   png_infop info_ptr; 
 
   if(pixels) {
-    RX_ERROR((PNG_ERR_ALREADY_LOADED));
+    RX_ERROR(PNG_ERR_ALREADY_LOADED);
     return false;
   }
   
@@ -84,7 +84,7 @@ bool PNG::load(std::string filename, bool datapath) {
 
   FILE* fp = fopen(filename.c_str(), "rb");
   if(!fp) {
-    RX_ERROR((PNG_ERR_LOAD_NO_FILE, filename.c_str()));
+    RX_ERROR(PNG_ERR_LOAD_NO_FILE, filename.c_str());
     fp = NULL;
     return false;
   }
@@ -93,14 +93,14 @@ bool PNG::load(std::string filename, bool datapath) {
   size_t r = 0;
   r = fread(sig, 1, 8, fp);
   if(r != 8) {
-    RX_ERROR((PNG_ERR_CANNOT_READ));
+    RX_ERROR(PNG_ERR_CANNOT_READ);
     fclose(fp);
     fp = NULL;
     return  false;
   }
 
   if(!png_check_sig(sig, 8)) {
-    RX_ERROR((PNG_ERR_SIG));
+    RX_ERROR(PNG_ERR_SIG);
     fclose(fp);
     fp = NULL;
     return false;
@@ -108,7 +108,7 @@ bool PNG::load(std::string filename, bool datapath) {
   
   png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
   if(!png_ptr) {
-    RX_ERROR((PNG_ERR_CREATE_READ_ST));
+    RX_ERROR(PNG_ERR_CREATE_READ_ST);
     fclose(fp);
     fp = NULL;
     return false;
@@ -117,7 +117,7 @@ bool PNG::load(std::string filename, bool datapath) {
   info_ptr = png_create_info_struct(png_ptr);
   if(!info_ptr) {
     png_destroy_read_struct(&png_ptr, NULL, NULL);
-    RX_ERROR((PNG_ERR_CREATE_INFO_PTR));
+    RX_ERROR(PNG_ERR_CREATE_INFO_PTR);
     fclose(fp);
     fp = NULL;
     return false;
@@ -179,7 +179,7 @@ bool PNG::load(std::string filename, bool datapath) {
 
   pixels = new unsigned char[num_bytes];
   if(!pixels) {
-    RX_ERROR((PNG_ERR_IMG_TOO_BIG));
+    RX_ERROR(PNG_ERR_IMG_TOO_BIG);
     png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
     fclose(fp);
     fp = NULL;
@@ -189,7 +189,7 @@ bool PNG::load(std::string filename, bool datapath) {
 
   png_bytep* row_ptrs = new png_bytep[height];
   if(!row_ptrs) {
-    RX_ERROR((PNG_ERR_IMG_TOO_BIG));
+    RX_ERROR(PNG_ERR_IMG_TOO_BIG);
     png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
     fclose(fp);
     fp = NULL;
@@ -223,14 +223,14 @@ bool PNG::save(std::string filename, bool datapath) {
 
   FILE* fp = fopen(filename.c_str(), "wb");
   if(!fp) {
-    RX_ERROR((PNG_ERR_SAVE_NO_FILE, filename.c_str()));
+    RX_ERROR(PNG_ERR_SAVE_NO_FILE, filename.c_str());
     fp = NULL;
     return false;
   }
 
   png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
   if(png_ptr == NULL) {
-    RX_ERROR((PNG_ERR_CREATE_WRITE_ST));
+    RX_ERROR(PNG_ERR_CREATE_WRITE_ST);
     fclose(fp);
     fp = NULL;
     return false;
@@ -239,7 +239,7 @@ bool PNG::save(std::string filename, bool datapath) {
 
   info_ptr = png_create_info_struct(png_ptr);
   if(info_ptr == NULL) {
-    RX_ERROR((PNG_ERR_CREATE_INFO_PTR));
+    RX_ERROR(PNG_ERR_CREATE_INFO_PTR);
     fclose(fp);
     fp = NULL;
     return false;

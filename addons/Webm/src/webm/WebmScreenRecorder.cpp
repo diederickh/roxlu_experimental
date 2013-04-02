@@ -28,7 +28,7 @@ bool WebmScreenRecorder::setup(WebmScreenRecorderSettings cfg) {
   settings = cfg;
 
   if(cfg.cb_user == NULL) {
-    RX_ERROR(("cb_user not set in the configs"));
+    RX_ERROR("cb_user not set in the configs");
     return false;
   }
 
@@ -58,13 +58,13 @@ bool WebmScreenRecorder::setup(WebmScreenRecorderSettings cfg) {
 
     bool r = webm.setup(cfg);
     if(!r) {
-      RX_ERROR(("cannot setup webm video"));
+      RX_ERROR("cannot setup webm video");
       return false;
     }
   }
 
   if(!webm.initialize()) {
-    RX_ERROR(("cannot initialize webm."));
+    RX_ERROR("cannot initialize webm.");
     return false;
   }
 
@@ -72,14 +72,14 @@ bool WebmScreenRecorder::setup(WebmScreenRecorderSettings cfg) {
     nbytes_per_video_frame = settings.vid_in_w * settings.vid_in_h * 3;
   }
   else {
-    RX_ERROR(("we only support VPX_IMG_FMT_RGB24 at the moment"));
+    RX_ERROR("we only support VPX_IMG_FMT_RGB24 at the moment");
     return false;
   }
 
 #if !defined(WEBM_SCREENREC_USE_PBOS)
   pixels = new unsigned char[nbytes_per_video_frame];
   if(!pixels) {
-    RX_ERROR(("cannot allocate memory for pixels"));
+    RX_ERROR("cannot allocate memory for pixels");
     return false;
   }
   memset(pixels, 0xFF, nbytes_per_video_frame);
@@ -90,7 +90,7 @@ bool WebmScreenRecorder::setup(WebmScreenRecorderSettings cfg) {
 
 bool WebmScreenRecorder::start() {
   if(!webm.startThread()) {
-    RX_ERROR(("cannot start encoder/screen-recorder thread"));
+    RX_ERROR("cannot start encoder/screen-recorder thread");
     return false;
   }
   return true;
@@ -98,7 +98,7 @@ bool WebmScreenRecorder::start() {
 
 bool WebmScreenRecorder::stop() {
   if(!webm.stopThread()) {
-    RX_ERROR(("cannot stop encoder/screen-recorder thread (?)"));
+    RX_ERROR("cannot stop encoder/screen-recorder thread (?)");
     return false;
   }
   return true;

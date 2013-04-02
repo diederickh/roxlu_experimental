@@ -39,12 +39,12 @@ bool CommandLineOption::isset() {
 
 std::string CommandLineOption::getString(int index) {
   if(type != CL_TYPE_STRING) {
-    RX_ERROR((CMO_ERR_NO_STRING));
+    RX_ERROR(CMO_ERR_NO_STRING);
     return "";
   }
 
   if(index > count()) {
-    RX_ERROR((CMO_ERR_OOR));
+    RX_ERROR(CMO_ERR_OOR);
     return "";
   }
 
@@ -55,12 +55,12 @@ std::string CommandLineOption::getString(int index) {
 
 std::string CommandLineOption::getFileName(int index) {
   if(type != CL_TYPE_FILE) {
-    RX_ERROR((CMO_ERR_NO_FILE));
+    RX_ERROR(CMO_ERR_NO_FILE);
     return "";
   }
 
   if(index > count()) {
-    RX_ERROR((CMO_ERR_OOR));
+    RX_ERROR(CMO_ERR_OOR);
     return "";
   }
 
@@ -71,28 +71,28 @@ std::string CommandLineOption::getFileName(int index) {
 
 std::string CommandLineOption::getBaseName(int index) {
   if(type != CL_TYPE_FILE) {
-    RX_ERROR((CMO_ERR_NO_FILE));
+    RX_ERROR(CMO_ERR_NO_FILE);
     return "";
   }
 
   if(index > count()) {
-    RX_ERROR((CMO_ERR_OOR));
+    RX_ERROR(CMO_ERR_OOR);
     return "";
   }
 
   struct arg_file* af = (struct arg_file*)(arg);
-  std::string val(af->basename[index], strlen(af->basename[index]));
+  std::string val(af->basename[index], strlen(af->basename[index]);
   return val;
 }
 
 std::string CommandLineOption::getExtension(int index) {
   if(type != CL_TYPE_FILE) {
-    RX_ERROR((CMO_ERR_NO_FILE));
+    RX_ERROR(CMO_ERR_NO_FILE);
     return "";
   }
 
   if(index > count()) {
-    RX_ERROR((CMO_ERR_OOR));
+    RX_ERROR(CMO_ERR_OOR);
     return "";
   }
 
@@ -103,12 +103,12 @@ std::string CommandLineOption::getExtension(int index) {
 
 double CommandLineOption::getDouble(int index) {
   if(type != CL_TYPE_DOUBLE) {
-    RX_ERROR((CMO_ERR_NO_DOUBLE));
+    RX_ERROR(CMO_ERR_NO_DOUBLE);
     return 0.0;
   }
 
   if(index > count()) {
-    RX_ERROR((CMO_ERR_OOR));
+    RX_ERROR(CMO_ERR_OOR);
     return 0.0;
   }
   
@@ -118,12 +118,12 @@ double CommandLineOption::getDouble(int index) {
 
 int CommandLineOption::getInt(int index) {
   if(type != CL_TYPE_INTEGER) {
-    RX_ERROR((CMO_ERR_NO_INTEGER));
+    RX_ERROR(CMO_ERR_NO_INTEGER);
     return 0;
   }
 
   if(index > count()) {
-    RX_ERROR((CMO_ERR_OOR));
+    RX_ERROR(CMO_ERR_OOR);
     return 0.0;
   }
 
@@ -174,7 +174,7 @@ CommandLineOption* CommandLineOptions::addString(char* shortflag,
   }
 
   if(!arg) {
-    RX_ERROR((CMO_ERR_ARG_ERR));
+    RX_ERROR(CMO_ERR_ARG_ERR);
     delete option;
     return NULL;
   }
@@ -209,7 +209,7 @@ CommandLineOption* CommandLineOptions::addFlag(char* shortflag,
   }
 
   if(!arg) {
-    RX_ERROR((CMO_ERR_ARG_ERR));
+    RX_ERROR(CMO_ERR_ARG_ERR);
     delete option;
     return NULL;
   }
@@ -244,7 +244,7 @@ CommandLineOption* CommandLineOptions::addInt(char* shortflag,
   }
 
   if(!arg) {
-    RX_ERROR((CMO_ERR_ARG_ERR));
+    RX_ERROR(CMO_ERR_ARG_ERR);
     delete option;
     return NULL;
   }
@@ -279,7 +279,7 @@ CommandLineOption* CommandLineOptions::addDouble(char* shortflag,
   }
 
   if(!arg) {
-    RX_ERROR((CMO_ERR_ARG_ERR));
+    RX_ERROR(CMO_ERR_ARG_ERR);
     delete option;
     return NULL;
   }
@@ -314,7 +314,7 @@ CommandLineOption* CommandLineOptions::addFile(char* shortflag,
   }
 
   if(!arg) {
-    RX_ERROR((CMO_ERR_ARG_ERR));
+    RX_ERROR(CMO_ERR_ARG_ERR);
     delete option;
     return NULL;
   }
@@ -334,7 +334,7 @@ bool CommandLineOptions::parse(int argc, char* argv[]) {
   }
 
   if(arg_nullcheck(argtable) != 0) {
-    RX_ERROR((CMO_ERR_NULLCHECK));
+    RX_ERROR(CMO_ERR_NULLCHECK);
     return false;
   }
 
@@ -356,7 +356,7 @@ void CommandLineOptions::print() {
 
 bool CommandLineOptions::setup() {
   if(!options.size()) {
-    RX_ERROR((CMO_ERR_NO_OPTIONS));
+    RX_ERROR(CMO_ERR_NO_OPTIONS));
     return false;
   }
 

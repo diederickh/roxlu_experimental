@@ -36,7 +36,7 @@ inline PaSampleFormat AudioPlayer::libSndfileFormatToPortAudioFormat(int fmt) {
     return paInt32;
   }
   else {
-     RX_ERROR(("Unhandled format"));
+     RX_ERROR("Unhandled format");
      return 0;
   }
 }

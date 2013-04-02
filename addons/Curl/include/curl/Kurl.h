@@ -33,7 +33,7 @@
 
 #define RETURN_CURLCODE(result, msg, rvalue, ptr )      \
   if(result != CURLE_OK) {                              \
-    RX_ERROR((msg));                                    \
+    RX_ERROR(msg);                                    \
     if(ptr != NULL) {                                   \
         delete ptr;                                     \
         ptr = NULL;                                     \
@@ -43,7 +43,7 @@
 
 #define RETURN_CURLFORMCODE(result, msg, rvalue, ptr) \
   if(result != 0) {                                   \
-    RX_ERROR((msg));                                  \
+    RX_ERROR(msg);                                  \
     if(ptr != NULL) {                                 \
         delete ptr;                                   \
         ptr = NULL;                                   \

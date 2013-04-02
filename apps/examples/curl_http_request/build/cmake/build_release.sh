@@ -14,5 +14,5 @@ fi
 
 cd build.release
 cmake -DCMAKE_BUILD_TYPE=Release ../
-make 
+make -j4
 make install

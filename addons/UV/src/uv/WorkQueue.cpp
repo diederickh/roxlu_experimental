@@ -45,7 +45,7 @@ WorkQueue::WorkQueue()
 WorkQueue::~WorkQueue() {
   if(count()) {
 
-    RX_ERROR((WQ_ERR_STILL_RUNNING));
+    RX_ERROR(WQ_ERR_STILL_RUNNING);
     while(count()) {
       update();
     }

@@ -13,19 +13,19 @@ namespace buttons {
   {
     loop = uv_default_loop();
     if(!loop) {
-      RX_ERROR(("Cannot get default libuv loop for buttons server"));
+      RX_ERROR("Cannot get default libuv loop for buttons server");
     }
     sock.data = this;
   }
 
   Server::~Server() {
-    RX_ERROR(("need to shutdown uv + remove all clients, free mem"));
+    RX_ERROR("need to shutdown uv + remove all clients, free mem");
     clear();
   }
   
   bool Server::start() {
     if(!loop) {
-      RX_ERROR(("No loop found"));
+      RX_ERROR("No loop found");
       return false;
     }
 
@@ -50,7 +50,7 @@ namespace buttons {
   void Server::removeConnection(Connection* c) {
     std::vector<Connection*>::iterator it = std::find(connections.begin(), connections.end(), c);
     if(it == connections.end()) {
-      RX_ERROR(("cannot find client to remove (?)"));
+      RX_ERROR("cannot find client to remove (?)");
       return;
     }
 
@@ -164,7 +164,7 @@ namespace buttons {
   }
 
   Connection::~Connection() {
-    RX_ERROR(("Connection client connection!"));
+    RX_ERROR("Connection client connection!");
   }
 
   void Connection::parseBuffer() {
@@ -238,7 +238,7 @@ namespace buttons {
         break;
       }
       default: {
-        RX_ERROR(("Error: Server received an Unhandled client task. %d \n", cmd.name)); 
+        RX_ERROR("Error: Server received an Unhandled client task. %d \n", cmd.name); 
         break;
       }
     }
@@ -260,7 +260,7 @@ namespace buttons {
 
     int r = uv_write(wreq, (uv_stream_t*) &sock, &buf, 1, buttons_connection_on_write);
     if(r) {
-      RX_ERROR(("cannot uv_write(): %s", uv_strerror(uv_last_error(sock.loop))));
+      RX_ERROR("cannot uv_write(): %s", uv_strerror(uv_last_error(sock.loop)));
     }
   }
 
@@ -271,7 +271,7 @@ namespace buttons {
     delete req;
 
     if(status == -1) {
-      RX_ERROR(("connection disconnected (?) "));
+      RX_ERROR("connection disconnected (?) ");
       return;
     }
   }
@@ -282,7 +282,7 @@ namespace buttons {
   void buttons_server_on_new_connection(uv_stream_t* sock, int status) {
     Server* s = static_cast<Server*>(sock->data);
     if(status == -1) {
-      RX_ERROR(("cannot handle new connection"));
+      RX_ERROR("cannot handle new connection");
       return;
     }
 
@@ -290,7 +290,7 @@ namespace buttons {
     int r = 0;
     r = uv_tcp_init(s->loop, &c->sock);
     if(r) {
-      RX_ERROR(("uv_tcp_init failed on client"));
+      RX_ERROR("uv_tcp_init failed on client");
       delete c; 
       c = NULL;
       return ;
@@ -298,7 +298,7 @@ namespace buttons {
 
     r = uv_accept(sock, (uv_stream_t*)&c->sock);
     if(r) {
-      RX_ERROR(("uv_accept failed on client"));
+      RX_ERROR("uv_accept failed on client");
       delete c; 
       c = NULL;
       return;
@@ -306,7 +306,7 @@ namespace buttons {
     
     r = uv_read_start((uv_stream_t*)&c->sock, buttons_server_on_alloc, buttons_server_on_read);
     if(r) {
-      RX_ERROR(("uv_read_start failed on client"));
+      RX_ERROR("uv_read_start failed on client");
       delete c; 
       c = NULL;
       return;
@@ -326,7 +326,7 @@ namespace buttons {
     if(nread < 0) {
       int r = uv_read_stop(sock);
       if(r) {
-        RX_ERROR(("error shutting down client. %s", uv_strerror(uv_last_error(sock->loop))));
+        RX_ERROR("error shutting down client. %s", uv_strerror(uv_last_error(sock->loop)));
       }
 
       if(buf.base) {
@@ -344,7 +344,7 @@ namespace buttons {
  
       r = uv_shutdown(&c->shutdown_req, sock, buttons_server_on_shutdown);
       if(r) {
-        RX_ERROR(("error shutting down client. %s", uv_strerror(uv_last_error(sock->loop))));
+        RX_ERROR("error shutting down client. %s", uv_strerror(uv_last_error(sock->loop)));
         delete c;
         c = NULL;
         return;
@@ -464,7 +464,7 @@ namespace buttons {
         break;
       }
       default: {
-        RX_ERROR(("Error: unhandled sync type: %d\n", target->type)); 
+        RX_ERROR("Error: unhandled sync type: %d\n", target->type); 
         ret = false;
         break;
       }};
@@ -488,7 +488,7 @@ namespace buttons {
         result.element = elements[result.buttons_id][result.element_id];
 
         if(result.element == NULL) {
-          RX_ERROR(("We received an event for an unknown element: %d, buttons: %d", result.element_id, result.buttons_id));
+          RX_ERROR("We received an event for an unknown element: %d, buttons: %d", result.element_id, result.buttons_id);
           return false;
         }
 

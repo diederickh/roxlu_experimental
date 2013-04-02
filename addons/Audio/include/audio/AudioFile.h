@@ -30,7 +30,7 @@ class AudioFile {
 
 #define AUDIOFILE_INIT_CHECK() \
   if(!handle) { \
-    RX_ERROR(("not yet initialized."));   \
+    RX_ERROR("not yet initialized.");   \
     return 0; \
   } 
 
