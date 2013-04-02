@@ -15,7 +15,6 @@
 
 #define RX_LOG_LEVEL_NONE 0 
 
-
 typedef void(*roxlu_log_callback)(int level, void* user, int line, const char* function, const char* fmt, va_list args);
 
 extern roxlu_log_callback roxlu_log_cb;
@@ -32,53 +31,45 @@ void rx_error(int line, const char* function, const char* fmt, ...);
 
 #if defined(_MSC_VER)
 #  define RX_VERBOSE(fmt, ...) { rx_verbose(__LINE__, __FUNCSIG__, fmt, ##__VA_ARGS__); } 
+#  define RX_WARNING(fmt, ...) { rx_warning(__LINE__, __FUNCSIG__, fmt, ##__VA_ARGS__); } 
+#  define RX_ERROR(fmt, ...) { rx_error(__LINE__, __FUNCSIG__, fmt, ##__VA_ARGS__); } 
 #else                                                                             
 #  define RX_VERBOSE(fmt, ...) { rx_verbose(__LINE__, __PRETTY_FUNCTION__, fmt, ##__VA_ARGS__); } 
 #  define RX_WARNING(fmt, ...) { rx_warning(__LINE__, __PRETTY_FUNCTION__, fmt, ##__VA_ARGS__); } 
 #  define RX_ERROR(fmt, ...) { rx_error(__LINE__, __PRETTY_FUNCTION__, fmt, ##__VA_ARGS__); } 
 #endif
-//#define RX_VERBOSE(fmt, ...) { rx_verbose(__LINE__, __PRETTY_FUNCTION__, fmt, ##__VA_ARGS__); } 
-//#define RX_VERBOSE(fmt, ...) { rx_verbose(__LINE__, __PRETTY_FUNCTION__, fmt, ##__VA_ARGS__); } 
 
 #if !defined(RX_LOG_LEVEL)
 #  define RX_LOG_LEVEL RX_LOG_LEVEL_VERBOSE
 #endif
 
-#if defined(_MSC_VER) 
-//#  define RX_VERBOSE(x) { printf("[verbose] [%s L%d] - ", __FUNCSIG__, __LINE__); printf x; printf("\n"); }
-//#  define RX_WARNING(x) { printf("[warning] [%s L%d] - ", __FUNCSIG__, __LINE__); printf x; printf("\n"); }
-#  define RX_ERROR(x) { printf("[error] [%s L%d] - ", __FUNCSIG__, __LINE__); printf x; printf("\n"); }
-#else 
-#  if RX_LOG_LEVEL >= RX_LOG_LEVEL_VERBOSE 
-#    if defined(RX_LOG_NO_COLOR)
-//#      define RX_VERBOSE(x) {  printf("[verbose] [%s L%d] - ", __PRETTY_FUNCTION__, __LINE__); printf x; printf("\n"); }
-#    else 
-//#      define RX_VERBOSE(x) { printf("[verbose] \x1b[36m" "[%s L%d] - " "\x1b[33m", __PRETTY_FUNCTION__, __LINE__); printf x; printf("\x1b[0m\n"); }
-#    endif
-#  else
-//#    define RX_VERBOSE(x) {}
-#  endif
+// unset log macros based on the -DRX_LOG_LEVEL preprocessor variable
+#if RX_LOG_LEVEL == RX_LOG_LEVEL_VERBOSE
+#elif RX_LOG_LEVEL ==  RX_LOG_LEVEL_WARNING
+  #undef RX_VERBOSE
+#elif RX_LOG_LEVEL == RX_LOG_LEVEL_ERROR
+  #undef RX_VERBOSE
+  #undef RX_WARNING
+#endif
 
-#  if RX_LOG_LEVEL >= RX_LOG_LEVEL_WARNING
-#    if defined(RX_LOG_NO_COLOR)
-//#      define RX_WARNING(x) { printf("[%s L%d] - ", __PRETTY_FUNCTION__, __LINE__); printf x; printf("\n"); }
-#    else 
-//#      define RX_WARNING(x) { printf("\x1b[35m[warning] \x1b[36m" "[%s L%d] - " "\x1b[33m", __PRETTY_FUNCTION__, __LINE__); printf x; printf("\x1b[0m\n"); }
-#    endif
-#  else 
-//#    define RX_WARNING(x) { }
-#  endif
+#if RX_LOG_LEVEL == RX_LOG_LEVEL_NONE
+  #undef RX_ERROR
+  #undef RX_VERBOSE
+  #undef RX_WARNING
+#endif
 
-#  if RX_LOG_LEVEL >= RX_LOG_LEVEL_ERROR
-#    if defined(RX_LOG_NO_COLOR)
-//#      define RX_ERROR(x) { printf("[%s L%d] - ", __PRETTY_FUNCTION__, __LINE__); printf x; printf("\n"); }
-#    else
-//#      define RX_ERROR(x) { printf("\x1b[31m[error] \x1b[36m" "[%s L%d] - " "\x1b[31m", __PRETTY_FUNCTION__, __LINE__); printf x; printf("\x1b[0m\n"); }
-#    endif
-#  else 
-//#    define RX_ERROR(x) {}
-#  endif
-#endif // MSVC
+// if not set anymore, define empties
+#if !defined(RX_VERBOSE)
+  #define RX_VERBOSE(fmt, ...) {}
+#endif
+
+#if !defined(RX_WARNING)
+  #define RX_WARNING(fmt, ...) {}
+#endif
+
+#if !defined(RX_ERROR)
+  #define RX_ERROR(fmt, ...) {}
+#endif
 
 #endif // ROXLU_LOG_H
 
