@@ -55,6 +55,7 @@ class ClientSocket {
   client_socket_on_connected_cb cb_connected;
   client_socket_on_read_cb cb_read;
   void* user;
+
 };
 
 #endif
