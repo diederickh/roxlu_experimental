@@ -13,19 +13,26 @@ namespace roxlu {
                               va_list args)
   {
 
+    Log* l = static_cast<Log*>(user);
+    //    vprintf(fmt, args);
+    //    printf("\n");
+
+    //   uv_mutex_lock(&l->mutex);
     if(level > roxlu_log_level) {
+      //      uv_mutex_unlock(&l->mutex);
       return;
     }
-
-    Log* l = static_cast<Log*>(user);
+    
     std::stringstream ss_tty;
     std::stringstream ss_file;
 
+#if 1
     if(l->write_time) {
-      std::string timing =  rx_strftime(l->date_format.c_str());
+      std::string timing = rx_strftime(l->date_format.c_str());
       ss_tty << timing;
       ss_file << timing;
     }
+#endif
 
     if(l->write_log_level) {
       if(level == RX_LOG_LEVEL_VERBOSE) {
@@ -56,9 +63,9 @@ namespace roxlu {
       }
       else {
         printf("Unsupported log level.\n");
-        return;
       }
     }
+
     
     {
       if(l->use_colors) {
@@ -102,8 +109,8 @@ namespace roxlu {
     }
 
     LogMessage msg;
-    char buf[1024 * 2];
-
+    char buf[1024 * 68];
+#if 1 
     vsprintf(buf, fmt, args);
 
     ss_tty << buf;
@@ -112,6 +119,7 @@ namespace roxlu {
     if(l->use_colors) {
         ss_tty << "\x1b[0m";
     }
+#endif
     
 #if defined(_WIN32)
     ss_tty << "\r\n";
@@ -124,6 +132,8 @@ namespace roxlu {
     msg.tty_message = ss_tty.str();
     msg.file_message = ss_file.str();
     msg.level = level;
+
+    //    uv_mutex_unlock(&l->mutex);
 
     l->addMessage(msg);
   }

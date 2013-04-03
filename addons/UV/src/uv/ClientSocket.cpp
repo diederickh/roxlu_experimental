@@ -11,7 +11,8 @@ ClientSocket::ClientSocket(std::string host, std::string port)
   ,cb_connected(NULL)
   ,cb_read(NULL)
 {
-  loop = uv_default_loop();
+  // loop = uv_default_loop();
+  loop = uv_loop_new();
 
   sock = new uv_tcp_t();
   int r = uv_tcp_init(loop, sock);
@@ -24,6 +25,7 @@ ClientSocket::ClientSocket(std::string host, std::string port)
   connect_req.data = this;
   shutdown_req.data = this;
   timer_req.data = this;
+
 }
 
 ClientSocket::~ClientSocket() {
@@ -33,6 +35,9 @@ ClientSocket::~ClientSocket() {
   user = NULL;
   cb_connected = NULL;
   cb_read = NULL;
+
+  uv_loop_delete(loop);
+  loop = NULL;
 }
 
 void ClientSocket::clear() {
@@ -125,8 +130,10 @@ void client_socket_on_connect(uv_connect_t* req, int status) {
     c->reconnect();
     return;
   }
-    
-  int r = uv_read_start((uv_stream_t*)&c->sock, client_socket_on_alloc, client_socket_on_read);
+
+  RX_VERBOSE("ClietSocket::sock: %p, type: %d, UV_TCP: %d", c->sock, c->sock->type, UV_TCP);
+
+  int r = uv_read_start((uv_stream_t*)c->sock, client_socket_on_alloc, client_socket_on_read);
   if(r) {
     RX_ERROR("uv_read_start() failed %s", uv_strerror(uv_last_error(c->loop)));
     return;
@@ -139,8 +146,11 @@ void client_socket_on_connect(uv_connect_t* req, int status) {
 
 
 void client_socket_on_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
-  RX_VERBOSE("Received data from server, :%ld bytes", nbytes);
+
   ClientSocket* c = static_cast<ClientSocket*>(handle->data);
+
+
+  RX_VERBOSE("Received data from server, :%ld bytes, buffer.size(): %ld", nbytes, c->buffer.size());
 
   if(nbytes < 0) {
     int r = uv_read_stop(handle);
@@ -169,10 +179,10 @@ void client_socket_on_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
        
     RX_ERROR("------- NEED TO RECONNECT TO THE SERVER ------------- ");
     return;
-      
   }
-  
+
   std::copy(buf.base, buf.base + nbytes, std::back_inserter(c->buffer));
+
   if(c->cb_read) {
     c->cb_read(buf.base, nbytes, c);
   }
@@ -181,6 +191,7 @@ void client_socket_on_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
     delete[] buf.base;
     buf.base = NULL;
   }
+
 }
 
 uv_buf_t client_socket_on_alloc(uv_handle_t* handle, size_t nbytes) {
@@ -194,7 +205,7 @@ void client_socket_on_write(uv_write_t* req, int status) {
 
 void client_socket_on_shutdown(uv_shutdown_t* req, int status) {
   ClientSocket* c = static_cast<ClientSocket*>(req->data);
-  uv_close((uv_handle_t*)&c->sock, client_socket_on_close);
+  uv_close((uv_handle_t*)c->sock, client_socket_on_close);
 }
 
 void client_socket_on_close(uv_handle_t* handle) {
