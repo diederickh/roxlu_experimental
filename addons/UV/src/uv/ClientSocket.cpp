@@ -10,15 +10,12 @@ ClientSocket::ClientSocket(std::string host, std::string port)
   ,user(NULL)
   ,cb_connected(NULL)
   ,cb_read(NULL)
+  ,is_connected(false)
 {
   // loop = uv_default_loop();
   loop = uv_loop_new();
 
   sock = new uv_tcp_t();
-  int r = uv_tcp_init(loop, sock);
-  if(r) {
-    RX_ERROR("uv_tcp_init failed");
-  }
   sock->data = this;
 
   resolver_req.data = this;
@@ -38,10 +35,12 @@ ClientSocket::~ClientSocket() {
 
   uv_loop_delete(loop);
   loop = NULL;
+  is_connected = false;
 }
 
 void ClientSocket::clear() {
   buffer.clear();
+  
 }
 
 void ClientSocket::setup(client_socket_on_connected_cb conCB, 
@@ -53,7 +52,12 @@ void ClientSocket::setup(client_socket_on_connected_cb conCB,
 }
 
 bool ClientSocket::connect() {
-  int r = 0;
+
+  int r = uv_tcp_init(loop, sock);
+  if(r) {
+    RX_ERROR("uv_tcp_init failed");
+  }
+
   struct addrinfo hints;
   hints.ai_family = PF_INET;
   hints.ai_socktype = SOCK_STREAM;
@@ -69,6 +73,19 @@ bool ClientSocket::connect() {
   }
     
   return true;
+}
+
+void ClientSocket::disconnect() {
+  if(!is_connected) {
+    RX_WARNING(CS_WARN_CANT_DISCONNECT);
+    return;
+  }
+
+  int r = uv_shutdown(&shutdown_req, (uv_stream_t*)sock, client_socket_on_shutdown);
+  if(r) {
+    RX_ERROR(CS_ERR_CANT_SHUTDOWN);
+  }
+
 }
 
 void ClientSocket::reconnect() {
@@ -139,6 +156,8 @@ void client_socket_on_connect(uv_connect_t* req, int status) {
     return;
   }
 
+  c->is_connected = true;
+
   if(c->cb_connected) {
     c->cb_connected(c);
   }
@@ -169,7 +188,9 @@ void client_socket_on_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
       return;
     }
 
-    r = uv_shutdown(&c->shutdown_req, handle, client_socket_on_shutdown);
+    c->is_connected = false;
+
+    r = uv_shutdown(&c->shutdown_req, handle, client_socket_on_shutdown_reconnect);
     if(r) {
       RX_ERROR("error shutting down client. %s", uv_strerror(uv_last_error(handle->loop)));
       delete c;
@@ -208,7 +229,18 @@ void client_socket_on_shutdown(uv_shutdown_t* req, int status) {
   uv_close((uv_handle_t*)c->sock, client_socket_on_close);
 }
 
+void client_socket_on_shutdown_reconnect(uv_shutdown_t* req, int status) {
+  ClientSocket* c = static_cast<ClientSocket*>(req->data);
+  uv_close((uv_handle_t*)c->sock, client_socket_on_close_reconnect);
+}
+
+
 void client_socket_on_close(uv_handle_t* handle) {
+  ClientSocket* c = static_cast<ClientSocket*>(handle->data);
+  c->clear();
+}
+
+void client_socket_on_close_reconnect(uv_handle_t* handle) {
   ClientSocket* c = static_cast<ClientSocket*>(handle->data);
   c->clear();
   c->reconnect();
