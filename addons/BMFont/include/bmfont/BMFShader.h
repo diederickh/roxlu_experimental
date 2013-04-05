@@ -46,9 +46,8 @@ static const char* BMFONT_FS = GLSL(150,
                                     out vec4 fragcolor;
 
                                     void main() {
-                                      vec4 col = texture(u_tex, v_tex);
-                                      fragcolor = col.r * v_fg_color; 
-                                      fragcolor.a = 1.0;
+                                      float intensity = texture(u_tex, v_tex).r;
+                                      fragcolor = vec4(v_fg_color.rgb, intensity);
                                     }
 );
 

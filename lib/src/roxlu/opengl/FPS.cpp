@@ -86,7 +86,6 @@ namespace roxlu {
       }
     }
 
-
     glBindVertexArray(vao);
     shader.enable();
     shader.uniformMat4fv("u_pm", pm);
@@ -96,7 +95,10 @@ namespace roxlu {
     mm[14] = -0.4f;
     mm[0] = mm[5] = mm[10] = scale;
 
-    //glLineWidth(2.0f);
+#if !defined(ROXLU_GL_CORE3)
+    glLineWidth(2.0f);
+#endif
+
     shader.uniform4fv("u_col", fg_col);
     shader.uniformMat4fv("u_mm", mm);
     for(int i = 0; i < 4; ++i) {

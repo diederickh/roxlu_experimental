@@ -27,7 +27,10 @@ ClientSocket::ClientSocket(std::string host, std::string port)
 
 ClientSocket::~ClientSocket() {
   clear();
-  close();
+
+  if(is_connected) {
+    close();
+  }
 
   user = NULL;
   cb_connected = NULL;
@@ -104,6 +107,11 @@ void ClientSocket::update() {
 }
 
 void ClientSocket::write(char* data, size_t nbytes) {
+  if(!is_connected) {
+    RX_ERROR(CS_ERR_CANT_WRITE);
+    return;
+  }
+
   uv_buf_t buf = uv_buf_init(data, nbytes);
   uv_write_t* wreq = new uv_write_t();
   wreq->data = this;
@@ -237,11 +245,13 @@ void client_socket_on_shutdown_reconnect(uv_shutdown_t* req, int status) {
 
 void client_socket_on_close(uv_handle_t* handle) {
   ClientSocket* c = static_cast<ClientSocket*>(handle->data);
+  c->is_connected = false;
   c->clear();
 }
 
 void client_socket_on_close_reconnect(uv_handle_t* handle) {
   ClientSocket* c = static_cast<ClientSocket*>(handle->data);
+  c->is_connected = false;
   c->clear();
   c->reconnect();
 }

@@ -13,6 +13,7 @@ extern "C" {
 
 #define CS_WARN_CANT_DISCONNECT "We're not connected so we cant disconnect"
 #define CS_ERR_CANT_SHUTDOWN "Calling uv_shutdown failed"
+#define CS_ERR_CANT_WRITE "Cannot write to server because we're not connected."
 
 class ClientSocket;
 
@@ -45,6 +46,7 @@ class ClientSocket {
   void disconnect();                                            /* disconnects the current connection; if connected */
   void reconnect();                                             /* used internally; when disconnected we try to reconnect on a given time interval */
   void write(char* data, size_t nbytes);                        /* write data over sockets */
+  void write(const char* data, size_t nbytes);                  /* .... */
   void clear();                                                 /* clears the buffer */
   void close();                                                 /* shuts down the connection */
  public:
@@ -65,5 +67,9 @@ class ClientSocket {
   bool is_connected;
 
 };
+
+inline void ClientSocket::write(const char* data, size_t nbytes) {
+  write((char*)data, nbytes);
+}
 
 #endif

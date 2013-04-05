@@ -13,10 +13,10 @@ namespace roxlu {
 #if defined(ROXLU_GL_CORE3)
   static const char* FPS_VS = GLSL(150, 
                                    uniform mat4 u_pm;
-                                   uniform mat4 u_vm;
+                                   uniform mat4 u_mm;
                                    in vec4 a_pos;
                                    void main() {
-                                     gl_Position = u_pm * u_vm * a_pos;
+                                     gl_Position = u_pm * u_mm * a_pos;
                                    }
   );
 
@@ -25,7 +25,6 @@ namespace roxlu {
                                    out vec4 outcol;
                                    void main() {
                                      outcol = u_col;
-                                     outcol = vec4(1.0, 0.0, 0.0, 1.0);
                                    }
   );
 
