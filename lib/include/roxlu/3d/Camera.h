@@ -1,5 +1,5 @@
-#ifndef ROXLU_CAMERAH
-#define ROXLU_CAMERAH
+#ifndef ROXLU_CAMERA_H
+#define ROXLU_CAMERA_H
 
 #include <roxlu/opengl/GL.h>
 #include <roxlu/math/Mat3.h>

@@ -200,6 +200,8 @@ namespace buttons {
     void toggleVisible();
     void hide();
     void show();
+    void lock(); /* lock position */
+    void unlock();  /* unlock position */
     bool isOpen();
     void setColor(const float hue, float sat = 0.2f, float bright = 0.27f, float a = 1.0f);
     string getName();
@@ -341,6 +343,14 @@ namespace buttons {
 
   inline void Buttons::hide() {
     is_visible = false;
+  }
+
+  inline void Buttons::lock() {
+    setLock(true);
+  }
+  
+  inline void Buttons::unlock() {
+    setLock(false);
   }
 
 } // buttons

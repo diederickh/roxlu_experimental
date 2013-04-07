@@ -1,5 +1,5 @@
-#ifndef ROXLU_EASYCAMH
-#define ROXLU_EASYCAMH
+#ifndef ROXLU_EASYCAM_H
+#define ROXLU_EASYCAM_H
 
 #include <roxlu/3d/Camera.h>
 #include <roxlu/3d/ArcBall.h>

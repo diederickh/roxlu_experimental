@@ -64,11 +64,12 @@ class DebugDrawer {
   void end();
   void addVertex(const Vec3 pos);
   void addVertex(const Vec3 pos, const Vec4 col);
-  void addVertex(const float x, const float y, const float z, float r = 1.0f, float g = 0.0f, float b = 0.0f);
+  void addVertex(const float x, const float y, const float z, float r = 1.0f, float g = 0.0f, float b = 0.0f, float a = 1.0);
   void drawCircle(float x, float y, float radius, bool filled = true, float r = 1.0f, float g = 1.0f, float b = 1.0f, float a = 1.0f);
   void drawRectangle(float x, float y, float w, float h, bool filled, float r = 1.0f, float g = 1.0f, float b = 1.0f, float a = 1.0f);
   void draw();
   void draw(const float* pm, const float* vm);
+  void drawPerspective(float x, float y, float z);
   void drawTexture(GLuint tex, const float x, const float y, const float w, const float h);
   void setFill(bool mustFill);
 
@@ -77,6 +78,7 @@ class DebugDrawer {
  private: 
   void checkSize();
   void createOrtho(int ww, int wh);
+  void createPerspective(float n = 0.01, float f = 10.0f);
   void setupOpenGL();
   size_t getNumBytes();
   const float* getPtr();
@@ -103,7 +105,9 @@ class DebugDrawer {
   GLuint mm_id_tex;                                                        /* model matrix */
   GLuint tex_uniform;                                                      /* texture uniform id */
   float ortho_matrix[16];
-  float view_matrix[16];
+  float ortho_view_matrix[16];                                             /* view matrix; used for orthographic drawing */
+  float perspective_matrix[16];
+  float perspective_view_matrix[16];                                       /* used for 3D drawing */
   float tex_matrix[16];                                                    /* texture model matrix */
 
   // Generic drawing members

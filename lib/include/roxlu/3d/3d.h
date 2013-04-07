@@ -1,6 +1,7 @@
 #ifndef ROXLU_3D_INCLUDEDH
 #define ROXLU_3D_INCLUDEDH
 
+#include <roxlu/opengl/GL.h>
 
 #ifdef ROXLU_WITH_OPENGL
 #include <roxlu/3d/ArcBall.h>
