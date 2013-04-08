@@ -132,7 +132,7 @@ void cursor_callback(GLFWwindow* window, int x, int y) {
   sim_ptr->mouse_y = y;
 
   if(sim_ptr->is_mouse_down) {
-    sim_ptr->onMouseDrag(x, y, (sim_ptr->prev_mouse_x - x), (sim_ptr->prev_mouse_y - y), sim_ptr->pressed_mouse_button);
+    sim_ptr->onMouseDrag(x, y, (x - sim_ptr->prev_mouse_x ), (sim_ptr->prev_mouse_y - y), sim_ptr->pressed_mouse_button);
   }
   else {
     sim_ptr->onMouseMove(x,y);

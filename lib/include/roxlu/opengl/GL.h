@@ -39,6 +39,7 @@
 #  include <GL/glfw3.h>
 #elif defined(ROXLU_WITH_OPENFRAMEWORKS)
 #  define ROXLU_WITH_OPENGL
+#  include "ofMain.h"
 #elif defined(ROXLU_WITH_OSX_NATIVE)
 #  define ROXLU_WITH_OPENGL
 #  include <OpenGL/gl.h>
