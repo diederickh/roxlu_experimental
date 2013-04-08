@@ -26,7 +26,7 @@ using namespace rapidxml;
 
 #define BMF_ERR_FILE "Error while loading the file from disk. Is it empty? Does it exist?"
 #define BMF_ERR_PARSE "Parse error: %s"
-#define BMF_ERR_CHAR_NOT_FOUND "Character not found: %c"
+#define BMF_ERR_CHAR_NOT_FOUND "Character not found: %c, %02X"
 #define BMF_ERR_NO_COMMON "No <common> attribute fount in font description"
 #define BMF_ERR_NO_SCALEW "No scaleW found in <common>"
 #define BMF_ERR_NO_SCALEH "No scaleH found in <common>"
@@ -270,12 +270,13 @@ void BMFLoader<T>::getStringSize(std::string& str, int& w, int &h) {
   for(size_t i = 0; i < str.size(); ++i) {
     std::map<size_t, BMFChar>::iterator it = chars.find(str[i]);
     if(it == chars.end()) {
-      RX_ERROR(BMF_ERR_CHAR_NOT_FOUND, str[i]);
+      unsigned char uc = (unsigned char)str[i];
+      RX_ERROR(BMF_ERR_CHAR_NOT_FOUND, str[i], uc);
       continue;
     }
     
     BMFChar& bchar = it->second;
-    w += bchar.xoffset + bchar.xadvance;
+    w += bchar.xadvance;
 
     if(bchar.height > h) {
       h = bchar.height;

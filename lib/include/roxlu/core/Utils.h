@@ -9,6 +9,7 @@
 #include <time.h>
 #include <string.h>
 #include <vector>
+#include <cmath> /* for pow() */
 #include <sstream>
 #include <fstream>
 #include <algorithm> /* std::replace() */
@@ -72,6 +73,10 @@ template<typename T>
 inline T rx_map(T value, T minIn, T maxIn, T minOut, T maxOut) {
 	T range = ((value - minIn) / (maxIn - minIn) * (maxOut - minOut) + minOut);
 	return range;
+}
+
+inline float rx_smoothstep(float edge0, float edge1, float t) {
+  return edge0 + (pow(t,2) * (3-2*t)) * (edge1 - edge0);
 }
 
 // as described in: "From Quaternion to Matrix and Back", J.M.P. van Waveren, 27th feb. 2005, id software
