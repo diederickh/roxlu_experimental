@@ -5,7 +5,7 @@ Implementation of the tween functions made available by [Robert Penner](http://w
 See `apps/examples/tween/` for all the implemented tween functions. You can walk through the different tween
 functions by pressing 0,1,2,3,..,A,B,C,...,T.
 
-The tween class is templates so if you implement the nessary mathematical operators (*, /, +, -), you can
+The tween class is templated so if you implement the nessary mathematical operators (*, /, +, -), you can
 tween any object you like.
 
 
