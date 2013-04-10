@@ -35,6 +35,10 @@ public:
 
   bool setPixels(unsigned char* pix, png_uint_32 w, png_uint_32 h, png_uint_32 type);
   unsigned char* getPixels();
+  png_uint_32 getNumChannels();
+  png_uint_32 getColorType();
+  png_uint_32 getWidth();
+  png_uint_32 getHeight();
 
   void print();
   std::string colorTypeToString(png_uint_32 ct);
@@ -65,4 +69,21 @@ inline std::string PNG::colorTypeToString(png_uint_32 ct) {
 inline unsigned char* PNG::getPixels() {
   return pixels;
 }
+
+inline png_uint_32 PNG::getNumChannels() {
+  return num_channels;
+}
+
+inline png_uint_32 PNG::getColorType() {
+  return color_type;
+}
+
+inline png_uint_32 PNG::getWidth() {
+  return width;
+}
+
+inline png_uint_32 PNG::getHeight() {
+  return height;
+}
+
 #endif

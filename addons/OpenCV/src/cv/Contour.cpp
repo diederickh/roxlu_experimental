@@ -1,3 +1,8 @@
+/*
+
+  This code is just a test.. do not use :-) 
+
+ */
 #include <cv/Contour.h>
 #include <roxlu/core/Utils.h>
 #include <roxlu/core/Log.h>
@@ -41,6 +46,11 @@ namespace roxlu {
       cv::Mat tmp(image_h, image_w, CV_8UC4, pixels); // CV_8U
       mat_original = tmp.clone();
       cvtColor(mat_original, mat_gray, CV_RGBA2GRAY);
+    }
+    else if(image_components == 1) {
+      cv::Mat tmp(image_h, image_w, CV_8UC1, pixels); // CV_8U
+      mat_original = tmp.clone();
+      mat_gray = tmp.clone();
     }
     else {
       RX_ERROR("CANNOT HANDLE COMPONENTS! %d", imageComponents);

@@ -565,6 +565,11 @@ static std::string rx_get_file_ext(std::string filepath) {
   return ext;
 }
 
-
+static bool rx_is_power_of_two(unsigned int x) {
+  while (((x & 1) == 0) && x > 1) { /* While x is even and > 1 */
+    x >>= 1;
+  }
+  return (x == 1);
+}
 
 #endif // ROXLU_UTILSH

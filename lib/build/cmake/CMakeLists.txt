@@ -247,6 +247,7 @@ macro(roxlu_addon_begin name)
   set(roxlu_addon_include_dir ${roxlu_addon_base_dir}/include/)
   set(roxlu_addon_src_dir ${roxlu_addon_base_dir}/src/)
   include_directories(${roxlu_addon_include_dir})
+  message(${roxlu_addon_include_dir})
 
 endmacro()
 
