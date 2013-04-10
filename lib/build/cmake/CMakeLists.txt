@@ -247,7 +247,7 @@ macro(roxlu_addon_begin name)
   set(roxlu_addon_include_dir ${roxlu_addon_base_dir}/include/)
   set(roxlu_addon_src_dir ${roxlu_addon_base_dir}/src/)
   include_directories(${roxlu_addon_include_dir})
-  roxlu_add_lib("roxlu_${roxlu_addon_name}")
+
 endmacro()
 
 macro(roxlu_addon_add_source_file file)
@@ -272,7 +272,11 @@ macro(roxlu_addon_add_source_files glob)
 endmacro()
 
 macro(roxlu_addon_end)
-  add_library("roxlu_${roxlu_addon_name}" STATIC ${roxlu_addon_source_files})
+  list(LENGTH roxlu_addon_source_files roxlu_addon_source_files_count)
+  if(${roxlu_addon_source_files_count} GREATER 0)
+    roxlu_add_lib("roxlu_${roxlu_addon_name}")
+    add_library("roxlu_${roxlu_addon_name}" STATIC ${roxlu_addon_source_files})
+  endif()
 
   set(roxlu_addon_source_files "")
   set(roxlu_addon_name "")
