@@ -105,6 +105,11 @@ macro(roxlu_add_lib lib)
   list(APPEND roxlu_libs ${lib})
 endmacro(roxlu_add_lib)
 
+macro(roxlu_add_extern_dylib lib)
+  list(APPEND roxlu_dylibs ${roxlu_extern_dylib_dir}/${lib})
+  list(APPEND roxlu_install_files ${roxlu_extern_dylib_dir}/${lib})
+endmacro()
+
 macro(roxlu_add_source_file src_file)
   list(APPEND roxlu_source_files ${src_file})
 endmacro(roxlu_add_source_file)
@@ -203,7 +208,7 @@ macro(roxlu_install_app)
     add_executable(${roxlu_app_name} ${roxlu_source_files} ${roxlu_lib_source_files})
   endif()
 
-  target_link_libraries(${roxlu_app_name} ${roxlu_libs})
+  target_link_libraries(${roxlu_app_name} ${roxlu_libs} ${roxlu_dylibs})
 
 
   install(TARGETS ${roxlu_app_name} DESTINATION ${roxlu_app_install_dir})
@@ -242,7 +247,7 @@ macro(roxlu_addon_begin name)
   set(roxlu_addon_include_dir ${roxlu_addon_base_dir}/include/)
   set(roxlu_addon_src_dir ${roxlu_addon_base_dir}/src/)
   include_directories(${roxlu_addon_include_dir})
-  roxlu_add_lib("roxlu_${roxlu_addon_name}")
+
 endmacro()
 
 macro(roxlu_addon_add_source_file file)
@@ -267,7 +272,11 @@ macro(roxlu_addon_add_source_files glob)
 endmacro()
 
 macro(roxlu_addon_end)
-  add_library("roxlu_${roxlu_addon_name}" STATIC ${roxlu_addon_source_files})
+  list(LENGTH roxlu_addon_source_files roxlu_addon_source_files_count)
+  if(${roxlu_addon_source_files_count} GREATER 0)
+    roxlu_add_lib("roxlu_${roxlu_addon_name}")
+    add_library("roxlu_${roxlu_addon_name}" STATIC ${roxlu_addon_source_files})
+  endif()
 
   set(roxlu_addon_source_files "")
   set(roxlu_addon_name "")
@@ -412,6 +421,7 @@ endif(ROXLU_64BIT)
 if(APPLE)
   set(roxlu_platform "mac") 
   set(roxlu_platform_lib_dir "gcc/static/")
+  set(roxlu_platform_dylib_dir "gcc/dynamic/")
   set(ROXLU_PLATFORM_MAC TRUE)
 endif(APPLE)
 
@@ -434,6 +444,7 @@ endif(WIN32)
 if(UNIX AND NOT APPLE)
   set(roxlu_platform "linux")
   set(roxlu_platform_lib_dir "gcc/static/")
+  set(roxlu_platform_dylib_dir "gcc/dynamic/")
   set(ROXLU_PLATFORM_LINUX TRUE)
 endif(UNIX AND NOT APPLE)
 
@@ -457,6 +468,7 @@ add_definitions(
 endif(NOT ROXLU_PLATFORM_WIN)
 
 set(roxlu_extern_lib_dir ${roxlu_base_dir}/extern/lib/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}/)
+set(roxlu_extern_dylib_dir ${roxlu_base_dir}/extern/lib/${roxlu_platform}/${roxlu_platform_dylib_dir}${roxlu_bits}/)
 set(roxlu_extern_lib_debug_dir ${roxlu_base_dir}/extern/lib/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}d/)
 set(roxlu_extern_bin_dir ${roxlu_base_dir}/extern/bin/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}/)
 set(roxlu_extern_bin_debug_dir ${roxlu_base_dir}/extern/bin/${roxlu_platform}/${roxlu_platform_lib_dir}${roxlu_bits}d/)

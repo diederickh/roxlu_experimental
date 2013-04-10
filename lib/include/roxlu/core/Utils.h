@@ -9,6 +9,7 @@
 #include <time.h>
 #include <string.h>
 #include <vector>
+#include <cmath> /* for pow() */
 #include <sstream>
 #include <fstream>
 #include <algorithm> /* std::replace() */
@@ -72,6 +73,10 @@ template<typename T>
 inline T rx_map(T value, T minIn, T maxIn, T minOut, T maxOut) {
 	T range = ((value - minIn) / (maxIn - minIn) * (maxOut - minOut) + minOut);
 	return range;
+}
+
+inline float rx_smoothstep(float edge0, float edge1, float t) {
+  return edge0 + (pow(t,2) * (3-2*t)) * (edge1 - edge0);
 }
 
 // as described in: "From Quaternion to Matrix and Back", J.M.P. van Waveren, 27th feb. 2005, id software
@@ -532,8 +537,33 @@ static bool rx_create_path(std::string path) {
   return true;
 }
 
+static std::vector<std::string> rx_get_files(std::string path) {
+  std::vector<std::string> result;
+  DIR* dir;
+  struct dirent* ent;
+  if((dir = opendir(path.c_str())) != NULL) {
+    while((ent = readdir(dir)) != NULL) {
+      if(ent->d_type == DT_REG) {
+        result.push_back(path +"/" +ent->d_name);
+      }
+    }
+    closedir(dir);
+  }
+  return result;
+}
 
+// returns the extension of a file; e.g. "tga", "flv", "gif", etc..
+static std::string rx_get_file_ext(std::string filepath) {
+  size_t pos = filepath.rfind(".");
+  std::string result = "";
 
+  if(pos == std::string::npos) {
+    return result;
+  }
+
+  std::string ext = filepath.substr(pos + 1, (filepath.size() - pos));
+  return ext;
+}
 
 
 

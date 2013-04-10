@@ -27,9 +27,11 @@ DebugDrawer::DebugDrawer()
 {
   memset(ortho_matrix, 0, sizeof(float) * 16);
   memset(tex_matrix, 0, sizeof(float) * 16);
-  memset(view_matrix, 0, sizeof(float) * 16);
+  memset(ortho_view_matrix, 0, sizeof(float) * 16);
+  memset(perspective_view_matrix, 0, sizeof(float) * 16);
   tex_matrix[0] = tex_matrix[5] = tex_matrix[10] = tex_matrix[15] = 1.0f;
-  view_matrix[0] = view_matrix[5] = view_matrix[10] = view_matrix[15] = 1.0f;
+  ortho_view_matrix[0] = ortho_view_matrix[5] = ortho_view_matrix[10] = ortho_view_matrix[15] = 1.0f;
+  perspective_view_matrix[0] = perspective_view_matrix[5] = perspective_view_matrix[10] = perspective_view_matrix[15] = 1.0f;
 
   int circle_resolution = 64;
   float rad = TWO_PI / circle_resolution;
@@ -40,6 +42,8 @@ DebugDrawer::DebugDrawer()
     v.setCol(1.0f, 1.0f, 1.0f, 1.0f);
     circle.push_back(v);
   }
+
+  createPerspective();
 }
 
 DebugDrawer::~DebugDrawer() {
@@ -141,8 +145,6 @@ void DebugDrawer::setupOpenGL() {
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)0);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)8);
 
-
-
   checkSize();
 
   is_initialized = true;
@@ -161,6 +163,26 @@ void DebugDrawer::createOrtho(int winWidth, int winHeight) {
   ortho_matrix[12] = -(ww)/ww;
   ortho_matrix[13] = -(hh)/-hh;
   ortho_matrix[14] = -(f+n)/fmn;
+}
+
+void DebugDrawer::createPerspective(float n, float f) {
+  float fov = (3.14f / 180.0f) * 60.0f;
+  float hh = tanf(fov * 0.5) * n;
+  float aspect = 4.0f / 3.0f;
+  float l = -hh * aspect;
+  float r = hh * aspect;
+  float b = -hh;
+  float t = hh;
+  
+  memset(perspective_matrix, 0x00, sizeof(perspective_matrix));
+
+  perspective_matrix[0] = 2.0f * n / (r - l);
+  perspective_matrix[5] = 2.0f * n / (t - b);
+  perspective_matrix[8] = (r + l) / (r - l);
+  perspective_matrix[9] = (t + b) / (t - b);
+  perspective_matrix[10] = -(f + n) / (f - n);
+  perspective_matrix[11] = -1.0f;
+  perspective_matrix[14] = -2.0f * f * n / (f - n);
 }
 
 void DebugDrawer::checkSize() {
@@ -192,8 +214,8 @@ void DebugDrawer::addVertex(const Vec3 pos, const Vec4 col) {
   vertices.push_back(vertex);
 }
 
-void DebugDrawer::addVertex(const float x, const float y, const float z, float r, float g, float b) {
-  addVertex(Vec3(x,y,z), Vec4(r,g,b,1.0f));
+void DebugDrawer::addVertex(const float x, const float y, const float z, float r, float g, float b, float a) {
+  addVertex(Vec3(x,y,z), Vec4(r,g,b,a));
 }
 
 void DebugDrawer::end() {
@@ -202,7 +224,7 @@ void DebugDrawer::end() {
 }
 
 void DebugDrawer::draw() {
-  draw(ortho_matrix, view_matrix);
+  draw(ortho_matrix, ortho_view_matrix);
 }
 
 void DebugDrawer::draw(const float* pm, const float* vm) {
@@ -238,6 +260,14 @@ void DebugDrawer::draw(const float* pm, const float* vm) {
 
   vertices.clear();
   entries.clear();
+}
+
+void DebugDrawer::drawPerspective(float x, float y, float z) {
+  perspective_view_matrix[12] = x;
+  perspective_view_matrix[13] = y;
+  perspective_view_matrix[14] = z;
+
+  draw(perspective_matrix, perspective_view_matrix);
 }
 
 void DebugDrawer::drawTexture(GLuint tex, const float x, const float y, const float w, const float h) {

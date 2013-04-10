@@ -21,6 +21,8 @@
 #define PNG_V_COLORTYPE "png.color_type: %s"
 #define PNG_V_NUMBYTES "png.num_bytes: %d"
 
+typedef unsigned int png_uint_32;
+
 class PNG {
 public:
   PNG();

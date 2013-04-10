@@ -78,7 +78,10 @@ namespace buttons {
     void onEvent(ButtonsEventType event, const Buttons& buttons, const Element* target, void* targetData);
 	
     int getContentHeight();
+    void setPosition(int x, int y);
     void position();
+    void lock();
+    void unlock();
 	
     int content_y;
     int content_x;
@@ -116,6 +119,21 @@ namespace buttons {
       filepath = rx_to_data_path("./");
     }
     return filepath;
+  }
+
+  inline void Panel::setPosition(int x, int y) {
+    assert(active_gui);
+    active_gui->setPosition(x,y);
+  }
+
+  inline void Panel::lock() {
+    assert(active_gui);
+    active_gui->lock();
+  }
+
+  inline void Panel::unlock() {
+    assert(active_gui);
+    active_gui->unlock();
   }
 } // buttons
 
