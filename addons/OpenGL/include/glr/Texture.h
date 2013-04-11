@@ -32,12 +32,13 @@ namespace gl {
                    GLenum type);
 
 
-    void draw(float x, float y, float w, float h);
+    void draw(float x, float y, float w = 0, float h = 0);
     unsigned int getWidth();                                                   /* returns the height as found when loading the image, or set when calling setPixels() */
     unsigned int getHeight();                                                  /* returns the width as found when loading the image, or set when calling setPixels() */
     GLuint getID();                                                            /* returns the texture id */
     void bind();
     void unbind();
+    bool isAllocated();                                                        /* returns true when the texture is allocated and ready to be used */
 
     void print();
     std::string formatToString(GLenum f);
@@ -82,6 +83,10 @@ namespace gl {
       return;
     }
     glBindTexture(target, 0);
+  }
+
+  inline bool Texture::isAllocated() {
+    return is_allocated;
   }
 
   inline void Texture::draw(float x, float y, float w, float h) {

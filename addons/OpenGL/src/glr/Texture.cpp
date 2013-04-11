@@ -1,6 +1,7 @@
 #include <glr/Texture.h>
 #include <image/PNG.h>
 #include <image/TGA.h>
+#include <image/JPG.h>
 
 namespace gl {
 
@@ -26,9 +27,7 @@ namespace gl {
     // LOAD THE IMAGE
     std::string ext = rx_get_file_ext(filepath);
     if(ext == "png") {
-    
       PNG png;
-
       if(!png.load(filepath, datapath)) {
         RX_ERROR(ERR_GL_CANNOT_LOAD_FILE, filepath.c_str());
         return false;
@@ -52,8 +51,57 @@ namespace gl {
       pixels = png.getPixels();
       type = GL_UNSIGNED_BYTE;
     }
+    else if(ext == "jpg") {
+      JPG jpg;
+      if(!jpg.load(filepath, datapath)) {
+        RX_ERROR(ERR_GL_CANNOT_LOAD_FILE, filepath.c_str());
+        return false;
+      }
+      
+      if(jpg.getNumChannels() == 4) {
+        internal_format = GL_RGBA;
+        format = GL_RGBA;
+      }
+      else if(jpg.getNumChannels() == 3) {
+        internal_format = GL_RGB;
+        format = GL_RGB;
+      }
+      else {
+        RX_ERROR(ERR_GL_FORMAT_NOT_SUPPORTED, "UNKNOWN (JPG)");
+        return false;
+      }
+
+      width = jpg.getWidth();
+      height = jpg.getHeight();
+      pixels = jpg.getPixels();
+      type = GL_UNSIGNED_BYTE;
+      
+    }
     else if(ext == "tga") {
-      RX_ERROR(ERR_GL_UNSUPPORTED_IMAGE, ext.c_str());
+      TGA tga;
+      if(!tga.load(filepath, datapath)) {
+        RX_ERROR(ERR_GL_CANNOT_LOAD_FILE, filepath.c_str());
+        return false;
+      }
+      
+      if(tga.getNumChannels() == 4) {
+        internal_format = GL_RGBA;
+        format = GL_RGBA;
+      }
+      else if(tga.getNumChannels() == 3) {
+        internal_format = GL_RGB;
+        format = GL_RGB;
+      }
+      else {
+        RX_ERROR(ERR_GL_FORMAT_NOT_SUPPORTED, "UNKNOWN (TGA)");
+        return false;
+      }
+
+      width = tga.getWidth();
+      height = tga.getHeight();
+      pixels = tga.getPixels();
+      type = GL_UNSIGNED_BYTE;
+      //  RX_ERROR(ERR_GL_UNSUPPORTED_IMAGE, ext.c_str());
     }
     else {
       RX_ERROR(ERR_GL_UNSUPPORTED_IMAGE, ext.c_str());

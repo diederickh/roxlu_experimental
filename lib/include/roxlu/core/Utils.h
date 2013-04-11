@@ -62,6 +62,10 @@ extern uint32_t gl_string_id(const char * data, int len);
 #define IS_ZERO(f) 	(fabs(f) < EPSILON)	
 
 
+
+static std::string rx_get_file_ext(std::string filepath);
+
+
 // as suggested: http://stackoverflow.com/questions/4100657/problem-with-my-clamp-macro
 template <typename T> 
 inline T rx_clamp(T value, T low, T high) {
@@ -537,14 +541,24 @@ static bool rx_create_path(std::string path) {
   return true;
 }
 
-static std::vector<std::string> rx_get_files(std::string path) {
+// retrieve files from the given path. if you pass an extension we only return files that have this extension. Use a value like "jpg", "flv", "txt", so w/o the dot
+static std::vector<std::string> rx_get_files(std::string path, std::string ext = "") { 
   std::vector<std::string> result;
   DIR* dir;
   struct dirent* ent;
   if((dir = opendir(path.c_str())) != NULL) {
     while((ent = readdir(dir)) != NULL) {
       if(ent->d_type == DT_REG) {
-        result.push_back(path +"/" +ent->d_name);
+        std::string file_path = path +"/" +ent->d_name;
+
+        if(ext.size()) {
+          std::string file_ext = rx_get_file_ext(file_path);
+          if(file_ext != ext) {
+            continue;
+          }
+        }
+
+        result.push_back(file_path);
       }
     }
     closedir(dir);
