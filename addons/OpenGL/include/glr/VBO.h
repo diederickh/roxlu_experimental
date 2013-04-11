@@ -24,6 +24,7 @@ namespace gl {
     void unbind();
 
     void push_back(T vertex);
+    void clear();
     size_t size();
 
   public:
@@ -125,6 +126,12 @@ namespace gl {
     inline size_t VBO<T>::size() {
 
     return vertices.size();
+  }
+
+  template<class T>
+    inline void VBO<T>::clear() {
+
+    return vertices.clear();
   }
 
 } // gl

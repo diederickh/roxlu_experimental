@@ -1,4 +1,5 @@
 #include <glr/Shader.h>
+#include <glr/Texture.h>
 
 namespace gl {
 
@@ -106,6 +107,10 @@ namespace gl {
       glBindAttribLocation(prog, 0, "a_pos");
       glBindAttribLocation(prog, 1, "a_tex");
     }
+    else if(vertex_type == VERTEX_CP) {
+      glBindAttribLocation(prog, 0, "a_col");
+      glBindAttribLocation(prog, 1, "a_pos");
+    }
     else {
       RX_WARNING(WARN_GL_SH_UNKNOWN_TYPE);
     }
@@ -128,7 +133,43 @@ namespace gl {
     unuse();
 
     return true;
-    
+  }
+
+  void Shader::activateTexture(Texture& tex, GLenum unit) {
+    if(unit == GL_TEXTURE0 && u_tex0 == -1) {
+      RX_ERROR(ERR_GL_SH_NO_UNI_TEX, 0);
+      return;
+    }
+    else if(unit == GL_TEXTURE1 && u_tex1 == -1) {
+      RX_ERROR(ERR_GL_SH_NO_UNI_TEX, 1);
+      return;
+    }
+    else if(unit == GL_TEXTURE2 && u_tex2 == -1) {
+      RX_ERROR(ERR_GL_SH_NO_UNI_TEX, 2);
+      return;
+    }
+    else if(unit == GL_TEXTURE3 && u_tex3 == -1) {
+      RX_ERROR(ERR_GL_SH_NO_UNI_TEX, 3);
+      return;
+    }
+
+    use();
+
+    glActiveTexture(unit);
+    tex.bind();
+
+    if(unit == GL_TEXTURE0) {
+      glUniform1i(u_tex0, 0);
+    }
+    else if(unit == GL_TEXTURE1) {
+      glUniform1i(u_tex1, 1);
+    }
+    else if(unit == GL_TEXTURE2) {
+      glUniform1i(u_tex2, 2);
+    }
+    else if(unit == GL_TEXTURE3) {
+      glUniform1i(u_tex3, 3);
+    }
   }
 
   void Shader::print() {
@@ -137,7 +178,7 @@ namespace gl {
     RX_VERBOSE("Shader.u_vm: %d", u_vm);
     RX_VERBOSE("Shader.u_mm: %d", u_mm);
     RX_VERBOSE("Shader.u_tex0: %d", u_tex0);
-    RX_VERBOSE("Shader.u_tex1: %d", u_tex1)
+    RX_VERBOSE("Shader.u_tex1: %d", u_tex1);
     RX_VERBOSE("Shader.u_tex2: %d", u_tex2);
     RX_VERBOSE("Shader.u_tex3: %d", u_tex3);
   }

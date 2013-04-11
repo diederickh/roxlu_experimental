@@ -5,11 +5,13 @@
 
 namespace gl {
 
+/* Vertex types, the field names `C`, `N`, `P`, `T` etc.. are alphabetically */
 
-#define VERTEX_P     1        /* vertex with only a position */
-#define VERTEX_PT    2        /* vertex with: position, texture coord */
-#define VERTEX_PN    3        /* vertex with: position normal */
-#define VERTEX_PNT   4        /* vertex with: position, normal, texture coord */
+#define VERTEX_P     1        /* vertex with: position */
+#define VERTEX_CP    2        /* vertex with: color, position */
+#define VERTEX_PT    3        /* vertex with: position, texture coord */
+#define VERTEX_NP    4        /* vertex with: position normal */
+#define VERTEX_NPT   5        /* vertex with: position, normal, texture coord */
 #define VERTEX_NONE 9999      /* undefined */
 
 
@@ -17,6 +19,14 @@ namespace gl {
     VertexP();
     VertexP(Vec3 pos);
 
+    Vec3 pos;
+  };
+
+  struct VertexCP {
+    VertexCP();
+    VertexCP(Vec4 color, Vec3 pos);
+
+    Vec4 color;
     Vec3 pos;
   };
 
@@ -28,19 +38,20 @@ namespace gl {
     Vec2 tex;
   };
 
-  struct VertexPN {
-    VertexPN();
-    VertexPN(Vec3 pos, Vec3 norm);
+  struct VertexNP {
+    VertexNP();
+    VertexNP(Vec3 pos, Vec3 norm);
 
-    Vec3 pos;
     Vec3 norm;
+    Vec3 pos;
   };
 
-  struct VertexPNT {
-    VertexPNT();
-    VertexPNT(Vec3 pos, Vec3 norm, Vec3 tex);
-    Vec3 pos;
+  struct VertexNPT {
+    VertexNPT();
+    VertexNPT(Vec3 pos, Vec3 norm, Vec3 tex);
+
     Vec3 norm;
+    Vec3 pos;
     Vec2 tex;
   };
 
@@ -55,6 +66,15 @@ namespace gl {
   {
   }
 
+  inline VertexCP::VertexCP() {
+  }
+  
+  inline VertexCP::VertexCP(Vec4 color, Vec3 pos)
+    :color(color)
+    ,pos(pos)
+  {
+  }
+
   inline VertexPT::VertexPT() {
   }
 
@@ -64,19 +84,19 @@ namespace gl {
   {
   }
 
-  inline VertexPN::VertexPN() {
+  inline VertexNP::VertexNP() {
   }
 
-  inline VertexPN::VertexPN(Vec3 pos, Vec3 norm)
+  inline VertexNP::VertexNP(Vec3 norm, Vec3 pos)
     :pos(pos)
     ,norm(norm) 
   {
   }
 
-  inline VertexPNT::VertexPNT() {
+  inline VertexNPT::VertexNPT() {
   }
   
-  inline VertexPNT::VertexPNT(Vec3 pos, Vec3 norm, Vec3 tex) 
+  inline VertexNPT::VertexNPT(Vec3 norm, Vec3 pos, Vec3 tex) 
     :pos(pos)
     ,norm(norm)
     ,tex(tex)

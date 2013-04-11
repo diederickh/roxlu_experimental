@@ -1,7 +1,9 @@
 #ifndef ROXLU_OPENGL_TEXTURE_H
 #define ROXLU_OPENGL_TEXTURE_H
 
+#include <assert.h>
 #include <roxlu/Roxlu.h>
+#include <glr/Drawer.h>
 
 #define ERR_GL_CANNOT_LOAD_FILE "Cannot load thefile: `%s`"
 #define ERR_GL_UNSUPPORTED_IMAGE "The filetype `%s` is not supported"
@@ -30,18 +32,17 @@ namespace gl {
                    GLenum type);
 
 
+    void draw(float x, float y, float w, float h);
     unsigned int getWidth();                                                   /* returns the height as found when loading the image, or set when calling setPixels() */
     unsigned int getHeight();                                                  /* returns the width as found when loading the image, or set when calling setPixels() */
     GLuint getID();                                                            /* returns the texture id */
     void bind();
     void unbind();
 
-
     void print();
     std::string formatToString(GLenum f);
     std::string typeToString(GLenum t);
     std::string targetToString(GLenum t);
-    
 
   private:
     bool is_allocated;                                                          /* indicates if the texture was allocated */
@@ -81,6 +82,11 @@ namespace gl {
       return;
     }
     glBindTexture(target, 0);
+  }
+
+  inline void Texture::draw(float x, float y, float w, float h) {
+    assert(glr_context);
+    glr_context->drawTexture(*this, x, y, w, h);
   }
 
 } // gl

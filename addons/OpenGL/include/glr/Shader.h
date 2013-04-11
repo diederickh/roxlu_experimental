@@ -4,7 +4,7 @@
 #include <roxlu/core/Log.h>
 #include <roxlu/opengl/GL.h>
 #include <glr/Vertex.h>
-#include <glr/Texture.h>
+
 #include <string>
 
 #define ERR_GL_SH_LOAD_FILE "Cannot load the shader file: `%s`"
@@ -20,6 +20,8 @@
 #define WARN_GL_SH_UNKNOWN_TYPE "Unsupported VertexType, we cannot automatically setup attribute locations"
 
 namespace gl {
+
+  class Texture;
 
   class Shader {
   public:
@@ -101,43 +103,6 @@ namespace gl {
     use();
 
     glUniformMatrix4fv(u_mm, 1, GL_FALSE, mm);
-  }
-
-  inline void Shader::activateTexture(Texture& tex, GLenum unit) {
-    if(unit == GL_TEXTURE0 && u_tex0 == -1) {
-      RX_ERROR(ERR_GL_SH_NO_UNI_TEX, 0);
-      return;
-    }
-    else if(unit == GL_TEXTURE1 && u_tex1 == -1) {
-      RX_ERROR(ERR_GL_SH_NO_UNI_TEX, 1);
-      return;
-    }
-    else if(unit == GL_TEXTURE2 && u_tex2 == -1) {
-      RX_ERROR(ERR_GL_SH_NO_UNI_TEX, 2);
-      return;
-    }
-    else if(unit == GL_TEXTURE3 && u_tex3 == -1) {
-      RX_ERROR(ERR_GL_SH_NO_UNI_TEX, 3);
-      return;
-    }
-
-    use();
-
-    glActiveTexture(unit);
-    tex.bind();
-
-    if(unit == GL_TEXTURE0) {
-      glUniform1i(u_tex0, 0);
-    }
-    else if(unit == GL_TEXTURE1) {
-      glUniform1i(u_tex1, 1);
-    }
-    else if(unit == GL_TEXTURE2) {
-      glUniform1i(u_tex2, 2);
-    }
-    else if(unit == GL_TEXTURE3) {
-      glUniform1i(u_tex3, 3);
-    }
   }
 
 } // gl

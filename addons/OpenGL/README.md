@@ -7,6 +7,31 @@ creating vertex buffers, shaders, vao, pixel buffers etc...
 These classes are meant to be used for sketch like applications. I recommend that
 you use pure GL and custom vertex buffers etc.. when working on production installations.
 
+/Super quick intro/
+
+````c++
+
+void setup() {
+     // always call glr_init() after you've created an opengl context.
+     glr_init();
+
+     // load an image
+     Texture tex;
+     tex.load("someimage.png", true);
+}
+
+void draw() {
+     tex.draw(10,10,320,240);
+
+     glr_nofill();
+     glr_draw_circle(10,10,100);
+
+     glr_fill();
+     glr_draw_cirlce(10,10,80);
+     
+}
+````
+
 
 Standards
 ----------
@@ -18,8 +43,9 @@ vertex types as long as you follow the standards that the addons needs:
 
 In the shader we assume these standards for the `VertexTypes`:
 
- - The vertex position is stored in an attribute called `vec3 a_pos` and is bound to the location `0`
+ - The vertex position is stored in an attribute called `vec3 a_pos` and is bound to the location `0`.
  - The texture coord is stored in an attribute called `vec2 a_tex` and is bound to the location `1`.
+ - The color is stored in an attribute called `vec4 a_col` and is bound to the location `2`.
 
 Besides the `VertexTypes` we assume the shader has these uniforms (not all have to be used)
 
@@ -82,4 +108,26 @@ The `Drawer` class is the **master** of all other types. It creates a couple of 
 instances for the different vertex types (`VertexP`, `VertexPT`, `VertexPTN` etc..). If you want 
 to draw meshes or textures you need an instance of this class. 
 
+### Font ###
 
+All in one class to draw basic bitmap texts, from the amazing [nothings](http://www.nothings.org). 
+
+
+Simple wrapper functions
+------------------------
+
+Although it's not the fastest solution, sometimes it's easy to draw in immediate mode, therefore we 
+added a couple of functions which let you use immediate mode that mimics old school openGL. These functions
+are:
+
+- `glr_begin([GL_POINTS, GL_TRIANGLES, ....])`  aka `glBegin()`
+- `glr_color([Vec3(), Vec4()])` aka `glColor#f()`
+- `glr_vertex(Vec3())`, aka `glVertex#f#()`
+- `glr_end()` aka `glEnd()`
+
+Drawing shapes:
+
+- `glr_draw_circle(x, y, radius)`
+- `glr_draw_rectangle(x, y, w, h)`
+- `glr_fill()`
+- `glr_nofill()`

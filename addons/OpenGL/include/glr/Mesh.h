@@ -4,6 +4,7 @@
 #include <roxlu/opengl/GL.h>
 #include <glr/VBO.h>
 #include <glr/VAO.h>
+#include <glr/Drawer.h>
 
 #define ERR_GL_MS_NOT_BOUND "The mesh is not bound, make sure you bind it before you want to draw."
 #define ERR_GL_MS_CANNOT_SETUP_VBO "Cannot setup the VBO for this mesh"
@@ -22,8 +23,8 @@ namespace gl {
     void update();                                                /* updates the vbo, if necessary it update the gpu */
     void drawArrays(GLenum mode, GLint first, GLsizei count);
     void push_back(T v);                                          /* add a new vertex to the mesh */
+    void clear();
     size_t size();                                                /* returns the number of vertices in the mesh */
-    
 
     void bind();                                                  /* bind the mesh.. or actually the VAO */
     void unbind();                                                /* unbind the mesh... or actually the VAO */
@@ -117,16 +118,16 @@ namespace gl {
   }
 
   template<class T>
+    inline void Mesh<T>::clear() {
+
+    vbo.clear();
+  }
+
+  template<class T>
     inline void Mesh<T>::drawArrays(GLenum mode, GLint first, GLsizei count) {
 
-    if(!is_bound) {
-      RX_ERROR(ERR_GL_MS_NOT_BOUND);
-      return;
-    }
-
-    update();
-    glDrawArrays(mode, first, count);
-
+    assert(glr_context);
+    glr_context->drawArrays(*this, mode, first, count);
   }
 
 

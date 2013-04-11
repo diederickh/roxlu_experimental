@@ -63,6 +63,12 @@ namespace gl {
       glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexPT), (GLvoid*)0); // pos
       glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexPT), (GLvoid*)12); // tex
     }
+    else if(vertex_type == VERTEX_CP) {
+      glEnableVertexAttribArray(0); // col
+      glEnableVertexAttribArray(1); // pos
+      glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(VertexCP), (GLvoid*)0); // col
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexCP), (GLvoid*)16); // pos
+    }
     else {
       RX_ERROR(ERR_GL_VAO_VERTEX_NOT_SUPPORTED);
       return false;
