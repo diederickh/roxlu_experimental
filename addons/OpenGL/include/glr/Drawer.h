@@ -3,6 +3,14 @@
   --------
 
   MAKE SURE THAT YOU CALL `gl_init()` before using any of the openGL addon code
+
+  Vertex attributes are bound to these locations:
+
+  - a_pos  : 0
+  - a_tex  : 1
+  - a_col  : 2
+  - a_norm : 3
+
  */
 
 #ifndef ROXLU_OPENGL_DRAWER_H
@@ -86,6 +94,31 @@ namespace gl {
                                      }
   );
 
+
+  // VERTEX_NP
+  // ---------------------------------------------------
+  static const char* GL_VS_NP = GLSL(120,
+                                     attribute vec4 a_pos;
+                                     attribute vec3 a_norm;
+                                     uniform mat4 u_pm;
+                                     uniform mat4 u_vm;
+                                     uniform mat4 u_mm;
+                                     varying vec3 v_norm;
+
+                                     void main() {
+                                       gl_Position = u_pm * u_vm * u_mm * a_pos;
+                                       v_norm = a_norm;
+                                     }
+  );
+
+  static const char* GL_FS_NP = GLSL(120, 
+                                     varying vec3 v_norm;
+                                     void main() {
+                                       gl_FragColor.rgb = 0.5 * v_norm + 0.5;
+                                       gl_FragColor.a = 1.0;
+                                     }
+  );
+
   // ---------------------------------------------------
 
   class Texture;
@@ -110,6 +143,8 @@ namespace gl {
 
     void createOrthographicMatrix();
     const float* getOrthographicMatrix();
+    void setProjectionMatrix(const float *pm);                                         /* set the projection matrix for the stock shaders: shader_p, shader_pt, shader_### */
+    void setViewMatrix(const float* vm);                                               /* set the view matrix for the stock shaders: shader_p, shader_pt, shader_### */
     
     void onResize(unsigned int w, unsigned int h);                                     /* when the window resizes we need to update the ortho-graphic matrix, this must be called by the user */
 
@@ -118,6 +153,7 @@ namespace gl {
     void drawTexture(Texture& tex, float x, float y, float w = 0, float h = 0);        /* draws a texture */
     void drawArrays(Mesh<VertexP>& mesh, GLenum mode, GLint first, GLsizei count);     /* draw a mesh, with mode (GL_TRIANGLES, GL_POINTS, etc..), and start drawing the vertices from loation `begin` and draw `count` vertices */
     void drawArrays(Mesh<VertexPT>& mesh, GLenum mode, GLint first, GLsizei count);    /* draw a mesh, with mode (GL_TRIANGLES, GL_POINTS, etc..), and start drawing the vertices from loation `begin` and draw `count` vertices */
+    void drawArrays(Mesh<VertexNP>& mesh, GLenum mode, GLint first, GLsizei count);    /* draw a mesh, with mode (GL_TRIANGLES, GL_POINTS, etc..), and start drawing the vertices from loation `begin` and draw `count` vertices */
 
     void fill();                                                                       /* immediate mode: draw circle / rectangle with fill */
     void nofill();                                                                     /* immediate mode: draw circle / rectangle without a fill */
@@ -133,6 +169,7 @@ namespace gl {
   private:
     gl::Shader shader_p;                                                               /* shader for VertexP types; positions */
     gl::Shader shader_pt;                                                              /* shader for VertexPT types; positions, texture coordinates */
+    gl::Shader shader_np;                                                              /* shader for VertexNP types: normals, position */
     gl::Shader shader_tex;                                                             /* shader used for drawing textures */
     gl::Shader shader_immediate;                                                       /* shader used for immediate drawing (vertex(), color(), begin(), end(), draw()) */
     Mat4 ortho_matrix;                                                                 /* orthographic projection */
@@ -156,6 +193,9 @@ namespace gl {
   }
   
   void glr_init();                                                                     /* must be called if you want to make use of the opengl addon */
+
+  void glr_set_view_matrix(const float* vm);                                           /* set the view matrix of the stock shaders: shader_p, shader_pt, etc... see `Drawer::setViewMatrix()` */
+  void glr_set_projection_matrix(const float* pm);                                     /* set the projection matrix of the stock shaders: shader_p, shader_pt, etc... see `Drawer::setProjectionMatrix()` */
 
   void glr_draw_circle(float x, float y, float radius);                                /* draw a radius at x/y with the given radius */
   void glr_draw_rectangle(float x, float y, float w, float h);                         /* draw a  rectangle at top left x/y and w/h */

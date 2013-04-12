@@ -46,6 +46,7 @@ In the shader we assume these standards for the `VertexTypes`:
  - The vertex position is stored in an attribute called `vec3 a_pos` and is bound to the location `0`.
  - The texture coord is stored in an attribute called `vec2 a_tex` and is bound to the location `1`.
  - The color is stored in an attribute called `vec4 a_col` and is bound to the location `2`.
+ - The normal is stored in an attribute called `vec4 a_norm` and is bound to the location `3`.
 
 Besides the `VertexTypes` we assume the shader has these uniforms (not all have to be used)
 

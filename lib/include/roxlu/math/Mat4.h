@@ -83,7 +83,6 @@ namespace roxlu {
     void setZAxis(const Vec3& ax); // indices: 8,9,10
     void setZAxis(const float* ax);
 	
-	
     static Mat4 translation(const Vec3& v);
     static Mat4 translation(const float x, const float y, const float z);
     static Mat4 rotation(const Mat3& o);

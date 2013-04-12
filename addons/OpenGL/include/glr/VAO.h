@@ -23,6 +23,7 @@ namespace gl {
     void enableAttributes(VBO<VertexP>& vbo);      /* enables the correct attributes for VertexP  */
     void enableAttributes(VBO<VertexPT>& vbo);     /* enables the correct attributes for VertexPT */
     void enableAttributes(VBO<VertexCP>& vbo);     /* enables the correct attributes for VertexCP */
+    void enableAttributes(VBO<VertexNP>& vbo);     /* enables the correct attributes for VertexNP */
 
     void bind();
     void unbind();

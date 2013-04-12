@@ -66,6 +66,18 @@ namespace gl {
     unbind();
   }
 
+  void VAO::enableAttributes(VBO<VertexNP>& vbo) {
+    bind();
+    vbo.bind();
+
+    glEnableVertexAttribArray(0); // pos
+    glEnableVertexAttribArray(4); // norm
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexNP), (GLvoid*)12); // pos
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(VertexNP), (GLvoid*)0); // norm
+
+    vbo.unbind();
+    unbind();
+  }
 
   void VAO::bind() {
    

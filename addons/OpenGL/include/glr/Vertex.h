@@ -30,10 +30,11 @@ namespace gl {
 
   struct VertexNP {
     VertexNP();
-    VertexNP(Vec3 pos, Vec3 norm);
+    VertexNP(Vec3 norm, Vec3 pos);
 
-    Vec3 norm;
-    Vec3 pos;
+   Vec3 norm; 
+   Vec3 pos;
+ 
   };
 
   struct VertexNPT {
@@ -77,8 +78,8 @@ namespace gl {
   }
 
   inline VertexNP::VertexNP(Vec3 norm, Vec3 pos)
-    :pos(pos)
-    ,norm(norm) 
+    :norm(norm) 
+    ,pos(pos)
   {
   }
 

@@ -34,6 +34,11 @@ namespace gl {
     shader_pt.bindAttribLocation("a_tex", 1);
     shader_pt.link();
 
+    shader_np.create(GL_VS_NP, GL_FS_NP);
+    shader_np.bindAttribLocation("a_pos", 0);
+    shader_np.bindAttribLocation("a_norm", 4);
+    shader_np.link();
+
     shader_tex.create(GL_VS_PT, GL_FS_PT); 
     shader_tex.bindAttribLocation("a_pos", 0);
     shader_tex.bindAttribLocation("a_tex", 1);
@@ -46,6 +51,7 @@ namespace gl {
     
     setupShader(shader_p);
     setupShader(shader_pt);
+    setupShader(shader_np);
     setupShader(shader_tex);
     setupShader(shader_immediate);
 
@@ -124,6 +130,29 @@ namespace gl {
     shader_pt.unuse();
   }
 
+  void Drawer::drawArrays(Mesh<VertexNP>& mesh, GLenum mode, GLint first, GLsizei count) {
+    shader_np.use();
+    mesh.bind();
+    mesh.update();
+    glDrawArrays(mode, first, count);
+    mesh.unbind();
+    shader_np.unuse();
+  }
+
+
+  // MATRICES
+  // ---------------------------------------------------
+  void Drawer::setProjectionMatrix(const float* pm) {
+    shader_p.setProjectionMatrix(pm);
+    shader_pt.setProjectionMatrix(pm);
+    shader_np.setProjectionMatrix(pm);
+  }
+
+  void Drawer::setViewMatrix(const float* vm) {
+    shader_p.setViewMatrix(vm);
+    shader_pt.setViewMatrix(vm);
+    shader_np.setViewMatrix(vm);
+  }
 
   void Drawer::createOrthographicMatrix() {
     ortho_matrix.orthoTopLeft(window_w, window_h, 0.0f, 100.0f);
@@ -214,6 +243,16 @@ namespace gl {
   void glr_init() {
     glr_context = new Drawer();
     glr_font.init();
+  }
+
+  void glr_set_projection_matrix(const float* pm) {
+    assert(glr_context);
+    glr_context->setProjectionMatrix(pm);
+  }
+
+  void glr_set_view_matrix(const float* vm) {
+    assert(glr_context);
+    glr_context->setViewMatrix(vm);
   }
 
   void glr_draw_circle(float x, float y, float radius) {
