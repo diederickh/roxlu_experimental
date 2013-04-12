@@ -9,7 +9,6 @@
 #define ERR_GL_MS_NOT_BOUND "The mesh is not bound, make sure you bind it before you want to draw."
 #define ERR_GL_MS_CANNOT_SETUP_VBO "Cannot setup the VBO for this mesh"
 #define ERR_GL_MS_CANNOT_SETUP_VAO "Cannot setup the VAO for this mesh"
-#define ERR_GL_MS_CANNOT_SETUP_VAO_ATTRIBS "Cannot setup the VAO attributes for this mesh"
 #define ERR_GL_MS_NOT_SETUP "The mesh wasn't setup() yet. Make sure you call setup() for the mesh."
 
 namespace gl {
@@ -19,7 +18,8 @@ namespace gl {
   public:
     Mesh();
     ~Mesh();
-    bool setup(GLenum usage, unsigned int vertexType);            /* setup the mesh, usage = GL_STATIC_DRAW / GL_STREAM_DRAW (a hint to the driver), vertexType = {VERTEX_P, VERTEX_PT, etc.. } */
+
+    bool setup(GLenum usage);                                     /* setup the mesh, usage = GL_STATIC_DRAW / GL_STREAM_DRAW (a hint to the driver) */
     void update();                                                /* updates the vbo, if necessary it update the gpu */
     void drawArrays(GLenum mode, GLint first, GLsizei count);
     void push_back(T v);                                          /* add a new vertex to the mesh */
@@ -49,25 +49,19 @@ namespace gl {
   }
 
   template<class T>
-    bool Mesh<T>::setup(GLenum usage, unsigned int vertexType) {
+    bool Mesh<T>::setup(GLenum usage) { 
 
    if(!vbo.setup(usage)) {
       RX_ERROR(ERR_GL_MS_CANNOT_SETUP_VBO);
       return false;
     }
 
-    if(!vao.setup(vertexType)) {
+   if(!vao.setup()) {
       RX_ERROR(ERR_GL_MS_CANNOT_SETUP_VAO);
       return false;
     }
-
-    vbo.bind();
  
-    if(!vao.enableAttributes()) {
-      RX_ERROR(ERR_GL_MS_CANNOT_SETUP_VAO_ATTRIBS);
-      vbo.unbind();
-      return false;
-    }
+   vao.enableAttributes(vbo); 
 
     vbo.unbind();
     is_setup = true;
@@ -84,7 +78,6 @@ namespace gl {
 
     vbo.update();
   }
-
 
   template<class T>
     inline void Mesh<T>::push_back(T v) {
@@ -110,7 +103,6 @@ namespace gl {
     vao.unbind();
   }
 
-
   template<class T>
     inline size_t Mesh<T>::size() {
 
@@ -129,10 +121,6 @@ namespace gl {
     assert(glr_context);
     glr_context->drawArrays(*this, mode, first, count);
   }
-
-
-
-
 
 } // gl
 #endif

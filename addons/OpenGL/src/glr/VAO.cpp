@@ -5,16 +5,14 @@ namespace gl {
 
   VAO::VAO()
     :id(0)
-    ,vertex_type(VERTEX_NONE)
   {
   }
 
   VAO::~VAO() {
     id = 0;
-    vertex_type = VERTEX_NONE;
   }
 
-  bool VAO::setup(unsigned int vertexType) {
+  bool VAO::setup() { 
     
     if(id) {
       RX_ERROR(ERR_GL_VAO_ALREADY_SETUP);
@@ -27,57 +25,47 @@ namespace gl {
       RX_ERROR(ERR_GL_VAO_CANNOT_CREATE);
       return false;
     }
-    
-    this->vertex_type = vertexType;
+
     return true;
   }
 
-  bool VAO::enableAttributes() {
-
-    if(vertex_type == VERTEX_NONE) {
-      RX_ERROR(ERR_GL_VAO_NOT_SETUP);
-      return false;
-    }
-    
-    if(!id) {
-      RX_ERROR(ERR_GL_VAO_NOT_SETUP);
-      return false;
-    }
-
-    GLint vbo = 0;
-    glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &vbo);
-    if(vbo == 0) {
-      RX_ERROR(ERR_GL_VAO_VBO_NOT_BOUND);
-      return false;
-    }
-
+  void VAO::enableAttributes(VBO<VertexP>& vbo) {
     bind();
-    
-    if(vertex_type == VERTEX_P) {
-      glEnableVertexAttribArray(0);
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexP), (GLvoid*)0);
-    }
-    else if(vertex_type == VERTEX_PT) {
-      glEnableVertexAttribArray(0); // pos
-      glEnableVertexAttribArray(1); // tex
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexPT), (GLvoid*)0); // pos
-      glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexPT), (GLvoid*)12); // tex
-    }
-    else if(vertex_type == VERTEX_CP) {
-      glEnableVertexAttribArray(0); // col
-      glEnableVertexAttribArray(1); // pos
-      glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(VertexCP), (GLvoid*)0); // col
-      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexCP), (GLvoid*)16); // pos
-    }
-    else {
-      RX_ERROR(ERR_GL_VAO_VERTEX_NOT_SUPPORTED);
-      return false;
-    }
+    vbo.bind();
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexP), (GLvoid*)0);
     
     unbind();
-
-    return true;
+    
   }
+
+  void VAO::enableAttributes(VBO<VertexPT>& vbo) {
+    bind();
+    vbo.bind();
+
+    glEnableVertexAttribArray(0); // pos
+    glEnableVertexAttribArray(1); // tex
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexPT), (GLvoid*)0); // pos
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexPT), (GLvoid*)12); // tex
+
+    vbo.unbind();
+    unbind();
+  }
+
+  void VAO::enableAttributes(VBO<VertexCP>& vbo) {
+    bind();
+    vbo.bind();
+
+    glEnableVertexAttribArray(0); // col
+    glEnableVertexAttribArray(1); // pos
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(VertexCP), (GLvoid*)0); // col
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexCP), (GLvoid*)16); // pos
+
+    vbo.unbind();
+    unbind();
+  }
+
 
   void VAO::bind() {
    

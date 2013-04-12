@@ -5,16 +5,6 @@
 
 namespace gl {
 
-/* Vertex types, the field names `C`, `N`, `P`, `T` etc.. are alphabetically */
-
-#define VERTEX_P     1        /* vertex with: position */
-#define VERTEX_CP    2        /* vertex with: color, position */
-#define VERTEX_PT    3        /* vertex with: position, texture coord */
-#define VERTEX_NP    4        /* vertex with: position normal */
-#define VERTEX_NPT   5        /* vertex with: position, normal, texture coord */
-#define VERTEX_NONE 9999      /* undefined */
-
-
   struct VertexP {
     VertexP();
     VertexP(Vec3 pos);
@@ -54,7 +44,6 @@ namespace gl {
     Vec3 pos;
     Vec2 tex;
   };
-
 
   // ----------------------------------
 

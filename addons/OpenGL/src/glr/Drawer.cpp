@@ -25,11 +25,25 @@ namespace gl {
     }
 
     // SHADERS
-    shader_p.create(GL_VS_P, GL_FS_P, VERTEX_P);
-    shader_pt.create(GL_VS_PT, GL_FS_PT, VERTEX_PT);
-    shader_tex.create(GL_VS_PT, GL_FS_PT, VERTEX_PT);
-    shader_immediate.create(GL_VS_CP, GL_FS_CP, VERTEX_CP);
+    shader_p.create(GL_VS_P, GL_FS_P); 
+    shader_p.bindAttribLocation("a_pos", 0);
+    shader_p.link();
 
+    shader_pt.create(GL_VS_PT, GL_FS_PT);
+    shader_pt.bindAttribLocation("a_pos", 0);
+    shader_pt.bindAttribLocation("a_tex", 1);
+    shader_pt.link();
+
+    shader_tex.create(GL_VS_PT, GL_FS_PT); 
+    shader_tex.bindAttribLocation("a_pos", 0);
+    shader_tex.bindAttribLocation("a_tex", 1);
+    shader_tex.link();
+
+    shader_immediate.create(GL_VS_CP, GL_FS_CP); 
+    shader_immediate.bindAttribLocation("a_col", 0);
+    shader_immediate.bindAttribLocation("a_pos", 1);
+    shader_immediate.link();
+    
     setupShader(shader_p);
     setupShader(shader_pt);
     setupShader(shader_tex);
@@ -39,7 +53,7 @@ namespace gl {
     float tw = 1.0f;
     float th = 1.0f;
     texture_mesh = new Mesh<VertexPT>();
-    texture_mesh->setup(GL_STATIC_DRAW, VERTEX_PT);
+    texture_mesh->setup(GL_STATIC_DRAW);
     texture_mesh->push_back(VertexPT(Vec3(0.0f,   th),  Vec2(0.0f, 1.0f)) );
     texture_mesh->push_back(VertexPT(Vec3(tw,     th),  Vec2(1.0f, 1.0f)) );
     texture_mesh->push_back(VertexPT(Vec3(tw,   0.0f),  Vec2(1.0f, 0.0f)) );
@@ -49,7 +63,7 @@ namespace gl {
     texture_mesh->update();
 
     immediate_mesh = new Mesh<VertexCP>();
-    immediate_mesh->setup(GL_STREAM_DRAW, VERTEX_CP);
+    immediate_mesh->setup(GL_STREAM_DRAW); 
 
     // SHAPES
     int circle_resolution = 64;

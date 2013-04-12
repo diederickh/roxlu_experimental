@@ -101,7 +101,6 @@ namespace gl {
       height = tga.getHeight();
       pixels = tga.getPixels();
       type = GL_UNSIGNED_BYTE;
-      //  RX_ERROR(ERR_GL_UNSUPPORTED_IMAGE, ext.c_str());
     }
     else {
       RX_ERROR(ERR_GL_UNSUPPORTED_IMAGE, ext.c_str());

@@ -1,6 +1,7 @@
 #ifndef ROXLU_OPENGL_VAO_H
 #define ROXLU_OPENGL_VAO_H
 
+#include <glr/VBO.h>
 #include <glr/Vertex.h>
 #include <roxlu/opengl/GL.h>
 
@@ -17,13 +18,16 @@ namespace gl {
     VAO();
     ~VAO();
 
-    bool setup(unsigned int vertexType);            /* sets up the VAO and enables the attributes, and sets the vertex attrib pointers. make sure that the VBO that you want to use with this VBO is bound! */
-    bool enableAttributes();                        /* enables the correct attributes based on the current `type` */
+    bool setup();                                  /* sets up the VAO and enables the attributes, and sets the vertex attrib pointers. make sure that the VBO that you want to use with this VBO is bound! */
+
+    void enableAttributes(VBO<VertexP>& vbo);      /* enables the correct attributes for VertexP  */
+    void enableAttributes(VBO<VertexPT>& vbo);     /* enables the correct attributes for VertexPT */
+    void enableAttributes(VBO<VertexCP>& vbo);     /* enables the correct attributes for VertexCP */
+
     void bind();
     void unbind();
 
   public:
-    unsigned int vertex_type;
     GLuint id;
   };
 

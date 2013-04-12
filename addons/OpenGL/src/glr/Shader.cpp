@@ -5,7 +5,8 @@ namespace gl {
 
   Shader::Shader()
     :prog(0)
-    ,vertex_type(VERTEX_NONE)
+    ,vert_id(0)
+    ,frag_id(0)
     ,u_pm(-1)
     ,u_vm(-1)
     ,u_tex0(-1)
@@ -23,16 +24,17 @@ namespace gl {
       prog = 0;
     }
 
-    vertex_type = VERTEX_NONE;
     u_pm = -1;
     u_vm = -1;
     u_tex0 = -1;
     u_tex1 = -1;
     u_tex2 = -1;
     u_tex3 = -1;
+    vert_id = 0;
+    frag_id = 0;
   }
 
-  bool Shader::load(std::string vs, std::string fs, unsigned int vertexType, bool datapath) {
+  bool Shader::load(std::string vs, std::string fs, bool datapath) {
 
     std::string vss = rx_get_file_contents(vs, datapath);
     if(!vss.size()) {
@@ -46,20 +48,15 @@ namespace gl {
       return false;
     }
 
-    return create(vss, fss, vertexType);
+    return create(vss, fss);
   }
 
-  bool Shader::create(std::string vs, std::string fs, unsigned int vertexType) {
+  bool Shader::create(std::string vs, std::string fs) {
 
     if(prog) {
       RX_ERROR(ERR_GL_SH_ALREADY_CREATED);
       return false;
     }
-
-    this->vertex_type = vertexType;
-
-    GLuint vert_id = 0;
-    GLuint frag_id = 0;
 
     vert_id = glCreateShader(GL_VERTEX_SHADER);
     frag_id = glCreateShader(GL_FRAGMENT_SHADER);
@@ -100,19 +97,27 @@ namespace gl {
     glAttachShader(prog, vert_id);
     glAttachShader(prog, frag_id);
     
-    if(vertex_type == VERTEX_P) {
-      glBindAttribLocation(prog, 0, "a_pos");
+
+    return true;
+  }
+
+  void Shader::bindAttribLocation(std::string attrib, GLuint index) {
+    attributes[attrib] = index;
+  }
+
+  bool Shader::link() {
+    if(!vert_id || !frag_id) {
+      RX_ERROR(ERR_GL_SH_NO_VERT_OR_FRAG);
+      return false;
     }
-    else if(vertex_type == VERTEX_PT) {
-      glBindAttribLocation(prog, 0, "a_pos");
-      glBindAttribLocation(prog, 1, "a_tex");
+
+    if(!prog) {
+      RX_ERROR(ERR_GL_SH_PROG_NOT_CREATED);
+      return false;
     }
-    else if(vertex_type == VERTEX_CP) {
-      glBindAttribLocation(prog, 0, "a_col");
-      glBindAttribLocation(prog, 1, "a_pos");
-    }
-    else {
-      RX_WARNING(WARN_GL_SH_UNKNOWN_TYPE);
+
+    for(std::map<std::string, GLuint>::iterator it = attributes.begin(); it != attributes.end(); ++it) {
+      glBindAttribLocation(prog, it->second, it->first.c_str());
     }
     
     glLinkProgram(prog);
@@ -134,6 +139,7 @@ namespace gl {
 
     return true;
   }
+
 
   void Shader::activateTexture(Texture& tex, GLenum unit) {
     if(unit == GL_TEXTURE0 && u_tex0 == -1) {
