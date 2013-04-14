@@ -7,7 +7,7 @@ creating vertex buffers, shaders, vao, pixel buffers etc...
 These classes are meant to be used for sketch like applications. I recommend that
 you use pure GL and custom vertex buffers etc.. when working on production installations.
 
-/Super quick intro/
+_Super quick intro_
 
 ````c++
 

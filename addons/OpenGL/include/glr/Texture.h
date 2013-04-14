@@ -3,10 +3,11 @@
 
 #include <assert.h>
 #include <roxlu/Roxlu.h>
+#include <image/Image.h>
 #include <glr/Drawer.h>
 
 #define ERR_GL_CANNOT_LOAD_FILE "Cannot load thefile: `%s`"
-#define ERR_GL_UNSUPPORTED_IMAGE "The filetype `%s` is not supported"
+//#define ERR_GL_UNSUPPORTED_IMAGE "The filetype `%s` is not supported"
 #define ERR_GL_FORMAT_NOT_SUPPORTED "Image format is not supported: `%s`"
 #define ERR_GL_INVALID_SIZE "The size of the image is invalid: %d x %d"
 #define ERR_GL_CANNOT_CREATE_TEX "Cannot create a texture"
@@ -22,6 +23,8 @@ namespace gl {
     ~Texture();
 
     bool load(std::string filepath, bool datapath = false);                   /* load an image as texture */
+    
+    bool setPixels(Image& img);                                               /* set the pixels from this image */
 
     bool setPixels(unsigned char* pixels, 
                    unsigned int w,

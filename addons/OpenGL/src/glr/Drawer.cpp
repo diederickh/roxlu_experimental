@@ -36,7 +36,7 @@ namespace gl {
 
     shader_np.create(GL_VS_NP, GL_FS_NP);
     shader_np.bindAttribLocation("a_pos", 0);
-    shader_np.bindAttribLocation("a_norm", 4);
+    shader_np.bindAttribLocation("a_norm", 3);
     shader_np.link();
 
     shader_tex.create(GL_VS_PT, GL_FS_PT); 
@@ -116,6 +116,7 @@ namespace gl {
     shader_p.use();
     mesh.bind();
     mesh.update();
+    shader_p.setModelMatrix(mesh.mm().getPtr());
     glDrawArrays(mode, first, count);
     mesh.unbind();
     shader_p.unuse();
@@ -125,6 +126,7 @@ namespace gl {
     shader_pt.use();
     mesh.bind();
     mesh.update();
+    shader_pt.setModelMatrix(mesh.mm().getPtr());
     glDrawArrays(mode, first, count);
     mesh.unbind();
     shader_pt.unuse();
@@ -134,6 +136,7 @@ namespace gl {
     shader_np.use();
     mesh.bind();
     mesh.update();
+    shader_np.setModelMatrix(mesh.mm().getPtr());
     glDrawArrays(mode, first, count);
     mesh.unbind();
     shader_np.unuse();
@@ -293,6 +296,11 @@ namespace gl {
   void glr_end() {
     assert(glr_context);
     glr_context->end();
+  }
+
+  Shader& glr_get_shader_np() {
+    assert(glr_context);
+    return glr_context->shader_np;
   }
 
   Drawer* glr_context = NULL;

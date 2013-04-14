@@ -23,6 +23,7 @@ roxlu_addon_begin("image")
    roxlu_add_extern_lib(zlib.lib)
  endif()
 
+ roxlu_addon_add_source_file(image/Image.cpp)
  roxlu_addon_add_source_file(image/PNG.cpp)
  roxlu_addon_add_source_file(image/TGA.cpp)
  roxlu_addon_add_source_file(image/JPG.cpp)

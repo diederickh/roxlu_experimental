@@ -51,3 +51,10 @@
 #ifndef DX
 #define DX(i,j,w)	((j)*(w))+(i)
 #endif
+
+// Pixel formats (see libav pixfmt.h)
+#define RX_FMT_NONE 0
+#define RX_FMT_RGB24 1
+#define RX_FMT_BGR24 2
+#define RX_FMT_RGBA32 3
+#define RX_FMT_GRAY8 4

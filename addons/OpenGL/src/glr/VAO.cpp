@@ -56,7 +56,7 @@ namespace gl {
   void VAO::enableAttributes(VBO<VertexCP>& vbo) {
     bind();
     vbo.bind();
-
+    RX_ERROR("WE NEED TO TEST THIS!!! - POS MUST BE ON 0 and col on 2 !! see reamde");
     glEnableVertexAttribArray(0); // col
     glEnableVertexAttribArray(1); // pos
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(VertexCP), (GLvoid*)0); // col
@@ -71,9 +71,9 @@ namespace gl {
     vbo.bind();
 
     glEnableVertexAttribArray(0); // pos
-    glEnableVertexAttribArray(4); // norm
+    glEnableVertexAttribArray(3); // norm
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexNP), (GLvoid*)12); // pos
-    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(VertexNP), (GLvoid*)0); // norm
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexNP), (GLvoid*)0); // norm
 
     vbo.unbind();
     unbind();

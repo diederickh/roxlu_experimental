@@ -10,6 +10,10 @@ roxlu_addon_begin("opengl")
   roxlu_addon_add_source_file(glr/Font.cpp)
   roxlu_addon_add_source_file(glr/Camera.cpp)
   roxlu_addon_add_source_file(io/OBJ.cpp)
+
+  roxlu_addon_add_source_file(experimental/Filter.cpp)
+  roxlu_addon_add_source_file(experimental/RenderPass.cpp)
+  roxlu_addon_add_source_file(experimental/Scene.cpp)
   # --------------------------------------------------------------------------------------
 
 roxlu_addon_end()

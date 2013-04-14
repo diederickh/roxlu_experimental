@@ -166,12 +166,15 @@ namespace gl {
   private:
     void setupShader(Shader& shader);                                                  /* sets up a shader; sets identity matrices + ortho matrix */
 
-  private:
+  public:
     gl::Shader shader_p;                                                               /* shader for VertexP types; positions */
     gl::Shader shader_pt;                                                              /* shader for VertexPT types; positions, texture coordinates */
     gl::Shader shader_np;                                                              /* shader for VertexNP types: normals, position */
+
+  private:
     gl::Shader shader_tex;                                                             /* shader used for drawing textures */
     gl::Shader shader_immediate;                                                       /* shader used for immediate drawing (vertex(), color(), begin(), end(), draw()) */
+
     Mat4 ortho_matrix;                                                                 /* orthographic projection */
     unsigned int window_w;                                                             /* viewport width; is retrieved automatically when started, or update when the user calls onResize() */
     unsigned int window_h;                                                             /* viewport height; is retrieved automatically when started, or update when the user calls onResize() */
@@ -208,6 +211,7 @@ namespace gl {
   void glr_vertex(Vec3 position);                                                      /* immediate mode: end the current sequence of vertices */
   void glr_end();                                                                      /* immediate mode: this will draw the current sequence */
 
+  Shader& glr_get_shader_np();                                                         /* returns the stock shader for: normals + position, vertex meshes */
   extern Drawer* glr_context; 
 
 } // gl

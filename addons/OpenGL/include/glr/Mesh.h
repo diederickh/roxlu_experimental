@@ -1,6 +1,7 @@
 #ifndef ROXLU_OPENGL_MESH_H
 #define ROXLU_OPENGL_MESH_H
 
+#include <assert.h>
 #include <roxlu/opengl/GL.h>
 #include <roxlu/core/Utils.h>
 #include <io/OBJ.h>
@@ -30,6 +31,11 @@ namespace gl {
     void push_back(T v);                                          /* add a new vertex to the mesh */
     void clear();
     size_t size();                                                /* returns the number of vertices in the mesh */
+
+    Mat4& mm();                                                   /* returns the model matrix */
+    void setPosition(Vec3 pos);                                   /* set the position on the model matrix */
+    Vec3 getPosition();                                           /* get the current location of the mesh */
+    void setScale(float s);                                       /* sets the scale for x/y/z */
 
     void bind();                                                  /* bind the mesh.. or actually the VAO */
     void unbind();                                                /* unbind the mesh... or actually the VAO */
@@ -102,6 +108,8 @@ namespace gl {
   template<class T>
     inline void Mesh<T>::update() {
 
+    assert(vbo.size());
+
     if(!is_setup) {
       RX_ERROR(ERR_GL_MS_NOT_SETUP);
       return;
@@ -149,9 +157,38 @@ namespace gl {
   template<class T>
     inline void Mesh<T>::drawArrays(GLenum mode, GLint first, GLsizei count) {
 
+    assert(vbo.size());
     assert(glr_context);
+
     glr_context->drawArrays(*this, mode, first, count);
   }
+
+  template<class T>
+    inline void Mesh<T>::setPosition(Vec3 position) {
+
+    model_matrix.setPosition(position);
+  }
+
+  template<class T>
+    inline Vec3 Mesh<T>::getPosition() {
+
+    return model_matrix.getPosition();
+  }
+
+  template<class T>
+    inline void Mesh<T>::setScale(float s) {
+
+    model_matrix.setScale(s); 
+  }
+
+
+  template<class T>
+    inline Mat4& Mesh<T>::mm() {
+
+    return model_matrix;
+  }
+
+
 
 } // gl
 #endif

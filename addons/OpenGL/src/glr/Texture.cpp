@@ -1,7 +1,4 @@
 #include <glr/Texture.h>
-#include <image/PNG.h>
-#include <image/TGA.h>
-#include <image/JPG.h>
 
 namespace gl {
 
@@ -22,99 +19,36 @@ namespace gl {
   }
 
   bool Texture::load(std::string filepath, bool datapath) {
-    unsigned char* pixels = NULL;
-
-    // LOAD THE IMAGE
-    std::string ext = rx_get_file_ext(filepath);
-    if(ext == "png") {
-      PNG png;
-      if(!png.load(filepath, datapath)) {
-        RX_ERROR(ERR_GL_CANNOT_LOAD_FILE, filepath.c_str());
-        return false;
-      }
-    
-      if(png.getColorType() == PNG_COLOR_TYPE_RGB) {
-        internal_format = GL_RGB;
-        format = GL_RGB;
-      }
-      else if(png.getColorType() == PNG_COLOR_TYPE_RGBA) {
-        internal_format = GL_RGBA;
-        format = GL_RGBA;
-      }
-      else {
-        RX_ERROR(ERR_GL_FORMAT_NOT_SUPPORTED, png.colorTypeToString(png.getColorType()).c_str());
-        return false;
-      }
-
-      width = png.getWidth();
-      height = png.getHeight();
-      pixels = png.getPixels();
-      type = GL_UNSIGNED_BYTE;
-    }
-    else if(ext == "jpg") {
-      JPG jpg;
-      if(!jpg.load(filepath, datapath)) {
-        RX_ERROR(ERR_GL_CANNOT_LOAD_FILE, filepath.c_str());
-        return false;
-      }
-      
-      if(jpg.getNumChannels() == 4) {
-        internal_format = GL_RGBA;
-        format = GL_RGBA;
-      }
-      else if(jpg.getNumChannels() == 3) {
-        internal_format = GL_RGB;
-        format = GL_RGB;
-      }
-      else {
-        RX_ERROR(ERR_GL_FORMAT_NOT_SUPPORTED, "UNKNOWN (JPG)");
-        return false;
-      }
-
-      width = jpg.getWidth();
-      height = jpg.getHeight();
-      pixels = jpg.getPixels();
-      type = GL_UNSIGNED_BYTE;
-      
-    }
-    else if(ext == "tga") {
-      TGA tga;
-      if(!tga.load(filepath, datapath)) {
-        RX_ERROR(ERR_GL_CANNOT_LOAD_FILE, filepath.c_str());
-        return false;
-      }
-      
-      if(tga.getNumChannels() == 4) {
-        internal_format = GL_RGBA;
-        format = GL_RGBA;
-      }
-      else if(tga.getNumChannels() == 3) {
-        internal_format = GL_RGB;
-        format = GL_RGB;
-      }
-      else {
-        RX_ERROR(ERR_GL_FORMAT_NOT_SUPPORTED, "UNKNOWN (TGA)");
-        return false;
-      }
-
-      width = tga.getWidth();
-      height = tga.getHeight();
-      pixels = tga.getPixels();
-      type = GL_UNSIGNED_BYTE;
-    }
-    else {
-      RX_ERROR(ERR_GL_UNSUPPORTED_IMAGE, ext.c_str());
+    Image img;
+    if(!img.load(filepath, datapath)) {
+      RX_ERROR(ERR_GL_CANNOT_LOAD_FILE, filepath.c_str());
       return false;
     }
+  
+    return setPixels(img);
+  }
 
-    if(!width || !height) {
-      RX_ERROR(ERR_GL_INVALID_SIZE, width, height);
-      return false;
-    }
+  bool Texture::setPixels(Image& img) {
 
+    width = img.getWidth();
+    height = img.getHeight();
+    type = GL_UNSIGNED_BYTE;
     target = GL_TEXTURE_2D;
     
-    if(!setPixels(pixels, width, height, GL_TEXTURE_2D, internal_format, format, type)) {
+    if(img.getPixelFormat() == RX_FMT_RGB24) {
+      internal_format = GL_RGB;
+      format = GL_RGB;
+    }
+    else if(img.getPixelFormat() == RX_FMT_RGBA32) {
+      internal_format = GL_RGBA;
+      format = GL_RGBA;
+    }
+    else {
+      RX_ERROR(ERR_GL_FORMAT_NOT_SUPPORTED);
+      return false;
+    }
+    
+    if(!setPixels(img.getPixels(), width, height, target, internal_format, format, type)) {
       return false;
     }
 
@@ -192,15 +126,12 @@ namespace gl {
   }
 
   std::string Texture::formatToString(GLenum f) {
-    if(f == GL_RGB) {
-      return "GL_RGB";
-    }
-    else if(f == GL_RGBA) {
-      return "GL_RGBA";
-    }
-    else {
-      return "UNKNOWN";
-    }
+    switch(f) {
+      case GL_RGB: return "GL_RGB";
+      case GL_RGBA: return "GL_RGBA";
+      case GL_R: return "GL_R";
+      default: return "UNKNOWN";
+    }; 
   }
 
 

@@ -322,11 +322,15 @@ namespace gl {
     glVertexAttribPointer(glGetAttribLocation(prog, "a_pos"), 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)0);
     glVertexAttribPointer(glGetAttribLocation(prog, "a_tex"), 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)8);
 
+    // get width/height for the ortho matrix
+    GLint vp[4];
+    glGetIntegerv(GL_VIEWPORT, vp);
+
     // ortho pm
     float n = 0.0;
     float f = 1.0;
-    float ww = 1024.0f;
-    float hh = 768.0f;
+    float ww = vp[2]; 
+    float hh = vp[3];
     float fmn = f - n;
     pm[1]  = 0.0f;
     pm[2]  = 0.0f;

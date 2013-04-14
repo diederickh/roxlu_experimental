@@ -15,6 +15,7 @@
 #include <vector>
 #include <iterator>
 #include <roxlu/Roxlu.h>
+#include <image/Image.h>
 #include <bmfont/BMFTypes.h>
 #include <bmfont/BMFLoader.h>
 #include <bmfont/BMFShader.h>
@@ -145,7 +146,7 @@ void BMFRenderer<T>::setup(int windowW, int windowH, BMFShader* useShader) {
     ::exit(EXIT_FAILURE);
   }
 
-  if(img.getComponents() != 1) {
+  if(img.getPixelFormat() != RX_FMT_GRAY8) {
     RX_ERROR(BMF_ERR_WRONG_NCOMPONENTS);
     ::exit(EXIT_FAILURE);
   }

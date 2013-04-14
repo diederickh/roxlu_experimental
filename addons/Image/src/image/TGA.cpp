@@ -14,7 +14,9 @@ TGA::TGA()
 {
 }
 
-TGA::TGA(const TGA& other) {
+TGA::TGA(const TGA& other) 
+  :pixels(NULL)
+{
   clone(other);
 }
 
