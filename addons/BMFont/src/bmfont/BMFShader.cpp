@@ -5,6 +5,7 @@ GLuint BMFShader::prog = 0;
 GLint BMFShader::u_projection_matrix = -1;
 GLint BMFShader::u_model_matrix = -1;
 GLint BMFShader::u_tex = -1;
+GLint BMFShader::u_alpha = -1;
 
 BMFShader::BMFShader()
   :tex(0)
@@ -28,6 +29,9 @@ void BMFShader::setup(GLuint vbo, GLuint tex) {
     u_projection_matrix = glGetUniformLocation(prog, "u_projection_matrix");
     u_model_matrix = glGetUniformLocation(prog, "u_model_matrix");
     u_tex = glGetUniformLocation(prog, "u_tex");
+    u_alpha = glGetUniformLocation(prog, "u_alpha");
+    
+    glUniform1f(u_alpha, 1.0f);
   }
 
   glGenVertexArrays(1, &vao);
