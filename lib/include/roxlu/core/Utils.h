@@ -438,6 +438,15 @@ static std::string rx_int_to_string(int num) {
   return ss.str();
 }
 
+static std::string rx_string_replace(std::string str, std::string from, std::string to) {
+  size_t start_pos = str.find(from);
+  if(start_pos == std::string::npos) {
+    return str;
+  }
+  str.replace(start_pos, from.length(), to);
+  return str;
+}
+
 static std::string rx_string_replace(std::string str, char from, char to) {
   std::replace(str.begin(), str.end(), from, to);
   return str;
@@ -446,6 +455,7 @@ static std::string rx_string_replace(std::string str, char from, char to) {
 static std::string rx_strip_filename(std::string path) {
   std::string directory;
   path = rx_string_replace(path, '\\', '/');
+  path = rx_string_replace(path, "//", "/");
   const size_t last_slash_idx = path.rfind('/');
 
   if(std::string::npos != last_slash_idx) {
@@ -459,6 +469,18 @@ static std::string rx_strip_filename(std::string path) {
   return directory;
 }
 
+static std::string rx_strip_dir(std::string path) {
+  std::string filename;;
+  path = rx_string_replace(path, '\\', '/');
+  path = rx_string_replace(path, "//", "/");
+  const size_t last_slash_idx = path.rfind('/');
+
+  if(std::string::npos != last_slash_idx) {
+    filename = path.substr(last_slash_idx + 1, path.size());
+  }
+
+  return filename;
+}
 
 static bool rx_create_dir(std::string path) {
 #ifdef _WIN32

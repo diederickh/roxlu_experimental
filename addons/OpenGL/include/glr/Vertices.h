@@ -11,6 +11,7 @@
 #ifndef ROXLU_VERTICES_H
 #define ROXLU_VERTICES_H
 
+#include <assert.h>
 #include <vector>
 
 namespace gl {
@@ -30,6 +31,8 @@ namespace gl {
     bool mustAllocate(size_t& bytesToAllocate);                /* use this when you'e working with a VBO. it returns true and sets the bytesToAllocate to the number of bytes needed on the gpu, but clamped at a fixed page size. So the bytesAllocated might be bigger then the number of bytes used. */
     bool hasChanged();                                         /* returns true when we need to update */
     void unsetHasChanged();                                    /* after you've updated the things you need, call this to make super you won't keep updating */
+
+    T& operator[](size_t dx);                                  /* returns a reference tothe T element at location dx */
 
     /* iterators */
     typename std::vector<T>::iterator begin();
@@ -128,6 +131,14 @@ namespace gl {
   template<class T>
     typename std::vector<T>::iterator Vertices<T>::end() {
     return vertices.end();
+  }
+
+  template<class T>
+    inline T& Vertices<T>::operator[](size_t dx) {
+    
+    assert(dx < size());
+    
+    return vertices[dx];
   }
 
 } // gl

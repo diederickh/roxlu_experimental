@@ -45,8 +45,9 @@ namespace gl {
     shader_tex.link();
 
     shader_immediate.create(GL_VS_CP, GL_FS_CP); 
-    shader_immediate.bindAttribLocation("a_col", 0);
-    shader_immediate.bindAttribLocation("a_pos", 1);
+    shader_immediate.bindAttribLocation("a_col", 2);
+    shader_immediate.bindAttribLocation("a_pos", 0);
+
     shader_immediate.link();
     
     setupShader(shader_p);
@@ -103,7 +104,7 @@ namespace gl {
 
     shader_tex.use();
     shader_tex.setModelMatrix(texture_mesh->model_matrix.getPtr());
-    shader_tex.activateTexture(tex, GL_TEXTURE0);
+    shader_tex.activeTexture(tex, GL_TEXTURE0);
     
     texture_mesh->bind();
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -258,6 +259,11 @@ namespace gl {
     glr_context->setViewMatrix(vm);
   }
 
+  const float* glr_get_orthographic_matrix() {
+    assert(glr_context);
+    return glr_context->ortho_matrix.getPtr();
+  }
+
   void glr_draw_circle(float x, float y, float radius) {
     assert(glr_context);
     glr_context->drawCircle(x, y, radius);
@@ -288,6 +294,10 @@ namespace gl {
     glr_context->color(color);
   }
 
+  void glr_color(float r, float g, float b, float a) {
+    glr_color(Vec4(r,g,b,a));
+  }
+
   void glr_vertex(Vec3 position) {
     assert(glr_context);
     glr_context->vertex(position);
@@ -301,6 +311,11 @@ namespace gl {
   Shader& glr_get_shader_np() {
     assert(glr_context);
     return glr_context->shader_np;
+  }
+
+  Shader& glr_get_shader_pt() {
+    assert(glr_context);
+    return glr_context->shader_pt;
   }
 
   Drawer* glr_context = NULL;

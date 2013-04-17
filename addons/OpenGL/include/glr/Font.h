@@ -21,6 +21,10 @@ namespace gl {
 
 #endif
 
+#ifndef ROXLU_OPENGL_FONT_H
+#define ROXLU_OPENGL_FONT_H
+
+
 #define STB_FONT_consolas_14_usascii_BITMAP_WIDTH         128
 #define STB_FONT_consolas_14_usascii_BITMAP_HEIGHT         68
 #define STB_FONT_consolas_14_usascii_BITMAP_HEIGHT_POW2   128
@@ -168,7 +172,7 @@ namespace gl {
   //    data: NULL or specified size
   //    height: STB_FONT_consolas_14_usascii_BITMAP_HEIGHT or STB_FONT_consolas_14_usascii_BITMAP_HEIGHT_POW2
   //    return value: spacing between lines
-  static void stb_font_consolas_14_usascii(stb_fontchar font[STB_FONT_consolas_14_usascii_NUM_CHARS],
+  static void stb_font_consolas_14_usascii(gl::stb_fontchar font[STB_FONT_consolas_14_usascii_NUM_CHARS],
                                            unsigned char data[STB_FONT_consolas_14_usascii_BITMAP_HEIGHT][STB_FONT_consolas_14_usascii_BITMAP_WIDTH],
                                            int height)
   {
@@ -234,9 +238,6 @@ namespace gl {
 #endif
     
   // ---------------------------------------------------------
-
-#ifndef ROXLU_OPENGL_FONT_H
-#define ROXLU_OPENGL_FONT_H
 
 #include <roxlu/opengl/GL.h>
 #include <string>

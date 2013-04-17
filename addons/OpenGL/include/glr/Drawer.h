@@ -170,8 +170,6 @@ namespace gl {
     gl::Shader shader_p;                                                               /* shader for VertexP types; positions */
     gl::Shader shader_pt;                                                              /* shader for VertexPT types; positions, texture coordinates */
     gl::Shader shader_np;                                                              /* shader for VertexNP types: normals, position */
-
-  private:
     gl::Shader shader_tex;                                                             /* shader used for drawing textures */
     gl::Shader shader_immediate;                                                       /* shader used for immediate drawing (vertex(), color(), begin(), end(), draw()) */
 
@@ -199,6 +197,7 @@ namespace gl {
 
   void glr_set_view_matrix(const float* vm);                                           /* set the view matrix of the stock shaders: shader_p, shader_pt, etc... see `Drawer::setViewMatrix()` */
   void glr_set_projection_matrix(const float* pm);                                     /* set the projection matrix of the stock shaders: shader_p, shader_pt, etc... see `Drawer::setProjectionMatrix()` */
+  const float* glr_get_orthographic_matrix();                                          /* returns a pointer to the stock orthographic projection matrix */
 
   void glr_draw_circle(float x, float y, float radius);                                /* draw a radius at x/y with the given radius */
   void glr_draw_rectangle(float x, float y, float w, float h);                         /* draw a  rectangle at top left x/y and w/h */
@@ -208,10 +207,13 @@ namespace gl {
 
   void glr_begin(GLenum mode);                                                         /* immediate mode: begin a vertex sequence */
   void glr_color(Vec4 color);                                                          /* immediate mode: set the color for the next vertex */
+  void glr_color(float r = 1.0f, float g = 1.0f, float b = 1.0f, float a = 1.0);       /* immediate mode: set color */
   void glr_vertex(Vec3 position);                                                      /* immediate mode: end the current sequence of vertices */
   void glr_end();                                                                      /* immediate mode: this will draw the current sequence */
 
   Shader& glr_get_shader_np();                                                         /* returns the stock shader for: normals + position, vertex meshes */
+  Shader& glr_get_shader_pt();                                                         /* returns the stock shader for: position + texcoord, vertex meshes */
+
   extern Drawer* glr_context; 
 
 } // gl

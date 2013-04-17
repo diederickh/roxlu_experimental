@@ -104,6 +104,10 @@ namespace gl {
   void Shader::bindAttribLocation(std::string attrib, GLuint index) {
     attributes[attrib] = index;
   }
+  
+  GLint Shader::getUniformLocation(std::string uni) {
+    return glGetUniformLocation(prog, uni.c_str());
+  }
 
   bool Shader::link() {
     if(!vert_id || !frag_id) {
@@ -141,7 +145,9 @@ namespace gl {
   }
 
 
-  void Shader::activateTexture(Texture& tex, GLenum unit) {
+  void Shader::activeTexture(Texture& tex, GLenum unit) {
+    assert(prog);
+
     if(unit == GL_TEXTURE0 && u_tex0 == -1) {
       RX_ERROR(ERR_GL_SH_NO_UNI_TEX, 0);
       return;
@@ -160,7 +166,7 @@ namespace gl {
     }
 
     use();
-
+    
     glActiveTexture(unit);
     tex.bind();
 
@@ -176,6 +182,28 @@ namespace gl {
     else if(unit == GL_TEXTURE3) {
       glUniform1i(u_tex3, 3);
     }
+  }
+  
+  void Shader::activeTexture(Texture& tex, GLenum unit, GLint uniform) {
+    assert(prog);
+      
+    glActiveTexture(unit);
+    tex.bind();
+
+    switch(unit) {
+      case GL_TEXTURE0: glUniform1i(uniform, 0); break;
+      case GL_TEXTURE1: glUniform1i(uniform, 1); break;
+      case GL_TEXTURE2: glUniform1i(uniform, 2); break;
+      case GL_TEXTURE3: glUniform1i(uniform, 3); break;
+      case GL_TEXTURE4: glUniform1i(uniform, 4); break;
+      case GL_TEXTURE5: glUniform1i(uniform, 5); break;
+      case GL_TEXTURE6: glUniform1i(uniform, 6); break;
+      default: {
+        RX_ERROR(ERR_GL_SH_UNSUPPORTED_TEXUNIT);
+        break;
+      }
+    }
+
   }
 
   void Shader::print() {

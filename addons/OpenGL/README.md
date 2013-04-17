@@ -79,8 +79,9 @@ array for vertices.
 
 Wrapper around a `Vertex Array`. Based on the given type, it will enable the vertex attributes
 that apply to the type. We assume the attribute locations and sizes are described above in _Standards_.
-The VAO is not coupled with any other object, but you **need to** make sure that a **VBO** is currently
-bound.
+The standard VAO implementation can set the correct vertex attributes for all of the vertex types as 
+found in `Vertex.h`. If you want to use a custom vertex types, see the section `Customizing the vertex attributes`
+below.
 
 
 ### VBO ###
@@ -132,3 +133,51 @@ Drawing shapes:
 - `glr_draw_rectangle(x, y, w, h)`
 - `glr_fill()`
 - `glr_nofill()`
+
+
+Customizing the vertex attributes
+----------------------------------
+
+Although we're stuck to the vertex attribute positions you can still make sure of 
+all the features the openGL addon provides such as VBO and VAO handling. Because 
+most of the types are templated you can easily extend it with custom vertex types.
+
+The only thing you need to do when you want to make use of the `VAO`/`VBO`/`Mesh`/etc.. 
+classes is to create a function that will setup the VAO attributes, and bind the 
+attributes in your custom shader to the standard positions.
+
+_Bind attributes with custom shader_
+
+````c++
+
+// Shader setup: binds the attribute location
+// See the `a_my_own_attrib` which is used for somethin custom
+shader.create(STROKE_VS, STROKE_FS);
+shader.bindAttribLocation("a_pos", 0);
+shader.bindAttribLocation("a_col", 3);
+shader.bindAttribLocation("a_tex", 1);
+shader.bindAttribLocation("a_my_own_attrib", 10);
+ shader.link();
+
+````
+
+The `VAO<T>` object, which indirectly used by the `Mesh<T>` type, will call a function, 
+called: `glr_vao_enable_attributes(VBO<T>& vbo)`. When called you can assume that the 
+VBO is already bound, so you only need to setup the attributes.
+
+
+
+_Setup VAO_
+
+````c++
+  inline void glr_vao_enable_attributes(VBO<StrokeVertex>& vbo) {
+    glEnableVertexAttribArray(0); // pos
+    glEnableVertexAttribArray(1); // tex
+    glEnableVertexAttribArray(3); // color
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(StrokeVertex), (GLvoid*)0); // pos
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(StrokeVertex), (GLvoid*)8); // tex
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(StrokeVertex), (GLvoid*)16); // col
+  }
+
+````
+

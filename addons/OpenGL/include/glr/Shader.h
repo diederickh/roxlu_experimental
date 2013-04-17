@@ -20,6 +20,7 @@
 #define ERR_GL_SH_NO_UNI_MM "Cannot find the model matrix. Make sure the shader has a `mat4 u_mm`"
 #define ERR_GL_SH_NO_UNI_TEX "Cannot find the texture sampler for texture unit: %d, make sure to call the samples `u_tex%d` in your shader"
 #define ERR_GL_SH_NO_VERT_OR_FRAG "Cannot find a correct vertex or fragment shader; did you call `load()` or `create()` "
+#define ERR_GL_SH_UNSUPPORTED_TEXUNIT "The given texture unit id is not supported"
 
 namespace gl {
 
@@ -38,12 +39,15 @@ namespace gl {
     void unuse();                                                                                 /* deactivate all shaders; in a correct GL application, you shouldn't need to call this; */
 
     void bindAttribLocation(std::string attrib, GLuint index);                                    /* bind attrib location, must be called before you call 'link' */
+    GLint getUniformLocation(std::string uni);                                                    /* get the uniform location for the given uniform name, make sure that you have called `use()` before calling this */
 
     void setProjectionMatrix(const float* pm);
     void setViewMatrix(const float* pm);
     void setModelMatrix(const float* mm);
 
-    void activateTexture(Texture& tex, GLenum unit);                                              /* activates the texture unit and test the correct uniform value */
+    void activeTexture(Texture& tex, GLenum unit);                                                /* you must follow the standards with this: activates the texture unit and test the correct uniform value; */
+    void activeTexture(Texture& tex, GLenum unit, GLint uniform);                                 /* custom textures: activates the texture unit and for the given uniform id  */
+
     void print();
 
   public:
@@ -67,7 +71,7 @@ namespace gl {
       RX_ERROR(ERR_GL_SH_NOT_CREATED);
       return;
     }
-
+    
     glUseProgram(prog);
   }
 

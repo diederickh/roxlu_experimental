@@ -106,8 +106,6 @@ bool TGA::load(string filepath, bool datapath) {
     filepath = rx_to_data_path(filepath);
   }
 
-  RX_VERBOSE("Loading: %s", filepath.c_str());
-
 	std::ifstream ifs;
 	ifs.open(filepath.c_str(), std::ios::binary | std::ios::ate);
 	if(!ifs.is_open()) {

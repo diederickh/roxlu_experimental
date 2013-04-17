@@ -3,6 +3,8 @@
 
 namespace gl {
 
+#if 0
+
   VAO::VAO()
     :id(0)
   {
@@ -56,11 +58,11 @@ namespace gl {
   void VAO::enableAttributes(VBO<VertexCP>& vbo) {
     bind();
     vbo.bind();
-    RX_ERROR("WE NEED TO TEST THIS!!! - POS MUST BE ON 0 and col on 2 !! see reamde");
-    glEnableVertexAttribArray(0); // col
-    glEnableVertexAttribArray(1); // pos
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(VertexCP), (GLvoid*)0); // col
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexCP), (GLvoid*)16); // pos
+
+    glEnableVertexAttribArray(0); // pos
+    glEnableVertexAttribArray(2); // col
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexCP), (GLvoid*)16); // pos
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(VertexCP), (GLvoid*)0); // col
 
     vbo.unbind();
     unbind();
@@ -92,5 +94,7 @@ namespace gl {
   void VAO::unbind() {
     glBindVertexArray(0);
   }
+
+#endif
 
 } // gl

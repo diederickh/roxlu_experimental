@@ -34,7 +34,7 @@ namespace gl {
                    GLenum format, 
                    GLenum type);
 
-
+    
     void draw(float x, float y, float w = 0, float h = 0);
     unsigned int getWidth();                                                   /* returns the height as found when loading the image, or set when calling setPixels() */
     unsigned int getHeight();                                                  /* returns the width as found when loading the image, or set when calling setPixels() */

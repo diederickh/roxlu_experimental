@@ -39,10 +39,12 @@ namespace gl {
 
     void bind();                                                  /* bind the mesh.. or actually the VAO */
     void unbind();                                                /* unbind the mesh... or actually the VAO */
+
+    T& operator[](size_t dx);                                     /* retrieve the T element at the given location */
     
   public:
     VBO<T> vbo;
-    VAO vao;
+    VAO<T> vao;
     Mat4 model_matrix;
     bool is_bound;
     bool is_setup;
@@ -108,7 +110,9 @@ namespace gl {
   template<class T>
     inline void Mesh<T>::update() {
 
-    assert(vbo.size());
+    if(!vbo.size()) {
+      return;
+    }
 
     if(!is_setup) {
       RX_ERROR(ERR_GL_MS_NOT_SETUP);
@@ -181,14 +185,18 @@ namespace gl {
     model_matrix.setScale(s); 
   }
 
-
   template<class T>
     inline Mat4& Mesh<T>::mm() {
 
     return model_matrix;
   }
 
+  template<class T>
+    inline T& Mesh<T>::operator[](size_t dx) {
 
+    assert(dx < size());
 
+    return vbo[dx];
+  }
 } // gl
 #endif
