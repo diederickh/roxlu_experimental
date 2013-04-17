@@ -14,7 +14,9 @@ TGA::TGA()
 {
 }
 
-TGA::TGA(const TGA& other) {
+TGA::TGA(const TGA& other) 
+  :pixels(NULL)
+{
   clone(other);
 }
 
@@ -103,8 +105,6 @@ bool TGA::load(string filepath, bool datapath) {
   if(datapath) {
     filepath = rx_to_data_path(filepath);
   }
-
-  RX_VERBOSE("Loading: %s", filepath.c_str());
 
 	std::ifstream ifs;
 	ifs.open(filepath.c_str(), std::ios::binary | std::ios::ate);

@@ -7,4 +7,7 @@
 #include <glr/VAO.h>
 #include <glr/Mesh.h>
 #include <glr/Font.h>
+#include <glr/Camera.h>
+#include <io/OBJ.h>
+
 

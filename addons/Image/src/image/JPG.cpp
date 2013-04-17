@@ -105,7 +105,6 @@ void JPG::print() {
 
 void JPG::clear() {
   if(pixels) {
-    RX_VERBOSE("~JPG - deleting pixels");
     delete[] pixels;
     pixels = NULL;
   }

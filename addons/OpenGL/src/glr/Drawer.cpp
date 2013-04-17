@@ -25,13 +25,34 @@ namespace gl {
     }
 
     // SHADERS
-    shader_p.create(GL_VS_P, GL_FS_P, VERTEX_P);
-    shader_pt.create(GL_VS_PT, GL_FS_PT, VERTEX_PT);
-    shader_tex.create(GL_VS_PT, GL_FS_PT, VERTEX_PT);
-    shader_immediate.create(GL_VS_CP, GL_FS_CP, VERTEX_CP);
+    shader_p.create(GL_VS_P, GL_FS_P); 
+    shader_p.bindAttribLocation("a_pos", 0);
+    shader_p.link();
 
+    shader_pt.create(GL_VS_PT, GL_FS_PT);
+    shader_pt.bindAttribLocation("a_pos", 0);
+    shader_pt.bindAttribLocation("a_tex", 1);
+    shader_pt.link();
+
+    shader_np.create(GL_VS_NP, GL_FS_NP);
+    shader_np.bindAttribLocation("a_pos", 0);
+    shader_np.bindAttribLocation("a_norm", 3);
+    shader_np.link();
+
+    shader_tex.create(GL_VS_PT, GL_FS_PT); 
+    shader_tex.bindAttribLocation("a_pos", 0);
+    shader_tex.bindAttribLocation("a_tex", 1);
+    shader_tex.link();
+
+    shader_immediate.create(GL_VS_CP, GL_FS_CP); 
+    shader_immediate.bindAttribLocation("a_col", 2);
+    shader_immediate.bindAttribLocation("a_pos", 0);
+
+    shader_immediate.link();
+    
     setupShader(shader_p);
     setupShader(shader_pt);
+    setupShader(shader_np);
     setupShader(shader_tex);
     setupShader(shader_immediate);
 
@@ -39,7 +60,7 @@ namespace gl {
     float tw = 1.0f;
     float th = 1.0f;
     texture_mesh = new Mesh<VertexPT>();
-    texture_mesh->setup(GL_STATIC_DRAW, VERTEX_PT);
+    texture_mesh->setup(GL_STATIC_DRAW);
     texture_mesh->push_back(VertexPT(Vec3(0.0f,   th),  Vec2(0.0f, 1.0f)) );
     texture_mesh->push_back(VertexPT(Vec3(tw,     th),  Vec2(1.0f, 1.0f)) );
     texture_mesh->push_back(VertexPT(Vec3(tw,   0.0f),  Vec2(1.0f, 0.0f)) );
@@ -49,7 +70,7 @@ namespace gl {
     texture_mesh->update();
 
     immediate_mesh = new Mesh<VertexCP>();
-    immediate_mesh->setup(GL_STREAM_DRAW, VERTEX_CP);
+    immediate_mesh->setup(GL_STREAM_DRAW); 
 
     // SHAPES
     int circle_resolution = 64;
@@ -83,7 +104,7 @@ namespace gl {
 
     shader_tex.use();
     shader_tex.setModelMatrix(texture_mesh->model_matrix.getPtr());
-    shader_tex.activateTexture(tex, GL_TEXTURE0);
+    shader_tex.activeTexture(tex, GL_TEXTURE0);
     
     texture_mesh->bind();
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -96,6 +117,7 @@ namespace gl {
     shader_p.use();
     mesh.bind();
     mesh.update();
+    shader_p.setModelMatrix(mesh.mm().getPtr());
     glDrawArrays(mode, first, count);
     mesh.unbind();
     shader_p.unuse();
@@ -105,11 +127,36 @@ namespace gl {
     shader_pt.use();
     mesh.bind();
     mesh.update();
+    shader_pt.setModelMatrix(mesh.mm().getPtr());
     glDrawArrays(mode, first, count);
     mesh.unbind();
     shader_pt.unuse();
   }
 
+  void Drawer::drawArrays(Mesh<VertexNP>& mesh, GLenum mode, GLint first, GLsizei count) {
+    shader_np.use();
+    mesh.bind();
+    mesh.update();
+    shader_np.setModelMatrix(mesh.mm().getPtr());
+    glDrawArrays(mode, first, count);
+    mesh.unbind();
+    shader_np.unuse();
+  }
+
+
+  // MATRICES
+  // ---------------------------------------------------
+  void Drawer::setProjectionMatrix(const float* pm) {
+    shader_p.setProjectionMatrix(pm);
+    shader_pt.setProjectionMatrix(pm);
+    shader_np.setProjectionMatrix(pm);
+  }
+
+  void Drawer::setViewMatrix(const float* vm) {
+    shader_p.setViewMatrix(vm);
+    shader_pt.setViewMatrix(vm);
+    shader_np.setViewMatrix(vm);
+  }
 
   void Drawer::createOrthographicMatrix() {
     ortho_matrix.orthoTopLeft(window_w, window_h, 0.0f, 100.0f);
@@ -202,6 +249,21 @@ namespace gl {
     glr_font.init();
   }
 
+  void glr_set_projection_matrix(const float* pm) {
+    assert(glr_context);
+    glr_context->setProjectionMatrix(pm);
+  }
+
+  void glr_set_view_matrix(const float* vm) {
+    assert(glr_context);
+    glr_context->setViewMatrix(vm);
+  }
+
+  const float* glr_get_orthographic_matrix() {
+    assert(glr_context);
+    return glr_context->ortho_matrix.getPtr();
+  }
+
   void glr_draw_circle(float x, float y, float radius) {
     assert(glr_context);
     glr_context->drawCircle(x, y, radius);
@@ -232,6 +294,10 @@ namespace gl {
     glr_context->color(color);
   }
 
+  void glr_color(float r, float g, float b, float a) {
+    glr_color(Vec4(r,g,b,a));
+  }
+
   void glr_vertex(Vec3 position) {
     assert(glr_context);
     glr_context->vertex(position);
@@ -240,6 +306,16 @@ namespace gl {
   void glr_end() {
     assert(glr_context);
     glr_context->end();
+  }
+
+  Shader& glr_get_shader_np() {
+    assert(glr_context);
+    return glr_context->shader_np;
+  }
+
+  Shader& glr_get_shader_pt() {
+    assert(glr_context);
+    return glr_context->shader_pt;
   }
 
   Drawer* glr_context = NULL;

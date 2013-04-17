@@ -46,6 +46,7 @@ namespace roxlu {
 
       size_t size();                         /* the number of points */
       void clear();                          /* remove all points */
+      float length();                        /* get the length of the polyline */
       T at(float t);                         /* interpolate using catmull rom */
       T get(float t);                        /* get a point which is exactly on the line, at this time step, t is between 0 and 1 */
       void add(const T point);
@@ -87,6 +88,24 @@ namespace roxlu {
   }
   
   template<class T>
+    inline float Spline<T>::length() {
+    float l = 0.0f;
+    for(size_t i = 0; i < points.size() - 1; ++i) {
+      T a = points[i];
+      T b = points[i + 1];
+      l += (b - a).length();
+    }
+    return l;
+  }
+
+  // get the position at the line using linear interpolation
+  // this will only work for vector classes! If you have a long
+  // line and you want to divide it in equal parts you can use this
+  // function to get the correct position on the line. 
+  //
+  // `t = 0` means the start of the line
+  // `t = 1` means end of the line
+  template<class T>
    inline T Spline<T>::get(float t) {
 
     if(!points.size()) {
@@ -99,29 +118,47 @@ namespace roxlu {
 
     if(t > 0.9999f) {
       t = 1.0f;
+      return points.back();
     }
 
     if(t < 0.0f) {
       t = 0.0f;
     }
 
-    float curve_p = t * (points.size()-1);
-    int curve_num = curve_p;
-    t = curve_p - curve_num; // local t (mu)
+    // -------
+    float line_length = length();
+    float curr_l = 0.0;
+    float sample_at = line_length * t;
+    float curr_dist = 0;
+    float prev_dist = 0;
+    size_t start_dx = 0;
+    size_t end_dx = 0;
 
-    int b = curve_num;
-    int a = b - 1;
+    for(size_t i = 0; i < points.size()-1; ++i) {
+      T a = points[i];
+      T b = points[i + 1];
+      curr_l = (b-a).length();
+      curr_dist += curr_l;
+      start_dx = i;
+      end_dx = i + 1;
 
-    if(points.size() > 2) {
-      int c = b + 1;
-      T dir = points[c] - points[b];
-      return points[b] + dir * t;
+      if(curr_dist >= sample_at) {
+        break;
+      }
+      prev_dist = curr_dist;
     }
-    else {
-      T dir = points[b] - points[a];
-      return points[a] + dir * t;
+
+
+    T segment_start = points[start_dx];
+    T segment_end = points[end_dx];
+    float segment_length = sample_at - prev_dist;
+    T segment_dir = (segment_end - segment_start).normalize();
+    if(segment_length <= 0.01) {
+      return segment_start;
     }
 
+    T result = segment_start + segment_dir * segment_length;
+    return result;
   }
 
   template<class T>

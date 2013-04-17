@@ -210,7 +210,6 @@ macro(roxlu_install_app)
 
   target_link_libraries(${roxlu_app_name} ${roxlu_libs} ${roxlu_dylibs})
 
-
   install(TARGETS ${roxlu_app_name} DESTINATION ${roxlu_app_install_dir})
   install(FILES ${roxlu_install_files} DESTINATION ${roxlu_app_install_dir})
 
@@ -318,7 +317,7 @@ set(roxlu_core_sources
 )
 
 set(roxlu_experimental_sources 
-  ${roxlu_src_dir}/experimental/Image.cpp
+#  ${roxlu_src_dir}/experimental/Image.cpp
 #  ${roxlu_src_dir}/experimental/StereoCam.cpp
   ${roxlu_src_dir}/experimental/DebugDrawer.cpp
 #  ${roxlu_src_dir}/experimental/Tweens.cpp
@@ -336,7 +335,7 @@ set(roxlu_io_sources
   ${roxlu_src_dir}/io/RingBuffer.cpp
   ${roxlu_src_dir}/io/INI.cpp
   ${roxlu_src_dir}/io/File.cpp
-  ${roxlu_src_dir}/io/OBJ.cpp
+#  ${roxlu_src_dir}/io/OBJ.cpp
 )
 
 set(roxlu_math_sources 

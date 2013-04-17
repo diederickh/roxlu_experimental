@@ -1,6 +1,7 @@
 #ifndef ROXLU_OPENGL_VBO_H
 #define ROXLU_OPENGL_VBO_H
 
+#include <assert.h>
 #include <roxlu/core/Log.h>
 #include <glr/Vertices.h>
 #include <glr/Vertex.h>
@@ -26,6 +27,8 @@ namespace gl {
     void push_back(T vertex);
     void clear();
     size_t size();
+
+    T& operator[](size_t dx);                          /* retrieve the vertex stored at dx */
 
   public:
    Vertices<T> vertices;                               /* the vertices */
@@ -132,6 +135,14 @@ namespace gl {
     inline void VBO<T>::clear() {
 
     return vertices.clear();
+  }
+
+  template<class T>
+    inline T& VBO<T>::operator[](size_t dx) {
+
+    assert(dx < size());
+
+    return vertices[dx];
   }
 
 } // gl
