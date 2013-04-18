@@ -1,5 +1,6 @@
 #include <glr/Shader.h>
 #include <glr/Texture.h>
+#include <roxlu/opengl/Error.h>
 
 namespace gl {
 
@@ -124,7 +125,7 @@ namespace gl {
       glBindAttribLocation(prog, it->second, it->first.c_str());
     }
     
-    glLinkProgram(prog);
+    glLinkProgram(prog); eglGetShaderLinkLog(prog);
 
     glDeleteShader(vert_id);
     glDeleteShader(frag_id);

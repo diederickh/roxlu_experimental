@@ -129,7 +129,7 @@ namespace gl {
     switch(f) {
       case GL_RGB: return "GL_RGB";
       case GL_RGBA: return "GL_RGBA";
-      case GL_R: return "GL_R";
+      case GL_RED: return "GL_RED";
       default: return "UNKNOWN";
     }; 
   }

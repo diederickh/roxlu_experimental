@@ -6,28 +6,49 @@
 #
 # General variables
 # -----------------
-# - roxlu_platform_lib_dir:  Used to create a per platform path for libraries.
-#                            "vs2012/" "vs2010/" (including slash)
-# - roxlu_platform:          String like "linux", "win", "mac"
-# - roxlu_install_files:     Files you want to move to the install directory
-#                            for example with ROXLU_WIN_LIB_DYNAMIC is set to TRUE
-#                            you might want to copy the DLL files to the install dir.
-# - roxlu_libs:              If you need to link with additional libraries you can 
-#                            add them to this collection.
-# - roxlu_extern_lib_dir:    path to the "extern/lib/[OS]/[platform/compiler]/[arch]/ 
-#                            so you can directly use something like:
-#                            ${roxlu_extern_lib_dir}/libportaudio.a to target libraries.
-# - roxlu_extern_lib_debug_dir: point to the debug version of the libs: adds a 'd' after 
-#                               ${roxlu_extern_lib_dir}
-# - roxlu_extern_bin_dir:    Mostly used on windows to get a path to the DLL files
-# - roxlu_extern_src_dir:    For libraries we compile from src
-# - roxlu_win_runtime:       For windows builds this is set to MT, MD so you know 
-#                            what libraries to link against. Because we're not building
-#                            all debug libraries for windows, we have a separate setting
-#                            that you can use:
-# - roxlu_win_runtime_project: This is set to MDd for a debug build, you can use this to
-#                              include debug libs on windows.
-
+# - roxlu_platform_lib_dir:                           Used to create a per platform path for libraries.
+#                                                     "vs2012/" "vs2010/" (including slash)
+#
+# - roxlu_platform:                                   String like "linux", "win", "mac"
+#
+# - roxlu_install_files:                              Files you want to move to the install directory
+#                                                     for example with ROXLU_WIN_LIB_DYNAMIC is set to TRUE
+#                                                     you might want to copy the DLL files to the install dir.
+# - roxlu_libs:                                       If you need to link with additional libraries you can 
+#                                                     add them to this collection.
+#
+# - roxlu_extern_lib_dir:                             path to the "extern/lib/[OS]/[platform/compiler]/[arch]/ 
+#                                                     so you can directly use something like:
+#                                                     ${roxlu_extern_lib_dir}/libportaudio.a to target libraries.
+#
+# - roxlu_extern_lib_debug_dir:                       point to the debug version of the libs: adds a 'd' after 
+#                                                     ${roxlu_extern_lib_dir}
+#
+# - roxlu_extern_bin_dir:                             Mostly used on windows to get a path to the DLL files
+#
+# - roxlu_extern_src_dir:                             For libraries we compile from src
+#
+# - roxlu_win_runtime:                                For windows builds this is set to MT, MD so you know 
+#                                                     what libraries to link against. Because we're not building
+#                                                     all debug libraries for windows, we have a separate setting
+#                                                     that you can use:
+#
+# - roxlu_win_runtime_project:                        This is set to MDd for a debug build, you can use this to
+#                                                     include debug libs on windows.
+#
+#
+# Macros
+# ------
+# roxlu_add_addon(name)                               Adds a new addon to your projects; adds source files, include
+#                                                     directories and makes sure your executable is linked with all 
+#                                                     the necessary libraries
+#
+# roxlu_addon_add_dependency(name)                    Some addons need other addons to work. For example the OpenGL
+#                                                     addon needs the Image addon to load images. The CMakeLists.txt
+#                                                     of the OpenGL addon will add an dependency for the Image addon
+#                                                     so that the image addon is include in the build automatically.                       
+#
+#
 cmake_minimum_required(VERSION 2.8)
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
@@ -139,6 +160,13 @@ endmacro(roxlu_enable_opengl)
 # --------------------------------------------------------------------------------
 
 macro(roxlu_app_initialize app_name)
+  list(LENGTH roxlu_addon_dependencies roxlu_addon_dependencies_count)
+  math(EXPR roxlu_addon_dependencies_iter ${roxlu_addon_dependencies_count}-1)
+
+  foreach(i RANGE ${roxlu_addon_dependencies_iter})
+    list(GET roxlu_addon_dependencies ${i} roxlu_dependent_addon)
+    roxlu_add_addon(${roxlu_dependent_addon})
+  endforeach(i)
 
   if(CMAKE_BUILD_TYPE STREQUAL Debug)
     set(roxlu_app_name ${app_name}_debug)
@@ -246,8 +274,6 @@ macro(roxlu_addon_begin name)
   set(roxlu_addon_include_dir ${roxlu_addon_base_dir}/include/)
   set(roxlu_addon_src_dir ${roxlu_addon_base_dir}/src/)
   include_directories(${roxlu_addon_include_dir})
-  message(${roxlu_addon_include_dir})
-
 endmacro()
 
 macro(roxlu_addon_add_source_file file)
@@ -269,6 +295,10 @@ endmacro()
 macro(roxlu_addon_add_source_files glob) 
   file(GLOB_RECURSE addon_source_files ${roxlu_addon_src_dir}/*.cpp)
   list(APPEND roxlu_addon_source_files ${addon_source_files})
+endmacro()
+
+macro(roxlu_addon_add_dependency addon)
+  list(APPEND roxlu_addon_dependencies ${addon})
 endmacro()
 
 macro(roxlu_addon_end)

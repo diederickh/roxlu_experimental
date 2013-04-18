@@ -44,7 +44,7 @@ struct CommandLineOption {
   std::string getExtension(int index = 0);                                            /* used for CL_TYPE_FILE, returns the extension of the file passed from the command line */
   double getDouble(int index = 0);                                                    /* used for CL_TYPE_DOUBLE, returns the double value */
   int getInt(int index = 0);                                                          /* used for CL_TYPE_INTEGER, returns the given integer value */
-  bool isset();                                                                       /* used for CL_TYPE_LIT, check if the flag has been passed to the application */
+  bool isSet();                                                                       /* used for CL_TYPE_LIT, check if the flag has been passed to the application */
 
   CommandLineOptionType type;                                                         /* the type of this option, internally used to check if we can return the the values asked.. */
   void* arg;                                                                          /* pointer to the argtable2 type */ 
@@ -55,42 +55,42 @@ class CommandLineOptions {
   CommandLineOptions();
   ~CommandLineOptions();
 
-  CommandLineOption* addString(char* shortflag,                                       /* add a string option */
-                               char* longflag = NULL, 
-                               char* message = NULL, 
+  CommandLineOption* addString(const char* shortflag,                                       /* add a string option */
+                               const char* longflag = NULL, 
+                               const char* message = NULL, 
                                CommandLineNumArguments num = CL_ZERO_OR_ONCE,
                                int mincount = 1,
                                int maxcount = 5);
 
-  CommandLineOption* addFlag(char* shortflag,                                        /* add a basic flag to enable/disable different parts in your application */
-                               char* longflag = NULL, 
-                               char* message = NULL, 
+  CommandLineOption* addFlag(const char* shortflag,                                        /* add a basic flag to enable/disable different parts in your application */
+                             const char* longflag = NULL, 
+                             const char* message = NULL, 
+                             CommandLineNumArguments num = CL_ZERO_OR_ONCE,
+                             int mincount = 1,
+                             int maxcount = 5);
+
+
+  CommandLineOption* addDouble(const char* shortflag,                                       /* add a double type */
+                               const char* longflag = NULL, 
+                               const char* message = NULL, 
                                CommandLineNumArguments num = CL_ZERO_OR_ONCE,
                                int mincount = 1,
                                int maxcount = 5);
 
-
-  CommandLineOption* addDouble(char* shortflag,                                       /* add a double type */
-                               char* longflag = NULL, 
-                               char* message = NULL, 
-                               CommandLineNumArguments num = CL_ZERO_OR_ONCE,
-                               int mincount = 1,
-                               int maxcount = 5);
-
-  CommandLineOption* addInt(char* shortflag,                                          /* add an integer option */
-                            char* longflag = NULL, 
-                            char* message = NULL, 
+  CommandLineOption* addInt(const char* shortflag,                                          /* add an integer option */
+                            const char* longflag = NULL, 
+                            const char* message = NULL, 
                             CommandLineNumArguments num = CL_ZERO_OR_ONCE,
                             int mincount = 1,
                             int maxcount = 5);
 
 
-  CommandLineOption* addFile(char* shortflag,                                         /* add a file, so you can get the full path, extension and base name */
-                            char* longflag = NULL, 
-                            char* message = NULL, 
-                            CommandLineNumArguments num = CL_ZERO_OR_ONCE,
-                            int mincount = 1,
-                            int maxcount = 5);
+  CommandLineOption* addFile(const char* shortflag,                                         /* add a file, so you can get the full path, extension and base name */
+                             const char* longflag = NULL, 
+                             const char* message = NULL, 
+                             CommandLineNumArguments num = CL_ZERO_OR_ONCE,
+                             int mincount = 1,
+                             int maxcount = 5);
 
 
   bool parse(int argc, char* argv[]);                                                 /* parse arguments passed to you application */

@@ -24,12 +24,12 @@ int main(int argc, char* argv[]) {
   cmo.print();
 
   // Check if the flag is given: ./this_file -v
-  if(verbose->isset()) {
+  if(verbose->isSet()) {
     printf("> Verbose option is set.\n");
   }
 
   printf("> Number of double values: %d\n", double_value->count());
-  if(double_value->isset()) {
+  if(double_value->isSet()) {
     printf("> Double value: %f\n", double_value->getDouble());
   }
 

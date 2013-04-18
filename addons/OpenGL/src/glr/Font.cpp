@@ -2,7 +2,7 @@
 
 namespace gl {
 
-void glr_draw_string(const std::string& str, float x, float y, float r, float g, float b) {
+void glr_draw_string(const ::std::string& str, float x, float y, float r, float g, float b) {
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -11,7 +11,7 @@ void glr_draw_string(const std::string& str, float x, float y, float r, float g,
   size_t to_allocate = str.size() * sizeof(float) * 4 * 6; // 4-floats per vertex, 6 floats (two tris) per char
   if(to_allocate > glr_font.allocated) {
     while(glr_font.allocated < to_allocate) {
-      glr_font.allocated = std::max<size_t>(glr_font.allocated * 2, 4096);
+      glr_font.allocated = ::std::max<size_t>(glr_font.allocated * 2, 4096);
     }
     glBindVertexArray(glr_font.vao);
     glBindBuffer(GL_ARRAY_BUFFER, glr_font.vbo);
@@ -71,13 +71,13 @@ void glr_draw_string(const std::string& str, float x, float y, float r, float g,
   glUseProgram(glr_font.prog);
   glBindVertexArray(glr_font.vao);
 
-  // @todo WHY DOES glBufferSubData NOT WORK???? (ATI CARD?)
   glBindBuffer(GL_ARRAY_BUFFER, glr_font.vbo);
   glBufferData(GL_ARRAY_BUFFER, dx * sizeof(float), glr_font.buffer, GL_DYNAMIC_DRAW);
-  glEnableVertexAttribArray(glGetAttribLocation(glr_font.prog, "a_pos"));
-  glEnableVertexAttribArray(glGetAttribLocation(glr_font.prog, "a_tex"));
-  glVertexAttribPointer(glGetAttribLocation(glr_font.prog, "a_pos"), 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)0);
-  glVertexAttribPointer(glGetAttribLocation(glr_font.prog, "a_tex"), 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)8);
+
+  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)0);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)8);
   
   float col[3] = {r,g,b};
   glUniform3fv(glr_font.u_col, 1, col);

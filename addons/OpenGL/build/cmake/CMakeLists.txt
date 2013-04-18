@@ -1,5 +1,7 @@
 # opengl
 
+roxlu_addon_add_dependency(Image)
+
 roxlu_addon_begin("opengl")
 
   # --------------------------------------------------------------------------------------

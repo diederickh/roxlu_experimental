@@ -24,7 +24,106 @@
 #define ERR_GL_DR_UNSUPPORTED_VERTEX_TYPE "The given vertex type is not supported"
 
 namespace gl {
+#if defined(ROXLU_GL_CORE3)
+  // VERTEX_P
+  // ---------------------------------------------------
+  static const char* GL_VS_P = GLSL(150,
+                                    in vec4 a_pos;
+                                    uniform mat4 u_pm;
+                                    uniform mat4 u_vm;
+                                    uniform mat4 u_mm;
 
+                                    void main() {
+                                      gl_Position = u_pm * u_vm * u_mm * a_pos;
+                                    }
+  );
+
+  static const char* GL_FS_P = GLSL(150, 
+                                    out vec4 frag_color;
+                                    void main() {
+                                      frag_color = vec4(0.8, 0.8, 0.8, 1.0);
+                                    }
+  );
+
+
+  // VERTEX_CP
+  // ---------------------------------------------------
+  static const char* GL_VS_CP = GLSL(150,
+                                     in vec4 a_pos;
+                                     in vec4 a_col;
+                                     uniform mat4 u_pm;
+                                     uniform mat4 u_vm;
+                                     uniform mat4 u_mm;
+                                     out vec4 v_col;
+
+                                     void main() {
+                                       gl_Position = u_pm * u_vm * u_mm * a_pos;
+                                       v_col = a_col;
+                                     }
+  );
+
+  static const char* GL_FS_CP = GLSL(150, 
+                                     in vec4 v_col;
+                                     out vec4 frag_color;
+                                     void main() {
+                                       frag_color = v_col;
+                                       frag_color.a = 1.0;
+                                     }
+  );
+
+
+  // VERTEX_PT
+  // ---------------------------------------------------
+  static const char* GL_VS_PT = GLSL(150,
+                                     in vec4 a_pos;
+                                     in vec2 a_tex;
+                                     uniform mat4 u_pm;
+                                     uniform mat4 u_vm;
+                                     uniform mat4 u_mm;
+                                     out vec2 v_tex;
+
+                                     void main() {
+                                       gl_Position = u_pm * u_vm * u_mm * a_pos;
+                                       v_tex = a_tex;
+                                     }
+  );
+
+  static const char* GL_FS_PT = GLSL(150, 
+                                     uniform sampler2D u_tex0;
+                                     in vec2 v_tex;
+                                     out vec4 frag_color;
+                                     void main() {
+                                       frag_color = texture(u_tex0, v_tex);
+                                     }
+  );
+
+
+  // VERTEX_NP
+  // ---------------------------------------------------
+  static const char* GL_VS_NP = GLSL(150,
+                                     in vec4 a_pos;
+                                     in vec3 a_norm;
+                                     uniform mat4 u_pm;
+                                     uniform mat4 u_vm;
+                                     uniform mat4 u_mm;
+                                     out vec3 v_norm;
+
+                                     void main() {
+                                       gl_Position = u_pm * u_vm * u_mm * a_pos;
+                                       v_norm = a_norm;
+                                     }
+  );
+
+  static const char* GL_FS_NP = GLSL(150, 
+                                     in vec3 v_norm;
+                                     out vec4 frag_color;
+                                     void main() {
+                                       frag_color.rgb = 0.5 * v_norm + 0.5;
+                                       frag_color.a = 1.0;
+                                     }
+  );
+
+#else
   // VERTEX_P
   // ---------------------------------------------------
   static const char* GL_VS_P = GLSL(120,
@@ -118,6 +217,8 @@ namespace gl {
                                        gl_FragColor.a = 1.0;
                                      }
   );
+
+#endif // ROXLU_GL_CORE3
 
   // ---------------------------------------------------
 

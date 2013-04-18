@@ -224,7 +224,11 @@ namespace gl {
   // SHAPES (immediate mode)
   // ---------------------------------------------------
   void Drawer::drawCircle(float x, float y, float radius) {
+#if defined(ROXLU_GL_CORE3)
+    begin(GL_LINE_LOOP);
+#else
     begin((immediate_must_fill) ? GL_POLYGON : GL_LINE_LOOP);
+#endif
     for(size_t i = 0; i < immediate_circle.size(); ++i) {
       VertexCP v = immediate_circle[i];
       Vec3 pos(x + v.pos.x * radius, y + v.pos.y * radius, 0.0f);
@@ -234,7 +238,11 @@ namespace gl {
   }
 
   void Drawer::drawRectangle(float x, float y, float w, float h) {
+#if defined(ROXLU_GL_CORE3)
+    begin(GL_LINE_LOOP);
+#else
     begin((immediate_must_fill) ? GL_POLYGON : GL_LINE_LOOP);
+#endif
     vertex(Vec3(x, y, 0));         // top left
     vertex(Vec3(x + w, y, 0));;    // top right 
     vertex(Vec3(x + w, y + h, 0)); // bottom right

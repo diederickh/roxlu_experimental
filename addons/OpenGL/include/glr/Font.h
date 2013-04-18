@@ -5,6 +5,10 @@
 #include <iomanip>
 #include <stdio.h>
 #include <stdint.h>
+#include <string>
+#include <roxlu/core/Log.h>
+#include <roxlu/opengl/Error.h>
+
 
 namespace gl {
 
@@ -24,6 +28,10 @@ namespace gl {
 #ifndef ROXLU_OPENGL_FONT_H
 #define ROXLU_OPENGL_FONT_H
 
+
+#define ERR_FONT_UNI_PM "Cannot find a valid u_pm uniform"
+#define ERR_FONT_UNI_TEX "Cannot find a valid u_tex uniform"
+#define ERR_FONT_UNI_COL "Cannot find a valid u_col uniform"
 
 #define STB_FONT_consolas_14_usascii_BITMAP_WIDTH         128
 #define STB_FONT_consolas_14_usascii_BITMAP_HEIGHT         68
@@ -242,6 +250,32 @@ namespace gl {
 #include <roxlu/opengl/GL.h>
 #include <string>
 
+#if defined(ROXLU_GL_CORE3)
+  static const char* FONT_VS = GLSL(150, 
+                                    uniform mat4 u_pm;
+                                    in vec4 a_pos;
+                                    in vec2 a_tex;
+                                    out vec2 v_tex; 
+                                    void main() {
+                                      gl_Position = u_pm * a_pos; 
+                                      v_tex = a_tex;
+                                    }
+  );
+
+  static const char* FONT_FS = GLSL(150, 
+                                    uniform sampler2D u_tex;
+                                    uniform vec3 u_col;
+                                    in vec2 v_tex; 
+                                    out vec4 frag_color;
+
+                                    void main() {
+                                      vec4 col = texture(u_tex, v_tex);
+                                      frag_color.rgb = u_col * col.r ;
+                                      frag_color.a = col.a;
+                                    }
+  );
+
+#else
   static const char* FONT_VS = GLSL(120, 
                                     uniform mat4 u_pm;
                                     attribute vec4 a_pos;
@@ -263,6 +297,7 @@ namespace gl {
                                       gl_FragColor.a = col.a;
                                     }
   );
+#endif
 
   struct Font {
     void init();
@@ -292,25 +327,46 @@ namespace gl {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, STB_SOMEFONT_BITMAP_WIDTH, STB_SOMEFONT_BITMAP_HEIGHT, 0, GL_ALPHA, GL_UNSIGNED_BYTE, pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, STB_SOMEFONT_BITMAP_WIDTH, STB_SOMEFONT_BITMAP_HEIGHT, 0, GL_RED, GL_UNSIGNED_BYTE, pixels);
 
     // Shader 
     GLuint vert_id = glCreateShader(GL_VERTEX_SHADER);
     GLuint frag_id = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(vert_id, 1, &FONT_VS, NULL);
     glShaderSource(frag_id, 1, &FONT_FS, NULL);
+
     glCompileShader(vert_id); //eglGetShaderInfoLog(vert_id);
     glCompileShader(frag_id); //eglGetShaderInfoLog(frag_id);
-    prog = glCreateProgram();
+
+    prog = glCreateProgram(); 
+
     glAttachShader(prog, vert_id);
     glAttachShader(prog, frag_id);
+
+    glBindAttribLocation(prog, 0, "a_pos");
+    glBindAttribLocation(prog, 1, "a_tex");
+
     glLinkProgram(prog);
     glUseProgram(prog);
 
     u_pm = glGetUniformLocation(prog, "u_pm");
     u_tex = glGetUniformLocation(prog, "u_tex");
     u_col = glGetUniformLocation(prog, "u_col");
-
+    
+    if(u_pm < 0) {
+      RX_ERROR(ERR_FONT_UNI_PM);
+      return;
+    }
+    if(u_tex < 0) {
+      RX_ERROR(ERR_FONT_UNI_TEX);
+      return;
+    }
+    if(u_col < 0) {
+      RX_ERROR(ERR_FONT_UNI_COL);
+      return;
+    }
+    printf("%d\n", vert_id);
+    
     // vao
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -351,7 +407,7 @@ namespace gl {
     pm[14] = -(f+n)/fmn;
   }
 
-  void glr_draw_string(const std::string& str, float x, float y, float r = 1.0, float g = 1.0, float b = 1.0);
+  void glr_draw_string(const ::std::string& str, float x, float y, float r = 1.0, float g = 1.0, float b = 1.0);
 
   extern Font glr_font;
 

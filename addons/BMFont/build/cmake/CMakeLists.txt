@@ -1,5 +1,7 @@
 # bmfont
 
+roxlu_addon_add_dependency(Image)
+
 roxlu_addon_begin("bmfont")
  # --------------------------------------------------------------------------------------
  roxlu_addon_add_source_file(bmfont/BMFTypes.cpp)
