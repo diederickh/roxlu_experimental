@@ -1,4 +1,4 @@
-# bmfont
+# image
 
 roxlu_addon_begin("image")
  # --------------------------------------------------------------------------------------
@@ -10,8 +10,9 @@ roxlu_addon_begin("image")
 
  if(WIN32) 
    roxlu_add_dll(libpng15.dll)
-
    roxlu_add_dll(zlib1.dll)
+
+   roxlu_add_extern_lib(libjpeg.lib)
 
    if(CMAKE_BUILD_TYPE STREQUAL Debug)
      roxlu_add_extern_lib(libpng15-static.lib)
