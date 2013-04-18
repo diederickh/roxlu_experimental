@@ -144,7 +144,11 @@ namespace roxlu {
     ,write_log_level(true)
     ,max_file_size(1024 * 1024)
   {
+#if defined(_WIN32)
+    date_format = "%d-%m-%y %H:%M:%S ";
+#else
     date_format = "%F %T ";
+#endif
     loop = uv_default_loop();
     uv_mutex_init(&mutex);
   }

@@ -1,6 +1,15 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <jpeglib.h>
+ // #if defined(_WIN32)
+ // #include <windows.h>
+ // #endif
+#if defined(_WIN32)
+#  define XMD_H
+#  include <jpeglib.h>
+#  undef XMD_H
+#else 
+#  include <jpeglib.h>
+#endif
 #include <image/JPG.h>
 #include <roxlu/core/Log.h>
 #include <roxlu/core/Utils.h>        

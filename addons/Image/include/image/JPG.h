@@ -29,7 +29,6 @@ class JPG {
     
   void print();
 
-
  public:
 
   unsigned char* pixels;
@@ -39,8 +38,6 @@ class JPG {
   unsigned int height;
   unsigned int bit_depth;
   unsigned int num_channels;
-
-
 };
 
 
@@ -64,7 +61,5 @@ inline unsigned int JPG::getNumChannels() {
 inline unsigned int JPG::getBitDepth() {
   return bit_depth;
 }
-
-    
   
 #endif
