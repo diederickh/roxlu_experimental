@@ -41,13 +41,14 @@ static const char* BMFONT_VS = GLSL(150,
 
 static const char* BMFONT_FS = GLSL(150, 
                                     uniform sampler2DRect u_tex;
+                                    uniform float u_alpha;
                                     in vec2 v_tex;
                                     in vec4 v_fg_color;
                                     out vec4 fragcolor;
 
                                     void main() {
                                       float intensity = texture(u_tex, v_tex).r;
-                                      fragcolor = vec4(v_fg_color.rgb, intensity);
+                                      fragcolor = vec4(v_fg_color.rgb, intensity) * u_alpha;
                                     }
 );
 
@@ -70,13 +71,13 @@ static const char* BMFONT_VS = GLSL(120,
 
 static const char* BMFONT_FS = GLSL(120, 
                                     uniform sampler2DRect u_tex;
+                                    uniform float u_alpha;
                                     varying vec2 v_tex;
                                     varying vec4 v_fg_color;
-                                    
 
                                     void main() {
                                       float intensity = texture2DRect(u_tex, v_tex).r;
-                                      gl_FragColor = vec4(v_fg_color.rgb, intensity);
+                                      gl_FragColor = vec4(v_fg_color.rgb, intensity) * u_alpha;
                                     }
 );
 
@@ -93,6 +94,7 @@ class BMFShader {
   virtual void setup(GLuint vbo, GLuint tex);
   virtual void setModelMatrix(const float* modelMatrix);
   virtual void setProjectMatrix(const float* projectionMatrix);
+  virtual void setAlpha(float a);
   virtual void draw();
 
  public:
@@ -100,6 +102,7 @@ class BMFShader {
   static GLint u_projection_matrix;
   static GLint u_model_matrix;
   static GLint u_tex;
+  static GLint u_alpha;
   GLuint vao;
   GLuint tex;
 };
@@ -112,6 +115,10 @@ inline void BMFShader::setModelMatrix(const float* mm) {
 inline void BMFShader::setProjectMatrix(const float* pm) {
   glUseProgram(prog);
   glUniformMatrix4fv(u_projection_matrix, 1, GL_FALSE, pm);
+}
+
+inline void BMFShader::setAlpha(float a) {
+  glUniform1f(u_alpha, a);
 }
 
 #endif 

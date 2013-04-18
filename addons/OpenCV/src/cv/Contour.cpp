@@ -1,81 +1,67 @@
+/*
+
+  This code is just a test.. do not use :-) 
+
+ */
 #include <cv/Contour.h>
 #include <roxlu/core/Utils.h>
 #include <roxlu/core/Log.h>
 
 namespace roxlu {
-  Contour::Contour()
-    :image_w(0)
-    ,image_h(0)
-    ,image_components(0)
-  {
+  Contour::Contour() {
   }
 
   Contour::~Contour() {
     reset();
   }
   
-  bool Contour::loadImage(std::string filename, bool datapath) {
-    if(datapath) {
-      filename = rx_to_data_path(filename);
-    }
-    /*
-    mat = cv::imread(filename.c_str(), CV_LOAD_IMAGE_COLOR);
-    if(!mat.data) {
+  bool Contour::findContours(Image& img) {
+
+    if(!setPixels(img.getPixels(), img.getWidth(), img.getHeight(), img.getPixelFormat())) {
       return false;
     }
-    */
+
+    return findContours();
+  }
+
+  bool Contour::findContours(unsigned char* pixels, unsigned int w, unsigned int h, unsigned int pixfmt) {
+
+    if(!setPixels(pixels, w, h, pixfmt)) {
+      return false;
+    }
+
+    return findContours();
+  }
+
+  bool Contour::setPixels(unsigned char* pixels, unsigned int w, unsigned int h, unsigned int pixfmt) {
+
+    if(pixfmt == RX_FMT_RGB24) {
+      cv::Mat tmp(h, w, CV_8UC3, pixels); 
+      cvtColor(tmp, gray_img, CV_RGB2GRAY);
+    }
+    else if(pixfmt == RX_FMT_RGBA32) {
+      cv::Mat tmp(h, w, CV_8UC4, pixels); 
+      cvtColor(tmp, gray_img, CV_RGBA2GRAY);
+    }
+    else if(pixfmt == RX_FMT_GRAY8) {
+      cv::Mat tmp(h, w, CV_8UC1, pixels); 
+      gray_img = tmp.clone();
+    }
+    else {
+      RX_ERROR(RX_CV_UNSUPPORTED_PIX_FMT);
+      return false;
+    }
+
+    cv::threshold(gray_img, thresholded_img, 100, 255, cv::THRESH_BINARY);
+
     return true;
   }
 
-  bool Contour::setPixels(unsigned char* pixels, int imageW, int imageH, int imageComponents) {
-    image_w = imageW;
-    image_h = imageH;
-    image_components = imageComponents;
-
-    if(image_components == 3) {
-      cv::Mat tmp(image_h, image_w, CV_8UC3, pixels); // CV_8U
-      mat_original = tmp.clone();
-      cvtColor(mat_original, mat_gray, CV_BGR2GRAY);
-    }
-    else if(image_components == 4) {
-      cv::Mat tmp(image_h, image_w, CV_8UC4, pixels); // CV_8U
-      mat_original = tmp.clone();
-      cvtColor(mat_original, mat_gray, CV_RGBA2GRAY);
-    }
-    else {
-      RX_ERROR("CANNOT HANDLE COMPONENTS! %d", imageComponents);
-      return false;
-    }
-    
-    cv::Mat tmp(image_h, image_w, mat_gray.type());
-    cv::threshold(mat_gray, tmp, 100,255, cv::THRESH_BINARY);
-    mat_bw = tmp.clone();
+  bool Contour::findContours() {
+    reset();
+    cv::findContours(thresholded_img, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, cv::Point(0, 0) );
 
     return true;
-  }
-
-  void Contour::findContours() {
-    contours.clear();
-    hierarchy.clear();
-
-
-    bool use_canny = false;
-    if(use_canny) {
-      cv::Mat canny_output;
-      int thresh = 5;
-
-      cv::Canny(mat_gray, canny_output, thresh, thresh*2, 3 );
-
-      //cv::findContours(canny_output, contours, hierarchy,  CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
-      //cv::findContours(canny_output, contours, hierarchy,  CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
-      //cv::findContours(canny_output, contours, hierarchy,  CV_RETR_LIST, CV_CHAIN_APPROX_NONE, cv::Point(0, 0) );
-      cv::findContours(canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
-    }          
-    else {
-      // awesome result for edge rotoscoping...
-      cv::findContours(mat_bw, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, cv::Point(0, 0) );
-    }
-
   }
 
   cv::Point Contour::getCentroid() {
@@ -110,11 +96,35 @@ namespace roxlu {
   }
 
   void Contour::reset() {
-    image_w = 0;
-    image_h = 0;
-    image_components = 0;    
     contours.clear();
     hierarchy.clear();
   }
+
+
+    /*
+    contours.clear();
+    hierarchy.clear();
+
+
+    bool use_canny = false;
+    if(use_canny) {
+      cv::Mat canny_output;
+      int thresh = 5;
+
+      cv::Canny(mat_gray, canny_output, thresh, thresh*2, 3 );
+
+      //cv::findContours(canny_output, contours, hierarchy,  CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+      //cv::findContours(canny_output, contours, hierarchy,  CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+      //cv::findContours(canny_output, contours, hierarchy,  CV_RETR_LIST, CV_CHAIN_APPROX_NONE, cv::Point(0, 0) );
+      cv::findContours(canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+    }          
+    else {
+      // awesome result for edge rotoscoping...
+      cv::findContours(mat_bw, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, cv::Point(0, 0) );
+    }
+    */
+
+
+
 } // roxlu
 

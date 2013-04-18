@@ -2,6 +2,8 @@
 #include <roxlu/core/Utils.h>
 #include <png.h>
 
+// ----------------------------------------------------------------
+
 PNG::PNG() 
   :width(0)
   ,height(0)
@@ -14,7 +16,9 @@ PNG::PNG()
 {
 }
 
-PNG::PNG(const PNG& other) {
+PNG::PNG(const PNG& other)
+  :pixels(NULL)
+{
   if(other.num_bytes > 0 && other.pixels) {
     pixels = new unsigned char[other.num_bytes];
     memcpy((char*)pixels, (char*)other.pixels, other.num_bytes);
@@ -214,6 +218,27 @@ bool PNG::load(std::string filename, bool datapath) {
 }
 
 bool PNG::save(std::string filename, bool datapath) {
+
+  if(!width || !height) {
+    RX_ERROR(PNG_ERR_SIZE, width, height);
+    return false;
+  }
+
+  if(!stride) {
+    RX_ERROR(PNG_ERR_STRIDE, stride);
+    return false;
+  }
+
+  if(!pixels) {
+    RX_ERROR(PNG_ERR_PIXELS);
+    return false;
+  }
+
+  if(!bit_depth) {
+    RX_ERROR(PNG_ERR_BITDEPTH, bit_depth);
+    return false;
+  }
+
   png_structp png_ptr; 
   png_infop info_ptr; 
 
@@ -297,21 +322,25 @@ bool PNG::setPixels(unsigned char* pix, png_uint_32 w, png_uint_32 h, png_uint_3
     case PNG_COLOR_TYPE_GRAY: {
       num_bytes = width * height;
       num_channels = 1;
+      stride = width;
       break;
     }
     case PNG_COLOR_TYPE_GRAY_ALPHA: {
       num_bytes = width * height * 2;
       num_channels = 2;
+      stride = width * 2;
       break;
     }
     case PNG_COLOR_TYPE_RGB: {
       num_bytes = width * height * 3;
       num_channels = 3;
+      stride = width * 3;
       break;
     }
     case PNG_COLOR_TYPE_RGB_ALPHA: {
       num_bytes = width * height * 4;
       num_channels = 4;
+      stride = width * 4;
       break;
     }
     default: return false;

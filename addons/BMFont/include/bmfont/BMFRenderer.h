@@ -15,6 +15,7 @@
 #include <vector>
 #include <iterator>
 #include <roxlu/Roxlu.h>
+#include <image/Image.h>
 #include <bmfont/BMFTypes.h>
 #include <bmfont/BMFLoader.h>
 #include <bmfont/BMFShader.h>
@@ -35,13 +36,17 @@ class BMFRenderer {
  public:
   BMFRenderer(BMFLoader<T>& font);
   ~BMFRenderer();
-  void setup(int windowW, int windowH, BMFShader* shader = NULL);         /* setup the renderer; we need to the windowW/H for the ortho graphic projection matrix */
+  void setup(int windowW,                                                 /* setup the renderer; we need to the windowW/H for the ortho graphic projection matrix */
+             int windowH,  
+             size_t pageSize = 1024,                                      /* we will allocate this number of bytes each time the buffer needs to grow (or a multiple of this) */
+             BMFShader* shader = NULL);      
   void update();                                                          /* updates the VBO if needed */
   size_t addVertices(std::vector<T>& vertices);                           /* add vertices to the VBO and returns the index into multi_counts and multi_firsts. See glMultiDrawArrays for info on these members */
   void draw();                                                            /* render all strings */
   void drawText(size_t index);                                            /* draw only a specific entry. pass a value you got from addVertices().. also make sure you call bind() before drawing single instances of vertices */
   void drawText(size_t index, const float* modelMatrix);                  /* draw only a specific entry + custom model matrix. pass a value you got from addVertices().. also make sure you call bind() before drawing single instances of vertices */
   void setModelMatrix(const float* mm);
+  void setAlpha(float a);
   void reset();                                                           /* reset the VBO, call this when you are updating the text repeatedly */
   void bind();                                                            /* bind the specific GL objects we use to render the text. only call this when you are using drawText(). Call bind() once per frame. */
  protected:
@@ -55,7 +60,7 @@ class BMFRenderer {
 
   GLuint tex;                                                             /* the font texture */
   GLuint vbo;                                                             /* the BMFRenderer takes care of all buffer handling */
-
+  
  public:
   float projection_matrix[16];
   float model_matrix[16];
@@ -63,6 +68,8 @@ class BMFRenderer {
   std::vector<GLsizei> multi_counts;
   std::vector<T> vertices;
   size_t bytes_allocated;
+  size_t prev_num_vertices;                                               /* we keep track of the number of vertices in the update() function so we only need to update the sub-buffer data, with new vertices */
+  size_t page_size;                                                       /* number of bytes to allocate when the buffer needs to grow */
 };
 
 // -----------------------------------------------
@@ -73,6 +80,8 @@ BMFRenderer<T>::BMFRenderer(BMFLoader<T>& font)
   ,is_setup(false)
   ,shader(NULL)
   ,allocated_shader(false)
+  ,prev_num_vertices(0) 
+  ,page_size(1024) 
 {
   clear();
 
@@ -127,11 +136,12 @@ void BMFRenderer<T>::reset() {
   vertices.clear();
   multi_firsts.clear();
   multi_counts.clear();
+  prev_num_vertices = 0;
 }
 
 template<class T>
-void BMFRenderer<T>::setup(int windowW, int windowH, BMFShader* useShader) {
-
+void BMFRenderer<T>::setup(int windowW, int windowH, size_t pageSize, BMFShader* useShader) {
+  page_size = pageSize;
   rx_ortho(0, windowW, windowH, 0.0, -1.0, 1.0, projection_matrix);
 
   if(!font.getImageWidth() || !font.getImageHeight() || !font.getImagePath().size()) {
@@ -145,7 +155,7 @@ void BMFRenderer<T>::setup(int windowW, int windowH, BMFShader* useShader) {
     ::exit(EXIT_FAILURE);
   }
 
-  if(img.getComponents() != 1) {
+  if(img.getPixelFormat() != RX_FMT_GRAY8) {
     RX_ERROR(BMF_ERR_WRONG_NCOMPONENTS);
     ::exit(EXIT_FAILURE);
   }
@@ -157,7 +167,6 @@ void BMFRenderer<T>::setup(int windowW, int windowH, BMFShader* useShader) {
 
   glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
-  //glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RED, img.getWidth(), img.getHeight(), 0, GL_RED, GL_UNSIGNED_BYTE, img.getPixels());
   glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_R8, img.getWidth(), img.getHeight(), 0, GL_RED, GL_UNSIGNED_BYTE, img.getPixels());
   is_setup = true;
 
@@ -194,12 +203,18 @@ void BMFRenderer<T>::update() {
 
   if(bytes_needed > bytes_allocated) {
     while(bytes_allocated < bytes_needed) {
-      bytes_allocated = std::max<size_t>(bytes_allocated * 2, 1024);
+      bytes_allocated = std::max<size_t>(bytes_allocated * 2, page_size);
     }
     glBufferData(GL_ARRAY_BUFFER, bytes_allocated, NULL, GL_STREAM_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_needed, vertices[0].getPtr());
+  }
+  else if(vertices.size() != prev_num_vertices) {
+    size_t new_bytes = (vertices.size() - prev_num_vertices) * sizeof(T);
+    size_t prev_offset = prev_num_vertices * sizeof(T);
+    glBufferSubData(GL_ARRAY_BUFFER, prev_offset, new_bytes, vertices[prev_num_vertices].getPtr());
   }
 
-  glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_needed, vertices[0].getPtr());
+  prev_num_vertices = vertices.size(); 
 }
 
 template<class T>
@@ -254,4 +269,8 @@ inline void BMFRenderer<T>::setModelMatrix(const float* modelMatrix) {
   memcpy(model_matrix, modelMatrix, sizeof(float) * 16);
 }
 
+template<class T>
+inline void BMFRenderer<T>::setAlpha(float a) {
+  shader->setAlpha(a);
+}
 #endif

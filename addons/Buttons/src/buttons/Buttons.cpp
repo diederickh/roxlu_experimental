@@ -41,13 +41,17 @@ namespace buttons {
     ,col_sat(0.0f)
     ,col_bright(0.0f)
     ,col_alpha(0.0f)
+    ,vao(0)
   {
 
     if(!shaders_initialized) {
-      glGenVertexArrays(1, &vao);
       bmf = new BitmapFont();
+
       gui_shader.create(BUTTONS_VS, BUTTONS_FS);
+      glBindAttribLocation(gui_shader.prog_id, 0, "pos");
+      glBindAttribLocation(gui_shader.prog_id, 1, "col");
       gui_shader.link();
+
       gui_shader.enable();
       gui_shader.addUniform("projection_matrix");
       gui_shader.addAttribute("pos");
@@ -59,7 +63,16 @@ namespace buttons {
     dynamic_text = new Text(*bmf);
     glBindVertexArray(vao);
     glGenBuffers(1, &vbo); eglGetError();
+
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
     glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
+    glEnableVertexAttribArray(0); eglGetError();
+    glEnableVertexAttribArray(1); eglGetError();
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), (GLvoid*)0); 
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), (GLvoid*)8);
+    glBindVertexArray(0);
 
     createOrtho(768, 1024);
 	
@@ -86,6 +99,9 @@ namespace buttons {
       delete el;
       ++it;
     }
+  }
+
+  void Buttons::setup() {
   }
 
   // http://en.wikipedia.org/wiki/Orthographic_projection_(geometry)
@@ -186,28 +202,19 @@ namespace buttons {
     }
 
     // do we need to grow our buffer?
-    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
     size_t size_needed = vd.size() * sizeof(ButtonVertex);
     if(size_needed > allocated_bytes) {
       while(allocated_bytes < size_needed) {
         allocated_bytes = std::max<size_t>(allocated_bytes * 2, 256);
       }
       first_run = false; // we don't need this one anymore @todo cleanup
-      
-      glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError();
       glBufferData(GL_ARRAY_BUFFER, allocated_bytes, NULL, GL_STREAM_DRAW); eglGetError();
-		
-      glEnableVertexAttribArray(gui_shader.getAttribute("pos")); eglGetError();
-      glEnableVertexAttribArray(gui_shader.getAttribute("col")); eglGetError();
-      glVertexAttribPointer(gui_shader.getAttribute("pos"), 2, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), (GLvoid*)offsetof(ButtonVertex,pos));
-      glVertexAttribPointer(gui_shader.getAttribute("col"), 4, GL_FLOAT, GL_FALSE, sizeof(ButtonVertex), (GLvoid*)offsetof(ButtonVertex,col));
     }
 	
     // And update the vbo.
     glBindBuffer(GL_ARRAY_BUFFER, vbo); eglGetError(); // roxlu
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(ButtonVertex)*vd.size(), (GLvoid*)vd.getPtr()); eglGetError();
-    glBindVertexArray(0);
-
   }
 
   void Buttons::generateVertices() {

@@ -62,6 +62,10 @@ extern uint32_t gl_string_id(const char * data, int len);
 #define IS_ZERO(f) 	(fabs(f) < EPSILON)	
 
 
+
+static std::string rx_get_file_ext(std::string filepath);
+
+
 // as suggested: http://stackoverflow.com/questions/4100657/problem-with-my-clamp-macro
 template <typename T> 
 inline T rx_clamp(T value, T low, T high) {
@@ -434,6 +438,15 @@ static std::string rx_int_to_string(int num) {
   return ss.str();
 }
 
+static std::string rx_string_replace(std::string str, std::string from, std::string to) {
+  size_t start_pos = str.find(from);
+  if(start_pos == std::string::npos) {
+    return str;
+  }
+  str.replace(start_pos, from.length(), to);
+  return str;
+}
+
 static std::string rx_string_replace(std::string str, char from, char to) {
   std::replace(str.begin(), str.end(), from, to);
   return str;
@@ -442,6 +455,7 @@ static std::string rx_string_replace(std::string str, char from, char to) {
 static std::string rx_strip_filename(std::string path) {
   std::string directory;
   path = rx_string_replace(path, '\\', '/');
+  path = rx_string_replace(path, "//", "/");
   const size_t last_slash_idx = path.rfind('/');
 
   if(std::string::npos != last_slash_idx) {
@@ -455,6 +469,18 @@ static std::string rx_strip_filename(std::string path) {
   return directory;
 }
 
+static std::string rx_strip_dir(std::string path) {
+  std::string filename;;
+  path = rx_string_replace(path, '\\', '/');
+  path = rx_string_replace(path, "//", "/");
+  const size_t last_slash_idx = path.rfind('/');
+
+  if(std::string::npos != last_slash_idx) {
+    filename = path.substr(last_slash_idx + 1, path.size());
+  }
+
+  return filename;
+}
 
 static bool rx_create_dir(std::string path) {
 #ifdef _WIN32
@@ -537,14 +563,24 @@ static bool rx_create_path(std::string path) {
   return true;
 }
 
-static std::vector<std::string> rx_get_files(std::string path) {
+// retrieve files from the given path. if you pass an extension we only return files that have this extension. Use a value like "jpg", "flv", "txt", so w/o the dot
+static std::vector<std::string> rx_get_files(std::string path, std::string ext = "") { 
   std::vector<std::string> result;
   DIR* dir;
   struct dirent* ent;
   if((dir = opendir(path.c_str())) != NULL) {
     while((ent = readdir(dir)) != NULL) {
       if(ent->d_type == DT_REG) {
-        result.push_back(path +"/" +ent->d_name);
+        std::string file_path = path +"/" +ent->d_name;
+
+        if(ext.size()) {
+          std::string file_ext = rx_get_file_ext(file_path);
+          if(file_ext != ext) {
+            continue;
+          }
+        }
+
+        result.push_back(file_path);
       }
     }
     closedir(dir);
@@ -565,6 +601,11 @@ static std::string rx_get_file_ext(std::string filepath) {
   return ext;
 }
 
-
+static bool rx_is_power_of_two(unsigned int x) {
+  while (((x & 1) == 0) && x > 1) { /* While x is even and > 1 */
+    x >>= 1;
+  }
+  return (x == 1);
+}
 
 #endif // ROXLU_UTILSH

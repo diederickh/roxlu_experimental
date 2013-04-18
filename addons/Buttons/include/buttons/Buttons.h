@@ -133,7 +133,7 @@ namespace buttons {
   public:
     Buttons(const string& title, int w);
     ~Buttons();
-	
+    
     void update();
     void draw();
     void debugDraw();
@@ -213,6 +213,7 @@ namespace buttons {
     int getNumChildren();
 
   private:
+    void setup(); // creates vao, vbo, shader..
     void addElement(Element* el, const string& label);
     void addChildElements(Element* parent, vector<Element*>& children);
     void onMouseEnter(int x, int y);

@@ -49,6 +49,8 @@ class ClientSocket {
   void write(const char* data, size_t nbytes);                  /* .... */
   void clear();                                                 /* clears the buffer */
   void close();                                                 /* shuts down the connection */
+  bool isConnected();                                           /* check if the socket is connected.. this is not a 100% safe way to check as the socket can be "alive" but the connection was just closed. Best way is to write something to the socket and check if the result isn't -1 (this is done internally) */
+
  public:
   uv_loop_t* loop;
   uv_tcp_t* sock;
@@ -70,6 +72,10 @@ class ClientSocket {
 
 inline void ClientSocket::write(const char* data, size_t nbytes) {
   write((char*)data, nbytes);
+}
+
+inline bool ClientSocket::isConnected() {
+  return is_connected;
 }
 
 #endif

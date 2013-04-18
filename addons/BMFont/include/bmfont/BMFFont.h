@@ -19,9 +19,8 @@
 
 
  - This class is to be used in a way where you "add" texts vertices to a buffer. You can 
-   either add text once (when it's static), or update it for every frame. If you text changes
+   either add text once (when it's static), or update it for every frame. If your text changes
    you need to add it again and make sure to call `BMFFont::reset()`.
-
 
 */
 
@@ -39,14 +38,21 @@ class BMFFont {
  public:
   BMFFont();
   ~BMFFont();
-  bool setup(std::string filename, int windowW, int windowH, bool datapath = false);     
+
+ bool setup(std::string filename,                                                      /* sets up a font + renderer and shader. The pageSize is used by the VBO that contains the vertices for the text. When it needs to grow, it will grow `pageSize` or a multiple of this. */
+             int windowW,  
+             int windowH, 
+             size_t pageSize = 1024, 
+             bool datapath = false);     
+
   void setColor(float r, float g, float b, float a = 1.0);
+  void setAlpha(float a);
   size_t addText(std::string str, float x, float y);                                    /* add a new text and return indices to the offsets and vertex counts of the BMFRenderer, see BMFRenderer for more info */
   void update();                                                                        /* only call update when you're using the drawText() function. draw() will call update for you. Only call update() once after changing your texts */
   void draw();
   void bind();                                                                          /* bind the GL objects used for drawing; only call this manually when you're using `drawText()`, when  you use only `draw()` don't call this. Only call bind() once per frame. */
   void drawText(size_t index);                                                          /* only draw a specific text entry */
-  void drawText(size_t index, const float* modelMatrix);                                 /* only draw a specific text entry + with the given model matrix */
+  void drawText(size_t index, const float* modelMatrix);                                /* only draw a specific text entry + with the given model matrix */
   void reset();
   void print();
   void getStringSize(std::string str, int& w, int& h);                                   /* get the width and max height for the given string */
@@ -67,10 +73,10 @@ BMFFont<T>::~BMFFont() {
 }
 
 template<class T>
-inline bool BMFFont<T>::setup(std::string filename, int windowW, int windowH, bool datapath) {
+inline bool BMFFont<T>::setup(std::string filename, int windowW, int windowH, size_t pageSize,bool datapath) {
   bool r = true;
   r = loader.load(filename, datapath);
-  renderer.setup(windowW, windowH);
+  renderer.setup(windowW, windowH, pageSize);
   return r;
 }
 
@@ -104,6 +110,11 @@ inline void BMFFont<T>::drawText(size_t text) {
 template<class T>
 inline void BMFFont<T>::drawText(size_t text, const float* mm) {
   renderer.drawText(text, mm);
+}
+
+template<class T>
+inline void BMFFont<T>::setAlpha(float a) {
+  renderer.setAlpha(a);
 }
 
 template<class T>

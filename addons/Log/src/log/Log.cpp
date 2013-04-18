@@ -14,12 +14,8 @@ namespace roxlu {
   {
 
     Log* l = static_cast<Log*>(user);
-    //    vprintf(fmt, args);
-    //    printf("\n");
 
-    //   uv_mutex_lock(&l->mutex);
     if(level > roxlu_log_level) {
-      //      uv_mutex_unlock(&l->mutex);
       return;
     }
     
@@ -132,8 +128,6 @@ namespace roxlu {
     msg.tty_message = ss_tty.str();
     msg.file_message = ss_file.str();
     msg.level = level;
-
-    //    uv_mutex_unlock(&l->mutex);
 
     l->addMessage(msg);
   }

@@ -30,7 +30,7 @@ int CommandLineOption::count() {
   return 0;
 }
 
-bool CommandLineOption::isset() {
+bool CommandLineOption::isSet() {
   if(arg) {
     return count();
   }
@@ -81,7 +81,7 @@ std::string CommandLineOption::getBaseName(int index) {
   }
 
   struct arg_file* af = (struct arg_file*)(arg);
-  std::string val(af->basename[index], strlen(af->basename[index]);
+  std::string val(af->basename[index], strlen(af->basename[index]));
   return val;
 }
 
@@ -151,9 +151,9 @@ CommandLineOptions::~CommandLineOptions() {
 }
 
 
-CommandLineOption* CommandLineOptions::addString(char* shortflag,
-                                                 char* longflag,
-                                                 char* message,
+CommandLineOption* CommandLineOptions::addString(const char* shortflag,
+                                                 const char* longflag,
+                                                 const char* message,
                                                  CommandLineNumArguments num,
                                                  int mincount,
                                                  int maxcount)
@@ -186,9 +186,9 @@ CommandLineOption* CommandLineOptions::addString(char* shortflag,
   return option;
 }
 
-CommandLineOption* CommandLineOptions::addFlag(char* shortflag, 
-                                               char* longflag, 
-                                               char* message, 
+CommandLineOption* CommandLineOptions::addFlag(const char* shortflag, 
+                                               const char* longflag, 
+                                               const char* message, 
                                                CommandLineNumArguments num,
                                                int mincount,
                                                int maxcount) 
@@ -221,9 +221,9 @@ CommandLineOption* CommandLineOptions::addFlag(char* shortflag,
   return option;
 }
 
-CommandLineOption* CommandLineOptions::addInt(char* shortflag,
-                                              char* longflag,
-                                              char* message,
+CommandLineOption* CommandLineOptions::addInt(const char* shortflag,
+                                              const char* longflag,
+                                              const char* message,
                                               CommandLineNumArguments num,
                                               int mincount,
                                               int maxcount)
@@ -256,12 +256,12 @@ CommandLineOption* CommandLineOptions::addInt(char* shortflag,
   return option;
 }
 
-CommandLineOption* CommandLineOptions::addDouble(char* shortflag, 
-                                               char* longflag, 
-                                               char* message, 
-                                               CommandLineNumArguments num,
-                                               int mincount,
-                                               int maxcount) 
+CommandLineOption* CommandLineOptions::addDouble(const char* shortflag, 
+                                                 const char* longflag, 
+                                                 const char* message, 
+                                                 CommandLineNumArguments num,
+                                                 int mincount,
+                                                 int maxcount) 
 {
   CommandLineOption* option = new CommandLineOption();
   option->type = CL_TYPE_DOUBLE;
@@ -291,9 +291,9 @@ CommandLineOption* CommandLineOptions::addDouble(char* shortflag,
   return option;
 }
 
-CommandLineOption* CommandLineOptions::addFile(char* shortflag, 
-                                               char* longflag, 
-                                               char* message, 
+CommandLineOption* CommandLineOptions::addFile(const char* shortflag, 
+                                               const char* longflag, 
+                                               const char* message, 
                                                CommandLineNumArguments num,
                                                int mincount,
                                                int maxcount) 
@@ -356,7 +356,7 @@ void CommandLineOptions::print() {
 
 bool CommandLineOptions::setup() {
   if(!options.size()) {
-    RX_ERROR(CMO_ERR_NO_OPTIONS));
+    RX_ERROR(CMO_ERR_NO_OPTIONS);
     return false;
   }
 
@@ -367,7 +367,7 @@ bool CommandLineOptions::setup() {
 
   argtable = new void*[options.size()];
   for(size_t i = 0; i < options.size(); ++i) {
-     argtable[i] = (void*)options[i]->arg;
+    argtable[i] = (void*)options[i]->arg;
   }
 
   is_setup = true;

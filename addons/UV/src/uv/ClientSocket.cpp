@@ -55,7 +55,7 @@ void ClientSocket::setup(client_socket_on_connected_cb conCB,
 }
 
 bool ClientSocket::connect() {
-
+  
   int r = uv_tcp_init(loop, sock);
   if(r) {
     RX_ERROR("uv_tcp_init failed");
