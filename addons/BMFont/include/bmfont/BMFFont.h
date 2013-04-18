@@ -1,26 +1,26 @@
 /*
  
- Basic BMFFont parser.
- ---------------------
+  Basic BMFFont parser.
+  ---------------------
 
- - use the BMFFont application to generate a font map + XML output. 
-   http://www.angelcode.com/products/bmfont/
+  - use the BMFFont application to generate a font map + XML output. 
+  http://www.angelcode.com/products/bmfont/
 
- - supports only one page font textures (make the size of the texture big enough)
+  - supports only one page font textures (make the size of the texture big enough)
 
- - supports a custom callback which is called when we generate triangles. You can use
-   this callback to change the color of e.g. character
+  - supports a custom callback which is called when we generate triangles. You can use
+  this callback to change the color of e.g. character
 
- - The `BMFFont` class is a simple wrapper which ties the `BMFFontLoader` and `BMFFontRenderer` 
-   together. You can use the `BMFFontLoader` separately if you want ot handly the vertices 
-   in a different way. The `BMFFontRenderer` uses an optimized openGL render path using 
-   multidraw arrays and a stream draw VBO (could be more optimized by mapping the VBO 
-   memory to pinned space).
+  - The `BMFFont` class is a simple wrapper which ties the `BMFFontLoader` and `BMFFontRenderer` 
+  together. You can use the `BMFFontLoader` separately if you want ot handly the vertices 
+  in a different way. The `BMFFontRenderer` uses an optimized openGL render path using 
+  multidraw arrays and a stream draw VBO (could be more optimized by mapping the VBO 
+  memory to pinned space).
 
 
- - This class is to be used in a way where you "add" texts vertices to a buffer. You can 
-   either add text once (when it's static), or update it for every frame. If your text changes
-   you need to add it again and make sure to call `BMFFont::reset()`.
+  - This class is to be used in a way where you "add" texts vertices to a buffer. You can 
+  either add text once (when it's static), or update it for every frame. If your text changes
+  you need to add it again and make sure to call `BMFFont::reset()`.
 
 */
 
@@ -39,7 +39,7 @@ class BMFFont {
   BMFFont();
   ~BMFFont();
 
- bool setup(std::string filename,                                                      /* sets up a font + renderer and shader. The pageSize is used by the VBO that contains the vertices for the text. When it needs to grow, it will grow `pageSize` or a multiple of this. */
+  bool setup(std::string filename,                                                      /* sets up a font + renderer and shader. The pageSize is used by the VBO that contains the vertices for the text. When it needs to grow, it will grow `pageSize` or a multiple of this. */
              int windowW,  
              int windowH, 
              size_t pageSize = 1024, 
@@ -48,14 +48,16 @@ class BMFFont {
   void setColor(float r, float g, float b, float a = 1.0);
   void setAlpha(float a);
   size_t addText(std::string str, float x, float y);                                    /* add a new text and return indices to the offsets and vertex counts of the BMFRenderer, see BMFRenderer for more info */
-  void update();                                                                        /* only call update when you're using the drawText() function. draw() will call update for you. Only call update() once after changing your texts */
+  void flagChanged();                                                                   /* must be called if you want to upload the vertices to the gpu, when you add text we will automatically calls this for you */
+  void update();                                                                        /* update will make sure that the vertices will be sent to the gpu whenever the've been changed. */
   void draw();
   void bind();                                                                          /* bind the GL objects used for drawing; only call this manually when you're using `drawText()`, when  you use only `draw()` don't call this. Only call bind() once per frame. */
   void drawText(size_t index);                                                          /* only draw a specific text entry */
   void drawText(size_t index, const float* modelMatrix);                                /* only draw a specific text entry + with the given model matrix */
   void reset();
   void print();
-  void getStringSize(std::string str, int& w, int& h);                                   /* get the width and max height for the given string */
+  void getStringSize(std::string str, int& w, int& h);                                  /* get the width and max height for the given string */
+  size_t getNumVertices();                                                              /* get the number of vertices used to render the text*/
 
  public:
   BMFLoader<T> loader;
@@ -64,7 +66,7 @@ class BMFFont {
 
 template<class T>
 BMFFont<T>::BMFFont()
-  :renderer(loader)
+:renderer(loader)
 {
 }
 
@@ -88,6 +90,7 @@ inline void BMFFont<T>::setColor(float r, float g, float b, float a) {
 template<class T>
 inline size_t BMFFont<T>::addText(std::string str, float x, float y) {
   std::vector<T> vertices = loader.generateVertices(str, x, y);
+  flagChanged();
   return renderer.addVertices(vertices);
 }
 
@@ -135,6 +138,16 @@ inline void BMFFont<T>::bind() {
 template<class T>
 inline void BMFFont<T>::getStringSize(std::string str, int& w, int& h) {
   loader.getStringSize(str, w, h);
+}
+
+template<class T>
+inline size_t BMFFont<T>::getNumVertices() {
+  return renderer.size();
+}
+
+template<class T>
+inline void BMFFont<T>::flagChanged() {
+  return renderer.flagChanged();
 }
 
 

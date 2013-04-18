@@ -48,11 +48,14 @@ class BMFRenderer {
   void setModelMatrix(const float* mm);
   void setAlpha(float a);
   void reset();                                                           /* reset the VBO, call this when you are updating the text repeatedly */
+  size_t size();                                                          /* number of vertices */
   void bind();                                                            /* bind the specific GL objects we use to render the text. only call this when you are using drawText(). Call bind() once per frame. */
+  void flagChanged();                                                     /* when called we make sure that the generated vertices will be updated the next time you call update(); when vertices change this will be set for you. */
  protected:
   void clear();                                                           /* deallocates everything and resets the complete state; */
 
  protected:
+  bool is_changed;                                                        /* set in `flagChanged()` and is used to keep track when we need to update the vbo */
   bool is_setup;
   bool allocated_shader;
   BMFLoader<T>& font;
@@ -197,6 +200,10 @@ void BMFRenderer<T>::update() {
     return;
   }
 
+  if(!is_changed) {
+    return;
+  }
+
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
   size_t bytes_needed = vertices.size() * sizeof(T);
@@ -215,6 +222,8 @@ void BMFRenderer<T>::update() {
   }
 
   prev_num_vertices = vertices.size(); 
+
+  is_changed = false;
 }
 
 template<class T>
@@ -273,4 +282,15 @@ template<class T>
 inline void BMFRenderer<T>::setAlpha(float a) {
   shader->setAlpha(a);
 }
+
+template<class T>
+inline size_t BMFRenderer<T>::size() {
+  return vertices.size();
+}
+
+template<class T>
+inline void BMFRenderer<T>::flagChanged() {
+  is_changed = true;
+}
+
 #endif
