@@ -218,8 +218,10 @@ void BMFRenderer<T>::update() {
   else if(vertices.size() != prev_num_vertices) {
     size_t new_bytes = (vertices.size() - prev_num_vertices) * sizeof(T);
     size_t prev_offset = prev_num_vertices * sizeof(T);
-    glBufferSubData(GL_ARRAY_BUFFER, prev_offset, new_bytes, vertices[prev_num_vertices].getPtr());
+    //    glBufferSubData(GL_ARRAY_BUFFER, prev_offset, new_bytes, vertices[prev_num_vertices].getPtr());
   }
+
+  glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_needed, vertices[0].getPtr());
 
   prev_num_vertices = vertices.size(); 
 
@@ -269,6 +271,11 @@ inline void BMFRenderer<T>::drawText(size_t dx) {
 
 template<class T>
 inline void BMFRenderer<T>::drawText(size_t dx, const float* modelMatrix) {
+  assert(dx < multi_counts.size());
+  assert(multi_counts[dx] > 0);
+  assert(dx < multi_firsts.size());
+  assert(multi_firsts[dx] >= 0);
+
   shader->setModelMatrix(modelMatrix);
   glDrawArrays(GL_TRIANGLES, multi_firsts[dx], multi_counts[dx]);
 }
@@ -292,5 +299,7 @@ template<class T>
 inline void BMFRenderer<T>::flagChanged() {
   is_changed = true;
 }
+
+
 
 #endif

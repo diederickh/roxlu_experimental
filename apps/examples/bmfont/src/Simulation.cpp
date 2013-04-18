@@ -33,6 +33,7 @@ void Simulation::draw() {
   font.setColor(1.0f, 0.3f, 0.5f);
   font.addText(rx_strftime("%S"), 130.0f, 10.0f);
 
+  font.update(); // <-- make sure that the vertices are sent to the gpu
   font.draw();
   fps.draw();
 }

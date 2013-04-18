@@ -118,6 +118,7 @@ inline void BMFShader::setProjectMatrix(const float* pm) {
 }
 
 inline void BMFShader::setAlpha(float a) {
+  glUseProgram(prog);
   glUniform1f(u_alpha, a);
 }
 
