@@ -45,12 +45,19 @@ class BMFFont {
              size_t pageSize = 1024, 
              bool datapath = false);     
 
+  size_t addText(std::string str,                                                       /* add a new text and return indices to the offsets and vertex counts of the BMFRenderer, see BMFRenderer for more info */
+                 float x,                                                               /* generate vertices add this x */
+                 float y,                                                               /* generate vertices add this y */
+                 float xchange = 0.0f,                                                  /* offset the vertex position with this xchange value */
+                 float ychange = 0.0f);                                                 /* offset the vertex position with this ychange value; this can be used when you want to e.g. rotate text around the X-axis. If you want to rotate the vertices around the center of the text the vertices need to be generated "around" the X-axis. */
+
   void setColor(float r, float g, float b, float a = 1.0);
   void setAlpha(float a);
-  size_t addText(std::string str, float x, float y);                                    /* add a new text and return indices to the offsets and vertex counts of the BMFRenderer, see BMFRenderer for more info */
+
   void flagChanged();                                                                   /* must be called if you want to upload the vertices to the gpu, when you add text we will automatically calls this for you */
   void update();                                                                        /* update will make sure that the vertices will be sent to the gpu whenever the've been changed. */
   void draw();
+  void debugDraw();
   void bind();                                                                          /* bind the GL objects used for drawing; only call this manually when you're using `drawText()`, when  you use only `draw()` don't call this. Only call bind() once per frame. */
   void drawText(size_t index);                                                          /* only draw a specific text entry */
   void drawText(size_t index, const float* modelMatrix);                                /* only draw a specific text entry + with the given model matrix */
@@ -58,7 +65,7 @@ class BMFFont {
   void print();
   void getStringSize(std::string str, int& w, int& h);                                  /* get the width and max height for the given string */
   size_t getNumVertices();                                                              /* get the number of vertices used to render the text*/
-
+ 
  public:
   BMFLoader<T> loader;
   BMFRenderer<T> renderer;
@@ -88,8 +95,8 @@ inline void BMFFont<T>::setColor(float r, float g, float b, float a) {
 }
 
 template<class T>
-inline size_t BMFFont<T>::addText(std::string str, float x, float y) {
-  std::vector<T> vertices = loader.generateVertices(str, x, y);
+inline size_t BMFFont<T>::addText(std::string str, float x, float y, float xchange, float ychange) {
+  std::vector<T> vertices = loader.generateVertices(str, x, y, xchange, ychange);
   flagChanged();
   return renderer.addVertices(vertices);
 }
@@ -103,6 +110,12 @@ template<class T>
 inline void BMFFont<T>::draw() {
   renderer.update();
   renderer.draw();
+}
+
+template<class T>
+inline void BMFFont<T>::debugDraw() {
+  renderer.update();
+  renderer.debugDraw();
 }
 
 template<class T>

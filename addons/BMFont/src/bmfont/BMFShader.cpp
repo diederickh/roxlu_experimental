@@ -31,6 +31,10 @@ void BMFShader::setup(GLuint vbo, GLuint tex) {
     u_tex = glGetUniformLocation(prog, "u_tex");
     u_alpha = glGetUniformLocation(prog, "u_alpha");
     
+    assert(u_model_matrix >= 0);
+    assert(u_projection_matrix >= 0);
+    assert(u_tex >= 0);
+
     glUniform1f(u_alpha, 1.0f);
   }
 

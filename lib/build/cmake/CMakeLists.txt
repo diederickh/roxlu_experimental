@@ -43,11 +43,6 @@
 #                                                     directories and makes sure your executable is linked with all 
 #                                                     the necessary libraries
 #
-# roxlu_addon_add_dependency(name)                    Some addons need other addons to work. For example the OpenGL
-#                                                     addon needs the Image addon to load images. The CMakeLists.txt
-#                                                     of the OpenGL addon will add an dependency for the Image addon
-#                                                     so that the image addon is include in the build automatically.                       
-#
 #
 cmake_minimum_required(VERSION 2.8)
 
@@ -90,7 +85,14 @@ endif()
 # -------------------------------------------------------------------
 
 macro(roxlu_add_addon addon)
-  include(${roxlu_addons_dir}/${addon}/build/cmake/CMakeLists.txt) 
+  set(addon_target_name "roxlu_${addon}")
+  string(TOLOWER ${addon_target_name} addon_target_name)
+
+  if(TARGET ${addon_target_name})
+  else()
+      include(${roxlu_addons_dir}/${addon}/build/cmake/CMakeLists.txt) 
+  endif()
+
 endmacro(roxlu_add_addon)
 
 macro(roxlu_add_dll dll)
@@ -160,14 +162,6 @@ endmacro(roxlu_enable_opengl)
 # --------------------------------------------------------------------------------
 
 macro(roxlu_app_initialize app_name)
-  list(LENGTH roxlu_addon_dependencies roxlu_addon_dependencies_count)
-  math(EXPR roxlu_addon_dependencies_iter ${roxlu_addon_dependencies_count}-1)
-
-  foreach(i RANGE ${roxlu_addon_dependencies_iter})
-    list(GET roxlu_addon_dependencies ${i} roxlu_dependent_addon)
-    roxlu_add_addon(${roxlu_dependent_addon})
-  endforeach(i)
-
   if(CMAKE_BUILD_TYPE STREQUAL Debug)
     set(roxlu_app_name ${app_name}_debug)
   else()
@@ -295,10 +289,6 @@ endmacro()
 macro(roxlu_addon_add_source_files glob) 
   file(GLOB_RECURSE addon_source_files ${roxlu_addon_src_dir}/*.cpp)
   list(APPEND roxlu_addon_source_files ${addon_source_files})
-endmacro()
-
-macro(roxlu_addon_add_dependency addon)
-  list(APPEND roxlu_addon_dependencies ${addon})
 endmacro()
 
 macro(roxlu_addon_end)

@@ -48,13 +48,15 @@ static const char* BMFONT_FS = GLSL(150,
 
                                     void main() {
                                       float intensity = texture(u_tex, v_tex).r;
-                                      fragcolor = vec4(v_fg_color.rgb, intensity) * u_alpha;
+                                      fragcolor = vec4(v_fg_color.rgb, intensity);
+                                      fragcolor.a *= u_alpha;
                                     }
 );
 
 #else 
 static const char* BMFONT_VS = GLSL(120, 
                                     uniform mat4 u_projection_matrix;
+                                    uniform mat4 u_model_matrix;
                                     attribute vec4 a_pos;
                                     attribute vec2 a_tex;
                                     attribute vec4 a_fg_color;
@@ -63,7 +65,7 @@ static const char* BMFONT_VS = GLSL(120,
                                     varying vec4 v_fg_color;
 
                                     void main() {
-                                      gl_Position = u_projection_matrix * a_pos;
+                                      gl_Position = u_projection_matrix * u_model_matrix * a_pos;
                                       v_tex = a_tex;
                                       v_fg_color = a_fg_color;
                                     }

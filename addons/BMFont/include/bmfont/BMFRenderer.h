@@ -43,6 +43,7 @@ class BMFRenderer {
   void update();                                                          /* updates the VBO if needed */
   size_t addVertices(std::vector<T>& vertices);                           /* add vertices to the VBO and returns the index into multi_counts and multi_firsts. See glMultiDrawArrays for info on these members */
   void draw();                                                            /* render all strings */
+  void debugDraw();
   void drawText(size_t index);                                            /* draw only a specific entry. pass a value you got from addVertices().. also make sure you call bind() before drawing single instances of vertices */
   void drawText(size_t index, const float* modelMatrix);                  /* draw only a specific entry + custom model matrix. pass a value you got from addVertices().. also make sure you call bind() before drawing single instances of vertices */
   void setModelMatrix(const float* mm);
@@ -145,7 +146,7 @@ void BMFRenderer<T>::reset() {
 template<class T>
 void BMFRenderer<T>::setup(int windowW, int windowH, size_t pageSize, BMFShader* useShader) {
   page_size = pageSize;
-  rx_ortho(0, windowW, windowH, 0.0, -1.0, 1.0, projection_matrix);
+  rx_ortho(0, windowW, windowH, 0.0, -500.0, 500.0, projection_matrix);
 
   if(!font.getImageWidth() || !font.getImageHeight() || !font.getImagePath().size()) {
     RX_ERROR(BMF_ERR_NO_IMAGE);
@@ -218,10 +219,10 @@ void BMFRenderer<T>::update() {
   else if(vertices.size() != prev_num_vertices) {
     size_t new_bytes = (vertices.size() - prev_num_vertices) * sizeof(T);
     size_t prev_offset = prev_num_vertices * sizeof(T);
-    //    glBufferSubData(GL_ARRAY_BUFFER, prev_offset, new_bytes, vertices[prev_num_vertices].getPtr());
+    glBufferSubData(GL_ARRAY_BUFFER, prev_offset, new_bytes, vertices[prev_num_vertices].getPtr());
   }
 
-  glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_needed, vertices[0].getPtr());
+  //glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_needed, vertices[0].getPtr());
 
   prev_num_vertices = vertices.size(); 
 
@@ -263,6 +264,14 @@ void BMFRenderer<T>::draw() {
   }
 #endif
 }
+
+template<class T>
+void BMFRenderer<T>::debugDraw() {
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  draw();
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
 
 template<class T>
 inline void BMFRenderer<T>::drawText(size_t dx) {

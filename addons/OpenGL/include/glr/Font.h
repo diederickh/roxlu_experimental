@@ -271,7 +271,7 @@ namespace gl {
                                     void main() {
                                       vec4 col = texture(u_tex, v_tex);
                                       frag_color.rgb = u_col * col.r ;
-                                      frag_color.a = col.a;
+                                      frag_color.a = col.a * col.r;
                                     }
   );
 
@@ -294,7 +294,7 @@ namespace gl {
                                     void main() {
                                       vec4 col = texture2D(u_tex, v_tex);
                                       gl_FragColor.rgb = u_col ;
-                                      gl_FragColor.a = col.a;
+                                      gl_FragColor.a = col.a * u_col.r;
                                     }
   );
 #endif

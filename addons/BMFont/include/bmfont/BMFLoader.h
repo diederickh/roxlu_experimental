@@ -30,6 +30,7 @@ using namespace rapidxml;
 #define BMF_ERR_NO_COMMON "No <common> attribute fount in font description"
 #define BMF_ERR_NO_SCALEW "No scaleW found in <common>"
 #define BMF_ERR_NO_SCALEH "No scaleH found in <common>"
+#define BMF_ERR_NO_BASE "No base found in <common>"
 #define BMF_ERR_NO_PAGE_NODE "No <pages><page></page></pages> node found"
 #define BMF_ERR_NO_FILE_ATTR "<page> does not contain a file attribute"
 
@@ -41,7 +42,13 @@ class BMFLoader {
   ~BMFLoader();
   bool load(std::string file, bool datapath = false);                            /* load a BMFont .xml type file */
   void setColor(float r, float g, float b, float a = 1.0);                       /* set the color for new vertices */
-  std::vector<T> generateVertices(std::string str, float x, float y);            /* generate vertices for the given string at position x/y */
+
+  std::vector<T> generateVertices(std::string str,                               /* generate vertices for the given string at position x/y */
+                                  float x,                                       /* generate vertices add this x */
+                                  float y,                                       /* generate vertices add this y */
+                                  float xchange,                                 /* offset the vertex position with this xchange value */
+                                  float ychange);                                /* offset the vertex position with this ychange value; this can be used when you want to e.g. rotate text around the X-axis. If you want to rotate the vertices around the center of the text the vertices need to be generated "around" the X-axis. */   
+
   void print();                                                                  /* print some debug info */
 
   std::string getImagePath();                                                    /* get the path of the image that is used by this the BMFont renderer. The image is stored in the xml file. */
@@ -58,6 +65,7 @@ class BMFLoader {
   std::string image_path;                                                        /* path to image that must be used as texture for the font */
   int image_width;                                                               /* bmfont texture width */
   int image_height;                                                              /* bmfont texture height */
+  int base;                                                                      /* the number of pixels from the absolute top of the line to the base of the characters */
 };
 
 template<class T>
@@ -152,13 +160,21 @@ bool BMFLoader<T>::load(std::string filename, bool datapath) {
   }
   image_height = rx_string_to_int(attr->value());
 
-
   // IMAGE PATH
   if(!page_node) {
     RX_ERROR(BMF_ERR_NO_PAGE_NODE);
     return false;
   }
 
+  // BASE
+  attr = common_node->first_attribute("base");
+  if(!attr) {
+    RX_ERROR(BMF_ERR_NO_BASE);
+    return false;
+  }
+  base = rx_string_to_int(attr->value());
+
+  // FILE
   attr = page_node->first_attribute("file");
   if(!attr) {
     RX_ERROR(BMF_ERR_NO_FILE_ATTR);
@@ -219,7 +235,7 @@ bool BMFLoader<T>::load(std::string filename, bool datapath) {
 }
 
 template<class T>
-std::vector<T> BMFLoader<T>::generateVertices(std::string str, float x, float y) {
+std::vector<T> BMFLoader<T>::generateVertices(std::string str, float x, float y, float xchange, float ychange) {
   float xoffset = x;
   float yoffset = y;
   std::vector<T> result;
@@ -233,6 +249,31 @@ std::vector<T> BMFLoader<T>::generateVertices(std::string str, float x, float y)
     
     BMFChar& bchar = it->second;
 
+#if 0
+
+    /*
+
+      char.x / char.width / char.y / char.height are only related to the positions in the texture image
+
+     ------------------------------------------------------------ base line, `yoffset`
+     ^                                        ^
+     | - this is the char.yoffset             |
+     |                                        |
+     v                                        |
+     <-> char.xoffset                         |
+                                              |   - `this->base`
+             /\   | |        (_)              |
+            /  \  | |__   ___ _               |
+           / /\ \ | '_ \ / __| |              |
+          / ____ \| |_) | (__| |              |
+         /_/    \_\_.__/ \___| |              v
+         -----------------  _/ |       --------------
+                           |__/        
+           
+
+     */
+
+    // FROM "Y" THE TEXT WILL BE POSITIONED FROM THE BASE
     float x0 = xoffset + bchar.xoffset;
     float y0 = yoffset + bchar.yoffset;
     float x1 = x0 + bchar.width;
@@ -243,6 +284,49 @@ std::vector<T> BMFLoader<T>::generateVertices(std::string str, float x, float y)
     T c(x1, y0, bchar.x + bchar.width, bchar.y);
     T d(x0, y0, bchar.x, bchar.y);
 
+#else
+
+    /*
+      char.x / char.width / char.y / char.height are only related to the positions in the texture image
+                                              ---------
+     ^                                            ^
+     | - this is the char.yoffset                 |
+     |                                            |
+     v                                            | 
+     <-> char.xoffset                             |
+                                                  |   - `this->base`
+             /\   | |        (_)                  |
+            /  \  | |__   ___ _                   |
+           / /\ \ | '_ \ / __| |                  |
+          / ____ \| |_) | (__| |                  |
+         /_/    \_\_.__/ \___| |                  v
+       ------------------------------------------------------------  `yoffset` (the cursor.y position)
+                           |__/        
+           
+
+     */
+
+    float hh = base * 0.5;
+
+
+    // ALIGN WITH BOTTOM OF Y
+    float x0 = xoffset + bchar.xoffset + xchange;
+    float y0 = yoffset + bchar.yoffset - base + ychange;
+    float x1 = x0 + bchar.width;
+    float y1 = y0 + bchar.height;
+    
+
+    T a(x0, y1, bchar.x, bchar.y + bchar.height);
+    T b(x1, y1, bchar.x + bchar.width, bchar.y + bchar.height);
+    T c(x1, y0, bchar.x + bchar.width, bchar.y);
+    T d(x0, y0, bchar.x, bchar.y);
+
+    /*
+    printf("char: %c, bchar.x: %d, bchar.y: %d, bchar.width: %d, bchar.height: %d, bchar.xoffset: %d, bchar.yoffset: %d\n",
+           str[i], bchar.x, bchar.y, bchar.width, bchar.height, bchar.xoffset, bchar.yoffset);
+    */
+
+#endif
     a.setColor4fv(color);
     b.setColor4fv(color);
     c.setColor4fv(color);

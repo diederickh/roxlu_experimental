@@ -1,6 +1,6 @@
 # bmfont
 
-roxlu_addon_add_dependency(Image)
+roxlu_add_addon(Image)
 
 roxlu_addon_begin("bmfont")
  # --------------------------------------------------------------------------------------
