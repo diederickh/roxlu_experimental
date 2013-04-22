@@ -113,6 +113,19 @@ namespace gl {
     shader_tex.unuse();
   }
 
+  void Drawer::drawTexture(Texture& tex, const float* mm) {
+
+    shader_tex.use();
+    shader_tex.setModelMatrix(mm);
+    shader_tex.activeTexture(tex, GL_TEXTURE0);
+    
+    texture_mesh->bind();
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    texture_mesh->unbind();
+
+    shader_tex.unuse();
+  }
+
   void Drawer::drawArrays(Mesh<VertexP>& mesh, GLenum mode, GLint first, GLsizei count) {
     shader_p.use();
     mesh.bind();
