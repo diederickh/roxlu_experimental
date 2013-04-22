@@ -3,12 +3,18 @@
 
 void work_queue_worker(uv_work_t* req) {
   WorkQueueReq* wq = static_cast<WorkQueueReq*>(req->data);
-  wq->cb_worker(wq->user, wq->work_queue->isCancelled());
+
+  if(!wq->work_queue->isCancelled()) {
+    wq->cb_worker(wq->user);
+  }
 }
 
 void work_queue_ready(uv_work_t* req, int status) {
   WorkQueueReq* wq = static_cast<WorkQueueReq*>(req->data);
-  wq->cb_ready(wq->user, wq->work_queue->isCancelled());
+
+  if(!wq->work_queue->isCancelled()) {
+    wq->cb_ready(wq->user);
+  }
 
   uv_mutex_lock(&wq->work_queue->mutex);
   wq->work_queue->num_workers--;

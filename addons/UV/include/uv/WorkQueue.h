@@ -5,7 +5,7 @@ extern "C" {
 #  include <uv.h>
 };
 
-typedef void(*work_queue_callback) (void* user, bool cancelled);
+typedef void(*work_queue_callback) (void* user); 
 
 extern void work_queue_worker(uv_work_t* req);
 extern void work_queue_ready(uv_work_t* req, int status);
