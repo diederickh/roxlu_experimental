@@ -35,7 +35,8 @@ namespace gl {
                    GLenum type);
 
     
-    void draw(float x, float y, float w = 0, float h = 0);
+    void draw(float x, float y, float w = 0, float h = 0);                     /* draw the texture at these coordinates with the given width and height */
+    void draw(const float* mm);                                                /* draw the texture using the given model matrix, make sure to set the width and height too */
     unsigned int getWidth();                                                   /* returns the height as found when loading the image, or set when calling setPixels() */
     unsigned int getHeight();                                                  /* returns the width as found when loading the image, or set when calling setPixels() */
     GLuint getID();                                                            /* returns the texture id */
@@ -95,6 +96,11 @@ namespace gl {
   inline void Texture::draw(float x, float y, float w, float h) {
     assert(glr_context);
     glr_context->drawTexture(*this, x, y, w, h);
+  }
+
+  inline void Texture::draw(const float* mm) {
+    assert(glr_context);
+    glr_context->drawTexture(*this, mm);
   }
 
 } // gl

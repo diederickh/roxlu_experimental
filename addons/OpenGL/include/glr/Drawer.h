@@ -252,6 +252,7 @@ namespace gl {
     void drawCircle(float x, float y, float radius);                                   /* draw a radius at x/y with the given radius */
     void drawRectangle(float x, float y, float w, float h);                            /* draw a  rectangle at top left x/y and w/h */
     void drawTexture(Texture& tex, float x, float y, float w = 0, float h = 0);        /* draws a texture */
+    void drawTexture(Texture& tex, const float* mm);                                   /* draws a texture with the given model matrix */
     void drawArrays(Mesh<VertexP>& mesh, GLenum mode, GLint first, GLsizei count);     /* draw a mesh, with mode (GL_TRIANGLES, GL_POINTS, etc..), and start drawing the vertices from loation `begin` and draw `count` vertices */
     void drawArrays(Mesh<VertexPT>& mesh, GLenum mode, GLint first, GLsizei count);    /* draw a mesh, with mode (GL_TRIANGLES, GL_POINTS, etc..), and start drawing the vertices from loation `begin` and draw `count` vertices */
     void drawArrays(Mesh<VertexNP>& mesh, GLenum mode, GLint first, GLsizei count);    /* draw a mesh, with mode (GL_TRIANGLES, GL_POINTS, etc..), and start drawing the vertices from loation `begin` and draw `count` vertices */
