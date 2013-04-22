@@ -3,12 +3,12 @@
 
 void work_queue_worker(uv_work_t* req) {
   WorkQueueReq* wq = static_cast<WorkQueueReq*>(req->data);
-  wq->cb_worker(wq->user);
+  wq->cb_worker(wq->user, wq->work_queue->isCancelled());
 }
 
 void work_queue_ready(uv_work_t* req, int status) {
   WorkQueueReq* wq = static_cast<WorkQueueReq*>(req->data);
-  wq->cb_ready(wq->user);
+  wq->cb_ready(wq->user, wq->work_queue->isCancelled());
 
   uv_mutex_lock(&wq->work_queue->mutex);
   wq->work_queue->num_workers--;
@@ -37,6 +37,7 @@ WorkQueueReq::~WorkQueueReq() {
 
 WorkQueue::WorkQueue() 
   :num_workers(0)
+  ,is_cancelled(false)
 {
   loop = uv_default_loop();
   uv_mutex_init(&mutex);
@@ -44,6 +45,8 @@ WorkQueue::WorkQueue()
 
 WorkQueue::~WorkQueue() {
   if(count()) {
+
+    is_cancelled = true;
 
     RX_ERROR(WQ_ERR_STILL_RUNNING);
     while(count()) {

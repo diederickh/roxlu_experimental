@@ -16,6 +16,7 @@
 #ifndef ROXLU_BMFONT_SHADER_H
 #define ROXLU_BMFONT_SHADER_H
 
+#include <assert.h>
 #include <roxlu/opengl/GL.h>
 #include <roxlu/core/Utils.h>
 #include <bmfont/BMFTypes.h>

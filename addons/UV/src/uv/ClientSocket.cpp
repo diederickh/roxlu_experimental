@@ -8,11 +8,12 @@ ClientSocket::ClientSocket(std::string host, std::string port)
   ,port(port)
   ,loop(NULL)
   ,user(NULL)
+   //  ,timer_req(NULL)
   ,cb_connected(NULL)
   ,cb_read(NULL)
   ,is_connected(false)
+  ,is_connecting(false)
 {
-  // loop = uv_default_loop();
   loop = uv_loop_new();
 
   sock = new uv_tcp_t();
@@ -22,7 +23,6 @@ ClientSocket::ClientSocket(std::string host, std::string port)
   connect_req.data = this;
   shutdown_req.data = this;
   timer_req.data = this;
-
 }
 
 ClientSocket::~ClientSocket() {
@@ -39,6 +39,7 @@ ClientSocket::~ClientSocket() {
   uv_loop_delete(loop);
   loop = NULL;
   is_connected = false;
+  is_connecting = false;
 }
 
 void ClientSocket::clear() {
@@ -55,7 +56,14 @@ void ClientSocket::setup(client_socket_on_connected_cb conCB,
 }
 
 bool ClientSocket::connect() {
-  
+
+  if(is_connecting) {
+    RX_WARNING(CS_WARN_RECONNECTING);
+    return false;
+  }
+
+  is_connecting = true;
+
   int r = uv_tcp_init(loop, sock);
   if(r) {
     RX_ERROR("uv_tcp_init failed");
@@ -93,12 +101,17 @@ void ClientSocket::disconnect() {
 
 void ClientSocket::reconnect() {
   clear(); 
+
+  if(is_connecting) {
+    return;
+  }
+
   int r = uv_timer_init(loop, &timer_req);
   if(r) {
     RX_ERROR("uv_time_init() failed. cannot reconnect");
     return;
   }
-    
+
   uv_timer_start(&timer_req, client_socket_on_reconnect_timer, 1000, 0);
 }
 
@@ -152,6 +165,7 @@ void client_socket_on_connect(uv_connect_t* req, int status) {
   ClientSocket* c = static_cast<ClientSocket*>(req->data);
   if(status == -1) {
     RX_ERROR("cannot connect: %s", uv_strerror(uv_last_error(c->loop)));
+    c->is_connecting = false;
     c->reconnect();
     return;
   }
@@ -175,7 +189,6 @@ void client_socket_on_connect(uv_connect_t* req, int status) {
 void client_socket_on_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
 
   ClientSocket* c = static_cast<ClientSocket*>(handle->data);
-
 
   RX_VERBOSE("Received data from server, :%ld bytes, buffer.size(): %ld", nbytes, c->buffer.size());
 
@@ -206,7 +219,6 @@ void client_socket_on_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
       return;
     }
        
-    RX_ERROR("------- NEED TO RECONNECT TO THE SERVER ------------- ");
     return;
   }
 
@@ -252,6 +264,7 @@ void client_socket_on_close(uv_handle_t* handle) {
 void client_socket_on_close_reconnect(uv_handle_t* handle) {
   ClientSocket* c = static_cast<ClientSocket*>(handle->data);
   c->is_connected = false;
+  c->is_connecting = false;
   c->clear();
   c->reconnect();
 }
@@ -267,7 +280,6 @@ void client_socket_on_reconnect_timer(uv_timer_t* handle, int status) {
     RX_ERROR("error shutting down client. %s", uv_strerror(uv_last_error(handle->loop)));
     return;
   }
-    
-  RX_VERBOSE("reconnecting");
+
   c->connect();
 }

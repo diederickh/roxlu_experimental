@@ -204,7 +204,6 @@ namespace gl {
         break;
       }
     }
-
   }
 
   void Shader::print() {

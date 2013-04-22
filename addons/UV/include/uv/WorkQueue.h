@@ -5,7 +5,7 @@ extern "C" {
 #  include <uv.h>
 };
 
-typedef void(*work_queue_callback) (void* user);
+typedef void(*work_queue_callback) (void* user, bool cancelled);
 
 extern void work_queue_worker(uv_work_t* req);
 extern void work_queue_ready(uv_work_t* req, int status);
@@ -31,9 +31,18 @@ class WorkQueue {
   void addWorker(work_queue_callback workerCB, work_queue_callback readCB, void* user);
   void update();
   size_t count();
+  bool isCancelled();
 
   size_t num_workers;
   uv_loop_t* loop;
   uv_mutex_t mutex;
+
+ private:
+  bool is_cancelled;
 };
+
+inline bool WorkQueue::isCancelled() {
+  return is_cancelled;
+}
+
 #endif

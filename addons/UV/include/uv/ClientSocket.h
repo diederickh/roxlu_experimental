@@ -12,6 +12,7 @@ extern "C" {
 #include <roxlu/core/Log.h>
 
 #define CS_WARN_CANT_DISCONNECT "We're not connected so we cant disconnect"
+#define CS_WARN_RECONNECTING "Cannot connect as we're already reconnecting"
 #define CS_ERR_CANT_SHUTDOWN "Calling uv_shutdown failed"
 #define CS_ERR_CANT_WRITE "Cannot write to server because we're not connected."
 
@@ -58,6 +59,7 @@ class ClientSocket {
   uv_connect_t connect_req;
   uv_shutdown_t shutdown_req;
   uv_timer_t timer_req;
+  
   std::string host;
   std::string port;
   std::vector<char> buffer;
@@ -67,6 +69,7 @@ class ClientSocket {
   void* user;
   
   bool is_connected;
+  bool is_connecting; 
 
 };
 

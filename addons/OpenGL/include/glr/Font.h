@@ -365,7 +365,6 @@ namespace gl {
       RX_ERROR(ERR_FONT_UNI_COL);
       return;
     }
-    printf("%d\n", vert_id);
     
     // vao
     glGenVertexArrays(1, &vao);

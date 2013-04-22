@@ -129,7 +129,7 @@ void BMFRenderer<T>::clear() {
   is_setup = false;
 
   memset(projection_matrix, 0x00, sizeof(projection_matrix));
-
+ 
   multi_firsts.clear();
   multi_counts.clear();
   vertices.clear();
