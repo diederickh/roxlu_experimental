@@ -112,7 +112,7 @@ void ClientSocket::reconnect() {
     return;
   }
 
-  uv_timer_start(&timer_req, client_socket_on_reconnect_timer, 1000, 0);
+  uv_timer_start(&timer_req, client_socket_on_reconnect_timer, 10000, 0);
 }
 
 void ClientSocket::update() {
