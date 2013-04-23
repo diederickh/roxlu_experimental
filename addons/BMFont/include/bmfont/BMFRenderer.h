@@ -242,9 +242,9 @@ inline void BMFRenderer<T>::bind() {
     return ;
   }
 
+  shader->bind();
   shader->setProjectMatrix(projection_matrix);
   shader->setModelMatrix(model_matrix);
-  shader->draw();
 }
 
 template<class T>

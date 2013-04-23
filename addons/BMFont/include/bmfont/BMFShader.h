@@ -98,8 +98,7 @@ class BMFShader {
   virtual void setModelMatrix(const float* modelMatrix);
   virtual void setProjectMatrix(const float* projectionMatrix);
   virtual void setAlpha(float a);
-  virtual void draw();
-
+  void bind();
  public:
   static GLuint prog;
   static GLint u_projection_matrix;
@@ -111,18 +110,24 @@ class BMFShader {
 };
 
 inline void BMFShader::setModelMatrix(const float* mm) {
-  glUseProgram(prog);
   glUniformMatrix4fv(u_model_matrix, 1, GL_FALSE, mm);
 }
 
 inline void BMFShader::setProjectMatrix(const float* pm) {
-  glUseProgram(prog);
   glUniformMatrix4fv(u_projection_matrix, 1, GL_FALSE, pm);
 }
 
 inline void BMFShader::setAlpha(float a) {
-  glUseProgram(prog);
   glUniform1f(u_alpha, a);
+}
+
+inline void BMFShader::bind() {
+  glBindVertexArray(vao);
+  glUseProgram(prog);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_RECTANGLE, tex);
+  glUniform1i(u_tex, 0);
 }
 
 #endif 

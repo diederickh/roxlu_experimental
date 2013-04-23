@@ -53,12 +53,4 @@ void BMFShader::setup(GLuint vbo, GLuint tex) {
   this->tex = tex;
 }
 
-void BMFShader::draw() {
-  glBindVertexArray(vao);
-  glUseProgram(prog);
-
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_RECTANGLE, tex);
-  glUniform1i(u_tex, 0);
-}
 
