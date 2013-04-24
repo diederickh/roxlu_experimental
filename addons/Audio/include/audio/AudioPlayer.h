@@ -13,11 +13,18 @@ class AudioPlayer {
  public:
   AudioPlayer();
   ~AudioPlayer();
+
   bool load(std::string file, bool datapath = false);
   bool play();
+  bool stop();
+
   PaSampleFormat libSndfileFormatToPortAudioFormat(int fmt);
+  size_t getTotalReadFrames();
+  int getSampleRate();
 
  public:
+  size_t total_read_frames;
+  int samplerate;
   Audio audio;
   AudioFile audio_file;
 };
@@ -40,4 +47,13 @@ inline PaSampleFormat AudioPlayer::libSndfileFormatToPortAudioFormat(int fmt) {
      return 0;
   }
 }
+
+inline size_t AudioPlayer::getTotalReadFrames() {
+  return total_read_frames;
+}
+
+inline int AudioPlayer::getSampleRate() {
+  return samplerate;
+}
+
 #endif
