@@ -108,6 +108,7 @@ inline void BMFFont<T>::update() {
 
 template<class T>
 inline void BMFFont<T>::draw() {
+  renderer.bind();
   renderer.update();
   renderer.draw();
 }
