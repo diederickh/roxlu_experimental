@@ -212,8 +212,6 @@ bool PNG::load(std::string filename, bool datapath) {
   row_ptrs = NULL;
   png_destroy_read_struct(&png_ptr, &info_ptr, 0);
   fclose(fp);
-
-  print();
   return true;
 }
 

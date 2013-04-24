@@ -30,42 +30,42 @@ ShoutClientParams::~ShoutClientParams() {
 
 bool ShoutClientParams::validate() {
   if(!icecast_port) {
-    RX_ERROR((ICE_ERR_PORT));
+    RX_ERROR(ICE_ERR_PORT);
     return false;
   }
 
   if(!icecast_ip.size()) {
-    RX_ERROR((ICE_ERR_IP));
+    RX_ERROR(ICE_ERR_IP);
     return false;
   }
 
   if(!icecast_username.size()) {
-    RX_ERROR((ICE_ERR_USERNAME));
+    RX_ERROR(ICE_ERR_USERNAME);
     return false;
   }
 
   if(!icecast_password.size()) {
-    RX_ERROR((ICE_ERR_PASSWORD));
+    RX_ERROR(ICE_ERR_PASSWORD);
     return false;
   }
 
   if(!icecast_mount.size()) {
-    RX_ERROR((ICE_ERR_MOUNT));
+    RX_ERROR(ICE_ERR_MOUNT);
     return false;
   }
   
   if(!lame_num_channels) {
-    RX_ERROR((ICE_ERR_NUM_CHANNELS));
+    RX_ERROR(ICE_ERR_NUM_CHANNELS);
     return false;
   }
 
   if(lame_samplerate == SC_SAMPLERATE_NOT_SET) {
-    RX_ERROR((ICE_ERR_SAMPLERATE));
+    RX_ERROR(ICE_ERR_SAMPLERATE);
     return false;
   }
 
   if(lame_mode == SC_MODE_NOT_SET) {
-    RX_ERROR((ICE_ERR_MODE));
+    RX_ERROR(ICE_ERR_MODE);
     return false;
   }
 
@@ -106,59 +106,59 @@ bool ShoutClient::setup(ShoutClientParams& p) {
 
 bool ShoutClient::startStreaming() {
   if(is_started) {
-    RX_ERROR((ICE_ERR_ALREADY_STARTED));
+    RX_ERROR(ICE_ERR_ALREADY_STARTED);
     return false;
   }
 
   if(!(shout = shout_new())) {
-    RX_ERROR((ICE_ERR_NEW));
+    RX_ERROR(ICE_ERR_NEW);
     return false;
   }
 
   if(shout_set_host(shout, params.icecast_ip.c_str()) != SHOUTERR_SUCCESS) {
-    RX_ERROR((ICE_ERR_SET_HOST, shout_get_error(shout)));
+    RX_ERROR(ICE_ERR_SET_HOST, shout_get_error(shout));
     shout_free(shout);
     return false;
   }
 
   if(shout_set_protocol(shout, SHOUT_PROTOCOL_HTTP) != SHOUTERR_SUCCESS) {
-    RX_ERROR((ICE_ERR_SET_PROTO, shout_get_error(shout)));
+    RX_ERROR(ICE_ERR_SET_PROTO, shout_get_error(shout));
     shout_free(shout);
     return false;
   }
 
   if(shout_set_port(shout, params.icecast_port) != SHOUTERR_SUCCESS) {
-    RX_ERROR((ICE_ERR_SET_PORT, shout_get_error(shout)));
+    RX_ERROR(ICE_ERR_SET_PORT, shout_get_error(shout));
     shout_free(shout);
     return false;
   }
 
   if(shout_set_password(shout, params.icecast_password.c_str()) != SHOUTERR_SUCCESS) {
-    RX_ERROR((ICE_ERR_SET_PASS, shout_get_error(shout)));
+    RX_ERROR(ICE_ERR_SET_PASS, shout_get_error(shout));
     shout_free(shout);
     return false;
   }
 
   if(shout_set_mount(shout, params.icecast_mount.c_str()) != SHOUTERR_SUCCESS) {
-    RX_ERROR((ICE_ERR_SET_MOUNT, shout_get_error(shout)));
+    RX_ERROR(ICE_ERR_SET_MOUNT, shout_get_error(shout));
     shout_free(shout);
     return false;
   }
 
   if(shout_set_user(shout, params.icecast_username.c_str()) != SHOUTERR_SUCCESS) {
-    RX_ERROR((ICE_ERR_SET_USERNAME, shout_get_error(shout)));
+    RX_ERROR(ICE_ERR_SET_USERNAME, shout_get_error(shout));
     shout_free(shout);
     return false;
   }
 
   if(shout_set_format(shout, SHOUT_FORMAT_MP3) != SHOUTERR_SUCCESS) {
-    RX_ERROR((ICE_ERR_SET_FORMAT, shout_get_error(shout)));
+    RX_ERROR(ICE_ERR_SET_FORMAT, shout_get_error(shout));
     shout_free(shout);
     return false;
   }
 
   if(shout_set_nonblocking(shout, 1) != SHOUTERR_SUCCESS) {
-    RX_ERROR((ICE_ERR_SET_NONBLOCK, shout_get_error(shout)));
+    RX_ERROR(ICE_ERR_SET_NONBLOCK, shout_get_error(shout));
     shout_free(shout);
     return false;
 
@@ -191,7 +191,7 @@ bool ShoutClient::startStreaming() {
     l_samplerate = 44100;
   }
   else {
-    RX_ERROR((ICE_ERR_UNKNOWN_SAMPLERATE));
+    RX_ERROR(ICE_ERR_UNKNOWN_SAMPLERATE);
     shout_free(shout);
     return false;
   }
@@ -203,14 +203,14 @@ bool ShoutClient::startStreaming() {
     l_mode = MONO;
   }
   else {
-    RX_ERROR((ICE_ERR_UNKNOWN_MODE));
+    RX_ERROR(ICE_ERR_UNKNOWN_MODE);
     shout_free(shout);
     return false;
   }
 
   lame_flags = lame_init();
   if(!lame_flags) {
-    RX_ERROR((ICE_ERR_LAME_INIT));
+    RX_ERROR(ICE_ERR_LAME_INIT);
     shout_free(shout);
     return false;
   }
@@ -252,13 +252,13 @@ bool ShoutClient::startStreaming() {
 
 bool ShoutClient::stopStreaming() {
   if(!is_started) {
-    RX_ERROR((ICE_ERR_NOT_STARTED));
+    RX_ERROR(ICE_ERR_NOT_STARTED);
     return false;
   }
 
   int ret = shout_close(shout);
   if(ret != SHOUTERR_SUCCESS) {
-    RX_ERROR((ICE_ERR_CANNOT_CLOSE, shout_get_error(shout)));
+    RX_ERROR(ICE_ERR_CANNOT_CLOSE, shout_get_error(shout));
     return false;
   }
 
@@ -282,7 +282,7 @@ void ShoutClient::addAudio(const short int* data, size_t nbytes, int nsamples) {
   if(written > 0) {
     int ret = shout_send(shout, mp3_buffer, written);
     if(ret != SHOUTERR_SUCCESS) {
-      RX_ERROR((ICE_ERR_SHOUT_SEND, shout_get_error(shout)));
+      RX_ERROR(ICE_ERR_SHOUT_SEND, shout_get_error(shout));
     }
     else {
       shout_sync(shout);
@@ -300,7 +300,7 @@ void ShoutClient::addAudioInterleaved(const short int* data, size_t nbytes, int 
   if(written > 0) {
     int ret = shout_send(shout, mp3_buffer, written);
     if(ret != SHOUTERR_SUCCESS) {
-      RX_ERROR((ICE_ERR_SHOUT_SEND, shout_get_error(shout)));
+      RX_ERROR(ICE_ERR_SHOUT_SEND, shout_get_error(shout));
     }
     else {
       shout_sync(shout);

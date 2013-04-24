@@ -10,8 +10,7 @@ Audio::Audio()
 {
   PaError err = Pa_Initialize();
   if(err != paNoError) {
-    printf("ERROR: cannot initialize port audio.\n");
-    printf("ERROR: portaudio message: %s\n", Pa_GetErrorText(err));
+    RX_ERROR(ERR_AUDIO_INIT,  Pa_GetErrorText(err));
     ::exit(0);
   }
 }
@@ -21,27 +20,26 @@ Audio::~Audio() {
   if(input_stream) {
     PaError err = Pa_StopStream(input_stream);
     if(err != paNoError) {
-      printf("ERROR: cannot stop audio input stream: %s\n", Pa_GetErrorText(err));
+      RX_ERROR(ERR_AUDIO_IN_STOP, Pa_GetErrorText(err));
     }
     else {
-      printf("VERBOSE: closed input audio stream\n");
+      RX_VERBOSE(VER_AUDIO_IN_CLOSED);
     }
     input_stream = NULL;
   }
 
   PaError err = Pa_Terminate();
   if(err != paNoError) {
-    printf("ERROR: cannot terminate port audio.\n");
-    printf("ERROR: portaudio message: %s\n", Pa_GetErrorText(err));
+    RX_ERROR(ERR_AUDIO_PORT, Pa_GetErrorText(err));
   }
 
   if(output_stream) {
     PaError err = Pa_StopStream(output_stream);
     if(err != paNoError) {
-      printf("ERROR: cannot stop audio output stream: %s\n", Pa_GetErrorText(err));
+      RX_ERROR(ERR_AUDIO_OUT_STOP, Pa_GetErrorText(err));
     }
     else {
-      printf("VERBOSE: closed output audio stream\n");
+      RX_VERBOSE(VER_AUDIO_OUT_CLOSED);
     }
     output_stream = NULL;
   }
@@ -55,19 +53,20 @@ Audio::~Audio() {
 int Audio::listDevices() {
   int num = Pa_GetDeviceCount();
   if(num <= 0) {
-    printf("ERROR: Pa_CountDevices returned: %d\n", num);
+    RX_ERROR(ERR_AUDIO_DEV_COUNT, num);
     return -1;
   };
 
   const PaDeviceInfo* dev_info;
   for(int i = 0; i < num; ++i) {
     dev_info = Pa_GetDeviceInfo(i);
-    printf("[%d] = %s, max in channels: %d, max out channels: %d, default samplerate: %f\n"
-           ,i
-           ,dev_info->name
-           ,dev_info->maxInputChannels
-           ,dev_info->maxOutputChannels
-           ,dev_info->defaultSampleRate);
+
+    RX_VERBOSE(VER_AUDIO_DEV_INFO 
+               ,i
+               ,dev_info->name
+               ,dev_info->maxInputChannels
+               ,dev_info->maxOutputChannels
+               ,dev_info->defaultSampleRate);
   }
 
   return -1;
@@ -89,11 +88,11 @@ bool Audio::isInputFormatSupported(int device, int numChannels, PaSampleFormat f
 
   err = Pa_IsFormatSupported(&input, NULL, samplerate);
   if(err == paFormatIsSupported) {
-    printf("+ [%d] supports channels: %d, format: %s, samplerate: %d\n", device, numChannels, getSampleFormatText(format).c_str(), int(samplerate));
-    return true;
+    RX_VERBOSE(VER_AUDIO_FORMAT_SUPPORTED_Y, device, numChannels, getSampleFormatText(format).c_str(), int(samplerate));
+     return true;
   }
   else {
-    printf("- [%d] supports channels: %d, format: %s, samplerate: %d\n", device, numChannels, getSampleFormatText(format).c_str(), int(samplerate));
+    RX_VERBOSE(VER_AUDIO_FORMAT_SUPPORTED_N, device, numChannels, getSampleFormatText(format).c_str(), int(samplerate));
     return false;
   }
 }
@@ -122,12 +121,12 @@ bool Audio::openInputStream(int device, int numChannels, PaSampleFormat format
 
   PaDeviceIndex total_devices = Pa_GetDeviceCount();
   if(!total_devices || device >= total_devices) {
-    printf("ERROR: unknown device id: %d\n", device);
+    RX_ERROR(ERR_AUDIO_UNKNOWN_DEV, device);
     return false;
   }
 
   if(!isInputFormatSupported(device, numChannels, format, samplerate)) {
-    printf("ERROR: input format is not supported for this device: %d\n", device);
+    RX_ERROR(ERR_AUDIO_IN_FORMAT_NOT_SUPPORTED, device);
     return false;
   }
 
@@ -145,7 +144,7 @@ bool Audio::openInputStream(int device, int numChannels, PaSampleFormat format
                               ,audio_in_callback, (void*) this);
 
   if(err != paNoError) {
-    printf("ERROR: portaudio message: %s\n", Pa_GetErrorText(err));
+    RX_ERROR(ERR_AUDIO_PORTAUDIO_MSG, Pa_GetErrorText(err));
     return false;
   }
 									 
@@ -154,18 +153,18 @@ bool Audio::openInputStream(int device, int numChannels, PaSampleFormat format
 
 bool Audio::startInputStream() {
   if(!in_cb) {
-    printf("ERROR: cannot start input stream, no callback set.\n");
+    RX_ERROR(ERR_AUDIO_START_INPUT);
     return false;
   }
 
   if(input_stream == NULL) {
-    printf("ERROR: cannot start input stream which hasnt been opened yet.\n");
+    RX_ERROR(ERR_AUDIO_IN_NOT_OPENED);
     return false;
   }
 
   PaError err = Pa_StartStream(input_stream);
   if(err != paNoError) {
-    printf("ERROR: portaudio message: %s\n", Pa_GetErrorText(err));
+    RX_ERROR(ERR_AUDIO_PORTAUDIO_MSG, Pa_GetErrorText(err));
     return false;
   }
 
@@ -174,13 +173,13 @@ bool Audio::startInputStream() {
 
 bool Audio::stopInputStream() {
   if(input_stream == NULL) {
-    printf("ERROR: cannot stop a stream which isnt' created yet.\n");
+    RX_ERROR(ERR_AUDIO_STREAM_NOT_CREATED);
     return false;
   }
 
   PaError err = Pa_StopStream(input_stream);
   if(err != paNoError) {
-    printf("ERROR: portaudio message: %s\n", Pa_GetErrorText(err));
+    RX_ERROR(ERR_AUDIO_PORTAUDIO_MSG, Pa_GetErrorText(err));
     return false;
   }
 
@@ -205,12 +204,12 @@ bool Audio::openOutputStream(int device, int numChannels, PaSampleFormat format,
   params.device = device;
 
   if(params.device == paNoDevice) {
-    printf("Invalid device.\n");
+    RX_ERROR(ERR_AUDIO_INVALID_DEV);
     return false;
   }
 
   if(!numChannels) {
-    printf("Invalid channel count");
+    RX_ERROR(ERR_AUDIO_INVALID_CHANNEL_COUNT);
     return false;
   }
 
@@ -224,13 +223,13 @@ bool Audio::openOutputStream(int device, int numChannels, PaSampleFormat format,
                       audio_out_callback, this);
 
   if(err != paNoError) {
-    printf("ERROR: portaudio message: %s\n", Pa_GetErrorText(err));
+    RX_ERROR(ERR_AUDIO_PORTAUDIO_MSG, Pa_GetErrorText(err));
     return false;
   }
 
   err = Pa_SetStreamFinishedCallback(output_stream, &audio_out_end_callback);
   if(err != paNoError) {
-    printf("ERROR: portaudio message: %s\n", Pa_GetErrorText(err));
+    RX_ERROR(ERR_AUDIO_PORTAUDIO_MSG, Pa_GetErrorText(err));
     return false;
   }
 
@@ -240,19 +239,19 @@ bool Audio::openOutputStream(int device, int numChannels, PaSampleFormat format,
 
 bool Audio::startOutputStream() {
   if(!out_cb) {
-    printf("ERROR: no output callback set");
+    RX_ERROR(ERR_AUDIO_NO_OUTPUT_CB_SET);
     return false;
   }
 
   if(!output_stream) {
-    printf("ERROR: output stream not opened.\n");
+    RX_ERROR(ERR_AUDIO_OUT_NOT_OPENED);
     return false;
   }
 
   PaError err;
   err = Pa_StartStream(output_stream);
   if(err != paNoError) {
-    printf("ERROR: portaudio message: %s\n", Pa_GetErrorText(err));
+    RX_ERROR(ERR_AUDIO_PORTAUDIO_MSG, Pa_GetErrorText(err));
     return false;
   }
 
@@ -261,14 +260,14 @@ bool Audio::startOutputStream() {
 
 bool Audio::stopOutputStream() {
   if(!output_stream) {
-    printf("ERROR: output stream not opened.\n");
+    RX_ERROR(ERR_AUDIO_OUT_NOT_OPENED);
     return false;
   }
 
   PaError err;
   err = Pa_StopStream(output_stream);
   if(err != paNoError) {
-    printf("ERROR: portaudio message: %s\n", Pa_GetErrorText(err));
+    RX_ERROR(ERR_AUDIO_PORTAUDIO_MSG, Pa_GetErrorText(err));
     return false;
   }
 

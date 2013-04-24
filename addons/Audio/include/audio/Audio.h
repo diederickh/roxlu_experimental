@@ -27,6 +27,28 @@
 */
 
 
+#define ERR_AUDIO_INIT "cannot initialize port audio: %s"
+#define ERR_AUDIO_IN_STOP "cannot stop audio input stream: %s"
+#define ERR_AUDIO_PORT "cannot terminate port audio: %s"
+#define ERR_AUDIO_OUT_STOP "cannot stop audio output stream: %s"
+#define ERR_AUDIO_DEV_COUNT "Pa_CountDevices returned: %d"
+#define ERR_AUDIO_UNKNOWN_DEV "unknown device id: %d"
+#define ERR_AUDIO_IN_FORMAT_NOT_SUPPORTED "ERROR: input format is not supported for this device: %d"
+#define ERR_AUDIO_PORTAUDIO_MSG "portaudio message: %s"
+#define ERR_AUDIO_START_INPUT "cannot start input stream, no callback set."
+#define ERR_AUDIO_IN_NOT_OPENED "cannot start input stream which hasnt been opened yet"
+#define ERR_AUDIO_OUT_NOT_OPENED "output stream not opened."
+#define ERR_AUDIO_STREAM_NOT_CREATED "cannot stop a stream which isnt' created yet"
+#define ERR_AUDIO_INVALID_DEV "Invalid device"
+#define ERR_AUDIO_INVALID_CHANNEL_COUNT "Invalid channel count"
+#define ERR_AUDIO_NO_OUTPUT_CB_SET "no output callback set"
+
+#define VER_AUDIO_FORMAT_SUPPORTED_Y "+ [%d] supports channels: %d, format: %s, samplerate: %d"
+#define VER_AUDIO_FORMAT_SUPPORTED_N "- [%d] supports channels: %d, format: %s, samplerate: %d"
+#define VER_AUDIO_DEV_INFO "[%d] = %s, max in channels: %d, max out channels: %d, default samplerate: %f"
+#define VER_AUDIO_IN_CLOSED "closed input audio stream"
+#define VER_AUDIO_OUT_CLOSED "closed output audio streamd"
+
 
 typedef void(*cb_audio_in)(const void* input, unsigned long nframes, void* user);
 

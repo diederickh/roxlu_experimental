@@ -1,8 +1,9 @@
 #include <sqlite/Database.h>
+#include <roxlu/core/Log.h>
 
 int roxlu_database_busy_handler(void* v, int r) {
 #if !defined(NDEBUG)
-  printf("sqlite database seems to be locked.\n");
+  RX_ERROR("sqlite database seems to be locked.");
 #endif
   return 1;
 }
@@ -19,7 +20,7 @@ namespace roxlu  {
 
   Database::~Database() {
     if(opened) {
-      printf("closing database.\n");
+      RX_VERBOSE("closing database.");
       sqlite3_close(db);
     }
   }
@@ -28,7 +29,7 @@ namespace roxlu  {
   bool Database::open(const string& fileName) {
     file = fileName;
     if(SQLITE_OK != sqlite3_open(file.c_str(), &db)) {
-      printf("Error: %s\n", sqlite3_errmsg(db));
+      RX_ERROR("Error: %s", sqlite3_errmsg(db));
       sqlite3_close(db);
       return false;
     }
@@ -41,7 +42,7 @@ namespace roxlu  {
     Query q(*this, sql);
 
     if(!opened) {
-      printf("Warning query(): db not opened\n");
+      RX_WARNING("Warning query(): db not opened");
       return q;
     }
 
@@ -89,11 +90,11 @@ namespace roxlu  {
   // THE CALLER MUST FINALIZE() the statement when ready!
   bool Database::prepare(const string& sql, sqlite3_stmt** stmt) {
     if(!opened) {
-      printf("Warning prepare(): db not opened\n");
+      RX_WARNING("Warning prepare(): db not opened");
       return false;
     }
     if(SQLITE_OK != sqlite3_prepare_v2(db, sql.c_str(), -1, stmt, 0)) {
-      printf("DB error: %s with prepare: %s\n", sqlite3_errmsg(db), sql.c_str());
+      RX_ERROR("DB error: %s with prepare: %s\n", sqlite3_errmsg(db), sql.c_str());
       return false;
     }
     return true;
@@ -135,7 +136,7 @@ namespace roxlu  {
                                          );
 							
           if(result != SQLITE_OK) {
-            printf("Error: cannot bind: %s(%d) =  %s\n", qp->getField().c_str(),parameter_index, sqlite3_errmsg(db));
+            RX_ERROR("Error: cannot bind: %s(%d) =  %s", qp->getField().c_str(),parameter_index, sqlite3_errmsg(db));
             return false;
           }
           break;
