@@ -45,6 +45,8 @@ class BMFFont {
              size_t pageSize = 1024, 
              bool datapath = false);     
 
+  size_t allocate(int numPages);                                                        /* pre allocate some buffer to improve performance; make sure to only call this after calling `setup()` and only call it once! when pageSize = 1024 and you use numPages = 10, we callocate 10240 bytes */
+
   size_t addText(std::string str,                                                       /* add a new text and return indices to the offsets and vertex counts of the BMFRenderer, see BMFRenderer for more info */
                  float x,                                                               /* generate vertices add this x */
                  float y,                                                               /* generate vertices add this y */
@@ -94,6 +96,11 @@ inline bool BMFFont<T>::setup(std::string filename, int windowW, int windowH, si
   r = loader.load(filename, datapath);
   renderer.setup(windowW, windowH, pageSize);
   return r;
+}
+
+template<class T>
+inline size_t BMFFont<T>::allocate(int numPages) {
+  return renderer.allocate(numPages);
 }
 
 template<class T>

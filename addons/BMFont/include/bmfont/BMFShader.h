@@ -122,7 +122,6 @@ inline void BMFShader::setAlpha(float a) {
 }
 
 inline void BMFShader::bind() {
-  RX_VERBOSE("------- BIND --------");
   glBindVertexArray(vao);
   glUseProgram(prog);
 

@@ -63,20 +63,22 @@
    
    
 #   define   eglGetShaderLinkLog(id)                                             \
-        {                                                                        \
+   {                                                                             \
         GLint ret = 0;                                                           \
         glGetProgramiv(id, GL_LINK_STATUS, &ret);                                \
                                                                                  \
         if(ret == false) {                                                       \
-           int log_length = 0;                                                   \
-           GLchar buffer[log_length];                                            \
            GLsizei chars_written = 0;                                            \
-                                                                                 \
+           GLint log_length = 0;                                                 \
            glGetProgramiv(id, GL_INFO_LOG_LENGTH, &log_length);                  \
-           glGetProgramInfoLog(id, log_length, &chars_written, buffer);          \
-           printf("\n%s\n\n", buffer);                                           \
+           if(log_length > 0) {                                                  \
+               GLchar* buffer = new GLchar[log_length];                          \
+               glGetProgramInfoLog(id, 2048, &chars_written, buffer);            \
+               printf("\n%s\n\n", buffer);                                       \
+               delete[] buffer;                                                  \
+           }                                                                     \
        }                                                                         \
-   }
+    }
    
 #  else
    

@@ -18,6 +18,7 @@ extern "C" {
 
 #include <vector>
 #include <iterator>
+#include <sstream>
 #include <roxlu/Roxlu.h>
 #include <image/Image.h>
 #include <bmfont/BMFTypes.h>
@@ -33,6 +34,8 @@ extern "C" {
 #define BMF_ERR_IMAGE_SIZE "The loaded image width/height is not the same as defined in the font"
 #define BMF_ERR_BIND_NOT_ALLOCATED "We cannot bind because no bytes were allocated yet. Did you add any text?"
 #define BMF_ERR_BIND_SIZE "We cannot bind because the text doesn't have any vertices"
+#define BMF_ERR_ALLOC_ALREADY_VERTICES "You cannot allocate manually when you've added some text/vertices already. Makes sure to allocate before adding text"
+#define BMF_ERR_ALLOC_ALREADY_ALLOCATED "You cannot allocate manually when you've already allocated some bytes"
 
 template<class T> class 
 BMFLoader;
@@ -46,6 +49,7 @@ class BMFRenderer {
              int windowH,  
              size_t pageSize = 1024,                                      /* we will allocate this number of bytes each time the buffer needs to grow (or a multiple of this) */
              BMFShader* shader = NULL);      
+  size_t allocate(int numPages);                                            /* allocate `numPages * page_size` number of bytes already; we will the data with 0, make sure to only call this after setup and not when you have already uploaded some vertices! We return the number of bytes allocated or 0 on error */
   void update();                                                          /* updates the VBO if needed */
   size_t addVertices(std::vector<T>& vertices);                           /* add vertices to the VBO and returns the index into multi_counts and multi_firsts. See glMultiDrawArrays for info on these members */
   void removeVertices(size_t index);                                      /* remove vertices for the index which was returned by `addVertices()` */
@@ -97,6 +101,9 @@ BMFRenderer<T>::BMFRenderer(BMFLoader<T>& font)
   ,prev_num_vertices(0) 
   ,page_size(1024) 
   ,must_replace(false)
+  ,bytes_allocated(0)
+  ,vbo(0)
+  ,tex(0)
 {
   clear();
 
@@ -196,6 +203,33 @@ void BMFRenderer<T>::setup(int windowW, int windowH, size_t pageSize, BMFShader*
 }
 
 template<class T>
+size_t BMFRenderer<T>::allocate(int numPages) {
+
+  if(vertices.size()) {
+    RX_ERROR(BMF_ERR_ALLOC_ALREADY_VERTICES);
+    return 0;
+  }
+
+  if(bytes_allocated > 0) {
+    RX_ERROR(BMF_ERR_ALLOC_ALREADY_ALLOCATED);
+    return 0;
+  }
+
+  if(!vbo) {
+    RX_ERROR(BMF_ERR_NOT_SETUP);
+    return 0;
+  }
+
+  bytes_allocated = numPages * page_size;
+  RX_VERBOSE("PAGESIZE: %ld, numPages: %ld", page_size, numPages);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glBufferData(GL_ARRAY_BUFFER, bytes_allocated, NULL, GL_STREAM_DRAW);
+
+  RX_VERBOSE("ALLOCATED: %ld", bytes_allocated);
+  return bytes_allocated;
+}
+
+template<class T>
 size_t BMFRenderer<T>::addVertices(std::vector<T>& in) {
   size_t index = multi_firsts.size();
   multi_firsts.push_back(vertices.size());
@@ -255,7 +289,7 @@ void BMFRenderer<T>::update() {
     }
     glBufferData(GL_ARRAY_BUFFER, bytes_allocated, NULL, GL_STREAM_DRAW);
     glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_needed, vertices[0].getPtr());
-    //RX_ERROR("UPLOADED - allocated");
+    RX_ERROR("UPLOADED - allocated: %ld", bytes_allocated );
   }
   else if(vertices.size() != prev_num_vertices) {
     size_t new_bytes = (vertices.size() - prev_num_vertices) * sizeof(T);
@@ -275,9 +309,15 @@ void BMFRenderer<T>::update() {
     to_be_replaced.clear();
     
   }
-  glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_needed, vertices[0].getPtr());
+  //glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_needed, vertices[0].getPtr());
+#if 0
   uint64_t d = uv_hrtime() - start;
-  //RX_WARNING("UPDATING FONT VERTICES TOOK: %ld ns, %ld millis", d, d / 1000000);
+  uint64_t md = d / 1000000;
+  std::stringstream ss;
+  ss << d << " ns " << md << " millis";
+  RX_WARNING("UPDATING FONT VERTICES TOOK: %s ", ss.str().c_str());
+#endif
+
   prev_num_vertices = vertices.size(); 
   //RX_VERBOSE("NUM VERTICES: %ld", vertices.size());
   is_changed = false;
