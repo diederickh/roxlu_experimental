@@ -65,7 +65,7 @@ class BMFFont {
   void update();                                                                        /* update will make sure that the vertices will be sent to the gpu whenever the've been changed. */
   void draw();
   void debugDraw();
-  void bind();                                                                          /* bind the GL objects used for drawing; only call this manually when you're using `drawText()`, when  you use only `draw()` don't call this. Only call bind() once per frame. */
+  bool bind();                                                                          /* bind the GL objects used for drawing; only call this manually when you're using `drawText()`, when  you use only `draw()` don't call this. Only call bind() once per frame. */
   void drawText(size_t index);                                                          /* only draw a specific text entry */
   void drawText(size_t index, const float* modelMatrix);                                /* only draw a specific text entry + with the given model matrix */
   void reset();
@@ -180,8 +180,8 @@ inline void BMFFont<T>::reset() {
 }
 
 template<class T>
-inline void BMFFont<T>::bind() {
-  renderer.bind();
+inline bool BMFFont<T>::bind() {
+  return renderer.bind();
 }
 
 template<class T>

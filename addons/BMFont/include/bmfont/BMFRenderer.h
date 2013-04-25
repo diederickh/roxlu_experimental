@@ -31,6 +31,8 @@ extern "C" {
 #define BMF_ERR_NO_IMAGE_FOUND "Cannot find the image file: %s"
 #define BMF_ERR_WRONG_NCOMPONENTS "Wrong number of image channels in image file."
 #define BMF_ERR_IMAGE_SIZE "The loaded image width/height is not the same as defined in the font"
+#define BMF_ERR_BIND_NOT_ALLOCATED "We cannot bind because no bytes were allocated yet. Did you add any text?"
+#define BMF_ERR_BIND_SIZE "We cannot bind because the text doesn't have any vertices"
 
 template<class T> class 
 BMFLoader;
@@ -56,7 +58,7 @@ class BMFRenderer {
   void setAlpha(float a);
   void reset();                                                           /* reset the VBO, call this when you are updating the text repeatedly */
   size_t size();                                                          /* number of vertices */
-  void bind();                                                            /* bind the specific GL objects we use to render the text. only call this when you are using drawText(). Call bind() once per frame. */
+  bool bind();                                                            /* bind the specific GL objects we use to render the text. only call this when you are using drawText(). Call bind() once per frame. */
   void flagChanged();                                                     /* when called we make sure that the generated vertices will be updated the next time you call update(); when vertices change this will be set for you. */
  protected:
   void clear();                                                           /* deallocates everything and resets the complete state; */
@@ -273,7 +275,7 @@ void BMFRenderer<T>::update() {
     to_be_replaced.clear();
     
   }
-  //glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_needed, vertices[0].getPtr());
+  glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_needed, vertices[0].getPtr());
   uint64_t d = uv_hrtime() - start;
   //RX_WARNING("UPDATING FONT VERTICES TOOK: %ld ns, %ld millis", d, d / 1000000);
   prev_num_vertices = vertices.size(); 
@@ -283,21 +285,26 @@ void BMFRenderer<T>::update() {
 }
 
 template<class T>
-inline void BMFRenderer<T>::bind() {
+inline bool BMFRenderer<T>::bind() {
+
   if(!is_setup) {
     RX_ERROR(BMF_ERR_NOT_SETUP);
-    return;
+    return false;
   }
   if(!bytes_allocated) { 
-    return ;
+    RX_ERROR(BMF_ERR_BIND_NOT_ALLOCATED);
+    return false;
   }
   if(!vertices.size()) {
-    return ;
+    RX_ERROR(BMF_ERR_BIND_SIZE);
+    return false;
   }
 
   shader->bind();
   shader->setProjectMatrix(projection_matrix);
   shader->setModelMatrix(model_matrix);
+
+  return true;
 }
 
 template<class T>
