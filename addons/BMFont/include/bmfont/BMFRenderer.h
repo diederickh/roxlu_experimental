@@ -253,17 +253,17 @@ void BMFRenderer<T>::update() {
     }
     glBufferData(GL_ARRAY_BUFFER, bytes_allocated, NULL, GL_STREAM_DRAW);
     glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_needed, vertices[0].getPtr());
-    RX_ERROR("UPLOADED - allocated");
+    //RX_ERROR("UPLOADED - allocated");
   }
   else if(vertices.size() != prev_num_vertices) {
     size_t new_bytes = (vertices.size() - prev_num_vertices) * sizeof(T);
     size_t prev_offset = prev_num_vertices * sizeof(T);
     glBufferSubData(GL_ARRAY_BUFFER, prev_offset, new_bytes, vertices[prev_num_vertices].getPtr());
-    RX_ERROR("UPLOADED!");
+    //RX_ERROR("UPLOADED!");
   }
 
   if(must_replace) {
-    RX_ERROR("MUST REPLACE!: %ld", to_be_replaced.size());
+    //RX_ERROR("MUST REPLACE!: %ld", to_be_replaced.size());
     for(std::vector<size_t>::iterator it = to_be_replaced.begin(); it != to_be_replaced.end(); ++it) {
       size_t dx = *it;
       size_t start = multi_firsts[dx];
@@ -275,7 +275,7 @@ void BMFRenderer<T>::update() {
   }
   //glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_needed, vertices[0].getPtr());
   uint64_t d = uv_hrtime() - start;
-  RX_WARNING("UPDATING FONT VERTICES TOOK: %ld ns, %ld millis", d, d / 1000000);
+  //RX_WARNING("UPDATING FONT VERTICES TOOK: %ld ns, %ld millis", d, d / 1000000);
   prev_num_vertices = vertices.size(); 
   //RX_VERBOSE("NUM VERTICES: %ld", vertices.size());
   is_changed = false;
