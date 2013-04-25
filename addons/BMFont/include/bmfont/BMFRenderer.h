@@ -158,6 +158,7 @@ void BMFRenderer<T>::reset() {
   vertices.clear();
   multi_firsts.clear();
   multi_counts.clear();
+  to_be_replaced.clear();
   prev_num_vertices = 0;
 }
 
