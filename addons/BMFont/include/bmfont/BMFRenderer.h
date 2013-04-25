@@ -9,6 +9,10 @@
   
  */
 
+extern "C" {
+#include <uv.h>
+}
+
 #ifndef ROXLU_BMFONT_RENDERER_H
 #define ROXLU_BMFONT_RENDERER_H
 
@@ -42,6 +46,8 @@ class BMFRenderer {
              BMFShader* shader = NULL);      
   void update();                                                          /* updates the VBO if needed */
   size_t addVertices(std::vector<T>& vertices);                           /* add vertices to the VBO and returns the index into multi_counts and multi_firsts. See glMultiDrawArrays for info on these members */
+  void removeVertices(size_t index);                                      /* remove vertices for the index which was returned by `addVertices()` */
+  void replaceVertices(size_t index, std::vector<T>& vertices);           /* replace vertices for the given index, you can only use this when the number of vertices in the given vector is the same as the one you want to replace */
   void draw();                                                            /* render all strings */
   void debugDraw();
   void drawText(size_t index);                                            /* draw only a specific entry. pass a value you got from addVertices().. also make sure you call bind() before drawing single instances of vertices */
@@ -58,6 +64,7 @@ class BMFRenderer {
  protected:
   bool is_changed;                                                        /* set in `flagChanged()` and is used to keep track when we need to update the vbo */
   bool is_setup;
+  bool must_replace; /* is set to true when we must replace vertices, see member `to_be_replaced` */
   bool allocated_shader;
   BMFLoader<T>& font;
   BMFShader* shader;                                                      /* the `BMFShader` object which setups up a VAO/Shader which is specific for the used vertex */
@@ -70,6 +77,7 @@ class BMFRenderer {
   float model_matrix[16];
   std::vector<GLint> multi_firsts;
   std::vector<GLsizei> multi_counts;
+  std::vector<size_t> to_be_replaced;
   std::vector<T> vertices;
   size_t bytes_allocated;
   size_t prev_num_vertices;                                               /* we keep track of the number of vertices in the update() function so we only need to update the sub-buffer data, with new vertices */
@@ -86,6 +94,7 @@ BMFRenderer<T>::BMFRenderer(BMFLoader<T>& font)
   ,allocated_shader(false)
   ,prev_num_vertices(0) 
   ,page_size(1024) 
+  ,must_replace(false)
 {
   clear();
 
@@ -195,13 +204,40 @@ size_t BMFRenderer<T>::addVertices(std::vector<T>& in) {
 }
 
 template<class T>
+void BMFRenderer<T>::removeVertices(size_t dx) {
+  assert(dx < multi_firsts.size());
+  size_t start = multi_firsts[dx];
+  size_t count = multi_counts[dx];
+  //RX_VERBOSE("REMOVE FROM: %ld and %ld vertices", start, count);
+
+  vertices.erase(vertices.begin() + start, vertices.begin() + start + count);
+  multi_firsts.erase(multi_firsts.begin() + dx);
+  multi_counts.erase(multi_counts.begin() + dx);
+}
+
+template<class T>
+void BMFRenderer<T>::replaceVertices(size_t dx, std::vector<T>& in) {
+  assert(dx < multi_firsts.size());
+  to_be_replaced.push_back(dx);
+
+  size_t start = multi_firsts[dx];
+  size_t count = multi_counts[dx];
+  //  RX_VERBOSE("REPLACE FROM: %ld and %ld vertices", start, count);
+
+  //std::replace(vertices.begin() + start, vertices.begin() + start + count, in.begin(), in.end());
+  std::copy(in.begin(), in.end(), vertices.begin() + start) ; // vertices.begin() + start, vertices.begin() + start + count, in.begin(), in.end());
+  must_replace = true;
+  
+}
+
+template<class T>
 void BMFRenderer<T>::update() {
 
   if(!vertices.size()) {
     return;
   }
 
-  if(!is_changed) {
+  if(!is_changed && !must_replace) {
     return;
   }
 
@@ -209,24 +245,41 @@ void BMFRenderer<T>::update() {
 
   size_t bytes_needed = vertices.size() * sizeof(T);
 
+  uint64_t start = uv_hrtime();
+
   if(bytes_needed > bytes_allocated) {
     while(bytes_allocated < bytes_needed) {
       bytes_allocated = std::max<size_t>(bytes_allocated * 2, page_size);
     }
     glBufferData(GL_ARRAY_BUFFER, bytes_allocated, NULL, GL_STREAM_DRAW);
     glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_needed, vertices[0].getPtr());
+    RX_ERROR("UPLOADED - allocated");
   }
   else if(vertices.size() != prev_num_vertices) {
     size_t new_bytes = (vertices.size() - prev_num_vertices) * sizeof(T);
     size_t prev_offset = prev_num_vertices * sizeof(T);
     glBufferSubData(GL_ARRAY_BUFFER, prev_offset, new_bytes, vertices[prev_num_vertices].getPtr());
+    RX_ERROR("UPLOADED!");
   }
 
+  if(must_replace) {
+    RX_ERROR("MUST REPLACE!: %ld", to_be_replaced.size());
+    for(std::vector<size_t>::iterator it = to_be_replaced.begin(); it != to_be_replaced.end(); ++it) {
+      size_t dx = *it;
+      size_t start = multi_firsts[dx];
+      size_t count = multi_counts[dx];
+      glBufferSubData(GL_ARRAY_BUFFER, start * sizeof(T), sizeof(T) * count, vertices[start].getPtr());
+    }
+    to_be_replaced.clear();
+    
+  }
   //glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_needed, vertices[0].getPtr());
-
+  uint64_t d = uv_hrtime() - start;
+  RX_WARNING("UPDATING FONT VERTICES TOOK: %ld ns, %ld millis", d, d / 1000000);
   prev_num_vertices = vertices.size(); 
-
+  //RX_VERBOSE("NUM VERTICES: %ld", vertices.size());
   is_changed = false;
+  must_replace = false;
 }
 
 template<class T>

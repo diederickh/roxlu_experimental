@@ -103,6 +103,15 @@ inline void rx_sleep_millis(int millis) {
 #endif
 }
 
+inline std::string rx_str_pad(std::string src, int len, char pad) {
+  if(src.size() < len) {
+    for(size_t i = src.size(); i < len; ++i) {
+      src.push_back(pad);
+    }
+  }
+  return src;
+}
+
 // rx_strftime("%Y/%m%d"), http://www.cplusplus.com/reference/clibrary/ctime/strftime/
 inline std::string rx_strftime(const char* timestr) {
   time_t t;

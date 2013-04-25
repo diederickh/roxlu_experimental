@@ -51,8 +51,15 @@ class BMFFont {
                  float xchange = 0.0f,                                                  /* offset the vertex position with this xchange value */
                  float ychange = 0.0f);                                                 /* offset the vertex position with this ychange value; this can be used when you want to e.g. rotate text around the X-axis. If you want to rotate the vertices around the center of the text the vertices need to be generated "around" the X-axis. */
 
+  void removeText(size_t index);                                                        /* remove the vertices for the given index, which was returned by `addText()` */
+ 
+  void replaceText(size_t dx, std::string str, float x, float y, float xchange = 0.0f, float ychange = 0.0f);
+  size_t addVertices(std::vector<T>& in);
+  void replaceVertices(size_t index, std::vector<T>& vertices);                              /* replaces the text with some other vertices  */
   void setColor(float r, float g, float b, float a = 1.0);
   void setAlpha(float a);
+
+ std::vector<T> generateVertices(std::string str, float x, float y, float xchange = 0.0f, float ychange = 0.0f);
 
   void flagChanged();                                                                   /* must be called if you want to upload the vertices to the gpu, when you add text we will automatically calls this for you */
   void update();                                                                        /* update will make sure that the vertices will be sent to the gpu whenever the've been changed. */
@@ -95,10 +102,38 @@ inline void BMFFont<T>::setColor(float r, float g, float b, float a) {
 }
 
 template<class T>
+inline std::vector<T> BMFFont<T>::generateVertices(std::string str, float x, float y, float xchange, float ychange) {
+  return loader.generateVertices(str, x, y, xchange, ychange);
+}
+
+template<class T>
+inline size_t BMFFont<T>::addVertices(std::vector<T>& in) {
+  flagChanged(); // @todo check if this is necessary
+  return renderer.addVertices(in);
+}
+
+template<class T>
 inline size_t BMFFont<T>::addText(std::string str, float x, float y, float xchange, float ychange) {
   std::vector<T> vertices = loader.generateVertices(str, x, y, xchange, ychange);
   flagChanged();
   return renderer.addVertices(vertices);
+}
+
+template<class T>
+inline void BMFFont<T>::replaceText(size_t dx, std::string str, float x, float y, float xchange, float ychange) {
+  std::vector<T> vertices = loader.generateVertices(str, x, y, xchange, ychange);
+  renderer.replaceVertices(dx, vertices);
+}
+
+template<class T>
+inline void BMFFont<T>::replaceVertices(size_t dx, std::vector<T>& in) {
+  renderer.replaceVertices(dx, in);
+}
+
+
+template<class T>
+inline void BMFFont<T>::removeText(size_t index) { 
+  renderer.removeVertices(index);
 }
 
 template<class T>
