@@ -75,8 +75,9 @@ int main() {
   Simulation sim;
   sim_ptr = &sim;
   sim.window = window;
-  sim.window_w = width;
-  sim.window_h = height;
+
+  glfwGetWindowSize(window, (int*)&sim.window_w, (int*)&sim.window_h);
+
   sim.setup();
   
   bool running = true;
