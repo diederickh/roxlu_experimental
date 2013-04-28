@@ -1,3 +1,6 @@
+#ifndef ROXLU_KURL_H
+#define ROXLU_KURL_H
+
 #include <fstream>
 
 #if defined(__APPLE__) || defined(__linux) 
@@ -163,3 +166,5 @@ inline bool Kurl::isVerbose() {
 inline bool Kurl::isStillRunning() {
   return still_running;
 }
+
+#endif
