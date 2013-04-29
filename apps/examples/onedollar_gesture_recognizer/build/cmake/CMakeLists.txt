@@ -9,7 +9,7 @@ roxlu_add_addon(OSC)
 roxlu_add_addon(OneDollar)
 roxlu_add_addon(OpenGL)
 
-roxlu_app_initialize("onedollar_create_gestures")
+roxlu_app_initialize("onedollar_gesture_recognizer")
    # ---------------------------------------------
    roxlu_app_add_source_file(main.cpp)
    roxlu_app_add_source_file(Simulation.cpp)
