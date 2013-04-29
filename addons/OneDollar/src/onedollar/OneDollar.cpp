@@ -307,10 +307,11 @@ bool OneDollar::save(std::string filename, bool datapath) {
     RX_ERROR(ERR_DOLLAR_SAVE_FILE);
     return false;
   }
-		
-  std::vector<Gesture*>::const_iterator it = gestures.begin();
+
+  std::vector<Gesture*>::iterator it = gestures.begin();
   while(it != gestures.end()) {
-    out_file << *(*it) << std::endl;
+    Gesture* g = *it;
+    out_file << *g << std::endl;
     ++it;
   }
   out_file.close();

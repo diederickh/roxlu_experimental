@@ -272,6 +272,7 @@ namespace gl {
                                       vec4 col = texture(u_tex, v_tex);
                                       frag_color.rgb = u_col * col.r ;
                                       frag_color.a = col.a * col.r;
+
                                     }
   );
 
@@ -293,8 +294,8 @@ namespace gl {
                                     varying vec2 v_tex; 
                                     void main() {
                                       vec4 col = texture2D(u_tex, v_tex);
-                                      gl_FragColor.rgb = u_col ;
-                                      gl_FragColor.a = col.a * u_col.r;
+                                      gl_FragColor.rgb = u_col * col.r;
+                                      gl_FragColor.a = col.r;
                                     }
   );
 #endif
@@ -373,10 +374,10 @@ namespace gl {
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-    glEnableVertexAttribArray(glGetAttribLocation(prog, "a_pos"));
-    glEnableVertexAttribArray(glGetAttribLocation(prog, "a_tex"));
-    glVertexAttribPointer(glGetAttribLocation(prog, "a_pos"), 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)0);
-    glVertexAttribPointer(glGetAttribLocation(prog, "a_tex"), 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)8);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)8);
 
     // get width/height for the ortho matrix
     GLint vp[4];

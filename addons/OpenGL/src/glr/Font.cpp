@@ -13,19 +13,28 @@ void glr_draw_string(const ::std::string& str, float x, float y, float r, float 
     while(glr_font.allocated < to_allocate) {
       glr_font.allocated = ::std::max<size_t>(glr_font.allocated * 2, 4096);
     }
+
     glBindVertexArray(glr_font.vao);
     glBindBuffer(GL_ARRAY_BUFFER, glr_font.vbo);
     glBufferData(GL_ARRAY_BUFFER, glr_font.allocated, NULL, GL_DYNAMIC_DRAW);
 
     delete[] glr_font.buffer; 
     glr_font.buffer = new float[glr_font.allocated];
+    memset(glr_font.buffer, 0, glr_font.allocated);
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)8);
   }
 
   size_t floats_per_vertex = 4; // 2-xy, 2-st
-  size_t num_vertices = str.size() * floats_per_vertex * 6;
   size_t dx = 0;
+  size_t char_count = 0;
   const char* ptr = str.c_str();
+
   for(int i = 0; i < str.size(); ++i) {
+
     int c = str[i];
     int dd = c - STB_SOMEFONT_FIRST_CHAR;
 
@@ -65,20 +74,17 @@ void glr_draw_string(const ::std::string& str, float x, float y, float r, float 
     glr_font.buffer[dx++] = y + cd->y0f;
     glr_font.buffer[dx++] = cd->s0f;
     glr_font.buffer[dx++] = cd->t0f;
+
     x += cd->x1f;
+    char_count++;
   }
 
   glUseProgram(glr_font.prog);
   glBindVertexArray(glr_font.vao);
 
   glBindBuffer(GL_ARRAY_BUFFER, glr_font.vbo);
-  glBufferData(GL_ARRAY_BUFFER, dx * sizeof(float), glr_font.buffer, GL_DYNAMIC_DRAW);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, (char_count * 6 * 4 * sizeof(float)) , glr_font.buffer); 
 
-  glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)0);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)8);
-  
   float col[3] = {r,g,b};
   glUniform3fv(glr_font.u_col, 1, col);
 
@@ -87,7 +93,7 @@ void glr_draw_string(const ::std::string& str, float x, float y, float r, float 
   glUniform1i(glr_font.u_tex, 0);
   
   glUniformMatrix4fv(glr_font.u_pm, 1, GL_FALSE, glr_font.pm);
-  glDrawArrays(GL_TRIANGLES, 0, num_vertices);
+  glDrawArrays(GL_TRIANGLES, 0, char_count * 6);
 }
 
   Font glr_font;
