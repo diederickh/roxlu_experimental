@@ -147,6 +147,7 @@ namespace buttons {
 	
     Sliderf& addFloat(const string& label, float& value);
     SliderRangef& addFloatRange(const string& label, float* value); 
+    SliderRangei& addIntRange(const string& label, int* value);
     Slideri& addInt(const string& label, int& value);
     Toggle& addBool(const string& label, bool& value);
     ColorPicker& addColor(const string& label, float* value); 

@@ -345,6 +345,12 @@ namespace buttons {
     return *el;
   }
 
+  SliderRangei& Buttons::addIntRange(const string& label, int* value) {
+    buttons::SliderRangei* el = new SliderRangei(value, createCleanName(label));
+    addElement(el, label);
+    return *el;
+  }
+
   Slideri& Buttons::addInt(const string& label, int& value) {
     buttons::Slideri* el = new Slideri(value, createCleanName(label), Slideri::SLIDER_INT);
     addElement(el, label);

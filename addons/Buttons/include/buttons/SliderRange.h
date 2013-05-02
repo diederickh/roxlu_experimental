@@ -28,10 +28,9 @@ namespace buttons {
     void onMouseDown(int mx, int my);
 
     // storage & data
-    void updateValue();                                               /* updates the current min/max value using min_p and max_p */
-    void setMinValue(T v);                                            /* set the value for the minimum entry e.g. 10.0f */
-    void setMaxValue(T v);                                            /* set the value for the maximum entry e.g. 1000.0f */
-    
+    void updateValue();                                             /* updates the current min/max value using min_p and max_p */
+    void setMinValue(T v);                                          /* set the value for the minimum entry e.g. 10.0f */
+    void setMaxValue(T v);                                          /* set the value for the maximum entry e.g. 1000.0f */
     bool canSave();
     void save(config_setting_t* setting);                           /* save the values to the settings file */
     void save(config_setting_t* setting, float* v);                 /* save for T = float */
@@ -373,7 +372,6 @@ namespace buttons {
       {
       needsRedraw();
     }
-    
   }
 
   template<class T>
@@ -502,6 +500,7 @@ namespace buttons {
   }
 
   typedef SliderRange<float> SliderRangef;
+  typedef SliderRange<int> SliderRangei;
 
 } // namespace buttons
 #endif
