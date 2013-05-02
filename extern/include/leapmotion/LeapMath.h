@@ -16,8 +16,8 @@
 
 namespace Leap {
 
-/** The constant pi as a single precision floating point number. */
 #if !defined(PI)
+/** The constant pi as a single precision floating point number. */
 static const float PI          = 3.1415926536f;
 /**
  * The constant ratio to convert an angle measure from degrees to radians.

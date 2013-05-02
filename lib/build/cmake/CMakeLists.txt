@@ -235,6 +235,15 @@ macro(roxlu_install_app)
   install(TARGETS ${roxlu_app_name} DESTINATION ${roxlu_app_install_dir})
   install(FILES ${roxlu_install_files} DESTINATION ${roxlu_app_install_dir})
 
+  ## BEGIN TESTING PACKAGING
+  if(PACKAGE)
+    install(TARGETS ${roxlu_app_name} 
+      BUNDLE DESTINATION . COMPONENT Runtime
+      RUNTIME DESTINATION . COMPONENT Runtime) 
+    install(FILES ${roxlu_install_files} DESTINATION .)
+  endif()
+  ## END PACKAGING
+
   if(WIN32)
     set_target_properties(${roxlu_app_name} PROPERTIES OUTPUT_NAME_DEBUG ${roxlu_app_name})
 
@@ -253,7 +262,7 @@ macro(roxlu_install_app)
     endforeach(i)
 
 
-endif()
+  endif()
 
 endmacro(roxlu_install_app)
 

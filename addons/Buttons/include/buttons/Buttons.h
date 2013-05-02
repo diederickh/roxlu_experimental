@@ -25,6 +25,7 @@
 #include <buttons/Types.h>
 #include <buttons/Element.h>
 #include <buttons/Slider.h>
+#include <buttons/SliderRange.h>
 #include <buttons/Toggle.h>
 #include <buttons/Button.h>
 #include <buttons/Radio.h>
@@ -34,6 +35,7 @@
 #include <buttons/Rectangle.h>
 #include <buttons/Vector.h>
 #include <buttons/Storage.h>
+
 
 using std::vector;
 using namespace roxlu;
@@ -144,6 +146,7 @@ namespace buttons {
     void load(const string& file);
 	
     Sliderf& addFloat(const string& label, float& value);
+    SliderRangef& addFloatRange(const string& label, float* value); 
     Slideri& addInt(const string& label, int& value);
     Toggle& addBool(const string& label, bool& value);
     ColorPicker& addColor(const string& label, float* value); 

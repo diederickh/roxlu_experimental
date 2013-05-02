@@ -6,6 +6,7 @@ roxlu_enable_opengl()
 
 roxlu_add_addon(OpenGL)
 roxlu_add_addon(Protractor)
+roxlu_add_addon(LeapMotion)
 
 roxlu_app_initialize("protractor_gesture_recognizer")
    # ---------------------------------------------

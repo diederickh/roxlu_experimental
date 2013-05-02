@@ -121,10 +121,6 @@ namespace gl {
 
     Mesh<VertexPT> fullscreen_quad;
     gl::Shader fullscreen_shader;
-    
-    
-
-
   };
 
   inline void Compositor::setViewMatrix(const float* vm) {

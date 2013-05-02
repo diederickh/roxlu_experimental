@@ -29,7 +29,6 @@ namespace gl {
     virtual bool getRenderPassSource(GLenum shader, std::string& global, std::string& main); /* get the shader source for the render pass which must generate the draw buffers like motion buffer, depth buffer, occlusion buffer etc.. */
     virtual bool getShaderPassSource(GLenum shader, int pass, std::string& global, std::string& main);  /* get shader source for a full screen shader pass */
 
-
     virtual void render(Pass& pass);
 
   public:
@@ -65,6 +64,16 @@ namespace gl {
     std::vector<SceneNode<VertexNP>* > lights_np;
     std::vector<SceneNode<VertexNP>* > occluders_np;
   };
+
+  /*
+
+  class FilterBlurVertical : public Filter {
+  public:
+    int getNumShaderPasses();
+    bool getShaderPassSource(GLenum shader, int pass, std::string& global, std::string& main);
+  public:
+  };
+  */
 
 } // gl
 

@@ -29,7 +29,7 @@ namespace protractor {
     Gesture(std::string name);
     void addPoint(float x, float y);                         /* add a raw input point */
     void resample(int n = 16);                               /* simplifies the path and reduces the number of points */
-    void vectorize();                                        /* generate a vector representation from the gesture. It uses the reampled points to generate a normalized vector with length 2n */
+    void vectorize(bool angleSensitive = true);              /* generate a vector representation from the gesture. It uses the reampled points to generate a normalized vector with length 2n */
     void reset();                                            /* resets all members */
     float length();                                          /* returns the path length */
     Vec2 calculateCentroid();                                /* calculates the centroid of the gesture or returns the previously calculated centroid. */

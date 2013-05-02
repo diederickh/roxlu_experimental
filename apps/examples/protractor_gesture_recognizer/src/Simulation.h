@@ -3,6 +3,12 @@
 #include <glr/GL.h>
 #include <protractor/Protractor.h>
 
+//#define USE_LEAPMOTION
+
+#if defined(USE_LEAPMOTION)
+#  include <leap/LeapMotion.h>
+#endif
+
 #define STATE_NONE 0
 #define STATE_NEW_KEY 1
 #define STATE_NEW_INPUT 2
@@ -11,6 +17,11 @@
 
 using namespace gl;
 using namespace protractor;
+
+#if defined(USE_LEAPMOTION)
+void lm_connect(const Leap::Controller& controller, void* user);
+void lm_frame(const Leap::Controller& controller, Leap::Frame& frame, void* user);
+#endif
 
 class Simulation : public SimulationBase {
  public:
@@ -44,4 +55,8 @@ class Simulation : public SimulationBase {
 
   Protractor protractor;
   int state;
+
+#if defined(USE_LEAPMOTION)
+  LeapMotion lm;
+#endif
 };

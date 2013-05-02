@@ -656,9 +656,28 @@ namespace roxlu {
     *this *= rot;
   }
 
-  void Mat4::setZRotation(const float angle)  {
-    float ca = cos(angle);
-    float sa = sin(angle);
+
+  void Mat4::setXRotation(const float radians)  {
+    float ca = cos(radians);
+    float sa = sin(radians);
+    m[5] = ca;
+    m[6] = -sa;
+    m[9] = sa;
+    m[10] = ca;
+  }
+
+  void Mat4::setYRotation(const float radians)  {
+    float ca = cos(radians);
+    float sa = sin(radians);
+    m[0] = ca;
+    m[2] = sa;
+    m[8] = -sa;
+    m[10] = ca;
+  }
+
+  void Mat4::setZRotation(const float radians)  {
+    float ca = cos(radians);
+    float sa = sin(radians);
     m[0] = ca;
     m[1] = sa;
     m[4] = -sa;
@@ -846,8 +865,8 @@ namespace roxlu {
     return *this;
   }
 
-  Mat4& Mat4::perspective(float fov, float aspect, float n, float f) {
-    float hh = tanf(fov * DEG_TO_RAD * 0.5) * n;
+  Mat4& Mat4::perspective(float fovDegrees, float aspect, float n, float f) {
+    float hh = tanf(fovDegrees * DEG_TO_RAD * 0.5) * n;
     return frustum(-hh*aspect, hh*aspect, -hh, hh, n, f);
   }
 

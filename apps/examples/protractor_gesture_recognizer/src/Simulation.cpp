@@ -1,6 +1,25 @@
 #include <Simulation.h>
 #include <sstream>
 
+#if defined(USE_LEAPMOTION)
+void lm_connect(const Leap::Controller& controller, void* user) {
+}
+
+void lm_frame(const Leap::Controller& controller, Leap::Frame&  frame, void* user) {
+  if(frame.fingers().count() == 1) {
+    Simulation* s = static_cast<Simulation*>(user);
+    const Leap::Vector p = frame.fingers()[0].tipPosition();
+    float x = rx_map<float>(p.x, -150, 150, 0, 1024);
+    float y = rx_map<float>(p.y, 5, 500, 768, 0);
+    s->mouse_x = x;
+    s->mouse_y = y;
+    s->onMouseDrag(x, y, 0,0,0);
+  }
+}
+#endif
+
+// ----------------------------------------------------
+
 Simulation::Simulation()
   :SimulationBase()
   ,gesture(NULL)
@@ -22,9 +41,15 @@ void Simulation::setup() {
   protractor.load("gestures.txt", true);
   input_gesture = new Gesture("input");
 
+#if defined(USE_LEAPMOTION)
+  lm.setup(lm_connect, lm_frame, this);
+#endif
 }
 
 void Simulation::update() {
+#if defined(USE_LEAPMOTION)
+  lm.update();
+#endif
 }
 
 void Simulation::draw() {
@@ -92,8 +117,6 @@ void Simulation::drawNewInput() {
     glr_vertex(p);
   }
   glr_end();
-
-
 }
 
 void Simulation::drawMatch() {
@@ -106,6 +129,14 @@ void Simulation::drawMatch() {
     glr_vertex((*it));
   }
   glr_end();
+
+#if defined(USE_LEAPMOTION)
+  glPointSize(10.0f);
+  glr_color(254, 131, 121);
+  glr_begin(GL_POINTS);
+  glr_vertex(Vec2(mouse_x, mouse_y));
+  glr_end();
+#endif
 }
 
 void Simulation::drawRealtime() {
@@ -145,19 +176,32 @@ void Simulation::onMouseDrag(int x, int y, int dx, int dy, int button) {
   else if(state == STATE_MATCH_REALTIME) {
     realtime.addPoint(x,y);
 
-    if(realtime.points.size() > 1200) {
-      while(realtime.points.size() > 64) {
-        realtime.points.erase(realtime.points.begin());
-      }
-    }
-    
-    float score = 0.0f;
-    Gesture* realtime_matched = protractor.match(&realtime, &score);
-    RX_VERBOSE("SCORE: %f, MATCHED: %p", score, realtime_matched);
-    if(realtime_matched) { 
-      RX_VERBOSE("NAME: %s", realtime_matched->name.c_str());     
+    while(realtime.points.size() > 164) {
+      realtime.points.erase(realtime.points.begin());
     }
 
+    std::deque<Vec2> orig_points = realtime.points;
+    std::deque<Vec2> points = realtime.points;
+    int jump_size = 10;
+    for(size_t i = 0; i < points.size(); ++i) {
+      
+      float score = 0.0f;
+      realtime.points = points;
+      Gesture* realtime_matched = protractor.match(&realtime, &score);
+
+      if(realtime_matched) { 
+        //RX_VERBOSE("SCORE: %f, MATCHED: %p", score, realtime_matched);
+        //RX_VERBOSE("NAME: %s", realtime_matched->name.c_str());     
+      }
+      
+      if(points.size() < jump_size) {
+        break;
+      }
+      points.erase(points.begin(), points.begin() + jump_size);
+
+    }
+
+    realtime.points = orig_points;
   }
 }
 

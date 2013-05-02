@@ -67,7 +67,7 @@ namespace buttons {
     }
 	
     Slider& setColor(const float hue, float sat, float bright, float a = 1.0) {
-      Element::setColor(hue,sat, bright, a);
+      Element::setColor(hue, sat, bright, a);
 		
       bar_empty_color[3] = a;
       bar_filled_color[3] = a;
@@ -116,24 +116,24 @@ namespace buttons {
       buttons::createRect(vd, x, y, w, h, bg_top_color, bg_bottom_color);
 
       p = std::min<float>(1.0, p);
+      bt_w = 20;
 		
       int bar_h = 4; // bar height
-      int bar_filled_w = w * p;
-      int bar_empty_w = w * (1.0 - p);
+      int bar_filled_w = (w - 2 * bt_w) * p;
+      int bar_empty_w = (w - 2 * bt_w) * (1.0 - p);
       int bar_x = x; // start x
       int bar_y = (y + h) - bar_h; // start y
 
       // button + / -
-      bt_w = 20;
-      bt_dec_x = bar_x + (w - bt_w * 2) - 1;
+      bt_dec_x = bar_x + (w - (bt_w * 2) );
       bt_inc_x = bar_x + (w - bt_w);
       bt_y = y;
-      bt_h = h - bar_h;
+      bt_h = h; // - bar_h;
 
       buttons::createRect(vd, bt_dec_x, bt_y, bt_w, bt_h, bt_dec_top_color_ptr, bt_dec_bottom_color_ptr); // dec bg
       buttons::createRect(vd, bt_inc_x, bt_y, bt_w, bt_h, bt_inc_top_color_ptr, bt_inc_bottom_color_ptr); // inc bg
       buttons::createRect(vd, bt_inc_x + bt_w * 0.2, bt_y + bt_h * 0.45, bt_w * 0.6, 2, col_text, col_text); // + sign
-      buttons::createRect(vd, bt_inc_x + bt_w * 0.45, bt_y + bt_h * 0.20, 2, bt_h * 0.7, col_text, col_text); // + sign		
+      buttons::createRect(vd, bt_inc_x + bt_w * 0.45, bt_y + bt_h * 0.20, 2, bt_h * 0.6, col_text, col_text); // + sign		
       buttons::createRect(vd, bt_dec_x + bt_w * 0.2, bt_y + bt_h * 0.45, bt_w * 0.6, 2, col_text, col_text); // - sign
 
       // slider
@@ -209,8 +209,14 @@ namespace buttons {
 	
     void onMouseDragged(int mx, int my, int dx, int dy) {
       if(drag_inside) {
-        int local_x = std::min<int>(x+w,std::max<int>(x,mx));
-        p = (float)(local_x-x)/w;
+
+        if(BMOUSE_INSIDE(mx, my, bt_dec_x, y, bt_dec_x + bt_w * 2, bt_h)) { 
+          return;
+        }
+
+        int range_w = (w - (bt_w * 2));
+        int local_x = std::min<int>(x+range_w,std::max<int>(x,mx));
+        p = (float)(local_x-x)/range_w;
         value = minv + (p * (maxv-minv));
         needsRedraw();
         needsTextUpdate();

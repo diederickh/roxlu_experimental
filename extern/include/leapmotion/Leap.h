@@ -808,22 +808,22 @@ class Hand : public Interface {
  * frame, then `gesture()` returns an Invalid Gesture object (rather than a null
  * value). Always check object validity in situations where a gesture might be
  * invalid.
- * 
- * The following keys can be used with the Config class to configure the gesture 
+ *
+ * The following keys can be used with the Config class to configure the gesture
  * recognizer:
- * 
+ *
  * Key string | Value type | Default value | Units
  * -----------|------------|---------------|------
  * Gesture.Circle.MinRadius | float | 5.0 | mm
- * Gesture.Circle.MinArc | float | 1.5 | radians
+ * Gesture.Circle.MinArc | float | 1.5*pi | radians
  * Gesture.Swipe.MinLength | float | 150 | mm
  * Gesture.Swipe.MinVelocity | float | 1000 | mm/s
  * Gesture.KeyTap.MinDownVelocity | float | 50 | mm/s
  * Gesture.KeyTap.HistorySeconds | float | 0.1 | s
- * Gesture.KeyTap.MinDistance | float | 3.0 | mm
+ * Gesture.KeyTap.MinDistance | float | 5.0 | mm
  * Gesture.ScreenTap.MinForwardVelocity  | float | 50 | mm/s
  * Gesture.ScreenTap.HistorySeconds | float | 0.1 | s
- * Gesture.ScreenTap.MinDistance | float | 5.0 | mm
+ * Gesture.ScreenTap.MinDistance | float | 3.0 | mm
  */
 class Gesture : public Interface {
   public:
@@ -1101,13 +1101,13 @@ class SwipeGesture : public Gesture
  * * State::STATE_STOP -- The circle gesture is finished.
  *
  * You can set the minimum radius and minimum arc length required for a movement
- * to be recognized as a circle using the config attribute of a connected 
+ * to be recognized as a circle using the config attribute of a connected
  * Controller object. Use the following keys to configure circle recognition:
  *
  * Key string | Value type | Default value | Units
  * -----------|------------|---------------|------
  * Gesture.Circle.MinRadius | float | 5.0 | mm
- * Gesture.Circle.MinArc | float | 1.5 | radians
+ * Gesture.Circle.MinArc | float | 1.5*pi | radians
  *
  * The following example demonstrates how to set the circle configuration
  * parameters:
@@ -1228,7 +1228,7 @@ class CircleGesture : public Gesture
  * -----------|------------|---------------|------
  * Gesture.ScreenTap.MinForwardVelocity  | float | 50 | mm/s
  * Gesture.ScreenTap.HistorySeconds | float | 0.1 | s
- * Gesture.ScreenTap.MinDistance | float | 5.0 | mm
+ * Gesture.ScreenTap.MinDistance | float | 3.0 | mm
  *
  * The following example demonstrates how to set the screen tap configuration
  * parameters:
@@ -1318,7 +1318,7 @@ class ScreenTapGesture : public Gesture
  * -----------|------------|---------------|------
  * Gesture.KeyTap.MinDownVelocity | float | 50 | mm/s
  * Gesture.KeyTap.HistorySeconds | float | 0.1 | s
- * Gesture.KeyTap.MinDistance | float | 3.0 | mm
+ * Gesture.KeyTap.MinDistance | float | 5.0 | mm
  *
  * The following example demonstrates how to set the key tap configuration
  * parameters:
@@ -1824,7 +1824,7 @@ class PointableList : public Interface {
      * The member of the list that is farthest to the left within the standard
      * Leap frame of reference (i.e has the smallest X coordinate).
      *
-     * @returns The leftmost pointable, or invalid if list is empty. 
+     * @returns The leftmost pointable, or invalid if list is empty.
      */
     LEAP_EXPORT Pointable leftmost() const;
 
@@ -1832,7 +1832,7 @@ class PointableList : public Interface {
      * The member of the list that is farthest to the right within the standard
      * Leap frame of reference (i.e has the largest X coordinate).
      *
-     * @returns The rightmost pointable, or invalid if list is empty. 
+     * @returns The rightmost pointable, or invalid if list is empty.
      */
     LEAP_EXPORT Pointable rightmost() const;
 
@@ -1841,7 +1841,7 @@ class PointableList : public Interface {
      * The member of the list that is farthest to the front within the standard
      * Leap frame of reference (i.e has the smallest Z coordinate).
      *
-     * @returns The frontmost pointable, or invalid if list is empty. 
+     * @returns The frontmost pointable, or invalid if list is empty.
      */
     LEAP_EXPORT Pointable frontmost() const;
 
@@ -1904,7 +1904,7 @@ class FingerList : public Interface {
      * The member of the list that is farthest to the left within the standard
      * Leap frame of reference (i.e has the smallest X coordinate).
      *
-     * @returns The leftmost finger, or invalid if list is empty. 
+     * @returns The leftmost finger, or invalid if list is empty.
      */
     LEAP_EXPORT Finger leftmost() const;
 
@@ -1912,7 +1912,7 @@ class FingerList : public Interface {
      * The member of the list that is farthest to the right within the standard
      * Leap frame of reference (i.e has the largest X coordinate).
      *
-     * @returns The rightmost finger, or invalid if list is empty. 
+     * @returns The rightmost finger, or invalid if list is empty.
      */
     LEAP_EXPORT Finger rightmost() const;
 
@@ -1920,7 +1920,7 @@ class FingerList : public Interface {
      * The member of the list that is farthest to the front within the standard
      * Leap frame of reference (i.e has the smallest Z coordinate).
      *
-     * @returns The frontmost finger, or invalid if list is empty. 
+     * @returns The frontmost finger, or invalid if list is empty.
      */
     LEAP_EXPORT Finger frontmost() const;
 
@@ -1979,27 +1979,27 @@ class ToolList : public Interface {
      */
     LEAP_EXPORT ToolList& append(const ToolList& other);
 
-    /** 
+    /**
      * The member of the list that is farthest to the left within the standard
      * Leap frame of reference (i.e has the smallest X coordinate).
      *
-     * @returns The leftmost tool, or invalid if list is empty. 
+     * @returns The leftmost tool, or invalid if list is empty.
      */
     LEAP_EXPORT Tool leftmost() const;
 
-    /** 
+    /**
      * The member of the list that is farthest to the right within the standard
      * Leap frame of reference (i.e has the largest X coordinate).
      *
-     * @returns The rightmost tool, or invalid if list is empty. 
+     * @returns The rightmost tool, or invalid if list is empty.
      */
     LEAP_EXPORT Tool rightmost() const;
 
-    /** 
+    /**
      * The member of the list that is farthest to the front within the standard
      * Leap frame of reference (i.e has the smallest Z coordinate).
      *
-     * @returns The frontmost tool, or invalid if list is empty. 
+     * @returns The frontmost tool, or invalid if list is empty.
      */
     LEAP_EXPORT Tool frontmost() const;
 
@@ -2062,7 +2062,7 @@ class HandList : public Interface {
      * The member of the list that is farthest to the left within the standard
      * Leap frame of reference (i.e has the smallest X coordinate).
      *
-     * @returns The leftmost hand, or invalid if list is empty. 
+     * @returns The leftmost hand, or invalid if list is empty.
      */
     LEAP_EXPORT Hand leftmost() const;
 
@@ -2070,7 +2070,7 @@ class HandList : public Interface {
      * The member of the list that is farthest to the right within the standard
      * Leap frame of reference (i.e has the largest X coordinate).
      *
-     * @returns The rightmost hand, or invalid if list is empty. 
+     * @returns The rightmost hand, or invalid if list is empty.
      */
     LEAP_EXPORT Hand rightmost() const;
 
@@ -2078,7 +2078,7 @@ class HandList : public Interface {
      * The member of the list that is farthest to the front within the standard
      * Leap frame of reference (i.e has the smallest Z coordinate).
      *
-     * @returns The frontmost hand, or invalid if list is empty. 
+     * @returns The frontmost hand, or invalid if list is empty.
      */
     LEAP_EXPORT Hand frontmost() const;
 
@@ -2687,7 +2687,7 @@ class Frame : public Interface {
  * Key string | Value type | Default value | Units
  * -----------|------------|---------------|------
  * Gesture.Circle.MinRadius | float | 5.0 | mm
- * Gesture.Circle.MinArc | float | 1.5 | radians
+ * Gesture.Circle.MinArc | float | 1.5*pi | radians
  * Gesture.Swipe.MinLength | float | 150 | mm
  * Gesture.Swipe.MinVelocity | float | 1000 | mm/s
  * Gesture.KeyTap.MinDownVelocity | float | 50 | mm/s
@@ -2696,6 +2696,10 @@ class Frame : public Interface {
  * Gesture.ScreenTap.MinForwardVelocity  | float | 50 | mm/s
  * Gesture.ScreenTap.HistorySeconds | float | 0.1 | s
  * Gesture.ScreenTap.MinDistance | float | 5.0 | mm
+ *
+ * After setting a configuration value, you must call the Config::save method
+ * to commit the changes. The configuration value changes are not persistent;
+ * your application needs to set the values everytime it runs.
  *
  * @see CircleGesture
  * @see KeyTapGesture
@@ -2761,12 +2765,13 @@ class Config : public Interface {
     */
     LEAP_EXPORT bool setString(const std::string& key, const std::string& value);
 
-    /** 
+    /**
      * Saves the current state of the config.
      *
-     * Call ``save()`` after making a set of configurtation changes. The
+     * Call ``save()`` after making a set of configuration changes. The
      * ``save()`` function transfers the configuration changes to the Leap
-     * application.
+     * application. The configuration value changes are not persistent; your
+     * application needs to set the values everytime it runs.
      *
      * @returns true on success, false on failure.
      */
@@ -2859,13 +2864,76 @@ class Controller : public Interface {
     /**
      * Reports whether this application is the focused, foreground application.
      *
-     * Only the foreground application receives tracking information from
-     * the Leap Motion Controller.
+     * By default, your application only receives tracking information from
+     * the Leap Motion controller when it has the operating system input focus.
+     * To receive tracking data when your application is in the background,
+     * the background frames policy flag must be set.
      *
      * @returns True, if application has focus; false otherwise.
+     *
+     * @see Controller::setPolicyFlags()
      */
-
     LEAP_EXPORT bool hasFocus() const;
+
+    /**
+     * The supported controller policies.
+     *
+     * Currently, the only supported policy is the background frames policy,
+     * which determines whether your application receives frames of tracking
+     * data when it is not the focused, foreground application.
+     */
+    enum PolicyFlag {
+      POLICY_DEFAULT = 0,                 /**< The default policy. */
+      POLICY_BACKGROUND_FRAMES = (1 << 0) /**< Receive background frames. */
+    };
+
+    /**
+     * Gets the active policy settings.
+     *
+     * Use this function to determine the current policy state.
+     * Keep in mind that setting a policy flag is asynchronous, so changes are
+     * not effective immediately after calling setPolicyFlag(). In addition, a
+     * policy request can be declined by the user. You should always set the
+     * policy flags required by your application at startup and check that the
+     * policy change request was successful after an appropriate interval.
+     *
+     * If the controller object is not connected to the Leap, then the default
+     * policy state is returned.
+     *
+     * @returns The current policy flags.
+     */
+    LEAP_EXPORT PolicyFlag policyFlags() const;
+
+    /**
+     * Requests a change in policy.
+     *
+     * A request to change a policy is subject to user approval and a policy
+     * can be changed by the user at any time (using the Leap settings window).
+     * The desired policy flags must be set every time an application runs.
+     *
+     * Policy changes are completed asynchronously and, because they are subject
+     * to user approval, may not complete successfully. Call
+     * Controller::policyFlags() after a suitable interval to test whether
+     * the change was accepted.
+     *
+     * Currently, the background frames policy is the only policy supported.
+     * The background frames policy determines whether an application
+     * receives frames of tracking data while in the background. By
+     * default, the Leap only sends tracking data to the foreground application.
+     * Only applications that need this ability should request the background
+     * frames policy.
+     *
+     * At this time, you can use the Leap applications Settings window to
+     * globally enable or disable the background frames policy. However,
+     * each application that needs tracking data while in the background
+     * must also set the policy flag using this function.
+     *
+     * This function can be called before the Controller object is connected,
+     * but the request will be sent to the Leap after the Controller connects.
+     *
+     * @param flags A PolicyFlag value indicating the policies to request.
+     */
+    LEAP_EXPORT void setPolicyFlags(PolicyFlag flags) const;
 
     /**
      * Adds a listener to this Controller.

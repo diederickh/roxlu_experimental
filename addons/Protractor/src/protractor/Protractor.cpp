@@ -75,7 +75,7 @@ namespace protractor {
     }
   }
 
-  void Gesture::vectorize() {
+  void Gesture::vectorize(bool angleSensitive) {
     assert(resampled_points.size());
 
     rotated_points.clear();
@@ -84,6 +84,11 @@ namespace protractor {
     translate(-center);
     float indicative_angle = atan2(resampled_points[0].y, resampled_points[0].x);
     float delta = -indicative_angle;
+    
+    if(angleSensitive) {
+      float base_orientation = (PI * 0.25f) * floor( (indicative_angle + PI / 8.0f) / (PI / 4.0f));
+      delta = base_orientation - indicative_angle;
+    }
       
     Vec2 rotated_point;
     float cosa = cos(delta);
@@ -199,7 +204,7 @@ namespace protractor {
     for(std::vector<Gesture*>::iterator it = gestures.begin(); it != gestures.end(); ++it) {
       Gesture* other = *it;
       distance = in->calculateCosineDistance(other);
-      RX_VERBOSE("DIST: %f (%s)", distance, other->name.c_str());
+      //RX_VERBOSE("DIST: %f (%s)", distance, other->name.c_str());
       s = 1.0f/distance;
 
       if(s > max_score) {
