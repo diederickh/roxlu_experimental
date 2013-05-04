@@ -20,6 +20,7 @@ roxlu_addon_begin("opengl")
   roxlu_addon_add_source_file(experimental/filters/Demo.cpp)
   roxlu_addon_add_source_file(experimental/filters/VerticalBlur.cpp)
   roxlu_addon_add_source_file(experimental/filters/HorizontalBlur.cpp)
+  roxlu_addon_add_source_file(experimental/filters/Luminance.cpp)
   # --------------------------------------------------------------------------------------
 
 roxlu_addon_end()

@@ -4,10 +4,12 @@
 #include <assert.h>
 #include <vector>
 #include <roxlu/opengl/GL.h>
+#include <experimental/Types.h>
 #include <experimental/Filter.h>
 #include <experimental/filters/Demo.h>
 #include <experimental/filters/VerticalBlur.h>
 #include <experimental/filters/HorizontalBlur.h>
+#include <experimental/filters/Luminance.h>
 #include <glr/Mesh.h>
 #include <glr/FBO.h>
 
@@ -37,64 +39,46 @@ namespace gl {
                                                }
   );
 
+  void print_gl_enum(GLenum e);                                 /* just prints the GL_COLOR_ATTACHMENT# value, handy while debugging  */
+
   class Compositor {
   public:
     Compositor();
     ~Compositor();
 
-    void setProjectionMatrix(const float* pm);
-    void setViewMatrix(const float *vm);
-    void setModelMatrix(const float* mm);
+    void setup(int w, int h);
+    void addFilter(Filter* filter, int input, int output);      /* first add all the filters you want, then call create */
+    bool create();                                              /* create the fbo for the compositor and setup all filters */
 
-    bool create(int fboW, int fboH);
-    void addFilter(Filter* filter);
+    void begin();                                               /* call begin(), then draw your scene, then call end() */
+    void end();                                                 /* after drawing your scene call end() */
+    void draw(int num);                                         /* draw(), draws the given attachment point */
 
-    void begin();
-    void end();
-    void draw();
+    void createAttachment(int num);                             /* you can use this if you want to create another attachment point. This can be handy if you want to create the filter graph with some more advanced features, like bloom */
+    bool getAttachment(int num, Attachment& result);            /* this finds the attachment point by: `GL_COLOR_ATTACHMENT0 + num` and returns true if found, else false */
 
   private:
-    bool setupShaders();
-    bool setupBuffers();
-    bool setupFBO(int fboW, int fboH);
+    bool setupShaders();                                        /* sets up the internally used fullscreen shader */
+    bool setupBuffers();                                        /* sets up the fullscreen VBO */
+    bool setupFBO();                                            /* creates the FBO + all the nessary textures and attachments */
+    void createDefaultAttachments();                            /* creates the two default color attachments that we use for simple shaders: GL_COLOR_ATTACHMENT0 and GL_COLOR_ATTACHMENT1. By default we render the scene into GL_COLOR_ATTACHMENT0, see begin() */
+    GLuint createTexture();                                     /* just an helper to create a 2D texture */
 
   public:
-    //    gl::FBO fbo;
-    gl::Mesh<VertexPT> fullscreen_quad;
-    gl::Shader fullscreen_shader;
-    GLuint fullscreen_u_tex;
-    GLuint textures[2];
-    GLenum buffers[2];
-    GLuint fbo;
-    GLuint depth;
-    int fbo_w;
-    int fbo_h; 
-
-    const float* pm;
-    const float* vm;
-    const float* mm;
-
-    std::vector<Filter*> filters;
-    //    std::vector<Texture*> textures; // ping - pong textures
-    //    std::vector<GLenum> buffers; // GL_COLOR_ATTACHMENT0 / 1, just handy for ping-ponging
-
-    int buffer_dx;
-    //int texture_dx; 
-    int final_buffer;
-
+    bool initialized;                                           /* is set to true when the default attachments have been creatd */
+    gl::Mesh<VertexPT> fullscreen_quad;                         /* the fullscreen mesh */
+    gl::Shader fullscreen_shader;                               /* shader for fullscreen rendering */
+    std::vector<Attachment> attachments;                        /* all the created attachments */
+    std::vector<GLuint> textures;                               /* reference to all textures */
+    std::vector<GLenum> buffers;                                /* all attchment points (GL_COLOR_ATTACHMENT#) */
+    GLint fullscreen_u_tex;                                     /* uniform of the fullscreen texture */
+    GLuint fbo;                                                 /* the fbo */
+    GLuint depth;                                               /* depth buffer handle */
+    int fbo_w;                                                  /* width of the fbo */
+    int fbo_h;                                                  /* height of the fbo */
+    std::vector<Filter*> filters;                               /* the filters which we apply */
+    
   };
-
-  inline void Compositor::setProjectionMatrix(const float* m) {
-    pm = m;
-  }
-
-  inline void Compositor::setViewMatrix(const float* m) {
-    vm = m;
-  }
-
-  inline void Compositor::setModelMatrix(const float* m) {
-    mm = m;
-  }
 
 } // namespace gl
 

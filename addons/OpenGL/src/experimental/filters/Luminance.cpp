@@ -1,13 +1,12 @@
-#include <experimental/filters/Demo.h>
-#include <experimental/Compositor.h>
+#include <experimental/filters/Luminance.h>
 #include <roxlu/core/Log.h>
 
 namespace gl { 
 
-  bool DemoFilter::setup(int w, int h) { 
+  bool Luminance::setup(int w, int h) { 
 
-    if(!shader.create(DEMO_FILTER_VS, DEMO_FILTER_FS)) {
-      RX_ERROR(ERR_GL_DEMO_SHADER);
+    if(!shader.create(LUMINANCE_FILTER_VS, LUMINANCE_FILTER_FS)) {
+      RX_ERROR(ERR_GL_LUMINANCE_SHADER);
       return false;
     }
 
@@ -15,7 +14,7 @@ namespace gl {
     shader.bindAttribLocation("a_tex", 1);
 
     if(!shader.link()) {
-      RX_ERROR(ERR_GL_DEMO_SHADER);
+      RX_ERROR(ERR_GL_LUMINANCE_SHADER);
       return false;
     }
 
@@ -23,8 +22,7 @@ namespace gl {
     return true;
   }
 
-  void DemoFilter::render() { 
-
+  void Luminance::render() { 
     shader.use();
 
     glDrawBuffer(output.attachment);
@@ -33,6 +31,10 @@ namespace gl {
     glBindTexture(GL_TEXTURE_2D, input.texture);
     glUniform1i(u_tex, 0);
 
+  }
+
+  int Luminance::getNumberOfNeededColorAttachments() {
+    return 1;
   }
 
 } // gl

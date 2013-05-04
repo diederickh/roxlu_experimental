@@ -4,21 +4,44 @@
 
 namespace gl {
 
+  void print_gl_enum(GLenum e) {
+    switch(e) {
+      case GL_COLOR_ATTACHMENT0: RX_VERBOSE("GLenum: GL_COLOR_ATTACHMENT0"); break;
+      case GL_COLOR_ATTACHMENT1: RX_VERBOSE("GLenum: GL_COLOR_ATTACHMENT1"); break;
+      case GL_COLOR_ATTACHMENT2: RX_VERBOSE("GLenum: GL_COLOR_ATTACHMENT2"); break;
+      case GL_COLOR_ATTACHMENT3: RX_VERBOSE("GLenum: GL_COLOR_ATTACHMENT3"); break;
+      case GL_COLOR_ATTACHMENT4: RX_VERBOSE("GLenum: GL_COLOR_ATTACHMENT4"); break;
+      case GL_COLOR_ATTACHMENT5: RX_VERBOSE("GLenum: GL_COLOR_ATTACHMENT5"); break;
+      default: RX_VERBOSE("GLenum: UNKNOWN"); break;
+    }
+  }
+
   Compositor::Compositor() 
-    :buffer_dx(0)
+    :fullscreen_u_tex(-1)
+    ,fbo(0)
+    ,depth(0)
+    ,fbo_w(0)
+    ,fbo_h(0)
+    ,initialized(false)
   {
   }
 
   Compositor::~Compositor() {
+    // @todo remove all GL objects
   }
 
-  bool Compositor::create(int fboW, int fboH) {
+  void Compositor::setup(int w, int h) {
+    fbo_w = w;
+    fbo_h = h;
+  }
+
+  bool Compositor::create() {
     if(!filters.size()) {
       RX_ERROR(ERR_RPASS_ADD_FILTERS);
       return false;
     }
 
-    if(!setupFBO(fboW, fboH)) {
+    if(!setupFBO()) {
       return false;
     }
 
@@ -33,12 +56,9 @@ namespace gl {
     return true;
   }
 
+  bool Compositor::setupFBO() {
 
-  bool Compositor::setupFBO(int fboW, int fboH) {
-    fbo_w = fboW;
-    fbo_h = fboH;
-
-    if(!fboW || !fboH) {
+    if(!fbo_w || !fbo_h) {
       RX_ERROR(ERR_RPASS_FBO_SIZE);
       return false;
     }
@@ -47,23 +67,15 @@ namespace gl {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     // COLOR ATTACHMENTS
-    glGenTextures(2, textures);
-
-    for(int i = 0; i < 2; ++i) {                
-      glBindTexture(GL_TEXTURE_2D, textures[i]);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fboW, fboH, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+i, GL_TEXTURE_2D, textures[i], 0);
+    for(std::vector<Attachment>::iterator it = attachments.begin(); it != attachments.end(); ++it) {
+      Attachment& a = *it;
+      glFramebufferTexture2D(GL_FRAMEBUFFER, a.attachment, GL_TEXTURE_2D, a.texture, 0);
     }
 
     // DEPTH
     glGenRenderbuffers(1, &depth);
     glBindRenderbuffer(GL_RENDERBUFFER, depth);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, fboW, fboH);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, fbo_w, fbo_h);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth);
 
     for(std::vector<Filter*>::iterator it = filters.begin(); it != filters.end(); ++it) {
@@ -71,9 +83,6 @@ namespace gl {
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    buffers[0] = GL_COLOR_ATTACHMENT0;
-    buffers[1] = GL_COLOR_ATTACHMENT1;
 
     return true;
   }
@@ -118,9 +127,89 @@ namespace gl {
 
     return true;
   }
-  
-  void Compositor::addFilter(Filter* filter) {
+
+  bool Compositor::getAttachment(int num, Attachment& result) {
+    for(std::vector<Attachment>::iterator it = attachments.begin(); it != attachments.end(); ++it) {
+      Attachment& a = *it;
+      if(a.attachment == GL_COLOR_ATTACHMENT0 + num) {
+        result = a;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void Compositor::addFilter(Filter* filter, int input, int output) { 
     filters.push_back(filter);
+
+    if(!initialized) {
+      createDefaultAttachments();
+    }
+
+    Attachment a;
+    if(getAttachment(input, a)) {
+      filter->setInput(a);
+    }
+    else {
+      RX_VERBOSE("INPUT ATTACHMENT NOT FOUND");
+    }
+
+    if(getAttachment(output, a)) {
+      filter->setOutput(a);
+    }
+    else {
+      RX_VERBOSE("OUTPUT ATTACHMENT NOT FOUND");
+    }
+  }
+
+  void Compositor::createAttachment(int num) {
+    Attachment a;
+    a.attachment = GL_COLOR_ATTACHMENT0 + num;
+    a.texture = createTexture();
+
+    attachments.push_back(a);
+    buffers.push_back(a.attachment);
+    textures.push_back(a.texture);
+  }
+
+  GLuint Compositor::createTexture() {
+    if(!fbo_w || !fbo_h) {
+      RX_ERROR("No fbo_w or fbo_h set.. did you call setup?");
+      return 0;
+    }
+
+    GLuint tex = 0;
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fbo_w, fbo_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    return tex;
+  }
+
+  void Compositor::createDefaultAttachments() {
+
+    GLuint tex0 = createTexture();
+    GLuint tex1 = createTexture();
+
+    buffers.push_back(GL_COLOR_ATTACHMENT0); // default: ping
+    buffers.push_back(GL_COLOR_ATTACHMENT1); // deafult: pong
+    textures.push_back(tex0); // texture: ping
+    textures.push_back(tex1); // texture: pong
+
+    Attachment ping;
+    ping.texture = tex0;
+    ping.attachment = GL_COLOR_ATTACHMENT0;
+    attachments.push_back(ping);
+
+    Attachment pong;
+    pong.texture = tex1;
+    pong.attachment = GL_COLOR_ATTACHMENT1;
+    attachments.push_back(pong);
+
+    initialized = true;
   }
 
   void Compositor::begin() {
@@ -128,7 +217,7 @@ namespace gl {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     // CLEAR ALL ATTACHMENTS
-    glDrawBuffers(2, buffers);
+    glDrawBuffers(buffers.size(), &buffers[0]);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // CAPTURE SCENE INTO 0
@@ -137,21 +226,14 @@ namespace gl {
   }
 
   void Compositor::end() {
-
     fullscreen_quad.bind();
-
     glDepthMask(GL_FALSE);
-    buffer_dx = 1;
 
     for(std::vector<Filter*>::iterator it = filters.begin(); it != filters.end(); ++it) {
       Filter* f = *it;
-      glDrawBuffer(buffers[buffer_dx]);
-      buffer_dx = 1 - buffer_dx;
-      f->render(textures[buffer_dx]);
+      f->render();
       glDrawArrays(GL_TRIANGLES, 0, 6);
     }
-
-    buffer_dx = 1 - buffer_dx;
 
     // RESET 
     glDepthMask(GL_TRUE);
@@ -160,13 +242,19 @@ namespace gl {
   }
 
 
-  void Compositor::draw() {
+  void Compositor::draw(int num) {
+    Attachment a;
+    if(!getAttachment(num, a)) {
+      RX_VERBOSE("Cannot find the attachment you want to draw");
+      return;
+    }
+
     fullscreen_shader.use();
     fullscreen_quad.bind();
     
     glDepthMask(GL_FALSE);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, textures[buffer_dx]);
+    glBindTexture(GL_TEXTURE_2D, a.texture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glDepthMask(GL_TRUE);
   }

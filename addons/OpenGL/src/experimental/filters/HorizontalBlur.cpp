@@ -1,5 +1,7 @@
 #include <experimental/filters/HorizontalBlur.h>
+#include <experimental/Compositor.h>
 #include <roxlu/core/Log.h>
+
 
 namespace gl { 
 
@@ -67,12 +69,15 @@ namespace gl {
     return (float) (coeff * exp(expon));
   }
 
-  void HorizontalBlur::render(GLuint tex) { 
+  void HorizontalBlur::render() {
     shader.use();
-    
+        
+    glDrawBuffer(output.attachment);
+
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, tex);
+    glBindTexture(GL_TEXTURE_2D, input.texture);
     glUniform1i(u_tex, 0);
+
   }
 
 } // gl

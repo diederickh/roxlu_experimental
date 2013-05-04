@@ -39,11 +39,9 @@ namespace gl {
   class VerticalBlur : public Filter {
   public:
     VerticalBlur(float amount);
-
     bool setup(int w, int h);
-    void render(GLuint tex); 
+    void render(); 
     float gauss(float x, float sigma2);
-
   public:
     gl::Shader shader;
     GLuint u_tex;

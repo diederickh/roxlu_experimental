@@ -24,14 +24,14 @@ namespace gl {
                                            void main() {
                                              vec4 col = texture2D(u_tex, v_tex);
                                              gl_FragColor = col;
-                                             gl_FragColor.r += 0.1;
+                                             gl_FragColor.r += 0.2;
                                            }
   );
 
 class DemoFilter : public Filter {
  public:
   bool setup(int w, int h); 
-  virtual void render(GLuint tex); 
+  void render(); 
  public:
   gl::Shader shader;
   GLuint u_tex;

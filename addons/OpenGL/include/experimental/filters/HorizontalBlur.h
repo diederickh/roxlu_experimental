@@ -40,7 +40,7 @@ namespace gl {
   public:
     HorizontalBlur(float amount);
     bool setup(int w, int h);
-    void render(GLuint tex); 
+    void render();
     float gauss(float x, float sigma2);
   public:
     gl::Shader shader;
