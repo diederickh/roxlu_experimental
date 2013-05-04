@@ -1,5 +1,13 @@
 #include <Simulation.h>
 
+static void on_option_click(int id, void* user) {
+  RX_VERBOSE("Clicked on option: %d", id);
+}
+
+static void on_button_clicked(int id, void* user) {
+  RX_VERBOSE("On button clicked: %d", id);
+}
+
 Simulation::Simulation()
   :SimulationBase()
   ,gui("settings", 300, 400)
@@ -29,8 +37,9 @@ void Simulation::setup() {
   options.push_back("Option 1");
   options.push_back("Option 2");
   options.push_back("Option 3");
-  gui.addRadio<Simulation>("Options", 1, this, options, test_option); 
-  gui.addButton<Simulation>("Button", 0, this);
+
+  //gui.addRadio<Simulation>("Options", 1, this, options, test_option); 
+  gui.addButton("Button", 0, on_button_clicked, this);
   
   gui.setColor(0.3f);
   //  gui.load();

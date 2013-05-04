@@ -166,5 +166,9 @@ namespace gl {
     glDrawBuffers(bufs.size(), &bufs[0]);
   }
 
+  void FBO::drawBuffer(GLenum buf) {
+    glDrawBuffer(buf);
+  }
+
 
 } // gl

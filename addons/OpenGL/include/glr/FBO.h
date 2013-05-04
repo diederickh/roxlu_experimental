@@ -37,6 +37,7 @@ class FBO {
   void bind(GLenum target = GL_FRAMEBUFFER);
   void unbind();
   
+  void drawBuffer(GLenum buf);
   void drawBuffers(std::vector<GLenum>& bufs);    /* set the given buffers as active draw buffers */
   std::vector<GLenum>& getColorAttachments();     /* get a vector with all the color attachments that have been created */
 
