@@ -56,7 +56,7 @@
 +(uint32_t)(((const uint8_t *)(d))[0]) )
 #endif
 
-extern uint32_t gl_string_id(const char * data, int len);
+extern uint32_t string_id(const char * data, int len);
 
 #define EPSILON 0.000001
 #define IS_ZERO(f) 	(fabs(f) < EPSILON)	

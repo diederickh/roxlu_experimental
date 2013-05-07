@@ -163,12 +163,14 @@ namespace gl {
     shader_p.setProjectionMatrix(pm);
     shader_pt.setProjectionMatrix(pm);
     shader_np.setProjectionMatrix(pm);
+    shader_immediate.setProjectionMatrix(pm);
   }
 
   void Drawer::setViewMatrix(const float* vm) {
     shader_p.setViewMatrix(vm);
     shader_pt.setViewMatrix(vm);
     shader_np.setViewMatrix(vm);
+    shader_immediate.setViewMatrix(vm);
   }
 
   void Drawer::createOrthographicMatrix() {
