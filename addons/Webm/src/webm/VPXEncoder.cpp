@@ -75,7 +75,7 @@ bool VPXEncoder::configure() {
 
   vpx_codec_err_t res = vpx_codec_enc_config_default(interface, &cfg, 0);
   if(res) {
-    RX_ERROR(("failed to initialized config: %s\n", vpx_codec_err_to_string(res)));
+    RX_ERROR("failed to initialized config: %s\n", vpx_codec_err_to_string(res));
     return false;
   }
 
@@ -89,9 +89,9 @@ bool VPXEncoder::configure() {
 
 void VPXEncoder::die(const char* s) {
   const char* detail = vpx_codec_error_detail(&ctx);
-  RX_ERROR(("%s : %s", s, vpx_codec_error(&ctx)));
+  RX_ERROR("%s : %s", s, vpx_codec_error(&ctx));
   if(detail) {
-    RX_ERROR(("%s\n", detail));
+    RX_ERROR("%s\n", detail);
   }
 }
 
@@ -159,7 +159,7 @@ bool VPXEncoder::rescale(unsigned char* data) {
 #if 0 
   vpx_image_t* img_ptr = vpx_img_wrap(pic_in, settings.fmt, settings.in_w, settings.in_h, 0, data);
   if(!img_ptr) {
-    RX_ERROR(("cannot wrap input image."));
+    RX_ERROR("cannot wrap input image.");
     return false;
   }
   int h = sws_scale(sws, 
@@ -180,7 +180,7 @@ bool VPXEncoder::rescale(unsigned char* data) {
                     pic_out->planes, pic_out->stride);
   
   if(h != settings.out_h) {
-    RX_ERROR(("cannot convert input data with sws."));
+    RX_ERROR("cannot convert input data with sws.");
     return false;
   }
 

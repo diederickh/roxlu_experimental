@@ -7,6 +7,7 @@
 #include <pbd/Flocking.h>
 #include <pbd/Cloth.h>
 #include <pbd/Emitter.h>
+#include <pbd/Hair.h>
 
 using namespace roxlu;
 
@@ -22,6 +23,9 @@ typedef Spring<Vec3> Spring3;
 
 typedef Emitter<Particle2, Particles2, Vec2, EmitterHelper> Emitter2;
 typedef Emitter<Particle3, Particles3, Vec3, EmitterHelper3> Emitter3;
+
+typedef Hair<Vec2> Hair2;
+typedef Hair<Vec3> Hair3;
 
 inline void drawVertex(Vec3 p) {
   glVertex3fv(p.getPtr());

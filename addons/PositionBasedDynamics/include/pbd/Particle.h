@@ -1,20 +1,14 @@
 #ifndef ROXLU_PBD_PARTICLEH
 #define ROXLU_PBD_PARTICLEH
 
-//#include "Roxlu.h"
-//#include "Spring.h"
-
-
 template<class T>
 class Spring;
-
 
 template<class T>
 class Particle {
  public:
 
   Particle(const T& pos, float mass = 1.0f);
-  //	virtual ~Particle();
   void update(const float dt);
   void draw();
   void addForce(const T& f);
@@ -28,6 +22,7 @@ class Particle {
   T forces;
   T tmp_position;
   T velocity;
+  T d;  /* for the hair simulation */
 	
   float mass;
   float size;

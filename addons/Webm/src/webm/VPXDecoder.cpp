@@ -72,7 +72,7 @@ bool VPXDecoder::initializeDecoder() {
 
 bool VPXDecoder::initializeSWS() {
   if(sws != NULL) {
-    RX_WARNING(("SWS already initialized."));
+    RX_WARNING("SWS already initialized.");
     return false;
   }
   
@@ -129,6 +129,6 @@ void VPXDecoder::rescale(vpx_image_t* in, vpx_image_t* out) {
 
 void VPXDecoder::die() {
   const char* msg = vpx_codec_error_detail(&codec);
-  RX_WARNING(("%s, %s", msg, vpx_codec_error(&codec)));
+  RX_WARNING("%s, %s", msg, vpx_codec_error(&codec));
   ::exit(EXIT_FAILURE);
 }

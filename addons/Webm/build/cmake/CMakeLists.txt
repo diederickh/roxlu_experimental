@@ -9,6 +9,7 @@ roxlu_addon_begin("webm")
   roxlu_addon_add_source_file(webm/EBML.cpp)
   roxlu_addon_add_source_file(webm/Webm.cpp)
   roxlu_addon_add_source_file(webm/WebmScreenRecorder.cpp)
+  roxlu_addon_add_source_file(webm/IVF.cpp)
 
   if(APPLE)
     find_library(fr_foundation CoreFoundation)
