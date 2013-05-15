@@ -617,4 +617,26 @@ static bool rx_is_power_of_two(unsigned int x) {
   return (x == 1);
 }
 
+
+// ENDIANNESS
+// -------------------------------------------------------
+inline uint16_t rx_get_le_u16(const unsigned char* data) {
+  return (data[1] << 8)|(data[0]);
+}
+
+inline uint32_t rx_get_le_u32(const unsigned char* data) {
+  return (data[3] << 24)|(data[2] << 16)|(data[1] << 8)|(data[0]);
+}
+
+inline uint64_t rx_get_le_u64(const unsigned char* data) {
+  return ((uint64_t)data[7] << 56) 
+    | ((uint64_t)data[6] << 48)
+    | ((uint64_t)data[5] << 40) 
+    | ((uint64_t)data[4] << 32)
+    | ((uint64_t)data[3] << 24)
+    | ((uint64_t)data[2] << 16)
+    | ((uint64_t)data[1] << 8)
+    | ((uint64_t)data[0]);
+}
+
 #endif // ROXLU_UTILSH

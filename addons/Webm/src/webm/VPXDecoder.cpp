@@ -27,8 +27,7 @@ VPXDecoder::~VPXDecoder() {
 }
 
 bool VPXDecoder::setup(VPXSettings cfg) {
-  RX_VERBOSE("------------------------- SETUP DECODER -------------------------");
-  RX_ERROR("TODO: use VPXSettings.cb_write/cb_user + check if it's set, for the callback which is called when we have decoded data ");
+  RX_VERBOSE("TODO: use VPXSettings.cb_write/cb_user + check if it's set, for the callback which is called when we have decoded data ");
   settings = cfg;
   bool result = false;
   result = initializeDecoder();
@@ -102,7 +101,6 @@ void VPXDecoder::decodeFrame(unsigned char* data, int nbytes) {
     printf("\n");
 #endif
 
-  RX_WARNING("decode: %d bytes", nbytes);
   vpx_codec_iter_t iter = NULL;
   vpx_image_t* img;
   
