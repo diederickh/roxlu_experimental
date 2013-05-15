@@ -1,7 +1,8 @@
 # webm addon
 
-# the webm addon uses the videocapture addon to playback ivf files (see readme)
-roxlu_add_addon(VideoCapture) 
+
+roxlu_add_addon(VideoCapture)  # the webm addon uses the videocapture addon to playback ivf files (see readme)
+roxlu_add_addon(UV) # using libuv for the threaded uv writer 
 
 roxlu_addon_begin("webm")
 
@@ -12,7 +13,9 @@ roxlu_addon_begin("webm")
   roxlu_addon_add_source_file(webm/EBML.cpp)
   roxlu_addon_add_source_file(webm/Webm.cpp)
   roxlu_addon_add_source_file(webm/WebmScreenRecorder.cpp)
-  roxlu_addon_add_source_file(webm/IVF.cpp)
+  roxlu_addon_add_source_file(webm/IVFReader.cpp)
+  roxlu_addon_add_source_file(webm/IVFWriter.cpp)
+  roxlu_addon_add_source_File(webm/IVFWriterThreaded.cpp)
   roxlu_addon_add_source_file(webm/IVFPlayer.cpp)
 
   if(APPLE)

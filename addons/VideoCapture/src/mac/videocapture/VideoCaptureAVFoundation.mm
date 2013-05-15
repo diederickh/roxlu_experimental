@@ -127,6 +127,7 @@
      printf("WARNING: we cannot set the format, continueing anyway.\n");
   }
 
+
   // get width / height
   CMVideoDimensions dims = CMVideoFormatDescriptionGetDimensions([[[input device] activeFormat] formatDescription]);
   width = dims.width;
@@ -154,6 +155,7 @@
   [session stopRunning];
   return 1;
 }
+
 
 - (void) captureOutput:(AVCaptureOutput*)captureOutput
          didOutputSampleBuffer:(CMSampleBufferRef) sampleBuffer

@@ -1,7 +1,7 @@
 #ifndef ROXLU_IVF_PLAYER_H
 #define ROXLU_IVF_PLAYER_H
 
-#include <webm/IVF.h>
+#include <webm/IVFReader.h>
 #include <videocapture/VideoCaptureGLSurface.h>
 
 void ivf_player_read(unsigned char* pixels, size_t nbytes, void* user);
@@ -21,7 +21,7 @@ class IVFPlayer {
   int getHeight();                                                 /* returns the height of the video */
 
  public:
-  IVF ivf;
+  IVFReader ivf;
   VideoCaptureGLSurface gl_surface;
 };
 

@@ -23,8 +23,8 @@ void Simulation::update() {
 
 void Simulation::draw() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  fps.draw();
   player.draw(0,0);
+  fps.draw();
 }
 
 void Simulation::onMouseUp(int x, int y, int button) {

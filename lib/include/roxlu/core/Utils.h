@@ -639,4 +639,17 @@ inline uint64_t rx_get_le_u64(const unsigned char* data) {
     | ((uint64_t)data[0]);
 }
 
+// store a uint16 into mem, Little Endian
+inline void rx_put_le_u16(char* mem, uint16_t val) {
+  mem[0] = val;
+  mem[1] = val >> 8;
+}
+
+// store an uint32 into mem, Little Endian
+inline void rx_put_le_u32(char* mem, uint32_t val) {
+  mem[0] = val;
+  mem[1] = val >> 8;
+  mem[2] = val >> 16;
+  mem[3] = val >> 24;
+}
 #endif // ROXLU_UTILSH

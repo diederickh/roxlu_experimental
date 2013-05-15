@@ -95,7 +95,6 @@ void VPXEncoder::die(const char* s) {
   }
 }
 
-
 bool VPXEncoder::initializeSWS() {
   if(sws != NULL) {
     RX_WARNING(("SWS already initialized."));

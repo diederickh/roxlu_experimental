@@ -30,4 +30,5 @@ typedef void(*rx_capture_frame_cb)(void* pixels, size_t nbytes, void* user);
 - (NSString* const) widthHeightToCaptureSessionPreset:(int) w andHeight:(int) h;
 - (int) getWidth;
 - (int) getHeight;
+
 @end
