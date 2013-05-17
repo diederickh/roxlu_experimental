@@ -1,5 +1,7 @@
 # libav
 
+roxlu_add_addon(UV)  # we use libuv for threading
+
 roxlu_addon_begin("av")
 
   # --------------------------------------------------------------------------------------
@@ -36,7 +38,9 @@ roxlu_addon_begin("av")
   endif()
 
   roxlu_addon_add_source_file(av/AVEncoder.cpp)
+  roxlu_addon_add_source_file(av/AVEncoderThreaded.cpp)
   roxlu_addon_add_source_file(av/Types.cpp)
+
   # --------------------------------------------------------------------------------------
 
 roxlu_addon_end()

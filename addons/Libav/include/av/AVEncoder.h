@@ -27,25 +27,30 @@
 #define ERR_AV_ADD_VFRAME_SCALE "Adding a video frame cancelled because SWS_SCALE failed"
 #define ERR_AV_WRITE_VIDEO "An error occured when writing a video frame"
 #define ERR_AV_WRONG_MILLIS_FPS "Wrong timebase; we cannot calculate the millis per frame"
+#define ERR_AV_LIST_PIX_FMT_CODEC_NOT_OPEN "Cannot list the video codec pixel formats because it's not yet opened"
 
 class AVEncoder {
  public:
   AVEncoder();
   ~AVEncoder();
-  bool setup(AVEncoderSettings settings);                     /* call once with the encoder settings */
-  bool start(std::string filename, bool datapath = false);    /* call this when you want to start an encoding session */
-  bool stop();                                                /* call this when you want to stop the current encoding session */
+  bool setup(AVEncoderSettings settings);                              /* call once with the encoder settings */
+  bool start(std::string filename, bool datapath = false);             /* call this when you want to start an encoding session */
+  bool stop();                                                         /* call this when you want to stop the current encoding session */
   bool addVideoFrame(unsigned char* data, int64_t pts, size_t nbytes); /* add a raw frame. the format must be AVEncoderSettings.in_pixel_format. Pass the pts for the current frame, make sure it's in the timebase pts x */
   bool addVideoFrame(unsigned char* data, size_t nbytes);              /* add a video frame and let us determine the PTS */
  private:
   bool initializeSWS();
   bool rescale(unsigned char* data);
-  bool addVideoStream(enum AVCodecID codecID);                /* based on the current AVOutputFormat we will add a video stream for the given codec */
-  AVFrame* allocVideoFrame(enum AVPixelFormat pixelFormat,    /* allocates a AVFrame for the given params */
+  bool addVideoStream(enum AVCodecID codecID);                         /* based on the current AVOutputFormat we will add a video stream for the given codec */
+  AVFrame* allocVideoFrame(enum AVPixelFormat pixelFormat,             /* allocates a AVFrame for the given params */
                            int width, int height);
-  bool openVideo();                                           /* opens the video_codec_context, must be called after addVideoStream() */
-  bool openAudio();
+  bool openVideo();                                                    /* opens the video_codec_context, must be called after addVideoStream() */
+  bool openAudio();      
   void closeVideo();
+  
+  /* debug info */
+  void listSupportedVideoCodecPixelFormats();                          /* shows the names of the pixel formats that are supported by the video codec */
+
  public:
   AVEncoderSettings settings;
 

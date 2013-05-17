@@ -24,6 +24,7 @@ AVEncoder::AVEncoder()
 }
 
 AVEncoder::~AVEncoder() {
+  RX_ERROR("MAKE SURE THAT ALL ALLOCATED OBJECTS ARE FREED HERE!!");
 }
 
 bool AVEncoder::setup(AVEncoderSettings cfg) {
@@ -139,7 +140,9 @@ bool AVEncoder::addVideoStream(enum AVCodecID codecID) {
 
   video_codec_context = video_stream->codec;
 
-  video_codec_context->bit_rate = 400000;
+  listSupportedVideoCodecPixelFormats();
+
+  video_codec_context->bit_rate = 4000000;
   video_codec_context->width = settings.out_w;
   video_codec_context->height = settings.out_h;
   video_codec_context->time_base.den = settings.time_base_den;
@@ -315,4 +318,21 @@ void AVEncoder::closeVideo() {
     av_free(video_frame_out->data[0]);
     av_free(video_frame_out);
   }
+}
+
+
+void AVEncoder::listSupportedVideoCodecPixelFormats() {
+  if(!video_codec) {
+    RX_ERROR(ERR_AV_LIST_PIX_FMT_CODEC_NOT_OPEN);
+    return;
+  }
+  
+  RX_VERBOSE("-----------------------------");
+  const enum AVPixelFormat* fmt = video_codec->pix_fmts;
+  while(*fmt != -1) {
+    const AVPixFmtDescriptor* desc = av_pix_fmt_desc_get(*fmt);
+    RX_VERBOSE("FMT: %s", desc->name);
+    fmt++;
+  }
+  RX_VERBOSE("-----------------------------");
 }
