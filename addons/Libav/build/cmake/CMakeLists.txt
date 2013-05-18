@@ -1,6 +1,7 @@
 # libav
 
 roxlu_add_addon(UV)  # we use libuv for threading
+roxlu_add_addon(VideoCapture) # we use the VideoCaptureGLSurface to draw decode video
 
 roxlu_addon_begin("av")
 
@@ -36,9 +37,10 @@ roxlu_addon_begin("av")
   if(WIN32) 
   
   endif()
-
+  roxlu_addon_add_source_file(av/AVDecoder.cpp)
   roxlu_addon_add_source_file(av/AVEncoder.cpp)
   roxlu_addon_add_source_file(av/AVEncoderThreaded.cpp)
+  roxlu_addon_add_source_file(av/AVPlayer.cpp)
   roxlu_addon_add_source_file(av/Types.cpp)
 
   # --------------------------------------------------------------------------------------

@@ -80,7 +80,6 @@ bool VPXDecoder::initializeSWS() {
                        SWS_FAST_BILINEAR, NULL, NULL, NULL);
 
   if(!sws) {
-    RX_ERROR("Cannot initialize sws decoder.");
     return false;
   }
 

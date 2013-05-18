@@ -51,3 +51,10 @@ bool AVEncoderSettings::validate() {
 
   return true;
 }
+
+
+// ---------------------------------------------------
+AVPlayerSettings::AVPlayerSettings() 
+  :out_pixel_format(AV_PIX_FMT_NONE)
+{
+}

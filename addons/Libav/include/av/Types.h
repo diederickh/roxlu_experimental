@@ -20,6 +20,10 @@ extern "C" {
 #define ERR_AV_INVALID_TIMEBASE_DEN "The time_base_den is invalid"
 #define ERR_AV_INVALID_TIMEBASE_NUM "The time_base_num is invalid"
 
+#define AV_TYPE_NONE 0
+#define AV_TYPE_VIDEO 1
+#define AV_TYPE_AUDIO 2
+
 struct AVEncoderSettings {
 public:
   AVEncoderSettings();
@@ -35,6 +39,11 @@ public:
 
   double time_base_den;                        /* e.g. 25 (when time_base_num == 1, you'll get 25fps) */
   double time_base_num;                        /* e.g. 1 */
+};
+
+struct AVPlayerSettings {                      /* define the behavior of the AVPlayer. e.g. you can use it to convert the decoded frames from the default pixel format to some other format */
+  AVPlayerSettings();
+  AVPixelFormat out_pixel_format;              /* you can define the output pixel format when decoding. when you don't set this we use the default pixel format in which the video is encoded */
 };
 
 #endif

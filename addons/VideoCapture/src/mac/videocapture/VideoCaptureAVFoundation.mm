@@ -283,7 +283,7 @@
 
   if(fmt == VC_FMT_RGB24) { return kCMPixelFormat_24RGB; }
   else if(fmt == VC_FMT_YUYV422) { return kCMPixelFormat_422YpCbCr8_yuvs; }  // "yuvs"
-  else if(fmt == VC_FMT_UYVY422) { return kCMPixelFormat_422YpCbCr8; } // "yuv2"
+  else if(fmt == VC_FMT_UYVY422) { return kCMPixelFormat_422YpCbCr8; } // "yuv2", same a libav AV_PIX_FMT_UYVY422
   else {
    return 0;
   }
