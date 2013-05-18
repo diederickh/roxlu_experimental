@@ -6,7 +6,6 @@ void ivf_writer_thread(void* user) {
   uv_mutex_t& mutex = ivf->mutex;
   std::vector<IVFData*> work_data;
   bool must_stop = false;
-  int encoded = 0; // temp
 
   while(true) {
     // get frames that need to be encoded
@@ -27,10 +26,8 @@ void ivf_writer_thread(void* user) {
     std::sort(work_data.begin(), work_data.end(), IVFDataSorter());
     for(std::vector<IVFData*>::iterator it = work_data.begin(); it != work_data.end(); ++it) {
       IVFData* f = *it;
-      RX_VERBOSE("ENCODING: %ld, encoced: %d", f->pts, encoded); // encded == temp
       ivf->writer.addFrameWithPTS(f->pixels, f->pts, f->nbytes);
       f->is_free = true;
-      encoded++; // temp
     }
 
     if(must_stop) {
@@ -75,8 +72,9 @@ IVFWriterThreaded::IVFWriterThreaded()
 IVFWriterThreaded::~IVFWriterThreaded() {
   if(time_started) {
     stop();
-    uv_thread_join(&thread);
   }
+  uv_thread_join(&thread);
+  uv_mutex_destroy(&mutex);
 
   time_started = 0;
   millis_per_frame = 0;
@@ -87,6 +85,7 @@ IVFWriterThreaded::~IVFWriterThreaded() {
     IVFData* f = *it;
     delete f;
   }
+
   frames.clear();
 }
 
@@ -109,7 +108,7 @@ bool IVFWriterThreaded::start(std::string filename, bool datapath) {
   if(!writer.start(filename, datapath)) {
     return false;
   }
-  added = 0;
+
   new_frame_timeout = time_started + millis_per_frame;
 
   uv_thread_create(&thread, ivf_writer_thread, this);
@@ -140,17 +139,18 @@ void IVFWriterThreaded::addFrame(unsigned char* data, size_t nbytes) {
   // find a new frame
   IVFData* f = getFreeFrame();
   if(f) {
-    RX_VERBOSE("ADDED: %d", added); // temp
-    added++; // temp
     uint64_t pts = (rx_millis() - time_started) / millis_per_frame;
+
+    memcpy(f->pixels, data, nbytes);
+
     uv_mutex_lock(&mutex);
     {
       f->is_free = false;
       f->pts = pts;
       f->nbytes = nbytes;
-      memcpy(f->pixels, data, nbytes);
     }
     uv_mutex_unlock(&mutex);
+
   }
   else {
     RX_ERROR(IVF_ERR_TWNO_FREE_FRAMES);

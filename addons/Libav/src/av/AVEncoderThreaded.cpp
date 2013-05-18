@@ -3,7 +3,6 @@
 #include <av/AVEncoderThreaded.h>
 
 void avencoder_thread(void* user) {
-  RX_VERBOSE("THREAD!");
 
   AVEncoderThreaded& enc = *(static_cast<AVEncoderThreaded*>(user));
   uv_mutex_t& mutex = enc.mutex;
@@ -11,7 +10,6 @@ void avencoder_thread(void* user) {
   bool must_stop = false;
   
   while(true) {
-    RX_VERBOSE("...");
     // get frames that need to be encoded
     work_data.clear();
     uv_mutex_lock(&mutex);
@@ -25,13 +23,11 @@ void avencoder_thread(void* user) {
     }
     must_stop = enc.must_stop;
     uv_mutex_unlock(&mutex);
-    RX_VERBOSE("FRAMES: %ld", work_data.size());
 
     // encode worker data
     std::sort(work_data.begin(), work_data.end(), AVEncoderFrameSorter());
     for(std::vector<AVEncoderFrame*>::iterator it = work_data.begin(); it != work_data.end(); ++it) {
       AVEncoderFrame* f = *it;
-      RX_VERBOSE("ENCODING, PTS: %ld", f->pts);
       enc.enc.addVideoFrame(f->pixels, f->pts, f->nbytes);
       f->is_free = true;
     }
@@ -55,8 +51,15 @@ AVEncoderFrame::AVEncoderFrame()
 }
 
 AVEncoderFrame::~AVEncoderFrame() {
-  RX_ERROR("FREE!!");
+  if(pixels) {
+    delete[] pixels;
+    pixels = NULL;
+  }
+  is_free = true;
+  nbytes = 0;
+  pts = 0;
 }
+
 
 // -------------------------------------------
 
@@ -69,12 +72,25 @@ AVEncoderThreaded::AVEncoderThreaded()
 }
 
 AVEncoderThreaded::~AVEncoderThreaded() {
-  must_stop = true;
+
+  if(time_started) {
+    stop();
+  }
+
+  uv_thread_join(&thread);
+
   time_started = 0;
   new_frame_timeout = 0;
   millis_per_frame = 0;
 
-  RX_ERROR("DELETE AVENCODERFRAMES!");
+  for(std::vector<AVEncoderFrame*>::iterator it = frames.begin(); it != frames.end(); ++it) {
+    AVEncoderFrame* f = *it;
+    delete f;
+    f = NULL;
+  }
+  frames.clear();
+  
+  uv_mutex_destroy(&mutex);
 }
 
 bool AVEncoderThreaded::setup(AVEncoderSettings cfg, int numFramesToAllocate) {
@@ -103,8 +119,6 @@ bool AVEncoderThreaded::setup(AVEncoderSettings cfg, int numFramesToAllocate) {
     return false;
   }
 
-  RX_VERBOSE("SIZE: %d, MILLIS: %ld", size, millis_per_frame);
-  
   is_setup = true;
   return true;
 }
@@ -147,14 +161,17 @@ bool AVEncoderThreaded::addVideoFrame(unsigned char* data, size_t nbytes) {
   AVEncoderFrame* f = getFreeFrame();
   if(f) {
     int64_t pts = (millis() - time_started) / millis_per_frame;
+
+    memcpy(f->pixels, data, nbytes);
+
     uv_mutex_lock(&mutex);
     {
       f->is_free = false;
       f->pts = pts;
       f->nbytes = nbytes;
-      memcpy(f->pixels, data, nbytes);
     }
     uv_mutex_unlock(&mutex);
+
   }
   else {
     RX_ERROR(ERR_AVT_NO_FREE_FRAME);

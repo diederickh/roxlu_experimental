@@ -258,7 +258,7 @@
   frame_cb((void*)base_address, buffer_size, frame_user);
   CVPixelBufferUnlockBaseAddress(img_ref, 0);
 
-#if 1 
+#if 0 
   CMFormatDescriptionRef format_desc_ref = CMSampleBufferGetFormatDescription(sampleBuffer);
   FourCharCode active_video_type = CMFormatDescriptionGetMediaSubType(format_desc_ref);
   char* cptr = (char*)&active_video_type;
@@ -283,8 +283,6 @@
 
   if(fmt == VC_FMT_RGB24) { return kCMPixelFormat_24RGB; }
   else if(fmt == VC_FMT_YUYV422) { return kCMPixelFormat_422YpCbCr8_yuvs; }  // "yuvs"
-  //                                          kCVPixelFormatType_422YpCbCr8_yuvs
-  // kCMPixelFormat_422YpCbCr8
   else if(fmt == VC_FMT_UYVY422) { return kCMPixelFormat_422YpCbCr8; } // "yuv2"
   else {
    return 0;

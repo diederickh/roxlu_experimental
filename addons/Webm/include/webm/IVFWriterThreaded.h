@@ -43,7 +43,6 @@ class IVFWriterThreaded {
   IVFData* getFreeFrame();
  public:
   std::vector<IVFData*> frames;
-  int added;
   uint64_t time_started;
   uint64_t new_frame_timeout;
   uint64_t millis_per_frame;
