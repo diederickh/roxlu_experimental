@@ -18,17 +18,21 @@ extern "C" {
 #include <string>
 #include <vector>
 #include <deque>
-#include <av/Types.h>
+#include <av/AVTypes.h>
+#include <av/AVUtils.h>
 
+#define ERR_AVD_ALREADY_OPENED "Cannot opend the AVDecoder twice. First close it before opening again"
 #define ERR_AVD_ALLOC_FORMAT_CTX "Cannot allocate the avformat context"
 #define ERR_AVD_OPEN_INPUT "Cannot open the given file: '%s', error: %s"
 #define ERR_AVD_STREAM_INFO "Cannot find stream info."
 #define ERR_AVD_FIND_VIDEO_DECODER "Cannot find the video decoder"
-#define ERR_AVD_ALLOC_VIDEO_CONTEXT "Cannot allocate video codec context"
 #define ERR_AVD_OPEN_VIDEO_CONTEXT "Cannot open the video context: %s"
+#define ERR_AVD_ALLOC_VIDEO_CONTEXT "Cannot allocate video codec context"
+//#define ERR_AVD_NO_VIDEO_CODEC_CTX "Cannot find an initialized video codec context from the stream"
 #define ERR_AVD_NO_VIDEO_STREAM "Cannot find a video stream"
 #define ERR_AVD_ALLOC_FRAME "Cannot allocate a avframe"
-#define ERR_AVD_CLOSE_NO_FORMAT_CTX "Cannot close because it looks like you didn't call open()"
+#define ERR_AVD_COPY_VIDEO_CONTEXT "Cannot copy the video context: %s"
+//#define ERR_AVD_CLOSE_NO_FORMAT_CTX "Cannot close because it looks like you didn't call open()"
 #define V_AVD_EOF "We've read the whole file!"
 #define V_AVD_STREAM_NOT_USED "The stream with index: %d is not used"
 
@@ -52,7 +56,7 @@ class AVDecoder {
   int getWidth();                                                /* get the width of the video stream */
   int getHeight();                                               /* get the height of the video stream */
   AVPixelFormat getPixelFormat();                                /* get the pixel format used by the video decoder */
-
+  bool isOpen();                                                 /* returns true when the file has been opened correctly and not closed yet */
  private:
 
   /* muxer */
@@ -82,6 +86,10 @@ inline AVPixelFormat AVDecoder::getPixelFormat() {
   assert(video_codec_context);
   assert(video_stream);
   return video_stream->codec->pix_fmt;
+}
+
+inline bool AVDecoder::isOpen() {
+  return format_context; // when the format_context is set we assume the file has been opened. in close() we set this to NULL.
 }
 
 

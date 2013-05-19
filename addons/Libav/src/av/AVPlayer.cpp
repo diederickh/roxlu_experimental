@@ -13,11 +13,13 @@ extern "C" {
 
 // ----------------------------------------------
 
-// ----------------------------------------------
-
 void avplayer_thread(void* user) {
 
   AVPlayer& player = *static_cast<AVPlayer*>(user);
+
+  if(!player.initialize()) {
+    return;
+  }
 
   bool is_eof = false;
   bool must_stop = false;
@@ -33,7 +35,16 @@ void avplayer_thread(void* user) {
     free_frames.clear();
 
     if(!player.getFreeFrames(free_frames)) {
-      rx_sleep_millis(100); // @TODO check if this is ok...
+      rx_sleep_millis(10);                                      // @TODO check if this is ok..., it looks like it's no problem, though lets give it a bit time
+
+      player.lock();
+      must_stop = player.must_stop;
+      player.unlock();
+
+      if(must_stop) {
+        break;
+      }
+
       continue;
     }
 
@@ -42,7 +53,7 @@ void avplayer_thread(void* user) {
     for(std::vector<AVPlayerFrame*>::iterator it = free_frames.begin(); it != free_frames.end(); ++it) {
       player_frame = *it;
       decoder_frame = player.dec.decodeFrame(is_eof);
- 
+
       if(!decoder_frame) {
          break;
       }
@@ -55,7 +66,9 @@ void avplayer_thread(void* user) {
       switch(decoder_frame->type) {
 
         case AV_TYPE_VIDEO: {
-          
+
+          player_frame->reset();
+
           av_frame = decoder_frame->frame;      
           player_frame->is_free = false;
           player_frame->decoder_frame = decoder_frame;
@@ -79,6 +92,7 @@ void avplayer_thread(void* user) {
           }
 
           work_frames.push_back(player_frame);                    
+
           break;
         } // AV_TYPE_VIDEO
 
@@ -102,15 +116,13 @@ void avplayer_thread(void* user) {
     player.unlock();
 
     if(must_stop) {
-      RX_VERBOSE("MUST STOP PLAING!!!!!!");
       break;
     }
     
   }  // end thread loop
+  
+  player.shutdown();
 
-  player.freeFrames();
-  player.decoded_frames.clear();
-  player.must_stop = false;
 }
 
 // ----------------------------------------------
@@ -124,7 +136,15 @@ AVPlayerFrame::AVPlayerFrame()
 }
 
 AVPlayerFrame::~AVPlayerFrame() {
-  RX_VERBOSE("CLEAN ALL MEMORY USED BY THE AVPLAYERFRAME");
+  if(decoder_frame) {
+    delete decoder_frame;
+    decoder_frame = NULL;
+  }
+
+  avpicture_free(&pic);
+  is_free = true;
+  data = NULL;
+  nbytes = 0;
 }
 
 
@@ -134,30 +154,72 @@ AVPlayer::AVPlayer()
   :state(AVP_STATE_NONE)
   ,num_frames_to_allocate(0)
   ,time_started(0)
+  ,time_paused(0)
   ,nbytes_video_frame(0)
   ,sws(NULL)
   ,must_stop(false)
+  ,datapath(false)
 {
   uv_mutex_init(&mutex);
+  rx_init_libav();
 }
 
 AVPlayer::~AVPlayer() {
-  RX_ERROR("DELETE AVDECODER FRAMES - JOIN THREAD");
-  state = AVP_STATE_NONE;
+  stop();
+
+  uv_thread_join(&thread);
   uv_mutex_destroy(&mutex);
 
-  if(sws) {
-    sws_freeContext(sws);
-    sws = NULL;
-  }
+  shutdown();
+
+  state = AVP_STATE_NONE;
+  must_stop = true;
+  nbytes_video_frame = 0;
+  time_started = 0;
+  time_paused = 0;
+  num_frames_to_allocate = 0;
 }
 
-bool AVPlayer::open(std::string filename, bool datapath, AVPlayerSettings cfg, int numPreAllocateFrames) {
-  num_frames_to_allocate = numPreAllocateFrames;
-  settings = cfg;
+bool AVPlayer::setup(std::string filename, bool datapath, AVPlayerSettings cfg, int numPreAllocateFrames) {
+  this->filename = filename;
+  this->datapath = datapath;
+  this->num_frames_to_allocate = numPreAllocateFrames;
+  this->settings = cfg;
+
+  if(!open()) {
+    return false;
+  }
+
+#if defined(__APPLE__)
+  if(cfg.out_pixel_format != AV_PIX_FMT_NONE && cfg.out_pixel_format != AV_PIX_FMT_UYVY422) {
+    RX_ERROR("For now we only support the AVPlayerSettings.out_pixel_format = AV_PIX_FMT_UYVY422! on mac.");
+    ::exit(EXIT_FAILURE);
+  }
+#endif  
+
+  gl_surface.setup(dec.getWidth(), dec.getHeight()); 
+
+  return true;
+}
+
+bool AVPlayer::open() {
+
+  if(isOpen()) {
+    RX_ERROR(ERR_AVP_ALREADY_OPEN);
+    return false;
+  }
 
   if(!dec.open(filename, datapath)) {
     return false;
+  }
+
+  return true;
+}
+
+bool AVPlayer::initialize() {
+
+  if(!isOpen()) {
+    open();
   }
 
   if(settings.out_pixel_format == AV_PIX_FMT_NONE) {
@@ -167,8 +229,12 @@ bool AVPlayer::open(std::string filename, bool datapath, AVPlayerSettings cfg, i
   nbytes_video_frame = avpicture_get_size(settings.out_pixel_format, getWidth(), getHeight());
 
   dec.print();
-
-  RX_VERBOSE("Move this initialize call into the thread function OR play(), or create a `initialize()` and `shutdown()` which resets everything to the state the AVPlayer had when just created ");
+  
+  if(frames.size()) {
+    RX_ERROR(ERR_AVP_INIT_FRAMES_EXIST);
+    return false;
+  }
+  
   if(!initializeSWS()) {
     return false;
   }
@@ -177,9 +243,25 @@ bool AVPlayer::open(std::string filename, bool datapath, AVPlayerSettings cfg, i
     return false;
   }
 
-  // @TODO check if we can use YUV as format on MAC else another format which is more suited 
-  // on windows + make sure the settings.out_pixel_format matches
-  gl_surface.setup(dec.getWidth(), dec.getHeight()); 
+  return true;
+}
+
+bool AVPlayer::shutdown() {
+
+  dec.close();
+
+  deleteFrames();
+
+  decoded_frames.clear();
+
+  if(sws) {
+    sws_freeContext(sws);
+    sws = NULL;
+  }
+  
+  lock();
+  must_stop = false;
+  unlock();
 
   return true;
 }
@@ -225,6 +307,12 @@ bool AVPlayer::allocateFrames() {
 
 bool AVPlayer::play() {
 
+  if(state == AVP_STATE_PAUSE) {
+    state = AVP_STATE_PLAY;
+    time_started = time_started +(millis() - time_paused);
+    return true;
+  }
+
   if(state == AVP_STATE_PLAY) {
     RX_ERROR(ERR_AVP_ALREADY_PLAYING);
     return false;
@@ -239,9 +327,21 @@ bool AVPlayer::play() {
   return true;
 }
 
+bool AVPlayer::pause() {
+
+  if(state == AVP_STATE_PAUSE) {
+    RX_ERROR(ERR_AVP_ALREADY_PAUSED);
+    return false;
+  }
+
+  time_paused = millis();
+  state = AVP_STATE_PAUSE;
+  return true;
+}
+
 bool AVPlayer::stop() {
   state = AVP_STATE_NONE;
-  time_started = 0; // @TODO -> move to a new function `shutdown()`
+  time_started = 0; // @TODO -> move to a new function `shutdown()` (?)
 
   lock();
   {
@@ -252,46 +352,44 @@ bool AVPlayer::stop() {
   return true;
 }
 
-void AVPlayer::update() {
-  if(state != AVP_STATE_PLAY) {
-    return ;
-  }
-}
 
 void AVPlayer::draw(int x, int y, int w, int h) {
 
-  if(state != AVP_STATE_PLAY) {
+  if(state != AVP_STATE_PLAY && state != AVP_STATE_PAUSE) {
     return;
   }
 
-  // check if there is a frame in the queue.
-  AVPlayerFrame* f = NULL;
-  lock();
-  if(decoded_frames.size()) {
-    f = decoded_frames[0];
-  }
-  unlock();
 
-  // we got a frame, check if we need to display it
-  if(f) { 
+  if(state == AVP_STATE_PLAY) {
+    // check if there is a frame in the queue.
+    AVPlayerFrame* f = NULL;
+    lock();
+    if(decoded_frames.size()) {
+      f = decoded_frames[0];
+    }
+    unlock();
 
-    uint64_t time_playing = millis() - time_started;
+    // we got a frame, check if we need to display it
+    if(f) { 
 
-    if(f->decoder_frame->pts <= time_playing) {
+      uint64_t time_playing = millis() - time_started;
 
-      if(f->decoder_frame->type == AV_TYPE_VIDEO) {
-        gl_surface.setPixels((unsigned char*)f->data, f->nbytes);
+      if(f->decoder_frame->pts <= time_playing) {
 
-        lock();
-        {
-          f->is_free = true;
-          decoded_frames.erase(decoded_frames.begin());
+        if(f->decoder_frame->type == AV_TYPE_VIDEO) {
+          gl_surface.setPixels((unsigned char*)f->data, f->nbytes);
+
+          lock();
+          {
+            f->is_free = true;
+            decoded_frames.erase(decoded_frames.begin());
+          }
+          unlock();
+
         }
-        unlock();
-
-      }
-      else {
-        RX_VERBOSE("We got a frame which is not a video frame... we need to handle this!!");
+        else {
+          RX_VERBOSE("We got a frame which is not a video frame... we need to handle this!!");
+        }
       }
     }
   }

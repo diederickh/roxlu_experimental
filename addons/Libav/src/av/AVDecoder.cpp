@@ -12,8 +12,14 @@ AVDecoderFrame::AVDecoderFrame()
 }
 
 AVDecoderFrame::~AVDecoderFrame() {
-  // @TODO free up!
-  RX_VERBOSE("CLEAN/RESET AVDECODERFRAME");
+  pts = 0;
+  type = AV_TYPE_NONE;
+
+  if(frame) {
+    avcodec_free_frame(&frame);          
+    frame = NULL;
+  }
+
 }
 
 // ---------------------------------------------
@@ -25,16 +31,21 @@ AVDecoder::AVDecoder()
   ,video_codec_context(NULL)
   ,video_time_millis(0)
 {
-  avcodec_register_all();
+  rx_init_libav();
 }
 
 AVDecoder::~AVDecoder() {
-  RX_VERBOSE("CORRECTLY SHUTDOWN + CLEAN ALL LIBAV CONTEXTS + REMOVE AVDECODERFRAMES");
+  close();
 }
 
 bool AVDecoder::open(std::string filename, bool datapath) { 
   int r = 0;
   char err_msg[512];
+
+  if(format_context) {
+    RX_ERROR(ERR_AVD_ALREADY_OPENED);
+    return false;
+  }
 
   if(datapath) {
     filename = rx_to_data_path(filename);
@@ -48,6 +59,7 @@ bool AVDecoder::open(std::string filename, bool datapath) {
 
   r = avformat_open_input(&format_context, filename.c_str(), NULL, NULL);
   if(r < 0) {
+    RX_ERROR("%d", r);
     RX_ERROR(ERR_AVD_OPEN_INPUT, filename.c_str(), av_strerror(r, err_msg, sizeof(err_msg)));
     return false;
   }
@@ -69,7 +81,6 @@ bool AVDecoder::open(std::string filename, bool datapath) {
     if(codec_context->codec_type == AVMEDIA_TYPE_VIDEO) {
       video_stream = format_context->streams[i];
       video_time_millis = (double(video_stream->time_base.num) / video_stream->time_base.den) * 1000;
-      RX_VERBOSE("VIDEO STREAM TIME BASE: %f", video_time_millis);
       break;
     }
   }
@@ -86,7 +97,6 @@ bool AVDecoder::open(std::string filename, bool datapath) {
     return false;
   }
 
-  // @TODO @Paranoialmaniac in #libav-devel told me I don't need to allocate a codec context because it's already allocated by avformat_find_stream_info
   // @TODO call avcodec_close(), avfree(video_codec_context) when stopping ! 
   video_codec_context = avcodec_alloc_context3(video_codec);
   if(!video_codec_context) {
@@ -94,7 +104,18 @@ bool AVDecoder::open(std::string filename, bool datapath) {
     return false;
   }
 
-  // copy the extra data. @TODO where (and) do I need to free this?
+#if 0
+  // There seems to be a bug in libav regarding copy_context and avcodec_close. 
+  // avcodec_close is not freeing the copied extradata in case, because it checks
+  // if the avformatcontext.codec is an encoder. Because we have a decoder,
+  // the extra data isn't freed().
+  // see: https://gist.github.com/roxlu/5f0bbed4da1a52c971c4#file-utils-c-L1464-L1465
+  r = avcodec_copy_context(video_codec_context, video_stream->codec);
+  if(r != 0) {
+    RX_ERROR(ERR_AVD_COPY_VIDEO_CONTEXT, av_strerror(r, err_msg, sizeof(err_msg)));
+    return false;
+  }
+#else 
   if(video_stream->codec->extradata_size) {
     video_codec_context->extradata = (uint8_t*)av_malloc(video_stream->codec->extradata_size);
     video_codec_context->extradata_size = video_stream->codec->extradata_size;
@@ -104,6 +125,7 @@ bool AVDecoder::open(std::string filename, bool datapath) {
            video_stream->codec->extradata_size);
   }
 
+#endif
   r = avcodec_open2(video_codec_context, video_codec, NULL);
   if(r < 0) {
     RX_ERROR(ERR_AVD_OPEN_VIDEO_CONTEXT, av_strerror(r, err_msg, sizeof(err_msg)));
@@ -114,16 +136,23 @@ bool AVDecoder::open(std::string filename, bool datapath) {
 }
 
 bool AVDecoder::close() {
-  if(!format_context) {
-    RX_VERBOSE(ERR_AVD_CLOSE_NO_FORMAT_CTX);
-    return false;
+
+  if(format_context) {
+    avformat_close_input(&format_context);
+    format_context = NULL;
   }
 
-  // @todo close the decoder .. set everything to the same state as when we were just created */
-  RX_ERROR("CLEAR ALL THINGS WE'VE ALLOCATED!!");
-  if(video_stream) {
-
+  if(video_codec_context) {
+    av_freep(&video_codec_context->extradata);
+    avcodec_close(video_codec_context);
+    av_free(video_codec_context);
+    video_codec_context = NULL;
   }
+
+  video_stream = NULL;
+  video_codec = NULL; 
+  video_time_millis = 0;
+
   return true; 
 }
 
@@ -131,35 +160,41 @@ AVDecoderFrame* AVDecoder::decodeFrame(bool& isEOF) {
   isEOF = false;
 
   AVDecoderFrame* decoder_frame = new AVDecoderFrame();
-  decoder_frame->frame =  avcodec_alloc_frame();
+  decoder_frame->frame = avcodec_alloc_frame();
   if(!decoder_frame->frame) {
     RX_ERROR(ERR_AVD_ALLOC_FRAME);
     delete decoder_frame;
     return NULL;
   }
   
-  AVPacket packet;                                                                  // @TODO where do I need to free it
-  av_init_packet(&packet);                                                          // is this really necessary? (not done here: http://blog.tomaka17.com/2012/03/libavcodeclibavformat-tutorial/)
-    
+  AVPacket packet;    
+  av_init_packet(&packet);
+
   if(av_read_frame(format_context, &packet) < 0) {
-    RX_VERBOSE(V_AVD_EOF);                                                          // @TODO clean up packet (?)
-    isEOF = true;
+    RX_VERBOSE(V_AVD_EOF);         
+    isEOF = true;         
     delete decoder_frame;
+    av_free_packet(&packet); 
     return NULL;
   }
 
   if(packet.stream_index == video_stream->index) {
+
     int got_picture = 0;
     int bytes_used = avcodec_decode_video2(video_codec_context, decoder_frame->frame, &got_picture, &packet);
     if(got_picture) {
       decoder_frame->pts = video_time_millis * decoder_frame->frame->pkt_pts;
       decoder_frame->type = AV_TYPE_VIDEO;
     }
-    RX_VERBOSE("PTS: %ld, PACKET.PTS: %ld, WIDTH: %d, PICTURE: %d", decoder_frame->frame->pkt_pts, packet.pts, decoder_frame->frame->width, got_picture);
   }
   else {
-    RX_VERBOSE(V_AVD_STREAM_NOT_USED, packet.stream_index);
+    // this is where we could handle other streams (like audio / subtitle)
+    // RX_VERBOSE(V_AVD_STREAM_NOT_USED, packet.stream_index);
+    delete decoder_frame;
+    decoder_frame = NULL;
   }
+
+  av_free_packet(&packet);   
 
   return decoder_frame;
 }

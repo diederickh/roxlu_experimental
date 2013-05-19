@@ -16,11 +16,10 @@ AVEncoder::AVEncoder()
   ,video_codec(NULL)
   ,video_codec_context(NULL)
   ,video_stream(NULL)
-   //  ,video_frame_in(NULL)
   ,video_frame_out(NULL)
   ,sws(NULL)
 {
-  av_register_all();
+  rx_init_libav();
 }
 
 AVEncoder::~AVEncoder() {

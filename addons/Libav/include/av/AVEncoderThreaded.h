@@ -7,7 +7,7 @@ extern "C" {
 
 #include <string>
 #include <vector>
-#include <av/Types.h>
+#include <av/AVTypes.h>
 #include <av/AVEncoder.h>
 
 #define ERR_AVT_NOT_SETUP "Not setup so we cannot start!"

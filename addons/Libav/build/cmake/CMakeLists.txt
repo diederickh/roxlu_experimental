@@ -41,7 +41,8 @@ roxlu_addon_begin("av")
   roxlu_addon_add_source_file(av/AVEncoder.cpp)
   roxlu_addon_add_source_file(av/AVEncoderThreaded.cpp)
   roxlu_addon_add_source_file(av/AVPlayer.cpp)
-  roxlu_addon_add_source_file(av/Types.cpp)
+  roxlu_addon_add_source_file(av/AVTypes.cpp)
+  roxlu_addon_add_source_file(av/AVUtils.cpp)
 
   # --------------------------------------------------------------------------------------
 

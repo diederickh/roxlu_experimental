@@ -1,5 +1,5 @@
 #include <roxlu/core/Log.h>
-#include <av/Types.h>
+#include <av/AVTypes.h>
 
 AVEncoderSettings::AVEncoderSettings() 
   :in_pixel_format(AV_PIX_FMT_NONE)

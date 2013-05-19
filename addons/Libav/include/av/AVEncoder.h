@@ -9,7 +9,8 @@
 #ifndef ROXLU_LIBAV_AVENCODER_H
 #define ROXLU_LIBAV_AVENCODER_H
 
-#include <av/Types.h>
+#include <av/AVTypes.h>
+#include <av/AVUtils.h>
 
 #define ERR_AV_ALREADY_STARTED "Cannot start the AVEncoder twice"
 #define ERR_AV_OUTPUT_FMT "Cannot guess the output format"
