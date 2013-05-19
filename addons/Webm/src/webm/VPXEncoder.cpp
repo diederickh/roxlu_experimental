@@ -21,6 +21,11 @@ bool VPXEncoder::shutdown() {
   settings.fmt = AV_PIX_FMT_NONE;
 
   if(pic_out) {
+
+    if(vpx_codec_destroy(&ctx)) {
+      die("ERROR: failed to destroy codec.");
+    }
+
     vpx_img_free(pic_out);
     pic_out = NULL;
   }
@@ -30,9 +35,6 @@ bool VPXEncoder::shutdown() {
     sws = NULL;
   }
 
-  if(vpx_codec_destroy(&ctx)) {
-    die("ERROR: failed to destroy codec.");
-  }
   
   flags = 0;
   return true;

@@ -257,9 +257,7 @@ bool AVPlayer::shutdown() {
     sws = NULL;
   }
   
-  lock();
   must_stop = false;
-  unlock();
 
   return true;
 }
