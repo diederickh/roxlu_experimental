@@ -53,8 +53,8 @@ See `AVDecoder.cpp`, some things which you might want to know:
 
 # TODO
 
-[ ]   Add support for audio for the encoder (we can only encode video now)
-[ ]   Add support for audio for the decoder (we can only decode video now)
-[ ]   Cleanup all members and test for memory leaks in the `AVEncoder` and `AVEncoderThreaded`
-[ ]   When you play()/stop()/play()/stop()/etc.. a movie the texture buffer shows the last frame; The `VideoCaptureGLSurface` needs to clean the texture with e.g. black.
-[ ]   Look into hardware acceleration with libavcodec
+ - [ ]   Add support for audio for the encoder (we can only encode video now)
+ - [ ]   Add support for audio for the decoder (we can only decode video now)
+ - [ ]   Cleanup all members and test for memory leaks in the `AVEncoder` and `AVEncoderThreaded`
+ - [ ]   When you play()/stop()/play()/stop()/etc.. a movie the texture buffer shows the last frame; The `VideoCaptureGLSurface` needs to clean the texture with e.g. black.
+ - [ ]   Look into hardware acceleration with libavcodec
