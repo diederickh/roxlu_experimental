@@ -63,3 +63,4 @@ See `AVDecoder.cpp`, some things which you might want to know:
  -  When you play()/stop()/play()/stop()/etc.. a movie the texture buffer shows the last frame; The `VideoCaptureGLSurface` needs to clean the texture with e.g. black.
  -  Look into hardware acceleration with libavcodec
  -  Test if the time base / frame rate of the `AVEncoderSettings` that is passed to `AVEncoder::setup()` is supported (see `AVCodec.supported_framerates`)   
+ -  In `AVEncoder.cpp` I want to free the `video_frame_in` and `video_frame_out` members when you call `AVEncoder::stop()`, but `av_frame_free` does not free all memory that was allocated. 

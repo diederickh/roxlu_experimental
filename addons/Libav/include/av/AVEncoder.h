@@ -71,7 +71,6 @@ class AVEncoder {
   int64_t millis_per_frame;                                            /* how much millis one video frame takes */
   int64_t new_frame_timeout;                                           /* when current time reaches this point we need to a add a new frame */
 
-
   /* audio */
   AVCodecContext* audio_codec_context;
   AVCodec* audio_codec;
@@ -79,12 +78,12 @@ class AVEncoder {
   AVFrame* audio_frame;
 
   /* video */
-  AVCodec* video_codec;                                        /* a reference to the video codec in the video stream; we don't need to manage this memory */
-  AVCodecContext* video_codec_context;                         /* a reference to the video codec context in the video stream; we don't need to manage this memory */
-  AVStream* video_stream;                                      /* the video stream which has been added. we free the stream in `stop()` using the same code as in the example: https://github.com/libav/libav/blob/master/libavformat/output-example.c#L514-L516 */
-  AVFrame* video_frame_in;                                    /* the input video frame that will hold the pixels that need to be encoded */
-  AVFrame* video_frame_out;                                    /* when the output format is not the same as the input format we need to convert the input->output */
-  SwsContext* sws;                                             /* we use a SwsContext to convert the input when it's not the same size or pixel format as the output */
+  AVCodec* video_codec;                                               /* a reference to the video codec in the video stream; we don't need to manage this memory */
+  AVCodecContext* video_codec_context;                                /* a reference to the video codec context in the video stream; we don't need to manage this memory */
+  AVStream* video_stream;                                             /* the video stream which has been added. we free the stream in `stop()` using the same code as in the example: https://github.com/libav/libav/blob/master/libavformat/output-example.c#L514-L516 */
+  AVFrame* video_frame_in;                                            /* the input video frame that will hold the pixels that need to be encoded */
+  AVFrame* video_frame_out;                                           /* when the output format is not the same as the input format we need to convert the input->output */
+  SwsContext* sws;                                                    /* we use a SwsContext to convert the input when it's not the same size or pixel format as the output */
 };
 
 inline bool AVEncoder::isStarted() {            

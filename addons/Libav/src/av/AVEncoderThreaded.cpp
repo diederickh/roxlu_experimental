@@ -5,9 +5,15 @@
 void avencoder_thread(void* user) {
 
   AVEncoderThreaded& enc = *(static_cast<AVEncoderThreaded*>(user));
+  
+  if(!enc.initialize()) {
+    return;
+  }
+
   uv_mutex_t& mutex = enc.mutex;
   std::vector<AVEncoderFrame*> work_data;
   bool must_stop = false;
+
   
   while(true) {
     // get frames that need to be encoded
@@ -27,12 +33,13 @@ void avencoder_thread(void* user) {
     // encode worker data
     std::sort(work_data.begin(), work_data.end(), AVEncoderFrameSorter());
     for(std::vector<AVEncoderFrame*>::iterator it = work_data.begin(); it != work_data.end(); ++it) {
+
       AVEncoderFrame* f = *it;
-      // RX_VERBOSE("ADDING: pixels: %p, AVEncoderFrame: %p", f->pixels, f);
-      //enc.enc.addVideoFrame(f->pixels, f->pts, f->nbytes);
-      //uv_mutex_lock(&mutex);
-      //f->is_free = true;
-      //uv_mutex_unlock(&mutex);
+      enc.enc.addVideoFrame(f->pixels, f->pts, f->nbytes);
+
+      uv_mutex_lock(&mutex);
+      f->is_free = true;
+      uv_mutex_unlock(&mutex);
     }
 
     if(must_stop) {
@@ -40,7 +47,7 @@ void avencoder_thread(void* user) {
     }
   }
 
-  enc.enc.stop();
+  enc.shutdown();
 }
 
 // -------------------------------------------
@@ -54,11 +61,12 @@ AVEncoderFrame::AVEncoderFrame()
 }
 
 AVEncoderFrame::~AVEncoderFrame() {
-  RX_VERBOSE("--------------------------------");
+
   if(pixels) {
     delete[] pixels;
     pixels = NULL;
   }
+
   is_free = true;
   nbytes = 0;
   pts = 0;
@@ -71,6 +79,10 @@ AVEncoderThreaded::AVEncoderThreaded()
   :is_setup(false)
   ,thread(NULL)
   ,must_stop(true)
+  ,num_frames_to_allocate(0)
+  ,millis_per_frame(0)
+  ,new_frame_timeout(0)
+  ,time_started(0)
 {
   uv_mutex_init(&mutex);
 }
@@ -109,21 +121,43 @@ bool AVEncoderThreaded::setup(AVEncoderSettings cfg, int numFramesToAllocate) {
     RX_ERROR(ERR_AVT_WRONG_SIZE);
     return false;
   }
-  
-  for(int i = 0; i < numFramesToAllocate; ++i) {
-    AVEncoderFrame* f = new AVEncoderFrame();
-    f->pixels = new unsigned char[size];
-    RX_VERBOSE("PIXELS: %p", f->pixels);
-    frames.push_back(f);
-  }
-
+ 
   millis_per_frame = (cfg.time_base_num / cfg.time_base_den) * 1000;
   if(!millis_per_frame) {
     RX_ERROR(ERR_AVT_WRONG_MILLIS_PER_FRAME);
     return false;
   }
 
+  num_frames_to_allocate = numFramesToAllocate;
+
   is_setup = true;
+  return true;
+}
+
+bool AVEncoderThreaded::initialize() {
+
+  if(frames.size()) {
+    RX_ERROR(ERR_AVT_INITIALIZE_FRAMES);
+    return false;
+  }
+
+  for(int i = 0; i < num_frames_to_allocate; ++i) {
+    AVEncoderFrame* f = new AVEncoderFrame();
+    frames.push_back(f);
+  }
+
+  return true;
+}
+
+bool AVEncoderThreaded::shutdown() {
+
+  for(std::vector<AVEncoderFrame*>::iterator it = frames.begin(); it != frames.end(); ++it) {
+    delete *it;
+  }
+
+  frames.clear();
+
+  enc.stop();
   return true;
 }
 
@@ -133,64 +167,65 @@ bool AVEncoderThreaded::start(std::string filename, bool datapath) {
     RX_ERROR(ERR_AVT_NOT_SETUP);
     return false;
   }
+
   uv_mutex_lock(&mutex);
   must_stop = false;
   uv_mutex_unlock(&mutex);
-
+  
   enc.start(filename, datapath);
 
   time_started = millis();
 
   new_frame_timeout = millis() + millis_per_frame;
 
-  //uv_thread_create(&thread, avencoder_thread, this);
+  uv_thread_create(&thread, avencoder_thread, this);
 
   return true;
 
 }
 
 bool AVEncoderThreaded::addVideoFrame(unsigned char* data, size_t nbytes) {
-  static int added = 0;
   if(!time_started) {
     RX_ERROR(ERR_AVT_NOT_STARTED);
     return false;
   }
 
+#if 1
   uint64_t now = millis();
   if(now < new_frame_timeout) {
     return false;
   }
   new_frame_timeout = now + millis_per_frame;
+#endif
 
   AVEncoderFrame* f = getFreeFrame();
 
-
   if(f) {
+
     int64_t pts = (millis() - time_started) / millis_per_frame;
-    
+
     uv_mutex_lock(&mutex);
     {
       f->is_free = false;
       f->pts = pts;
-      f->nbytes = nbytes;
-      RX_VERBOSE("COPYING INTO, pixels: %p, frame: %p, ADDED: %d", f->pixels, f, added);
-      ++added;
-      
-      memcpy(f->pixels, data, nbytes);
+      if(!f->pixels) {
+        f->pixels = new unsigned char[nbytes];
+        f->nbytes = nbytes;
+      }
     }
     uv_mutex_unlock(&mutex);
+    memcpy(f->pixels, data, nbytes);
 
   }
   else {
     RX_ERROR(ERR_AVT_NO_FREE_FRAME);
   }
-  RX_VERBOSE("++++++++++++++++++++++++");
+
   return true;
 }
 
 AVEncoderFrame* AVEncoderThreaded::getFreeFrame() {
   AVEncoderFrame* f = NULL;
-  static int found_frames =  0;
 
   uv_mutex_lock(&mutex);
   {
@@ -198,15 +233,11 @@ AVEncoderFrame* AVEncoderThreaded::getFreeFrame() {
       AVEncoderFrame* frame = *it;
       if(frame->is_free) {
         f = frame;
-        found_frames++;
-        RX_VERBOSE("----------------->: %p", f);
         break;
       }
     }
   }
   uv_mutex_unlock(&mutex);
-  //f = NULL;
-  RX_VERBOSE("--- GOT FREE FRAME: %p, found: %d", f, found_frames);  
   return f;
 }
 
@@ -229,3 +260,4 @@ bool AVEncoderThreaded::stop() {
 uint64_t AVEncoderThreaded::millis() {
   return (uv_hrtime()/1000000);
 }
+

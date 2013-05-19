@@ -15,6 +15,7 @@ extern "C" {
 #define ERR_AVT_WRONG_SIZE "Cannot calculate the size for the input pixel format"
 #define ERR_AVT_WRONG_MILLIS_PER_FRAME "Wrong millis per frame .. did you set the time_base_num and time_base_den faulty?"
 #define ERR_AVT_NO_FREE_FRAME "No free frame found. Allocate more frames (see setup()), or change the frame rate (see AVEncoderSettings time_base_*) "
+#define ERR_AVT_INITIALIZE_FRAMES "Cannot initialize because there are already allocated frames. Did you call start twice maybe?"
 
 void avencoder_thread(void* user);
 
@@ -38,17 +39,23 @@ class AVEncoderThreaded {
  public:
   AVEncoderThreaded();
   ~AVEncoderThreaded();
-  bool setup(AVEncoderSettings cfg, int numFramesToAllocate = 10);
+  bool setup(AVEncoderSettings cfg, int numFramesToAllocate = 100);
   bool start(std::string filename, bool datapath = false);
   bool stop();
   bool addVideoFrame(unsigned char* data, size_t nbytes);
   uint64_t millis();                                         /* tiny helper to retrieve time in millis */
+
+ public:
+  bool initialize();                                         /* accessed from the thread; initializes just before the thread loop starts */
+  bool shutdown();                                           /* cleans the AVEncoderThreaded::frames member when the thread stops (e.g. when stop() has been called) */
+
  private:
   AVEncoderFrame* getFreeFrame();
 
-public:                                                     /* all members are actually private but we need to acces them in the thread function */
+ public:                                                     /* all members are actually private but we need to acces them in the thread function */
   bool is_setup;
   std::vector<AVEncoderFrame*> frames;
+  int num_frames_to_allocate;
 
   /* timing when encoding */
   uint64_t time_started;

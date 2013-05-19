@@ -1,3 +1,13 @@
+/*
+
+  Note: I'm freeing the video_frame_out and video_frame_in
+  int the destructor; or at least I'm following what I read and saw
+  in the libav documentation. but it seems that these still leak.
+
+  I would like to call avcodec_free_frame(video_frame_{in,out}) in 
+  stop(), but that introduces a memory leak.
+
+ */
 #include <roxlu/core/Utils.h>
 #include <roxlu/core/Log.h>
 #include <av/AVEncoder.h>
@@ -24,9 +34,19 @@ AVEncoder::AVEncoder()
 }
 
 AVEncoder::~AVEncoder() {
-  RX_ERROR("MAKE SURE THAT ALL ALLOCATED OBJECTS ARE FREED HERE!! --> call stop()");
   if(isStarted()) {
     stop();
+  }
+
+  // @TODO - free the frames in stop(), but it seems that these functions leak!
+  if(video_frame_out) {
+    avcodec_free_frame(&video_frame_out);
+    video_frame_out = NULL;
+  }
+
+  if(video_frame_in) {
+    avcodec_free_frame(&video_frame_in);
+    video_frame_in = NULL;
   }
 
   millis_per_frame = 0;
@@ -140,12 +160,12 @@ bool AVEncoder::addVideoStream(enum AVCodecID codecID) {
 
   listSupportedVideoCodecPixelFormats();
 
-  video_codec_context->bit_rate = 400000;
+  video_codec_context->bit_rate = 4000000;
   video_codec_context->width = settings.out_w;
   video_codec_context->height = settings.out_h;
   video_codec_context->time_base.den = settings.time_base_den;
   video_codec_context->time_base.num = settings.time_base_num;
-  video_codec_context->gop_size = 12; /* emit one intra frame very gop_size frames at most */
+  video_codec_context->gop_size = 5; /* emit one intra frame very gop_size frames at most */
   video_codec_context->pix_fmt = AV_PIX_FMT_YUV420P;
   //video_codec_context->pix_fmt = AV_PIX_FMT_UYVY422;  // when using the Logitech Webcam c920 on mac, this is the standard format, so setting this is value for the encode would mean we don't need to convert but this makes sws_scale crash
 
@@ -166,8 +186,7 @@ AVFrame* AVEncoder::allocVideoFrame(enum AVPixelFormat pixelFormat, int width, i
     RX_ERROR(ERR_AV_ALLOC_AVFRAME);
     return NULL;
   }
-  
-  
+    
   size = avpicture_get_size(pixelFormat, width, height);
   buf = (uint8_t*)av_malloc(size);
   if(!buf) {
@@ -189,28 +208,26 @@ bool AVEncoder::openVideo() {
   }
 
   // allocate the encodec raw frame 
-  video_frame_out = allocVideoFrame(video_codec_context->pix_fmt, 
-                                video_codec_context->width, 
-                                video_codec_context->height);
   if(!video_frame_out) {
-    RX_ERROR(ERR_AV_ALLOC_VIDEO_FRAME);
-    return false;
+    video_frame_out = allocVideoFrame(video_codec_context->pix_fmt, 
+                                      video_codec_context->width, 
+                                      video_codec_context->height);
+    if(!video_frame_out) {
+      RX_ERROR(ERR_AV_ALLOC_VIDEO_FRAME);
+      return false;
+    }
   }
 
+  
   // allocate a container for the input data
-  video_frame_in = allocVideoFrame(settings.in_pixel_format, settings.in_w, settings.in_h);
   if(!video_frame_in) {
-    RX_ERROR("Cannot allocate video frame in");
-    return false;
+    video_frame_in = allocVideoFrame(settings.in_pixel_format, settings.in_w, settings.in_h);
+    if(!video_frame_in) {
+      RX_ERROR("Cannot allocate video frame in");
+      return false;
+    }
   }
 
-  //video_pic_in = alloc_picture
-
-  // when the output format is not YUV420P, we need a temporary 
-  // frame to convert into the correct format 
-  //if(settings.in_pixel_format != settings.out_pixel_format) {
-  //  tmp_video_frame = allocVideoFrame(settings.in_pixel_format, settings.in_w, settings.in_h);
-  //}
   return true;
 }
 
@@ -219,8 +236,7 @@ bool AVEncoder::rescale(unsigned char* data) {
   assert(video_codec_context);
   assert(video_frame_in);
   assert(video_frame_out);
-  static int called = 0;
-  ++called;
+
   // get the input data into the video_frame_in member
   int img_nbytes = avpicture_fill((AVPicture*)video_frame_in, (uint8_t*)data, 
                                   settings.in_pixel_format, settings.in_w, 
@@ -235,34 +251,34 @@ bool AVEncoder::rescale(unsigned char* data) {
     return false;
   }
 
-  RX_VERBOSE("SCALED! : %d", called);
-
   return true;
 }
 
 bool AVEncoder::addVideoFrame(unsigned char* data, size_t nbytes) {
   int64_t pts = (rx_millis() - time_started) / millis_per_frame;
-  /// millis_per_frame;
   RX_VERBOSE("millis_per_Frame: %ld, time_started: %ld, pts: %ld", millis_per_frame, time_started, pts);
   return addVideoFrame(data, pts, nbytes);
-  
 }
 
 bool AVEncoder::addVideoFrame(unsigned char* data, int64_t pts, size_t nbytes) {
-
   assert(video_codec_context);
   assert(video_stream);
 
+  // @TODO When encoding to MP4,Webm,Mov, the resulting video seems to skip frames.. FLV works just fine, find out why!
+#if 1 
+#  if 0
   if(pts <= new_frame_timeout) {
-    RX_VERBOSE("SAME FRAME PTS");
     return false;
   }
   new_frame_timeout = pts;
-  //uint64_t now = rx_millis();
-  //if(now < new_frame_timeout) {
-    //    return false;
-  //}
-  //new_frame_timeout = now + millis_per_frame;
+#  else
+  uint64_t now = rx_millis();
+  if(now < new_frame_timeout) {
+    return false;
+  }
+  new_frame_timeout = now + millis_per_frame;
+#  endif
+#endif
 
   // scale or convert the pixel format if necessary
   if(sws) {
@@ -283,7 +299,7 @@ bool AVEncoder::addVideoFrame(unsigned char* data, int64_t pts, size_t nbytes) {
   AVPacket pkt = { 0 } ;
   int got_packet;
   av_init_packet(&pkt);
-
+  
   video_frame_out->pts = pts;
   int r = avcodec_encode_video2(video_codec_context, &pkt, video_frame_out, &got_packet);
   if(!r && got_packet && pkt.size) {
@@ -329,7 +345,7 @@ bool AVEncoder::stop() {
 
   int r = av_write_trailer(format_context);
   if(r != 0) {
-    // @todo free/close all other av contexts
+    // @todo free/close all other av contexts when we fail here.
     RX_ERROR(ERR_AV_TRAILER, av_strerror(r, err_msg, sizeof(err_msg)));
     return false;
   }
@@ -345,7 +361,6 @@ bool AVEncoder::stop() {
 
   if(!(output_format->flags & AVFMT_NOFILE)) {
     avio_close(format_context->pb);
-    RX_VERBOSE("CLOSED!");
   }
   
   av_free(format_context);
@@ -364,6 +379,8 @@ bool AVEncoder::stop() {
 }
 
 void AVEncoder::closeVideo() {
+#if 0
+  // @TODO - these are moved to the d'tor.. but this is where we want it; though this introduces a memory leak!
   if(video_frame_out) {
     avcodec_free_frame(&video_frame_out);
     video_frame_out = NULL;
@@ -373,6 +390,7 @@ void AVEncoder::closeVideo() {
     avcodec_free_frame(&video_frame_in);
     video_frame_in = NULL;
   }
+#endif
 
   if(video_codec) {
     avcodec_close(video_stream->codec);
@@ -382,8 +400,8 @@ void AVEncoder::closeVideo() {
   video_stream = NULL;              
   video_codec_context = NULL;       
   video_codec = NULL;               
-  video_frame_out = NULL; // allocated by AVEncoder
-  video_frame_in = NULL; // allocated by AVEncoder
+  //video_frame_out = NULL; // allocated by AVEncoder 
+  //video_frame_in = NULL; // allocated by AVEncoder
 }
 
 
