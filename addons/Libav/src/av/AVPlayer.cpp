@@ -1,4 +1,3 @@
-
 extern "C" {
 #  include <libavutil/avutil.h>
 #  include <libavutil/imgutils.h>
@@ -9,7 +8,6 @@ extern "C" {
 #include <roxlu/core/Log.h>
 #include <roxlu/core/Utils.h>
 #include <av/AVPlayer.h>
-
 
 // ----------------------------------------------
 

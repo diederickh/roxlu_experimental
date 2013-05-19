@@ -17,13 +17,19 @@ AVEncoder::AVEncoder()
   ,video_codec_context(NULL)
   ,video_stream(NULL)
   ,video_frame_out(NULL)
+  ,video_frame_in(NULL)
   ,sws(NULL)
 {
   rx_init_libav();
 }
 
 AVEncoder::~AVEncoder() {
-  RX_ERROR("MAKE SURE THAT ALL ALLOCATED OBJECTS ARE FREED HERE!!");
+  RX_ERROR("MAKE SURE THAT ALL ALLOCATED OBJECTS ARE FREED HERE!! --> call stop()");
+  if(isStarted()) {
+    stop();
+  }
+
+  millis_per_frame = 0;
 }
 
 bool AVEncoder::setup(AVEncoderSettings cfg) {
@@ -79,8 +85,10 @@ bool AVEncoder::start(std::string filename, bool datapath) {
     return false;
   }
 
-  if(!initializeSWS()) {
-    return false;
+  if(needsSWS()) {
+    if(!initializeSWS()) {
+      return false;
+    }
   }
 
   av_dump_format(format_context, 0, filename.c_str(), 1);
@@ -99,24 +107,15 @@ bool AVEncoder::start(std::string filename, bool datapath) {
 
 bool AVEncoder::initializeSWS() {
   assert(video_codec_context);
-#if 0
-  if(settings.in_pixel_format != video_codec_context->pix_fmt
-     || settings.in_w != settings.out_w
-     || settings.in_h != settings.out_h) 
-    {
-#endif
 
-      sws = sws_getContext(settings.in_w, settings.in_h, settings.in_pixel_format,
-                           settings.out_w, settings.out_h, video_codec_context->pix_fmt,
-                           SWS_FAST_BILINEAR, NULL, NULL, NULL);
-      if(!sws) {
-        RX_ERROR(ERR_AV_SWS);
-        return false;
-      }
-
-#if 0
+  sws = sws_getContext(settings.in_w, settings.in_h, settings.in_pixel_format,
+                       settings.out_w, settings.out_h, video_codec_context->pix_fmt,
+                       SWS_FAST_BILINEAR, NULL, NULL, NULL);
+  if(!sws) {
+    RX_ERROR(ERR_AV_SWS);
+    return false;
   }
-#endif
+
 
   return true;
 }
@@ -141,7 +140,7 @@ bool AVEncoder::addVideoStream(enum AVCodecID codecID) {
 
   listSupportedVideoCodecPixelFormats();
 
-  video_codec_context->bit_rate = 4000000;
+  video_codec_context->bit_rate = 400000;
   video_codec_context->width = settings.out_w;
   video_codec_context->height = settings.out_h;
   video_codec_context->time_base.den = settings.time_base_den;
@@ -168,6 +167,7 @@ AVFrame* AVEncoder::allocVideoFrame(enum AVPixelFormat pixelFormat, int width, i
     return NULL;
   }
   
+  
   size = avpicture_get_size(pixelFormat, width, height);
   buf = (uint8_t*)av_malloc(size);
   if(!buf) {
@@ -177,6 +177,7 @@ AVFrame* AVEncoder::allocVideoFrame(enum AVPixelFormat pixelFormat, int width, i
   }
 
   avpicture_fill((AVPicture*)pic, buf, pixelFormat, width, height);
+  
   return pic;
 }
 
@@ -196,6 +197,15 @@ bool AVEncoder::openVideo() {
     return false;
   }
 
+  // allocate a container for the input data
+  video_frame_in = allocVideoFrame(settings.in_pixel_format, settings.in_w, settings.in_h);
+  if(!video_frame_in) {
+    RX_ERROR("Cannot allocate video frame in");
+    return false;
+  }
+
+  //video_pic_in = alloc_picture
+
   // when the output format is not YUV420P, we need a temporary 
   // frame to convert into the correct format 
   //if(settings.in_pixel_format != settings.out_pixel_format) {
@@ -207,19 +217,25 @@ bool AVEncoder::openVideo() {
 
 bool AVEncoder::rescale(unsigned char* data) {
   assert(video_codec_context);
-
-  int img_nbytes = avpicture_fill(&video_frame_in, (uint8_t*)data, 
+  assert(video_frame_in);
+  assert(video_frame_out);
+  static int called = 0;
+  ++called;
+  // get the input data into the video_frame_in member
+  int img_nbytes = avpicture_fill((AVPicture*)video_frame_in, (uint8_t*)data, 
                                   settings.in_pixel_format, settings.in_w, 
                                   settings.in_h);
 
-  int h = sws_scale(sws,
-                    video_frame_in.data, video_frame_in.linesize, 0, settings.in_h,
+   int h = sws_scale(sws,
+                    video_frame_in->data, video_frame_in->linesize, 0, settings.in_h,
                     video_frame_out->data, video_frame_out->linesize);
 
   if(h != settings.in_h) {
     RX_ERROR(ERR_AV_SWS_SCALE);
     return false;
   }
+
+  RX_VERBOSE("SCALED! : %d", called);
 
   return true;
 }
@@ -233,19 +249,35 @@ bool AVEncoder::addVideoFrame(unsigned char* data, size_t nbytes) {
 }
 
 bool AVEncoder::addVideoFrame(unsigned char* data, int64_t pts, size_t nbytes) {
+
   assert(video_codec_context);
   assert(video_stream);
 
-  uint64_t now = rx_millis();
-  if(now < new_frame_timeout) {
-    RX_VERBOSE("...");
+  if(pts <= new_frame_timeout) {
+    RX_VERBOSE("SAME FRAME PTS");
     return false;
   }
-  new_frame_timeout = now + millis_per_frame;
-  
-  if(!rescale(data)) {
-    RX_ERROR(ERR_AV_ADD_VFRAME_SCALE);
-    return false;
+  new_frame_timeout = pts;
+  //uint64_t now = rx_millis();
+  //if(now < new_frame_timeout) {
+    //    return false;
+  //}
+  //new_frame_timeout = now + millis_per_frame;
+
+  // scale or convert the pixel format if necessary
+  if(sws) {
+
+    if(!rescale(data)) {
+      RX_ERROR(ERR_AV_ADD_VFRAME_SCALE);
+      return false;
+    }
+  }
+  else {
+    // @TODO add error check
+    avpicture_fill((AVPicture*)video_frame_out, (uint8_t*)data, 
+                   settings.in_pixel_format, settings.in_w, 
+                   settings.in_h);
+
   }
 
   AVPacket pkt = { 0 } ;
@@ -272,6 +304,8 @@ bool AVEncoder::addVideoFrame(unsigned char* data, int64_t pts, size_t nbytes) {
     r = 0;
   }
 
+  av_free_packet(&pkt);
+
   if(r != 0) {
     RX_ERROR(ERR_AV_WRITE_VIDEO);
     return false;
@@ -286,8 +320,19 @@ bool AVEncoder::openAudio() {
 }
 
 bool AVEncoder::stop() {
-  // @todo add a check if we actually started encoding
-  av_write_trailer(format_context);
+  char err_msg[512];
+
+  if(!output_format) {
+    RX_ERROR(ERR_AV_NOT_STARTED);
+    return false;
+  }
+
+  int r = av_write_trailer(format_context);
+  if(r != 0) {
+    // @todo free/close all other av contexts
+    RX_ERROR(ERR_AV_TRAILER, av_strerror(r, err_msg, sizeof(err_msg)));
+    return false;
+  }
 
   if(video_stream) {
     closeVideo();
@@ -304,19 +349,41 @@ bool AVEncoder::stop() {
   }
   
   av_free(format_context);
-  // @todo close sws
+  format_context = NULL;
+
+  if(sws) {
+    sws_freeContext(sws);
+    sws = NULL;
+  }
+
+  new_frame_timeout = 0;
   time_started = 0;
+  output_format = NULL;
 
   return true;
 }
 
 void AVEncoder::closeVideo() {
-  if(video_codec) {
-    RX_VERBOSE("close video!");
-    avcodec_close(video_stream->codec);
-    av_free(video_frame_out->data[0]);
-    av_free(video_frame_out);
+  if(video_frame_out) {
+    avcodec_free_frame(&video_frame_out);
+    video_frame_out = NULL;
   }
+
+  if(video_frame_in) {
+    avcodec_free_frame(&video_frame_in);
+    video_frame_in = NULL;
+  }
+
+  if(video_codec) {
+    avcodec_close(video_stream->codec);
+  }
+
+  // these are all just references to the video AVStream, see addVideoStream()
+  video_stream = NULL;              
+  video_codec_context = NULL;       
+  video_codec = NULL;               
+  video_frame_out = NULL; // allocated by AVEncoder
+  video_frame_in = NULL; // allocated by AVEncoder
 }
 
 
@@ -334,4 +401,35 @@ void AVEncoder::listSupportedVideoCodecPixelFormats() {
     fmt++;
   }
   RX_VERBOSE("-----------------------------");
+}
+
+bool AVEncoder::needsSWS() {
+  assert(video_codec);
+
+  if(!isInputPixelFormatSupportedByCodec()) {
+    return true;
+  }
+
+  if(settings.in_w != settings.out_w || settings.in_h != settings.out_h) {
+    return true;
+  }
+
+  return false;
+}
+
+bool AVEncoder::isInputPixelFormatSupportedByCodec() {
+  assert(video_codec);
+
+  bool supported = false;
+  const enum AVPixelFormat* fmt = video_codec->pix_fmts;
+  while(*fmt != -1) {
+    if(*fmt == settings.in_pixel_format) {
+      supported = true;
+      break;
+    }
+    fmt++;
+  }
+
+  return supported;
+  
 }

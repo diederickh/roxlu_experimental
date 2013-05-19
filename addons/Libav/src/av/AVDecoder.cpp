@@ -97,7 +97,6 @@ bool AVDecoder::open(std::string filename, bool datapath) {
     return false;
   }
 
-  // @TODO call avcodec_close(), avfree(video_codec_context) when stopping ! 
   video_codec_context = avcodec_alloc_context3(video_codec);
   if(!video_codec_context) {
     RX_ERROR(ERR_AVD_ALLOC_VIDEO_CONTEXT);

@@ -12,7 +12,11 @@ used by libav.
 These classes are used to encode raw input data to a media stream and mux it into a file 
 (I might add network features some day). 
 
-
+- `AVEncoder::listSupportedVideoCodecPixelFormats()`: Video encoders typically support
+  multiple different input pixel formats. If you can provide a pixel format that is supported
+  by the codec (so, if it exists in the output of `listSupportedVideoCodecPixelFormats()`), then
+  we don't need to convert the input data to the correct pixel format. Set the `AVEncoderSettings.in_pixel_format`
+  to the input format you can provide. 
 
 ## AVDecoder
 
@@ -53,8 +57,9 @@ See `AVDecoder.cpp`, some things which you might want to know:
 
 # TODO
 
- - [ ]   Add support for audio for the encoder (we can only encode video now)
- - [ ]   Add support for audio for the decoder (we can only decode video now)
- - [ ]   Cleanup all members and test for memory leaks in the `AVEncoder` and `AVEncoderThreaded`
- - [ ]   When you play()/stop()/play()/stop()/etc.. a movie the texture buffer shows the last frame; The `VideoCaptureGLSurface` needs to clean the texture with e.g. black.
- - [ ]   Look into hardware acceleration with libavcodec
+ -  Add support for audio for the encoder (we can only encode video now)
+ -  Add support for audio for the decoder (we can only decode video now)
+ -  Cleanup all members and test for memory leaks in the `AVEncoder` and `AVEncoderThreaded`
+ -  When you play()/stop()/play()/stop()/etc.. a movie the texture buffer shows the last frame; The `VideoCaptureGLSurface` needs to clean the texture with e.g. black.
+ -  Look into hardware acceleration with libavcodec
+ -  Test if the time base / frame rate of the `AVEncoderSettings` that is passed to `AVEncoder::setup()` is supported (see `AVCodec.supported_framerates`)   

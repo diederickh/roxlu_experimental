@@ -38,7 +38,7 @@ class AVEncoderThreaded {
  public:
   AVEncoderThreaded();
   ~AVEncoderThreaded();
-  bool setup(AVEncoderSettings cfg, int numFramesToAllocate = 100);
+  bool setup(AVEncoderSettings cfg, int numFramesToAllocate = 10);
   bool start(std::string filename, bool datapath = false);
   bool stop();
   bool addVideoFrame(unsigned char* data, size_t nbytes);
