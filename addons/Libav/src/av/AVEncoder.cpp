@@ -17,13 +17,14 @@ AVEncoder::AVEncoder()
   :output_format(NULL)
   ,format_context(NULL)
   ,time_started(0)
-  ,millis_per_frame(0)
+  ,millis_per_video_frame(0)
   ,new_frame_timeout(0)
   ,audio_codec_context(NULL)
   ,audio_codec(NULL)
   ,audio_stream(NULL)
   ,audio_frame(NULL)
   ,audio_input_frame_size(0) // experimental
+  ,added_audio_frames(0)
   ,video_codec(NULL)
   ,video_codec_context(NULL)
   ,video_stream(NULL)
@@ -51,7 +52,7 @@ AVEncoder::~AVEncoder() {
     video_frame_in = NULL;
   }
 
-  millis_per_frame = 0;
+  millis_per_video_frame = 0;
 }
 
 bool AVEncoder::setup(AVEncoderSettings cfg) {
@@ -60,8 +61,8 @@ bool AVEncoder::setup(AVEncoderSettings cfg) {
     return false;
   }
 
-  millis_per_frame = (cfg.time_base_num / cfg.time_base_den) * 1000;
-  if(!millis_per_frame) {
+  millis_per_video_frame = (cfg.time_base_num / cfg.time_base_den) * 1000;
+  if(!millis_per_video_frame) {
     RX_ERROR(ERR_AV_WRONG_MILLIS_FPS);
     return false;
   }
@@ -133,6 +134,8 @@ bool AVEncoder::start(std::string filename, bool datapath) {
 
   avformat_write_header(format_context, NULL);
   time_started = rx_millis();
+  
+  print();
   return true;
 }
 
@@ -223,6 +226,7 @@ bool AVEncoder::openVideo() {
   // we assume we're using libx264 for now.
   AVDictionary* opts = NULL;
   av_dict_set(&opts, "preset", "ultrafast", 0);
+  av_dict_set(&opts, "tune", "zerolatency", 0);
 
   if(avcodec_open2(video_codec_context, NULL, &opts) < 0) {
     RX_ERROR(ERR_AV_OPEN_VIDEO_CODEC);
@@ -279,8 +283,8 @@ bool AVEncoder::rescale(unsigned char* data) {
 }
 
 bool AVEncoder::addVideoFrame(unsigned char* data, size_t nbytes) {
-  int64_t pts = (rx_millis() - time_started) / millis_per_frame;
-  RX_VERBOSE("millis_per_Frame: %ld, time_started: %ld, pts: %ld", millis_per_frame, time_started, pts);
+  int64_t pts = (rx_millis() - time_started) / millis_per_video_frame;
+  //RX_VERBOSE("millis_per_Frame: %ld, time_started: %ld, pts: %ld", millis_per_video_frame, time_started, pts);
   return addVideoFrame(data, pts, nbytes);
 }
 
@@ -300,7 +304,7 @@ bool AVEncoder::addVideoFrame(unsigned char* data, int64_t pts, size_t nbytes) {
   if(now < new_frame_timeout) {
     return false;
   }
-  new_frame_timeout = now + millis_per_frame;
+  new_frame_timeout = now + millis_per_video_frame;
 #  endif
 #endif
 
@@ -339,12 +343,13 @@ bool AVEncoder::addVideoFrame(unsigned char* data, int64_t pts, size_t nbytes) {
     }
     pkt.stream_index = video_stream->index;
     r = av_interleaved_write_frame(format_context, &pkt);
+    RX_VERBOSE("VIDEO PTS: %d, PKT.DTS: %d", pkt.pts, pkt.dts);
   }
   else {
     r = 0;
   }
 
-  av_free_packet(&pkt);
+  //av_free_packet(&pkt);
 
   if(r != 0) {
     RX_ERROR(ERR_AV_WRITE_VIDEO);
@@ -394,6 +399,7 @@ bool AVEncoder::stop() {
     sws = NULL;
   }
 
+  added_audio_frames = 0;
   new_frame_timeout = 0;
   time_started = 0;
   output_format = NULL;
@@ -526,9 +532,9 @@ bool AVEncoder::addAudioStream(enum AVCodecID codecID) {
   
   // default params - @TODO put these in AVEncoderSettings
   audio_codec_context->sample_fmt = AV_SAMPLE_FMT_S16P;
-  audio_codec_context->bit_rate = 64000;
+  audio_codec_context->bit_rate = 128000;
   audio_codec_context->sample_rate = 44100;
-  audio_codec_context->channels = 2;
+  audio_codec_context->channels = 1;
 
   if(format_context->oformat->flags & AVFMT_GLOBALHEADER) {
     audio_codec_context->flags |= CODEC_FLAG_GLOBAL_HEADER;
@@ -555,7 +561,7 @@ bool AVEncoder::openAudio() {
   }
   else {
     audio_input_frame_size = audio_codec_context->frame_size;
-    RX_VERBOSE("AUDIO CODEC HAS NO SUPPORT FOR VARIABLE FRAME SIZE");
+    RX_VERBOSE("AUDIO CODEC HAS NO SUPPORT FOR VARIABLE FRAME SIZE, NUSING");
   }
   RX_VERBOSE("FRAME SIZE: %d", audio_input_frame_size);
 
@@ -572,24 +578,27 @@ bool AVEncoder::openAudio() {
   return true;
 }
 
-bool AVEncoder::addAudioFrame(uint8_t* data, int nsamples, size_t nbytes) {
+bool AVEncoder::addAudioFrame(uint8_t* data, int nsamples) {
   assert(audio_stream);
 
+  char err_msg[512];
   AVCodecContext* c = audio_codec_context;
   AVFrame* frame = avcodec_alloc_frame();
   AVPacket pkt = { 0 };
   int got_packet = 0;
   int r = 0;
+  int buffer_size = audio_input_frame_size * av_get_bytes_per_sample(c->sample_fmt) * c->channels;
+
+  frame->pts = added_audio_frames;
+  frame->nb_samples = nsamples;
+  added_audio_frames += nsamples;
 
   av_init_packet(&pkt);
 
-  // fill the frame
   r = avcodec_fill_audio_frame(frame, c->channels, c->sample_fmt, 
-                               data, 
-                               audio_input_frame_size * av_get_bytes_per_sample(c->sample_fmt) * c->channels, 
-                               1);
+                               data, buffer_size, 1);
   if(r != 0) {
-    RX_ERROR(ERR_AV_FILL_AUDIO_FRAME);
+    RX_ERROR(ERR_AV_FILL_AUDIO_FRAME, av_strerror(r, err_msg, sizeof(err_msg)));
     avcodec_free_frame(&frame);
     return false;
   }
@@ -599,6 +608,18 @@ bool AVEncoder::addAudioFrame(uint8_t* data, int nsamples, size_t nbytes) {
   if(r != 0) {
     avcodec_free_frame(&frame);
     RX_ERROR(ERR_AV_ENCODE_AUDIO);
+  }
+  
+  if(got_packet) {
+    if(pkt.pts != AV_NOPTS_VALUE) {
+      pkt.pts = av_rescale_q(pkt.pts, audio_codec_context->time_base, audio_stream->time_base);
+    }
+    if(pkt.dts != AV_NOPTS_VALUE) {
+      pkt.dts = av_rescale_q(pkt.dts, audio_codec_context->time_base, audio_stream->time_base);
+    }
+    if(pkt.duration != AV_NOPTS_VALUE) {
+      pkt.duration = av_rescale_q(pkt.duration, audio_codec_context->time_base, audio_stream->time_base);
+    }
   }
 
   if(!got_packet) {
@@ -615,9 +636,8 @@ bool AVEncoder::addAudioFrame(uint8_t* data, int nsamples, size_t nbytes) {
     return false;
   }
 
-  // write compressed frame
   avcodec_free_frame(&frame);
-  av_free_packet(&pkt);  // @TODO do we really need to free the packet (?) (it might have heap data?!)
+  //av_free_packet(&pkt);  // @TODO do we really need to free the packet (?) (it might have heap data?!)
   return true;
 }
 
@@ -630,4 +650,23 @@ void AVEncoder::closeAudio() {
   audio_codec = NULL;
   audio_stream = NULL;
   audio_codec_context = NULL;
+}
+
+
+void AVEncoder::print() {
+  if(!output_format) {
+    return;
+  }
+  RX_VERBOSE("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+
+  if(video_stream) {
+    RX_VERBOSE("video_stream.time_base.num: %d", video_stream->time_base.num);
+    RX_VERBOSE("video_stream.time_base.den: %d", video_stream->time_base.den);
+  }
+
+  if(audio_stream) {
+    RX_VERBOSE("audio_stream.time_base.num: %d", audio_stream->time_base.num);
+    RX_VERBOSE("audio_stream.time_base.den: %d", audio_stream->time_base.den);
+  }
+  RX_VERBOSE("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 }

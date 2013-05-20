@@ -46,7 +46,7 @@ extern "C" {
 #define ERR_AV_LIST_SMP_FMT_CODEC_NOT_OPEN "Cannot list the audio codec sample formats because it's not yet opened"
 #define ERR_AV_OPEN_AUDIO "Cannot open the audio codec because we don't have a valid audio_codec_context. Did you call addAudioStream()"
 #define ERR_AV_ENCODE_AUDIO "Error occured when encoding audio"
-#define ERR_AV_FILL_AUDIO_FRAME "Error occured when filling the audio frame before we pass it to the audio encoder"
+#define ERR_AV_FILL_AUDIO_FRAME "Error occured when filling the audio frame before we pass it to the audio encoder: %s"
 #define V_AV_VIDEO_CODEC "> Using video codec: %s"
 #define V_AV_AUDIO_CODEC "> Using audio codec: %s"
 
@@ -59,8 +59,9 @@ class AVEncoder {
   bool stop();                                                         /* call this when you want to stop the current encoding session */
   bool addVideoFrame(unsigned char* data, int64_t pts, size_t nbytes); /* add a raw frame. the format must be AVEncoderSettings.in_pixel_format. Pass the pts for the current frame, make sure it's in the timebase pts x */
   bool addVideoFrame(unsigned char* data, size_t nbytes);              /* add a video frame and let us determine the PTS */
-  bool addAudioFrame(uint8_t* data, int nsamples, size_t nbytes);         /* add new audio samples */
-  bool isStarted();                                                    /* returns true when we've started encoding, we test if format_context is not NULL */
+  bool addAudioFrame(uint8_t* data, int nsamples);                     /* add new audio samples */
+  bool isStarted();                                                    /* returns true when we've started encoding, we test if time_started > 0 */
+  void print();                                                        /* prints some valuable info (codecs must be opened) */
  private:
 
   /* audio */
@@ -92,7 +93,7 @@ class AVEncoder {
   AVOutputFormat* output_format;                                       /* based on the given filename to `start()` we use av_guess_format() to find the appropriate AVOutputFormat. We don't need to deallocate this, but in `stop()` we set this to NULL */
   AVFormatContext* format_context;                                     /* the `AVFormatContext` which is used while muxing, see start() */
   int64_t time_started;                                                /* the time we started; used to make sure the encoding adds new video frames at the same pace as the FPS */
-  int64_t millis_per_frame;                                            /* how much millis one video frame takes */
+  int64_t millis_per_video_frame;                                      /* how much millis one video frame takes */
   int64_t new_frame_timeout;                                           /* when current time reaches this point we need to a add a new frame */
 
   /* audio */
@@ -101,6 +102,7 @@ class AVEncoder {
   AVStream* audio_stream;
   AVFrame* audio_frame; /* NOT USED FOR NOW! */
   int audio_input_frame_size; /* see example: https://github.com/libav/libav/blob/master/libavformat/output-example.c#L111-L117 */
+  uint64_t added_audio_frames;
 
   /* video */
   AVCodec* video_codec;                                               /* a reference to the video codec in the video stream; we don't need to manage this memory */
@@ -112,7 +114,7 @@ class AVEncoder {
 };
 
 inline bool AVEncoder::isStarted() {            
-  return output_format;
+  return time_started;
 }
 
 #endif

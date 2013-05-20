@@ -2,6 +2,7 @@
 
 roxlu_add_addon(UV)  # we use libuv for threading
 roxlu_add_addon(VideoCapture) # we use the VideoCaptureGLSurface to draw decode video
+roxlu_add_addon(Audio) # for audio input that we use to encode
 
 roxlu_addon_begin("av")
 

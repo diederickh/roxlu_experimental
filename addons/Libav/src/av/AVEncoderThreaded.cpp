@@ -189,6 +189,7 @@ bool AVEncoderThreaded::start(std::string filename, bool datapath) {
 }
 
 bool AVEncoderThreaded::addVideoFrame(unsigned char* data, size_t nbytes) {
+
   if(!time_started) {
     RX_ERROR(ERR_AVT_NOT_STARTED);
     return false;
