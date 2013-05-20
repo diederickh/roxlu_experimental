@@ -160,14 +160,17 @@ bool AVEncoder::addVideoStream(enum AVCodecID codecID) {
 
   listSupportedVideoCodecPixelFormats();
 
-  video_codec_context->bit_rate = 4000000;
   video_codec_context->width = settings.out_w;
   video_codec_context->height = settings.out_h;
   video_codec_context->time_base.den = settings.time_base_den;
   video_codec_context->time_base.num = settings.time_base_num;
-  video_codec_context->gop_size = 5; /* emit one intra frame very gop_size frames at most */
+  video_codec_context->gop_size = 12; /* emit one intra frame very gop_size frames at most */
   video_codec_context->pix_fmt = AV_PIX_FMT_YUV420P;
   //video_codec_context->pix_fmt = AV_PIX_FMT_UYVY422;  // when using the Logitech Webcam c920 on mac, this is the standard format, so setting this is value for the encode would mean we don't need to convert but this makes sws_scale crash
+
+  video_codec_context->keyint_min = 25;
+  video_codec_context->gop_size = 250;
+  
 
   if(format_context->oformat->flags & AVFMT_GLOBALHEADER) {
     video_codec_context->flags |= CODEC_FLAG_GLOBAL_HEADER;
@@ -201,11 +204,16 @@ AVFrame* AVEncoder::allocVideoFrame(enum AVPixelFormat pixelFormat, int width, i
 }
 
 bool AVEncoder::openVideo() {
+  // we assume we're using libx264 for now.
+  AVDictionary* opts = NULL;
+  av_dict_set(&opts, "preset", "ultrafast", 0);
 
-  if(avcodec_open2(video_codec_context, NULL, NULL) < 0) {
+  if(avcodec_open2(video_codec_context, NULL, &opts) < 0) {
     RX_ERROR(ERR_AV_OPEN_VIDEO_CODEC);
+    av_dict_free(&opts);
     return false;
   }
+  av_dict_free(&opts);
 
   // allocate the encodec raw frame 
   if(!video_frame_out) {

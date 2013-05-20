@@ -12,6 +12,10 @@
 #ifndef ROXLU_LIBAV_AVENCODER_H
 #define ROXLU_LIBAV_AVENCODER_H
 
+extern "C" {
+#  include <libavutil/opt.h> 
+}
+
 #include <av/AVTypes.h>
 #include <av/AVUtils.h>
 

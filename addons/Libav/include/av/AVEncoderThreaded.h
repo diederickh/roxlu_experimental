@@ -53,6 +53,7 @@ class AVEncoderThreaded {
   AVEncoderFrame* getFreeFrame();
 
  public:                                                     /* all members are actually private but we need to acces them in the thread function */
+  AVEncoderSettings settings;
   bool is_setup;
   std::vector<AVEncoderFrame*> frames;
   int num_frames_to_allocate;

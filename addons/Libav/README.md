@@ -17,6 +17,10 @@ These classes are used to encode raw input data to a media stream and mux it int
   by the codec (so, if it exists in the output of `listSupportedVideoCodecPixelFormats()`), then
   we don't need to convert the input data to the correct pixel format. Set the `AVEncoderSettings.in_pixel_format`
   to the input format you can provide. 
+- The `AVEncoder` is still work in progress and for now mostly tested to generate .flv, .mov and .mp4
+  using h264 (libx264). In `AVEncoder::open()` we select the ultrafast preset, this makes no sense when 
+  encoding with e.g. ogg. I want to add a couple of custom presets like `QUALITY_MEDIUM`,`QUALITY_GOOD` 
+  and `QUALITY_BEST` which will automatically set the correct settings for the encoder.
 
 ## AVDecoder
 

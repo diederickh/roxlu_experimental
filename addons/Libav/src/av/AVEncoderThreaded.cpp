@@ -115,13 +115,6 @@ bool AVEncoderThreaded::setup(AVEncoderSettings cfg, int numFramesToAllocate) {
     return false;
   }
 
-  // preallocate the frames
-  int size = avpicture_get_size(cfg.in_pixel_format, cfg.in_w, cfg.in_h);
-  if(!size) {
-    RX_ERROR(ERR_AVT_WRONG_SIZE);
-    return false;
-  }
- 
   millis_per_frame = (cfg.time_base_num / cfg.time_base_den) * 1000;
   if(!millis_per_frame) {
     RX_ERROR(ERR_AVT_WRONG_MILLIS_PER_FRAME);
@@ -129,8 +122,9 @@ bool AVEncoderThreaded::setup(AVEncoderSettings cfg, int numFramesToAllocate) {
   }
 
   num_frames_to_allocate = numFramesToAllocate;
-
+  settings = cfg;
   is_setup = true;
+
   return true;
 }
 
@@ -141,8 +135,18 @@ bool AVEncoderThreaded::initialize() {
     return false;
   }
 
+  // preallocate the frames
+  int nbytes_per_image = avpicture_get_size(settings.in_pixel_format, settings.in_w, settings.in_h);
+  if(!nbytes_per_image) {
+    RX_ERROR(ERR_AVT_WRONG_SIZE);
+    return false;
+  }
+
   for(int i = 0; i < num_frames_to_allocate; ++i) {
     AVEncoderFrame* f = new AVEncoderFrame();
+    f->pixels = new unsigned char[nbytes_per_image];
+    f->nbytes = nbytes_per_image;
+    f->is_free = true;
     frames.push_back(f);
   }
 
@@ -204,18 +208,14 @@ bool AVEncoderThreaded::addVideoFrame(unsigned char* data, size_t nbytes) {
 
     int64_t pts = (millis() - time_started) / millis_per_frame;
 
+    memcpy(f->pixels, data, nbytes);
+
     uv_mutex_lock(&mutex);
     {
       f->is_free = false;
       f->pts = pts;
-      if(!f->pixels) {
-        f->pixels = new unsigned char[nbytes];
-        f->nbytes = nbytes;
-      }
     }
     uv_mutex_unlock(&mutex);
-    memcpy(f->pixels, data, nbytes);
-
   }
   else {
     RX_ERROR(ERR_AVT_NO_FREE_FRAME);

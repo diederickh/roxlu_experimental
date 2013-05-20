@@ -139,7 +139,7 @@
 
   // Configure output
   output = [[AVCaptureVideoDataOutput alloc] init];
-
+  
 #if 0
   // See  http://uri-labs.com/macosx_headers/AVCaptureOutput_h/Classes/AVCaptureVideoDataOutput/index.html
   // for an explanation of the different values you can set for the video settings member of the 
@@ -151,6 +151,7 @@
   //[output setVideoSettings:video_settings];             // use custom settings.
   //[output setVideoSettings:[NSDictionary dictionary]];  // use device native format
   [output setVideoSettings:nil];                          // use default uncompressed format
+  //output.videoSettings = @{ (NSString *)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_422YpCbCr8) };
 #endif
 
 #if 0
@@ -253,9 +254,15 @@
 {
   CVImageBufferRef img_ref = CMSampleBufferGetImageBuffer(sampleBuffer);
   CVPixelBufferLockBaseAddress(img_ref, 0);
-  size_t buffer_size = CVPixelBufferGetDataSize(img_ref);
+  size_t buffer_size = CVPixelBufferGetDataSize(img_ref);                   // this is the complete size of the buffer - not always the same as the bytes contained by the image - 
   void* base_address = CVPixelBufferGetBaseAddress(img_ref);
-  frame_cb((void*)base_address, buffer_size, frame_user);
+
+  // get number of bytes in the image.
+  size_t img_bytes_per_row = CVPixelBufferGetBytesPerRow(img_ref);
+  size_t img_height = CVPixelBufferGetHeight(img_ref);
+  size_t nbytes = img_bytes_per_row * img_height;
+
+  frame_cb((void*)base_address, nbytes, frame_user);
   CVPixelBufferUnlockBaseAddress(img_ref, 0);
 
 #if 0 
