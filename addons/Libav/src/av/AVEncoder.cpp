@@ -23,12 +23,14 @@ AVEncoder::AVEncoder()
   ,audio_codec(NULL)
   ,audio_stream(NULL)
   ,audio_frame(NULL)
+  ,audio_input_frame_size(0) // experimental
   ,video_codec(NULL)
   ,video_codec_context(NULL)
   ,video_stream(NULL)
   ,video_frame_out(NULL)
   ,video_frame_in(NULL)
   ,sws(NULL)
+
 {
   rx_init_libav();
 }
@@ -111,6 +113,15 @@ bool AVEncoder::start(std::string filename, bool datapath) {
     }
   }
 
+  //if(!addAudioStream(output_format->audio_codec)) {
+  if(!addAudioStream(AV_CODEC_ID_MP3)) { // @TODO - for now we hardcoded this, but we should use the preferred codec from the audio_format - or define it in AVEncoderSettings 
+    return false;
+  }
+
+  if(!openAudio()) {
+    return false;
+  }
+
   av_dump_format(format_context, 0, filename.c_str(), 1);
 
   if(!(output_format->flags & AVFMT_NOFILE)) {
@@ -148,6 +159,11 @@ bool AVEncoder::addVideoStream(enum AVCodecID codecID) {
   if(!video_codec) {
     RX_ERROR(ERR_AV_VIDEO_ENC_NOT_FOUND);
     return false;
+  }
+
+  const AVCodecDescriptor* desc = avcodec_descriptor_get(codecID);
+  if(desc) {
+    RX_VERBOSE(V_AV_VIDEO_CODEC, desc->name); 
   }
 
   video_stream = avformat_new_stream(format_context, video_codec);
@@ -338,11 +354,6 @@ bool AVEncoder::addVideoFrame(unsigned char* data, int64_t pts, size_t nbytes) {
   return true;
 }
 
-
-bool AVEncoder::openAudio() {
-  return true;
-}
-
 bool AVEncoder::stop() {
   char err_msg[512];
 
@@ -360,6 +371,10 @@ bool AVEncoder::stop() {
 
   if(video_stream) {
     closeVideo();
+  }
+
+  if(audio_stream) {
+    closeAudio();
   }
 
   for(int i = 0; i < format_context->nb_streams; ++i) {
@@ -418,7 +433,9 @@ void AVEncoder::listSupportedVideoCodecPixelFormats() {
     RX_ERROR(ERR_AV_LIST_PIX_FMT_CODEC_NOT_OPEN);
     return;
   }
-  
+
+  RX_VERBOSE("");
+  RX_VERBOSE("Supported pixel formats that the video encoder can handle:");
   RX_VERBOSE("-----------------------------");
   const enum AVPixelFormat* fmt = video_codec->pix_fmts;
   while(*fmt != -1) {
@@ -427,6 +444,28 @@ void AVEncoder::listSupportedVideoCodecPixelFormats() {
     fmt++;
   }
   RX_VERBOSE("-----------------------------");
+  RX_VERBOSE("");
+}
+
+
+void AVEncoder::listSupportedAudioCodecSampleFormats() {
+  if(!audio_codec) {
+    RX_ERROR(ERR_AV_LIST_SMP_FMT_CODEC_NOT_OPEN);
+    return;
+  }
+
+  RX_VERBOSE("");
+  RX_VERBOSE("Supported sample formats that the audio encoder can handle:");
+  RX_VERBOSE("-----------------------------");
+  const enum AVSampleFormat* fmt = audio_codec->sample_fmts;
+  while(*fmt != -1) {
+    const enum AVSampleFormat f = *fmt;
+    
+    RX_VERBOSE("FMT: %s", av_get_sample_fmt_name(f));
+    fmt++;
+  }
+  RX_VERBOSE("-----------------------------");
+  RX_VERBOSE("");
 }
 
 bool AVEncoder::needsSWS() {
@@ -458,4 +497,137 @@ bool AVEncoder::isInputPixelFormatSupportedByCodec() {
 
   return supported;
   
+}
+
+bool AVEncoder::addAudioStream(enum AVCodecID codecID) {
+  assert(output_format);
+  assert(format_context);
+
+  audio_codec = avcodec_find_encoder(codecID);
+  if(!audio_codec) {
+    RX_ERROR(ERR_AV_AUDIO_ENC_NOT_FOUND);
+    return false;
+  }
+
+  const AVCodecDescriptor* desc = avcodec_descriptor_get(codecID);
+  if(desc) {
+    RX_VERBOSE(V_AV_AUDIO_CODEC, desc->name);
+  }
+
+  audio_stream = avformat_new_stream(format_context, audio_codec);
+  if(!audio_stream) {
+    RX_ERROR(ERR_AV_AUDIO_STREAM);
+    return false;
+  }
+
+  audio_codec_context = audio_stream->codec;
+
+  listSupportedAudioCodecSampleFormats();
+  
+  // default params - @TODO put these in AVEncoderSettings
+  audio_codec_context->sample_fmt = AV_SAMPLE_FMT_S16P;
+  audio_codec_context->bit_rate = 64000;
+  audio_codec_context->sample_rate = 44100;
+  audio_codec_context->channels = 2;
+
+  if(format_context->oformat->flags & AVFMT_GLOBALHEADER) {
+    audio_codec_context->flags |= CODEC_FLAG_GLOBAL_HEADER;
+  }
+  
+  return true;
+}
+
+bool AVEncoder::openAudio() {
+
+  if(!audio_codec_context) {
+    RX_ERROR(ERR_AV_OPEN_AUDIO);
+    return false;
+  }
+
+  if(avcodec_open2(audio_codec_context, NULL, NULL) < 0) {
+    RX_ERROR(ERR_AV_OPEN_AUDIO_CODEC);
+    return false;
+  }
+
+  if(audio_codec->capabilities & CODEC_CAP_VARIABLE_FRAME_SIZE) {
+    RX_VERBOSE("AUDIO CODEC HAS SUPPORT FOR VARIABLE FRAME SIZE");
+    audio_input_frame_size = 10000;
+  }
+  else {
+    audio_input_frame_size = audio_codec_context->frame_size;
+    RX_VERBOSE("AUDIO CODEC HAS NO SUPPORT FOR VARIABLE FRAME SIZE");
+  }
+  RX_VERBOSE("FRAME SIZE: %d", audio_input_frame_size);
+
+  /*
+  if(!audio_frame) {
+    audio_frame = avcodec_alloc_frame(); // @TODO avcodec_free_frame(&audio_frame)
+    if(!audio_frame) {
+      RX_ERROR(ERR_AV_ALLOC_AUDIO_FRAME);
+      return false;
+    }
+  }
+  */
+
+  return true;
+}
+
+bool AVEncoder::addAudioFrame(uint8_t* data, int nsamples, size_t nbytes) {
+  assert(audio_stream);
+
+  AVCodecContext* c = audio_codec_context;
+  AVFrame* frame = avcodec_alloc_frame();
+  AVPacket pkt = { 0 };
+  int got_packet = 0;
+  int r = 0;
+
+  av_init_packet(&pkt);
+
+  // fill the frame
+  r = avcodec_fill_audio_frame(frame, c->channels, c->sample_fmt, 
+                               data, 
+                               audio_input_frame_size * av_get_bytes_per_sample(c->sample_fmt) * c->channels, 
+                               1);
+  if(r != 0) {
+    RX_ERROR(ERR_AV_FILL_AUDIO_FRAME);
+    avcodec_free_frame(&frame);
+    return false;
+  }
+
+  // encode the audio data
+  r = avcodec_encode_audio2(c, &pkt, frame, &got_packet);
+  if(r != 0) {
+    avcodec_free_frame(&frame);
+    RX_ERROR(ERR_AV_ENCODE_AUDIO);
+  }
+
+  if(!got_packet) {
+    avcodec_free_frame(&frame); // the example doesn't free the frame .. 
+    return false;
+  }
+
+  // write the audio frame
+  pkt.stream_index = audio_stream->index;
+  r = av_interleaved_write_frame(format_context, &pkt);
+  if(r != 0) {
+    RX_ERROR(ERR_AV_WRITE_VIDEO);
+    avcodec_free_frame(&frame);
+    return false;
+  }
+
+  // write compressed frame
+  avcodec_free_frame(&frame);
+  av_free_packet(&pkt);  // @TODO do we really need to free the packet (?) (it might have heap data?!)
+  return true;
+}
+
+void AVEncoder::closeAudio() {
+  if(audio_codec) {
+    avcodec_close(audio_stream->codec);
+  }
+
+  // just references to audio_stream->* members; 
+  audio_codec = NULL;
+  audio_stream = NULL;
+  audio_codec_context = NULL;
 }

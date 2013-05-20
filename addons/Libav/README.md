@@ -68,3 +68,4 @@ See `AVDecoder.cpp`, some things which you might want to know:
  -  Look into hardware acceleration with libavcodec
  -  Test if the time base / frame rate of the `AVEncoderSettings` that is passed to `AVEncoder::setup()` is supported (see `AVCodec.supported_framerates`)   
  -  In `AVEncoder.cpp` I want to free the `video_frame_in` and `video_frame_out` members when you call `AVEncoder::stop()`, but `av_frame_free` does not free all memory that was allocated. 
+ -  In `AVEncoder.cpp` clean up audio memory + add a check if the sample format is supported by the audio encoder. See [here](http://libav.org/doxygen/master/samplefmt_8h.html#af9a51ca15301871723577c730b5865c5a35eaaad9da207aa4e63fa02fd67fae68) for a list of formats

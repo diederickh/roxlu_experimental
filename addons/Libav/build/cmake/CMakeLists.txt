@@ -21,6 +21,7 @@ roxlu_addon_begin("av")
     roxlu_add_extern_lib(libssl.a)
     roxlu_add_extern_lib(libcrypto.a)
     roxlu_add_extern_lib(libavutil.a)
+    roxlu_add_extern_lib(libmp3lame.a)
     
     find_library(fr_cf CoreFoundation)
     find_library(fr_acc VideoDecodeAcceleration)
