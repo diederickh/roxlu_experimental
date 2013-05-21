@@ -161,7 +161,6 @@ bool ShoutClient::startStreaming() {
     RX_ERROR(ICE_ERR_SET_NONBLOCK, shout_get_error(shout));
     shout_free(shout);
     return false;
-
   }
 
   if(has_info) {
@@ -173,7 +172,6 @@ bool ShoutClient::startStreaming() {
     }
   }
   
-
   long ret = shout_open(shout);
   if (ret == SHOUTERR_SUCCESS) {
     ret = SHOUTERR_CONNECTED;
@@ -182,6 +180,11 @@ bool ShoutClient::startStreaming() {
   while (ret == SHOUTERR_BUSY) {
     usleep(10000);
     ret = shout_get_connected(shout);
+  }
+  if(ret == SHOUTERR_NOLOGIN) {
+    RX_ERROR(ICE_ERR_NOLOGIN);
+    shout_free(shout);
+    return false;
   }
 
   int l_samplerate = 0;
@@ -273,9 +276,9 @@ bool ShoutClient::stopStreaming() {
 }
 
 
-void ShoutClient::addAudio(const short int* data, size_t nbytes, int nsamples) {
+bool ShoutClient::addAudio(const short int* data, size_t nbytes, int nsamples) {
   if(!is_started || !shout || !lame_flags) {
-    return;
+    return false;
   }
 
   int written = lame_encode_buffer(lame_flags, data, data, nsamples, mp3_buffer, MP3_BUFFER_SIZE);
@@ -283,17 +286,18 @@ void ShoutClient::addAudio(const short int* data, size_t nbytes, int nsamples) {
     int ret = shout_send(shout, mp3_buffer, written);
     if(ret != SHOUTERR_SUCCESS) {
       RX_ERROR(ICE_ERR_SHOUT_SEND, shout_get_error(shout));
+      return false;
     }
     else {
       shout_sync(shout);
     }
   }
-
+  return true;
 }
 
-void ShoutClient::addAudioInterleaved(const short int* data, size_t nbytes, int nsamples) {
+bool ShoutClient::addAudioInterleaved(const short int* data, size_t nbytes, int nsamples) {
   if(!is_started || !shout || !lame_flags) {
-    return;
+    return false;
   }
 
   int written = lame_encode_buffer_interleaved(lame_flags, (short int*)data, nsamples, mp3_buffer, MP3_BUFFER_SIZE);
@@ -301,10 +305,11 @@ void ShoutClient::addAudioInterleaved(const short int* data, size_t nbytes, int 
     int ret = shout_send(shout, mp3_buffer, written);
     if(ret != SHOUTERR_SUCCESS) {
       RX_ERROR(ICE_ERR_SHOUT_SEND, shout_get_error(shout));
+      return false;
     }
     else {
       shout_sync(shout);
     }
   }
-
+  return true;
 }

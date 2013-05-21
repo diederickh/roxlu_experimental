@@ -11,7 +11,8 @@
 #define ICE_ERR_IP "Icecast server ip not set"
 #define ICE_ERR_USERNAME "Icecast username not set"
 #define ICE_ERR_PASSWORD "Icecast password not set"
-#define ICE_ERR_MOUNT "Icecaset mount not set"
+#define ICE_ERR_MOUNT "Icecast mount not set"
+#define ICE_ERR_NOLOGIN "Icecast can't connect because the login fails"
 #define ICE_ERR_NUM_CHANNELS "Incorrect number of channels set for lame encoder"
 #define ICE_ERR_SAMPLERATE "No samplerate set for the lame encoder"
 #define ICE_ERR_MODE "No lame mode set"
@@ -79,8 +80,8 @@ class ShoutClient {
   ~ShoutClient();
   bool setup(ShoutClientParams& params);                                                     /* setup the shoutclient. settings are stored internally and used in startStreaming() */
   void setStreamInfo(ShoutClientStreamInfo& info);                                           /* set stream information, will be unset when you pass an empty ShoutClientStreamInfo */
-  void addAudio(const short int* data, size_t nbytes, int nsamples);                         /* nsamples is the number of samples of one channel */
-  void addAudioInterleaved(const short int* data, size_t nbytes, int nsamples);              /* call this when the audio data is interleaved */
+  bool addAudio(const short int* data, size_t nbytes, int nsamples);                         /* nsamples is the number of samples of one channel */
+  bool addAudioInterleaved(const short int* data, size_t nbytes, int nsamples);              /* call this when the audio data is interleaved */
   bool startStreaming();                                                                     /* start streaming to the server */ 
   bool stopStreaming();                                                                      /* stop streaming to the server */
   bool isStreaming();                                                                        /* check if we are currently streaming */
