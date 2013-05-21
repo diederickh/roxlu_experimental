@@ -21,6 +21,9 @@ These classes are used to encode raw input data to a media stream and mux it int
   using h264 (libx264). In `AVEncoder::open()` we select the ultrafast preset, this makes no sense when 
   encoding with e.g. ogg. I want to add a couple of custom presets like `QUALITY_MEDIUM`,`QUALITY_GOOD` 
   and `QUALITY_BEST` which will automatically set the correct settings for the encoder.
+- *IMPORTANT* It's important to know that when you use `AVEncoder` directly you need to make sure
+  that the calls to `addVideoFrame()`, `addAudioFrame()` and `update()` needs to be synchronized!
+
 
 ## AVDecoder
 
@@ -54,7 +57,6 @@ See `AVDecoder.cpp`, some things which you might want to know:
    to be copied. *update: this results in a memory leak, so we're not using `avcodec_copy_context`
    but allocating it ourself. I sent a mail to the libav-devel mailing list asking about this issue.
    https://gist.github.com/roxlu/47a268ec1ccf6e3be4db*
-
 
 
 

@@ -30,8 +30,6 @@ AVEncoder::AVEncoder()
   ,video_frame_out(NULL)
   ,video_frame_in(NULL)
   ,sws(NULL)
-
-   /* filter graph */
   ,filter_graph(NULL)
   ,src_filter(NULL)
   ,sink_filter(NULL)
@@ -127,7 +125,7 @@ bool AVEncoder::start(std::string filename, bool datapath) {
     return false;
   }
 
-  if(!setupFilterGraph()) {
+  if(!openFilterGraph()) {
     return false;
   }
 
@@ -304,10 +302,10 @@ bool AVEncoder::update() {
   int r = 0;
   AVPacket pkt = { 0 } ;
   int got_packet = 0;
+
   av_init_packet(&pkt);
 
   while(true) {
-
     r = av_buffersink_get_frame(sink_filter, f);
     if(r < 0) {
       av_frame_free(&f);
@@ -338,9 +336,12 @@ bool AVEncoder::update() {
   av_frame_free(&f);
 
   if(r != 0) {
-    RX_ERROR(ERR_AV_WRITE_VIDEO);
+    char err[512];
+    av_strerror(r, err, sizeof(err));
+    RX_ERROR(ERR_AV_WRITE_VIDEO, err);
     return false;
   }
+
   return true;
 }
 
@@ -364,7 +365,7 @@ bool AVEncoder::addVideoFrame(unsigned char* data, int64_t pts, size_t nbytes) {
                        settings.in_pixel_format, settings.in_w, 
                        settings.in_h);
     if(r == 0) {
-      RX_ERROR(ERR_AF_FILL_VIDEO_FRAME);
+      RX_ERROR(ERR_AV_FILL_VIDEO_FRAME);
       return false;
     }
   }
@@ -407,7 +408,7 @@ bool AVEncoder::stop() {
     // @todo use this way for av_strerror everywhere
     av_strerror(r, err_msg, sizeof(err_msg));
     RX_ERROR(ERR_AV_TRAILER, err_msg);
-    return false;
+    return false; // @todo hmm do we want this?
   }
 
   if(video_stream) {
@@ -434,8 +435,9 @@ bool AVEncoder::stop() {
     sws_freeContext(sws);
     sws = NULL;
   }
+
+  closeFilterGraph();
   
-  added_video_frames = 0;
   added_audio_frames = 0;
   time_started = 0;
   output_format = NULL;
@@ -685,7 +687,9 @@ void AVEncoder::print() {
 
 
 // =====================================================================
-bool AVEncoder::setupFilterGraph() {
+bool AVEncoder::openFilterGraph() {
+  assert(!filter_graph);
+
   char err[512];
   int r = 0;
 
@@ -693,6 +697,7 @@ bool AVEncoder::setupFilterGraph() {
   filter_graph = avfilter_graph_alloc();
   if(!filter_graph) {
     RX_ERROR("Cannot allocate filter graph");
+    closeFilterGraph();
     return false;
   }
 
@@ -706,6 +711,7 @@ bool AVEncoder::setupFilterGraph() {
   if(r < 0) {
     av_strerror(r, err, sizeof(err));
     RX_ERROR("Cannot create the buffer filter: %s / %s", err, args);
+    closeFilterGraph();
     return false;
   }
 
@@ -713,6 +719,7 @@ bool AVEncoder::setupFilterGraph() {
   r = avfilter_graph_create_filter(&sink_filter, avfilter_get_by_name("buffersink"), "sink", NULL, NULL, filter_graph);
   if(r < 0) {
     RX_ERROR("Cannot create the buffersink filter");
+    closeFilterGraph();
     return false;
   }
 
@@ -721,45 +728,63 @@ bool AVEncoder::setupFilterGraph() {
   r = avfilter_graph_create_filter(&fps_filter, avfilter_get_by_name("fps"), "fps", args, NULL, filter_graph);
   if(r < 0) {
     RX_ERROR("Cannot create the fps filter");
+    closeFilterGraph();
     return false;
   }
 
   r = avfilter_link(src_filter, 0, fps_filter, 0);
   if(r < 0) {
     RX_ERROR("Cannot link the src_filter to the fps_filter");
+    closeFilterGraph();
     return false;
   }
 
   r = avfilter_link(fps_filter, 0, sink_filter, 0);
   if(r < 0) {
     RX_ERROR("Cannot link the fps_filter to the sink_filter");
+    closeFilterGraph();
     return false;
   }
-
-#if 0
-  r = avfilter_config_links(src_filter);
-  if(r < 0) {
-    RX_VERBOSE("Cannot config_links the src_filter");
-    return false;
-  }
-  r = avfilter_config_links(fps_filter);
-  if(r < 0) {
-    RX_VERBOSE("Cannot config_links the fps_filter");
-    return false;
-  }
-  r = avfilter_config_links(sink_filter);
-  if(r < 0) {
-    RX_VERBOSE("Cannot config_links the sink_filter");
-    return false;
-  }
-#endif
 
   // check validity
   r = avfilter_graph_config(filter_graph, NULL);
   if(r < 0) {
     RX_ERROR("avfilter_graph_config failed");
+    closeFilterGraph();
     return false;
   }
+
+  return true;
+}
+
+bool AVEncoder::closeFilterGraph() {
+
+  if(filter_graph) {
+    avfilter_graph_free(&filter_graph);
+    filter_graph = NULL;
+  }
+
+#if 0
+  // @TODO - figure out if we need to free these too or if they get freed by avfilter_graph_free
+  if(src_filter) {
+    avfilter_free(src_filter);
+    src_filter = NULL;
+  }
+
+  if(sink_filter) {
+    avfilter_free(sink_filter);
+    sink_filter = NULL;
+  }
+
+  if(fps_filter) {
+    avfilter_free(fps_filter);
+    fps_filter = NULL;
+  }
+#else 
+  fps_filter = NULL;
+  sink_filter = NULL;
+  fps_filter = NULL;
+#endif 
 
   return true;
 }

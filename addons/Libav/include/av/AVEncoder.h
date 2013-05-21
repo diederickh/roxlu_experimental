@@ -8,6 +8,9 @@
   - https://github.com/libav/libav/blob/master/libavformat/output-example.c
 
 
+  When you use `addVideoFrame()`, `addAudioFrame`, `update()` from different threads
+  make sure to synchronize these calls! The `AVEncoderThreaded` does this for you.
+
  */
 #ifndef ROXLU_LIBAV_AVENCODER_H
 #define ROXLU_LIBAV_AVENCODER_H
@@ -43,7 +46,7 @@ extern "C" {
 #define ERR_AV_SWS "Cannot create a SWS context"
 #define ERR_AV_SWS_SCALE "Cannot sws_scale(), returned incorrect result"
 #define ERR_AV_ADD_VFRAME_SCALE "Adding a video frame cancelled because SWS_SCALE failed"
-#define ERR_AV_WRITE_VIDEO "An error occured when writing a video frame"
+#define ERR_AV_WRITE_VIDEO "An error occured when writing a video frame: %s"
 #define ERR_AV_WRITE_AUDIO "An error occured when writing an audio frame"
 #define ERR_AV_WRONG_MILLIS_FPS "Wrong timebase; we cannot calculate the millis per frame"
 #define ERR_AV_LIST_PIX_FMT_CODEC_NOT_OPEN "Cannot list the video codec pixel formats because it's not yet opened"
@@ -64,7 +67,7 @@ class AVEncoder {
   ~AVEncoder();
   bool setup(AVEncoderSettings settings);                              /* call once with the encoder settings */
   bool start(std::string filename, bool datapath = false);             /* call this when you want to start an encoding session */
-  bool update(); /* testing with filters, call this as often as possible */
+  bool update();                                                       /* call this as often as possible; this needs to be called at a higher FPS than your set `AVEncoderSettings.time_base_*` FPS value */
   bool stop();                                                         /* call this when you want to stop the current encoding session */
   bool addVideoFrame(unsigned char* data, int64_t pts, size_t nbytes); /* add a raw frame. the format must be AVEncoderSettings.in_pixel_format. Pass the pts for the current frame, make sure it's in the timebase pts x */
   bool addVideoFrame(unsigned char* data, size_t nbytes);              /* add a video frame and let us determine the PTS */
@@ -91,8 +94,9 @@ class AVEncoder {
   bool isInputPixelFormatSupportedByCodec();                           /* returns if the given `AVEncoderSettings.in_pixel_format` is supported by the found encoder; this is used to create an sws context if we need to convert the incoming data */
   bool needsSWS();                                                     /* returns true if we need an SWS context. This either means that the input pixel format is not supported by the codec, or the width and height of the output video are not the same as the input */
 
-  /* filter graph - testing */
-  bool setupFilterGraph();
+  /* filter graph */
+  bool openFilterGraph();                                              /* we use libavfilters' filter graph to make sure we have a steady stream of AVFRames with video. This is handy to get a cfr (constant frame rate) */
+  bool closeFilterGraph();                                             /* closes + frees the filter graph */
   
   /* debug info */
   void listSupportedVideoCodecPixelFormats();                          /* shows the names of the pixel formats that are supported by the video codec */
@@ -112,7 +116,7 @@ class AVEncoder {
   AVCodec* audio_codec;
   AVStream* audio_stream;
   AVFrame* audio_frame; /* NOT USED FOR NOW! */
-  int audio_input_frame_size; /* see example: https://github.com/libav/libav/blob/master/libavformat/output-example.c#L111-L117 */
+  int audio_input_frame_size;                                         /* see example: https://github.com/libav/libav/blob/master/libavformat/output-example.c#L111-L117 */
   uint64_t added_audio_frames;
 
   /* video */
@@ -123,11 +127,11 @@ class AVEncoder {
   AVFrame* video_frame_out;                                           /* when the output format is not the same as the input format we need to convert the input->output */
   SwsContext* sws;                                                    /* we use a SwsContext to convert the input when it's not the same size or pixel format as the output */
 
-  /* filter graph - testing */
-  AVFilterGraph* filter_graph;
-  AVFilterContext* src_filter;
-  AVFilterContext* sink_filter;
-  AVFilterContext* fps_filter;
+  /* filter graph */
+  AVFilterGraph* filter_graph;                                        /* the filter graph that is used to get a fps filter; this might also be used with other, custom filters */
+  AVFilterContext* src_filter;                                        /* the src filter, to which we add frames; this is the input fo the graph */
+  AVFilterContext* sink_filter;                                       /* the sink filter, from which we read frames; this is the output of the graph */
+  AVFilterContext* fps_filter;                                        /* the fps filter which makes sure we have a steady stream of frames (for real time encoding) */
 };
 
 inline bool AVEncoder::isStarted() {            
