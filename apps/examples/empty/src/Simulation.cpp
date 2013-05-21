@@ -41,5 +41,6 @@ void Simulation::onKeyUp(int key) {
 }
 
 void Simulation::onWindowClose() {
+  ::exit(EXIT_SUCCESS);
 }
 

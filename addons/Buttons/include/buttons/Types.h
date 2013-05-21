@@ -32,6 +32,7 @@ namespace buttons {
     ,BTYPE_PAD = 6
     ,BTYPE_RECTANGLE = 7
     ,BTYPE_VECTOR = 8
+    ,BTYPE_SLIDER_RANGE = 9
   };
 
   enum ElementStates {

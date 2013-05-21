@@ -27,8 +27,7 @@ VPXDecoder::~VPXDecoder() {
 }
 
 bool VPXDecoder::setup(VPXSettings cfg) {
-  RX_VERBOSE("------------------------- SETUP DECODER -------------------------");
-  RX_ERROR("TODO: use VPXSettings.cb_write/cb_user + check if it's set, for the callback which is called when we have decoded data ");
+  RX_VERBOSE("TODO: use VPXSettings.cb_write/cb_user + check if it's set, for the callback which is called when we have decoded data ");
   settings = cfg;
   bool result = false;
   result = initializeDecoder();
@@ -72,7 +71,7 @@ bool VPXDecoder::initializeDecoder() {
 
 bool VPXDecoder::initializeSWS() {
   if(sws != NULL) {
-    RX_WARNING(("SWS already initialized."));
+    RX_WARNING("SWS already initialized.");
     return false;
   }
   
@@ -81,7 +80,6 @@ bool VPXDecoder::initializeSWS() {
                        SWS_FAST_BILINEAR, NULL, NULL, NULL);
 
   if(!sws) {
-    RX_ERROR("Cannot initialize sws decoder.");
     return false;
   }
 
@@ -102,7 +100,6 @@ void VPXDecoder::decodeFrame(unsigned char* data, int nbytes) {
     printf("\n");
 #endif
 
-  RX_WARNING("decode: %d bytes", nbytes);
   vpx_codec_iter_t iter = NULL;
   vpx_image_t* img;
   
@@ -129,6 +126,6 @@ void VPXDecoder::rescale(vpx_image_t* in, vpx_image_t* out) {
 
 void VPXDecoder::die() {
   const char* msg = vpx_codec_error_detail(&codec);
-  RX_WARNING(("%s, %s", msg, vpx_codec_error(&codec)));
+  RX_WARNING("%s, %s", msg, vpx_codec_error(&codec));
   ::exit(EXIT_FAILURE);
 }

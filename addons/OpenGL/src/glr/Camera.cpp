@@ -32,7 +32,7 @@ namespace gl {
     screen_h = h;
     half_screen_w = w * 0.5f;
     half_screen_h = h * 0.5f;
-    setPerspective(60.0f * DEG_TO_RAD , float(w)/h, 0.01, 100.0f);
+    setPerspective(60.0f , float(w)/h, 0.01, 600.0f);
   }
 
   void Camera::onMouseDown(int x, int y) {

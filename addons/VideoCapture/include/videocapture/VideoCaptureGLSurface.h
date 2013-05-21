@@ -49,7 +49,7 @@ class VideoCaptureGLSurface {
   ~VideoCaptureGLSurface();
   //  void setup(int w, int h, VideoCaptureFormat fmt = VC_NONE);
 #if defined(__APPLE__)
-  void setup(int w, int h, GLenum internalFormat = GL_RGBA, GLenum format = GL_YCBCR_422_APPLE, GLenum type = GL_UNSIGNED_SHORT_8_8_APPLE);
+  void setup(int w, int h, GLenum internalFormat = GL_RGBA, GLenum format = GL_YCBCR_422_APPLE, GLenum type = GL_UNSIGNED_SHORT_8_8_APPLE);     /* the GL_YCBCR_422_APPLE format is the same as libav AV_PIX_FMT_UYVY422, also called "yuv2" */
 #else
   void setup(int w, int h, GLenum internalFormat = GL_RGBA, GLenum format = GL_RGB, GLenum type = GL_UNSIGNED_BYTE);
 #endif

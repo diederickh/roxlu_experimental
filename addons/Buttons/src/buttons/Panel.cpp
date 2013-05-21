@@ -100,10 +100,20 @@ namespace buttons {
     assert(active_gui != NULL);
     return active_gui->addFloat(label, value);
   }
+  
+  SliderRangef& Panel::addFloatRange(const string& label, float* value) {
+    assert(active_gui != NULL);
+    return active_gui->addFloatRange(label, value);
+  }
 
   Slideri& Panel::addInt(const string& label, int& value) {
     assert(active_gui != NULL);
     return active_gui->addInt(label, value);
+  }
+
+  SliderRangei& Panel::addIntRange(const string& label, int* value) {
+    assert(active_gui != NULL);
+    return active_gui->addIntRange(label, value);
   }
 
   Pad<int>& Panel::addInt2(const string& label, int* value) {

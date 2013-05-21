@@ -56,6 +56,8 @@ namespace buttons {
     config_lookup_int(&cfg, "gui.y", &b.y);
     config_lookup_int(&cfg, "gui.w", &b.w);
 
+    b.setPosition(b.x, b.y);
+
     config_setting_t* el_group = config_lookup(&cfg, "elements");
     if(!el_group) {
       printf("WARNING: cannot find elements\n");

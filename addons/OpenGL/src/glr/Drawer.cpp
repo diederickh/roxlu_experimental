@@ -163,12 +163,14 @@ namespace gl {
     shader_p.setProjectionMatrix(pm);
     shader_pt.setProjectionMatrix(pm);
     shader_np.setProjectionMatrix(pm);
+    shader_immediate.setProjectionMatrix(pm);
   }
 
   void Drawer::setViewMatrix(const float* vm) {
     shader_p.setViewMatrix(vm);
     shader_pt.setViewMatrix(vm);
     shader_np.setViewMatrix(vm);
+    shader_immediate.setViewMatrix(vm);
   }
 
   void Drawer::createOrthographicMatrix() {
@@ -313,6 +315,10 @@ namespace gl {
   void glr_color(Vec4 color) {
     assert(glr_context);
     glr_context->color(color);
+  }
+
+  void glr_color(int r, int g, int b, int a) {
+    glr_color(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
   }
 
   void glr_color(float r, float g, float b, float a) {

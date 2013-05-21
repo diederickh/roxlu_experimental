@@ -1,26 +1,15 @@
-/* 
-   Compositor
-   -----------
-
-   Generic pipeline for adding simple effects to a render pass. Because
-   you can easily add effects to a render pass we need to have a couple
-   of standards. For example we create different render-buffers based, 
-   on the added filters. For example a light ray effect would need a 
-   occlusion buffer, if you add this we will automatically allocate the 
-   nessary space for this buffer. The shader needs to know into what buffer
-   it needs to write though... and therefore we fix the gl_FragData locations:
-
-   - Location `0` is used to render the diffuse color (so textures etc..)
-   - Location `1` is used to render the occlusion buffer (e.g. used by light ray filter)
-
-*/
-
-#ifndef ROXLU_OPENGL_RENDERPASS_H
-#define ROXLU_OPENGL_RENDERPASS_H
+#ifndef ROXLU_OPENGL_COMPOSITOR_H
+#define ROXLU_OPENGL_COMPOSITOR_H
 
 #include <assert.h>
 #include <vector>
 #include <roxlu/opengl/GL.h>
+#include <experimental/Types.h>
+#include <experimental/Filter.h>
+#include <experimental/filters/Demo.h>
+#include <experimental/filters/VerticalBlur.h>
+#include <experimental/filters/HorizontalBlur.h>
+#include <experimental/filters/Luminance.h>
 #include <glr/Mesh.h>
 #include <glr/FBO.h>
 
@@ -28,10 +17,6 @@
 #define ERR_RPASS_ADD_FILTERS "You can only create the render pass after you've added filters!"
 #define ERR_RPASS_FBO_SETUP "Cannot setup the FBO"
 #define ERR_RPASS_FULLSCREEN_SHADER "Cannot create the fullscreen shader"
-
-//#define ERR_RPASS_UNI_MM "Cannot find uniform for model matrix"
-//#define ERR_RPASS_UNI_VM "Cannot find uniform for view matrix"
-//#daefine ERR_RPASS_UNI_PM "Cannot find uniform for projection matrix"
 
 namespace gl {
 
@@ -46,121 +31,55 @@ namespace gl {
   );
 
   static const char* COMP_FULLSCREEN_FS = GLSL(120,
-                                               uniform sampler2D u_tex0;
+                                               uniform sampler2D u_tex;
                                                varying vec2 v_tex;
                                                void main() {
-                                                 vec4 col = texture2D(u_tex0, v_tex);
+                                                 vec4 col = texture2D(u_tex, v_tex);
                                                  gl_FragColor =  col;
                                                }
   );
-                                               
 
-  // ----------------------------------------------
-
-  class Filter;
-
-  // ----------------------------------------------
-
-  struct Pass {
-    Pass();
-
-    void setProjectionMatrix(const float* pm);
-    void setViewMatrix(const float* vm);
-    void setModelMatrix(const float* mm);
-
-    int num;
-
-    GLuint prog;
-    GLint u_pm;
-    GLint u_vm;
-    GLint u_mm;
-    GLint u_col;
-    
-  };
-
-  struct RenderPass : public Pass {
-    RenderPass();
-  };
-
-  struct ShaderPass : public Pass {
-    ShaderPass();
-  };
-  
-  // ----------------------------------------------
+  void print_gl_enum(GLenum e);                                 /* just prints the GL_COLOR_ATTACHMENT# value, handy while debugging  */
 
   class Compositor {
   public:
     Compositor();
     ~Compositor();
 
-    void setProjectionMatrix(const float* pm);
-    void setViewMatrix(const float *vm);
-    void setModelMatrix(const float* mm);
+    void setup(int w, int h);
+    void addFilter(Filter* filter, int input, int output);      /* first add all the filters you want, then call create */
+    bool create();                                              /* create the fbo for the compositor and setup all filters */
 
-    bool create(int fboW, int fboH);
-    bool createPass(Pass& pass);
-    void render();
-    void renderPass(Pass& pass);
-    int countShaderPasses();       /* returns the number of shader passes we need to apply */
+    void begin();                                               /* call begin(), then draw your scene, then call end() */
+    void end();                                                 /* after drawing your scene call end() */
+    void draw(int num);                                         /* draw(), draws the given attachment point */
 
-    void addFilter(Filter* f);
-    bool getShaderSource(Filter* f, GLenum shader, int pass, std::string& global, std::string& main);
-
-    bool createDrawBuffer(std::string& fragdata, std::string& uniform); /* this will create a new texure and attaches this to a free color attachment in the FBO we use to render into.  The fragdata is set to the fragdata entry you should use in your shader; it will have a value like: `gl_FragData[2]`.  The uniform is set to the value of the texture sampler that will be used to bind the color-attachment in a shader pass (note: not render pass). It returns false on error */
+    void createAttachment(int num);                             /* you can use this if you want to create another attachment point. This can be handy if you want to create the filter graph with some more advanced features, like bloom */
+    bool getAttachment(int num, Attachment& result);            /* this finds the attachment point by: `GL_COLOR_ATTACHMENT0 + num` and returns true if found, else false */
 
   private:
-    bool setupShaders();
-    bool setupBuffers();
-    bool setupFBO(int fboW, int fboH);
+    bool setupShaders();                                        /* sets up the internally used fullscreen shader */
+    bool setupBuffers();                                        /* sets up the fullscreen VBO */
+    bool setupFBO();                                            /* creates the FBO + all the nessary textures and attachments */
+    void createDefaultAttachments();                            /* creates the two default color attachments that we use for simple shaders: GL_COLOR_ATTACHMENT0 and GL_COLOR_ATTACHMENT1. By default we render the scene into GL_COLOR_ATTACHMENT0, see begin() */
+    GLuint createTexture();                                     /* just an helper to create a 2D texture */
 
   public:
-    FBO fbo;
-    RenderPass render_pass;
-    std::vector<Filter*> filters;
-    std::vector<ShaderPass*> shader_passes;
-
-    Mesh<VertexPT> fullscreen_quad;
-    gl::Shader fullscreen_shader;
+    bool initialized;                                           /* is set to true when the default attachments have been creatd */
+    gl::Mesh<VertexPT> fullscreen_quad;                         /* the fullscreen mesh */
+    gl::Shader fullscreen_shader;                               /* shader for fullscreen rendering */
+    std::vector<Attachment> attachments;                        /* all the created attachments */
+    std::vector<GLuint> textures;                               /* reference to all textures */
+    std::vector<GLenum> buffers;                                /* all attchment points (GL_COLOR_ATTACHMENT#) */
+    GLint fullscreen_u_tex;                                     /* uniform of the fullscreen texture */
+    GLuint fbo;                                                 /* the fbo */
+    GLuint depth;                                               /* depth buffer handle */
+    int fbo_w;                                                  /* width of the fbo */
+    int fbo_h;                                                  /* height of the fbo */
+    std::vector<Filter*> filters;                               /* the filters which we apply */
     
-    
-
-
   };
 
-  inline void Compositor::setViewMatrix(const float* vm) {
-    render_pass.setViewMatrix(vm);
-  }
+} // namespace gl
 
-  inline void Compositor::setProjectionMatrix(const float* pm) {
-    render_pass.setProjectionMatrix(pm);
-  }
-
-  inline void Pass::setViewMatrix(const float* vm) {
-    assert(prog);
-    assert(vm);
-    assert(u_vm >= 0);
-
-    glUseProgram(prog);
-    glUniformMatrix4fv(u_vm, 1, GL_FALSE, vm);
-  }
-
-  inline void Pass::setProjectionMatrix(const float* pm) {
-    assert(prog);
-    assert(pm);
-    assert(u_pm >= 0);
-
-    glUseProgram(prog);
-    glUniformMatrix4fv(u_pm, 1, GL_FALSE, pm);
-  }
-
-
-  inline void Pass::setModelMatrix(const float* mm) {
-    assert(prog);
-    assert(mm);
-    assert(u_mm >= 0);
-
-    glUniformMatrix4fv(u_mm, 1, GL_FALSE, mm);
-  }
-
-} // gl 
 #endif

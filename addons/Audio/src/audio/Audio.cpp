@@ -101,6 +101,7 @@ std::string Audio::getSampleFormatText(PaSampleFormat f) {
   std::string r = "";
 
   switch(f) {
+    // interleaved formats
     case paFloat32:      r = "F32"; break;
     case paInt32:        r = "I32"; break;
     case paInt24:        r = "I24"; break;
@@ -108,6 +109,12 @@ std::string Audio::getSampleFormatText(PaSampleFormat f) {
     case paInt8:         r = "I8"; break;
     case paUInt8:        r = "UI8"; break;
     case paCustomFormat: r = "CustomFormat"; break;
+
+      // NON-interleaved formats, aka planar
+    case (paFloat32|paNonInterleaved):      r = "F32P"; break;
+    case (paInt32|paNonInterleaved):        r = "I32P"; break;
+    case (paInt24|paNonInterleaved):        r = "I24P"; break;
+    case (paInt16|paNonInterleaved):        r = "I16P"; break;
     default: r = "unknown"; break;
   };
 

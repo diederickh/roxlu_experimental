@@ -359,7 +359,6 @@ namespace buttons {
 
   template<class T>
     void ColorT<T>::onMouseMoved(int mx, int my) {
-	
   }
 
   template<class T>

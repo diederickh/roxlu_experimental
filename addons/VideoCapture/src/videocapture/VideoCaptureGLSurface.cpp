@@ -72,6 +72,7 @@ void VideoCaptureGLSurface::setup(int w, int h, GLenum internalFormat, GLenum fo
   glGenTextures(1, &tex);
 
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
+
   /*
 #if defined(__APPLE__)
   glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, surface_w, surface_h, 0, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, NULL);
@@ -79,6 +80,7 @@ void VideoCaptureGLSurface::setup(int w, int h, GLenum internalFormat, GLenum fo
   glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, surface_w, surface_h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 #endif
   */
+
   glTexImage2D(GL_TEXTURE_RECTANGLE, 0, internalFormat, surface_w, surface_h, 0, format, type, NULL);
   glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -106,29 +108,6 @@ void VideoCaptureGLSurface::draw(int x, int y, int w, int h) {
   glBindVertexArray(vao);
   glUseProgram(prog);
 
-  //
-  /*
-  GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
-
-    float l = 0;
-    float r = viewport[2];
-    float b = viewport[3];
-    float n = -1.0;
-    float f = 1.0;
-    float t = 0.0;
-
-    pm[0] = (2.0f / (r - l));
-    pm[5] = (2.0f / (t - b));
-    pm[10] = (-2.0f / (f - n));
-    pm[12] = - ((r + l) / (r - l));
-    pm[13] = - ((t + b) / (t - b));
-    pm[14] = - ((f + n) / (f - n));
-    pm[15] = 1.0f;
-    glUniformMatrix4fv(u_pm, 1, GL_FALSE, pm);
-  */
-  //
-
   if(w == 0 && h == 0) {
     w = surface_w;
     h = surface_h;
@@ -147,7 +126,7 @@ void VideoCaptureGLSurface::draw(int x, int y, int w, int h) {
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
 
   glDrawArrays(GL_TRIANGLES, 0, 6);
-//  glBindVertexArray(0);
+
 }
 
 

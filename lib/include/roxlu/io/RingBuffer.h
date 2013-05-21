@@ -10,19 +10,20 @@ class RingBuffer {
   RingBuffer(size_t capacity);
   ~RingBuffer();
   void resize(size_t bytes);
-  size_t write(const char* data, size_t bytes);
-  size_t read(char* data, size_t bytes);
-  size_t drain(size_t bytes);
+  size_t write(const char* data, size_t bytes);           /* write and automatically set the write index to the correct position */
+  size_t read(char* data, size_t bytes);                  /* read and automatically change the read index (so freeing some bytes in the buffer) */
+  size_t drain(size_t bytes);                             /* drain w/o copying the data.. basically same as read */
   size_t size();
   size_t getWriteIndex();
+  size_t getReadIndex();
   char* getReadPtr();
   size_t getCapacity();
-  void reset();
+  void reset();                                           /* reset the buffer; you can start with a clean slate */
  private:
   size_t read_index;
   size_t write_index;
-  size_t capacity; // total amount of bytes we could store in the buffer
-  size_t bytes_stored;  // total bytes currently stored
+  size_t capacity;                                        /* total amount of bytes we could store in the buffer */
+  size_t bytes_stored;                                    /* total bytes currently stored */
   char* buffer;
 };
 
@@ -36,6 +37,10 @@ inline char* RingBuffer::getReadPtr() {
 
 inline size_t RingBuffer::getWriteIndex() {
   return write_index;
+}
+
+inline size_t RingBuffer::getReadIndex() {
+  return read_index;
 }
 
 inline size_t RingBuffer::getCapacity() {

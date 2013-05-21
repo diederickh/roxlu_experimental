@@ -309,7 +309,9 @@ namespace gl {
 
   void glr_begin(GLenum mode);                                                         /* immediate mode: begin a vertex sequence */
   void glr_color(Vec4 color);                                                          /* immediate mode: set the color for the next vertex */
-  void glr_color(float r = 1.0f, float g = 1.0f, float b = 1.0f, float a = 1.0);       /* immediate mode: set color */
+  void glr_color(float r, float g, float b, float a = 1.0);                            /* immediate mode: set color */
+  void glr_color(int r, int g, int b, int a = 255);                                    /* assign from unsigned char; range 0 - 255 */
+
   void glr_vertex(Vec3 position);                                                      /* immediate mode: end the current sequence of vertices */
   void glr_end();                                                                      /* immediate mode: this will draw the current sequence */
 

@@ -191,13 +191,14 @@ endmacro(roxlu_app_add_source_file)
 # endfunction()
 
 macro(roxlu_install_app)
-  if(WIN32)
+  # removed the if(WIN32) with the CMAKE_RUNTIME_* paths, because xcode was generating executables in the wrong directory
+  #if(WIN32)
     # make sure the exe is stored in /bin/
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${roxlu_app_install_dir})
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${roxlu_app_install_dir}) # necessary for Visual Studio + CMake
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${roxlu_app_install_dir})
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${roxlu_app_install_dir})
     #roxlu_app_add_source_file(${roxlu_app_build_dir}/icon.rc)
-  endif()
+  #endif()
 
   if(APPLE)
     if(DEFINED roxlu_app_icon_file)
@@ -232,8 +233,17 @@ macro(roxlu_install_app)
 
   target_link_libraries(${roxlu_app_name} ${roxlu_libs} ${roxlu_dylibs})
 
-  install(TARGETS ${roxlu_app_name} DESTINATION ${roxlu_app_install_dir})
+  install(TARGETS ${roxlu_app_name} RUNTIME DESTINATION ${roxlu_app_install_dir})
   install(FILES ${roxlu_install_files} DESTINATION ${roxlu_app_install_dir})
+
+  ## BEGIN TESTING PACKAGING
+  if(PACKAGE)
+    install(TARGETS ${roxlu_app_name} 
+      BUNDLE DESTINATION . COMPONENT Runtime
+      RUNTIME DESTINATION . COMPONENT Runtime) 
+    install(FILES ${roxlu_install_files} DESTINATION .)
+  endif()
+  ## END PACKAGING
 
   if(WIN32)
     set_target_properties(${roxlu_app_name} PROPERTIES OUTPUT_NAME_DEBUG ${roxlu_app_name})
@@ -253,7 +263,7 @@ macro(roxlu_install_app)
     endforeach(i)
 
 
-endif()
+  endif()
 
 endmacro(roxlu_install_app)
 

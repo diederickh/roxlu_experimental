@@ -56,7 +56,7 @@
 +(uint32_t)(((const uint8_t *)(d))[0]) )
 #endif
 
-extern uint32_t gl_string_id(const char * data, int len);
+extern uint32_t string_id(const char * data, int len);
 
 #define EPSILON 0.000001
 #define IS_ZERO(f) 	(fabs(f) < EPSILON)	
@@ -617,4 +617,39 @@ static bool rx_is_power_of_two(unsigned int x) {
   return (x == 1);
 }
 
+
+// ENDIANNESS
+// -------------------------------------------------------
+inline uint16_t rx_get_le_u16(const unsigned char* data) {
+  return (data[1] << 8)|(data[0]);
+}
+
+inline uint32_t rx_get_le_u32(const unsigned char* data) {
+  return (data[3] << 24)|(data[2] << 16)|(data[1] << 8)|(data[0]);
+}
+
+inline uint64_t rx_get_le_u64(const unsigned char* data) {
+  return ((uint64_t)data[7] << 56) 
+    | ((uint64_t)data[6] << 48)
+    | ((uint64_t)data[5] << 40) 
+    | ((uint64_t)data[4] << 32)
+    | ((uint64_t)data[3] << 24)
+    | ((uint64_t)data[2] << 16)
+    | ((uint64_t)data[1] << 8)
+    | ((uint64_t)data[0]);
+}
+
+// store a uint16 into mem, Little Endian
+inline void rx_put_le_u16(char* mem, uint16_t val) {
+  mem[0] = val;
+  mem[1] = val >> 8;
+}
+
+// store an uint32 into mem, Little Endian
+inline void rx_put_le_u32(char* mem, uint32_t val) {
+  mem[0] = val;
+  mem[1] = val >> 8;
+  mem[2] = val >> 16;
+  mem[3] = val >> 24;
+}
 #endif // ROXLU_UTILSH

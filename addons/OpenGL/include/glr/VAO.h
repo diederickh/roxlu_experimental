@@ -21,14 +21,6 @@ namespace gl {
 
     bool setup();                                  /* sets up the VAO and enables the attributes, and sets the vertex attrib pointers. make sure that the VBO that you want to use with this VBO is bound! */
     void enableAttributes(VBO<T>& vbo);
-
-#if 0    
-    void enableAttributes(VBO<VertexP>& vbo);      /* enables the correct attributes for VertexP  */
-    void enableAttributes(VBO<VertexPT>& vbo);     /* enables the correct attributes for VertexPT */
-    void enableAttributes(VBO<VertexCP>& vbo);     /* enables the correct attributes for VertexCP */
-    void enableAttributes(VBO<VertexNP>& vbo);     /* enables the correct attributes for VertexNP */
-#endif
-
     void bind();
     void unbind();
 

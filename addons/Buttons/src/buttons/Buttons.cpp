@@ -286,6 +286,7 @@ namespace buttons {
       glDisable(GL_CULL_FACE);
       cull_enabled = true;
     }
+
     bool depth_enabled = false;
     if(glIsEnabled(GL_DEPTH_TEST)) {
       glDisable(GL_DEPTH_TEST);
@@ -334,6 +335,18 @@ namespace buttons {
 
   Sliderf& Buttons::addFloat(const string& label, float& value) {
     buttons::Sliderf* el = new Sliderf(value, createCleanName(label), Sliderf::SLIDER_FLOAT);
+    addElement(el, label);
+    return *el;
+  }
+
+  SliderRangef& Buttons::addFloatRange(const string& label, float* value) {
+    buttons::SliderRangef* el = new SliderRangef(value, createCleanName(label));
+    addElement(el, label);
+    return *el;
+  }
+
+  SliderRangei& Buttons::addIntRange(const string& label, int* value) {
+    buttons::SliderRangei* el = new SliderRangei(value, createCleanName(label));
     addElement(el, label);
     return *el;
   }
@@ -699,7 +712,6 @@ namespace buttons {
       (*it)->onSaved();
       ++it;
     }
-
   }
 
   void Buttons::load() {

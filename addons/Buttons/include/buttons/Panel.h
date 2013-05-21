@@ -45,6 +45,8 @@ namespace buttons {
     Toggle& addBool(const string& label, bool& value);
     Slideri& addInt(const string& label, int& value);
     Sliderf& addFloat(const string& label, float& value);
+    SliderRangef& addFloatRange(const string& label, float* value);
+    SliderRangei& addIntRange(const string& label, int* value);
     ColorPicker& addColor(const string& label, float* value); // pointer to arary with 4 values
     Pad<int>& addInt2(const string& label, int* value); // pointer to array with 2 values
     Pad<float>& addFloat2(const string& label, float* value); // pointer to array with 2 values
@@ -52,7 +54,6 @@ namespace buttons {
     Rectangle<float>& addRectanglef(const string& label, float* value); // pointer to array with 4 entries (topleft, bottomright)
     Vector<float>& addVec2f(const string& label, float* value);
     Button& addButton(const std::string& label, int id, button_on_click_callback cb, void* user);
-
 
     template<class T>
       Radio<T>& addRadio(const string& label, int id, T* cb, vector<string> options, int& value) {

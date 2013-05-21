@@ -19,7 +19,7 @@ namespace roxlu {
 /**
  * Minimalistic wrapper around Voro++2D create by
  * Chris H. Rycroft (LBL / UC Berkeley). See http://math.lbl.gov/voro++/
- * for documentation, source and contact informatio.
+ * for documentation, source and contact information.
  *
  * I'm trying to mimic the usage of Voro++2D w/o creating all kinds of
  * new features. See some of the examples on how to get vertices/edges/faces
