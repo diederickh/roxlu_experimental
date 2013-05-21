@@ -14,6 +14,10 @@
 
 extern "C" {
 #  include <libavutil/opt.h> 
+#  include <libavfilter/avfilter.h>
+#  include <libavfilter/avfiltergraph.h>
+#  include <libavfilter/buffersrc.h>
+#  include <libavfilter/buffersink.h>
 }
 
 #include <av/AVTypes.h>
@@ -47,8 +51,12 @@ extern "C" {
 #define ERR_AV_OPEN_AUDIO "Cannot open the audio codec because we don't have a valid audio_codec_context. Did you call addAudioStream()"
 #define ERR_AV_ENCODE_AUDIO "Error occured when encoding audio"
 #define ERR_AV_FILL_AUDIO_FRAME "Error occured when filling the audio frame before we pass it to the audio encoder: %s"
+#define ERR_AV_FILL_VIDEO_FRAME "Error occured when filling the video frame"
+#define ERR_AV_VIDEO_FRAME_PIX_FMT "Cannot find the pixel format for the video_out_frame: %d"
+#define ERR_AV_ADD_TO_SRC_FILTER "Cannot add the video_frame_out to the src_filter: %s"
 #define V_AV_VIDEO_CODEC "> Using video codec: %s"
 #define V_AV_AUDIO_CODEC "> Using audio codec: %s"
+#define V_AV_CODEC_FRAME_SIZE "> The audio codec must get `%d` frames of audio per time"
 
 class AVEncoder {
  public:
@@ -56,6 +64,7 @@ class AVEncoder {
   ~AVEncoder();
   bool setup(AVEncoderSettings settings);                              /* call once with the encoder settings */
   bool start(std::string filename, bool datapath = false);             /* call this when you want to start an encoding session */
+  bool update(); /* testing with filters, call this as often as possible */
   bool stop();                                                         /* call this when you want to stop the current encoding session */
   bool addVideoFrame(unsigned char* data, int64_t pts, size_t nbytes); /* add a raw frame. the format must be AVEncoderSettings.in_pixel_format. Pass the pts for the current frame, make sure it's in the timebase pts x */
   bool addVideoFrame(unsigned char* data, size_t nbytes);              /* add a video frame and let us determine the PTS */
@@ -81,6 +90,9 @@ class AVEncoder {
                            int width, int height);
   bool isInputPixelFormatSupportedByCodec();                           /* returns if the given `AVEncoderSettings.in_pixel_format` is supported by the found encoder; this is used to create an sws context if we need to convert the incoming data */
   bool needsSWS();                                                     /* returns true if we need an SWS context. This either means that the input pixel format is not supported by the codec, or the width and height of the output video are not the same as the input */
+
+  /* filter graph - testing */
+  bool setupFilterGraph();
   
   /* debug info */
   void listSupportedVideoCodecPixelFormats();                          /* shows the names of the pixel formats that are supported by the video codec */
@@ -94,7 +106,6 @@ class AVEncoder {
   AVFormatContext* format_context;                                     /* the `AVFormatContext` which is used while muxing, see start() */
   int64_t time_started;                                                /* the time we started; used to make sure the encoding adds new video frames at the same pace as the FPS */
   int64_t millis_per_video_frame;                                      /* how much millis one video frame takes */
-  int64_t new_frame_timeout;                                           /* when current time reaches this point we need to a add a new frame */
 
   /* audio */
   AVCodecContext* audio_codec_context;
@@ -111,6 +122,12 @@ class AVEncoder {
   AVFrame* video_frame_in;                                            /* the input video frame that will hold the pixels that need to be encoded */
   AVFrame* video_frame_out;                                           /* when the output format is not the same as the input format we need to convert the input->output */
   SwsContext* sws;                                                    /* we use a SwsContext to convert the input when it's not the same size or pixel format as the output */
+
+  /* filter graph - testing */
+  AVFilterGraph* filter_graph;
+  AVFilterContext* src_filter;
+  AVFilterContext* sink_filter;
+  AVFilterContext* fps_filter;
 };
 
 inline bool AVEncoder::isStarted() {            

@@ -18,7 +18,6 @@ AVEncoder::AVEncoder()
   ,format_context(NULL)
   ,time_started(0)
   ,millis_per_video_frame(0)
-  ,new_frame_timeout(0)
   ,audio_codec_context(NULL)
   ,audio_codec(NULL)
   ,audio_stream(NULL)
@@ -32,6 +31,11 @@ AVEncoder::AVEncoder()
   ,video_frame_in(NULL)
   ,sws(NULL)
 
+   /* filter graph */
+  ,filter_graph(NULL)
+  ,src_filter(NULL)
+  ,sink_filter(NULL)
+  ,fps_filter(NULL)
 {
   rx_init_libav();
 }
@@ -123,6 +127,10 @@ bool AVEncoder::start(std::string filename, bool datapath) {
     return false;
   }
 
+  if(!setupFilterGraph()) {
+    return false;
+  }
+
   av_dump_format(format_context, 0, filename.c_str(), 1);
 
   if(!(output_format->flags & AVFMT_NOFILE)) {
@@ -134,8 +142,9 @@ bool AVEncoder::start(std::string filename, bool datapath) {
 
   avformat_write_header(format_context, NULL);
   time_started = rx_millis();
-  
+
   print();
+
   return true;
 }
 
@@ -246,7 +255,6 @@ bool AVEncoder::openVideo() {
     }
   }
 
-  
   // allocate a container for the input data
   if(!video_frame_in) {
     video_frame_in = allocVideoFrame(settings.in_pixel_format, settings.in_w, settings.in_h);
@@ -284,75 +292,100 @@ bool AVEncoder::rescale(unsigned char* data) {
 
 bool AVEncoder::addVideoFrame(unsigned char* data, size_t nbytes) {
   int64_t pts = (rx_millis() - time_started) / millis_per_video_frame;
-  //RX_VERBOSE("millis_per_Frame: %ld, time_started: %ld, pts: %ld", millis_per_video_frame, time_started, pts);
   return addVideoFrame(data, pts, nbytes);
+}
+
+bool AVEncoder::update() {
+  if(!isStarted()) {
+    return true;
+  }
+
+  AVFrame* f = avcodec_alloc_frame();
+  int r = 0;
+  AVPacket pkt = { 0 } ;
+  int got_packet = 0;
+  av_init_packet(&pkt);
+
+  while(true) {
+
+    r = av_buffersink_get_frame(sink_filter, f);
+    if(r < 0) {
+      av_frame_free(&f);
+      break;
+    }
+
+    r = avcodec_encode_video2(video_codec_context, &pkt, f, &got_packet);
+    if(!r && got_packet && pkt.size) {
+      if(pkt.pts != AV_NOPTS_VALUE) {
+        pkt.pts = av_rescale_q(pkt.pts, 
+                               video_codec_context->time_base, 
+                               video_stream->time_base);
+      }
+      if(pkt.dts != AV_NOPTS_VALUE) {
+        pkt.dts = av_rescale_q(pkt.dts, 
+                               video_codec_context->time_base, 
+                               video_stream->time_base);
+      }
+      pkt.stream_index = video_stream->index;
+
+      r = av_interleaved_write_frame(format_context, &pkt);
+      if(r < 0) {
+        break;
+      }
+    }
+
+  }
+  av_frame_free(&f);
+
+  if(r != 0) {
+    RX_ERROR(ERR_AV_WRITE_VIDEO);
+    return false;
+  }
+  return true;
 }
 
 bool AVEncoder::addVideoFrame(unsigned char* data, int64_t pts, size_t nbytes) {
   assert(video_codec_context);
   assert(video_stream);
+  assert(filter_graph);
+  assert(src_filter);
 
-  // @TODO When encoding to MP4,Webm,Mov, the resulting video seems to skip frames.. FLV works just fine, find out why!
-#if 1 
-#  if 0
-  if(pts <= new_frame_timeout) {
-    return false;
-  }
-  new_frame_timeout = pts;
-#  else
-  uint64_t now = rx_millis();
-  if(now < new_frame_timeout) {
-    return false;
-  }
-  new_frame_timeout = now + millis_per_video_frame;
-#  endif
-#endif
+  int r = 0;
 
   // scale or convert the pixel format if necessary
   if(sws) {
-
     if(!rescale(data)) {
       RX_ERROR(ERR_AV_ADD_VFRAME_SCALE);
       return false;
     }
   }
   else {
-    // @TODO add error check
-    avpicture_fill((AVPicture*)video_frame_out, (uint8_t*)data, 
-                   settings.in_pixel_format, settings.in_w, 
-                   settings.in_h);
-
+    r = avpicture_fill((AVPicture*)video_frame_out, (uint8_t*)data, 
+                       settings.in_pixel_format, settings.in_w, 
+                       settings.in_h);
+    if(r == 0) {
+      RX_ERROR(ERR_AF_FILL_VIDEO_FRAME);
+      return false;
+    }
   }
 
-  AVPacket pkt = { 0 } ;
-  int got_packet;
-  av_init_packet(&pkt);
-  
+  // add the video into the filter graph
+  video_frame_out->format = video_codec_context->pix_fmt;
+  const AVPixFmtDescriptor *desc = av_pix_fmt_desc_get((enum AVPixelFormat)video_frame_out->format);
+  if(!desc) {
+    RX_ERROR(ERR_AV_FILL_VIDEO_FRAME, video_frame_out->format);
+    return false;
+  }
+
+  video_frame_out->width = settings.out_w;
+  video_frame_out->height = settings.out_h;
   video_frame_out->pts = pts;
-  int r = avcodec_encode_video2(video_codec_context, &pkt, video_frame_out, &got_packet);
-  if(!r && got_packet && pkt.size) {
-    if(pkt.pts != AV_NOPTS_VALUE) {
-      pkt.pts = av_rescale_q(pkt.pts, 
-                             video_codec_context->time_base, 
-                             video_stream->time_base);
-    }
-    if(pkt.dts != AV_NOPTS_VALUE) {
-      pkt.dts = av_rescale_q(pkt.dts, 
-                             video_codec_context->time_base, 
-                             video_stream->time_base);
-    }
-    pkt.stream_index = video_stream->index;
-    r = av_interleaved_write_frame(format_context, &pkt);
-    RX_VERBOSE("VIDEO PTS: %d, PKT.DTS: %d", pkt.pts, pkt.dts);
-  }
-  else {
-    r = 0;
-  }
 
-  //av_free_packet(&pkt);
-
-  if(r != 0) {
-    RX_ERROR(ERR_AV_WRITE_VIDEO);
+  r = av_buffersrc_write_frame(src_filter, video_frame_out);
+  if(r < 0) {
+    char err[512];
+    av_strerror(r, err, sizeof(err));
+    RX_ERROR(ERR_AV_ADD_TO_SRC_FILTER, err);
     return false;
   }
 
@@ -360,6 +393,7 @@ bool AVEncoder::addVideoFrame(unsigned char* data, int64_t pts, size_t nbytes) {
 }
 
 bool AVEncoder::stop() {
+  int r = 0;
   char err_msg[512];
 
   if(!output_format) {
@@ -367,10 +401,12 @@ bool AVEncoder::stop() {
     return false;
   }
 
-  int r = av_write_trailer(format_context);
+  r = av_write_trailer(format_context);
   if(r != 0) {
     // @todo free/close all other av contexts when we fail here.
-    RX_ERROR(ERR_AV_TRAILER, av_strerror(r, err_msg, sizeof(err_msg)));
+    // @todo use this way for av_strerror everywhere
+    av_strerror(r, err_msg, sizeof(err_msg));
+    RX_ERROR(ERR_AV_TRAILER, err_msg);
     return false;
   }
 
@@ -398,9 +434,9 @@ bool AVEncoder::stop() {
     sws_freeContext(sws);
     sws = NULL;
   }
-
+  
+  added_video_frames = 0;
   added_audio_frames = 0;
-  new_frame_timeout = 0;
   time_started = 0;
   output_format = NULL;
 
@@ -408,19 +444,6 @@ bool AVEncoder::stop() {
 }
 
 void AVEncoder::closeVideo() {
-#if 0
-  // @TODO - these are moved to the d'tor.. but this is where we want it; though this introduces a memory leak!
-  if(video_frame_out) {
-    avcodec_free_frame(&video_frame_out);
-    video_frame_out = NULL;
-  }
-
-  if(video_frame_in) {
-    avcodec_free_frame(&video_frame_in);
-    video_frame_in = NULL;
-  }
-#endif
-
   if(video_codec) {
     avcodec_close(video_stream->codec);
   }
@@ -429,8 +452,6 @@ void AVEncoder::closeVideo() {
   video_stream = NULL;              
   video_codec_context = NULL;       
   video_codec = NULL;               
-  //video_frame_out = NULL; // allocated by AVEncoder 
-  //video_frame_in = NULL; // allocated by AVEncoder
 }
 
 
@@ -444,10 +465,12 @@ void AVEncoder::listSupportedVideoCodecPixelFormats() {
   RX_VERBOSE("Supported pixel formats that the video encoder can handle:");
   RX_VERBOSE("-----------------------------");
   const enum AVPixelFormat* fmt = video_codec->pix_fmts;
-  while(*fmt != -1) {
-    const AVPixFmtDescriptor* desc = av_pix_fmt_desc_get(*fmt);
-    RX_VERBOSE("FMT: %s", desc->name);
-    fmt++;
+  if(fmt) {
+    while(*fmt != -1) {
+      const AVPixFmtDescriptor* desc = av_pix_fmt_desc_get(*fmt);
+      RX_VERBOSE("FMT: %s", desc->name);
+      fmt++;
+    }
   }
   RX_VERBOSE("-----------------------------");
   RX_VERBOSE("");
@@ -464,11 +487,12 @@ void AVEncoder::listSupportedAudioCodecSampleFormats() {
   RX_VERBOSE("Supported sample formats that the audio encoder can handle:");
   RX_VERBOSE("-----------------------------");
   const enum AVSampleFormat* fmt = audio_codec->sample_fmts;
-  while(*fmt != -1) {
-    const enum AVSampleFormat f = *fmt;
-    
-    RX_VERBOSE("FMT: %s", av_get_sample_fmt_name(f));
-    fmt++;
+  if(fmt) {
+    while(*fmt != -1) {
+      const enum AVSampleFormat f = *fmt;
+      RX_VERBOSE("FMT: %s", av_get_sample_fmt_name(f));
+      fmt++;
+    }
   }
   RX_VERBOSE("-----------------------------");
   RX_VERBOSE("");
@@ -493,14 +517,15 @@ bool AVEncoder::isInputPixelFormatSupportedByCodec() {
 
   bool supported = false;
   const enum AVPixelFormat* fmt = video_codec->pix_fmts;
-  while(*fmt != -1) {
-    if(*fmt == settings.in_pixel_format) {
-      supported = true;
-      break;
+  if(fmt) {
+    while(*fmt != -1) {
+      if(*fmt == settings.in_pixel_format) {
+        supported = true;
+        break;
+      }
+      fmt++;
     }
-    fmt++;
   }
-
   return supported;
   
 }
@@ -532,7 +557,7 @@ bool AVEncoder::addAudioStream(enum AVCodecID codecID) {
   
   // default params - @TODO put these in AVEncoderSettings
   audio_codec_context->sample_fmt = AV_SAMPLE_FMT_S16P;
-  audio_codec_context->bit_rate = 128000;
+  audio_codec_context->bit_rate = 64000;
   audio_codec_context->sample_rate = 44100;
   audio_codec_context->channels = 1;
 
@@ -556,25 +581,13 @@ bool AVEncoder::openAudio() {
   }
 
   if(audio_codec->capabilities & CODEC_CAP_VARIABLE_FRAME_SIZE) {
-    RX_VERBOSE("AUDIO CODEC HAS SUPPORT FOR VARIABLE FRAME SIZE");
     audio_input_frame_size = 10000;
   }
   else {
     audio_input_frame_size = audio_codec_context->frame_size;
-    RX_VERBOSE("AUDIO CODEC HAS NO SUPPORT FOR VARIABLE FRAME SIZE, NUSING");
   }
-  RX_VERBOSE("FRAME SIZE: %d", audio_input_frame_size);
 
-  /*
-  if(!audio_frame) {
-    audio_frame = avcodec_alloc_frame(); // @TODO avcodec_free_frame(&audio_frame)
-    if(!audio_frame) {
-      RX_ERROR(ERR_AV_ALLOC_AUDIO_FRAME);
-      return false;
-    }
-  }
-  */
-
+  RX_VERBOSE(V_AV_CODEC_FRAME_SIZE, audio_input_frame_size);
   return true;
 }
 
@@ -608,6 +621,7 @@ bool AVEncoder::addAudioFrame(uint8_t* data, int nsamples) {
   if(r != 0) {
     avcodec_free_frame(&frame);
     RX_ERROR(ERR_AV_ENCODE_AUDIO);
+    return false;
   }
   
   if(got_packet) {
@@ -623,7 +637,7 @@ bool AVEncoder::addAudioFrame(uint8_t* data, int nsamples) {
   }
 
   if(!got_packet) {
-    avcodec_free_frame(&frame); // the example doesn't free the frame .. 
+    avcodec_free_frame(&frame); 
     return false;
   }
 
@@ -637,7 +651,6 @@ bool AVEncoder::addAudioFrame(uint8_t* data, int nsamples) {
   }
 
   avcodec_free_frame(&frame);
-  //av_free_packet(&pkt);  // @TODO do we really need to free the packet (?) (it might have heap data?!)
   return true;
 }
 
@@ -658,7 +671,6 @@ void AVEncoder::print() {
     return;
   }
   RX_VERBOSE("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-
   if(video_stream) {
     RX_VERBOSE("video_stream.time_base.num: %d", video_stream->time_base.num);
     RX_VERBOSE("video_stream.time_base.den: %d", video_stream->time_base.den);
@@ -670,3 +682,85 @@ void AVEncoder::print() {
   }
   RX_VERBOSE("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 }
+
+
+// =====================================================================
+bool AVEncoder::setupFilterGraph() {
+  char err[512];
+  int r = 0;
+
+  // create the graph
+  filter_graph = avfilter_graph_alloc();
+  if(!filter_graph) {
+    RX_ERROR("Cannot allocate filter graph");
+    return false;
+  }
+
+  // add the source filter
+  char args[1024];
+  snprintf(args, sizeof(args), "width=%d:height=%d:pix_fmt=%s:time_base=%d/%d:sar=1",
+           settings.out_w, settings.out_h,
+           "yuv420p", int(settings.time_base_num), int(settings.time_base_den));
+
+  r = avfilter_graph_create_filter(&src_filter, avfilter_get_by_name("buffer"), "src", args, NULL, filter_graph);
+  if(r < 0) {
+    av_strerror(r, err, sizeof(err));
+    RX_ERROR("Cannot create the buffer filter: %s / %s", err, args);
+    return false;
+  }
+
+  // add the sink filter
+  r = avfilter_graph_create_filter(&sink_filter, avfilter_get_by_name("buffersink"), "sink", NULL, NULL, filter_graph);
+  if(r < 0) {
+    RX_ERROR("Cannot create the buffersink filter");
+    return false;
+  }
+
+  // add the fps filter
+  snprintf(args, sizeof(args), "fps=%d", int(settings.time_base_den));
+  r = avfilter_graph_create_filter(&fps_filter, avfilter_get_by_name("fps"), "fps", args, NULL, filter_graph);
+  if(r < 0) {
+    RX_ERROR("Cannot create the fps filter");
+    return false;
+  }
+
+  r = avfilter_link(src_filter, 0, fps_filter, 0);
+  if(r < 0) {
+    RX_ERROR("Cannot link the src_filter to the fps_filter");
+    return false;
+  }
+
+  r = avfilter_link(fps_filter, 0, sink_filter, 0);
+  if(r < 0) {
+    RX_ERROR("Cannot link the fps_filter to the sink_filter");
+    return false;
+  }
+
+#if 0
+  r = avfilter_config_links(src_filter);
+  if(r < 0) {
+    RX_VERBOSE("Cannot config_links the src_filter");
+    return false;
+  }
+  r = avfilter_config_links(fps_filter);
+  if(r < 0) {
+    RX_VERBOSE("Cannot config_links the fps_filter");
+    return false;
+  }
+  r = avfilter_config_links(sink_filter);
+  if(r < 0) {
+    RX_VERBOSE("Cannot config_links the sink_filter");
+    return false;
+  }
+#endif
+
+  // check validity
+  r = avfilter_graph_config(filter_graph, NULL);
+  if(r < 0) {
+    RX_ERROR("avfilter_graph_config failed");
+    return false;
+  }
+
+  return true;
+}
+// =====================================================================

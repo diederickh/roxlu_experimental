@@ -10,6 +10,7 @@ extern "C" {
 #  include <libavutil/mathematics.h>
 #  include <libavcodec/avcodec.h>
 #  include <libswscale/swscale.h>
+#  include <libavfilter/avfilter.h>
 }
 
 #define ERR_AV_INVALID_IN_FMT "The in_pixel_format is invalid"
