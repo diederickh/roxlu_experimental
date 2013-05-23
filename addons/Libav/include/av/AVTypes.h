@@ -31,13 +31,19 @@ public:
   bool validate();
 
 public:
-  AVPixelFormat in_pixel_format; 
+
+  /* audio settings */
+  enum AVSampleFormat sample_fmt;              /* the audio sample format e.g. AV_SAMPLE_FMT_S16, AV_SAMPLE_FMT_S16P, AV_SAMPLE_FMT_FLT(P), see: http://libav.org/doxygen/master/samplefmt_8h.html#af9a51ca15301871723577c730b5865c5 */
+  int audio_bit_rate;                          /* the bitrate for the audio encoder, e.g. 64000, 128000, 196000 */
+  int sample_rate;                             /* e.g. 44100 */
+  int num_channels;                            /* audio channels; make sure to select the correct `sample_fmt` for interleaved and/or planar structured audio */
+
+  /* video settings */
+  AVPixelFormat in_pixel_format;               /* the input pixel format */
   int in_w;
   int in_h;
-
   int out_w;
   int out_h;
-
   double time_base_den;                        /* e.g. 25 (when time_base_num == 1, you'll get 25fps) */
   double time_base_num;                        /* e.g. 1 */
 };

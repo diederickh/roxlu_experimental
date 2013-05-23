@@ -190,12 +190,18 @@ bool AVEncoder::addVideoStream(enum AVCodecID codecID) {
   video_codec_context->height = settings.out_h;
   video_codec_context->time_base.den = settings.time_base_den;
   video_codec_context->time_base.num = settings.time_base_num;
-  video_codec_context->gop_size = 12; /* emit one intra frame very gop_size frames at most */
+  // video_codec_context->gop_size = 12; /* emit one intra frame very gop_size frames at most */
   video_codec_context->pix_fmt = AV_PIX_FMT_YUV420P;
   //video_codec_context->pix_fmt = AV_PIX_FMT_UYVY422;  // when using the Logitech Webcam c920 on mac, this is the standard format, so setting this is value for the encode would mean we don't need to convert but this makes sws_scale crash
 
-  video_codec_context->keyint_min = 25;
-  video_codec_context->gop_size = 250;
+  //video_codec_context->keyint_min = 25;
+  //video_codec_context->gop_size = 40;
+  video_codec_context->bit_rate = 500000;
+  //video_codec_context->qmin = 10;
+  //video_codec_context->qmax = 18;
+  //video_codec_context->rc_buffer_size = 0;
+  //video_codec_context->rc_max_rate = 128000;
+  //video_codec_context->rc_buffer_size = 0;
   
 
   if(format_context->oformat->flags & AVFMT_GLOBALHEADER) {
@@ -234,6 +240,7 @@ bool AVEncoder::openVideo() {
   AVDictionary* opts = NULL;
   av_dict_set(&opts, "preset", "ultrafast", 0);
   av_dict_set(&opts, "tune", "zerolatency", 0);
+  //av_dict_set(&opts, "crf", "18", 0);
 
   if(avcodec_open2(video_codec_context, NULL, &opts) < 0) {
     RX_ERROR(ERR_AV_OPEN_VIDEO_CODEC);
@@ -300,17 +307,17 @@ bool AVEncoder::update() {
 
   AVFrame* f = avcodec_alloc_frame();
   int r = 0;
-  AVPacket pkt = { 0 } ;
-  int got_packet = 0;
 
-  av_init_packet(&pkt);
+  int got_packet = 0;
 
   while(true) {
     r = av_buffersink_get_frame(sink_filter, f);
     if(r < 0) {
-      av_frame_free(&f);
       break;
     }
+
+    AVPacket pkt = { 0 } ;
+    av_init_packet(&pkt);
 
     r = avcodec_encode_video2(video_codec_context, &pkt, f, &got_packet);
     if(!r && got_packet && pkt.size) {
@@ -327,6 +334,9 @@ bool AVEncoder::update() {
       pkt.stream_index = video_stream->index;
 
       r = av_interleaved_write_frame(format_context, &pkt);
+
+      av_frame_unref(f);
+
       if(r < 0) {
         break;
       }
@@ -557,8 +567,8 @@ bool AVEncoder::addAudioStream(enum AVCodecID codecID) {
 
   listSupportedAudioCodecSampleFormats();
   
-  // default params - @TODO put these in AVEncoderSettings
-  audio_codec_context->sample_fmt = AV_SAMPLE_FMT_S16P;
+  // default params - @TODO put these in AVEncoderSettings + use them here
+  audio_codec_context->sample_fmt = AV_SAMPLE_FMT_S16P; 
   audio_codec_context->bit_rate = 64000;
   audio_codec_context->sample_rate = 44100;
   audio_codec_context->channels = 1;
@@ -594,6 +604,12 @@ bool AVEncoder::openAudio() {
 }
 
 bool AVEncoder::addAudioFrame(uint8_t* data, int nsamples) {
+  bool result = addAudioFrame(data, nsamples, added_audio_frames);
+  added_audio_frames += nsamples;
+  return result;
+}
+
+bool AVEncoder::addAudioFrame(uint8_t* data, int nsamples, int64_t pts) {
   assert(audio_stream);
 
   char err_msg[512];
@@ -604,9 +620,8 @@ bool AVEncoder::addAudioFrame(uint8_t* data, int nsamples) {
   int r = 0;
   int buffer_size = audio_input_frame_size * av_get_bytes_per_sample(c->sample_fmt) * c->channels;
 
-  frame->pts = added_audio_frames;
+  frame->pts = pts;
   frame->nb_samples = nsamples;
-  added_audio_frames += nsamples;
 
   av_init_packet(&pkt);
 
@@ -660,6 +675,9 @@ void AVEncoder::closeAudio() {
   if(audio_codec) {
     avcodec_close(audio_stream->codec);
   }
+
+  // @TODO uncomment (after we got the threaded encoder working)
+  //  audio_input_frame_size = 0; 
 
   // just references to audio_stream->* members; 
   audio_codec = NULL;

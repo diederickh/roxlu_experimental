@@ -23,10 +23,11 @@ struct AVEncoderFrame {                /* we create a somewhat similar object li
   AVEncoderFrame();
   ~AVEncoderFrame();
 
-  unsigned char* pixels;
+  unsigned char* data;
   int64_t pts;
   bool is_free;
   size_t nbytes;
+  int type; 
 };
 
 struct AVEncoderFrameSorter {
@@ -42,7 +43,9 @@ class AVEncoderThreaded {
   bool setup(AVEncoderSettings cfg, int numFramesToAllocate = 100);
   bool start(std::string filename, bool datapath = false);
   bool stop();
+  bool isStarted();
   bool addVideoFrame(unsigned char* data, size_t nbytes);
+  bool addAudioFrame(uint8_t* data, size_t nsamples);
   uint64_t millis();                                         /* tiny helper to retrieve time in millis */
 
  public:
@@ -50,18 +53,24 @@ class AVEncoderThreaded {
   bool shutdown();                                           /* cleans the AVEncoderThreaded::frames member when the thread stops (e.g. when stop() has been called) */
 
  private:
-  AVEncoderFrame* getFreeFrame();
+  AVEncoderFrame* getFreeVideoFrame();                       /* get a free (preallocated) video frame */
+  AVEncoderFrame* getFreeAudioFrame();                       /* get a free (preallocated) audio frame) */
+  AVEncoderFrame* getFreeFrame(int type);                    /* get a free frame for the given type */
 
  public:                                                     /* all members are actually private but we need to acces them in the thread function */
   AVEncoderSettings settings;
   bool is_setup;
   std::vector<AVEncoderFrame*> frames;
-  int num_frames_to_allocate;
+
+  /* audio */
+  uint64_t num_added_audio_samples; /* @todo init clear */
+  size_t nbytes_per_audio_buffer; /* @todo init/clear */
 
   /* timing when encoding */
   uint64_t time_started;
-  uint64_t new_frame_timeout;
-  uint64_t millis_per_frame;
+  uint64_t new_video_frame_timeout;
+  int num_video_frames_to_allocate;
+  uint64_t millis_per_video_frame;
 
   /* encoder */
   AVEncoder enc;
@@ -70,9 +79,11 @@ class AVEncoderThreaded {
   bool must_stop;
   uv_mutex_t mutex;
   uv_thread_t thread;
-  
-  
 };
+
+inline bool AVEncoderThreaded::isStarted() {
+  return enc.isStarted(); // @todo this might be thread unsafe
+}
 
 #endif
 

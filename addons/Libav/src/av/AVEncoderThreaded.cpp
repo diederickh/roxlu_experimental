@@ -7,13 +7,13 @@ void avencoder_thread(void* user) {
   AVEncoderThreaded& enc = *(static_cast<AVEncoderThreaded*>(user));
   
   if(!enc.initialize()) {
+  RX_VERBOSE("-- not initialize??");
     return;
   }
 
   uv_mutex_t& mutex = enc.mutex;
   std::vector<AVEncoderFrame*> work_data;
   bool must_stop = false;
-
   
   while(true) {
     // get frames that need to be encoded
@@ -31,16 +31,25 @@ void avencoder_thread(void* user) {
     uv_mutex_unlock(&mutex);
 
     // encode worker data
-    std::sort(work_data.begin(), work_data.end(), AVEncoderFrameSorter());
+    //    std::sort(work_data.begin(), work_data.end(), AVEncoderFrameSorter());
     for(std::vector<AVEncoderFrame*>::iterator it = work_data.begin(); it != work_data.end(); ++it) {
 
       AVEncoderFrame* f = *it;
-      enc.enc.addVideoFrame(f->pixels, f->pts, f->nbytes);
+      if(f->type == AV_TYPE_VIDEO) {
+        enc.enc.addVideoFrame(f->data, f->pts, f->nbytes);
+        enc.enc.update();
+      }
+      else if(f->type == AV_TYPE_AUDIO) {
+        enc.enc.addAudioFrame(f->data, 1152, f->pts);
+        enc.enc.update();
+      }
 
       uv_mutex_lock(&mutex);
       f->is_free = true;
       uv_mutex_unlock(&mutex);
     }
+
+
 
     if(must_stop) {
       break;
@@ -53,23 +62,25 @@ void avencoder_thread(void* user) {
 // -------------------------------------------
 
 AVEncoderFrame::AVEncoderFrame() 
-  :pixels(NULL)
+  :data(NULL)
   ,pts(0)
   ,is_free(true)
   ,nbytes(0)
+  ,type(AV_TYPE_NONE)
 {
 }
 
 AVEncoderFrame::~AVEncoderFrame() {
 
-  if(pixels) {
-    delete[] pixels;
-    pixels = NULL;
+  if(data) {
+    delete[] data;
+    data = NULL;
   }
 
   is_free = true;
   nbytes = 0;
   pts = 0;
+  type = AV_TYPE_NONE;
 }
 
 
@@ -79,10 +90,11 @@ AVEncoderThreaded::AVEncoderThreaded()
   :is_setup(false)
   ,thread(NULL)
   ,must_stop(true)
-  ,num_frames_to_allocate(0)
-  ,millis_per_frame(0)
-  ,new_frame_timeout(0)
+  ,num_video_frames_to_allocate(0)
+  ,millis_per_video_frame(0)
+  ,new_video_frame_timeout(0)
   ,time_started(0)
+  ,num_added_audio_samples(0)
 {
   uv_mutex_init(&mutex);
 }
@@ -96,8 +108,9 @@ AVEncoderThreaded::~AVEncoderThreaded() {
   uv_thread_join(&thread);
 
   time_started = 0;
-  new_frame_timeout = 0;
-  millis_per_frame = 0;
+  new_video_frame_timeout = 0;
+  millis_per_video_frame = 0;
+  num_added_audio_samples = 0;
 
   for(std::vector<AVEncoderFrame*>::iterator it = frames.begin(); it != frames.end(); ++it) {
     AVEncoderFrame* f = *it;
@@ -115,16 +128,16 @@ bool AVEncoderThreaded::setup(AVEncoderSettings cfg, int numFramesToAllocate) {
     return false;
   }
 
-  millis_per_frame = (cfg.time_base_num / cfg.time_base_den) * 1000;
-  if(!millis_per_frame) {
+  // setup video
+  millis_per_video_frame = (cfg.time_base_num / cfg.time_base_den) * 1000;
+  if(!millis_per_video_frame) {
     RX_ERROR(ERR_AVT_WRONG_MILLIS_PER_FRAME);
     return false;
   }
 
-  num_frames_to_allocate = numFramesToAllocate;
+  num_video_frames_to_allocate = numFramesToAllocate;
   settings = cfg;
   is_setup = true;
-
   return true;
 }
 
@@ -142,13 +155,34 @@ bool AVEncoderThreaded::initialize() {
     return false;
   }
 
-  for(int i = 0; i < num_frames_to_allocate; ++i) {
+  // preallocate video frames 
+  for(int i = 0; i < num_video_frames_to_allocate; ++i) {
     AVEncoderFrame* f = new AVEncoderFrame();
-    f->pixels = new unsigned char[nbytes_per_image];
+    f->data = new unsigned char[nbytes_per_image];
     f->nbytes = nbytes_per_image;
     f->is_free = true;
+    f->type = AV_TYPE_VIDEO;
     frames.push_back(f);
   }
+
+  // preallocate audio frames
+  int linesize = 0;
+  nbytes_per_audio_buffer = av_samples_get_buffer_size(&linesize, 
+                                                              settings.num_channels,
+                                                              enc.getAudioInputFrameSize(),
+                                                              settings.sample_fmt,
+                                                              0); // @todo what do we need for this last parameter to av_samples_get_buffer_size
+  // @todo also pass an option to allocate X-audio frames
+  for(int i = 0; i < num_video_frames_to_allocate; ++i) {
+    AVEncoderFrame* f = new AVEncoderFrame();
+    f->data = new unsigned char[nbytes_per_audio_buffer];
+    f->nbytes = nbytes_per_audio_buffer;
+    f->is_free = true;
+    f->type = AV_TYPE_AUDIO;
+    frames.push_back(f);
+  }
+
+  RX_VERBOSE("-------------------------: %ld <--------------------", nbytes_per_audio_buffer);
 
   return true;
 }
@@ -160,7 +194,6 @@ bool AVEncoderThreaded::shutdown() {
   }
 
   frames.clear();
-
   enc.stop();
   return true;
 }
@@ -179,13 +212,39 @@ bool AVEncoderThreaded::start(std::string filename, bool datapath) {
   enc.start(filename, datapath);
 
   time_started = millis();
-
-  new_frame_timeout = millis() + millis_per_frame;
+  num_added_audio_samples = 0;
+  new_video_frame_timeout = millis() + millis_per_video_frame;
 
   uv_thread_create(&thread, avencoder_thread, this);
 
   return true;
 
+}
+
+bool AVEncoderThreaded::addAudioFrame(uint8_t* data, size_t nsamples) {
+  if(!time_started) {
+    RX_ERROR(ERR_AVT_NOT_STARTED);
+    return false;
+  }
+
+  AVEncoderFrame* f = getFreeAudioFrame();
+  if(!f) {
+    RX_ERROR(ERR_AVT_NO_FREE_FRAME);
+    return false;
+  }
+
+  uint64_t pts = num_added_audio_samples;
+  num_added_audio_samples += nsamples;
+
+  uv_mutex_lock(&mutex);
+  {
+    memcpy(f->data, data, nbytes_per_audio_buffer);
+    f->pts = pts;
+    f->is_free = false;
+  }
+  uv_mutex_unlock(&mutex);
+
+  return true;
 }
 
 bool AVEncoderThreaded::addVideoFrame(unsigned char* data, size_t nbytes) {
@@ -195,24 +254,27 @@ bool AVEncoderThreaded::addVideoFrame(unsigned char* data, size_t nbytes) {
     return false;
   }
 
-#if 1
+#if 0
   uint64_t now = millis();
-  if(now < new_frame_timeout) {
+  if(now < new_video_frame_timeout) {
     return false;
   }
-  new_frame_timeout = now + millis_per_frame;
+  new_video_frame_timeout = now + millis_per_video_frame;
 #endif
 
-  AVEncoderFrame* f = getFreeFrame();
+  AVEncoderFrame* f = getFreeVideoFrame();
 
   if(f) {
 
-    int64_t pts = (millis() - time_started) / millis_per_frame;
-
-    memcpy(f->pixels, data, nbytes);
-
+    int64_t pts = (millis() - time_started) / millis_per_video_frame;
+    int64_t p = pts;
+    static int counter = 0;
+    //     pts = counter;
+    ++counter;
+    RX_VERBOSE("TIME PTS: %ld, C: %ld", p, pts);
     uv_mutex_lock(&mutex);
     {
+      memcpy(f->data, data, nbytes);
       f->is_free = false;
       f->pts = pts;
     }
@@ -225,14 +287,22 @@ bool AVEncoderThreaded::addVideoFrame(unsigned char* data, size_t nbytes) {
   return true;
 }
 
-AVEncoderFrame* AVEncoderThreaded::getFreeFrame() {
+AVEncoderFrame* AVEncoderThreaded::getFreeVideoFrame() {
+  return getFreeFrame(AV_TYPE_VIDEO);
+}
+
+AVEncoderFrame* AVEncoderThreaded::getFreeAudioFrame() {
+  return getFreeFrame(AV_TYPE_AUDIO);
+}
+
+AVEncoderFrame* AVEncoderThreaded::getFreeFrame(int type) {
   AVEncoderFrame* f = NULL;
 
   uv_mutex_lock(&mutex);
   {
     for(std::vector<AVEncoderFrame*>::iterator it = frames.begin(); it != frames.end(); ++it) {
       AVEncoderFrame* frame = *it;
-      if(frame->is_free) {
+      if(frame->type == type && frame->is_free) {
         f = frame;
         break;
       }

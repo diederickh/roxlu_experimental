@@ -72,8 +72,10 @@ class AVEncoder {
   bool addVideoFrame(unsigned char* data, int64_t pts, size_t nbytes); /* add a raw frame. the format must be AVEncoderSettings.in_pixel_format. Pass the pts for the current frame, make sure it's in the timebase pts x */
   bool addVideoFrame(unsigned char* data, size_t nbytes);              /* add a video frame and let us determine the PTS */
   bool addAudioFrame(uint8_t* data, int nsamples);                     /* add new audio samples */
+  bool addAudioFrame(uint8_t* data, int nsamples, int64_t pts);        /* add new audio samples + give pts */
   bool isStarted();                                                    /* returns true when we've started encoding, we test if time_started > 0 */
   void print();                                                        /* prints some valuable info (codecs must be opened) */
+  int getAudioInputFrameSize();                                        /* get the number of bytes the framesize for the audio encoder should be; this is the amount which must be passed into add audio frame */
  private:
 
   /* audio */
@@ -136,6 +138,10 @@ class AVEncoder {
 
 inline bool AVEncoder::isStarted() {            
   return time_started;
+}
+
+inline int AVEncoder::getAudioInputFrameSize() {
+  return audio_input_frame_size;
 }
 
 #endif
