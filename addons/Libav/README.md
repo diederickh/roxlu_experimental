@@ -5,12 +5,55 @@ decode, mux and demux media. This addon provides an encoder, decoder and player,
 optimized and taking advantage of multi core cpus. Where possible hardware acceleration is 
 used by libav.
 
+_Setup an threaded encoder, we assume input is in AV_PIX_FMT_UYVY422_
+````c++
+AVEncoderThreaded enc;
+
+void setup() {
+  AVEncoderSettings cfg;
+
+  // VIDEO SETTTINGS
+  cfg.in_w = cfg.out_w = cap.getWidth(); // cap is an VideoCapture object, see the VideoCapture addon
+  cfg.in_h = cfg.out_h = cap.getHeight();
+  cfg.in_pixel_format = AV_PIX_FMT_UYVY422; // this is what OS uses for the default buffer format when using a Logitech Cam; using YUV is faster when the pixel data needs to be converted to a format that the encoder understands 
+  cfg.time_base_den = 25;
+  cfg.time_base_num = 1;
+
+  // AUDIO SETTINGS
+  cfg.sample_fmt = AV_SAMPLE_FMT_S16P; 
+  cfg.audio_bit_rate = 64000;
+  cfg.sample_rate = 44100;
+  cfg.num_channels = 1; // for now you can only encode with one channel of audio
+
+  enc.setup(cfg);
+
+  if(!enc.start("recording.mp4", true)) {
+     printf("Cananot start encoder, check you settings");
+     ::exit(EXIT_FAILURE);                                  
+  }
+}
+
+
+void on_webcam_frame(unsigned char* data, size_t nbytes) {
+  enc.addVideoFrame(data, nbytes);
+}
+
+void on_audio_frame(const void* data, unsigned long nframes) {
+  enc.addAudioFrame((uint8_t*) data, nframes);
+}
+
+void on_exit() {
+  enc.stop();
+}
+````
 
 
 ## AVEncoder && AVEncoderThreaded
 
 These classes are used to encode raw input data to a media stream and mux it into a file 
-(I might add network features some day). 
+(I might add network features some day). It's advised to use `AVEncoderThreaaded` because
+this handles all thread synchronization. If you want to use `AVEncoder` make sure calls to
+`addAudioFrame()`, `addVideoFrame` and `update()` are synchronized (aka. wrap a mutex around them)
 
 - `AVEncoder::listSupportedVideoCodecPixelFormats()`: Video encoders typically support
   multiple different input pixel formats. If you can provide a pixel format that is supported
@@ -77,4 +120,4 @@ See `AVDecoder.cpp`, some things which you might want to know:
  -  In `AVEncoder.cpp` clean up audio memory + add a check if the sample format is supported by the audio encoder. See [here](http://libav.org/doxygen/master/samplefmt_8h.html#af9a51ca15301871723577c730b5865c5a35eaaad9da207aa4e63fa02fd67fae68) for a list of formats
  -  Use libavresample to automatically resample audio samplerates/formats
  -  Add a test if we really need swscale in the `AVencoder` based on the `AVEncoderSettings.in_pixel_format`
- -  Test if the settings in `AVEncoderSettings` can be used for the given format.
+ -  Test if the settings in `AVEncoderSettings` can be used for the given format. 

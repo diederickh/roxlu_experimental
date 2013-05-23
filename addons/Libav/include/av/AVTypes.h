@@ -20,6 +20,10 @@ extern "C" {
 #define ERR_AV_INVALID_OUT_H "The out_h setting is invalid"
 #define ERR_AV_INVALID_TIMEBASE_DEN "The time_base_den is invalid"
 #define ERR_AV_INVALID_TIMEBASE_NUM "The time_base_num is invalid"
+#define ERR_AV_INVALID_AUDIO_CODEC_ID "For now we only support mp3 for the audio encoder"
+#define ERR_AV_INVALID_SAMPLE_RATE "The sample_rate setting is invalid. Use something like 44100"
+#define ERR_AV_INVALID_NUM_CHANNELS "The num_channels setting is invalid. For now only one channel audio is supported"
+#define ERR_AV_INVALID_AUDIO_BIT_RATE "The audio_bit_rate setting is invalid. Use e.g. 64000, 196000, etc.."
 
 #define AV_TYPE_NONE 0
 #define AV_TYPE_VIDEO 1
@@ -29,14 +33,19 @@ struct AVEncoderSettings {
 public:
   AVEncoderSettings();
   bool validate();
+  bool validateAudio();
+  bool validateVideo();
+  bool useAudio();                             /* when use_audio = false, we won't record audio. this is the default value */
 
 public:
 
   /* audio settings */
+  bool use_audio;                              /* set this to true if you want to add an audio stream to the recording */
   enum AVSampleFormat sample_fmt;              /* the audio sample format e.g. AV_SAMPLE_FMT_S16, AV_SAMPLE_FMT_S16P, AV_SAMPLE_FMT_FLT(P), see: http://libav.org/doxygen/master/samplefmt_8h.html#af9a51ca15301871723577c730b5865c5 */
   int audio_bit_rate;                          /* the bitrate for the audio encoder, e.g. 64000, 128000, 196000 */
   int sample_rate;                             /* e.g. 44100 */
   int num_channels;                            /* audio channels; make sure to select the correct `sample_fmt` for interleaved and/or planar structured audio */
+  enum AVCodecID audio_codec;                  /* hardcoded, must be AV_CODEC_ID_MP3 */
 
   /* video settings */
   AVPixelFormat in_pixel_format;               /* the input pixel format */
@@ -52,5 +61,9 @@ struct AVPlayerSettings {                      /* define the behavior of the AVP
   AVPlayerSettings();
   AVPixelFormat out_pixel_format;              /* you can define the output pixel format when decoding. when you don't set this we use the default pixel format in which the video is encoded */
 };
+
+inline bool AVEncoderSettings::useAudio() {
+  return use_audio;
+}
 
 #endif

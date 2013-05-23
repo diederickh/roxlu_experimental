@@ -43,7 +43,7 @@ AVEncoder::~AVEncoder() {
     stop();
   }
 
-  // @TODO - free the frames in stop(), but it seems that these functions leak!
+  // @TODO - free the frames in stop(), but it seems that these functions leak! - maybe use avframe_unref()
   if(video_frame_out) {
     avcodec_free_frame(&video_frame_out);
     video_frame_out = NULL;
@@ -116,8 +116,7 @@ bool AVEncoder::start(std::string filename, bool datapath) {
     }
   }
 
-  //if(!addAudioStream(output_format->audio_codec)) {
-  if(!addAudioStream(AV_CODEC_ID_MP3)) { // @TODO - for now we hardcoded this, but we should use the preferred codec from the audio_format - or define it in AVEncoderSettings 
+  if(!addAudioStream(settings.audio_codec)) { 
     return false;
   }
 
@@ -190,20 +189,18 @@ bool AVEncoder::addVideoStream(enum AVCodecID codecID) {
   video_codec_context->height = settings.out_h;
   video_codec_context->time_base.den = settings.time_base_den;
   video_codec_context->time_base.num = settings.time_base_num;
-  // video_codec_context->gop_size = 12; /* emit one intra frame very gop_size frames at most */
-  video_codec_context->pix_fmt = AV_PIX_FMT_YUV420P;
-  //video_codec_context->pix_fmt = AV_PIX_FMT_UYVY422;  // when using the Logitech Webcam c920 on mac, this is the standard format, so setting this is value for the encode would mean we don't need to convert but this makes sws_scale crash
+  video_codec_context->pix_fmt = AV_PIX_FMT_YUV420P; // @todo - test if the video codec supports this format
 
+  //video_codec_context->gop_size = 12; /* emit one intra frame very gop_size frames at most */
   //video_codec_context->keyint_min = 25;
   //video_codec_context->gop_size = 40;
-  video_codec_context->bit_rate = 500000;
+  //video_codec_context->bit_rate = 500000;
   //video_codec_context->qmin = 10;
   //video_codec_context->qmax = 18;
   //video_codec_context->rc_buffer_size = 0;
   //video_codec_context->rc_max_rate = 128000;
   //video_codec_context->rc_buffer_size = 0;
   
-
   if(format_context->oformat->flags & AVFMT_GLOBALHEADER) {
     video_codec_context->flags |= CODEC_FLAG_GLOBAL_HEADER;
   }
@@ -240,7 +237,7 @@ bool AVEncoder::openVideo() {
   AVDictionary* opts = NULL;
   av_dict_set(&opts, "preset", "ultrafast", 0);
   av_dict_set(&opts, "tune", "zerolatency", 0);
-  //av_dict_set(&opts, "crf", "18", 0);
+  av_dict_set(&opts, "crf", "18", 0); 
 
   if(avcodec_open2(video_codec_context, NULL, &opts) < 0) {
     RX_ERROR(ERR_AV_OPEN_VIDEO_CODEC);
@@ -457,7 +454,7 @@ bool AVEncoder::stop() {
 
 void AVEncoder::closeVideo() {
   if(video_codec) {
-    avcodec_close(video_stream->codec);
+    avcodec_close(video_stream->codec); // @todo - shouldn't I call av_free here as well?
   }
 
   // these are all just references to the video AVStream, see addVideoStream()
@@ -466,27 +463,6 @@ void AVEncoder::closeVideo() {
   video_codec = NULL;               
 }
 
-
-void AVEncoder::listSupportedVideoCodecPixelFormats() {
-  if(!video_codec) {
-    RX_ERROR(ERR_AV_LIST_PIX_FMT_CODEC_NOT_OPEN);
-    return;
-  }
-
-  RX_VERBOSE("");
-  RX_VERBOSE("Supported pixel formats that the video encoder can handle:");
-  RX_VERBOSE("-----------------------------");
-  const enum AVPixelFormat* fmt = video_codec->pix_fmts;
-  if(fmt) {
-    while(*fmt != -1) {
-      const AVPixFmtDescriptor* desc = av_pix_fmt_desc_get(*fmt);
-      RX_VERBOSE("FMT: %s", desc->name);
-      fmt++;
-    }
-  }
-  RX_VERBOSE("-----------------------------");
-  RX_VERBOSE("");
-}
 
 
 void AVEncoder::listSupportedAudioCodecSampleFormats() {
@@ -567,11 +543,10 @@ bool AVEncoder::addAudioStream(enum AVCodecID codecID) {
 
   listSupportedAudioCodecSampleFormats();
   
-  // default params - @TODO put these in AVEncoderSettings + use them here
-  audio_codec_context->sample_fmt = AV_SAMPLE_FMT_S16P; 
-  audio_codec_context->bit_rate = 64000;
-  audio_codec_context->sample_rate = 44100;
-  audio_codec_context->channels = 1;
+  audio_codec_context->sample_fmt = settings.sample_fmt;
+  audio_codec_context->bit_rate = settings.audio_bit_rate;
+  audio_codec_context->sample_rate = settings.sample_rate;
+  audio_codec_context->channels = settings.num_channels;
 
   if(format_context->oformat->flags & AVFMT_GLOBALHEADER) {
     audio_codec_context->flags |= CODEC_FLAG_GLOBAL_HEADER;
@@ -593,13 +568,12 @@ bool AVEncoder::openAudio() {
   }
 
   if(audio_codec->capabilities & CODEC_CAP_VARIABLE_FRAME_SIZE) {
-    audio_input_frame_size = 10000;
+    audio_input_frame_size = 1000;
   }
   else {
     audio_input_frame_size = audio_codec_context->frame_size;
   }
 
-  RX_VERBOSE(V_AV_CODEC_FRAME_SIZE, audio_input_frame_size);
   return true;
 }
 
@@ -676,8 +650,7 @@ void AVEncoder::closeAudio() {
     avcodec_close(audio_stream->codec);
   }
 
-  // @TODO uncomment (after we got the threaded encoder working)
-  //  audio_input_frame_size = 0; 
+  audio_input_frame_size = 0; 
 
   // just references to audio_stream->* members; 
   audio_codec = NULL;
@@ -782,28 +755,77 @@ bool AVEncoder::closeFilterGraph() {
     filter_graph = NULL;
   }
 
-#if 0
-  // @TODO - figure out if we need to free these too or if they get freed by avfilter_graph_free
-  if(src_filter) {
-    avfilter_free(src_filter);
-    src_filter = NULL;
-  }
-
-  if(sink_filter) {
-    avfilter_free(sink_filter);
-    sink_filter = NULL;
-  }
-
-  if(fps_filter) {
-    avfilter_free(fps_filter);
-    fps_filter = NULL;
-  }
-#else 
   fps_filter = NULL;
   sink_filter = NULL;
   fps_filter = NULL;
-#endif 
 
   return true;
 }
-// =====================================================================
+
+
+int AVEncoder::getAudioInputFrameSizePerChannel(enum AVCodecID codecID, 
+                                                enum AVSampleFormat sampleFormat, 
+                                                int bitrate, 
+                                                int samplerate) 
+{
+  // check if we have all necessary settings to get
+  AVCodec* c = avcodec_find_encoder(codecID);
+  if(!c) {
+    RX_ERROR(ERR_AV_AUDIO_ENC_NOT_FOUND);
+    return 0;
+  }
+
+  if(c->capabilities & CODEC_CAP_VARIABLE_FRAME_SIZE) {
+    return 1000;
+  }
+  else {
+    AVCodecContext* ctx = avcodec_alloc_context3(c);
+    if(!ctx) {
+      RX_ERROR(ERR_AV_ALLOC_CODEC_CONTEXT);
+      return 0;
+    }
+
+    ctx->sample_fmt = sampleFormat;
+    ctx->bit_rate = bitrate;
+    ctx->sample_rate = samplerate;
+
+    int r = avcodec_open2(ctx, c, NULL);
+    if(r < 0) {
+      RX_ERROR(ERR_AV_OPEN_AUDIO_CODEC);
+      return 0;
+    }
+    
+    int fs = ctx->frame_size;
+    avcodec_close(ctx);
+    av_free(ctx);
+
+    return fs;
+
+  }
+  return 0;
+
+}
+
+
+void AVEncoder::listSupportedVideoCodecPixelFormats() {
+  if(!video_codec) {
+    RX_ERROR(ERR_AV_LIST_PIX_FMT_CODEC_NOT_OPEN);
+    return;
+  }
+
+  RX_VERBOSE("");
+  RX_VERBOSE("Supported pixel formats that the video encoder can handle:");
+  RX_VERBOSE("-----------------------------");
+  const enum AVPixelFormat* fmt = video_codec->pix_fmts;
+  if(fmt) {
+    while(*fmt != -1) {
+      const AVPixFmtDescriptor* desc = av_pix_fmt_desc_get(*fmt);
+      RX_VERBOSE("FMT: %s", desc->name);
+      fmt++;
+    }
+  }
+  RX_VERBOSE("-----------------------------");
+  RX_VERBOSE("");
+}
+
+

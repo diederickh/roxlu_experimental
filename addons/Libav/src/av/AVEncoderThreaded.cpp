@@ -30,9 +30,8 @@ void avencoder_thread(void* user) {
     uv_mutex_unlock(&mutex);
 
     // encode worker data
-    //    std::sort(work_data.begin(), work_data.end(), AVEncoderFrameSorter());
+    //std::sort(work_data.begin(), work_data.end(), AVEncoderFrameSorter()); // @todo seems to work fine w/o
     for(std::vector<AVEncoderFrame*>::iterator it = work_data.begin(); it != work_data.end(); ++it) {
-
       AVEncoderFrame* f = *it;
       if(f->type == AV_TYPE_VIDEO) {
         enc.enc.addVideoFrame(f->data, f->pts, f->nbytes);
@@ -166,7 +165,7 @@ bool AVEncoderThreaded::initialize() {
   int linesize = 0;
   nbytes_per_audio_buffer = av_samples_get_buffer_size(&linesize, 
                                                               settings.num_channels,
-                                                              enc.getAudioInputFrameSize(),
+                                                              enc.getAudioInputFrameSizePerChannel(settings) * settings.num_channels,
                                                               settings.sample_fmt,
                                                               0); // @todo what do we need for this last parameter to av_samples_get_buffer_size
   // @todo also pass an option to allocate X-audio frames

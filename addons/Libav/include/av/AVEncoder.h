@@ -38,8 +38,9 @@ extern "C" {
 #define ERR_AV_AUDIO_STREAM "Cannot create a new audio stream"
 #define ERR_AV_OPEN_VIDEO_CODEC "Cannot open the video encoder"
 #define ERR_AV_OPEN_AUDIO_CODEC "Cannot open the audio encoder"
+#define ERR_AV_ALLOC_CODEC_CONTEXT "Cannot allocate a codec context"
 #define ERR_AV_ALLOC_VIDEO_FRAME "Cannot allocate a video frame"
-#define ERR_AV_ALLOC_AUDIO_FRAME "CAnnot allocate an audio frame"
+#define ERR_AV_ALLOC_AUDIO_FRAME "Cannot allocate an audio frame"
 #define ERR_AV_ALLOC_AVFRAME "avcodec_alloc_frame fails"
 #define ERR_AV_ALLOC_BUF_AVFRAME "Cannot av_malloc the buffer for the AVFrame"
 #define ERR_AV_OPEN_FILE "Cannot open the output file (permissions correct?)"
@@ -59,7 +60,6 @@ extern "C" {
 #define ERR_AV_ADD_TO_SRC_FILTER "Cannot add the video_frame_out to the src_filter: %s"
 #define V_AV_VIDEO_CODEC "> Using video codec: %s"
 #define V_AV_AUDIO_CODEC "> Using audio codec: %s"
-#define V_AV_CODEC_FRAME_SIZE "> The audio codec must get `%d` frames of audio per time"
 
 class AVEncoder {
  public:
@@ -75,7 +75,13 @@ class AVEncoder {
   bool addAudioFrame(uint8_t* data, int nsamples, int64_t pts);        /* add new audio samples + give pts */
   bool isStarted();                                                    /* returns true when we've started encoding, we test if time_started > 0 */
   void print();                                                        /* prints some valuable info (codecs must be opened) */
-  int getAudioInputFrameSize();                                        /* get the number of bytes the framesize for the audio encoder should be; this is the amount which must be passed into add audio frame */
+
+  int getAudioInputFrameSizePerChannel(AVEncoderSettings cfg);         /* get the number of bytes the framesize for the audio encoder should be; this is the amount which must be passed into add audio frame. */
+  int getAudioInputFrameSizePerChannel(enum AVCodecID codecID,         /* get the audio input framesize for the given audio codec and settings */
+                                       enum AVSampleFormat sampleFormat,
+                                       int bitrate,
+                                       int samplerate);
+     
  private:
 
   /* audio */
@@ -140,8 +146,11 @@ inline bool AVEncoder::isStarted() {
   return time_started;
 }
 
-inline int AVEncoder::getAudioInputFrameSize() {
-  return audio_input_frame_size;
+inline int AVEncoder::getAudioInputFrameSizePerChannel(AVEncoderSettings cfg) {
+  return getAudioInputFrameSizePerChannel(cfg.audio_codec, 
+                                          cfg.sample_fmt, 
+                                          cfg.audio_bit_rate, 
+                                          cfg.sample_rate);
 }
 
 #endif
