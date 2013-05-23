@@ -3,7 +3,6 @@ extern "C" {
 #  include <libavutil/imgutils.h>
 }
 
-#include <image/Image.h> // temp
 #include <roxlu/Roxlu.h>
 #include <roxlu/core/Log.h>
 #include <roxlu/core/Utils.h>

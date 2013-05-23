@@ -12,6 +12,7 @@ roxlu_addon_begin("av")
     roxlu_add_extern_lib(libavfilter.a)
     roxlu_add_extern_lib(libavformat.a)
     roxlu_add_extern_lib(libavresample.a)
+    roxlu_add_extern_lib(libswscale.a)
     roxlu_add_extern_lib(libx264.a)
     roxlu_add_extern_lib(libspeex.a)
     roxlu_add_extern_lib(libvorbis.a)
@@ -24,6 +25,15 @@ roxlu_addon_begin("av")
     roxlu_add_extern_lib(libcrypto.a)
     roxlu_add_extern_lib(libavutil.a)
     roxlu_add_extern_lib(libmp3lame.a)
+
+# find_library(fr_foundation CoreFoundation)
+#    find_library(fr_services CoreServices)
+
+  
+    
+    roxlu_add_extern_lib(libuv.a)
+    roxlu_add_extern_lib(libvpx.a)
+ #   roxlu_add_lib(${fr_foundation})
     
     find_library(fr_cf CoreFoundation)
     find_library(fr_acc VideoDecodeAcceleration)
