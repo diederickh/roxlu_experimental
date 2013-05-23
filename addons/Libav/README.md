@@ -58,6 +58,10 @@ See `AVDecoder.cpp`, some things which you might want to know:
    but allocating it ourself. I sent a mail to the libav-devel mailing list asking about this issue.
    https://gist.github.com/roxlu/47a268ec1ccf6e3be4db*
 
+ - `AVFrame` is a containter that can be filled with frame data. `av_alloc_frame()` creates an empty container.
+   `av_buffersink_get_frame()` fills the container. If you call `av_buffersink_get_frame` on the same frame again,
+   it will overwrite the previous contents, thus a leak. `av_frame_unref` clears the _contents_ of the container, so 
+   you can reuse it again.
 
 
 
@@ -73,3 +77,4 @@ See `AVDecoder.cpp`, some things which you might want to know:
  -  In `AVEncoder.cpp` clean up audio memory + add a check if the sample format is supported by the audio encoder. See [here](http://libav.org/doxygen/master/samplefmt_8h.html#af9a51ca15301871723577c730b5865c5a35eaaad9da207aa4e63fa02fd67fae68) for a list of formats
  -  Use libavresample to automatically resample audio samplerates/formats
  -  Add a test if we really need swscale in the `AVencoder` based on the `AVEncoderSettings.in_pixel_format`
+ -  Test if the settings in `AVEncoderSettings` can be used for the given format.

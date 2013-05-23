@@ -7,7 +7,6 @@ void avencoder_thread(void* user) {
   AVEncoderThreaded& enc = *(static_cast<AVEncoderThreaded*>(user));
   
   if(!enc.initialize()) {
-  RX_VERBOSE("-- not initialize??");
     return;
   }
 
@@ -48,8 +47,6 @@ void avencoder_thread(void* user) {
       f->is_free = true;
       uv_mutex_unlock(&mutex);
     }
-
-
 
     if(must_stop) {
       break;
@@ -158,7 +155,7 @@ bool AVEncoderThreaded::initialize() {
   // preallocate video frames 
   for(int i = 0; i < num_video_frames_to_allocate; ++i) {
     AVEncoderFrame* f = new AVEncoderFrame();
-    f->data = new unsigned char[nbytes_per_image];
+    f->data = new unsigned char[nbytes_per_image + 4]; // @todo - we add 4 bytes because swscale seems to access (or writes into) a location which isn't allowed. My guess is that is uses SSE that is 4 bytes aligned, see this log with a backtracke: https://gist.github.com/roxlu/ffcc2305dd96d21f0a4f */
     f->nbytes = nbytes_per_image;
     f->is_free = true;
     f->type = AV_TYPE_VIDEO;
@@ -181,8 +178,6 @@ bool AVEncoderThreaded::initialize() {
     f->type = AV_TYPE_AUDIO;
     frames.push_back(f);
   }
-
-  RX_VERBOSE("-------------------------: %ld <--------------------", nbytes_per_audio_buffer);
 
   return true;
 }
@@ -267,11 +262,6 @@ bool AVEncoderThreaded::addVideoFrame(unsigned char* data, size_t nbytes) {
   if(f) {
 
     int64_t pts = (millis() - time_started) / millis_per_video_frame;
-    int64_t p = pts;
-    static int counter = 0;
-    //     pts = counter;
-    ++counter;
-    RX_VERBOSE("TIME PTS: %ld, C: %ld", p, pts);
     uv_mutex_lock(&mutex);
     {
       memcpy(f->data, data, nbytes);
