@@ -1,4 +1,5 @@
 #include "Webcam.h"
+#include <image/Image.h>
 
 void webcam_on_audio_in(const void* input, unsigned long nframes, void* user) {
   Webcam* w = static_cast<Webcam*>(user);
@@ -21,19 +22,34 @@ bool Webcam::setup() {
 
   // CAPTURE
   cap.listDevices();
-  bool r = cap.openDevice(0, 640, 480, VC_FMT_YUYV422); // mac, "yuvs"
+  //bool r = cap.openDevice(0, 640, 480, VC_FMT_YUYV422); // mac, "yuvs"
+  VideoCaptureSettings cap_settings;
+  cap_settings.width = 640;
+  cap_settings.height = 480;
+
+  cap_settings.in_pixel_format = AV_PIX_FMT_YUYV422;
+  //cap_settings.in_pixel_format = AV_PIX_FMT_YUV422P;
+  //cap_settings.in_pixel_format = AV_PIX_FMT_UYVY422;
+  //cap_settings.in_pixel_format = AV_PIX_FMT_YUV420P;
+  //cap_settings.in_pixel_format = AV_PIX_FMT_RGB24;
+  cap_settings.out_pixel_format = AV_PIX_FMT_RGB24;
+
+  bool r = cap.openDevice(0, cap_settings);
+  cap.printVerboseInfo();
+  //bool r = cap.openDevice(0, 640, 480, VC_FMT_RGB24);
   if(!r) {
     RX_ERROR("Cannot open the capture device");
     return false;
   }
- 
+
   surf.setup(cap.getWidth(), cap.getHeight());
  
    // VIDEO SETTTINGS
   AVEncoderSettings cfg;
   cfg.in_w = cfg.out_w = cap.getWidth();
   cfg.in_h = cfg.out_h = cap.getHeight();
-  cfg.in_pixel_format = AV_PIX_FMT_UYVY422; 
+  cfg.in_pixel_format = AV_PIX_FMT_YUYV422;
+  //cfg.in_pixel_format = AV_PIX_FMT_RGB24;
   cfg.time_base_den = 25;
   cfg.time_base_num = 1;
  
@@ -78,8 +94,17 @@ void Webcam::update() {
     cap.update();
  
     if(cap.hasNewData()) {
-
+#if 0
+      static int i = 0;
+      char buf[512];
+      sprintf(buf, "%03d.png", i);
+      Image img;
+      img.copyPixels(cap.getNewDataPtr(), 640, 480, RX_FMT_RGB24);
+      img.save(buf, true);
+      ++i;
+#endif
       if(is_recording) {
+        
         enc.addVideoFrame(cap.getNewDataPtr(), cap.getNumBytes());
       }
 

@@ -5,6 +5,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/../../../../../lib/build/cmake/CMakeLists.txt)
 roxlu_enable_opengl()
 
 roxlu_add_addon(Libav)
+roxlu_add_addon(Image)
 
 roxlu_app_initialize("libav_video_recorder")
    # ---------------------------------------------

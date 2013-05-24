@@ -257,7 +257,7 @@ macro(roxlu_install_app)
       file(TO_NATIVE_PATH ${roxlu_file_to_copy} fcopy_from)
       file(TO_NATIVE_PATH ${roxlu_app_install_dir} fcopy_to)
       ADD_CUSTOM_COMMAND( TARGET ${roxlu_app_name} POST_BUILD
-        COMMAND xcopy "${fcopy_from}" "${fcopy_to}" /y /C
+        COMMAND xcopy "${fcopy_from}" "${fcopy_to}" /y /c
         COMMENT "copying dlls ."
       )
     endforeach(i)

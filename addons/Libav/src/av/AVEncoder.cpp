@@ -694,7 +694,7 @@ bool AVEncoder::openFilterGraph() {
 
   // add the source filter
   char args[1024];
-  snprintf(args, sizeof(args), "width=%d:height=%d:pix_fmt=%s:time_base=%d/%d:sar=1",
+  sprintf(args, "width=%d:height=%d:pix_fmt=%s:time_base=%d/%d:sar=1",
            settings.out_w, settings.out_h,
            "yuv420p", int(settings.time_base_num), int(settings.time_base_den));
 
@@ -715,7 +715,7 @@ bool AVEncoder::openFilterGraph() {
   }
 
   // add the fps filter
-  snprintf(args, sizeof(args), "fps=%d", int(settings.time_base_den));
+  sprintf(args, "fps=%d", int(settings.time_base_den));
   r = avfilter_graph_create_filter(&fps_filter, avfilter_get_by_name("fps"), "fps", args, NULL, filter_graph);
   if(r < 0) {
     RX_ERROR("Cannot create the fps filter");

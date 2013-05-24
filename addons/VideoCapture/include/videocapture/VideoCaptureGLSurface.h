@@ -91,7 +91,7 @@ class VideoCaptureGLSurface {
   int read_dx;
   int num_bytes;
   VideoCaptureVertex vertices[6];
-  
 };
+
 
 #endif

@@ -43,13 +43,44 @@ roxlu_addon_begin("av")
     roxlu_add_lib(-lz)
     roxlu_add_lib(-lm)
   endif()
+
+  
   
   if(UNIX)
   endif()
   
   if(WIN32) 
-  
+    roxlu_add_extern_lib(avcodec.lib)
+    roxlu_add_extern_lib(avfilter.lib)
+    roxlu_add_extern_lib(avformat.lib)
+    roxlu_add_extern_lib(avresample.lib)
+    roxlu_add_extern_lib(avutil.lib)
+    roxlu_add_extern_lib(swscale.lib)
+
+    roxlu_add_dll(avcodec-55.dll)
+    roxlu_add_dll(avfilter-3.dll)
+    roxlu_add_dll(avformat-55.dll)
+    roxlu_add_dll(avresample-1.dll)
+    roxlu_add_dll(avutil-52.dll)
+    roxlu_add_dll(swscale-2.dll)
+
+    add_definitions(-D__STDC_CONSTANT_MACROS)
+
+#    roxlu_add_extern_lib(libx264.a)
+#    roxlu_add_extern_lib(libspeex.a)
+#    roxlu_add_extern_lib(libvorbis.a)
+#    roxlu_add_extern_lib(libvorbisenc.a)
+#    roxlu_add_extern_lib(libtheoraenc.a)
+#    roxlu_add_extern_lib(libtheoradec.a)
+#    roxlu_add_extern_lib(libtheora.a)
+#    roxlu_add_extern_lib(libogg.a)
+#    roxlu_add_extern_lib(libssl.a)
+#    roxlu_add_extern_lib(libcrypto.a)
+#    roxlu_add_extern_lib(libavutil.a)
+#    roxlu_add_extern_lib(libmp3lame.a)
+
   endif()
+  
   roxlu_addon_add_source_file(av/AVDecoder.cpp)
   roxlu_addon_add_source_file(av/AVEncoder.cpp)
   roxlu_addon_add_source_file(av/AVEncoderThreaded.cpp)
