@@ -5,11 +5,15 @@ roxlu_addon_begin("videocapture")
   # --------------------------------------------------------------------------------------
   roxlu_addon_add_include_dir(${roxlu_platform})
   roxlu_addon_add_source_file(videocapture/VideoCapture.cpp)
+  roxlu_addon_add_source_file(videocapture/VideoCaptureBase.cpp)
   roxlu_addon_add_source_file(videocapture/VideoCaptureGLSurface.cpp)
+  roxlu_addon_add_source_file(videocapture/Utils.cpp)
+  roxlu_addon_add_source_file(videocapture/Types.cpp)
 
   if(APPLE) 
-     roxlu_addon_add_source_file(${roxlu_platform}/videocapture/rx_capture_mac.mm)
-     roxlu_addon_add_source_file(${roxlu_platform}/videocapture/VideoCaptureAVFoundation.mm)
+   #  roxlu_addon_add_source_file(videocapture/rx_capture_mac.mm)
+     roxlu_addon_add_source_file(videocapture/mac/VideoCaptureAVFoundation.mm)
+     roxlu_addon_add_source_file(videocapture/mac/VideoCaptureMac.cpp)
 
      find_library(fr_core_foundation CoreFoundation)
      find_library(fr_cocoa Cocoa)
@@ -44,7 +48,7 @@ roxlu_addon_begin("videocapture")
 roxlu_addon_end()
 
 if(APPLE)
-  set_target_properties(roxlu_videocapture PROPERTIES COMPILE_FLAGS "-ObjC++")
+#  set_target_properties(roxlu_videocapture PROPERTIES COMPILE_FLAGS "-ObjC++")
 #  set_target_properties(rx_capture PROPERTIES COMPILE_FLAGS "-ObjC++")
 endif()
 

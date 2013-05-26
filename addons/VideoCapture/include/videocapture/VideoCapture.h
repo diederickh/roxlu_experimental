@@ -1,173 +1,177 @@
-#ifndef ROXLU_VIDEOCAPTURE_BASE_H
-#define ROXLU_VIDEOCAPTURE_BASE_H
+#ifndef ROXLU_VIDEOCAPTURE_H
+#define ROXLU_VIDEOCAPTURE_H
 
 #include <algorithm>
-#include <videocapture/rx_capture.h>
+#include <assert.h>
 #include <stdio.h>
-#include <string.h> // memcpy
+#include <string.h> 
 #include <roxlu/core/Log.h>
+#include <videocapture/Types.h>
+
+#if defined(__APPLE__)
+#  include <videocapture/mac/VideoCaptureMac.h>
+#endif
 
 extern "C" {
 #  include <libavformat/avformat.h>
 #  include <libavutil/avutil.h>
-  //#  include <libavutil/imgutils.h>
-  //#  include <libavutil/mathematics.h>
 #  include <libavcodec/avcodec.h>
 #  include <libswscale/swscale.h>
-
 }
 
+#define ERR_VIDCAP_SWS "Cannot create an sws context that we need to convert between pixel formats"
+#define ERR_VIDCAP_ALLOC_FRAME "Cannot allocate a frame"
+#define ERR_VIDCAP_ALLOC_FRAMEBUF "Error while allocating the AVFrame that we use to convert webcam pixel format"
+#define ERR_VIDCAP_SWS_SCALE "Something went wrong while trying to scale the input data "
 
-extern void video_capture_callback(void* pixels, size_t nbytes, void* user);
+
+typedef void (*videocapture_frame_callback)(AVFrame* pixelsIn, size_t nbytesIn,                        /* this function will be calls when we've processed a frame pixelsIn are the raw bytes; pixelsOut are the pixels converted to pixels_out_format (if set) */
+                                            AVFrame* pixelsOut, size_t nbytesOut, 
+                                            void* user);
+
+void videocapture_process_frame_callback(void* pixels, size_t nbytes, void* user);                  /* will be called by the implementation */
 
 class VideoCapture {
  public:
   VideoCapture();
   ~VideoCapture();
+
+  /* Capture control */
   int listDevices();
-  int printVerboseInfo();
-  //  int openDevice(int device, int w, int h, VideoCaptureFormat fmt);
-  int openDevice(int device, VideoCaptureSettings cfg);
-  int closeDevice();
-  int startCapture();
+  bool openDevice(int device, VideoCaptureSettings cfg, 
+                  videocapture_frame_callback frameCB, void* user);
+  bool closeDevice();
+  bool startCapture();
+  bool stopCapture();
   void update();
-  int isFormatSupported(VideoCaptureFormat fmt, int w, int h, int set = 0); 
-  // CHANGED: see getNewDataPtr()
-  //unsigned char* getPtr(); // get pointer to 'bytes'
-  size_t getNumBytes(); // get number of bytes in 'bytes'
-  bool hasNewData(); // returns true when we received data from capture device
-  void copyData(char* dest); // copies data + sets 'has_new_data' to false. Make sure 'dest' can hold getNumBytes
-  int getWidth();
+
+  /* Capture properties */
+  int getWidth();                                                    
   int getHeight();
-  // use getNewDataPtr() --> resets automatically!
-  //  void resetHasNewData(); // tells us that we've read the last frame
-  unsigned char* getNewDataPtr();
-  VideoCaptureFormat getFormat();
- private: 
+
+  /* Query capabilities */
+  bool isPixelFormatSupported(int device, enum AVPixelFormat fmt);
+  bool isSizeSupported(int device, int width, int height);
+  bool isFrameRateSupported(int device, double fps);
+  std::vector<AVCapability> getCapabilities(int device);  
+  std::vector<AVRational> getSupportedFrameRates(int device,int width, int height, enum AVPixelFormat fmt);
+  std::vector<enum AVPixelFormat> getSupportedPixelFormats(int device, int width, int height);
+  std::vector<AVSize> getSupportedSizes(int device);
+
+  /* Print capabilities */
+  void printSupportedPixelFormats(int device);  
+  void printSupportedPixelFormats(int device, int width, int height); 
+  void printSupportedFrameRates(int device, int width, int height, enum AVPixelFormat fmt);
+  void printSupportedSizes(int device);      
+  void printCapabilities(int device);       
+
+ private:
+  /* Pixel format conversion */
   bool needsSWS();
   AVFrame* allocVideoFrame(enum AVPixelFormat fmt, int w, int h);
-  void setupShader();
-  void setupBuffer();
- private:
-  rx_capture_t* c;
+
  public:
-  VideoCaptureSettings settings;
-  size_t nbytes; // number of bytes copied to 'bytes'
-  bool has_new_data;
-  size_t allocated_bytes;
-  unsigned char* bytes; /* output bytes as defined by your VideoCaptureSettings.out_pixel_format */
-  unsigned char* pixels_in; /* raw input bytes as we received from the capturer */
-  unsigned char* pixels_out; /* converted pixels as defined in VideoCaptureSettings.in_pixel_format */
-  rx_capture_t capture;
-  VideoCaptureFormat fmt;
+  /* callback */
+  videocapture_frame_callback cb_frame;
+  void* cb_user;                                        /* pointer to the user object that get's passed to the callback function you've set in `openDevice` */
+  bool has_new_frame;                                   /* will be set to true in the callback handler. calling `update()` will trigger the callback, and we also set has_new_frame to false again */
 
   /* converting between pixel formats */
+  VideoCaptureSettings settings;                        
   SwsContext* sws;
-  AVFrame* video_frame_in;     /* tmp - used to convert input image */
-  AVFrame* video_frame_out;    /* tmp - used to convert input image */
+  AVFrame* video_frame_in;    
+  AVFrame* video_frame_out;   
+  size_t nbytes_in;
+  size_t nbytes_out;
+
+#if defined(__APPLE__)
+  VideoCaptureMac cap;
+#endif
+
+
 };
 
-//inline unsigned char* VideoCapture::getPtr() {
-//  return bytes;
-//}
-
-inline unsigned char* VideoCapture::getNewDataPtr() {
-  has_new_data = false;
-  return bytes;
-}
-
-inline size_t VideoCapture::getNumBytes() {
-  return nbytes;
-}
-
-inline void VideoCapture::update() {
-  capture.update(&capture);
-}
-
-inline bool VideoCapture::hasNewData() {
-  return has_new_data;
-}
-
-inline void VideoCapture::copyData(char *dest) {
-  memcpy(dest, bytes, nbytes);
-}
-
-//inline void VideoCapture::resetHasNewData() {
-//  has_new_data = false;
-//}
-
+// VideoCapture extras
+// --------------------------------------------------------------------------
 inline int VideoCapture::getWidth() {
-  return capture.get_width(&capture);
+  return settings.width;
 }
 
 inline int VideoCapture::getHeight() {
-  return capture.get_height(&capture);
+  return settings.height;
 }
 
-inline int VideoCapture::isFormatSupported(VideoCaptureFormat fmt, int w, int h, int set) {
-  return capture.is_format_supported(&capture, fmt, w, h, set);
-}
+
+// Thin wrapper around implementation
+// --------------------------------------------------------------------------
 
 inline int VideoCapture::listDevices() {
-  return capture.list_devices(&capture);
+  return cap.listDevices();
 }
 
-inline int VideoCapture::printVerboseInfo() {
-  return capture.print_verbose_info(&capture);
+inline bool VideoCapture::closeDevice() {
+  return cap.closeDevice();
 }
 
-//inline int VideoCapture::openDevice(int device, int w, int h, VideoCaptureFormat format) {
-inline int VideoCapture::openDevice(int device, VideoCaptureSettings cfg) { 
-  settings = cfg;
-
-  if(needsSWS()) {
-    sws = sws_getContext(settings.width, settings.height, settings.in_pixel_format,
-                         settings.width, settings.height, settings.out_pixel_format,
-                         SWS_FAST_BILINEAR, NULL, NULL, NULL);
-    if(!sws) {
-      RX_ERROR("Cannot create an sws context that we need to convert between pixel formats");
-      return 0;
-    }
-    
-    video_frame_in = allocVideoFrame(settings.in_pixel_format, settings.width, settings.height);
-    video_frame_out = allocVideoFrame(settings.out_pixel_format, settings.width, settings.height);
-
-    int size = 0;
-    size = avpicture_get_size(settings.in_pixel_format, settings.width, settings.height);
-    pixels_in = new unsigned char[size];
-    RX_VERBOSE("SIZE: %d", size);
-
-    size = avpicture_get_size(settings.out_pixel_format, settings.width, settings.height);
-    pixels_out = new unsigned char[size];
-    RX_VERBOSE("SIZE: %d", size);
-    
-    //   int nbytes_per_image = avpicture_get_size(settings.in_pixel_format, settings.in_w, settings.in_h);
-  }
-
-  capture.set_frame_callback(&capture, video_capture_callback, this);
-  fmt = VC_FMT_YUYV422;
-  //fmt = VC_FMT_UYVY422;
-  //fmt = VC_FMT_RGB24;
-  return capture.open_device(&capture, device, settings.width, settings.height, fmt);
+inline bool VideoCapture::startCapture() {
+  return cap.startCapture();
 }
 
-inline int VideoCapture::closeDevice() {
-  return capture.close_device(&capture);
+inline bool VideoCapture::stopCapture() {
+  return cap.stopCapture();
 }
 
-inline int VideoCapture::startCapture() {
-  return capture.capture_start(&capture);
+inline void VideoCapture::update() {
+  cap.update();
 }
 
-inline bool VideoCapture::needsSWS() {
-  return true; // tmp - we need to start using a VideoCaptureSettings object to convert from->to 
+inline bool VideoCapture::isPixelFormatSupported(int device, enum AVPixelFormat fmt) {
+  return cap.isPixelFormatSupported(device, fmt);
 }
 
-inline VideoCaptureFormat VideoCapture::getFormat() {
-  return fmt;
+inline bool VideoCapture::isSizeSupported(int device, int width, int height) {
+  return cap.isSizeSupported(device, width, height);
+};
+
+inline bool VideoCapture::isFrameRateSupported(int device, double fps) {
+  return cap.isFrameRateSupported(device, fps);
 }
 
+inline std::vector<AVCapability> VideoCapture::getCapabilities(int device) {
+  return cap.getCapabilities(device);
+}
 
+inline std::vector<AVRational> VideoCapture::getSupportedFrameRates(int device,int width, int height, enum AVPixelFormat fmt) {
+  return cap.getSupportedFrameRates(device, width, height, fmt);
+}
+
+inline std::vector<enum AVPixelFormat> VideoCapture::getSupportedPixelFormats(int device, int width, int height) {
+  return cap.getSupportedPixelFormats(device, width, height);
+}
+
+inline std::vector<AVSize> VideoCapture::getSupportedSizes(int device) {
+  return cap.getSupportedSizes(device);
+}
+
+inline void VideoCapture::printSupportedPixelFormats(int device) {
+ cap.printSupportedPixelFormats(device);
+}
+
+inline void VideoCapture::printSupportedPixelFormats(int device, int width, int height) {
+  cap.printSupportedPixelFormats(device, width, height);
+}
+
+inline void VideoCapture::printSupportedFrameRates(int device, int width, int height, enum AVPixelFormat fmt) {
+  cap.printSupportedFrameRates(device, width, height, fmt);
+}
+
+inline void VideoCapture::printSupportedSizes(int device) {
+  cap.printSupportedSizes(device);
+}
+
+inline void VideoCapture::printCapabilities(int device) {
+  cap.printCapabilities(device);
+}
 
 #endif
 

@@ -11,6 +11,6 @@ roxlu_app_initialize("libav_video_recorder")
    # ---------------------------------------------
    roxlu_app_add_source_file(main.cpp)
    roxlu_app_add_source_file(Simulation.cpp)
-   roxlu_app_add_source_file(Webcam.cpp)
+#   roxlu_app_add_source_file(Webcam.cpp)
    # ---------------------------------------------
 roxlu_install_app()
