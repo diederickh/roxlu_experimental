@@ -38,8 +38,24 @@ roxlu_addon_begin("videocapture")
 
 
   if(WIN32) 
-    roxlu_addon_add_source_file(${roxlu_platform}/videocapture/rx_capture_win.cpp)
-    roxlu_addon_add_source_file(${roxlu_platform}/videocapture/VideoCaptureDirectShow.cpp)
+    find_package(WindowsSDK REQUIRED)
+  #  roxlu_add_include_dir("${WINDOWSSDK_LATEST_DIR}/Include")
+  file(TO_CMAKE_PATH ${WINDOWSSDK_PREFERRED_DIR} windows_sdk_dir)
+  file(TO_CMAKE_PATH ${WINDOWSSDK_LATEST_DIR} windows_sdk_dir)
+    message("+++++++++++++ ${windows_sdk_dir}")
+    message("+++++++++++++ ${WINDOWSSDK_LATEST_DIR}")
+    roxlu_add_include_dir(${windows_sdk_dir}/Include)
+    roxlu_add_lib(${windows_sdk_dir}/Samples/multimedia/directshow/baseclasses/Release/strmbase.lib)
+#    roxlu_add_lib("strmbase.lib")
+
+   roxlu_addon_add_source_file(videocapture/win/directshow/VideoCaptureDirectShow.cpp)
+   roxlu_addon_add_source_file(videocapture/win/directshow/VideoCaptureDirectShowCB.cpp)
+   roxlu_addon_add_source_file(videocapture/win/mediafoundation/VideoCaptureMediaFoundation.cpp)
+   roxlu_addon_add_source_file(videocapture/win/mediafoundation/VideoCaptureMediaFoundationCB.cpp)
+#   roxlu_addon_add_source_file(videocapture/win/VideoCaptureWin.cpp)
+#   roxlu_addon_add_source_file(${roxlu_platform}/videocapture/rx_capture_win.cpp)
+#   roxlu_addon_add_source_file(${roxlu_platform}/videocapture/VideoCaptureDirectShow.cpp)
+
     roxlu_add_lib(strmiids.lib)
   endif()
 

@@ -1,6 +1,7 @@
 #include <videocapture/VideoCaptureBase.h>
 #include <videocapture/Utils.h>
 #include <roxlu/core/Log.h>
+#include <algorithm>
 
 
 // TESTING FOR SUPPORTED CAPABILITES
@@ -19,6 +20,75 @@ bool VideoCaptureBase::isFrameRateSupported(int device, double fps) {
   std::vector<AVCapability> caps = getCapabilities(device);
   return std::find_if(caps.begin(), caps.end(), AVCapabilityFindFrameRate(fps)) != caps.end();
 }
+
+std::vector<AVSize> VideoCaptureBase::getSupportedSizes(int device) {
+  std::vector<AVSize> result;
+  std::vector<AVCapability> caps = getCapabilities(device);
+ 
+  for(std::vector<AVCapability>::iterator it = caps.begin(); it != caps.end(); ++it) {
+    AVCapability& cap = *it;
+    std::vector<AVSize>::iterator it_found = std::find(result.begin(), result.end(), cap.size);
+    if(it_found == result.end()) {
+      result.push_back(cap.size);
+    }
+  }
+ 
+  return result;
+}
+
+std::vector<AVPixelFormat> VideoCaptureBase::getSupportedPixelFormats(int device, int width, int height) {
+  std::vector<enum AVPixelFormat> result;
+  std::vector<AVCapability> caps = getCapabilities(device);
+ 
+  for(std::vector<AVCapability>::iterator it = caps.begin(); it != caps.end(); ++it) {
+    AVCapability& cap = *it;
+    if(cap.size.width == width && cap.size.height == height) {
+      std::vector<AVPixelFormat>::iterator it_found = std::find(result.begin(), result.end(), cap.pixel_format);
+      if(it_found == result.end()) {
+        result.push_back(cap.pixel_format);
+      }
+    }
+  }
+ 
+  return result;
+}
+
+std::vector<AVRational> VideoCaptureBase::getSupportedFrameRates(int device, int width, int height, enum AVPixelFormat fmt) {
+  std::vector<AVCapability> caps;
+  std::vector<AVRational> result;
+
+  for(std::vector<AVCapability>::iterator it = caps.begin(); it != caps.end(); ++it) {
+    AVCapability& cap = *it;
+    if(cap.size.width == width && cap.size.height == height && cap.pixel_format == fmt) {
+      result.push_back(cap.framerate);
+    }
+  }
+
+  return result;  
+}
+
+
+bool VideoCaptureBase::getBestMatchingCapability(int device, 
+                                                 VideoCaptureSettings cfg, 
+                                                 AVCapability& result) 
+{
+  std::vector<AVCapability> caps = getCapabilities(device);
+  for(std::vector<AVCapability>::iterator it = caps.begin(); it != caps.end(); ++it) {
+    AVCapability& cap = *it;
+    if(cfg.width == cap.size.width 
+       && cfg.height == cap.size.height
+       && cfg.in_pixel_format == cap.pixel_format) 
+      {
+        float cap_fps = rx_libav_rational_to_fps(cap.framerate);
+        if(cap_fps == cfg.fps) {
+          result = cap;
+          return true;
+        }
+      }
+  }
+  return false;
+}
+
 
 // LOGGING SUPPORTED CAPABILITIES 
 // --------------------------------------------------------------------------------------
@@ -150,6 +220,7 @@ void VideoCaptureBase::printCapabilities(int device) {
   // sort by size and pixel format
 }
 
+#if 0
 std::vector<AVCapability> VideoCaptureBase::getCapabilities(int device) {
   std::vector<AVCapability> result;
 
@@ -196,3 +267,4 @@ std::vector<AVCapability> VideoCaptureBase::getCapabilities(int device) {
 
   return result;
 }
+#endif

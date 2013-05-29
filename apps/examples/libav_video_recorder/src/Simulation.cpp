@@ -5,7 +5,7 @@ void on_frame(AVFrame* in, size_t nbytesIn, AVFrame* out, size_t nbytesOut, void
   RX_VERBOSE("GOT: %d in, out: %d, %d, %d", nbytesIn, nbytesOut, out->width, out->height);
   static int c = 0;
 
-  return;
+
   char fname[512];
   sprintf(fname, "img_%04d.png", c);
   
@@ -20,71 +20,39 @@ void on_frame(AVFrame* in, size_t nbytesIn, AVFrame* out, size_t nbytesOut, void
 
 Simulation::Simulation()
   :SimulationBase()
+   //  ,cap(VIDEOCAPTURE_WINDOWS_MEDIA_FOUNDATION)
 {
-  mac.listDevices();
-  
-  mac.printSupportedPixelFormats(0);
-  // mac.printCapabilities(0);
-
-  if(mac.isPixelFormatSupported(0, AV_PIX_FMT_YUYV422)) {
-    VideoCaptureSettings cfg;
-    //cfg.in_pixel_format = AV_PIX_FMT_UYVY422;
-    cfg.in_pixel_format = AV_PIX_FMT_YUYV422;
-    //cfg.in_pixel_format = AV_PIX_FMT_RGB24;
-    //cfg.out_pixel_format = AV_PIX_FMT_RGB24;
-    cfg.out_pixel_format  = AV_PIX_FMT_UYVY422;
-    cfg.width = 640;
-    cfg.height = 480;
-    cfg.fps = 5.00;
-    if(!mac.openDevice(0, cfg, on_frame, this)) {
-      RX_ERROR("Cannot open devvice");
-    }
-    else {
-      RX_VERBOSE("Opened");
-      mac.startCapture();
-    }
-  }
-  if(mac.isPixelFormatSupported(0, AV_PIX_FMT_YUYV422)) {
-    /*
-    mac.isSizeSupported(0, 640, 480);
-    mac.isFrameRateSupported(0, 30.0);
-    mac.printSupportedFrameRates(0, 640, 480, AV_PIX_FMT_YUYV422);
-    mac.printSupportedPixelFormats(0, 640, 480);
-    mac.printSupportedSizes(0);
-    mac.printCapabilities(0);
-    mac.printSupportedPixelFormats(0);
-    */
-  }
-
-
 }
 
 void Simulation::setup() {
   setWindowTitle("Video recorder - Press 1 to start recording. Press 2 to stop the recording.");
-
-#if 0
-  if(!cam.setup()) {
-    RX_ERROR("Cannot setup the webcam and/or encoder; check if we're using the correct device and correct encoder settings.");
-    ::exit(EXIT_FAILURE);
+  cap.listDevices();
+  
+  VideoCaptureSettings cfg;
+  cfg.width = 640;
+  cfg.height = 480;
+  cfg.in_pixel_format = AV_PIX_FMT_YUV420P;
+  cfg.out_pixel_format = AV_PIX_FMT_RGB24;
+  cfg.fps = 30.00;
+  
+  if(cap.openDevice(0, cfg, on_frame, this)) {
+    cap.startCapture();
   }
 
-  cam.startCapture();
-#endif
-
+  /*
+  cap.printCapabilities(0);
+  cap.printSupportedPixelFormats(0);
+  cap.printSupportedPixelFormats(0, 640, 480);
+  cap.printSupportedSizes(0);
+  */
 }
 
 void Simulation::update() {
-#if 0
-  cam.update();
-#endif
+   cap.update();
 }
 
 void Simulation::draw() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-#if 0
-  cam.draw();
-#endif
-
   fps.draw();
 }
 
@@ -104,24 +72,30 @@ void Simulation::onChar(int ch) {
 }
 
 void Simulation::onKeyDown(int key) {
-#if 0
   if(key == GLFW_KEY_1) {
-    cam.startRecording();
+    cap.startCapture();
   }
   else if(key == GLFW_KEY_2) {
-    cam.stopRecording();
+    cap.stopCapture();
   }
-#endif
+  else if(key == GLFW_KEY_3) {
+    VideoCaptureSettings cfg;
+    cfg.width = 320;
+    cfg.height = 240;
+    cfg.in_pixel_format = AV_PIX_FMT_YUV420P;
+    cfg.out_pixel_format = AV_PIX_FMT_RGB24;
+    cfg.fps = 30.00;
+    cap.openDevice(0, cfg, on_frame, this);
+  }
+  else if(key == GLFW_KEY_4) {
+    cap.closeDevice();
+  }
 }
 
 void Simulation::onKeyUp(int key) {
 }
 
 void Simulation::onWindowClose() {
-#if 0
-  cam.stopCapture();
-  cam.stopRecording();
-#endif
   ::exit(EXIT_SUCCESS);
 }
 

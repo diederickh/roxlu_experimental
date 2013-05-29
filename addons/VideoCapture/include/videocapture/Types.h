@@ -11,28 +11,51 @@ extern "C" {
 #define ERR_VIDCAP_INVALID_IN_PIX_FMT "Invalid VideoCaptureSettings.in_pixel_format"
 #define ERR_VIDCAP_INVALID_FPS "Invalid VideoCaptureSettings.fps"
 
-
 typedef void(*videocapture_frame_cb)(void* pixels, size_t nbytes, void* user); /* the callback function that gets called by the implementation with video data */
 
+// The VideoCapture add supports multiple capture implementations, these are used together
+// with the VideoCapture() constructor where you tell what capture implementation you want
+// to use. For each platform we select a default implementation
+enum VideoCaptureImplementation {
+  VIDEOCAPTURE_DIRECTSHOW,                   // Windows - DEFAULT - Use the DirectShow samplegrabber
+  VIDEOCAPTURE_WINDOWS_MEDIA_FOUNDATION,     // Windows -         - Use the Windows Media Foundation grabber
+  VIDEOCAPTURE_AVFOUNDATION,                 // Mac     - DEFAULT - Use the AVFoundation grabber
+  VIDEOCAPTURE_V4L                           // Linux   - DEFAULT - Use the Video4Linux sample grabber
+};
+
+// AVSize represents the capture width/height a device can use to capture (most devices support multiple sizes)
 struct AVSize {
   AVSize();
   int width;
   int height;
+
+  bool operator<(const AVSize& o) const {
+    return width < o.width && height < o.height;
+  }
+
+  bool operator==(const AVSize& o) const {
+    return width == o.width && height == o.height;
+  }
+
 };
 
+// AVCapability represent the capabilities that a capture device supports. 
 struct AVCapability {
   AVCapability();
+  int index;                                       /* default to -1, but can be used by the implementation to reference an internal index */
   AVSize size;
   AVRational framerate;
   AVPixelFormat pixel_format;
 };
 
+// Used to filter capabilities on pixel formats
 struct AVCapabilityFindPixelFormat {
   AVCapabilityFindPixelFormat(enum AVPixelFormat fmt):fmt(fmt){}
   bool operator()(const AVCapability& c) { return c.pixel_format == fmt; } 
   enum AVPixelFormat fmt;
 };
 
+// Used to filter capabilites on size
 struct AVCapabilityFindSize {
   AVCapabilityFindSize(int w, int h):w(w),h(h){}
   bool operator()(const AVCapability& c) { return c.size.width == w && c.size.height == h; } 
@@ -54,6 +77,7 @@ struct AVCapabilityFindFrameRate {
   double fps;
 };
 
+// The VideoCaptureSettings are used to open a capture device
 struct VideoCaptureSettings {
   VideoCaptureSettings();
   bool validate();                             /* returns true when all member has been correctly set */
@@ -63,15 +87,6 @@ struct VideoCaptureSettings {
   float fps;                                   /* the framerate you want to captute in,  must  2 digit accurate, e.g. 30.00, 29.97, 20.00 etc... */
   enum AVPixelFormat in_pixel_format;          /* the pixel format you want to receive you're data in.. this must be supported */
   enum AVPixelFormat out_pixel_format;         /* if you set this to something else then AV_PIX_FMT_NONE, we will use SWS to convert incoming data to this format */
-};
-
-// Using libavutil/pixfmt.h
-enum VideoCaptureFormat {
-  VC_FMT_RGB24,   /* packed RGB 8:8:8, 24bpp, RGBRGB.. */
-  VC_FMT_YUYV422, /* packed YUV 4:2:2, 16bpp, Y0 Cb Y1 Cr, mac = kCMPixelFormat_422YpCbCr8_yuvs*/
-  VC_FMT_UYVY422, /* packed YUV 4:2:2, 16bpp, Cb Y0 Cr Y1, mac = kCMPixelFormat_422YpCbCr8 */ 
-  VC_FMT_I420,    /* yuv 4:2:0 */
-  VC_NONE
 };
 
 // -----------------------------------
@@ -84,6 +99,7 @@ inline AVSize::AVSize()
 
 inline AVCapability::AVCapability() 
                     :pixel_format(AV_PIX_FMT_NONE)
+                   ,index(-1)
 {
 }
 

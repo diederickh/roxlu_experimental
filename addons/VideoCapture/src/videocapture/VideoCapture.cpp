@@ -33,7 +33,7 @@ void videocapture_process_frame_callback(void* pixels, size_t nbytes, void* user
 
 // --------------------------------------------------------------------------
 
-VideoCapture::VideoCapture() 
+VideoCapture::VideoCapture(VideoCaptureImplementation imp) 
   :sws(NULL)
   ,video_frame_in(NULL)
   ,video_frame_out(NULL)
@@ -41,13 +41,46 @@ VideoCapture::VideoCapture()
   ,nbytes_out(0)
   ,cb_user(NULL)
   ,cb_frame(NULL)
+  ,cap(NULL)
 {
-  cap.setFrameCallback(videocapture_process_frame_callback, this);
+
+  // Create the capture implementation
+  switch(imp) {
+#if defined(_WIN32)
+    case VIDEOCAPTURE_DIRECTSHOW:                 {  cap = new VideoCaptureDirectShow2();     break;     }
+    case VIDEOCAPTURE_WINDOWS_MEDIA_FOUNDATION:   {  cap = new VideoCaptureMediaFoundation(); break;     }
+#endif
+    default: {
+      RX_ERROR("Unhandled VideoCaptureImplemtation type");
+      ::exit(EXIT_FAILURE);
+    }
+  }
+  if(imp == VIDEOCAPTURE_DIRECTSHOW) {
+
+  }
+  else if(imp == VIDEOCAPTURE_WINDOWS_MEDIA_FOUNDATION) {
+    
+  }
+  else {
+
+  }
+  cap->setFrameCallback(videocapture_process_frame_callback, this);
 }
 
 VideoCapture::~VideoCapture() {
   RX_ERROR("Free video_frame_{in,out}, close device if its opened");
-  cap.stopCapture();
+
+  if(cap) {
+    cap->stopCapture();
+    cap->closeDevice();
+    delete cap;
+    cap = NULL;
+  }
+
+  nbytes_in = 0;
+  nbytes_out = 0;
+  cb_user = NULL;
+  cb_frame = NULL;
 }
 
 AVFrame* VideoCapture::allocVideoFrame(enum AVPixelFormat fmt, int w, int h) {
@@ -107,7 +140,7 @@ bool VideoCapture::openDevice(int device, VideoCaptureSettings cfg,
     nbytes_out = nbytes_in;
   }
   
-  return cap.openDevice(device, cfg);
+  return cap->openDevice(device, cfg);
 }
 
 

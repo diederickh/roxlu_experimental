@@ -1,9 +1,13 @@
 #include <glfw_wrapper/SimulationBase.h>
 #include <roxlu/Roxlu.h>
-#include "Webcam.h"
+//#include "Webcam.h"
 #include <videocapture/VideoCapture.h>
-#include <videocapture/mac/VideoCaptureMac.h>
+//#include <videocapture/mac/VideoCaptureMac.h>
+//#include "VideoCaptureMediaFoundation.h"
+//#include "VideoCaptureDirectShow.h"
 
+//#define USE_MF  // use MediaFoundation grabber
+//#define USE_DS  // use DirectShow grabber
 void on_frame(AVFrame* in, size_t nbytesIn, AVFrame* out, size_t nbytesOut, void* user);
 
 class Simulation : public SimulationBase {
@@ -22,6 +26,13 @@ class Simulation : public SimulationBase {
   void onWindowClose();
  public:
   FPS fps;
-  //  Webcam cam;
-  VideoCapture mac;
+  VideoCapture cap;
+
+#if defined(USE_DS)
+  VideoCaptureDirectShow2 cap;
+#endif
+
+#if defined(USE_MF)
+  VideoCaptureMediaFoundation cap;
+#endif
 };

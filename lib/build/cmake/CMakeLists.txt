@@ -409,9 +409,6 @@ set(roxlu_lib_source_files
   ${roxlu_extern_sources_c}
 )
 
-#add_library(roxlu static ${roxlu_base_source_files})
-#roxlu_add_lib(roxlu)
-
 source_group("src\\roxlu\\3d" FILES ${roxlu_3d_sources})
 source_group("src\\roxlu\\core" FILES ${roxlu_core_sources})
 source_group("src\\roxlu\\experimental" FILES ${roxlu_experimental_sources})
@@ -468,6 +465,8 @@ if(WIN32)
   endif()
 
   set(ROXLU_PLATFORM_WIN TRUE)
+
+  list(APPEND CMAKE_MODULE_PATH "${roxlu_base_dir}/lib/build/cmake/win/modules/")
 
 endif(WIN32)
 
