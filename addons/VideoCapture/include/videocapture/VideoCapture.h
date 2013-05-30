@@ -26,6 +26,8 @@ extern "C" {
 #define ERR_VIDCAP_ALLOC_FRAME "Cannot allocate a frame"
 #define ERR_VIDCAP_ALLOC_FRAMEBUF "Error while allocating the AVFrame that we use to convert webcam pixel format"
 #define ERR_VIDCAP_SWS_SCALE "Something went wrong while trying to scale the input data "
+#define ERR_VIDCAP_FILL_PIC "Error while trying to fill the AVFRame; fill returned 0"
+#define ERR_VIDCAP_NOT_OPENED "Cannot close the device because it's not yet openend"
 
 // ---------------------------------------------------------
 
@@ -78,6 +80,12 @@ class VideoCapture {
   void printCapabilities(int device);                                                                                                              /* prints the capabilites for the given device like supported pixel formats, frame rates and sizes */
 
  private:
+  enum State {
+    STATE_NONE,
+    STATE_OPENED,
+    STATE_CAPTURING
+  };
+
   /* Pixel format conversion */
   bool needsSWS();
   AVFrame* allocVideoFrame(enum AVPixelFormat fmt, int w, int h);                                                                                  /* internally used to allocate a AVFrame which in turn is used to convert pixel formats (if necessary) */
@@ -97,6 +105,7 @@ class VideoCapture {
   size_t nbytes_out;                                                                                                                               /* number of bytes in the video_frame_out */
 
   VideoCaptureBase* cap;
+  VideoCapture::State state;
 };
 
 // VideoCapture extras
@@ -117,15 +126,23 @@ inline int VideoCapture::listDevices() {
   return cap->listDevices();
 }
 
-inline bool VideoCapture::closeDevice() {
-  return cap->closeDevice();
-}
-
 inline bool VideoCapture::startCapture() {
+  if(state != VideoCapture::STATE_OPENED) {
+    RX_ERROR("Cannot start capturing because we're not opened");
+    return false;
+  }
+  if(state == VideoCapture::STATE_CAPTURING) {
+    RX_ERROR("Already capturing...");
+    return false;
+  }
   return cap->startCapture();
 }
 
 inline bool VideoCapture::stopCapture() {
+  if(state != VideoCapture::STATE_CAPTURING) {
+    RX_ERROR("Cannot stopCapture() because we're not capturing");
+    return false;
+  }
   return cap->stopCapture();
 }
 

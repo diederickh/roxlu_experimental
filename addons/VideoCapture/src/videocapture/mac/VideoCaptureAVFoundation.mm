@@ -7,11 +7,14 @@
 - (id) init {
   
   self = [super init];
-  cb_frame = nil;
-  cb_user = nil;
-  input = nil;
-  output = nil;
-        
+  if(self) {
+    cb_frame = nil;
+    cb_user = nil;
+    session = nil;
+    input = nil;
+    output = nil;
+  }
+  RX_VERBOSE("ADD @autoreleasepool where necessary!");        
   return self;
 }
 
@@ -31,140 +34,193 @@
          andFormat:(enum AVPixelFormat) fmt 
       andFrameRate:(float) fps
 {
-  NSError* error;
 
-  // Get the device
-  AVCaptureDevice* cap_device = [self getCaptureDevice: dev];
-  if(!cap_device) {
-    RX_ERROR(ERR_CM_DEVICE_NOT_FOUND);
-    return 0;
-  }
+  @autoreleasepool { // tmp
 
-  input = [AVCaptureDeviceInput deviceInputWithDevice:cap_device error:&error];
-  if(!input) {
-    RX_ERROR(ERR_CM_CAPTURE_DEVICE);
-    return 0;
-  }
-
-  // Create session
-  session = [[AVCaptureSession alloc]init];
-  if(!session) {
-    RX_ERROR(ERR_CM_ALLOC_SESSION);
-    return 0;
-  }
-
-
-  [session beginConfiguration];
-
-  // @todo do we really need this?
-  NSString* const preset = [self widthHeightToCaptureSessionPreset: w andHeight: h];
-  if([session canSetSessionPreset:preset]) {
-    session.sessionPreset = preset; 
-  }
-  else {
-    printf("ERROR: Cannot set high capture preset.\n");
-    return 0;
-  }
-
-
-  // Check if we can use this input + add it.
-  if(![session canAddInput:input]) {
-    RX_ERROR(ERR_CM_SESSION_INPUT);
-    return 0;
-  }
-
-  [session addInput:input];
-
-  // Find format 
-  AVFrameRateRange* found_fps;
-  bool did_found_format = false;
-  CMFormatDescriptionRef format_ref;
-  AVCaptureDeviceFormat* found_format;
-  for(AVCaptureDeviceFormat* f in [cap_device formats]) {
-    if(![[f mediaType] isEqualToString: AVMediaTypeVideo]) {
-      continue;
+    // Get the device
+    NSError* error;
+    AVCaptureDevice* cap_device = [self getCaptureDevice: dev];
+    if(!cap_device) {
+      RX_ERROR(ERR_CM_DEVICE_NOT_FOUND);
+      return 0;
     }
 
-    CMFormatDescriptionRef fmt_description = [f formatDescription];
-    CMPixelFormatType pixel_format_type = CMFormatDescriptionGetMediaSubType(fmt_description);
-    int libav_format = [self avFoundationPixelFormatToLibavPixelFormat: pixel_format_type];    
+
+    input = [AVCaptureDeviceInput deviceInputWithDevice:cap_device error:&error];
+    if(!input) {
+      RX_ERROR(ERR_CM_CAPTURE_DEVICE);
+      return 0;
+    }
+    [input retain];
+
+    // Create session
+    session = [[AVCaptureSession alloc]init];
+    if(!session) {
+      RX_ERROR(ERR_CM_ALLOC_SESSION);
+      return 0;
+    }
+
+    [session beginConfiguration];
+
+    // @todo do we really need this?
+    NSString* const preset = [self widthHeightToCaptureSessionPreset: w andHeight: h];
+    if([session canSetSessionPreset:preset]) {
+      session.sessionPreset = preset; 
+    }
+    else {
+      printf("ERROR: Cannot set high capture preset.\n");
+      return 0;
+    }
+
+
+    // Check if we can use this input + add it.
+    if(![session canAddInput:input]) {
+      RX_ERROR(ERR_CM_SESSION_INPUT);
+      return 0;
+    }
+
+    [session addInput:input];
+
+    // Find format 
+    AVFrameRateRange* found_fps;
+    bool did_found_format = false;
+    //CMFormatDescriptionRef format_ref;
+    AVCaptureDeviceFormat* found_format;
+    for(AVCaptureDeviceFormat* f in [cap_device formats]) {
+      if(![[f mediaType] isEqualToString: AVMediaTypeVideo]) {
+        continue;
+      }
+
+      CMFormatDescriptionRef fmt_description = [f formatDescription];
+      CMPixelFormatType pixel_format_type = CMFormatDescriptionGetMediaSubType(fmt_description);
+      int libav_format = [self avFoundationPixelFormatToLibavPixelFormat: pixel_format_type];    
     
-    if(libav_format != fmt) {
-      continue;
-    }
+      if(libav_format != fmt) {
+        continue;
+      }
 
-    CMVideoDimensions dims = CMVideoFormatDescriptionGetDimensions([f formatDescription]);
-    if(dims.width != w || dims.height != h) {
-      continue;
-    }
-
+      CMVideoDimensions dims = CMVideoFormatDescriptionGetDimensions([f formatDescription]);
+      if(dims.width != w || dims.height != h) {
+        continue;
+      }
     
-    for(AVFrameRateRange* fps_range in [f videoSupportedFrameRateRanges]) {
-      AVRational rat;
-      CMTime dur = [fps_range maxFrameDuration];
-      rat.num = dur.value;
-      rat.den = dur.timescale;
-      double fps_raw = 1.0 / (double(rat.num) / double(rat.den));
-      float fps_corrected = 0.0f;
-      char buf[512];
-      sprintf(buf, "%2.02f", fps_raw);
-      sscanf(buf, "%f", &fps_corrected);
-      if(fps_corrected == fps) {
-        did_found_format = true;
-        format_ref = fmt_description;
-        found_fps = fps_range;
-        found_format = f;
-        break;
+      for(AVFrameRateRange* fps_range in [f videoSupportedFrameRateRanges]) {
+        AVRational rat;
+        CMTime dur = [fps_range maxFrameDuration];
+        rat.num = dur.value;
+        rat.den = dur.timescale;
+        double fps_raw = 1.0 / (double(rat.num) / double(rat.den));
+        float fps_corrected = 0.0f;
+        char buf[512];
+        sprintf(buf, "%2.02f", fps_raw);
+        sscanf(buf, "%f", &fps_corrected);
+        if(fps_corrected == fps) {
+          did_found_format = true;
+          //format_ref = fmt_description;
+          found_fps = fps_range;
+          found_format = f;
+          break;
+        }
       }
     }
-  }
 
-  if(!did_found_format) {
-    RX_ERROR(ERR_CM_FORMAT_NOT_FOUND);
-    return 0;
-  }
+    if(!did_found_format) {
+      RX_ERROR(ERR_CM_FORMAT_NOT_FOUND);
+      return 0;
+    }
 
-  // Set the format type we found
-  AVCaptureDevice* d = [input device];
-  [d lockForConfiguration:nil];
-  [d setActiveFormat: found_format]; /* sets pixel format */
-  [d unlockForConfiguration];
+    // Set the format type we found
+    AVCaptureDevice* d = [input device];
+    [d lockForConfiguration:nil];
+    [d setActiveFormat: found_format]; /* sets pixel format */
+    [d unlockForConfiguration];
 
-  // Configure output
-  output = [[AVCaptureVideoDataOutput alloc] init];
-  if([self isLibavPixelFormatSupportedByCaptureVideoDataOutput: output pixelFormat: fmt] == 0) {
-    RX_ERROR(ERR_CM_PIX_FMT);
-    return 0;
-  }
+    // Configure output
+    output = [[AVCaptureVideoDataOutput alloc] init];
+    if([self isLibavPixelFormatSupportedByCaptureVideoDataOutput: output pixelFormat: fmt] == 0) {
+      RX_ERROR(ERR_CM_PIX_FMT);
+      return 0;
+    }
+    [output retain];
 
-  // Tell the AVCaptureVideoDataOutput to use the specified pixel format 
+    // Tell the AVCaptureVideoDataOutput to use the specified pixel format 
 #if 1
-  CMPixelFormatType pixel_format_type = [self libavPixelFormatToAVFoundationPixelFormat: fmt];
-  [output setVideoSettings: [NSDictionary dictionaryWithObjectsAndKeys: 
-    [NSNumber numberWithInt:pixel_format_type], kCVPixelBufferPixelFormatTypeKey,
-    [NSNumber numberWithInteger:w],  (id)kCVPixelBufferWidthKey,
-    [NSNumber numberWithInteger:h], (id)kCVPixelBufferHeightKey,
-    nil]];
+    CMPixelFormatType pixel_format_type = [self libavPixelFormatToAVFoundationPixelFormat: fmt];
+    [output setVideoSettings: [NSDictionary dictionaryWithObjectsAndKeys: 
+                                                 [NSNumber numberWithInt:pixel_format_type], kCVPixelBufferPixelFormatTypeKey,
+                                             [NSNumber numberWithInteger:w],  (id)kCVPixelBufferWidthKey,
+                                             [NSNumber numberWithInteger:h], (id)kCVPixelBufferHeightKey,
+                                            nil]];
 #endif
 
-  // Set FPS 
-  [cap_device lockForConfiguration:nil];
-  [cap_device setActiveVideoMinFrameDuration: [found_fps minFrameDuration]];
-  [cap_device unlockForConfiguration];
+    // Set FPS 
+    [cap_device lockForConfiguration:nil];
+    [cap_device setActiveVideoMinFrameDuration: [found_fps minFrameDuration]];
+    [cap_device unlockForConfiguration];
 
-  // Setup framegrabber callback
-  dispatch_queue_t queue = dispatch_queue_create("Video Queue", DISPATCH_QUEUE_SERIAL);
-  [output setSampleBufferDelegate:self queue:queue];
-  if(![session canAddOutput:output]) {
-    RX_ERROR(ERR_CM_OUTPUT);
+    // Setup framegrabber callback
+    dispatch_queue_t queue = dispatch_queue_create("Video Queue", DISPATCH_QUEUE_SERIAL);
+    [output setSampleBufferDelegate:self queue:queue];
+    if(![session canAddOutput:output]) {
+      RX_ERROR(ERR_CM_OUTPUT);
+      dispatch_release(queue);
+      [session commitConfiguration];
+      return 0;
+    }
+    [session addOutput:output];
+    dispatch_release(queue);
+
+    [session commitConfiguration];
+
+  } // autorelease - tmp  
+  return 1;
+}
+
+- (int) closeDevice {
+  //  return 0; // tmp
+
+
+  if(!session) {
+    RX_ERROR("Cannot close the device because it hasn't been opened yet.");
     return 0;
   }
-  [session addOutput:output];
-  dispatch_release(queue);
+  RX_VERBOSE("CLOSE DEVICE ----C");
+  [session stopRunning];
 
-  [session commitConfiguration];
-
+#if 1
+  [output setSampleBufferDelegate:nil queue:dispatch_get_main_queue()];
+  [session removeInput:input];
+  [session removeOutput:output];
+  [session release];
+  [input release];
+  [output release];
+  session = nil;
+  input = nil;
+  output = nil;
+#endif
   return 1;
+}
+
+- (void) dealloc {
+
+  return; // tmp
+
+  RX_VERBOSE("DEALLOC");
+  if(session) {
+    [session stopRunning];
+    [session release];
+   }
+
+  [input release];
+  [output release];
+
+  input = nil;
+  output = nil;
+  session = nil; 
+  cb_frame = nil;
+  cb_user = nil;
+
+  [super dealloc];
 }
 
 - (int) captureStart {
@@ -177,13 +233,12 @@
   return 1;
 }
 
-- (void) captureOutput:(AVCaptureOutput*)captureOutput
- didOutputSampleBuffer:(CMSampleBufferRef) sampleBuffer
-        fromConnection:(AVCaptureConnection*) connection 
+- (void) captureOutput: (AVCaptureOutput*) captureOutput
+ didOutputSampleBuffer: (CMSampleBufferRef) sampleBuffer
+        fromConnection: (AVCaptureConnection*) connection 
 {
   CVImageBufferRef img_ref = CMSampleBufferGetImageBuffer(sampleBuffer);
   CVPixelBufferLockBaseAddress(img_ref, 0);
-  size_t buffer_size = CVPixelBufferGetDataSize(img_ref);                   // this is the complete size of the buffer - not always the same as the bytes contained by the image - 
   void* base_address = CVPixelBufferGetBaseAddress(img_ref);
 
   // get number of bytes in the image.
@@ -234,110 +289,49 @@
   return nil;
 }
 
-- (int) getSizes: (std::vector<AVSize>&) result
-       forDevice: (int) device
+- (int) getCapabilities: (std::vector<AVCapability>&) result
+              forDevice: (int) device 
 {
-
   AVCaptureDevice* d = [self getCaptureDevice:device];
   if(!d) {
     return 0;
   }
 
+  int i = 0;
   for(AVCaptureDeviceFormat* f in [d formats]) {
     if(![[f mediaType] isEqualToString: AVMediaTypeVideo]) {
+      ++i;
       continue;
     }
-
-    CMVideoDimensions dims = CMVideoFormatDescriptionGetDimensions([f formatDescription]);
-    AVSize size;
-    size.width = dims.width;
-    size.height = dims.height;
-    result.push_back(size);
-  }
-
-  return result.size();
-}
-
-- (int) getPixelFormats: (std::vector<enum AVPixelFormat>&) result 
-               forWidth: (int) width 
-              andHeight: (int) height 
-              andDevice: (int) device 
-{
-
-  AVCaptureDevice* d = [self getCaptureDevice:device];
-  if(!d) {
-    return 0;
-  }
-
-  for(AVCaptureDeviceFormat* f in [d formats]) {
-       
-    CMVideoDimensions dims = CMVideoFormatDescriptionGetDimensions([f formatDescription]);
-    if(dims.width != width || dims.height != height) {
-      continue;
-    }
-
-    CMFormatDescriptionRef fmt_description = [f formatDescription];
-    CMPixelFormatType pixel_format_type = CMFormatDescriptionGetMediaSubType(fmt_description);
-    CMMediaType media_type = CMFormatDescriptionGetMediaType(fmt_description);
-
-    int libav_format = [self avFoundationPixelFormatToLibavPixelFormat: pixel_format_type];   
-    if(libav_format < 0) {
-      continue;
-    }
-
-    result.push_back((enum AVPixelFormat)libav_format);
-  }
-  return 0;
-}
-
-
-// returns the available frame rates for the given width, height and pixel format
-- (int) getFrameRates:(std::vector<AVRational>&) result 
-             forWidth:(int) width 
-            andHeight:(int) height
-            andFormat:(enum AVPixelFormat) fmt
-            andDevice:(int) device
-{
-
-  AVCaptureDevice* d = [self getCaptureDevice:device];
-  if(!d) {
-    return 0;
-  }
-
-  for(AVCaptureDeviceFormat* f in [d formats]) {
-    if(![[f mediaType] isEqualToString: AVMediaTypeVideo]) {
-      continue;
-    }
-
+    
     CMFormatDescriptionRef fmt_description = [f formatDescription];
     CMPixelFormatType pixel_format_type = CMFormatDescriptionGetMediaSubType(fmt_description);
     int libav_format = [self avFoundationPixelFormatToLibavPixelFormat: pixel_format_type];    
-    
-    if(libav_format != fmt) {
-      continue;
-    }
-
     CMVideoDimensions dims = CMVideoFormatDescriptionGetDimensions([f formatDescription]);
-    if(dims.width != width || dims.height != height) {
-      continue;
-    }
-
+    
     for(AVFrameRateRange* fps in [f videoSupportedFrameRateRanges]) {
-      AVRational rat;
+      AVCapability cap;
+
       if ([fps minFrameRate] != [fps maxFrameRate]) {
+        RX_VERBOSE("Need to handle a capability with different min/max framerates");
       }
       else {
         CMTime dur = [fps maxFrameDuration];
-        rat.num = dur.value;
-        rat.den = dur.timescale;
-        result.push_back(rat);
+        cap.framerate.num = dur.value;
+        cap.framerate.den = dur.timescale;
+        cap.size.width = dims.width;
+        cap.size.height = dims.height;
+        cap.pixel_format = (AVPixelFormat)libav_format;
+        cap.index = i;
+
+        result.push_back(cap);
       }
     }
+    ++i;
   }
 
   return result.size();
 }
-
 
 // PIXEL FORMAT CONVERSION + INFO
 // ----------------------------------------------------------------------------------------------
@@ -543,6 +537,12 @@ void* avf_alloc() {
   return [[VideoCaptureAVFoundation alloc] init];
 }
 
+void avf_dealloc(void* cap) {
+  if(cap) {
+    [(id)cap dealloc];
+  }
+}
+
 int avf_list_devices(void* cap) {
   return [(id)cap listDevices];
 }
@@ -556,7 +556,7 @@ int avf_open_device(void* cap, int device, VideoCaptureSettings cfg) {
 }
 
 int avf_close_device(void* cap) { 
-  return 0;
+  return [(id)cap closeDevice];
 }
 
 int avf_start_capture(void* cap) {
@@ -574,6 +574,7 @@ void avf_set_frame_callback(void* cap, videocapture_frame_cb frameCB, void* user
   [(id)cap setFrameCallback: frameCB user:user];
 }
 
+/*
 std::vector<AVRational> avf_get_framerates(void *cap, int device, int width, int height, enum AVPixelFormat fmt) {
   std::vector<AVRational> result;
   [(id)cap getFrameRates:result forWidth:width andHeight:height andFormat:fmt andDevice:device];
@@ -589,6 +590,13 @@ std::vector<enum AVPixelFormat> avf_get_pixel_formats(void* cap, int device, int
 std::vector<AVSize> avf_get_sizes(void* cap, int device) {
   std::vector<AVSize> result;
   [(id)cap getSizes:result forDevice:device];
+  return result;
+}
+*/
+
+std::vector<AVCapability> avf_get_capabilities(void* cap, int device) {
+  std::vector<AVCapability> result;
+  [(id)cap getCapabilities:result forDevice:device];
   return result;
 }
 

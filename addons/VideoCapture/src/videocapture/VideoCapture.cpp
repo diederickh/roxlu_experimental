@@ -13,6 +13,11 @@ void videocapture_process_frame_callback(void* pixels, size_t nbytes, void* user
                                   c->settings.in_pixel_format, c->settings.width, 
                                   c->settings.height);
 
+  if(!img_nbytes) {
+    RX_ERROR(ERR_VIDCAP_FILL_PIC);
+    return;
+  }
+
   if(c->sws) {
     AVFrame* f = c->video_frame_in;
     int h = sws_scale(c->sws,
@@ -42,6 +47,7 @@ VideoCapture::VideoCapture(VideoCaptureImplementation imp)
   ,cb_user(NULL)
   ,cb_frame(NULL)
   ,cap(NULL)
+  ,state(VideoCapture::STATE_NONE)
 {
 
   // Create the capture implementation
@@ -49,6 +55,8 @@ VideoCapture::VideoCapture(VideoCaptureImplementation imp)
 #if defined(_WIN32)
     case VIDEOCAPTURE_DIRECTSHOW:                 {  cap = new VideoCaptureDirectShow2();     break;     }
     case VIDEOCAPTURE_WINDOWS_MEDIA_FOUNDATION:   {  cap = new VideoCaptureMediaFoundation(); break;     }
+#elif defined(__APPLE__)
+    case VIDEOCAPTURE_AVFOUNDATION:               {  cap = new VideoCaptureMac();             break;     }
 #endif
     default: {
       RX_ERROR("Unhandled VideoCaptureImplemtation type");
@@ -81,6 +89,7 @@ VideoCapture::~VideoCapture() {
   nbytes_out = 0;
   cb_user = NULL;
   cb_frame = NULL;
+  state = VideoCapture::STATE_NONE;
 }
 
 AVFrame* VideoCapture::allocVideoFrame(enum AVPixelFormat fmt, int w, int h) {
@@ -115,6 +124,16 @@ bool VideoCapture::openDevice(int device, VideoCaptureSettings cfg,
                               videocapture_frame_callback frameCB,
                               void* user) 
 {
+
+  if(state == VideoCapture::STATE_OPENED) {
+    RX_ERROR("Cannot open the device because it's already opened, first close it");
+    return false;
+  }
+  else if(state == VideoCapture::STATE_CAPTURING) {
+    RX_ERROR("Cannot open the device because we're capturing, make sure to call stopCapture() and closeDevice() before openening it again");
+    return false;
+  }
+
   settings = cfg;
   cb_frame = frameCB;
   cb_user = user;
@@ -140,7 +159,50 @@ bool VideoCapture::openDevice(int device, VideoCaptureSettings cfg,
     nbytes_out = nbytes_in;
   }
   
-  return cap->openDevice(device, cfg);
+  if(!cap->openDevice(device, cfg)) {
+    RX_ERROR("Error while trying to open the device");
+    return false;
+  }
+
+  state = VideoCapture::STATE_OPENED;
+  return true;
+}
+
+
+bool VideoCapture::closeDevice() {
+
+  if(!cap) {
+    RX_ERROR("Cannot close; did not allocate the capture implementation");
+    return false;
+  }
+  if(state == VideoCapture::STATE_NONE) {
+    RX_ERROR("Did not open the device yet so we cannot close it");
+    return false;
+  }
+
+  bool r = cap->closeDevice();
+
+  if(sws) {
+    sws_freeContext(sws);
+    sws = NULL;
+  }
+
+
+  if(video_frame_out) {
+    RX_VERBOSE("FREED VIDEO_FRAME_OUT");
+    // av_free(video_frame_out->data);
+    avcodec_free_frame(&video_frame_out);
+    video_frame_in = NULL;
+  }
+  if(video_frame_in) {
+    RX_VERBOSE("FREED VIDEO_FRAME_IN");
+    //av_free(video_frame_in->data);
+    avcodec_free_frame(&video_frame_in);
+    video_frame_in = NULL;
+  }
+  
+  state = VideoCapture::STATE_NONE;
+  return r;
 }
 
 

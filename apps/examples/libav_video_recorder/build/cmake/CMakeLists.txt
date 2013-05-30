@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
+set(ROXLU_32BIT ON) # EDSDK is only 32bit
+
 include(${CMAKE_CURRENT_LIST_DIR}/../../../../../lib/build/cmake/CMakeLists.txt) # roxlu cmake
 
 roxlu_enable_opengl()
@@ -21,6 +23,7 @@ roxlu_app_initialize("libav_video_recorder")
 #    roxlu_app_add_source_file(VideoCaptureDirectShow.cpp)
 #    roxlu_app_add_source_file(VideoCaptureDirectShowCB.cpp)
 #   roxlu_app_add_source_file(MediaFoundationDebug.cpp)
+if(WIN32) 
    roxlu_add_lib(mf.lib)
    roxlu_add_lib(mfplay.lib)
    roxlu_add_lib(mfplat.lib)
@@ -28,7 +31,7 @@ roxlu_app_initialize("libav_video_recorder")
    roxlu_add_lib(mfreadwrite.lib)
    roxlu_add_lib(Shlwapi.lib)
    roxlu_add_lib(strmiids.lib) 
-
+endif()
 #   roxlu_app_add_source_file(Webcam.cpp)
    # ---------------------------------------------
 roxlu_install_app()

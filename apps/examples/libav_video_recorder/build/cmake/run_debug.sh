@@ -19,6 +19,6 @@ fi
 ./build_debug.sh
 
 cd ${bd}
-
+#export NSZombieEnabled=YES
 ./${app}
 

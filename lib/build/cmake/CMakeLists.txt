@@ -133,6 +133,11 @@ macro(roxlu_add_extern_dylib lib)
   list(APPEND roxlu_install_files ${roxlu_extern_dylib_dir}/${lib})
 endmacro()
 
+# add a framework from the extern/lib/mac/frameworks directory (when installing we set all the correct linker settings)
+macro(roxlu_add_extern_framework name)
+  list(APPEND roxlu_frameworks ${name}) 
+endmacro()
+
 macro(roxlu_add_source_file src_file)
   list(APPEND roxlu_source_files ${src_file})
 endmacro(roxlu_add_source_file)
@@ -191,6 +196,7 @@ endmacro(roxlu_app_add_source_file)
 # endfunction()
 
 macro(roxlu_install_app)
+
   # removed the if(WIN32) with the CMAKE_RUNTIME_* paths, because xcode was generating executables in the wrong directory
   #if(WIN32)
     # make sure the exe is stored in /bin/
@@ -207,6 +213,35 @@ macro(roxlu_install_app)
     else()
       add_executable(${roxlu_app_name} ${roxlu_source_files} ${roxlu_lib_source_files})
     endif()
+
+    # EXPERIMENTAL: Copy frameworks from extern/lib/mac/frameworks, to the install dir and set the @executable paths
+    # frameworks from the extern/lib/mac/frameworks dir
+    # ----------------------------------------------------------------------------
+    foreach(framework_name in ${roxlu_frameworks})
+      set(framework_dir ${roxlu_base_dir}/extern/lib/mac/frameworks/${framework_name}.framework)
+
+      if(IS_DIRECTORY ${framework_dir})
+        set(framework_dest_dir ${roxlu_app_install_dir}/lib/)
+        set(framework_file ${framework_dest_dir}${framework_name}.framework/${framework_name})
+        get_filename_component(framework_file ${framework_file} ABSOLUTE)
+
+        # copy the framework to bin/lib directory and change the @executable path of the framework which will be then used to set the search path in the executable
+        file(COPY ${framework_dir} DESTINATION ${framework_dest_dir})
+
+        # THIS WORKS AND CHANGED THE @executable_path in the generated executable, but some frameworks link with other libs inside their own dirs... which doesnt work out
+        #add_custom_command(TARGET ${roxlu_app_name} PRE_LINK
+        #  COMMAND ${CMAKE_INSTALL_NAME_TOOL} -id "@executable_path/lib/${framework_name}.framework/Versions/Current/${framework_name}" "${framework_file}"
+        #  COMMENT "Changing install name"
+        #  )
+
+        # make sure that we link with this copied framework
+        find_library(fr_${framework_name} ${framework_name} PATHS ${framework_dest_dir})
+        roxlu_add_lib(${fr_${framework_name}})
+
+      endif()
+    endforeach()
+    # ----------------------------------------------------------------------------
+
   endif()
 
   if(WIN32)

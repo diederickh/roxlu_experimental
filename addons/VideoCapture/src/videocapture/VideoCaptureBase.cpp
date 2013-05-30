@@ -159,7 +159,6 @@ void VideoCaptureBase::printSupportedPixelFormats(int device) {
   RX_VERBOSE("--------------------------------------------------------------------");
 
   std::set<enum AVPixelFormat> unique_fmts;
-  enum AVPixelFormat last_fmt = AV_PIX_FMT_NONE;
   for(std::vector<AVCapability>::iterator it = caps.begin();
       it != caps.end();
       ++it)

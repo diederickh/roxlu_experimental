@@ -1,6 +1,7 @@
 #ifndef ROXLU_VIDEOCAPTURE_MAC_H
 #define ROXLU_VIDEOCAPTURE_MAC_H
 
+#include <videocapture/Types.h>
 #include <videocapture/VideoCaptureBase.h>
 #include <videocapture/mac/VideoCaptureMacInterface.h>
 
@@ -13,6 +14,7 @@ class VideoCaptureMac : public VideoCaptureBase {
   VideoCaptureMac();
   ~VideoCaptureMac();
 
+  /* CAMERA CONTROL */
   int listDevices();
   bool openDevice(int device, VideoCaptureSettings cfg);
   bool closeDevice();
@@ -21,17 +23,14 @@ class VideoCaptureMac : public VideoCaptureBase {
   void update();
   void setFrameCallback(videocapture_frame_cb frameCB, void* user);
 
-  /* UTILS */
-  std::vector<AVRational> getSupportedFrameRates(int device, 
-                                                 int width, 
-                                                 int height, 
-                                                 enum AVPixelFormat fmt);
+  /* CAPABILITIES */
+  std::vector<AVCapability> getCapabilities(int device);
 
-  std::vector<enum AVPixelFormat> getSupportedPixelFormats(int device,    
-                                                           int width, 
-                                                           int height);
-
+  /*
+  std::vector<AVRational> getSupportedFrameRates(int device, int width, int height,  enum AVPixelFormat fmt);
+  std::vector<enum AVPixelFormat> getSupportedPixelFormats(int device, int width, int height);
   std::vector<AVSize> getSupportedSizes(int device);
+  */
 
  private:
   void* cap;

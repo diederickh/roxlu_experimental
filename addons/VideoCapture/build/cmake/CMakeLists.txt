@@ -1,5 +1,5 @@
 # videocapture
-
+roxlu_add_addon(UV)  # we need the uv addon for the canon wrapper
 roxlu_addon_begin("videocapture")
 
   # --------------------------------------------------------------------------------------
@@ -28,6 +28,23 @@ roxlu_addon_begin("videocapture")
      roxlu_add_lib(${fr_core_video})
      roxlu_add_lib(${fr_core_media})
      roxlu_add_lib(${fr_core_media_io})
+
+     # testing - with EDSK
+
+     add_definitions(-D__MACOS__)
+
+     roxlu_addon_add_source_file(videocapture/edsdk/Canon.cpp)
+     roxlu_addon_add_source_file(videocapture/edsdk/CanonTypes.cpp)
+     roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskQueue.cpp)
+     roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskOpenSession.cpp)
+     roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskCloseSession.cpp)
+     roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskTakePicture.cpp)
+     roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskProperty.cpp)
+     roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskDownload.cpp)
+     roxlu_addon_add_source_file(videocapture/edsdk/CanonUtils.cpp)
+     roxlu_add_extern_framework(EDSDK)
+     roxlu_add_extern_framework(DPP)
+
   endif(APPLE)
 
   if(UNIX AND NOT APPLE)

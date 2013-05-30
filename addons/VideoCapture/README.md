@@ -23,3 +23,24 @@
   When you repeatedly call `openDevice()` and `closeDevice()` it leaks about 10kb. 
   Probably something with COM objects not being released
 - Add an API for device detection/loss
+
+
+# What version
+  
+  It seems that the latest version is not really the latest one; 
+  Version 2.13 crashes with a autorelease error and 2.12 seems to work fine (correct: EDSDKv2120M.dmg.zip, wrong: EDSDKv2130M.dmg.zip)
+
+# Fixing @executable_paths for the EDSK frameworks:
+
+- https://gist.github.com/roxlu/fb6f343d6a69c0ee43e7
+
+```sh
+$ cd EDSDK.framework/Versions/Current
+$ install_name_tool -id @executable_path/lib/EDSDK.framework/Versions/A/EDSDK EDSDK
+
+$ cd EDSDK.framework/Versions/Current/DPPLibCom.bundle/Contents/MacOS
+$ install_name_tool -change  @executable_path/../Frameworks/DPP.framework/Versions/A/DPP @executable_path/lib/DPP.framework/Versions/A/DPP DPPLibCom
+
+$ cd DPP.framework
+$ install_name_tool -id @executable_path/lib/DPP.framework/Versions/Current/DPP DPP
+````

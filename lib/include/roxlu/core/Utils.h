@@ -250,13 +250,15 @@ static std::string rx_get_exe_path() {
     free(path);
     return "";
   }
-
   strncpy(buffer, fullpath, usize);
-  free(fullpath);
+
   const char* dn = dirname(buffer);
   usize = strlen(dn);
   std::string ret(dn, usize) ;
   ret.push_back('/');
+
+  free(fullpath);
+  free(path);
   return ret;
 }
 

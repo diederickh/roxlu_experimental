@@ -12,6 +12,7 @@ VideoCaptureMac::VideoCaptureMac()
 
 VideoCaptureMac::~VideoCaptureMac() {
   RX_ERROR("added a VideoCaptureAVFoundation::dealloc + make sure that all is dealloc'd");
+  avf_dealloc(cap);
 }
 
 int VideoCaptureMac::listDevices() {
@@ -26,17 +27,15 @@ bool VideoCaptureMac::openDevice(int device, VideoCaptureSettings cfg) {
 }
 
 bool VideoCaptureMac::closeDevice() {
-  return true;
+  return avf_close_device(cap);
 }
 
 bool VideoCaptureMac::startCapture() {
-  avf_start_capture(cap);
-  return true;
+  return avf_start_capture(cap);
 }
 
 bool VideoCaptureMac::stopCapture() {
-  avf_stop_capture(cap);
-  return true;
+  return avf_stop_capture(cap);
 }
 
 void VideoCaptureMac::update() {
@@ -46,11 +45,13 @@ void VideoCaptureMac::setFrameCallback(videocapture_frame_cb frameCB, void* user
   avf_set_frame_callback(cap, frameCB, user);
 }
 
-std::vector<AVRational> VideoCaptureMac::getSupportedFrameRates(int device,     
-                                                                int width, 
-                                                                int height, 
-                                                                enum AVPixelFormat fmt) 
-{
+std::vector<AVCapability> VideoCaptureMac::getCapabilities(int device) {
+  return avf_get_capabilities(cap, device);
+}
+
+/*
+std::vector<AVRational> VideoCaptureMac::getSupportedFrameRates(int device, int width, int height, enum AVPixelFormat fmt) {
+
   std::vector<AVRational> result;
   if(!cap) {
     RX_ERROR(ERR_CAP_MAC_PIXFMT_NOT_ALLOC);
@@ -61,10 +62,9 @@ std::vector<AVRational> VideoCaptureMac::getSupportedFrameRates(int device,
   return result;
 }
 
-std::vector<enum AVPixelFormat> VideoCaptureMac::getSupportedPixelFormats(int device,    
-                                                                          int width, 
-                                                                          int height) 
-{
+
+std::vector<enum AVPixelFormat> VideoCaptureMac::getSupportedPixelFormats(int device, int width, int height) {
+
   std::vector<enum AVPixelFormat> result;
   if(!cap) {
     RX_ERROR(ERR_CAP_MAC_CAP_NOT_ALLOC);
@@ -82,5 +82,6 @@ std::vector<AVSize> VideoCaptureMac::getSupportedSizes(int device) {
   }
   return avf_get_sizes(cap, device);
 }
+*/
 
 

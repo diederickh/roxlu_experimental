@@ -39,12 +39,10 @@
 #define ERR_CM_PIX_FMT "The pixelformat is not supported by AVCaptureDeviceOutput. This does not mean that the webcam doesn't support this format, just the Mac AVCaptureVideoDataOutput not"
 #define ERR_CM_OUTPUT "Cannot add output to current session; sessions needs to be configured."
 
-
 @interface VideoCaptureAVFoundation : NSObject<AVCaptureVideoDataOutputSampleBufferDelegate> {
   AVCaptureSession* session;                             /* Manages the state of the input device */
   AVCaptureDeviceInput* input;                           /* Concrete instance of `AVDeviceInput`,  represents the input device (webcam) */
   AVCaptureVideoDataOutput* output;                      /* Concrete instance of `AVDeviceOutput`, used to get the video frames */
-
   videocapture_frame_cb cb_frame;                        /* Gets called when we receive a new frame */
   void* cb_user;                                         /* User data that's will be passed into `cb_frame()` */
 }
@@ -56,6 +54,8 @@
          andHeight: (int) h 
          andFormat: (enum AVPixelFormat) fmt
       andFrameRate: (float) fps;                                                                 /* values like: 30.00, 29.97, 20.00, 5.00 etc.. are valid */
+
+- (int) closeDevice;
 
 - (void) captureOutput: (AVCaptureOutput*) captureOutput
  didOutputSampleBuffer: (CMSampleBufferRef) sampleBuffer
@@ -82,6 +82,7 @@
 
 - (NSString*) getPixelFormatString: (CMPixelFormatType) fmt;
 
+/*
 - (int) getFrameRates: (std::vector<AVRational>&) result 
              forWidth: (int) width 
             andHeight: (int) height
@@ -92,10 +93,13 @@
                forWidth: (int) width 
               andHeight: (int) height 
               andDevice: (int) device;
-
+*
 - (int) getSizes: (std::vector<AVSize>&) sizes
        forDevice: (int) device;
+*/
 
+- (int) getCapabilities: (std::vector<AVCapability>&) result
+              forDevice: (int) device;
 
 - (int) isLibavPixelFormatSupportedByCaptureVideoDataOutput: (AVCaptureVideoDataOutput*) o
                                                 pixelFormat: (enum AVPixelFormat) fmt;
