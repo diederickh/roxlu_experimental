@@ -1,3 +1,4 @@
+#include <roxlu/core/Utils.h>
 #include <videocapture/edsdk/Canon.h>
 #include <videocapture/edsdk/CanonUtils.h>
 #include <videocapture/edsdk/CanonTaskTakePicture.h>
@@ -28,6 +29,7 @@ bool CanonTaskTakePicture::execute() {
 
 bool CanonTaskTakePicture::takePicture() {
   EdsError err = EDS_ERR_OK;
+ 
   
   err = EdsSendCommand(canon->getCameraRef(), kEdsCameraCommand_TakePicture, 0);
 

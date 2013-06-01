@@ -1,6 +1,20 @@
 #include <videocapture/edsdk/CanonTypes.h>
 #include <videocapture/edsdk/CanonUtils.h>
 
+// The live view can only be started when the EdsAEMode has a certain value
+bool canon_can_start_live_view(EdsAEMode m) {
+  if(m == kEdsAEMode_Movie 
+     || m == kEdsAEMode_Green
+     || m == kEdsAEMode_Program
+     || m == kEdsAEMode_Tv
+     || m == kEdsAEMode_Av
+     || m == kEdsAEMode_Manual
+     || m == kEdsAEMode_A_DEP)
+    {
+      return true;
+    }
+  return false;
+}
 
 std::string canon_data_type_to_string(EdsDataType dt) {
   switch(dt) {
@@ -35,7 +49,6 @@ std::string canon_data_type_to_string(EdsDataType dt) {
     default: return "UNKNOWN TYPE"; break;
   }
 }
-
 
 std::string canon_error_to_string(EdsError err) {
   switch(err) {
@@ -352,4 +365,67 @@ std::string canon_property_to_string(EdsUInt32 prop) {
 
     default: return "UNKNOWN PROPERTY"; break;
   };
+}
+
+std::string canon_ae_mode_to_string(EdsAEMode mode) {
+  switch(mode) {
+    case kEdsAEMode_Program: return "kEdsAEMode_Program"; break; 
+    case kEdsAEMode_Tv: return "kEdsAEMode_Tv"; break; 
+    case kEdsAEMode_Av: return "kEdsAEMode_Av"; break; 
+    case kEdsAEMode_Manual: return "kEdsAEMode_Manual"; break; 
+    case kEdsAEMode_Bulb: return "kEdsAEMode_Bulb"; break; 
+    case kEdsAEMode_A_DEP: return "kEdsAEMode_A_DEP"; break; 
+    case kEdsAEMode_Custom: return "kEdsAEMode_Custom"; break; 
+    case kEdsAEMode_Lock: return "kEdsAEMode_Lock"; break; 
+    case kEdsAEMode_Green: return "kEdsAEMode_Green"; break; 
+    case kEdsAEMode_NightPortrait: return "kEdsAEMode_NightPortrait"; break; 
+    case kEdsAEMode_Sports: return "kEdsAEMode_Sports"; break; 
+    case kEdsAEMode_Portrait: return "kEdsAEMode_Portrait"; break; 
+    case kEdsAEMode_Landscape: return "kEdsAEMode_Landscape"; break; 
+    case kEdsAEMode_Closeup: return "kEdsAEMode_Closeup"; break; 
+    case kEdsAEMode_FlashOff: return "kEdsAEMode_FlashOff"; break; 
+    case kEdsAEMode_CreativeAuto: return "kEdsAEMode_CreativeAuto"; break; 
+    case kEdsAEMode_Movie: return "kEdsAEMode_Movie"; break; 
+    case kEdsAEMode_PhotoInMovie: return "kEdsAEMode_PhotoInMovie"; break; 
+    case kEdsAEMode_SceneIntelligentAuto: return "kEdsAEMode_SceneIntelligentAuto"; break; 
+    case kEdsAEMode_Unknown: return "kEdsAEMode_Unknown"; break; 
+    default: return "UNKNOWN AE MODE"; break;
+  }
+}
+
+std::string canon_metering_mode_to_string(EdsUInt32 mode) {
+  switch(mode) {
+    case 1: return "Spot metering"; break;
+    case 3: return "Evaluative metering"; break;
+    case 4: return "Partial metering"; break;
+    case 5: return "Center-weighted averaging metering"; break;
+    default: return "UNKNOWN METERING MODE"; break;
+  }
+}
+
+std::string canon_evf_output_device_to_string(EdsUInt32 d) {
+  switch(d) {
+    case kEdsEvfOutputDevice_TFT: return "KEdsEvfOutputDevice_TFT"; break;
+    case kEdsEvfOutputDevice_PC: return "KEdsEvfOutputDevice_PC"; break;
+    case (kEdsEvfOutputDevice_PC | kEdsEvfOutputDevice_TFT): return "KEdsEvfOutputDevice_PC && KEdsEvfOutputDevice_TFT"; break;
+    default: return "UNKNOWN EVF OUTPUT DEVICE"; break;
+  }
+}
+
+std::string canon_evf_af_mode_to_string(EdsUInt32 m) {
+  switch(m) {
+    case Evf_AFMode_Quick: return "Evf_AFMode_Quick"; break;
+    case Evf_AFMode_Live: return "Evf_AFMode_Live"; break;
+    case Evf_AFMode_LiveFace: return "Evf_AFMode_LiveFace"; break;
+    default: return "UNKNOWN EVF AF MODE"; break;
+  }
+}
+
+std::string canon_evf_zoom_to_string(EdsUInt32 z) {
+  switch(z) {
+    case kEdsEvfZoom_Fit: return "kEdsEvfZoom_Fit"; break;
+    case kEdsEvfZoom_x5: return "kEdsEvfZoom_x5"; break;
+    case kEdsEvfZoom_x10: return "kEdsEvfZoom_x10"; break;
+    default: return "UNKNOWN EVF ZOOM"; break;
+  }
 }

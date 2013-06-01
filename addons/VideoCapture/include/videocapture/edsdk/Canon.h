@@ -20,6 +20,8 @@
 #include <videocapture/edsdk/CanonTaskDownload.h>
 #include <videocapture/edsdk/CanonTaskOpenSession.h>
 #include <videocapture/edsdk/CanonTaskCloseSession.h>
+#include <videocapture/edsdk/CanonTaskEvfStart.h>
+#include <videocapture/edsdk/CanonTaskEvfEnd.h>
 
 #include <EDSDK.h>
 #include <EDSDKErrors.h>
@@ -64,10 +66,29 @@ class Canon {
   bool closeSession();
   bool takePicture();
   bool downloadPicture(EdsDirectoryItemRef item);
+  bool startLiveView();
+  bool endLiveView();
+  bool canStartLiveView();                                              /* returns true when the dial is in the correct position to start the live-view. not all dial options (AEModes) support live view */
+
 
   // Properties
   bool getProperty(EdsPropertyID prop);
   bool getCameraName();
+  bool getAEModeSelect();
+  bool getShutterSpeed();
+  bool getAperture();
+  bool getIso();
+  bool getMeteringMode();
+  bool getExposureCompensation();
+  bool getLiveViewSettings();
+  bool getLiveViewOutputDevice();
+  bool getLiveViewAutoFocusMode();
+  bool getLiveViewDepthOfFieldPreview();
+  bool getLiveViewZoom();
+  bool getLiveViewZoomPosition();
+  bool getImageQuality();
+  bool getAvailableShots();
+  
   CanonDevice* getDevice();
   EdsCameraRef getCameraRef();
 

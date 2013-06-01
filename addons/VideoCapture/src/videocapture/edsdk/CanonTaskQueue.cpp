@@ -17,6 +17,7 @@ void canon_task_queue_thread(void* queue) {
   std::vector<CanonTask*> work_data;
   bool stop = false;
   while(true) {
+
     q.lock();
     {
       std::copy(q.tasks.begin(), q.tasks.end(), std::back_inserter(work_data));
@@ -27,7 +28,10 @@ void canon_task_queue_thread(void* queue) {
 
     for(std::vector<CanonTask*>::iterator it = work_data.begin(); it != work_data.end(); ++it) {
       CanonTask& task = **it;
+      uint64_t t = uv_hrtime();
       task.execute();
+      double_t d = (double(uv_hrtime()) - double(t)) / 1000000.0;      
+      RX_VERBOSE("TOOK: %lf ms.", d);
     } 
     
     work_data.clear();

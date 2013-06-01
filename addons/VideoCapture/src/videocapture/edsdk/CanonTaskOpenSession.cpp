@@ -27,9 +27,30 @@ bool CanonTaskOpenSession::execute() {
   EdsError err = EdsOpenSession(canon->getCameraRef());
   if(err != EDS_ERR_OK) {
     CANON_ERROR(err);
-    RX_ERROR("We should cleanup here!");
     return false;
   }  
+  
+  EdsUInt32 save_to = kEdsSaveTo_Host;
+  err = EdsSetPropertyData(canon->getCameraRef(), kEdsPropID_SaveTo, 0, sizeof(save_to), &save_to);
+  if(err != EDS_ERR_OK) {
+    CANON_ERROR(err);
+    return false;
+  }
+  
+  if(!canon->lockUI()) {
+    return false;
+  }
+
+  EdsCapacity capacity = {0x7FFFFFFF, 0x1000, 1};
+  err = EdsSetCapacity(canon->getCameraRef(), capacity);
+  if(err != EDS_ERR_OK) {
+    CANON_ERROR(err);
+    return false;
+  }
+
+  if(!canon->unlockUI()) {
+    return false;
+  }
 
   return true;
 }

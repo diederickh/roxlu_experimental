@@ -20,7 +20,9 @@ enum CanonTaskType {
   CANON_TASK_CLOSE_SESSION,
   CANON_TASK_TAKE_PICTURE,
   CANON_TASK_DOWNLOAD,
-  CANON_TASK_GET_PROPERTY
+  CANON_TASK_GET_PROPERTY,
+  CANON_TASK_EVF_START,
+  CANON_TASK_EVF_END
 };
 
 // Tasks are execute asynchronously - this is a base type for tasks
@@ -46,11 +48,26 @@ struct CanonDevice {
 
   bool setProperty(EdsPropertyID prop, EdsChar* value);
   bool setProperty(EdsPropertyID prop, EdsUInt32 data);
-
   bool setModelName(EdsChar* name);
+  void print();
 
   EdsCameraRef camera_ref;
   EdsChar model_name[EDS_MAX_NAME];
+
+  EdsUInt32 getAEMode();
+  EdsUInt32 getAV();
+  EdsUInt32 getISO();
+  EdsUInt32 getMeteringMode();
+  EdsUInt32 getExposureCompensation();
+  EdsUInt32 getShutterSpeed();
+  EdsUInt32 getImageQuality();
+  EdsUInt32 getAvailableShots();
+  EdsUInt32 getEvfMode();
+  EdsUInt32 getEvfOutputDevice();
+  EdsUInt32 getEvfDepthOfFieldPreview();
+  EdsUInt32 getEvfZoom();
+  EdsUInt32 getEvfZoomPosition();
+  EdsUInt32 getEvfAFMode();
 
   // Taking picture parameters
   EdsUInt32 ae_mode;
@@ -58,26 +75,63 @@ struct CanonDevice {
   EdsUInt32 iso;
   EdsUInt32 metering_mode;
   EdsUInt32 exposure_compensation;
+  EdsUInt32 shutter_speed;  
   EdsUInt32 image_quality;
-  EdsUInt32 available_shot;
+  EdsUInt32 available_shots;
   EdsUInt32 evf_mode;
   EdsUInt32 evf_output_device;
   EdsUInt32 evf_depth_of_field_preview;
-  EdsUInt32 evf_zoom;
-  EdsUInt32 evf_zoom_position;
+  EdsUInt32 evf_zoom;   
   EdsUInt32 evf_af_mode;
-  EdsFocusInfo focus_info;
-
-  // List of values in which taking a picture parameter can be
-  EdsPropertyDesc ae_mode_desc;
-  EdsPropertyDesc av_desc;
-  EdsPropertyDesc tv_desc;
-  EdsPropertyDesc iso_desc;
-  EdsPropertyDesc metering_mode_desc;
-  EdsPropertyDesc exposure_compensation_desc;
-  EdsPropertyDesc image_quality_desc;
-  EdsPropertyDesc evf_af_mode_desc;
-
 };
+
+inline  EdsUInt32 CanonDevice::getAEMode() {
+  return ae_mode;
+}
+
+inline  EdsUInt32 CanonDevice::getAV() {
+  return av;
+}
+
+inline  EdsUInt32 CanonDevice::getISO() {
+  return iso;
+}
+
+inline  EdsUInt32 CanonDevice::getMeteringMode() {
+  return metering_mode;
+}
+
+inline  EdsUInt32 CanonDevice::getExposureCompensation() {
+  return exposure_compensation;
+}
+
+inline  EdsUInt32 CanonDevice::getShutterSpeed() {
+  return shutter_speed;
+}
+
+inline  EdsUInt32 CanonDevice::getImageQuality() {
+  return image_quality;
+}
+
+inline  EdsUInt32 CanonDevice::getAvailableShots() {
+  return available_shots;
+}
+
+inline  EdsUInt32 CanonDevice::getEvfMode() {
+  return evf_mode;
+}
+
+inline  EdsUInt32 CanonDevice::getEvfOutputDevice() {
+  return evf_output_device;
+}
+
+inline  EdsUInt32 CanonDevice::getEvfDepthOfFieldPreview() {
+  return evf_depth_of_field_preview;
+}
+
+inline  EdsUInt32 CanonDevice::getEvfAFMode() {
+  return evf_af_mode;
+}
+
 
 #endif

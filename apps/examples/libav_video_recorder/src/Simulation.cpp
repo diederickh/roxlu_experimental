@@ -72,11 +72,15 @@ void Simulation::update() {
 #if !defined(USE_CANON)
    cap.update();
 #endif
-   RX_VERBOSE(".");
+   // RX_VERBOSE(".");
 }
 
 void Simulation::draw() {
+  float r = 0.5 + sin(rx_millis() * 0.001) * 0.5;
+  //  printf("%f\n", r);
+  glClearColor(r, 0, 1-r, 1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
   fps.draw();
 }
 
@@ -120,6 +124,15 @@ void Simulation::onKeyDown(int key) {
     printf(">>> take picture\n");
     can.takePicture();
     printf("<<< take picture\n");
+  }
+  else if(key == GLFW_KEY_P) {
+    can.getDevice()->print();
+  }
+  else if(key == GLFW_KEY_Q) {
+    can.startLiveView();
+  }
+  else if(key == GLFW_KEY_W) {
+    can.endLiveView();
   }
 
 #endif
