@@ -27,7 +27,7 @@ Simulation::Simulation()
 #if !defined(USE_CANON)
    //  ,cap(VIDEOCAPTURE_WINDOWS_MEDIA_FOUNDATION)
    //,cap(VIDEOCAPTURE_AVFOUNDATION)
-   ,cap(VIDEOCAPTURE_EDSDK)
+  ,cap(VIDEOCAPTURE_EDSDK)
 #endif
 {
 }
