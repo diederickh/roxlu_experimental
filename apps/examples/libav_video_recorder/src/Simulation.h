@@ -2,12 +2,14 @@
 #include <roxlu/Roxlu.h>
 //#include "Webcam.h"
 #include <videocapture/VideoCapture.h>
+#include <videocapture/VideoCaptureGLSurface.h>
 #include <videocapture/edsdk/Canon.h>
+
 //#include <videocapture/mac/VideoCaptureMac.h>
 //#include "VideoCaptureMediaFoundation.h"
 //#include "VideoCaptureDirectShow.h"
 
-#define USE_CANON // use canon 
+//#define USE_CANON // use canon 
 //#define USE_MF  // use MediaFoundation grabber
 //#define USE_DS  // use DirectShow grabber
 void on_frame(AVFrame* in, size_t nbytesIn, AVFrame* out, size_t nbytesOut, void* user);
@@ -27,7 +29,11 @@ class Simulation : public SimulationBase {
   void onKeyUp(int key);
   void onWindowClose();
  public:
+  unsigned char* pixels;
+  bool has_new_frame;
+
   FPS fps;
+  VideoCaptureGLSurface surface;
 
 #if defined(USE_CANON)
   Canon can;

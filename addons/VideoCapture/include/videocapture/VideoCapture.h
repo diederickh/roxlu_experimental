@@ -15,6 +15,8 @@
 #  include <videocapture/win/mediafoundation/VideoCaptureMediaFoundation.h>
 #endif
 
+#include <videocapture/edsdk/Canon.h>
+
 extern "C" {
 #  include <libavformat/avformat.h>
 #  include <libavutil/avutil.h>

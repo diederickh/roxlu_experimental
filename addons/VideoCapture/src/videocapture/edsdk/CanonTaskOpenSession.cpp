@@ -19,7 +19,7 @@ bool CanonTaskOpenSession::execute() {
     ::exit(EXIT_FAILURE);
   }
 
-  if(canon->getState() != Canon::STATE_OPENED) {
+  if(canon->getState() != Canon::STATE_NONE) {
     RX_ERROR("The device hasn't been opened so we cannot open the session either");
     return false;
   }
@@ -51,6 +51,8 @@ bool CanonTaskOpenSession::execute() {
   if(!canon->unlockUI()) {
     return false;
   }
+
+  canon->setStateOpened();
 
   return true;
 }

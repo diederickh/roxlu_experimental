@@ -1,5 +1,6 @@
 # videocapture
 roxlu_add_addon(UV)  # we need the uv addon for the canon wrapper
+roxlu_add_addon(Image) # we use the jpeg to decode the live view stream
 roxlu_addon_begin("videocapture")
 
   # --------------------------------------------------------------------------------------
@@ -43,6 +44,8 @@ roxlu_addon_begin("videocapture")
      roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskDownload.cpp)
      roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskEvfStart.cpp)
      roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskEvfEnd.cpp)
+     roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskEvfDownload.cpp)
+     roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskStop.cpp)
      roxlu_addon_add_source_file(videocapture/edsdk/CanonUtils.cpp)
      roxlu_add_extern_framework(EDSDK)
      roxlu_add_extern_framework(DPP)

@@ -29,6 +29,9 @@ void videocapture_process_frame_callback(void* pixels, size_t nbytes, void* user
       return;
     }
   }
+  else {
+    c->video_frame_out = c->video_frame_in;
+  }
 
   c->cb_frame(c->video_frame_in, c->nbytes_in,
               c->video_frame_out, c->nbytes_out,
@@ -58,6 +61,7 @@ VideoCapture::VideoCapture(VideoCaptureImplementation imp)
 #elif defined(__APPLE__)
     case VIDEOCAPTURE_AVFOUNDATION:               {  cap = new VideoCaptureMac();             break;     }
 #endif
+    case VIDEOCAPTURE_EDSDK:                      {  cap = new Canon();                       break;     }     
     default: {
       RX_ERROR("Unhandled VideoCaptureImplemtation type");
       ::exit(EXIT_FAILURE);

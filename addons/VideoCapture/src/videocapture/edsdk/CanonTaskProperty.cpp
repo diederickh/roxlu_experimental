@@ -11,7 +11,6 @@ CanonTaskProperty::CanonTaskProperty(Canon* canon, EdsPropertyID propertyID)
 }
 
 CanonTaskProperty::~CanonTaskProperty() {
-  
 }
 
 bool CanonTaskProperty::execute() {
@@ -25,14 +24,12 @@ bool CanonTaskProperty::execute() {
     canon->unlockUI();
   }
 
-  RX_VERBOSE("Execute...");
   return true;
 }
 
 
 
 bool CanonTaskProperty::getProperty(EdsPropertyID prop) {
-  RX_VERBOSE("Get property");
   EdsError err = EDS_ERR_OK;
   EdsDataType data_type = kEdsDataType_Unknown;
   EdsUInt32 data_size = 0;
@@ -40,9 +37,9 @@ bool CanonTaskProperty::getProperty(EdsPropertyID prop) {
   EdsChar string_data[EDS_MAX_NAME];
   
   if(prop == kEdsPropID_Unknown) {
-    RX_VERBOSE("UNKNOWN PROPERTY!!");
+    RX_VERBOSE("Unknown property");
+    return false;
   }
-
 
   err = EdsGetPropertySize(canon->getCameraRef(), prop, 0, &data_type, &data_size);
   if(err != EDS_ERR_OK) {
@@ -51,7 +48,6 @@ bool CanonTaskProperty::getProperty(EdsPropertyID prop) {
   }
 
   std::string dt = canon_data_type_to_string(data_type);
-  RX_VERBOSE(">> property type: %s size: %d", dt.c_str(), int(data_size));
 
   switch(data_type) {
 

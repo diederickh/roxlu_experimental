@@ -45,7 +45,6 @@ bool CanonTaskDownload::execute() {
   }
 
   err = EdsDownload(item, dir_item_info.size, stream);
-
   if(err == EDS_ERR_OK) {
     err = EdsDownloadComplete(item);
     if(err != EDS_ERR_OK) {
@@ -53,6 +52,9 @@ bool CanonTaskDownload::execute() {
       result = false;
       goto done;
     }
+  }
+  else {
+    CANON_ERROR(err);
   }
 
  done:

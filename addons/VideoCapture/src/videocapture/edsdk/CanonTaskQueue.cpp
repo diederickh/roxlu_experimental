@@ -15,34 +15,38 @@ void canon_task_queue_thread(void* queue) {
   }
 
   std::vector<CanonTask*> work_data;
-  bool stop = false;
+  bool must_stop = false;
   while(true) {
 
     q.lock();
     {
       std::copy(q.tasks.begin(), q.tasks.end(), std::back_inserter(work_data));
       q.tasks.clear();
-      stop = q.must_stop;
     }
     q.unlock();
 
     for(std::vector<CanonTask*>::iterator it = work_data.begin(); it != work_data.end(); ++it) {
       CanonTask& task = **it;
-      uint64_t t = uv_hrtime();
-      task.execute();
-      double_t d = (double(uv_hrtime()) - double(t)) / 1000000.0;      
-      RX_VERBOSE("TOOK: %lf ms.", d);
+
+      if(task.type == CANON_TASK_STOP) {
+        must_stop = true;
+        break;
+      }
+      do {
+        task.execute();
+      } while(task.mustRetry());
+
+      delete *it;
     } 
     
     work_data.clear();
-    
-    if(stop) {
+
+    if(must_stop) {
       break;
     }
 
     rx_sleep_millis(1);
   }
-
   q.shutdown();
 }
 
@@ -50,16 +54,8 @@ void canon_task_queue_thread(void* queue) {
 
 CanonTaskQueue::CanonTaskQueue(Canon* canon) 
    :state(STATE_NONE)
-   ,must_stop(false)
    ,canon(canon)
 {
-  /*
-  loop = uv_loop_new();
-  if(!loop) {
-    RX_ERROR("Cannot create the uv_loop that we need for the task queue");
-    ::exit(EXIT_FAILURE);
-  }
-  */
 
   if(uv_mutex_init(&mutex) < 0) {
     RX_ERROR("Cannot initialize the mutex for the queue thread");
@@ -69,31 +65,18 @@ CanonTaskQueue::CanonTaskQueue(Canon* canon)
 }
 
 CanonTaskQueue::~CanonTaskQueue() {
-  RX_ERROR("NEED TO FREE / SHUTDOWN THE THRAD! - JOIN THE THREAD");
-  /*
-  if(loop) {
-    uv_loop_delete(loop);
-    loop = NULL;
+  for(std::vector<CanonTask*>::iterator it = tasks.begin(); it != tasks.end(); ++it) {
+    delete *it;
   }
-  */
+  uv_mutex_destroy(&mutex);
 }
 
 bool CanonTaskQueue::start() {
-  /*
-  if(!loop) {
-    RX_ERROR(ERR_CANON_NO_LOOP);
-    return false;
-  }
-  */
 
   if(state != STATE_NONE) {
     RX_ERROR("Cannot start the task queue because it's already started");
     return false;
   }
-
-  lock();
-  must_stop = false;
-  unlock();
 
   state = STATE_STARTED;
 
@@ -108,11 +91,15 @@ bool CanonTaskQueue::stop() {
     return false;
   }
 
-  lock();
-  must_stop = true;
-  unlock();
+  RX_VERBOSE("AND STOP!");
 
-  RX_VERBOSE("STOPPED THREAD");
+  // add the stop task
+  CanonTaskStop* task = new CanonTaskStop(canon);
+  if(!task) {
+    RX_ERROR("Cannot allocate the stop task (!?)");
+    return false;
+  }
+  addTask(task);
 
   return true;
 }
@@ -151,4 +138,5 @@ bool CanonTaskQueue::addTask(CanonTask* task) {
   unlock();
   return true;
 }
+
 

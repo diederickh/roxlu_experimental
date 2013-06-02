@@ -105,6 +105,65 @@ bool JPG::load(std::string filename, bool datapath) {
   return true;
 }
 
+// decompress from memory stream
+bool JPG::load(unsigned char* compressed, size_t nbytes) {
+  struct jpeg_error_mgr jerr;
+  struct jpeg_decompress_struct cinfo;
+  
+  cinfo.err = jpeg_std_error(&jerr);
+  jpeg_create_decompress(&cinfo);
+  jpeg_mem_src(&cinfo, compressed, nbytes);
+
+  int rc = jpeg_read_header(&cinfo, TRUE);
+  if(rc != 1) {
+    RX_ERROR("Error while reading the jpeg header");
+    return false;
+  }
+
+  bool need_alloc = false;
+  jpeg_start_decompress(&cinfo);
+
+  if(cinfo.output_width != width) {
+    width = cinfo.output_width;
+    need_alloc = true;
+  }
+  if(cinfo.output_height != height) {
+    height = cinfo.output_height;
+    need_alloc = true;
+  }
+  if(cinfo.output_components != num_channels) {
+    num_channels = cinfo.output_components;
+    need_alloc = true;
+  }
+
+  if(!width || !height) {
+    RX_ERROR("Read incorrect jpg size: %d x %d", width, height);
+    jpeg_finish_decompress(&cinfo);
+    jpeg_destroy_decompress(&cinfo);
+    return false;
+  }
+
+  // only allocate when the sizes or num channels change.
+  if(need_alloc) {
+    bit_depth = 8;
+    num_bytes = width * height * num_channels;
+    stride = width * num_channels;
+    pixels = new unsigned char[num_bytes];
+  }
+
+  size_t dest_row = 0;
+  while(cinfo.output_scanline < cinfo.output_height) {
+    unsigned char* buffer_array[1];
+    buffer_array[0] = pixels + cinfo.output_scanline * stride;
+    jpeg_read_scanlines(&cinfo, buffer_array, 1);
+  }
+
+  jpeg_finish_decompress(&cinfo);
+  jpeg_destroy_decompress(&cinfo);
+ 
+  return true;
+}
+
 void JPG::print() {
   RX_VERBOSE("JPG.width: %d", width);
   RX_VERBOSE("JPG.height: %d", height);

@@ -20,7 +20,8 @@ enum VideoCaptureImplementation {
   VIDEOCAPTURE_DIRECTSHOW,                   // Windows - DEFAULT - Use the DirectShow samplegrabber
   VIDEOCAPTURE_WINDOWS_MEDIA_FOUNDATION,     // Windows -         - Use the Windows Media Foundation grabber
   VIDEOCAPTURE_AVFOUNDATION,                 // Mac     - DEFAULT - Use the AVFoundation grabber
-  VIDEOCAPTURE_V4L                           // Linux   - DEFAULT - Use the Video4Linux sample grabber
+  VIDEOCAPTURE_V4L,                          // Linux   - DEFAULT - Use the Video4Linux sample grabber
+  VIDEOCAPTURE_EDSDK
 };
 
 // AVSize represents the capture width/height a device can use to capture (most devices support multiple sizes)

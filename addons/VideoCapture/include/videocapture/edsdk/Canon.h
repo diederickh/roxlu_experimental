@@ -11,7 +11,8 @@
   - Copy the directory `Macintosh/EDSDK/Framework/EDSDK.framework` to `roxlu/extern/lib/mac/frameworks/`
 
 */
-
+#include <image/JPG.h>
+#include <videocapture/VideoCaptureBase.h>
 #include <videocapture/Types.h>
 #include <videocapture/edsdk/CanonTypes.h>
 #include <videocapture/edsdk/CanonTaskQueue.h>
@@ -22,6 +23,8 @@
 #include <videocapture/edsdk/CanonTaskCloseSession.h>
 #include <videocapture/edsdk/CanonTaskEvfStart.h>
 #include <videocapture/edsdk/CanonTaskEvfEnd.h>
+#include <videocapture/edsdk/CanonTaskEvfDownload.h>
+#include <videocapture/edsdk/CanonTaskStop.h>
 
 #include <EDSDK.h>
 #include <EDSDKErrors.h>
@@ -39,11 +42,12 @@ EdsError EDSCALLBACK canon_download_progress(EdsUInt32 percent, EdsVoid* user, E
 
 // -----------------------------------------------------------
 
-class Canon {
+class Canon : public VideoCaptureBase {
  public:
   enum State {
     STATE_NONE,
-    STATE_OPENED
+    STATE_OPENED,
+    STATE_LIVE_VIEW
   };
 
  public:
@@ -57,6 +61,7 @@ class Canon {
   bool startCapture();
   bool stopCapture();
   void update();
+  std::vector<AVCapability> getCapabilities(int device);
 
   // Camera control
   bool isLegacy();                                                      /* to support older models - for now we always return false */
@@ -68,8 +73,13 @@ class Canon {
   bool downloadPicture(EdsDirectoryItemRef item);
   bool startLiveView();
   bool endLiveView();
+  bool downloadLiveView();
   bool canStartLiveView();                                              /* returns true when the dial is in the correct position to start the live-view. not all dial options (AEModes) support live view */
 
+  // Events & callbacks
+  void fireEvent(CanonEvent& ev);                                       /* fired from the queue manager thread */
+  void setStateOpened();
+  void setStateLiveView();
 
   // Properties
   bool getProperty(EdsPropertyID prop);
@@ -86,6 +96,7 @@ class Canon {
   bool getLiveViewDepthOfFieldPreview();
   bool getLiveViewZoom();
   bool getLiveViewZoomPosition();
+
   bool getImageQuality();
   bool getAvailableShots();
   
@@ -98,10 +109,11 @@ class Canon {
   bool shutdown();                                                      /* used internally: will be called, when the task queue thread loop will end */
 
  private:
-
+  CanonTaskQueue queue;
+  JPG jpg;                                                              /* jpeg object that we use to decompress */
   State state;
   CanonDevice input_device;
-  CanonTaskQueue queue;
+
   
 };
 

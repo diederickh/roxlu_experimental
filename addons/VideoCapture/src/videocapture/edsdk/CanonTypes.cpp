@@ -1,18 +1,33 @@
 #include <videocapture/edsdk/CanonTypes.h>
+#include <videocapture/edsdk/Canon.h>
 
 // ----------------------------------------
 
 CanonTask::CanonTask(Canon* canon, CanonTaskType type) 
   :canon(canon)
   ,type(type)
+  ,must_retry(false)
 {
 }
 
 CanonTask::~CanonTask() {
 }
 
+
 // ----------------------------------------
-CanonDevice::CanonDevice()
+CanonEvent::CanonEvent(CanonEventType type, void* data)
+  :type(type)
+  ,data(data)
+{
+}
+
+CanonLiveViewData::CanonLiveViewData()
+  :stream_ref(NULL)
+{
+}
+
+// ----------------------------------------
+CanonDevice::CanonDevice(Canon* canon)
   :ae_mode(0)
   ,av(0)
   ,iso(0)
@@ -26,6 +41,7 @@ CanonDevice::CanonDevice()
   ,evf_depth_of_field_preview(0)
   ,evf_zoom(0)
   ,evf_af_mode(0)
+  ,canon(canon)
 {
 }
 
@@ -46,6 +62,7 @@ bool CanonDevice::setProperty(EdsPropertyID prop, EdsChar* value) {
 
 
 bool CanonDevice::setProperty(EdsPropertyID prop, EdsUInt32 data) {
+
   switch(prop) {
     case kEdsPropID_AEModeSelect:            { ae_mode = data;                      break;  }
     case kEdsPropID_Tv:                      { shutter_speed = data;                break;  }
@@ -66,6 +83,13 @@ bool CanonDevice::setProperty(EdsPropertyID prop, EdsUInt32 data) {
       break;
     }
   };
+
+  if(prop == kEdsPropID_Evf_OutputDevice) { 
+    if(isUsingPCForLiveView()) {
+       CanonEvent ev(CANON_EVENT_EVF_STARTED, NULL);
+       canon->fireEvent(ev);
+    }
+  }
 
   return true;
 }

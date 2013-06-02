@@ -30,6 +30,8 @@ bool CanonTaskEvfStart::execute() {
     return false;
   }
 
+  canon->setStateLiveView();
+
   return true;
 }
 

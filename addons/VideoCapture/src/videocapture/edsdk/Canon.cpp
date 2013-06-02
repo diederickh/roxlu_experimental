@@ -3,14 +3,16 @@
 #include <videocapture/edsdk/Canon.h>
 #include <videocapture/edsdk/CanonUtils.h>
 
-
 // -----------------------------------------------------------
 EdsError EDSCALLBACK canon_handle_object_event(EdsUInt32 event, EdsBaseRef ref, EdsVoid*  user) {
   EdsError result = EDS_ERR_OK;
   Canon* canon = static_cast<Canon*>(user);
-  //  RX_VERBOSE("object event: %s", canon_event_to_string(event).c_str());
+
   if(event == kEdsObjectEvent_DirItemCreated) {
-    //xo    canon->downloadPicture((EdsDirectoryItemRef)ref);
+    canon->downloadPicture((EdsDirectoryItemRef)ref);
+  }
+  else if(event == kEdsObjectEvent_DirItemRequestTransfer) {
+    canon->downloadPicture((EdsDirectoryItemRef)ref);
   }
   return result;
 }
@@ -20,19 +22,14 @@ EdsError EDSCALLBACK canon_handle_property_event(EdsUInt32 event, EdsUInt32 prop
   EdsError result = EDS_ERR_OK;
 
   if(event == kEdsPropertyEvent_PropertyChanged) {
-    RX_VERBOSE("property event: %s", canon_event_to_string(event).c_str());
-    RX_VERBOSE("property: %s", canon_property_to_string(property).c_str());
     canon->getProperty(property);
   }
-
    
   return result;
 }
 
 EdsError EDSCALLBACK canon_handle_state_event(EdsUInt32 event, EdsUInt32 param, EdsVoid* user) {
   EdsError result = EDS_ERR_OK;
-  //RX_VERBOSE("state event: %s", canon_event_to_string(event).c_str());
-
   return result;
 }
 
@@ -45,7 +42,9 @@ EdsError EDSCALLBACK canon_download_progress(EdsUInt32 percent, EdsVoid* user, E
 Canon::Canon() 
   :state(STATE_NONE)
   ,queue(this)
+  ,input_device(this)
 {
+
   EdsError err = EdsInitializeSDK();
   if(err != EDS_ERR_OK) {
     RX_ERROR("Cannot initialize EDSDK");
@@ -55,9 +54,9 @@ Canon::Canon()
 }
 
 Canon::~Canon() {
+  EdsError err = EdsCloseSession(getCameraRef());
   EdsTerminateSDK();
 }
-
 
 // VideoCaptureBase implementation
 // -----------------------------------------------------------
@@ -134,8 +133,6 @@ bool Canon::openDevice(int device, VideoCaptureSettings cfg) {
     goto error;
   }
 
-  state = STATE_OPENED;
-
   queue.start();
 
   EdsRelease(camera_list);
@@ -148,8 +145,17 @@ bool Canon::openDevice(int device, VideoCaptureSettings cfg) {
   return false;
 }
 
+void Canon::setStateOpened() {
+  state = STATE_OPENED;
+}
+void Canon::setStateLiveView() {
+  state =STATE_LIVE_VIEW;
+}
+
 bool Canon::closeDevice() {
-  RX_VERBOSE("@todo unset the property event handler");
+  if(state == STATE_LIVE_VIEW) {
+    endLiveView();
+  }
 
   if(state != STATE_OPENED) {
     RX_ERROR("Cannot close the device because we didn't opened a device yet. Did you call openDevice()?");
@@ -167,14 +173,40 @@ bool Canon::closeDevice() {
 }
 
 bool Canon::startCapture() {
-  return true;
+  return startLiveView();
 }
 
 bool Canon::stopCapture() {
-  return true;
+  return endLiveView();
 }
 
 void Canon::update() {
+}
+
+// Events & Callbacks
+// -----------------------------------------------------------
+void Canon::fireEvent(CanonEvent& ev) {
+
+  if(ev.type == CANON_EVENT_EVF_DATA) {
+    EdsUInt32 buffer_size = 0;
+    unsigned char* data;
+    CanonLiveViewData& live_view_data = *static_cast<CanonLiveViewData*>(ev.data);
+    EdsGetLength(live_view_data.stream_ref, &buffer_size);
+    EdsGetPointer(live_view_data.stream_ref, (EdsVoid**)&data);
+
+    if(data[0] != 0x00 && data[1] != 0x00) {
+      if(jpg.load(data, buffer_size)) {
+        assert(cb_frame);
+        cb_frame((void*)jpg.getPixels(), jpg.getNumBytes(), cb_user);
+      }
+    }
+
+    downloadLiveView();
+  }
+  else if(ev.type == CANON_EVENT_EVF_STARTED) {
+    downloadLiveView();
+  }
+
 }
 
 // Camera control
@@ -196,6 +228,10 @@ bool Canon::openSession() {
 }
 
 bool Canon::closeSession() {
+  if(state == STATE_LIVE_VIEW) {
+    endLiveView();
+  }
+
   if(state != STATE_OPENED) {
     RX_ERROR(ERR_CANON_NOT_OPENED);
     return false;
@@ -222,10 +258,7 @@ bool Canon::takePicture() {
     RX_ERROR("Cannot allocate take picture task");
     return false;
   }
-  uint64_t n = rx_millis();
   queue.addTask(task);
-  uint64_t d = rx_millis() - n;
-  RX_VERBOSE("Took: %ld", d);
   return true;
 }
 
@@ -247,11 +280,6 @@ bool Canon::downloadPicture(EdsDirectoryItemRef item) {
 }
 
 bool Canon::lockUI() {
-  if(state != STATE_OPENED) {
-    RX_ERROR(ERR_CANON_NOT_OPENED);
-    return false;
-  }
-
   EdsError err = EdsSendStatusCommand(input_device.camera_ref, kEdsCameraStatusCommand_UILock, 0);
   if(err != EDS_ERR_OK) {
     RX_ERROR("Cannot lock the ui");
@@ -261,11 +289,6 @@ bool Canon::lockUI() {
 }
 
 bool Canon::unlockUI() {
-  if(state != STATE_OPENED) {
-    RX_ERROR(ERR_CANON_NOT_OPENED);
-    return false;
-  }
-
   EdsError err = EdsSendStatusCommand(input_device.camera_ref, kEdsCameraStatusCommand_UIUnLock, 0);
   if(err != EDS_ERR_OK) {
     RX_ERROR("Cannot unlock the ui");
@@ -280,18 +303,10 @@ bool Canon::canStartLiveView() {
     RX_ERROR("No device found");
     return false;
   }
-  if(state != STATE_OPENED) {
-    RX_ERROR("Cannot start live view when the device hasn't been opened");
-    return false;
-  }
-  return  canon_can_start_live_view((EdsAEMode)getDevice()->getAEMode());
+  return canon_can_start_live_view((EdsAEMode)getDevice()->getAEMode());
 }
 
 bool Canon::startLiveView() {
-  if(state != STATE_OPENED) {
-    RX_ERROR(ERR_CANON_NOT_OPENED);
-    return false;
-  }
   if(!canStartLiveView()) {
     RX_ERROR("The current (dial knob) AEMode cannot be used for live view");
     return false;
@@ -308,14 +323,30 @@ bool Canon::startLiveView() {
 }
 
 bool Canon::endLiveView() {
-  if(state != STATE_OPENED) {
-    RX_ERROR(ERR_CANON_NOT_OPENED);
+  if(state != STATE_LIVE_VIEW) {
+    RX_ERROR("Cannot end the live view when it's not started");
     return false;
   }
 
   CanonTaskEvfEnd* task = new CanonTaskEvfEnd(this);
   if(!task) {
     RX_ERROR("Cannot allocate CanonTaskEvfEnd");
+    return false;
+  }
+
+  queue.addTask(task);
+  return true;
+}
+
+bool Canon::downloadLiveView() {
+  if(state != STATE_LIVE_VIEW) {
+    RX_ERROR("Cannot download an live view because it looks like the live view hasn't been started yet, call startLiveView first");
+    return false;
+  }
+
+  CanonTaskEvfDownload* task = new CanonTaskEvfDownload(this);
+  if(!task) {
+    RX_ERROR("Cannot allocate a CanonTaskEvfDownload()");
     return false;
   }
 
@@ -455,12 +486,12 @@ bool Canon::getAvailableShots() {
 }
 
 bool Canon::getProperty(EdsPropertyID prop) {
- if(state != STATE_OPENED) {
-    RX_ERROR(ERR_CANON_NOT_OPENED);
+  if(!getCameraRef()) {
+    RX_ERROR("Cannot get property because the camera ref is invalid");
     return false;
   }
 
- CanonTaskProperty* task = new CanonTaskProperty(this, prop);
+  CanonTaskProperty* task = new CanonTaskProperty(this, prop);
   if(!task) {
     RX_ERROR("Cannot allcate the property");
     return false;
@@ -470,3 +501,19 @@ bool Canon::getProperty(EdsPropertyID prop) {
 }
 
 
+// CAPABILITIES
+std::vector<AVCapability> Canon::getCapabilities(int device) {
+  std::vector<AVCapability> caps;
+
+  AVCapability cap;
+  cap.size.width = 928;
+  cap.size.height = 616;
+  cap.pixel_format = AV_PIX_FMT_RGB24;
+  cap.framerate.num = 1;
+  cap.framerate.den = 30;
+
+  caps.push_back(cap);
+
+  return caps;
+  //  cap.size = 
+}

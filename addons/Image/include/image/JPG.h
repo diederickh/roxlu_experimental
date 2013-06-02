@@ -18,13 +18,14 @@ class JPG {
   void clear();
 
   bool load(std::string filename, bool datapath = false);
+  bool load(unsigned char* compressed, size_t nbytes);
   bool save(std::string filename, bool datapath = false);
-
   
   unsigned char* getPixels();
   unsigned int getWidth();
   unsigned int getHeight();
   unsigned int getNumChannels();
+  unsigned int getNumBytes();
   unsigned int getBitDepth();
     
   void print();
@@ -60,6 +61,10 @@ inline unsigned int JPG::getNumChannels() {
 
 inline unsigned int JPG::getBitDepth() {
   return bit_depth;
+}
+
+inline unsigned int JPG::getNumBytes() {
+  return num_bytes;
 }
   
 #endif

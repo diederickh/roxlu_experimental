@@ -42,6 +42,8 @@ bool CanonTaskEvfEnd::execute() {
     return false;
   }
 
+  canon->setStateOpened();
+
   return true;
 }
 

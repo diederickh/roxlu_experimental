@@ -6,6 +6,7 @@ extern "C" {
 }
 
 #include <videocapture/edsdk/CanonTypes.h>
+#include <videocapture/edsdk/CanonTaskStop.h>
 #include <vector>
 
 #define ERR_CANON_NO_LOOP "No uv_loop created."
@@ -31,7 +32,7 @@ class CanonTaskQueue {
   bool addTask(CanonTask* task);
   void lock();
   void unlock();
-
+  void join();                                              /* join the thread */
 
  public:
   enum State {
@@ -40,7 +41,6 @@ class CanonTaskQueue {
   };
 
   Canon* canon;
-  bool must_stop;
   uv_mutex_t mutex;
   uv_thread_t thread_id;
   std::vector<CanonTask*> tasks;
@@ -55,4 +55,7 @@ inline void CanonTaskQueue::unlock() {
   uv_mutex_unlock(&mutex);
 }
 
+inline void CanonTaskQueue::join() {
+  uv_thread_join(&thread_id);
+}
 #endif
