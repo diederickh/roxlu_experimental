@@ -27,7 +27,7 @@ Simulation::Simulation()
 #if !defined(USE_CANON)
    //  ,cap(VIDEOCAPTURE_WINDOWS_MEDIA_FOUNDATION)
    //,cap(VIDEOCAPTURE_AVFOUNDATION)
-  ,cap(VIDEOCAPTURE_EDSDK)
+   ,cap(VIDEOCAPTURE_EDSDK)
 #endif
 {
 }
@@ -52,7 +52,8 @@ void Simulation::setup() {
 
 #if !defined(USE_CANON)
   cap.listDevices();
-  cap.printCapabilities(0);
+  //cap.printCapabilities(0);
+  cap.printSupportedPixelFormats();
   VideoCaptureSettings cfg;
   cfg.width = 640;
   cfg.height = 480;
