@@ -386,13 +386,13 @@ set(roxlu_experimental_sources
 #  ${roxlu_src_dir}/experimental/StereoCam.cpp
 #  ${roxlu_src_dir}/experimental/DebugDrawer.cpp
 #  ${roxlu_src_dir}/experimental/Tweens.cpp
-#  ${roxlu_src_dir}/experimental/BitmapFont.cpp
+  ${roxlu_src_dir}/experimental/BitmapFont.cpp
 #  ${roxlu_src_dir}/experimental/Font.cpp
 #  ${roxlu_src_dir}/experimental/SimpleAnim.cpp
 #  ${roxlu_src_dir}/experimental/Tween.cpp
 #  ${roxlu_src_dir}/experimental/TGA.cpp
 #  ${roxlu_src_dir}/experimental/TGARecorder.cpp
-#  ${roxlu_src_dir}/experimental/Text.cpp
+  ${roxlu_src_dir}/experimental/Text.cpp
 )
 
 set(roxlu_io_sources
