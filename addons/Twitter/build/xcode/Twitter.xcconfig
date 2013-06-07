@@ -1,2 +1,0 @@
-TWITTER_INCLUDES=$(ROXLU_ADDON_DIR)/Twitter/include/ $(ROXLU_ADDON_DIR)/Twitter/extern/include/
-TWITTER_LIBS=$(RELD)/libcrypto.a $(RELD)/libssl.a $(RELD)/libuv.a

@@ -1,85 +1,121 @@
-Twitter
---------
-Standalone minimal twitter library for C++ using the fast libuv library and openssl. 
-  This library only has two dependencies for which static libraries are included.
-  - OpenSSL 1.01
-  - libuv, hash: 149b16f1232d8fdcf5436534d6ade6f9877e1b8f 
-  - To compile add an include path to: `addons/Twitter/include` and ...
-  - .. make sure that you add the sources of the Twitter addon to your project. These are 
-  
-    - `Twitter/src/twitter/*.cpp`
-    - `Twitter/extern/format/*.*`
-  
+# Twitter
 
-  
-    
-How to use this library
-========================
+This library is a minimal C++ library for the Twitter REST and Streaming
+API. It's written in pure C++/C and uses [openSSL](http://www.openssl.org/), the excellent [libuv](https://github.com/joyent/libuv)
+library for networking and some third party algorithms for HMAC-SHA1 (see HTTP addon).
 
-Step 1: Create an Twitter application
---------------------------------------
-- Go to http://dev.twitter.com/ and follow the steps to create a new application. If you follow the example applications
-from `roxlu/apps/examples/twitter_get_tokens` then you need to change the values passed into `tw.setConsumer()` and `tw.setConsumerSecrect`
-with the values of the application you created on http://dev.twitter.com
+## How to use this API
+If you really want to understand how everything works you need to read up on [oauth](http://www.oauth.net),
+[openSSL](http://www.openssl.org) and [libuv](https://github.com/joyent/libuv). For this addon it's important
+to know that twitter has a couple of different [API categories](https://dev.twitter.com/start).
 
-Step 2: Create a SSL private key
----------------------------------
+#### 1. Create an application
 
-- First you need to create a private key for SSL, follow these steps (self signed certificate): Create a key for the Certificate Authority certificate (CA-certificate)
-   
-`$ openssl genrsa 2048 > ca-key.pem`
-      
+You need to create an application at the [developers site](http://developer.twitter.com) of Twitter. You need
+to login and then goto to [My Applications](https://dev.twitter.com/apps) where you can create a new 
+application by clicking on the **Create new application** button. Your application will use oauth to make
+requests on behalf of the user who authorizes the application. If you're like me, and mainly work on 
+[interactive installations](http://www.apollomedia.nl) you will create a new application and a new
+user for the installation and authorize your application with the user.  At this point it's probably good
+to read up on [oauth](http://www.oauth.net), but if you're in a hurry it's good to know these terms:
 
-- Create a certificate with this key, you can leave all fields empty (just press enter) (nodes = no password):
-   
-`$ openssl req -new -x509 -nodes -days 36000 -key ca-key.pem -out ca-cert.pem`
-    
+ - consumer key + secret: These values represent your application 
+ - access token + secret: These values represent the user who granted access to the application
 
-- Create client certificate, remove passphrase and sign it with the CA certificate
-    
-`$ openssl req -newkey rsa:2048 -days 36000 -nodes -keyout client-key.pem -out client-req.pem`
+#### 2. Setup the Twitter object
 
- `$ openssl rsa -in client-key.pem -out client-key.pem`
-    
- `$ openssl x509 -req -in client-req.pem -days 36000 -CA ca-cert.pem -CAkey ca-key.pem -set_serial 01 -out client-cert.pem`
-    
+Once you've created the application, Twitter gives you all the necessary values for the consumer and
+user tokens. Go to your application setting, and see the **OAuth settings**. The following examples shows
+how to setup the `Twitter` object.
 
-**You now have the following files**
-  - client-cert.pem = public key
-  - client-key.pem = private key
+````c++
 
-**Use the `client-key.pem` for your twitter applications**
-      
-Step 3: Get a access token:
-----------------------------
-- See the example application in `roxlu/apps/examples/twitter_get_tokens/`.
-  This is a plain simple c++ application that you can compile directly using 
-  gcc/g++ or XCode. You should run this application from the command line. It 
-  will ask you to open an url from twitter. When you open this link you need to 
-  grant the application so it can use your account to connect to the twitter 
-  servers.
+   bool r =  twitter.setup("466622389-...",   /* the token */
+                           "eH25IAxRIB...",   /* the token secret */
+                           "e0vURm6xh....",   /* the consumer key */ 
+                           "R7HfL0vgy2F....");/* the consumer secret */
+   if(!r) {
+     RX_ERROR("Cannot setup the twitter obj");
+     ::exit(EXIT_FAILURE);
+   }
 
-- After you've granted your account + application, you will see a PIN that you 
-  need to enter on the command line. Then press enter.
+````
 
-- The twitter_get_tokens application will then exchange the PIN for an 
-  authorization token and secret. Keep these codes private, but add them 
-  to your application. See twitter_streaming_example where we use these 
-  tokens. See the main.cpp file comments about creating a twitter_tokens.h 
-  file, with this contents:
+Make sure to call `twitter.update()` as often as possible. We're using non-blocking sockets, so 
+the socket backend needs check if there is data to be processed on a regularly basis. So e.g. use:
 
-<pre>
-tw.setToken("TOKEN");
-tw.setTokenSecret("SOME_TOKEN_SECRET");
-</pre>
+````c++
+void testApp::update() {
+     twitter.update();
+}
+````
 
+#### 3. Making API requests
 
-Step 4: Use your access tokens to make API calls
--------------------------------------------------
-- Make sure you've created a ssl key and use this in you application 
-- Once you've got an access token you can start using the library and 
-  make API calls. You can see two example API calls in the Twitter class, see
-  apiStatusesUpdate() and apiStatusesFilter()
-- This library does not parse the API responses
+All api functions start with the prefix _api_ and I tried to give each function the same name
+as the api endpoint. For example, the api call [statuses/update_with_media](https://dev.twitter.com/docs/api/1/post/statuses/update_with_media)
+can be accessed using `twitter.apiStatusesUpdateWithMedia`. All the api functions follow the same scheme:
+`functionName(parameterObject, callback_function, callback_data)`. The `parameterObject` is an object
+on which you set the parameters for the api call. For the call `apiStatusesUpdateWithMedia` you pass an object
+of the type `TwitterStatusesUpdate`. For information on how to use the parameter objects, see the `TwitterTypes.h`
+file or the [twitter examples](https://github.com/roxlu/roxlu/tree/master/apps/examples). The next parameter is a
+callback function that will be called when requests finishes or when we receive data from Twitter. All callbacks
+must follow this definition:
+
+````c++
+void twitter_callback(HTTPConnection* c, HTTPConnectionEvent event, const char* data, size_t len, void* user)
+````
+
+The `HTTPConnection` is a pointer to the underlying socket connection and is used to connect and transfer 
+data to the Twitter servers. `HTTPConnectionEvent` is an integer value and represents the type of event for
+which the callback got called. When we've parsed the http response headers and know the http status, the 
+`HTTPConnectionEvent` will have a value like `HTTP_ON_STATUS`, when we read data from the body section it
+will have an value of `HTTP_ON_BODY`. Use this event value to execute the appropriate code. `data` will contain
+data in case you receive the `HTTP_ON_BODY` event. **note: this is not a NULL terminated string**. 
+
+_Example of doing a status update_
+````c++
+
+   // Include the necessary files:
+   #include <twitter/Twitter.h>
 
 
+   // the callback for the status update
+   // --------------------------------------------------------------
+   void twitter_status_cb(HTTPConnection* c, HTTPConnectionEvent event, 
+                          const char* data, size_t len, void* user) 
+   {
+      if(event == HTTP_ON_STATUS) {
+         RX_VERBOSE("HTTP status: %d", c->parser.status_code);
+      }
+      else if(event == HTTP_ON_BODY) {
+         // parse the tweet.
+         std::string str(data, data+len);
+         Tweet tweet;
+         tweet.parseJSON(str);
+         tweet.print();
+      }
+   }
+
+
+   // in your setup()       
+   // --------------------------------------------------------------
+   bool r =  twitter.setup("466622389-...",    /* the token */
+                           "eH25IAxRIB...",    /* the token secret */
+                           "e0vURm6xhS...",    /* the consumer key */
+                           "R7HfL0vgy2...");   /* the consumer secret */
+   if(!r) {
+     RX_ERROR("Cannot setup the twitter obj");
+     ::exit(EXIT_FAILURE);
+   }
+
+   // create a new status update + add an image to the post
+   TwitterStatusesUpdate status("example status update with image :-)");
+   status.addMedia("media.png", true); // true => get file from data folder
+   twitter.apiStatusesUpdateWithMedia(status, twitter_status_cb, NULL);
+
+   // in your update()
+   // --------------------------------------------------------------
+   twitter.update()
+
+````
