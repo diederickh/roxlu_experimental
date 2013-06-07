@@ -30,7 +30,6 @@ class TwitterCallParams {
   httpconnection_event_callback cb_response;
 };
 
-
 //-------------------------------------------------------------------------------
 
 inline void TwitterCallParams::setEndPoint(std::string endp) {
@@ -73,5 +72,4 @@ class TwitterStatusesFilter : public TwitterCallParams {
   void follow(std::string followString);
 };
 
-//-------------------------------------------------------------------------------
 #endif

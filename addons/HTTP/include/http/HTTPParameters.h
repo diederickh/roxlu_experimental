@@ -37,6 +37,7 @@ struct HTTPParameterSort {
 //-------------------------------------------------------------------------------
 
 class HTTPParameters {
+
  public:
   HTTPParameters();
   void add(HTTPParameter p);                                                           /* append the given parameter */
@@ -96,4 +97,5 @@ inline HTTPParameter& HTTPParameters::operator[](const std::string name) {
   p.setName(name);
   return p;
 }
+
 #endif

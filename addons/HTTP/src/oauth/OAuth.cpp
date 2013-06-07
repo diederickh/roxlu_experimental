@@ -187,7 +187,6 @@ void OAuth::print() {
   printf("--\n");
 }
 
-
 void OAuth::updateNonceAndTimestamp() {
   nonce = generateNonce();
   epoch = oauth_timestamp();

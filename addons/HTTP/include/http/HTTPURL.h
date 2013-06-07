@@ -34,7 +34,6 @@ class HTTPURL {
   std::string host;
   std::string path;
   std::string port;
- 
 };
 
 inline void HTTPURL::setHost(std::string h) {
@@ -87,7 +86,6 @@ inline void HTTPURL::addQueryParameter(HTTPParameter p) {
 inline void HTTPURL::addQueryParameters(HTTPParameters& p) {
   query_parameters.copy(p);
 }
-
 
 inline HTTPParameters& HTTPURL::getQueryParameters() {
   return query_parameters;

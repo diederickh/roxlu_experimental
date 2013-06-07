@@ -87,6 +87,6 @@ class HTTPConnection {
   httpconnection_event_callback cb_close;                                                                                        /* gets called when the connection closes (cb_event is called too) */          
   void* cb_event_user;                                                                                                              /* is passed into the event handler */       
   void* cb_close_user;                                                                                                              /* is passed into the close handler */
-  
 };
+
 #endif

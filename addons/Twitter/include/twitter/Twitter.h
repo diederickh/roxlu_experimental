@@ -10,8 +10,8 @@
 #include <twitter/TwitterTypes.h>
 #include <twitter/Tweet.h>
 
-
 class Twitter {
+
  public:
   Twitter();
   ~Twitter();
@@ -20,6 +20,7 @@ class Twitter {
   void apiStatusesFilter(TwitterStatusesFilter& param, httpconnection_event_callback cbEvent, void* user);
   void apiStatusesUpdate(TwitterStatusesUpdate& param, httpconnection_event_callback cbEvent, void* user);
   void apiStatusesUpdateWithMedia(TwitterStatusesUpdate& param, httpconnection_event_callback cbEvent, void* user);
+
  private:
   void setDefaultParams(TwitterCallParams& p);
   void makeAPICall(TwitterCallParams& p);                                                                               /* helper that creates an request object and makes sure the request is made..*/
@@ -29,4 +30,5 @@ class Twitter {
   OAuth oauth;                                                                                                          /* the requests must be signed using oauth */
   HTTP http;                                                                                                            /* our http context that we used to perform all the http requests */
 };
+
 #endif

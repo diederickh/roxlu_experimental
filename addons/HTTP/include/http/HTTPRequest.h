@@ -9,11 +9,11 @@
 #include <http/HTTPURL.h>
 
 class HTTPRequest {
+
  public:
   HTTPRequest();
   HTTPRequest(HTTPURL url, HTTPMethod m = HTTP_METHOD_GET, HTTPVersion v = HTTP_VERSION_1_0);
   ~HTTPRequest();
-
   void addHeader(HTTPHeader h);                                      /* add a http header */
   void addContentParameter(HTTPParameter p);                         /* add a parameter that will be added into the content of the request (multipart/form-data, or url encoded) */
   void addContentParameters(HTTPParameters& p);                      /* "" */
@@ -28,13 +28,11 @@ class HTTPRequest {
   bool hasFileParameter();                                           /* helper which returns true when there are content parameters that are files */
   void generateBoundary();                                           /* generates an unique boundary string */
   std::string getBoundary();                                         /* returns the generated boundary string */ 
-  
   HTTPURL& getURL();                                                 /* returns the URL with the host information to which we send the request */
   HTTPMethod getMethod();                                            /* POST, GET, .. */
   HTTPVersion getVersion();                                          /* HTTP 1.0 or 1.1 */
   HTTPFormEncoding getFormEncoding();                                /* returns the form encoding; if the current value is HTTP_FORM_ENCODING_NONE (default), we automatically detect the correct encoding */
   HTTPParameters& getContentParameters();                            /* returns a reference to the content parameters */
-
   void print();                                                      /* shows some debug info */
 
  private:
@@ -86,4 +84,5 @@ inline HTTPParameters& HTTPRequest::getContentParameters() {
 inline void HTTPRequest::addContentParameters(HTTPParameters& p) {
   content_parameters.copy(p);
 }
+
 #endif

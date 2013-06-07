@@ -7,7 +7,6 @@ Twitter::Twitter() {
 Twitter::~Twitter() {
 }
 
-
 // This must be called before making any of the other calls!
 bool Twitter::setup(std::string token, std::string tokenSecret, 
                     std::string consumer, std::string consumerSecret)
@@ -21,7 +20,6 @@ bool Twitter::setup(std::string token, std::string tokenSecret,
 void Twitter::update() {
   http.update();
 }
-
 
 // API IMPLEMENTATION
 //-------------------------------------------------------------------------------
@@ -93,8 +91,4 @@ void Twitter::makeAPICall(TwitterCallParams& p) {
   else {
     http.sendRequest(req, p.cb_response, p.cb_user);
   }
-
 }
-
-
-

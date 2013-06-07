@@ -46,7 +46,6 @@ void SSLBuffer::addEncryptedData(const char* buf, size_t len) {
   update();
 }
 
-
 // Updates the SSL bio states and en/decrypts
 void SSLBuffer::update() {
   if(!SSL_is_init_finished(ssl)) {
@@ -78,7 +77,6 @@ void SSLBuffer::flushDestBIO() {
   }
 }
 
-
 // Is there data pending in the out buffer which should send?
 void SSLBuffer::flushSourceBIO() {
   if(SSL_is_init_finished(ssl)) { 
@@ -90,7 +88,6 @@ void SSLBuffer::flushSourceBIO() {
     }
   }
 }
-
 
 // Any of the SSL_* functions can cause a error. We need to handle the SSL_ERROR_WANT_READ/WRITE
 void SSLBuffer::handleError(int r) {

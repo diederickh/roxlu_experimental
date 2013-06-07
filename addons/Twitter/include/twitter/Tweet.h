@@ -12,7 +12,6 @@ typedef unsigned long long u64;
 #  endif
 #endif
 
-
 struct TweetUser {
 public:
   TweetUser();

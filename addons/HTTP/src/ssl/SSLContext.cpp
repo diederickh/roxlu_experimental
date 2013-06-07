@@ -46,5 +46,3 @@ SSLContext::~SSLContext() {
     SSL_CTX_free(ssl_ctx);
   }
 }
-
-

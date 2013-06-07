@@ -22,7 +22,6 @@ HTTPURL::HTTPURL(std::string host, std::string path, HTTPProto proto)
 HTTPURL::~HTTPURL() {
 }
 
-
 std::string HTTPURL::getQueryString() {
   std::string result;
   HTTPParameters tmp;

@@ -224,8 +224,9 @@ HTTPConnection::~HTTPConnection() {
   loop = NULL;
   cb_event = NULL;
   cb_event_user = NULL;
-  //  cb_data = NULL;
-  //  cb_data_user = NULL;
+  cb_close = NULL;
+  cb_close_user = NULL;
+
   host.clear();
   port.clear();
 
