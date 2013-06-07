@@ -8,13 +8,13 @@ PercentEncode::PercentEncode() {
 
 std::string PercentEncode::encode(std::string input) {
   std::string result;
-  char buf[5];
-  char encoded;
+  char buf[5] = {};
+  char encoded[2] = {};
   for(int i = 0; i < input.size(); ++i) {
     char c = input[i];
     if(rfc3986[c]) {
-      sprintf(&encoded, "%c", rfc3986[c]);
-      result.append(&encoded,1);
+      sprintf(encoded, "%c", rfc3986[c]);
+      result.push_back(encoded[0]);
     }
     else {
       sprintf(buf, "%%%02X", c);

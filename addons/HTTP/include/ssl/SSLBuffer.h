@@ -8,6 +8,7 @@ extern "C" {
 }
 
 #include <vector>
+#include <iterator>
 #include <algorithm>
 
 typedef void(*sslbuffer_callback)(const char* data, size_t len, void* user);

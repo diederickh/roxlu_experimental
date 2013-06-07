@@ -10,6 +10,7 @@
 #  include <sys/timeb.h>
 #endif
 
+#include <iterator>
 #include <algorithm> 
 #include <functional> 
 #include <cctype>

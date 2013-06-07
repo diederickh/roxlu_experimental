@@ -21,11 +21,15 @@ void twitter_filter_cb(HTTPConnection* c, HTTPConnectionEvent event,
 
 int main() {
 
+#error  remove this define + set the correct tokens before running this example
+
   Twitter tw;
   bool r =  tw.setup("466622389-...",  /* the token */
                      "eH25IAxRIB...",  /* the token secret */
                      "e0vURm6xhS...",  /* the consumer key */
                      "R7HfL0vgy...."); /* the consumer secret */
+
+
   if(!r) {
     RX_ERROR("Cannot setup the twitter obj");
     ::exit(EXIT_FAILURE);

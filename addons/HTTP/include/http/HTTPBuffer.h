@@ -2,6 +2,7 @@
 #define ROXLU_HTTP_BUFFER_H
 
 #include <vector>
+#include <iterator>
 #include <algorithm>
 #include <ssl/SSLContext.h>
 #include <ssl/SSLBuffer.h>

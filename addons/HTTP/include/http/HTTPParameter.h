@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include <string>
+#include <iterator>
 #include <algorithm>
 #include <vector>
 #include <http/HTTPTypes.h>

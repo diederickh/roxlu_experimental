@@ -51,15 +51,18 @@ roxlu_addon_begin("http")
     roxlu_add_extern_lib(libeay32.lib)
     roxlu_add_extern_lib(zlib.lib)
     roxlu_add_extern_lib(libuv.lib)
+    roxlu_add_extern_lib(jansson.lib)
   
     roxlu_add_lib(ws2_32.lib)
     roxlu_add_lib(psapi.lib)
     roxlu_add_lib(iphlpapi.lib)
+   
   
     roxlu_add_dll(libcurl.dll)
     roxlu_add_dll(libeay32.dll)
     roxlu_add_dll(ssleay32.dll)
-  
+    roxlu_add_dll(jansson.dll)
+    
   endif()
   
   if(NOT APPLE AND UNIX)

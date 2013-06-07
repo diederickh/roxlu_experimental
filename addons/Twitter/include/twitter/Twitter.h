@@ -1,8 +1,11 @@
 #ifndef ROXLU_TWITTER_H
 #define ROXLU_TWITTER_H
 
-#include <string>
+extern "C" {
+#  include <uv.h>
+}
 
+#include <string>
 #include <ssl/SSLContext.h>
 #include <oauth/OAuth.h>
 #include <http/HTTP.h>
