@@ -61,7 +61,9 @@ VideoCapture::VideoCapture(VideoCaptureImplementation imp)
 #elif defined(__APPLE__)
     case VIDEOCAPTURE_AVFOUNDATION:               {  cap = new VideoCaptureMac();             break;     }
 #endif
+#if defined(ROXLU_USE_EDSDK)
     case VIDEOCAPTURE_EDSDK:                      {  cap = new Canon();                       break;     }     
+#endif
     default: {
       RX_ERROR("Unhandled VideoCaptureImplemtation type");
       ::exit(EXIT_FAILURE);

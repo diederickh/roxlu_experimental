@@ -99,6 +99,16 @@ Tips & Tricks
   on Mac and the file `[yourapp]/build/cmake/icon.icns` will be used. Checkout http://www.img2icnsapp.com/ 
   to create icon files.
 
+# Documentation
+These are just some blurbs which I will structure at some point
+
+/rx_create_shader/
+````c++
+inline GLuint rx_create_shader(const char* vs, const char* fs) 
+````
+Creates a shader with given vertex and fragment sources. You need
+to call `glLinkPogram(prog)`;
+
 TODO
 ----
 - [ ] Remove all unused #defines and use compiler preprocessor flag if possible:

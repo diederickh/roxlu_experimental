@@ -16,6 +16,7 @@ AVDecoderFrame::~AVDecoderFrame() {
   type = AV_TYPE_NONE;
 
   if(frame) {
+    av_frame_unref(frame);
     avcodec_free_frame(&frame);          
     frame = NULL;
   }
@@ -103,6 +104,9 @@ bool AVDecoder::open(std::string filename, bool datapath) {
     return false;
   }
 
+
+  video_codec_context->refcounted_frames = 1;   // see reference of avcodec_decode_video2
+
 #if 0
   // There seems to be a bug in libav regarding copy_context and avcodec_close. 
   // avcodec_close is not freeing the copied extradata in case, because it checks
@@ -184,6 +188,7 @@ AVDecoderFrame* AVDecoder::decodeFrame(bool& isEOF) {
     if(got_picture) {
       decoder_frame->pts = video_time_millis * decoder_frame->frame->pkt_pts;
       decoder_frame->type = AV_TYPE_VIDEO;
+      
     }
   }
   else {

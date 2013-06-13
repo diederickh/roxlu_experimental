@@ -15,7 +15,9 @@
 #  include <videocapture/win/mediafoundation/VideoCaptureMediaFoundation.h>
 #endif
 
-#include <videocapture/edsdk/Canon.h>
+#if defined(ROXLU_USE_EDSDK) // @todo make this in option in the cmake files (edsdk is only 32bit)
+#  include <videocapture/edsdk/Canon.h>
+#endif
 
 extern "C" {
 #  include <libavformat/avformat.h>

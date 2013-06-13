@@ -12,7 +12,6 @@ roxlu_addon_begin("videocapture")
   roxlu_addon_add_source_file(videocapture/Types.cpp)
 
   if(APPLE) 
-   #  roxlu_addon_add_source_file(videocapture/rx_capture_mac.mm)
      roxlu_addon_add_source_file(videocapture/mac/VideoCaptureAVFoundation.mm)
      roxlu_addon_add_source_file(videocapture/mac/VideoCaptureMac.cpp)
 
@@ -30,25 +29,26 @@ roxlu_addon_begin("videocapture")
      roxlu_add_lib(${fr_core_media})
      roxlu_add_lib(${fr_core_media_io})
 
-     # testing - with EDSK
+     # testing - with EDSDK
+     if(USE_EDSDK)
+       add_definitions(-D__MACOS__)
 
-     add_definitions(-D__MACOS__)
-
-     roxlu_addon_add_source_file(videocapture/edsdk/Canon.cpp)
-     roxlu_addon_add_source_file(videocapture/edsdk/CanonTypes.cpp)
-     roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskQueue.cpp)
-     roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskOpenSession.cpp)
-     roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskCloseSession.cpp)
-     roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskTakePicture.cpp)
-     roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskProperty.cpp)
-     roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskDownload.cpp)
-     roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskEvfStart.cpp)
-     roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskEvfEnd.cpp)
-     roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskEvfDownload.cpp)
-     roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskStop.cpp)
-     roxlu_addon_add_source_file(videocapture/edsdk/CanonUtils.cpp)
-     roxlu_add_extern_framework(EDSDK)
-     roxlu_add_extern_framework(DPP)
+       roxlu_addon_add_source_file(videocapture/edsdk/Canon.cpp)
+       roxlu_addon_add_source_file(videocapture/edsdk/CanonTypes.cpp)
+       roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskQueue.cpp)
+       roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskOpenSession.cpp)
+       roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskCloseSession.cpp)
+       roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskTakePicture.cpp)
+       roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskProperty.cpp)
+       roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskDownload.cpp)
+       roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskEvfStart.cpp)
+       roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskEvfEnd.cpp)
+       roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskEvfDownload.cpp)
+       roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskStop.cpp)
+       roxlu_addon_add_source_file(videocapture/edsdk/CanonUtils.cpp)
+       roxlu_add_extern_framework(EDSDK)
+       roxlu_add_extern_framework(DPP)
+    endif()
 
   endif(APPLE)
 
@@ -61,32 +61,22 @@ roxlu_addon_begin("videocapture")
 
   if(WIN32) 
     find_package(WindowsSDK REQUIRED)
-  #  roxlu_add_include_dir("${WINDOWSSDK_LATEST_DIR}/Include")
-  file(TO_CMAKE_PATH ${WINDOWSSDK_PREFERRED_DIR} windows_sdk_dir)
-  file(TO_CMAKE_PATH ${WINDOWSSDK_LATEST_DIR} windows_sdk_dir)
-    message("+++++++++++++ ${windows_sdk_dir}")
-    message("+++++++++++++ ${WINDOWSSDK_LATEST_DIR}")
+
+    file(TO_CMAKE_PATH ${WINDOWSSDK_PREFERRED_DIR} windows_sdk_dir)
+    file(TO_CMAKE_PATH ${WINDOWSSDK_LATEST_DIR} windows_sdk_dir)
+
     roxlu_add_include_dir(${windows_sdk_dir}/Include)
     roxlu_add_lib(${windows_sdk_dir}/Samples/multimedia/directshow/baseclasses/Release/strmbase.lib)
-#    roxlu_add_lib("strmbase.lib")
-
-   roxlu_addon_add_source_file(videocapture/win/directshow/VideoCaptureDirectShow.cpp)
-   roxlu_addon_add_source_file(videocapture/win/directshow/VideoCaptureDirectShowCB.cpp)
-   roxlu_addon_add_source_file(videocapture/win/mediafoundation/VideoCaptureMediaFoundation.cpp)
-   roxlu_addon_add_source_file(videocapture/win/mediafoundation/VideoCaptureMediaFoundationCB.cpp)
-#   roxlu_addon_add_source_file(videocapture/win/VideoCaptureWin.cpp)
-#   roxlu_addon_add_source_file(${roxlu_platform}/videocapture/rx_capture_win.cpp)
-#   roxlu_addon_add_source_file(${roxlu_platform}/videocapture/VideoCaptureDirectShow.cpp)
-
     roxlu_add_lib(strmiids.lib)
+
+    roxlu_addon_add_source_file(videocapture/win/directshow/VideoCaptureDirectShow.cpp)
+    roxlu_addon_add_source_file(videocapture/win/directshow/VideoCaptureDirectShowCB.cpp)
+    roxlu_addon_add_source_file(videocapture/win/mediafoundation/VideoCaptureMediaFoundation.cpp)
+    roxlu_addon_add_source_file(videocapture/win/mediafoundation/VideoCaptureMediaFoundationCB.cpp)
   endif()
 
   # --------------------------------------------------------------------------------------
 
 roxlu_addon_end()
 
-if(APPLE)
-#  set_target_properties(roxlu_videocapture PROPERTIES COMPILE_FLAGS "-ObjC++")
-#  set_target_properties(rx_capture PROPERTIES COMPILE_FLAGS "-ObjC++")
-endif()
 
