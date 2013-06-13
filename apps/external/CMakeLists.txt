@@ -55,6 +55,7 @@ if(NOT APPLE AND UNIX)
   roxlu_add_lib(libXrandr.so)
   roxlu_add_lib(pthread)
   roxlu_add_lib(Xi)
+  roxlu_add_lib(dl)
   
 endif()
 

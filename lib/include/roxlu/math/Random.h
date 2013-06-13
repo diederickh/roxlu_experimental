@@ -2,10 +2,12 @@
 #define ROXLU_RANDOMH
 
 // random: source openFrameworks + stackoverflow
+#include <stdlib.h>
 #include <roxlu/math/Vec3.h>
 #include <roxlu/math/Vec2.h>
 #include <roxlu/core/platform/Platform.h>
 #include "float.h"
+
 
 
 static void rx_init_random() {

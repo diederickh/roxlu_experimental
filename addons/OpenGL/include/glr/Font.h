@@ -5,10 +5,10 @@
 #include <iomanip>
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h> 
 #include <string>
 #include <roxlu/core/Log.h>
 #include <roxlu/opengl/Error.h>
-
 
 namespace gl {
 
