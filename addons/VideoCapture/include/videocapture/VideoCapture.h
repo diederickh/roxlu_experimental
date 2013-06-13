@@ -5,14 +5,18 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h> 
+#include <vector>
 #include <roxlu/core/Log.h>
 #include <videocapture/Types.h>
+#include <videocapture/VideoCaptureBase.h>
 
 #if defined(__APPLE__)
 #  include <videocapture/mac/VideoCaptureMac.h>
 #elif defined(_WIN32)
 #  include <videocapture/win/directshow/VideoCaptureDirectShow.h>
 #  include <videocapture/win/mediafoundation/VideoCaptureMediaFoundation.h>
+#elif defined(__linux)
+#  include <videocapture/linux/v4l2/VideoCaptureV4L2.h>
 #endif
 
 #if defined(ROXLU_USE_EDSDK) // @todo make this in option in the cmake files (edsdk is only 32bit)
@@ -48,7 +52,7 @@ class VideoCapture {
 #elif defined(__APPLE__)
   VideoCapture(VideoCaptureImplementation imp = VIDEOCAPTURE_AVFOUNDATION);
 #elif defined(__linux)  
-  VideoCapture(VideoCaptureImplementation imp = VIDEOCAPTURE_V4L);
+  VideoCapture(VideoCaptureImplementation imp = VIDEOCAPTURE_V4L2);
 #else
   VideoCapture(VideoCaptureImplementation imp);
 #endif
@@ -131,23 +135,40 @@ inline int VideoCapture::listDevices() {
 }
 
 inline bool VideoCapture::startCapture() {
+
   if(state != VideoCapture::STATE_OPENED) {
     RX_ERROR("Cannot start capturing because we're not opened");
     return false;
   }
+
   if(state == VideoCapture::STATE_CAPTURING) {
     RX_ERROR("Already capturing...");
     return false;
   }
-  return cap->startCapture();
+
+  if(cap->startCapture()) {
+    state = VideoCapture::STATE_CAPTURING;
+    cap->setState(VIDCAP_STATE_CAPTURING);
+    return true;
+  }
+
+  return false;
 }
 
 inline bool VideoCapture::stopCapture() {
+
   if(state != VideoCapture::STATE_CAPTURING) {
     RX_ERROR("Cannot stopCapture() because we're not capturing");
     return false;
   }
-  return cap->stopCapture();
+
+  if(cap->stopCapture()) {
+    state = VideoCapture::STATE_OPENED;
+    cap->setState(VIDCAP_STATE_OPENED);
+    return true;
+  }
+
+  return false;
 }
 
 inline void VideoCapture::update() {

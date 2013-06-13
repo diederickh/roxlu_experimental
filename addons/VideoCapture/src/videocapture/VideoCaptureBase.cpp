@@ -177,8 +177,6 @@ void VideoCaptureBase::printSupportedPixelFormats(int device) {
     }
 }
 
-
-
 void VideoCaptureBase::printCapabilities(int device) {
 
   std::vector<AVCapability> caps = getCapabilities(device);
@@ -215,55 +213,4 @@ void VideoCaptureBase::printCapabilities(int device) {
       double fps = 1.0 / (double(r.num) / double(r.den));
       RX_VERBOSE("\tFPS %2.02f ", fps);
     }
-  
-  // sort by size and pixel format
 }
-
-#if 0
-std::vector<AVCapability> VideoCaptureBase::getCapabilities(int device) {
-  std::vector<AVCapability> result;
-
-  std::vector<AVSize> sizes = getSupportedSizes(device);
-  if(!sizes.size()) {
-    return result;
-  }
-
-  for(std::vector<AVSize>::iterator sit = sizes.begin(); 
-      sit != sizes.end(); 
-      ++sit) 
-    {
-
-      AVSize& size = *sit;
-      std::vector<enum AVPixelFormat> formats = getSupportedPixelFormats(device, 
-                                                                         size.width, 
-                                                                         size.height);
-      for(std::vector<enum AVPixelFormat>::iterator pit = formats.begin(); 
-        pit != formats.end(); 
-        ++pit)
-      {
-        
-        enum AVPixelFormat fmt = *pit;
-        std::vector<AVRational> framerates = getSupportedFrameRates(device, 
-                                                                    size.width, 
-                                                                    size.height, 
-                                                                    fmt);
-
-        for(std::vector<AVRational>::iterator fit = framerates.begin(); 
-            fit != framerates.end(); 
-            ++fit) 
-          {
-            AVRational fps = *fit;
-
-            AVCapability cb;
-            cb.size = size;
-            cb.framerate = fps;
-            cb.pixel_format = fmt;
-            
-            result.push_back(cb);
-          }
-      }
-    }
-
-  return result;
-}
-#endif

@@ -84,7 +84,6 @@ AVEncoderFrame::~AVEncoderFrame() {
 
 AVEncoderThreaded::AVEncoderThreaded()
   :is_setup(false)
-  ,thread(NULL)
   ,must_stop(true)
   ,num_video_frames_to_allocate(0)
   ,millis_per_video_frame(0)

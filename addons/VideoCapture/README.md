@@ -25,12 +25,14 @@
 - Add an API for device detection/loss
 
 
-# What version
+
+### EDSDK
+##### What version
   
   It seems that the latest version is not really the latest one; 
   Version 2.13 crashes with a autorelease error and 2.12 seems to work fine (correct: EDSDKv2120M.dmg.zip, wrong: EDSDKv2130M.dmg.zip)
 
-# Fixing @executable_paths for the EDSK frameworks:
+##### Fixing @executable_paths for the EDSK frameworks:
 
 - https://gist.github.com/roxlu/fb6f343d6a69c0ee43e7
 

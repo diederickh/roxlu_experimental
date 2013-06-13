@@ -26,12 +26,6 @@ class VideoCaptureMac : public VideoCaptureBase {
   /* CAPABILITIES */
   std::vector<AVCapability> getCapabilities(int device);
 
-  /*
-  std::vector<AVRational> getSupportedFrameRates(int device, int width, int height,  enum AVPixelFormat fmt);
-  std::vector<enum AVPixelFormat> getSupportedPixelFormats(int device, int width, int height);
-  std::vector<AVSize> getSupportedSizes(int device);
-  */
-
  private:
   void* cap;
 };

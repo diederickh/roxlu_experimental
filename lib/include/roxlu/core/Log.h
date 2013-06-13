@@ -7,6 +7,11 @@
 #  include <stdarg.h>
 #endif
 
+#if defined(__linux) 
+#  include <stdarg.h>
+#  include <stdio.h>
+#endif
+
 #define RX_LOG_NO_COLOR
 #define RX_LOG_LEVEL_ALL 4
 #define RX_LOG_LEVEL_ERROR  1
