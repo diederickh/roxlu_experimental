@@ -35,6 +35,8 @@ Simulation::Simulation()
 void Simulation::setup() {
   setWindowTitle("Video recorder - Press 1 to start recording. Press 2 to stop the recording.");
 
+#if 0
+
 #if defined(USE_CANON)
   can.listDevices();
 
@@ -79,9 +81,13 @@ void Simulation::setup() {
   cap.printSupportedSizes(0);
   */
 #endif
+
+
+#endif
 }
 
 void Simulation::update() {
+#if 0
 #if !defined(USE_CANON)
    cap.update();
 #endif
@@ -90,6 +96,7 @@ void Simulation::update() {
      has_new_frame = false;
    }
    // RX_VERBOSE(".");
+#endif
 }
 
 void Simulation::draw() {
@@ -97,7 +104,7 @@ void Simulation::draw() {
   //  printf("%f\n", r);
   glClearColor(r, 0, 1-r, 1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  surface.draw(0,0);
+  //  surface.draw(0,0);
   fps.draw();
 }
 
@@ -117,7 +124,7 @@ void Simulation::onChar(int ch) {
 }
 
 void Simulation::onKeyDown(int key) {
-
+#if 0
 #if defined(USE_CANON) 
   if(key == GLFW_KEY_1) {
     for(int i = 0; i < 200; ++i) {
@@ -180,15 +187,18 @@ void Simulation::onKeyDown(int key) {
     cap.closeDevice();
   }
 #endif
-
+#endif
 }
 
 void Simulation::onKeyUp(int key) {
 }
 
 void Simulation::onWindowClose() {
+#if 0
 #if defined(USE_CANON)
   can.closeDevice();
+#endif
+
 #endif
   ::exit(EXIT_SUCCESS);
 }

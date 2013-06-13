@@ -371,7 +371,7 @@ set(roxlu_3d_sources
   ${roxlu_src_dir}/3d/Camera.cpp
   ${roxlu_src_dir}/3d/ArcBall.cpp
   ${roxlu_src_dir}/3d/EasyCam.cpp
-  ${roxlu_src_dir}/3d/shapes/Axis.cpp
+#  ${roxlu_src_dir}/3d/shapes/Axis.cpp
 )
 
 set(roxlu_core_sources 
@@ -384,15 +384,15 @@ set(roxlu_core_sources
 set(roxlu_experimental_sources 
 #  ${roxlu_src_dir}/experimental/Image.cpp
 #  ${roxlu_src_dir}/experimental/StereoCam.cpp
-  ${roxlu_src_dir}/experimental/DebugDrawer.cpp
+#  ${roxlu_src_dir}/experimental/DebugDrawer.cpp
 #  ${roxlu_src_dir}/experimental/Tweens.cpp
-  ${roxlu_src_dir}/experimental/BitmapFont.cpp
-  ${roxlu_src_dir}/experimental/Font.cpp
+#  ${roxlu_src_dir}/experimental/BitmapFont.cpp
+#  ${roxlu_src_dir}/experimental/Font.cpp
 #  ${roxlu_src_dir}/experimental/SimpleAnim.cpp
 #  ${roxlu_src_dir}/experimental/Tween.cpp
 #  ${roxlu_src_dir}/experimental/TGA.cpp
 #  ${roxlu_src_dir}/experimental/TGARecorder.cpp
-  ${roxlu_src_dir}/experimental/Text.cpp
+#  ${roxlu_src_dir}/experimental/Text.cpp
 )
 
 set(roxlu_io_sources
@@ -524,7 +524,6 @@ endif(ROXLU_64BIT)
 if(NOT ROXLU_PLATFORM_WIN)
 # http://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
 add_definitions(
-  "-Wno-invalid-offsetof"
   "-Wreturn-type"
   "-Werror=return-type"
 )

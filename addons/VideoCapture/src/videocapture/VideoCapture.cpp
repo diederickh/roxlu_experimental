@@ -60,8 +60,12 @@ VideoCapture::VideoCapture(VideoCaptureImplementation imp)
     case VIDEOCAPTURE_WINDOWS_MEDIA_FOUNDATION:   {  cap = new VideoCaptureMediaFoundation(); break;     }
 #elif defined(__APPLE__)
     case VIDEOCAPTURE_AVFOUNDATION:               {  cap = new VideoCaptureMac();             break;     }
+#elif defined(__linux)      
+    case VIDEOCAPTURE_V4L2:                       {  cap = new VideoCaptureV4L2();            break;     }
 #endif
+#if !defined(__linux)
     case VIDEOCAPTURE_EDSDK:                      {  cap = new Canon();                       break;     }     
+#endif
     default: {
       RX_ERROR("Unhandled VideoCaptureImplemtation type");
       ::exit(EXIT_FAILURE);
@@ -80,8 +84,7 @@ VideoCapture::VideoCapture(VideoCaptureImplementation imp)
 }
 
 VideoCapture::~VideoCapture() {
-  RX_ERROR("Free video_frame_{in,out}, close device if its opened");
-
+  // @todo Free video_frame_{in,out}, close device if its opened
   if(cap) {
     cap->stopCapture();
     cap->closeDevice();
@@ -185,22 +188,20 @@ bool VideoCapture::closeDevice() {
   }
 
   bool r = cap->closeDevice();
+  cap->setState(VIDCAP_STATE_NONE);
 
   if(sws) {
     sws_freeContext(sws);
     sws = NULL;
   }
 
-
+  // @todo - need to test if se leak the video_frame_out / in here
   if(video_frame_out) {
-    RX_VERBOSE("FREED VIDEO_FRAME_OUT");
-    // av_free(video_frame_out->data);
     avcodec_free_frame(&video_frame_out);
     video_frame_in = NULL;
   }
+
   if(video_frame_in) {
-    RX_VERBOSE("FREED VIDEO_FRAME_IN");
-    //av_free(video_frame_in->data);
     avcodec_free_frame(&video_frame_in);
     video_frame_in = NULL;
   }
@@ -214,6 +215,3 @@ bool VideoCapture::needsSWS() {
   return settings.out_pixel_format != AV_PIX_FMT_NONE
     && settings.in_pixel_format != settings.out_pixel_format;
 }
-
-
-

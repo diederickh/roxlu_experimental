@@ -28,11 +28,9 @@ extern "C" {
 #define ERR_AVD_FIND_VIDEO_DECODER "Cannot find the video decoder"
 #define ERR_AVD_OPEN_VIDEO_CONTEXT "Cannot open the video context: %s"
 #define ERR_AVD_ALLOC_VIDEO_CONTEXT "Cannot allocate video codec context"
-//#define ERR_AVD_NO_VIDEO_CODEC_CTX "Cannot find an initialized video codec context from the stream"
 #define ERR_AVD_NO_VIDEO_STREAM "Cannot find a video stream"
 #define ERR_AVD_ALLOC_FRAME "Cannot allocate a avframe"
 #define ERR_AVD_COPY_VIDEO_CONTEXT "Cannot copy the video context: %s"
-//#define ERR_AVD_CLOSE_NO_FORMAT_CTX "Cannot close because it looks like you didn't call open()"
 #define V_AVD_EOF "We've read the whole file!"
 #define V_AVD_STREAM_NOT_USED "The stream with index: %d is not used"
 

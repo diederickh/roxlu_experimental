@@ -1,6 +1,7 @@
 # videocapture
 roxlu_add_addon(UV)  # we need the uv addon for the canon wrapper
 roxlu_add_addon(Image) # we use the jpeg to decode the live view stream
+
 roxlu_addon_begin("videocapture")
 
   # --------------------------------------------------------------------------------------
@@ -31,9 +32,7 @@ roxlu_addon_begin("videocapture")
      roxlu_add_lib(${fr_core_media_io})
 
      # testing - with EDSK
-
      add_definitions(-D__MACOS__)
-
      roxlu_addon_add_source_file(videocapture/edsdk/Canon.cpp)
      roxlu_addon_add_source_file(videocapture/edsdk/CanonTypes.cpp)
      roxlu_addon_add_source_file(videocapture/edsdk/CanonTaskQueue.cpp)
@@ -53,22 +52,26 @@ roxlu_addon_begin("videocapture")
   endif(APPLE)
 
   if(UNIX AND NOT APPLE)
-    roxlu_addon_add_source_file(${roxlu_platform}/videocapture/rx_capture_linux.cpp)
-    roxlu_addon_add_source_file(${roxlu_platform}/videocapture/VideoCaptureV4L2.cpp)
+    roxlu_add_extern_include_dir(videocapture/linux/)
+    roxlu_addon_add_source_file(videocapture/linux/v4l2/VideoCaptureV4L2.cpp)
+    roxlu_addon_add_source_file(videocapture/linux/v4l2/VideoCaptureV4L2Types.cpp)
+    roxlu_addon_add_source_file(videocapture/linux/v4l2/VideoCaptureV4L2Utils.cpp) 
+
     roxlu_add_lib(udev)
+    add_definitions(-D__STDC_CONSTANT_MACROS)
+
   endif(UNIX AND NOT APPLE)
 
 
   if(WIN32) 
     find_package(WindowsSDK REQUIRED)
-  #  roxlu_add_include_dir("${WINDOWSSDK_LATEST_DIR}/Include")
-  file(TO_CMAKE_PATH ${WINDOWSSDK_PREFERRED_DIR} windows_sdk_dir)
-  file(TO_CMAKE_PATH ${WINDOWSSDK_LATEST_DIR} windows_sdk_dir)
-    message("+++++++++++++ ${windows_sdk_dir}")
-    message("+++++++++++++ ${WINDOWSSDK_LATEST_DIR}")
+  
+    file(TO_CMAKE_PATH ${WINDOWSSDK_PREFERRED_DIR} windows_sdk_dir)
+    file(TO_CMAKE_PATH ${WINDOWSSDK_LATEST_DIR} windows_sdk_dir)
+  
     roxlu_add_include_dir(${windows_sdk_dir}/Include)
     roxlu_add_lib(${windows_sdk_dir}/Samples/multimedia/directshow/baseclasses/Release/strmbase.lib)
-#    roxlu_add_lib("strmbase.lib")
+    # roxlu_add_lib("strmbase.lib")
 
    roxlu_addon_add_source_file(videocapture/win/directshow/VideoCaptureDirectShow.cpp)
    roxlu_addon_add_source_file(videocapture/win/directshow/VideoCaptureDirectShowCB.cpp)

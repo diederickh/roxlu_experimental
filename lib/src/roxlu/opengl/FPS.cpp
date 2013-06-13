@@ -1,4 +1,5 @@
 #include <roxlu/opengl/FPS.h>
+#include <roxlu/core/Utils.h>
 
 #ifdef ROXLU_WITH_OPENGL
 
@@ -70,7 +71,7 @@ namespace roxlu {
       }
     }
 
-    rx_uint64 now = Timer::now();
+    rx_uint64 now = rx_millis();
     ++frame_count;
     if(now > timeout) {
       timeout = now + 1000;

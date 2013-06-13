@@ -53,6 +53,9 @@ if(NOT APPLE AND UNIX)
   roxlu_add_lib(Xxf86vm)
   roxlu_add_lib(rt)
   roxlu_add_lib(libXrandr.so)
+  roxlu_add_lib(pthread)
+  roxlu_add_lib(Xi)
+  
 endif()
 
 roxlu_add_include_dir(${glfw_include_dir})
