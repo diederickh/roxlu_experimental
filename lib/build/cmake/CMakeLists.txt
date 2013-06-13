@@ -386,7 +386,9 @@ set(roxlu_experimental_sources
 #  ${roxlu_src_dir}/experimental/StereoCam.cpp
 #  ${roxlu_src_dir}/experimental/DebugDrawer.cpp
 #  ${roxlu_src_dir}/experimental/Tweens.cpp
+
 #  ${roxlu_src_dir}/experimental/BitmapFont.cpp
+  ${roxlu_src_dir}/experimental/BitmapFont.cpp
 #  ${roxlu_src_dir}/experimental/Font.cpp
 #  ${roxlu_src_dir}/experimental/SimpleAnim.cpp
 #  ${roxlu_src_dir}/experimental/Tween.cpp
@@ -426,10 +428,10 @@ set(roxlu_opengl_sources
 
 # 3rd party, used by addons
 set(roxlu_extern_sources_c 
-  ${roxlu_src_dir}/external/http_parser.c
-  ${roxlu_src_dir}/external/stb_image_write.c
-  ${roxlu_src_dir}/external/slre.c
-  ${roxlu_src_dir}/external/stb_truetype.c
+#  ${roxlu_src_dir}/external/http_parser.c
+#  ${roxlu_src_dir}/external/stb_image_write.c
+#  ${roxlu_src_dir}/external/slre.c
+#  ${roxlu_src_dir}/external/stb_truetype.c
 ) 
 
 set(roxlu_lib_source_files
