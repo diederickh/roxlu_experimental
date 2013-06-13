@@ -12,29 +12,33 @@
 #define VIDEO_CAP_NUM_PBOS 2
 #define VIDEO_CAP_PI 3.14159265
 
-static const char* VIDEO_CAP_VS = GLSL(120,
-  uniform mat4 u_mm;
-  uniform mat4 u_pm;
-  uniform mat4 u_scale_matrix;
-  uniform mat4 u_rot_matrix;
-  attribute vec4 a_pos;
-  attribute vec2 a_tex;
-  varying vec2 v_tex;
-  void main() {
-    gl_Position = u_pm * u_mm * u_rot_matrix * u_scale_matrix * a_pos;
-    v_tex = a_tex;
-  }
-);
+// @todo create GL3 versions of the video capture shaders
+static const char* VIDEO_CAP_VS = "" 
+  " #extension GL_ARB_texture_rectangle : enable\n"
+  " uniform mat4 u_mm; "
+  " uniform mat4 u_pm; "
+  " uniform mat4 u_scale_matrix; "
+  " uniform mat4 u_rot_matrix; "
+  " attribute vec4 a_pos; "
+  " attribute vec2 a_tex; "
+  " varying vec2 v_tex;" 
+  " void main() { "
+  "   gl_Position = u_pm * u_mm * u_rot_matrix * u_scale_matrix * a_pos; "
+  "  v_tex = a_tex; "
+  " }" 
+  "";
 
-static const char* VIDEO_CAP_FS = GLSL(120, 
-  uniform sampler2DRect u_tex;
-  varying vec2 v_tex;
-  void main() {
-    vec4 col = texture2DRect(u_tex, v_tex);
-    gl_FragColor = col;
-		gl_FragColor.a = 1.0;
-  }
-);
+
+static const char* VIDEO_CAP_FS = ""
+  " #extension GL_ARB_texture_rectangle : enable\n"
+  " uniform sampler2DRect u_tex; " 
+  " varying vec2 v_tex; "
+  " void main() { "
+  "   vec4 col = texture2DRect(u_tex, v_tex); "
+  "   gl_FragColor = col; "
+  "   gl_FragColor.a = 1.0; "
+  " } "
+  "";
 
 struct VideoCaptureVertex {
   float x,y,s,t;
@@ -47,12 +51,13 @@ class VideoCaptureGLSurface {
  public:
   VideoCaptureGLSurface();
   ~VideoCaptureGLSurface();
-  //  void setup(int w, int h, VideoCaptureFormat fmt = VC_NONE);
+
 #if defined(__APPLE__)
   void setup(int w, int h, GLenum internalFormat = GL_RGBA, GLenum format = GL_YCBCR_422_APPLE, GLenum type = GL_UNSIGNED_SHORT_8_8_APPLE);     /* the GL_YCBCR_422_APPLE format is the same as libav AV_PIX_FMT_UYVY422, also called "yuv2" */
 #else
   void setup(int w, int h, GLenum internalFormat = GL_RGBA, GLenum format = GL_RGB, GLenum type = GL_UNSIGNED_BYTE);
 #endif
+
   void setPixels(unsigned char* pixels, size_t nbytes);
   void draw(int x, int y, int width = 0, int height = 0);
   void reset();

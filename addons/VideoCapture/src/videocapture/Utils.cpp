@@ -18,7 +18,7 @@ std::string rx_libav_pixel_format_to_string(enum AVPixelFormat fmt) {
     case AV_PIX_FMT_YUV422P10LE:   return "AV_PIX_FMT_YUV422P10LE";      break;    
     case AV_PIX_FMT_YUV444P10LE:   return "AV_PIX_FMT_YUV444P10LE";      break;    
     case AV_PIX_FMT_VDPAU_H264:    return "AV_PIX_FMT_VDPAU_H264";       break;
-    case AV_PIX_FMT_VDPAU_MPEG2:   return "AV_PIX_FMT_VDPAU_MGEG2";      break;
+    case AV_PIX_FMT_VDPAU_MPEG2:   return "AV_PIX_FMT_VDPAU_MPEG2";      break;
     default:                       return "UNHANDLED AVPIXELFORMAT";     break;
   };
 }

@@ -207,14 +207,15 @@ void VideoCaptureV4L2::update() {
     return;
   }
 
+#if 0  
   fd_set fds;
   struct timeval tv;
   int r;
-  
+    
   FD_ZERO(&fds);
   FD_SET(capture_device_fd, &fds);
   
-  tv.tv_sec = 2;
+  tv.tv_sec = 1;
   tv.tv_usec = 0;
 
   r = select(capture_device_fd + 1, &fds, NULL, NULL, &tv);
@@ -233,7 +234,8 @@ void VideoCaptureV4L2::update() {
     closeDevice();
     return;
   }
-  
+#endif
+
   readFrame();
 }
 
@@ -268,6 +270,10 @@ bool VideoCaptureV4L2::readFrame() {
   }
 
   assert(buf.index < capture_buffers.size());
+
+  if(cb_frame) {
+    cb_frame(capture_buffers[buf.index]->start, buf.bytesused, cb_user);
+  }
 
   if(v4l2_ioctl(capture_device_fd, VIDIOC_QBUF, &buf) == -1) {
     RX_ERROR("Error with queueing the buffer again: %s", strerror(errno));

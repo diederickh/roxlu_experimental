@@ -71,15 +71,7 @@ VideoCapture::VideoCapture(VideoCaptureImplementation imp)
       ::exit(EXIT_FAILURE);
     }
   }
-  if(imp == VIDEOCAPTURE_DIRECTSHOW) {
 
-  }
-  else if(imp == VIDEOCAPTURE_WINDOWS_MEDIA_FOUNDATION) {
-    
-  }
-  else {
-
-  }
   cap->setFrameCallback(videocapture_process_frame_callback, this);
 }
 
