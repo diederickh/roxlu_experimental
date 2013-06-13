@@ -31,8 +31,7 @@ roxlu_addon_begin("videocapture")
      roxlu_add_lib(${fr_core_media})
      roxlu_add_lib(${fr_core_media_io})
 
-
-     # testing - with EDSDK
+     # EDSDK
      if(USE_EDSDK)
        add_definitions(-D__MACOS__)
 

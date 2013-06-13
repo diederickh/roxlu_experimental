@@ -177,17 +177,12 @@
 }
 
 - (int) closeDevice {
-  //  return 0; // tmp
-
-
   if(!session) {
     RX_ERROR("Cannot close the device because it hasn't been opened yet.");
     return 0;
   }
-  RX_VERBOSE("CLOSE DEVICE ----C");
-  [session stopRunning];
 
-#if 1
+  [session stopRunning];
   [output setSampleBufferDelegate:nil queue:dispatch_get_main_queue()];
   [session removeInput:input];
   [session removeOutput:output];
@@ -197,15 +192,14 @@
   session = nil;
   input = nil;
   output = nil;
-#endif
+
   return 1;
 }
 
 - (void) dealloc {
-
+  RX_VERBOSE("DEALLOC THE VIDEOCAPTUREAVFOUNDATION");
   return; // tmp
 
-  RX_VERBOSE("DEALLOC");
   if(session) {
     [session stopRunning];
     [session release];
