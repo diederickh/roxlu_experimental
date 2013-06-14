@@ -9,7 +9,7 @@ extern "C" {
 #include <vector>
 
 #define S_VERB_NEW_CONNECTION "Got a new connection: %p"
-#define S_VERB_REMOVED_CONNECTION "Got a new connection: %p"
+#define S_VERB_REMOVED_CONNECTION "Removed connection: %p"
 #define S_VERB_ON_READ "Got data from client. nbytes: %ld"
 #define S_ERR_NO_LOOP "Server loop member is not initialized"
 #define S_ERR_INIT_SOCK "Cannot setup the server socket"

@@ -178,6 +178,8 @@ bool VideoCaptureV4L2::startCapture() {
     return false;
   }
 
+  setState(VIDCAP_STATE_CAPTURING);
+
   return true;
 }
 
@@ -194,6 +196,7 @@ bool VideoCaptureV4L2::stopCapture() {
     return false;
   }
 
+  setState(VIDCAP_STATE_NONE);
   return true;
 }
 

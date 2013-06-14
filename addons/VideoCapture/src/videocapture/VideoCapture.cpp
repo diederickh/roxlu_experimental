@@ -109,7 +109,7 @@ AVFrame* VideoCapture::allocVideoFrame(enum AVPixelFormat fmt, int w, int h) {
 
   size = avpicture_get_size(fmt, w,h);
   buf = (uint8_t*)av_malloc(size);
-  if(!buf) {
+  if(!buf){
     RX_ERROR(ERR_VIDCAP_ALLOC_FRAMEBUF);
     av_free(pic);
     return NULL;

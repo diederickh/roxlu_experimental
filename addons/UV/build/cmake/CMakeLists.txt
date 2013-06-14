@@ -4,6 +4,7 @@ roxlu_addon_begin("uv")
 
   # --------------------------------------------------------------------------------------
   roxlu_addon_add_source_file(uv/ClientSocket.cpp)
+  roxlu_addon_add_source_file(uv/ServerSocket.cpp)
   roxlu_addon_add_source_file(uv/WorkQueue.cpp)
 
   if(UNIX) 
