@@ -23,3 +23,7 @@ audio.openInputStream(1, 2, paInt16 | paNonInterleaved, 44100, 1152); // use paN
 audio.startInputStream();
 
 ````
+
+## TODO
+
+- fix bug that stopping a stream stops all audio

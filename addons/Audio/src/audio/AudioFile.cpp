@@ -10,16 +10,20 @@ AudioFile::AudioFile()
 }
 
 AudioFile::~AudioFile() {
+  close();
+}
+
+void AudioFile::close() {
   if(buffer) {
     delete[] buffer;
     buffer = NULL;
   }
-
+ 
   if(handle) {
     sf_close(handle);
     handle = NULL;
   }
-
+ 
   is_loaded = false;
 }
 

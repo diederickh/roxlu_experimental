@@ -18,6 +18,11 @@
 void webcam_frame_callback(AVFrame* in, size_t nbytesin, AVFrame* out, size_t nbytesout, void* user);
 
 // ---------------------------------------------------------
+class WebcamListener {
+ public:
+  virtual void onWebcamPixelsUpdated(char* pixels, size_t nbytes) = 0;            /* will get called when we got new pixels data from the capturer; the `pixel` argument will contain the pixels in the output pixel format */
+};
+// ---------------------------------------------------------
 
 class Webcam {
  public:
@@ -33,6 +38,9 @@ class Webcam {
 #endif
   ~Webcam();
 
+  /* Listeners */
+  void addListener(WebcamListener* listener);
+
   /* Capture control */
   int listDevices();
   bool openDevice(int device, VideoCaptureSettings cfg, videocapture_frame_callback frameCB = NULL, void* user = NULL);
@@ -47,6 +55,8 @@ class Webcam {
   /* Capture properties */
   int getWidth();
   int getHeight();
+  AVPixelFormat getOutPixelFormat();
+  AVPixelFormat getInPixelFormat();
 
   /* Capabilities */
   bool isPixelFormatSupported(int device, enum AVPixelFormat fmt);
@@ -59,23 +69,28 @@ class Webcam {
 
  public:
   volatile bool has_new_pixels;
-  int num_bytes;
-  char* pixels; 
+  int num_out_bytes;
+  char* out_pixels; 
 
   VideoCapture cap;
   VideoCaptureGLSurface surface;
   videocapture_frame_callback cb_frame;
   void* cb_user;
+  std::vector<WebcamListener*> listeners;
 };
 
 inline Webcam::Webcam(VideoCaptureImplementation imp)
               :cap(imp)
              ,cb_user(NULL)
              ,cb_frame(NULL)
-             ,pixels(NULL)
+             ,out_pixels(NULL)
              ,has_new_pixels(false)
-             ,num_bytes(0)
+             ,num_out_bytes(0)
 {
+}
+
+inline void Webcam::addListener(WebcamListener* listener) {
+  listeners.push_back(listener);
 }
 
 inline int Webcam::listDevices() {
@@ -85,10 +100,10 @@ inline int Webcam::listDevices() {
 inline bool Webcam::closeDevice() {
 
   // reset our own main-treaded-buffer
-  if(pixels) {
-    delete[] pixels;
-    pixels = NULL;
-    num_bytes = 0;
+  if(out_pixels) {
+    delete[] out_pixels;
+    out_pixels = NULL;
+    num_out_bytes = 0;
     has_new_pixels = false;
   }
 
@@ -139,5 +154,12 @@ inline void Webcam::printSupportedFrameRates(int device, int w, int h, enum AVPi
   cap.printSupportedFrameRates(device, w, h, fmt);
 }
 
+inline AVPixelFormat Webcam::getInPixelFormat() {
+  return cap.getInPixelFormat();
+}
+
+inline AVPixelFormat Webcam::getOutPixelFormat() {
+  return cap.getOutPixelFormat();
+}
 
 #endif

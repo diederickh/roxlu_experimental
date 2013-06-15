@@ -240,7 +240,7 @@ namespace gl {
   // ---------------------------------------------------
   void Drawer::drawCircle(float x, float y, float radius) {
 #if defined(ROXLU_GL_CORE3)
-    begin(GL_LINE_LOOP);
+    begin((immediate_must_fill) ? GL_TRIANGLE_FAN : GL_LINE_LOOP);
 #else
     begin((immediate_must_fill) ? GL_POLYGON : GL_LINE_LOOP);
 #endif

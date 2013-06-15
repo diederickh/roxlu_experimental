@@ -3,8 +3,8 @@
 void webcam_frame_callback(AVFrame* in, size_t nbytesin, AVFrame* out, size_t nbytesout, void* user) {
   Webcam* cam = static_cast<Webcam*>(user);
 
-  if(cam->pixels) {
-    memcpy(cam->pixels, out->data[0], nbytesout);
+  if(cam->out_pixels) {
+    memcpy(cam->out_pixels, out->data[0], nbytesout);
     cam->has_new_pixels = true;
   }
 
@@ -15,13 +15,13 @@ void webcam_frame_callback(AVFrame* in, size_t nbytesin, AVFrame* out, size_t nb
 
 Webcam::~Webcam() {
   closeDevice();
-  num_bytes = 0;
+  num_out_bytes = 0;
   has_new_pixels = false;
 }
 
 bool Webcam::openDevice(int device, VideoCaptureSettings cfg, videocapture_frame_callback frameCB, void* user) {
 
-  if(pixels) {
+  if(out_pixels) {
     RX_ERROR("Already opened the device. Make sure to first close it");
     return false;
   }
@@ -39,8 +39,8 @@ bool Webcam::openDevice(int device, VideoCaptureSettings cfg, videocapture_frame
 
     // get number of bytes in output image.
     AVPicture tmp_pic;
-    num_bytes = avpicture_fill(&tmp_pic, NULL, cfg.out_pixel_format, cfg.width, cfg.height);
-    pixels = new char[num_bytes];
+    num_out_bytes = avpicture_fill(&tmp_pic, NULL, cfg.out_pixel_format, cfg.width, cfg.height);
+    out_pixels = new char[num_out_bytes];
 
     // setup the GL-surface
     surface.setup(cfg.width, cfg.height, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE);
@@ -53,8 +53,11 @@ bool Webcam::openDevice(int device, VideoCaptureSettings cfg, videocapture_frame
 
 void Webcam::update() {
   if(has_new_pixels) {
-    surface.setPixels((unsigned char*)pixels, num_bytes);
+    surface.setPixels((unsigned char*)out_pixels, num_out_bytes);
     has_new_pixels = false;
+    for(std::vector<WebcamListener*>::iterator it = listeners.begin(); it != listeners.end(); ++it) {
+      (*it)->onWebcamPixelsUpdated(out_pixels, num_out_bytes);
+    }
   }
   cap.update();
 }

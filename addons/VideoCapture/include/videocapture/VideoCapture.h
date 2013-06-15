@@ -70,6 +70,8 @@ class VideoCapture {
   /* Capture properties */                                  
   int getWidth();                                                                                                                                  /* after opening the device get the heigth */
   int getHeight();                                                                                                                                 /* after opening the device get the width */
+  AVPixelFormat getOutPixelFormat();                                                                                                               /* get the pixel format for the output */
+  AVPixelFormat getInPixelFormat();                                                                                                                /* get the pixel format for the pixels we get from the grabber */             
 
   /* Query capabilities */
   bool isPixelFormatSupported(int device, enum AVPixelFormat fmt);                                                                                 /* test if the device supports the given pixel format; this can be handy if you e.g. want to grab in YUV */
@@ -222,6 +224,15 @@ inline void VideoCapture::printSupportedSizes(int device) {
 inline void VideoCapture::printCapabilities(int device) {
   cap->printCapabilities(device);
 }
+
+inline AVPixelFormat VideoCapture::getInPixelFormat() {
+  return settings.in_pixel_format;
+}
+
+inline AVPixelFormat VideoCapture::getOutPixelFormat() {
+  return settings.out_pixel_format;
+}
+
 
 #endif
 

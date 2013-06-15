@@ -29,6 +29,7 @@ void draw() {
      glr_fill();
      glr_draw_cirlce(10,10,80);
      
+     glr_draw_string("roxlu", 10, 10, 1.0, 1.0, 0.0); // draw yello string     
 }
 ````
 

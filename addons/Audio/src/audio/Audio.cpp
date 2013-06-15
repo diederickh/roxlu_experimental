@@ -265,6 +265,17 @@ bool Audio::startOutputStream() {
   return true;
 }
 
+bool Audio::closeOutputStream() {
+
+  PaError err = Pa_CloseStream(output_stream);
+  if(err != paNoError) {
+    RX_ERROR("Cannot close the stream");
+    return false;
+  }
+
+  return true;
+}
+
 bool Audio::stopOutputStream() {
   if(!output_stream) {
     RX_ERROR(ERR_AUDIO_OUT_NOT_OPENED);

@@ -5,10 +5,13 @@
 #include <sndfile.h>
 #include <audio/Audio.h>
 
+void audio_file_audio_out_callback(void* output, unsigned long nframes, void* user);
+
 class AudioFile {
  public:
   AudioFile();
   ~AudioFile();
+  
   bool load(std::string filename, bool datapath = false);
   void print();
   sf_count_t readFrames(void* output, unsigned long nframes);
@@ -16,9 +19,9 @@ class AudioFile {
   int getFormat();
   int getSampleRate();
   int getNumFramesPerChunk();
-
+  void close();            /* closes the file and frees memory */
  public:
-  Audio audio;
+  // Audio audio;
   bool is_loaded;
   SF_INFO info;
   SNDFILE* handle;

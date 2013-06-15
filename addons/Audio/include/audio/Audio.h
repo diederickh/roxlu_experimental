@@ -84,6 +84,7 @@ class Audio {
   int getDefaultOutputDevice();
   bool openOutputStream(int device, int numChannels, PaSampleFormat format, double samplerate, unsigned long framesPerBuffer);
   bool startOutputStream();
+  bool closeOutputStream();
   bool stopOutputStream();
   void setOutputCallback(cb_audio_out outCB, void* outUser);
 
