@@ -39,6 +39,27 @@ AVDecoder::~AVDecoder() {
   close();
 }
 
+bool AVDecoder::open(AVFormatContext* ctx) {
+  RX_VERBOSE("Open using custom context");
+  int r = 0;
+  char err_msg[512] = {0};
+
+  if(format_context) {
+    RX_ERROR("It looks like you're trying to open a decoder which is already opened");
+    return false;
+  }
+
+  format_context = ctx;
+
+  r = avformat_open_input(&format_context, "foo.h264", NULL, NULL);
+  if(r < 0) {
+    RX_ERROR("Error while opening the formatcontext: %s", av_strerror(r, err_msg, sizeof(err_msg)));
+    return false;
+  }
+
+  return true;
+}
+
 bool AVDecoder::open(std::string filename, bool datapath) { 
   int r = 0;
   char err_msg[512];

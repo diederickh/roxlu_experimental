@@ -23,7 +23,7 @@
   When you repeatedly call `openDevice()` and `closeDevice()` it leaks about 10kb. 
   Probably something with COM objects not being released
 - Add an API for device detection/loss
-
+-  Check if avframe/picture is used correctly; when you maintain your own buffer, you only use avpicture_fill() and NOT avpicture_alloc/avpicture_free!
 
 
 ### EDSDK
@@ -46,3 +46,4 @@ $ install_name_tool -change  @executable_path/../Frameworks/DPP.framework/Versio
 $ cd DPP.framework
 $ install_name_tool -id @executable_path/lib/DPP.framework/Versions/Current/DPP DPP
 ````
+

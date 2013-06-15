@@ -15,7 +15,6 @@ VideoCaptureGLSurface::VideoCaptureGLSurface()
   ,surface_h(0)
   ,window_w(0)
   ,window_h(0)
-   //  ,fmt(VC_NONE)
   ,vbo(0)
   ,vao(0)
   ,tex(0)
@@ -70,16 +69,7 @@ void VideoCaptureGLSurface::setup(int w, int h, GLenum internalFormat, GLenum fo
   }
 
   glGenTextures(1, &tex);
-
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
-
-  /*
-#if defined(__APPLE__)
-  glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, surface_w, surface_h, 0, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, NULL);
-#elif defined(_WIN32)
-  glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, surface_w, surface_h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-#endif
-  */
 
   glTexImage2D(GL_TEXTURE_RECTANGLE, 0, internalFormat, surface_w, surface_h, 0, format, type, NULL);
   glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -126,7 +116,6 @@ void VideoCaptureGLSurface::draw(int x, int y, int w, int h) {
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
 
   glDrawArrays(GL_TRIANGLES, 0, 6);
-
 }
 
 
@@ -181,7 +170,7 @@ void VideoCaptureGLSurface::setupGL() {
   
   glGenBuffers(1, &vbo);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
   glEnableVertexAttribArray(0); 
   glEnableVertexAttribArray(1);
@@ -204,6 +193,7 @@ void VideoCaptureGLSurface::setPixels(unsigned char* pixels, size_t nbytes) {
 
   glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos[read_dx]);
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
+
   /*
 #if defined(__APPLE__)
   glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, surface_w, surface_h, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, 0);
@@ -213,7 +203,6 @@ void VideoCaptureGLSurface::setPixels(unsigned char* pixels, size_t nbytes) {
   */
 
   glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, surface_w, surface_h, tex_format, tex_type, 0);
-   // glTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, surface_w, surface_h, GL_RGB, GL_UNSIGNED_BYTE, 0);
   glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos[write_dx]);
   glBufferData(GL_PIXEL_UNPACK_BUFFER, nbytes, NULL, GL_STREAM_DRAW); 
   GLubyte* ptr = (GLubyte*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);

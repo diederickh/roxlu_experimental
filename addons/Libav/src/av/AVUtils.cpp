@@ -2,6 +2,8 @@
 
 bool rx_did_register_all = false;
 
+
+// @todo - add a rx_shutdown_libav() to deinitialize e.g. the network (see libav/tools/aviocat.c)
 void rx_init_libav() {
   if(!rx_did_register_all) {
 

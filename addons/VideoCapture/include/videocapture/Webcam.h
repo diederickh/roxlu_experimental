@@ -14,6 +14,7 @@
 
 // ---------------------------------------------------------
 
+// CALLED FROM OTHER THREAD (!)
 void webcam_frame_callback(AVFrame* in, size_t nbytesin, AVFrame* out, size_t nbytesout, void* user);
 
 // ---------------------------------------------------------
@@ -57,6 +58,10 @@ class Webcam {
   void printSupportedFrameRates(int device, int width, int height, enum AVPixelFormat fmt);
 
  public:
+  volatile bool has_new_pixels;
+  int num_bytes;
+  char* pixels; 
+
   VideoCapture cap;
   VideoCaptureGLSurface surface;
   videocapture_frame_callback cb_frame;
@@ -67,6 +72,9 @@ inline Webcam::Webcam(VideoCaptureImplementation imp)
               :cap(imp)
              ,cb_user(NULL)
              ,cb_frame(NULL)
+             ,pixels(NULL)
+             ,has_new_pixels(false)
+             ,num_bytes(0)
 {
 }
 
@@ -75,6 +83,15 @@ inline int Webcam::listDevices() {
 }
 
 inline bool Webcam::closeDevice() {
+
+  // reset our own main-treaded-buffer
+  if(pixels) {
+    delete[] pixels;
+    pixels = NULL;
+    num_bytes = 0;
+    has_new_pixels = false;
+  }
+
   return cap.closeDevice();
 }
 

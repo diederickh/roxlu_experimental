@@ -10,7 +10,7 @@ class RingBuffer {
   RingBuffer(size_t capacity);
   ~RingBuffer();
   void resize(size_t bytes);
-  size_t write(const char* data, size_t bytes);           /* write and automatically set the write index to the correct position */
+  size_t write(const char* data, size_t bytes);           /* write and automatically set the write index to the correct position, returns the number of bytes written */
   size_t read(char* data, size_t bytes);                  /* read and automatically change the read index (so freeing some bytes in the buffer) */
   size_t drain(size_t bytes);                             /* drain w/o copying the data.. basically same as read */
   size_t size();

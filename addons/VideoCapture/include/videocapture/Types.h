@@ -85,7 +85,7 @@ struct VideoCaptureSettings {
 
   int width;                                   /* the width you want to capture in */ 
   int height;                                  /* the height you want to capture in */
-  float fps;                                   /* the framerate you want to captute in,  must  2 digit accurate, e.g. 30.00, 29.97, 20.00 etc... */
+  float fps;                                   /* the framerate you want to capture in, must  2 digit accurate, e.g. 30.00, 29.97, 20.00 etc... */
   enum AVPixelFormat in_pixel_format;          /* the pixel format you want to receive you're data in.. this must be supported */
   enum AVPixelFormat out_pixel_format;         /* if you set this to something else then AV_PIX_FMT_NONE, we will use SWS to convert incoming data to this format */
 };

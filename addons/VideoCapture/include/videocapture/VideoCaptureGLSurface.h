@@ -13,7 +13,37 @@
 #define VIDEO_CAP_PI 3.14159265
 
 // @todo create GL3 versions of the video capture shaders
+#if defined(ROXLU_GL_CORE3) 
 static const char* VIDEO_CAP_VS = "" 
+  " #version 150\n"
+  " uniform mat4 u_mm; "
+  " uniform mat4 u_pm; "
+  " uniform mat4 u_scale_matrix; "
+  " uniform mat4 u_rot_matrix; "
+  " in vec4 a_pos; "
+  " in vec2 a_tex; "
+  " out vec2 v_tex;" 
+  " void main() { "
+  "   gl_Position = u_pm * u_mm * u_rot_matrix * u_scale_matrix * a_pos; "
+  "   v_tex = a_tex; "
+  " }" 
+  "";
+
+
+static const char* VIDEO_CAP_FS = ""
+  " #version 150\n"
+  " uniform sampler2DRect u_tex; " 
+  " in vec2 v_tex; "
+  " out vec4 outcol; "
+  " void main() { "
+  "   vec4 col = texture(u_tex, v_tex); "
+  "   outcol = col; "
+  "   outcol.a = 1.0; "
+  " } "
+  "";
+#else 
+static const char* VIDEO_CAP_VS = "" 
+  " #version 120\n"
   " #extension GL_ARB_texture_rectangle : enable\n"
   " uniform mat4 u_mm; "
   " uniform mat4 u_pm; "
@@ -30,6 +60,7 @@ static const char* VIDEO_CAP_VS = ""
 
 
 static const char* VIDEO_CAP_FS = ""
+  " #version 120\n"
   " #extension GL_ARB_texture_rectangle : enable\n"
   " uniform sampler2DRect u_tex; " 
   " varying vec2 v_tex; "
@@ -39,6 +70,7 @@ static const char* VIDEO_CAP_FS = ""
   "   gl_FragColor.a = 1.0; "
   " } "
   "";
+#endif
 
 struct VideoCaptureVertex {
   float x,y,s,t;

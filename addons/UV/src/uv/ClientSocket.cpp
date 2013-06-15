@@ -26,8 +26,6 @@ ClientSocket::ClientSocket(std::string host, std::string port)
 }
 
 ClientSocket::~ClientSocket() {
-  clear();
-
   if(is_connected) {
     close();
   }
@@ -40,11 +38,6 @@ ClientSocket::~ClientSocket() {
   loop = NULL;
   is_connected = false;
   is_connecting = false;
-}
-
-void ClientSocket::clear() {
-  buffer.clear();
-  
 }
 
 void ClientSocket::setup(client_socket_on_connected_cb conCB, 
@@ -100,8 +93,6 @@ void ClientSocket::disconnect() {
 }
 
 void ClientSocket::reconnect() {
-  clear(); 
-
   if(is_connecting) {
     return;
   }
@@ -190,7 +181,6 @@ void client_socket_on_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
 
   ClientSocket* c = static_cast<ClientSocket*>(handle->data);
 
-  RX_VERBOSE("Received data from server, :%ld bytes, buffer.size(): %ld", nbytes, c->buffer.size());
 
   if(nbytes < 0) {
     int r = uv_read_stop(handle);
@@ -221,8 +211,6 @@ void client_socket_on_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
        
     return;
   }
-
-  std::copy(buf.base, buf.base + nbytes, std::back_inserter(c->buffer));
 
   if(c->cb_read) {
     c->cb_read(buf.base, nbytes, c);
@@ -258,14 +246,12 @@ void client_socket_on_shutdown_reconnect(uv_shutdown_t* req, int status) {
 void client_socket_on_close(uv_handle_t* handle) {
   ClientSocket* c = static_cast<ClientSocket*>(handle->data);
   c->is_connected = false;
-  c->clear();
 }
 
 void client_socket_on_close_reconnect(uv_handle_t* handle) {
   ClientSocket* c = static_cast<ClientSocket*>(handle->data);
   c->is_connected = false;
   c->is_connecting = false;
-  c->clear();
   c->reconnect();
 }
 

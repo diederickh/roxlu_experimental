@@ -47,6 +47,7 @@ class AVDecoder {
  public:
   AVDecoder();
   ~AVDecoder();
+  bool open(AVFormatContext* context);                           /* open using a custom setup AVFormatContext; which might be handy if you need to do your own I/O */
   bool open(std::string filename, bool datapath = false);        /* open a video file */
   bool close();                                                  /* closes the video file, resetting everything that was opened by open() */
   AVDecoderFrame* decodeFrame(bool& isEOF);                      /* caller is responsilbe for freeing the returned frame. if no frame is found we return NULL.  */

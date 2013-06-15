@@ -121,3 +121,4 @@ See `AVDecoder.cpp`, some things which you might want to know:
  -  Use libavresample to automatically resample audio samplerates/formats
  -  Add a test if we really need swscale in the `AVencoder` based on the `AVEncoderSettings.in_pixel_format`
  -  Test if the settings in `AVEncoderSettings` can be used for the given format. 
+ -  Check if avframe/picture is used correctly; when you maintain your own buffer, you only use avpicture_fill() and NOT avpicture_alloc/avpicture_free!
