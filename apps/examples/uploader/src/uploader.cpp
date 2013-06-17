@@ -331,7 +331,7 @@ void delete_files() {
       QueryResult update_state(uploader_db);
       uploader_db.query(sql_buf).execute(update_state);
       update_state.finish();
-
+      
     }
   }
 }
@@ -354,31 +354,31 @@ int load_settings() {
     LS_RETURN(r, "ERROR: cannot find the src_files_path in uploader.ini\n");
 
     r = config.lookupValue("database_path", database_path);
-    LS_RETURN(r, "ERROR: cannot get database path.\n");
+    LS_RETURN(r, "ERROR: cannot get the database path setting.\n");
 
     r = config.lookupValue("get_total_entries_to_upload_query", get_total_entries_to_upload_query);
-    LS_RETURN(r, "ERROR: cannot find get_total_entries_to_upload_query\n");
+    LS_RETURN(r, "ERROR: cannot find the get_total_entries_to_upload_query setting.\n");
 
     r = config.lookupValue("get_entries_to_upload_query", get_entries_to_upload_query);
-    LS_RETURN(r, "ERROR: cannot get get_total_entries_to_upload_query.\n");
+    LS_RETURN(r, "ERROR: cannot get the get_total_entries_to_upload_query setting.\n");
     
     r = config.lookupValue("set_upload_state_query", set_upload_state_query);
-    LS_RETURN(r, "ERROR: cannot find set_upload_state_query\n");
+    LS_RETURN(r, "ERROR: cannot find the set_upload_state_query setting \n");
 
     r = config.lookupValue("reset_upload_state_query", reset_upload_state_query);
-    LS_RETURN(r, "ERROR: cannot find reset_upload_state_query\n");
+    LS_RETURN(r, "ERROR: cannot find the reset_upload_state_query setting\n");
     
     r = config.lookupValue("file_field", file_field);
-    LS_RETURN(r, "ERROR: cannot find file_field\n");
+    LS_RETURN(r, "ERROR: cannot find the file_field setting\n");
 
     r = config.lookupValue("id_field", id_field);
-    LS_RETURN(r, "ERROR: cannot find id_field\n");
+    LS_RETURN(r, "ERROR: cannot find the id_field setting\n");
 
     r = config.lookupValue("delete_files_query", delete_files_query);
-    LS_RETURN(r, "ERROR: cannot find delete_files_query\n");
+    LS_RETURN(r, "ERROR: cannot find the delete_files_query setting\n");
 
     r = config.lookupValue("verbose", is_verbose);
-    LS_RETURN(r, "ERROR: cannot find verbose\n");
+    LS_RETURN(r, "ERROR: cannot find the verbose setting\n");
 
     config.lookupValue("delete_after_days", delete_after_days);
     config.lookupValue("delete_after_hours", delete_after_hours);

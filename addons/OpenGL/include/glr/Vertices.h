@@ -21,6 +21,7 @@ namespace gl {
     Vertices();
     ~Vertices();
 
+    void assign(int num, T v);
     void push_back(T v);                                       /* add a new vertex to the buffer */
     size_t size();                                             /* number of vertices in buffer */
 
@@ -58,6 +59,11 @@ namespace gl {
     bytes_allocated = 0;
     vertices.clear();
     has_changed = false;
+  }
+  
+  template<class T>
+    void Vertices<T>::assign(int num, T v) {
+    vertices.assign(num, v);
   }
 
   template<class T>

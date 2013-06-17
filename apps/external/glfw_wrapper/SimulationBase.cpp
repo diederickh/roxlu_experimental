@@ -4,6 +4,7 @@
 // --------------------------------------------------------------
 bool rx_glfw_init() {
   glfwSetErrorCallback(rx_glfw_error_callback);
+
   if(!glfwInit()) {
     printf("ERORR: glfwInit() fails");
     return false;
@@ -42,9 +43,11 @@ GLFWwindow* rx_glfw_create_window(int w, int h, const char* title, GLFWmonitor* 
 
 bool rx_setup_opengl_extensions() {
 #if defined(ROXLU_GL_CORE3)
+#if  !defined(__APPLE__)
   if(glxwInit() != 0) {
     return false;
   }
+#endif
 #else
   glewExperimental = true;
   GLenum err = glewInit();

@@ -26,12 +26,14 @@ bool Webcam::openDevice(int device, VideoCaptureSettings cfg, videocapture_frame
     return false;
   }
 
+#if 0
   if(cfg.out_pixel_format != AV_PIX_FMT_RGB24) {
     RX_ERROR("For now we only support an out pixel format of AV_PIX_FMT_RGB24; in future releases we will support other formats");
     return false;
   }
 
   cfg.out_pixel_format = AV_PIX_FMT_RGB24;
+#endif
 
   if(cap.openDevice(device, cfg, webcam_frame_callback, this)) {
     cb_frame = frameCB;
@@ -43,7 +45,9 @@ bool Webcam::openDevice(int device, VideoCaptureSettings cfg, videocapture_frame
     out_pixels = new char[num_out_bytes];
 
     // setup the GL-surface
+#if 0
     surface.setup(cfg.width, cfg.height, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE);
+#endif
 
     return true;
   }
@@ -53,7 +57,9 @@ bool Webcam::openDevice(int device, VideoCaptureSettings cfg, videocapture_frame
 
 void Webcam::update() {
   if(has_new_pixels) {
+#if 0
     surface.setPixels((unsigned char*)out_pixels, num_out_bytes);
+#endif
     has_new_pixels = false;
     for(std::vector<WebcamListener*>::iterator it = listeners.begin(); it != listeners.end(); ++it) {
       (*it)->onWebcamPixelsUpdated(out_pixels, num_out_bytes);
@@ -63,6 +69,8 @@ void Webcam::update() {
 }
 
 void Webcam::draw(int x, int y, int w, int h) {
+#if 0
   surface.draw(x, y, w, h);
+#endif
 }
 

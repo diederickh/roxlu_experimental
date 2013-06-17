@@ -1,3 +1,4 @@
+#include <roxlu/core/Log.h>
 #include <glr/Drawer.h>
 #include <glr/Texture.h>
 #include <glr/Mesh.h>
@@ -270,6 +271,22 @@ namespace gl {
   void glr_init() {
     glr_context = new Drawer();
     glr_font.init();
+  }
+
+#define GLR_PRINT_INFO_INTEGERV(field) {         \
+  GLint nn = 0;                                  \
+  glGetIntegerv(field, &nn);                     \
+  RX_VERBOSE(#field ": %d", nn);                 \
+  }
+  
+  void glr_print_info() {
+    GLint major, minor;
+    glGetIntegerv(GL_MAJOR_VERSION, &major);
+    glGetIntegerv(GL_MINOR_VERSION, &minor);
+    RX_VERBOSE("GL_MAJOR_VERSION: %d, GL_MINOR_VERSION: %d", major, minor);
+
+    GLR_PRINT_INFO_INTEGERV(GL_MAX_TEXTURE_IMAGE_UNITS);
+    GLR_PRINT_INFO_INTEGERV(GL_MAX_TEXTURE_SIZE);
   }
 
   void glr_set_projection_matrix(const float* pm) {

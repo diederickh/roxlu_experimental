@@ -35,8 +35,14 @@
 #elif defined(ROXLU_WITH_GLFW3_AND_GLXW)
 #  define ROXLU_GL_CORE3
 #  define ROXLU_WITH_OPENGL
-#  include <GLXW/glxw.h>
+#  define GLFW_INCLUDE_GLCOREARB
+#  if !defined(__APPLE__)
+#    include <GLXW/glxw.h>     
+#  endif
 #  include <GL/glfw3.h>
+#  if defined(__APPLE__)
+#    include <OpenGL/glext.h>
+#  endif
 #elif defined(ROXLU_WITH_OPENFRAMEWORKS)
 #  define ROXLU_WITH_OPENGL
 #  include "ofMain.h"

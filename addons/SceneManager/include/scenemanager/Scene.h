@@ -20,7 +20,7 @@ class Scene {
   void setSceneManager(SceneManager* sm);
 
   virtual void setState(int state) = 0;
-  virtual void setup() = 0;                             /* gets called when the scene has been added to the manager */
+  virtual bool setup() = 0;                             /* gets called when the scene has been added to the manager */
   virtual void update() = 0;
   virtual void draw() = 0;
   virtual bool onTimeout();                              /* when you've set timeout_after_seconds, this function will be called repeatedly until you change the 'timeout' value or go to another scene */

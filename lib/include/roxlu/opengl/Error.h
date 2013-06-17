@@ -1,28 +1,25 @@
 #ifndef ROXLU_ERRORH
 #define ROXLU_ERRORH
 
-
 #if defined(ROXLU_WITH_OPENGL)
 
 #  if defined(ROXLU_DEBUG)
 #    include <stdlib.h>
 #    include <assert.h>
-#    define eglGetError( )                                                                                             \
-        {                                                                                                              \
-          for ( GLenum Error = glGetError( ); ( GL_NO_ERROR != Error ); Error = glGetError( ) )                        \
-            {                                                                                                          \
-              switch ( Error )                                                                                         \
-                {                                                                                                      \
-                  case GL_INVALID_ENUM:      printf( "\n%s\n\n", "GL_INVALID_ENUM"      ); assert( 0 ); break;         \
-                  case GL_INVALID_VALUE:     printf( "\n%s\n\n", "GL_INVALID_VALUE"     ); assert( 0 ); break;         \
-                  case GL_INVALID_OPERATION: printf( "\n%s\n\n", "GL_INVALID_OPERATION" ); assert( 0 ); break;         \
-                  case GL_STACK_OVERFLOW:    printf( "\n%s\n\n", "GL_STACK_OVERFLOW"    ); assert( 0 ); break;         \
-                  case GL_STACK_UNDERFLOW:   printf( "\n%s\n\n", "GL_STACK_UNDERFLOW"   ); assert( 0 ); break;         \
-                  case GL_OUT_OF_MEMORY:     printf( "\n%s\n\n", "GL_OUT_OF_MEMORY"     ); assert( 0 ); break;         \
-                  default:                                                                              break;         \
-                }                                                                                                      \
-            }                                                                                                          \
-        }
+#    define eglGetError( )                                              \
+  {                                                                     \
+    for ( GLenum Error = glGetError( ); ( GL_NO_ERROR != Error ); Error = glGetError( ) ) \
+      {                                                                 \
+        switch ( Error )                                                \
+          {                                                             \
+            case GL_INVALID_ENUM:      printf( "\n%s\n\n", "GL_INVALID_ENUM"      );    assert( 0 ); break; \
+            case GL_INVALID_VALUE:     printf( "\n%s\n\n", "GL_INVALID_VALUE"     );    assert( 0 ); break; \
+            case GL_INVALID_OPERATION: printf( "\n%s\n\n", "GL_INVALID_OPERATION" );    assert( 0 ); break; \
+            case GL_OUT_OF_MEMORY:     printf( "\n%s\n\n", "GL_OUT_OF_MEMORY"     );    assert( 0 ); break; \
+            default:                   printf("Unhandled glGetError(), use debugger");  assert( 0 ); break; \
+          }                                                             \
+      }                                                                 \
+  }
 
 #    define eglCheckFramebufferStatus( )                                                                                                                           \
         {                                                                                                                                                          \

@@ -119,8 +119,6 @@ public:
                 void* user = NULL,
                 kurl_cb_on_write writeCB = NULL);                                                 /* when given you need to store the data yourself! */
   
-
-
   bool get(std::string url, 
            kurl_cb_request requestCB, 
            void* user);

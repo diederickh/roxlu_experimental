@@ -296,6 +296,7 @@ namespace gl {
   }
   
   void glr_init();                                                                     /* must be called if you want to make use of the opengl addon */
+  void glr_print_info();                                                               /* print some infomration about the currently active context (like version) */
 
   void glr_set_view_matrix(const float* vm);                                           /* set the view matrix of the stock shaders: shader_p, shader_pt, etc... see `Drawer::setViewMatrix()` */
   void glr_set_projection_matrix(const float* pm);                                     /* set the projection matrix of the stock shaders: shader_p, shader_pt, etc... see `Drawer::setProjectionMatrix()` */

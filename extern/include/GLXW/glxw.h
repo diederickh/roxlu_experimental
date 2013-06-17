@@ -12,7 +12,7 @@ struct glxw;
 #endif
 
 #ifdef __cplusplus
-extern "C" {
+extrn "C" {
 #endif
 
 int glxwInit(void);
