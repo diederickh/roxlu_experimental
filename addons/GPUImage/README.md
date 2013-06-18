@@ -27,7 +27,7 @@ First of all, the `GPUImage` helps you with a couple of things:
 
 
 
-/Pseudo code:/
+_Pseudo code:_
 
 ````c++
   GLuint tex;
@@ -48,7 +48,7 @@ First of all, the `GPUImage` helps you with a couple of things:
       ::exit(EXIT_FAILURE);
     }
 
-    drawer.setPosition(10, 10);
+    drawer.setPosition(640, 360);
     drawer.setSize(1280, 720);
   }
 
@@ -71,7 +71,7 @@ does all this:
  - Use `setModelMatrix()` to position the vertices that you want to use to draw. You can pass an idenity matrix.
  - Call `bindTextures(ids)` to bind the separate textures there are generated with `genTextures()`. Make sure the that array you pass into this function has the correct number of textures. Use `getNumTextures()` to retrieve the number of textures that the colorspace conversion shaders wants. 
 
-/Pseudo code, using your own draw path/
+_Pseudo code, using your own draw path_
 
 ````c++
 

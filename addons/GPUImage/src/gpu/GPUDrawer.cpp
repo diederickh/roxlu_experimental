@@ -31,24 +31,17 @@ bool GPUDrawer::setup() {
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   
   gl::Vertices<gl::VertexPT> vertices;
-#if 0
-  gl::VertexPT a(Vec3(0,0,0), Vec2(0.0, 0.0));
-  gl::VertexPT b(Vec3(1,0,0), Vec2(1.0, 0.0));
-  gl::VertexPT c(Vec3(1,1,0), Vec2(1.0, 1.0));
-  gl::VertexPT d(Vec3(0,1,0), Vec2(0.0, 1.0));
-#else 
   gl::VertexPT a(Vec3(-0.5, -0.5, 0.0), Vec2(0.0, 0.0));
   gl::VertexPT b(Vec3( 0.5, -0.5, 0.0), Vec2(1.0, 0.0));
   gl::VertexPT c(Vec3( 0.5,  0.5, 0.0), Vec2(1.0, 1.0));
   gl::VertexPT d(Vec3(-0.5,  0.5, 0.0), Vec2(0.0, 1.0));
-#endif
-
   vertices.push_back(a);
   vertices.push_back(b);
   vertices.push_back(c);
   vertices.push_back(a);
   vertices.push_back(c);
   vertices.push_back(d);
+
   glBufferData(GL_ARRAY_BUFFER, vertices.getNumBytes(), vertices.getPtr(), GL_STATIC_DRAW);
 
   glEnableVertexAttribArray(0); // pos
@@ -59,7 +52,7 @@ bool GPUDrawer::setup() {
   return true;
 }
 
-bool GPUDrawer::draw(GPUImage& img, GLuint* ids) { // , int x, int y, int w, int h) {
+bool GPUDrawer::draw(GPUImage& img, GLuint* ids) {
 
   if(!viewport_w) {
     GLint viewport[4];
@@ -78,9 +71,6 @@ bool GPUDrawer::draw(GPUImage& img, GLuint* ids) { // , int x, int y, int w, int
   img.setProjectionMatrix(ortho_matrix); 
   img.setModelMatrix(model_matrix.getPtr());
   img.bindTextures(ids);
-
-  //  model_matrix.setPosition(x, y, 0);
-  //  model_matrix.setScale(w, h, 1);
 
   glBindVertexArray(vao);
   glDrawArrays(GL_TRIANGLES, 0, 6);
