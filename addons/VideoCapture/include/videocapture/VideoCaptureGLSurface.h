@@ -1,3 +1,5 @@
+// @deprecated - GPUImage/GPUImageDrawer have taken this functionality in
+// a separate addon. 2013.06.18
 #ifndef ROXLU_VIDEOCAPTURE_GL_SURFACE_H
 #define ROXLU_VIDEOCAPTURE_GL_SURFACE_H
 

@@ -1,6 +1,7 @@
 # videocapture
 roxlu_add_addon(UV)  # we need the uv addon for the canon wrapper
 roxlu_add_addon(Image) # we use the jpeg to decode the live view stream
+roxlu_add_addon(GPUImage) 
 
 roxlu_addon_begin("videocapture")
 

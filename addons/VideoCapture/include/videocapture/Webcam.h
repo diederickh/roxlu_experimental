@@ -9,8 +9,9 @@
 #ifndef ROXLU_VIDEOCAPTURE_WEBCAM_H
 #define ROXLU_VIDEOCAPTURE_WEBCAM_H
 
-#include <videocapture/VideoCaptureGLSurface.h>
 #include <videocapture/VideoCapture.h>
+#include <gpu/GPUImage.h>
+#include <gpu/GPUDrawer.h>
 
 // ---------------------------------------------------------
 
@@ -49,8 +50,13 @@ class Webcam {
   bool stopCapture();
   void update();
 
-  /* draw! */
-  void draw(int x, int y, int w, int h);
+  /* draw! & position */
+  void setFlipVertical(bool flip);
+  void setFlipHorizontal(bool flip);
+  void setRotation(float radians);
+  void setPosition(float x, float y, float z = 0.0);
+  void setSize(float w, float h);
+  void draw();
 
   /* Capture properties */
   int getWidth();
@@ -68,26 +74,17 @@ class Webcam {
   void printSupportedFrameRates(int device, int width, int height, enum AVPixelFormat fmt);
 
  public:
+  std::vector<WebcamListener*> listeners;                           
   volatile bool has_new_pixels;
   int num_out_bytes;
   char* out_pixels; 
-
   VideoCapture cap;
-  VideoCaptureGLSurface surface;
   videocapture_frame_callback cb_frame;
   void* cb_user;
-  std::vector<WebcamListener*> listeners;
+  GLuint* gpu_tex;
+  GPUImage gpu_image;
+  GPUDrawer gpu_drawer;
 };
-
-inline Webcam::Webcam(VideoCaptureImplementation imp)
-              :cap(imp)
-             ,cb_user(NULL)
-             ,cb_frame(NULL)
-             ,out_pixels(NULL)
-             ,has_new_pixels(false)
-             ,num_out_bytes(0)
-{
-}
 
 inline void Webcam::addListener(WebcamListener* listener) {
   listeners.push_back(listener);
@@ -105,6 +102,11 @@ inline bool Webcam::closeDevice() {
     out_pixels = NULL;
     num_out_bytes = 0;
     has_new_pixels = false;
+  }
+
+  if(gpu_tex) {
+    gpu_image.deleteTextures(gpu_tex);
+    gpu_tex = NULL;
   }
 
   return cap.closeDevice();
@@ -160,6 +162,26 @@ inline AVPixelFormat Webcam::getInPixelFormat() {
 
 inline AVPixelFormat Webcam::getOutPixelFormat() {
   return cap.getOutPixelFormat();
+}
+
+inline void Webcam::setPosition(float x, float y, float z) {
+  gpu_drawer.setPosition(x, y, z);
+}
+
+inline void Webcam::setSize(float w, float h) {
+  gpu_drawer.setSize(w, h);
+}
+
+inline void Webcam::setFlipVertical(bool flip) {
+  gpu_drawer.setFlipVertical(flip);
+}
+
+inline void Webcam::setFlipHorizontal(bool flip) {
+  gpu_drawer.setFlipHorizontal(flip);
+}
+
+inline void Webcam::setRotation(float radians) {
+  gpu_drawer.setRotation(radians);
 }
 
 #endif
