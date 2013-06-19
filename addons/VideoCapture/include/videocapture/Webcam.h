@@ -1,8 +1,9 @@
 /*
 
-  This webcam class combines the `VideoCapture` and `VideoCaptureGLSurface`
+  This webcam class combines the `VideoCapture` and `GPUImage/Drawer`
   features in one simple class which makes it easier to draw the captured 
-  video to your window.
+  video using an optimized path; you can use YUYV422/YUV422/etc.. for 
+  optimized throughput. 
 
 
 */

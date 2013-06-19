@@ -53,14 +53,34 @@ bool AudioFile::load(std::string filename, bool datapath) {
   return true;
 }
 
+sf_count_t AudioFile::readItems(void* output, sf_count_t nitems) {
+
+  if(!is_loaded) {
+    RX_ERROR("Cannot readItems() because we haven't loaded the file yet");
+    return 0;
+  }  
+
+  sf_count_t num_read = sf_read_short(handle, (short*)output, nitems);
+  return num_read;
+}
+
 sf_count_t AudioFile::readFrames(void* output, unsigned long nframes) {
   if(!is_loaded) {
+    RX_ERROR("Cannot read frames becuse we haven't loaded the file yet");
     return 0;
   }
 
   sf_count_t num_read = sf_readf_short(handle, (short*)output, nframes);
 
   return num_read;
+}
+
+sf_count_t AudioFile::seek(sf_count_t frames, int whence) {
+  if(!is_loaded) {
+    RX_ERROR("Not loaded so we cannot seek");
+    return 0;
+  }
+  return sf_seek(handle, frames, whence);
 }
 
 void AudioFile::print() {

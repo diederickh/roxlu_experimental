@@ -1,5 +1,57 @@
 #include <audio/Audio.h>
 
+bool rx_is_audio_initialized_flag = false;
+
+// Initializes the audio backend (port audio)
+bool rx_init_audio() {
+
+  if(rx_is_audio_initialized_flag) {
+    return true;
+  }
+
+  PaError err = Pa_Initialize();
+  if(err != paNoError) {
+    RX_ERROR(ERR_AUDIO_INIT,  Pa_GetErrorText(err));
+    return false;
+  }
+
+  rx_is_audio_initialized_flag = true;
+
+  return true;
+}
+
+// Shuts down the audio backend (when initialized_flag)
+bool rx_shutdown_audio() {
+
+  if(!rx_is_audio_initialized_flag) {
+    return true;
+  }
+
+  PaError err = Pa_Terminate();
+  if(err != paNoError) {
+    RX_ERROR(ERR_AUDIO_PORT, Pa_GetErrorText(err));
+    return false;
+  }
+
+  rx_is_audio_initialized_flag = false;
+
+  return true;
+}
+
+bool rx_is_audio_initialized() {
+  return rx_is_audio_initialized_flag;
+}
+
+int rx_get_default_audio_output_device() {
+  return Pa_GetDefaultOutputDevice();
+}
+
+int rx_get_default_audio_input_device() {
+  return Pa_GetDefaultInputDevice();
+}
+// ------------------------------------------------------------------
+
+
 Audio::Audio() 
   :input_stream(NULL)
   ,in_cb(NULL)
@@ -8,10 +60,9 @@ Audio::Audio()
   ,out_cb(NULL)
   ,out_user(NULL)
 {
-  PaError err = Pa_Initialize();
-  if(err != paNoError) {
-    RX_ERROR(ERR_AUDIO_INIT,  Pa_GetErrorText(err));
-    ::exit(0);
+  if(!rx_is_audio_initialized()) {
+    RX_ERROR(ERR_AUDIO_NOT_INITIALIZED);
+    ::exit(EXIT_FAILURE);
   }
 }
 
@@ -28,10 +79,6 @@ Audio::~Audio() {
     input_stream = NULL;
   }
 
-  PaError err = Pa_Terminate();
-  if(err != paNoError) {
-    RX_ERROR(ERR_AUDIO_PORT, Pa_GetErrorText(err));
-  }
 
   if(output_stream) {
     PaError err = Pa_StopStream(output_stream);
@@ -299,6 +346,7 @@ void Audio::setOutputCallback(cb_audio_out outCB, void* outUser) {
 
 // -------------------------------------------------------------------------------------------
 
+// @deprecated - use audioout
 int audio_out_callback(const void* input, void* output, unsigned long nframes,
                        const PaStreamCallbackTimeInfo* time,
                        PaStreamCallbackFlags status, void* user)
@@ -308,6 +356,7 @@ int audio_out_callback(const void* input, void* output, unsigned long nframes,
   return paContinue;
 }
 
+// @deprecated - use audioout
 void audio_out_end_callback(void* user) {
 
 }

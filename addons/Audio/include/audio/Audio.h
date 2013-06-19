@@ -26,7 +26,7 @@
 
 */
 
-
+#define ERR_AUDIO_NOT_INITIALIZED "Cannot use audio input or output. Make sure to call `rx_init_audio()` before using any of the audio features. Make sure to call `rx_shutdown_audio()` when closing your application. Add this in your main.cpp file"
 #define ERR_AUDIO_INIT "cannot initialize port audio: %s"
 #define ERR_AUDIO_IN_STOP "cannot stop audio input stream: %s"
 #define ERR_AUDIO_PORT "cannot terminate port audio: %s"
@@ -102,4 +102,16 @@ class Audio {
   cb_audio_out out_cb;
   void* out_user;
 };
+
+
+// ------------------------------------------------------------------
+
+extern bool rx_is_audio_initialized_flag;              /* make sure audio is only initialize once */
+
+bool rx_is_audio_initialized();                        /* returns true when the audio backend has been initialize (rx_audio_init() has been called), `rx_init_audio()` + `rx_shutdown_audio()`  this must be called by your application! */
+bool rx_init_audio();                                  /* initializes the audio */
+bool rx_shutdown_audio();                              /* shutsdown the audio engine (port audio) */
+int rx_get_default_audio_output_device();              /* returns the index/id of the default audio output device */
+int rx_get_default_audio_input_device();               /* returns the index/id of the default audio input device */
+
 #endif
