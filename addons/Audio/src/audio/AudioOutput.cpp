@@ -6,11 +6,28 @@ int audio_output_callback(const void* input, void* output, unsigned long numFram
                           const PaStreamCallbackTimeInfo* time,
                           PaStreamCallbackFlags status, void* user) 
 {
+  
   AudioOutput* out = static_cast<AudioOutput*>(user);
+  assert(out->num_channels);
+
   size_t nread = 0;
   std::vector<SoundInfo*> to_remove;
+  size_t nbytes = out->num_channels * numFrames * sizeof(float);
+  memset((char*)output, 0x00, nbytes);
 
-  for(std::vector<SoundInfo*>::iterator it = out->sounds_info.begin(); it != out->sounds_info.end(); ++it) {
+  if(!out->sounds_info.size()) {
+    return paContinue;
+  }
+
+  std::vector<SoundInfo*> sounds;
+  uv_mutex_lock(&out->mutex);
+  {
+    std::copy(out->sounds_info.begin(), out->sounds_info.end(), std::back_inserter(sounds));
+  }
+  uv_mutex_unlock(&out->mutex);
+
+
+  for(std::vector<SoundInfo*>::iterator it = sounds.begin(); it != sounds.end(); ++it) {
 
     SoundInfo* si = *it;
     if(si->state != AS_STATE_PLAYING) {
@@ -18,10 +35,11 @@ int audio_output_callback(const void* input, void* output, unsigned long numFram
     }
 
     si->stream->gotoFrame(si->read_frames);
-    nread = si->stream->read(&output, numFrames);
-    RX_VERBOSE("READ: %ld", nread);
+    nread = si->stream->accumulate(output, numFrames);
 
     if(nread == 0) {
+      si->state = AS_STATE_NONE;
+      delete si;
       to_remove.push_back(si);
     }
     else {
@@ -30,8 +48,10 @@ int audio_output_callback(const void* input, void* output, unsigned long numFram
   }
 
   uv_mutex_lock(&out->mutex);
-  for(std::vector<SoundInfo*>::iterator it = to_remove.begin(); it != to_remove.end(); ++it) {
-    out->removeSoundInfo(*it);
+  {
+    for(std::vector<SoundInfo*>::iterator it = to_remove.begin(); it != to_remove.end(); ++it) {
+      out->removeSoundInfo(*it);
+    }
   }
   uv_mutex_unlock(&out->mutex);
 
@@ -39,6 +59,8 @@ int audio_output_callback(const void* input, void* output, unsigned long numFram
 }
 
 void audio_output_stream_end_callback(void* user) {
+  AudioOutput* output = static_cast<AudioOutput*>(user);
+  output->shutdown();
 }
 
 // ------------------------------------------------------------------
@@ -54,29 +76,67 @@ SoundInfo::~SoundInfo() {
   read_frames = 0;
   state = AS_STATE_NONE;
   stream = NULL;
+ 
 }
 
 // ------------------------------------------------------------------
 
 AudioOutput::AudioOutput() 
-  :output_stream(NULL)
+  :num_channels(0)
+  ,format(0)
+  ,samplerate(0)
+  ,frames_per_buffer(0)
   ,state(AO_STATE_NONE)
+  ,output_stream(NULL)
 {
   if(!rx_is_audio_initialized()) {
     RX_ERROR(ERR_AUDIO_NOT_INITIALIZED);
     ::exit(EXIT_FAILURE);
   }
 
-  uv_mutex_init(&mutex);
+  if(uv_mutex_init(&mutex) < 0) {
+    RX_ERROR("Cannot initialize the mutex in the audio output");
+    ::exit(EXIT_FAILURE);
+  }
 }
 
 AudioOutput::~AudioOutput() {
-  RX_VERBOSE("CLOSE / FREE OUTPUT STREAM");
+  uv_mutex_lock(&mutex);
+
+  for(std::vector<SoundInfo*>::iterator it = sounds_info.begin(); it != sounds_info.end(); ++it) {
+    (*it)->state = AS_STATE_NONE;
+  }
+  uv_mutex_unlock(&mutex);
+
+  if(output_stream) {
+    if(!stopOutputStream() && !closeOutputStream()) {
+      shutdown();
+      output_stream = NULL;
+    }
+  }
+  uv_mutex_destroy(&mutex);
 }
 
-bool AudioOutput::openOutputStream(int device, int numChannels, PaSampleFormat format, 
-                                   double samplerate, unsigned long framesPerBuffer) 
+// Shutdown; will be either called though the end stream callback or from destructor
+void AudioOutput::shutdown() {
+  for(std::vector<SoundInfo*>::iterator it = sounds_info.begin(); it != sounds_info.end(); ++it) {
+    delete *it;
+  }
+
+  num_channels = 0;
+  format = 0;
+  samplerate = 0;
+  frames_per_buffer = 0;
+  state = AO_STATE_NONE;
+
+  sounds_info.clear();
+  sounds.clear();
+}
+
+bool AudioOutput::openOutputStream(int device, int numChannels, PaSampleFormat audioFormat, 
+                                   double audioSamplerate, unsigned long framesPerBuffer) 
 {
+
 
   if(output_stream) {
     RX_ERROR("We already opened an output stream. You can only open one output stream for now");
@@ -98,7 +158,12 @@ bool AudioOutput::openOutputStream(int device, int numChannels, PaSampleFormat f
     return false;
   }
 
-  params.channelCount = numChannels;
+  num_channels = numChannels;
+  format = audioFormat;
+  samplerate = audioSamplerate;
+  frames_per_buffer = framesPerBuffer;
+
+  params.channelCount = num_channels;
   params.sampleFormat = format;
   params.suggestedLatency = Pa_GetDeviceInfo(device)->defaultLowOutputLatency;
   params.hostApiSpecificStreamInfo = NULL;
@@ -124,11 +189,6 @@ bool AudioOutput::openOutputStream(int device, int numChannels, PaSampleFormat f
 }
 
 bool AudioOutput::startOutputStream() {
-
-  if(state != AO_STATE_OPENED) {
-    RX_ERROR("Before starting the output stream, open it");
-    return false;
-  }
 
   if(!output_stream) {
     RX_ERROR("Cannot start the output stream because we havent been setup");
@@ -171,6 +231,25 @@ bool AudioOutput::stopOutputStream() {
   return true;
 }
 
+bool AudioOutput::closeOutputStream() {
+  if(state != AO_STATE_OPENED) {
+    RX_ERROR("Cannot close the stream. Did you open the stream? Make sure to open() and stop() before calling close()");
+    return false;
+  }
+
+  PaError err = Pa_CloseStream(output_stream);
+  if(err != paNoError) {
+    RX_ERROR("Cannot close the stream: %s (%p)", Pa_GetErrorText(err), output_stream);
+    return false;
+  }
+
+  output_stream = NULL;
+
+  state = AO_STATE_NONE;
+  return true;
+}
+
+
 bool AudioOutput::addSound(int id, AudioStream* io) {
   sounds.insert(std::pair<int, AudioStream*>(id, io));
   return true;
@@ -191,53 +270,47 @@ bool AudioOutput::playSound(int id) {
   uv_mutex_lock(&mutex);
   sounds_info.push_back(si);
   uv_mutex_unlock(&mutex);
-  /*
-
-  if(st->getState() == AS_STATE_PLAYING) {
-    RX_ERROR("Already playing sound: %d", id);
-    return false;
-  }
-  st->setState(AS_STATE_PLAYING);
-  */
   return true;
 }
 
 bool AudioOutput::stopSound(int id) {
-
+  RX_ERROR("stopSound not yet implemented!");
+  /*
   AudioStream* st = getSound(id);
   if(!st) {
     RX_ERROR("Cannot find the given sound, with id: %d", id);
     return false;
   }
-
-  if(st->getState() == AS_STATE_NONE) {
-    RX_ERROR("Cannot stop because we're not playing this sound: %d", id);
-    return false;
-  }
-
-  st->setState(AS_STATE_NONE);
-
-  return true;
+  */
+  return false;
 }
 
 AudioStream* AudioOutput::getSound(int id) {
-  std::map<int, AudioStream*>::iterator it = sounds.find(id);
-  if(it == sounds.end()) {
-    return NULL;
+  AudioStream* found_stream = NULL;
+
+  uv_mutex_lock(&mutex);
+  {
+    std::map<int, AudioStream*>::iterator it = sounds.find(id);
+    if(it == sounds.end()) {
+      return NULL;
+    }
+    found_stream = it->second;
   }
-  return it->second;
+  uv_mutex_unlock(&mutex);
+
+  return found_stream;
 }
 
-// may only be called from the audio out called + make sure to wrap it around a mutex
+// we only remove the item from the vector here; this is called from the audio output callback 
+// we deallocate memory in the output callback because calling delete here, gives unexpected
+// behavior.
 bool AudioOutput::removeSoundInfo(SoundInfo* si) {
   std::vector<SoundInfo*>::iterator it = std::find(sounds_info.begin(), sounds_info.end(), si);
   if(it == sounds_info.end()) {
     RX_ERROR("Cannot remove sound object because we didn't find it");
     return false;
   }
-
   sounds_info.erase(it);
-  delete *it;
   return true;
 }
 

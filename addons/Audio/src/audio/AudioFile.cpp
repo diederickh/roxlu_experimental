@@ -60,7 +60,7 @@ sf_count_t AudioFile::readItems(void* output, sf_count_t nitems) {
     return 0;
   }  
 
-  sf_count_t num_read = sf_read_short(handle, (short*)output, nitems);
+  sf_count_t num_read = sf_read_float(handle, (float*)output, nitems);
   return num_read;
 }
 
@@ -70,7 +70,7 @@ sf_count_t AudioFile::readFrames(void* output, unsigned long nframes) {
     return 0;
   }
 
-  sf_count_t num_read = sf_readf_short(handle, (short*)output, nframes);
+  sf_count_t num_read = sf_readf_float(handle, (float*)output, nframes);
 
   return num_read;
 }

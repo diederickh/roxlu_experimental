@@ -7,7 +7,8 @@
   two important AudioStream types: AudioStreamFile and AudioStreamMemory
 
   Use an AudioStreamFile when you want to playback large, multi minute 
-  audio files and not many of these at the same time. 
+  audio files and not many of these at the same time. AudioStreamFile
+  needs some more work - still very experimental code - 
 
   Use an AudioStreamMemory when you want to playback smaller sounds with
   a duration < 60 sec. These are typical for sound effects.
@@ -23,36 +24,24 @@
 #include <string>
 #include <audio/AudioFile.h>
 
-#define AS_STATE_NONE 0
-#define AS_STATE_PLAYING 1
-#define AS_STATE_PAUSED 2
+#define AST_STATE_NONE 0                                                             /* you should set the state of an output stream to `open` when it's opened and make check this in `accumulate()` and and `read()` */
+#define AST_STATE_OPEN 1          
 
 // ------------------------------------------------------------------
 
 class AudioStream {
  public:
-  AudioStream();
+  AudioStream();                                                                    /* the AudioStream is used for reading from audio streams. this is used by the AudioOutput to read frames */
   virtual ~AudioStream();
-  virtual size_t read(void** output, unsigned long nframes) = 0;
-  virtual int getNumChannels() = 0;
-  virtual int getFormat() = 0;
-  virtual int getSampleRate() = 0;
+  virtual size_t read(void* output, unsigned long nframes) = 0;                     /* should read nframes into output, overwriting the data in output */
+  virtual size_t accumulate(void* output, unsigned long nframes) = 0;               /* should accumulate data to the output */
+  virtual int getNumChannels() = 0;                                                 /* return the number of channels */
+  virtual int getFormat() = 0;                                                      /* get the format using libsndfile format codes */
+  virtual int getSampleRate() = 0;                                                  /* get the samplerate, using libsndfile samplerate codes */
   virtual void gotoFrame(int frame) = 0;                                            /* set the read index back to the start */
-  
-  void setState(int state);
-  int getState();
-
  public:
   int state;
 };
-
-inline void AudioStream::setState(int st) {
-  state = st;
-}
-
-inline int AudioStream::getState() {
-  return state;
-}
 
 // ------------------------------------------------------------------
 
@@ -61,7 +50,8 @@ class AudioStreamFile : public AudioStream {
   AudioStreamFile();
   ~AudioStreamFile();
   bool load(std::string filename, bool datapath = false);
-  size_t read(void** input, unsigned long nframes);
+  size_t read(void* output, unsigned long nframes);
+  size_t accumulate(void* output, unsigned long nframes);
   int getNumChannels();
   int getFormat();
   int getSampleRate();
@@ -89,13 +79,14 @@ class AudioStreamMemory : public AudioStream {
   AudioStreamMemory();
   ~AudioStreamMemory();
   bool load(std::string filename, bool datapath = false);
-  size_t read(void** input, unsigned long nframes);
+  size_t read(void* output, unsigned long nframes);
+  size_t accumulate(void* output, unsigned long nframes);
   int getNumChannels();
   int getFormat();
   int getSampleRate();
   void gotoFrame(int frame);
  public:
-  std::vector<short> buffer;
+  std::vector<float> buffer;
   size_t index;
   int num_channels;
   int format;

@@ -4,7 +4,7 @@ roxlu_addon_begin("audio")
   # --------------------------------------------------------------------------------------
   roxlu_addon_add_source_file(audio/Audio.cpp)
   roxlu_addon_add_source_file(audio/AudioFile.cpp)
-  roxlu_addon_add_source_file(audio/AudioPlayer.cpp)
+#  roxlu_addon_add_source_file(audio/AudioPlayer.cpp)
   roxlu_addon_add_source_file(audio/AudioOutput.cpp)
   roxlu_addon_add_source_file(audio/AudioStream.cpp)
   roxlu_addon_add_source_file(audio/PCMWriter.cpp)

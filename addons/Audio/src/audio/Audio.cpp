@@ -20,24 +20,6 @@ bool rx_init_audio() {
   return true;
 }
 
-// Shuts down the audio backend (when initialized_flag)
-bool rx_shutdown_audio() {
-
-  if(!rx_is_audio_initialized_flag) {
-    return true;
-  }
-
-  PaError err = Pa_Terminate();
-  if(err != paNoError) {
-    RX_ERROR(ERR_AUDIO_PORT, Pa_GetErrorText(err));
-    return false;
-  }
-
-  rx_is_audio_initialized_flag = false;
-
-  return true;
-}
-
 bool rx_is_audio_initialized() {
   return rx_is_audio_initialized_flag;
 }
@@ -56,9 +38,6 @@ Audio::Audio()
   :input_stream(NULL)
   ,in_cb(NULL)
   ,in_user(NULL)
-  ,output_stream(NULL)
-  ,out_cb(NULL)
-  ,out_user(NULL)
 {
   if(!rx_is_audio_initialized()) {
     RX_ERROR(ERR_AUDIO_NOT_INITIALIZED);
@@ -79,22 +58,8 @@ Audio::~Audio() {
     input_stream = NULL;
   }
 
-
-  if(output_stream) {
-    PaError err = Pa_StopStream(output_stream);
-    if(err != paNoError) {
-      RX_ERROR(ERR_AUDIO_OUT_STOP, Pa_GetErrorText(err));
-    }
-    else {
-      RX_VERBOSE(VER_AUDIO_OUT_CLOSED);
-    }
-    output_stream = NULL;
-  }
-
   in_cb = NULL;
   in_user = NULL;
-  out_cb = NULL;
-  out_user = NULL;
 }
 
 int Audio::listDevices() {
@@ -205,6 +170,7 @@ bool Audio::openInputStream(int device, int numChannels, PaSampleFormat format
   return true;
 }
 
+
 bool Audio::startInputStream() {
   if(!in_cb) {
     RX_ERROR(ERR_AUDIO_START_INPUT);
@@ -247,118 +213,6 @@ void Audio::setInputListener(cb_audio_in inCB, void* inUser) {
 
 int Audio::getDefaultOutputDevice() {
   return Pa_GetDefaultOutputDevice();
-}
-
-bool Audio::openOutputStream(int device, int numChannels, PaSampleFormat format, 
-                             double samplerate, unsigned long framesPerBuffer)
-{
-  PaStreamParameters params;
-  PaError err;
-  
-  params.device = device;
-
-  if(params.device == paNoDevice) {
-    RX_ERROR(ERR_AUDIO_INVALID_DEV);
-    return false;
-  }
-
-  if(!numChannels) {
-    RX_ERROR(ERR_AUDIO_INVALID_CHANNEL_COUNT);
-    return false;
-  }
-
-  params.channelCount = numChannels;
-  params.sampleFormat = format;
-  params.suggestedLatency = Pa_GetDeviceInfo(device)->defaultLowOutputLatency;
-  params.hostApiSpecificStreamInfo = NULL;
-
-  err = Pa_OpenStream(&output_stream, NULL, &params, 
-                      samplerate, framesPerBuffer, paClipOff, 
-                      audio_out_callback, this);
-
-  if(err != paNoError) {
-    RX_ERROR(ERR_AUDIO_PORTAUDIO_MSG, Pa_GetErrorText(err));
-    return false;
-  }
-
-  err = Pa_SetStreamFinishedCallback(output_stream, &audio_out_end_callback);
-  if(err != paNoError) {
-    RX_ERROR(ERR_AUDIO_PORTAUDIO_MSG, Pa_GetErrorText(err));
-    return false;
-  }
-
-
-  return true;
-}
-
-bool Audio::startOutputStream() {
-  if(!out_cb) {
-    RX_ERROR(ERR_AUDIO_NO_OUTPUT_CB_SET);
-    return false;
-  }
-
-  if(!output_stream) {
-    RX_ERROR(ERR_AUDIO_OUT_NOT_OPENED);
-    return false;
-  }
-
-  PaError err;
-  err = Pa_StartStream(output_stream);
-  if(err != paNoError) {
-    RX_ERROR(ERR_AUDIO_PORTAUDIO_MSG, Pa_GetErrorText(err));
-    return false;
-  }
-
-  return true;
-}
-
-bool Audio::closeOutputStream() {
-
-  PaError err = Pa_CloseStream(output_stream);
-  if(err != paNoError) {
-    RX_ERROR("Cannot close the stream");
-    return false;
-  }
-
-  return true;
-}
-
-bool Audio::stopOutputStream() {
-  if(!output_stream) {
-    RX_ERROR(ERR_AUDIO_OUT_NOT_OPENED);
-    return false;
-  }
-
-  PaError err;
-  err = Pa_StopStream(output_stream);
-  if(err != paNoError) {
-    RX_ERROR(ERR_AUDIO_PORTAUDIO_MSG, Pa_GetErrorText(err));
-    return false;
-  }
-
-  return true;
-}
-
-void Audio::setOutputCallback(cb_audio_out outCB, void* outUser) {
-  out_cb = outCB;
-  out_user = outUser;
-}
-
-// -------------------------------------------------------------------------------------------
-
-// @deprecated - use audioout
-int audio_out_callback(const void* input, void* output, unsigned long nframes,
-                       const PaStreamCallbackTimeInfo* time,
-                       PaStreamCallbackFlags status, void* user)
-{
-  Audio* a = static_cast<Audio*>(user);
-  a->out_cb(output, nframes, a->out_user);
-  return paContinue;
-}
-
-// @deprecated - use audioout
-void audio_out_end_callback(void* user) {
-
 }
 
 // -------------------------------------------------------------------------------------------

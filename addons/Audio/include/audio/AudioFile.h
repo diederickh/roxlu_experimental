@@ -26,8 +26,8 @@ class AudioFile {
   
   bool load(std::string filename, bool datapath = false);
   void print();
-  sf_count_t readItems(void* output, sf_count_t nitems);                /* read nitems; we're always reading shorts */
-  sf_count_t readFrames(void* output, unsigned long nframes);           /* read nframes; we're always reading shorts */
+  sf_count_t readItems(void* output, sf_count_t nitems);                /* read nitems;  */
+  sf_count_t readFrames(void* output, unsigned long nframes);           /* read nframes; */
   sf_count_t seek(sf_count_t frames, int whence);                       /* seek to a certain position (in frames). whence can be SEEK_SET, SEEK_CUR, SEEK_END */
   int getNumChannels();
   int getFormat();
