@@ -15,6 +15,7 @@
 #ifndef ROXLU_AUDIO_OUTPUT_H
 #define ROXLU_AUDIO_OUTPUT_H
 
+#include <assert.h>
 #include <map>
 #include <string>
 #include <portaudio.h>

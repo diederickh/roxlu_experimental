@@ -71,7 +71,6 @@ void SceneManager::switchScene(int sceneName) {
 
 void SceneManager::addScene(Scene* scene) {
   scenes.push_back(scene);
-  scene->setup();
   scene->setSceneManager(this);
   scene->setState(STATE_SLEEP);
 }
@@ -86,7 +85,22 @@ void SceneManager::nextScene() {
   }
   current_scene = scenes[current_dx];
   current_scene->setState(STATE_ENTER);
+  setSceneTimeout(current_scene);
+}
 
+void SceneManager::previousScene() {
+  if(current_dx == 0) {
+    current_dx = scenes.size() -1;
+  }
+  else {
+    current_dx--;
+  }
+  if(current_scene != NULL) {
+    current_scene->setState(STATE_LEAVE);
+  }
+
+  current_scene = scenes[current_dx];
+  current_scene->setState(STATE_ENTER);
   setSceneTimeout(current_scene);
 }
 

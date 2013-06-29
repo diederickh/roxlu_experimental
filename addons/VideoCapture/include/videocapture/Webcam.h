@@ -22,7 +22,7 @@ void webcam_frame_callback(AVFrame* in, size_t nbytesin, AVFrame* out, size_t nb
 // ---------------------------------------------------------
 class WebcamListener {
  public:
-  virtual void onWebcamPixelsUpdated(char* pixels, size_t nbytes) = 0;            /* will get called when we got new pixels data from the capturer; the `pixel` argument will contain the pixels in the output pixel format */
+  virtual void onWebcamPixelsUpdated(char* inpixels, size_t nbytesin, char* outpixels, size_t nbytesout) = 0;            /* will get called when we got new pixels data from the capturer; the `pixel` argument will contain the pixels in the output pixel format */
 };
 // ---------------------------------------------------------
 
@@ -78,13 +78,16 @@ class Webcam {
   std::vector<WebcamListener*> listeners;                           
   volatile bool has_new_pixels;
   int num_out_bytes;
-  char* out_pixels; 
+  int num_in_bytes;
+  char* out_pixels;
+  char* in_pixels;
   VideoCapture cap;
   videocapture_frame_callback cb_frame;
   void* cb_user;
   GLuint* gpu_tex;
   GPUImage gpu_image;
   GPUDrawer gpu_drawer;
+  VideoCaptureSettings settings;
 };
 
 inline void Webcam::addListener(WebcamListener* listener) {

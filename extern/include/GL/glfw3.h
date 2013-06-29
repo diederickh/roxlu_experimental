@@ -45,21 +45,22 @@ extern "C" {
  */
 /*! @defgroup error Error handling
  */
-/*! @defgroup gamma Gamma ramp support
- */
 /*! @defgroup init Initialization and version information
  */
 /*! @defgroup input Input handling
  */
 /*! @defgroup monitor Monitor handling
+ *
+ *  This is the reference documentation for monitor related functions and types.
+ *  For more information, see the @ref monitor.
  */
 /*! @defgroup time Time input
  */
 /*! @defgroup window Window handling
  *
- *  This is the reference documentation for the window handling API, including
- *  creation, deletion and event polling.  For more information, see the
- *  [article on window handling](@ref window).
+ *  This is the reference documentation for window related functions and types,
+ *  including creation, deletion and event polling.  For more information, see
+ *  the @ref window.
  */
 
 
@@ -225,7 +226,7 @@ extern "C" {
  *  API changes.
  *  @ingroup init
  */
-#define GLFW_VERSION_REVISION       0
+#define GLFW_VERSION_REVISION       2
 /*! @} */
 
 /*! @name Key and button actions
@@ -818,7 +819,7 @@ typedef struct
  *
  *  @sa glfwGetGammaRamp glfwSetGammaRamp
  *
- *  @ingroup gamma
+ *  @ingroup monitor
  */
 typedef struct
 {
@@ -1119,12 +1120,12 @@ GLFWAPI const GLFWvidmode* glfwGetVideoMode(GLFWmonitor* monitor);
 /*! @brief Generates a gamma ramp and sets it for the specified monitor.
  *
  *  This function generates a 256-element gamma ramp from the specified exponent
- *  and then calls @ref glfwSetGamma with it.
+ *  and then calls @ref glfwSetGammaRamp with it.
  *
  *  @param[in] monitor The monitor whose gamma ramp to set.
  *  @param[in] gamma The desired exponent.
  *
- *  @ingroup gamma
+ *  @ingroup monitor
  */
 GLFWAPI void glfwSetGamma(GLFWmonitor* monitor, float gamma);
 
@@ -1138,7 +1139,7 @@ GLFWAPI void glfwSetGamma(GLFWmonitor* monitor, float gamma);
  *  @note The value arrays of the returned ramp are allocated and freed by GLFW.
  *  You should not free them yourself.
  *
- *  @ingroup gamma
+ *  @ingroup monitor
  */
 GLFWAPI const GLFWgammaramp* glfwGetGammaRamp(GLFWmonitor* monitor);
 
@@ -1151,7 +1152,7 @@ GLFWAPI const GLFWgammaramp* glfwGetGammaRamp(GLFWmonitor* monitor);
  *
  *  @note Gamma ramp sizes other than 256 are not supported by all hardware.
  *
- *  @ingroup gamma
+ *  @ingroup monitor
  */
 GLFWAPI void glfwSetGammaRamp(GLFWmonitor* monitor, const GLFWgammaramp* ramp);
 
@@ -2006,14 +2007,14 @@ GLFWAPI int glfwJoystickPresent(int joy);
  */
 GLFWAPI const float* glfwGetJoystickAxes(int joy, int* count);
 
-/*! @brief Returns the values of all buttons of the specified joystick.
+/*! @brief Returns the state of all buttons of the specified joystick.
  *
- *  This function returns the values of all buttons of the specified joystick.
+ *  This function returns the state of all buttons of the specified joystick.
  *
  *  @param[in] joy The joystick to query.
  *  @param[out] count Where to store the size of the returned array.  This is
  *  set to zero if an error occurred.
- *  @return An array of axis values, or `NULL` if the joystick is not present.
+ *  @return An array of button states, or `NULL` if the joystick is not present.
  *
  *  @note The returned array is allocated and freed by GLFW.  You should not
  *  free it yourself.

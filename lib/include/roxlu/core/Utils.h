@@ -426,6 +426,13 @@ static void rx_ortho(float l, float r, float b, float t, float n, float f, float
   dest[15] = 1.0f;
 }
 
+/* 
+   create ortho matrix, where top left = (0.0, 0.0)
+ */
+static void rx_ortho_top_left(float w, float h, float n, float f, float* dest) {
+  rx_ortho(0, w, h, 0, n, f, dest);
+}
+
 static size_t rx_string_to_sizet(std::string str) {
   size_t result = 0;
   std::stringstream ss;

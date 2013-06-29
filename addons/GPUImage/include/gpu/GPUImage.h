@@ -11,6 +11,8 @@ extern "C" {
 #include <gpu/GPUImage_Base.h>
 #include <gpu/GPUImage_UYVY422.h>
 #include <gpu/GPUImage_YUYV422.h>
+#include <gpu/GPUImage_RGB24.h>
+#include <gpu/GPUImage_RGBA.h>
 
 class GPUImage {
  public:

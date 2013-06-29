@@ -12,12 +12,11 @@ struct glxw;
 #endif
 
 #ifdef __cplusplus
-extrn "C" {
+extern "C" {
 #endif
 
 int glxwInit(void);
 int glxwInitCtx(struct glxw *ctx);
-void *glxwGetProcAddress(const char *proc);
 
 struct glxw {
 PFNGLCULLFACEPROC _glCullFace;

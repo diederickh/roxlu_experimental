@@ -30,7 +30,7 @@ class GPUImage_Base {
   virtual int getNumPlanes() = 0;
   virtual bool isPlanar() = 0;
 
-  /* general */
+  /* general + helpers*/
   void deleteTextures(GLuint* ids);                            /* helper to delete the given textures for the current format; so we assume that we receive an array of ids with the same size as `getNumTextures()` */
   AVPixelFormat getPixelFormat();                              /* get the pixel format for which this shader is used */
   void shutdown();                                             /* frees memory, delete shaders/program */

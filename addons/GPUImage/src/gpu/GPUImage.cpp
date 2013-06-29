@@ -24,6 +24,14 @@ bool GPUImage::setup(AVPixelFormat fmt) {
       imp = new GPUImage_YUYV422();
       break;
     }
+    case AV_PIX_FMT_RGB24: {
+      imp = new GPUImage_RGB24();
+      break;
+    }
+    case AV_PIX_FMT_RGBA: {
+      imp = new GPUImage_RGBA();
+      break;
+    }
     default: {
       return false;
     }

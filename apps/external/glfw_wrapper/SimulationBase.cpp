@@ -42,12 +42,12 @@ GLFWwindow* rx_glfw_create_window(int w, int h, const char* title, GLFWmonitor* 
 }
 
 bool rx_setup_opengl_extensions() {
-#if defined(ROXLU_GL_CORE3)
-#if  !defined(__APPLE__)
+#if defined(ROXLU_GL_CORE3) 
+#  if defined(glxw_h)  // on mac glxw doesn't seem to make GL_RGB_422_APPLE available
   if(glxwInit() != 0) {
     return false;
   }
-#endif
+#  endif
 #else
   glewExperimental = true;
   GLenum err = glewInit();

@@ -18,6 +18,7 @@ class SceneManager {
   Scene* findScene(int sceneName);
   int findSceneIndex(Scene* scene);
   void nextScene();
+  void previousScene();
   void update();
   void draw();
   int getCurrentSceneName();

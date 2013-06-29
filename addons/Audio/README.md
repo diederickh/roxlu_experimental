@@ -70,7 +70,7 @@ void setup() {
   }
 
   // setup the output device. Make sure to use paFloat32!!
-  bool r = !audio_output.openOutputStream(rx_get_default_audio_output_device(), 2, 
+  bool r = audio_output.openOutputStream(rx_get_default_audio_output_device(), 2, 
                                           paFloat32, 44100, 1024));
   if(!r) {
      ::exit(EXIT_FAILURE);

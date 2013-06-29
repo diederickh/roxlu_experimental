@@ -6,7 +6,7 @@
 class SceneManager;
 
 enum SceneStates {
-  STATE_LEAVE
+  STATE_LEAVE   = 1
   ,STATE_ENTER
   ,STATE_ACTIVE
   ,STATE_SLEEP
@@ -20,7 +20,7 @@ class Scene {
   void setSceneManager(SceneManager* sm);
 
   virtual void setState(int state) = 0;
-  virtual bool setup() = 0;                             /* gets called when the scene has been added to the manager */
+  virtual bool setup() = 0;                             /* must be called by user */
   virtual void update() = 0;
   virtual void draw() = 0;
   virtual bool onTimeout();                              /* when you've set timeout_after_seconds, this function will be called repeatedly until you change the 'timeout' value or go to another scene */

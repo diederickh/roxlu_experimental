@@ -16,12 +16,10 @@ void GPUImage_Base::shutdown() {
   if(vert_id) {
     glDeleteShader(vert_id);
     vert_id = 0;
-    RX_VERBOSE("DELETED VERT SHADER");
   }
   if(frag_id) {
     glDeleteShader(frag_id);
     frag_id = 0;
-    RX_VERBOSE("DELETE FRAG SHADER");
   }
   if(prog) {
     glDeleteProgram(prog);

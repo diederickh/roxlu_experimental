@@ -35,14 +35,11 @@
 #elif defined(ROXLU_WITH_GLFW3_AND_GLXW)
 #  define ROXLU_GL_CORE3
 #  define ROXLU_WITH_OPENGL
-#  define GLFW_INCLUDE_GLCOREARB
-#  if !defined(__APPLE__)
-#    include <GLXW/glxw.h>     
-#  endif
+#  include <OpenGL/gl3.h>
+#  include <OpenGL/gl3ext.h>
+//#  include <GLXW/glxw.h>     
+#define GLFW_INCLUDE_NONE
 #  include <GL/glfw3.h>
-#  if defined(__APPLE__)
-#    include <OpenGL/glext.h>
-#  endif
 #elif defined(ROXLU_WITH_OPENFRAMEWORKS)
 #  define ROXLU_WITH_OPENGL
 #  include "ofMain.h"
@@ -51,7 +48,8 @@
 #  include <OpenGL/gl.h>
 #endif
 
-// FIXES
+// FIXES (NOT NEEDED FOR GL3)
+/*
 #if defined(__APPLE__)
 #  if !defined(ROXLU_WITH_GLFW3_AND_GLXW)
 #    undef glGenVertexArrays
@@ -60,9 +58,10 @@
 #    define glBindVertexArray glBindVertexArrayAPPLE
 #  endif
 #endif
+*/
 
 #if defined(ROXLU_WITH_OSX_NATIVE)
-#  define GL_TEXTURE_RECTANGLE GL_TEXTURE_RECTANGLE_EXT  
+//#  define GL_TEXTURE_RECTANGLE GL_TEXTURE_RECTANGLE_EXT  
 #endif
 
 #endif // ROXLU_OPENGL_GL_H

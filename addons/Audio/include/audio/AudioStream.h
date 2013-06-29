@@ -18,6 +18,7 @@
 #ifndef ROXLU_AUDIO_STREAM_H
 #define ROXLU_AUDIO_STREAM_H
 
+#include <assert.h>
 #include <algorithm>
 #include <iterator>
 #include <vector>

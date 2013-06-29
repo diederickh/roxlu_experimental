@@ -112,7 +112,7 @@ Tween<T>::~Tween() {
 
 template<class T>
 void Tween<T>::set(T from, T to, double duration, double delay, TweenFunction tf) {
-
+  
   this->from = from;
   this->value = from;
   this->to = to;
@@ -148,14 +148,13 @@ void Tween<T>::update() {
 
   double n = rx_millis();
   double t = duration - (timeout - n);
-
   if(t < 0.0) {
     return;
   }
 
   t = CLAMP(t, 0, duration);
   ready = (t == duration);
-
+  
   switch(type) {
 
     case TWEEN_LINEAR: {
