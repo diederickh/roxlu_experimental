@@ -23,7 +23,7 @@ class SceneManager {
   void draw();
   int getCurrentSceneName();
   void setSceneTimeout(Scene* scene);
- protected:
+ public:
   SceneManagerListener* listener;
   Scene* current_scene;
   int current_dx;
