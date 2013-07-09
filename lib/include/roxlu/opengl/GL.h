@@ -32,12 +32,24 @@
 #  define GLEW_STATIC
 #  include <GL/glew.h>
 #  include <GL/glfw3.h>
+
+// TMP - GET NATIVE - TESTING WITH VDPAU ON LINUX, SEE 038
+#if defined(__linux)
+#  define GLFW_EXPOSE_NATIVE_X11
+#  define GLFW_EXPOSE_NATIVE_GLX
+#  include <GL/glfw3native.h>
+#endif
+// END - GET NATIVE
+
 #elif defined(ROXLU_WITH_GLFW3_AND_GLXW)
 #  define ROXLU_GL_CORE3
 #  define ROXLU_WITH_OPENGL
-#  include <OpenGL/gl3.h>
-#  include <OpenGL/gl3ext.h>
-//#  include <GLXW/glxw.h>     
+#  if !defined(__linux)
+#    include <OpenGL/gl3.h>
+#    include <OpenGL/gl3ext.h>
+#  endif
+
+#  include <GLXW/glxw.h>     
 #define GLFW_INCLUDE_NONE
 #  include <GL/glfw3.h>
 #elif defined(ROXLU_WITH_OPENFRAMEWORKS)

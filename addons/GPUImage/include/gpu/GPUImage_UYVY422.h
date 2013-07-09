@@ -10,6 +10,7 @@
 #ifndef ROXLU_GPU_IMAGE_UYVY422_H
 #define ROXLU_GPU_IMAGE_UYVY422_H
 
+#include <roxlu/core/Log.h>
 #include <gpu/GPUImage_Base.h>
 
 #if defined(ROXLU_GL_CORE3)
@@ -92,7 +93,8 @@ inline GLenum GPUImage_UYVY422::getInternalFormat() {
 #if defined(__APPLE__)
   return GL_RGB8;
 #else
-  #error not yet supported 
+  RX_ERROR("not yet supported");
+  return GL_RED;
 #endif
 }
 
@@ -104,7 +106,9 @@ inline GLenum GPUImage_UYVY422::getFormat() {
   return GL_YCBCR_422_APPLE;
 #  endif
 #else
-  #error not yet supported 
+  RX_ERROR("not yet supported");
+  //return GL_RGB_422_APPLE;
+  return GL_RED;
 #endif
 }
 
@@ -112,7 +116,8 @@ inline GLenum GPUImage_UYVY422::getType() {
 #if defined(__APPLE__)
   return GL_UNSIGNED_SHORT_8_8_APPLE;
 #else
-  #error not yet supported 
+  RX_ERROR("not yet supported");
+  return GL_RED;
 #endif
 }
 

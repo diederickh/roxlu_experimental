@@ -8,7 +8,8 @@ class SimulationBase;
 // GLFW
 // --------------------------------------------------------------
 
-bool rx_glfw_init();
+
+bool rx_glfw_init(int major = 3, int minor = 2);
 GLFWwindow* rx_glfw_create_window(int w, int h, const char* title, GLFWmonitor* monitor, GLFWwindow* share);
 void rx_glfw_setup_simulation(SimulationBase* sim, GLFWwindow* win);
 void rx_glfw_init(SimulationBase* sim, GLFWwindow* window);

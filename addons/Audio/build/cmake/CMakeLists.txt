@@ -25,6 +25,7 @@ roxlu_addon_begin("audio")
    # roxlu_add_extern_lib(libid3.a)
     roxlu_add_extern_lib(libiconv.a)  # iconv
     roxlu_add_extern_lib(libmp3lame.a)
+    roxlu_add_lib(asound) 
   endif()
 
   if(APPLE)

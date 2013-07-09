@@ -266,6 +266,7 @@ macro(roxlu_install_app)
     add_executable(${roxlu_app_name} ${roxlu_source_files} ${roxlu_lib_source_files})
   endif()
 
+  #list(REMOVE_DUPLICATES roxlu_libs)
   target_link_libraries(${roxlu_app_name} ${roxlu_libs} ${roxlu_dylibs})
 
   install(TARGETS ${roxlu_app_name} RUNTIME DESTINATION ${roxlu_app_install_dir})

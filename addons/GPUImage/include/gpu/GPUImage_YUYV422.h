@@ -9,6 +9,7 @@
 #ifndef ROXLU_GPU_IMAGE_YUYV422_H
 #define ROXLU_GPU_IMAGE_YUYV422_H
 
+#include <roxlu/core/Log.h>
 #include <gpu/GPUImage_Base.h>
 #include <gpu/GPUImage_UYVY422.h>
 
@@ -24,7 +25,9 @@ inline GLenum GPUImage_YUYV422::getType() {
 #if defined(__APPLE__)
   return GL_UNSIGNED_SHORT_8_8_REV_APPLE;
 #else
-  #error not yet supported 
+  //#error not yet supported 
+  RX_ERROR("NEED TO IMPLEMENT GPUIMAGE_YUY422::GETYPE!!!!!!!!!!!!");
+  return GL_RED;
 #endif
 }
 

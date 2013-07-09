@@ -36,27 +36,28 @@
             }                                                                                                                                                      \
         }
    
-#    define eglGetShaderInfoLog( Shader )                                        \
-       {                                                                         \
-         GLint   Status, Count;                                                  \
-         GLchar *Error;                                                          \
-                                                                                 \
-         glGetShaderiv( Shader, GL_COMPILE_STATUS, &Status );                    \
-                                                                                 \
-         if ( !Status )                                                          \
-           {                                                                     \
-             glGetShaderiv( Shader, GL_INFO_LOG_LENGTH, &Count );                \
-                                                                                 \
-             if ( Count > 0 )                                                    \
-               {                                                                 \
-                 Error = (GLchar *)malloc(Count);                                \
-                 glGetShaderInfoLog( Shader, Count, NULL, Error );               \
-                 printf( "%s\n", Error );                                        \
-                 free( Error );                                                  \
-                 assert( 0 );                                                    \
-               }                                                                 \
-           }                                                                     \
-       }
+#    define eglGetShaderInfoLog( Shader )                               \
+  {                                                                     \
+    GLint egl_status;                                                   \
+    GLint egl_count;                                                    \
+    GLchar *egl_error;                                                  \
+                                                                        \
+    glGetShaderiv( Shader, GL_COMPILE_STATUS, &egl_status );            \
+                                                                        \
+    if ( !egl_status )                                                  \
+      {                                                                 \
+        glGetShaderiv( Shader, GL_INFO_LOG_LENGTH, &egl_count );        \
+                                                                        \
+        if ( egl_count > 0 )                                            \
+          {                                                             \
+            egl_error = (GLchar *)malloc(egl_count);                    \
+            glGetShaderInfoLog( Shader, egl_count, NULL, egl_error );   \
+            printf( "%s\n", egl_error );                                \
+            free( egl_error );                                          \
+            assert( 0 );                                                \
+          }                                                             \
+      }                                                                 \
+  }
    
    
 #   define   eglGetShaderLinkLog(id)                                             \

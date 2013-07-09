@@ -2,7 +2,7 @@
 
 // GLFW
 // --------------------------------------------------------------
-bool rx_glfw_init() {
+bool rx_glfw_init(int major, int minor) {
   glfwSetErrorCallback(rx_glfw_error_callback);
 
   if(!glfwInit()) {
@@ -12,8 +12,8 @@ bool rx_glfw_init() {
 
   // when using GL3, set some hints
 #if defined(ROXLU_GL_CORE3)
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, major);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minor);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, 1);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #endif
