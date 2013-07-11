@@ -13,7 +13,11 @@ GPUImage_UYVY422::~GPUImage_UYVY422() {
 }
 
 bool GPUImage_UYVY422::setup() {
-  prog = rx_create_shader(UYVY_VS, UYVY_FS, vert_id, frag_id);
+  return setupShader(UYVY_VS, UYVY_FS);
+}
+
+bool GPUImage_UYVY422::setupShader(const char* VS, const char* FS) {
+ prog = rx_create_shader(VS, FS, vert_id, frag_id);
   glBindAttribLocation(prog, 0, "a_pos");
   glBindAttribLocation(prog, 1, "a_tex");
   glLinkProgram(prog);

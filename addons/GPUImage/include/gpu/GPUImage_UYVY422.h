@@ -97,6 +97,7 @@ class GPUImage_UYVY422 : public GPUImage_Base {
   GPUImage_UYVY422();
   ~GPUImage_UYVY422();
   bool setup();
+  bool setupShader(const char* VS, const char* FS);
   void useProgram();
   void setProjectionMatrix(const float* pm);
   void setModelMatrix(const float* mm);
