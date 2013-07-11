@@ -43,10 +43,17 @@ bool GPUImage_UYVY422::setup() {
 }
 
 void GPUImage_UYVY422::genTextures(GLuint* id, int w, int h) {
+  int tex_w = w;
+  int tex_h = h;
+
+#if defined(UYVY_USE_RGBA8_FORMAT)
+  tex_w = w * 0.5;
+#endif
+
   glGenTextures(1, id);
   glBindTexture(GL_TEXTURE_2D, *id);
   glTexImage2D(GL_TEXTURE_2D, 0,
-               getInternalFormat(), w, h, 0, 
+               getInternalFormat(), tex_w, tex_h, 0, 
                getFormat(), getType(), NULL);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -56,6 +63,11 @@ void GPUImage_UYVY422::genTextures(GLuint* id, int w, int h) {
 }
 
 void GPUImage_UYVY422::setPixels(GLuint* id, char* pixels, int w, int h) {
+
+#if defined(UYVY_USE_RGBA8_FORMAT)
+  w = w * 0.5;
+#endif  
+
   glBindTexture(GL_TEXTURE_2D, *id);
   glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, getFormat(), getType(), pixels);
 }
@@ -63,7 +75,6 @@ void GPUImage_UYVY422::setPixels(GLuint* id, char* pixels, int w, int h) {
 void GPUImage_UYVY422::bindTextures(GLuint* id) {
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, *id);
-
 }
 
 void GPUImage_UYVY422::setProjectionMatrix(const float* pm) {

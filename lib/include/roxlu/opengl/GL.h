@@ -48,8 +48,9 @@
 #    include <OpenGL/gl3.h>
 #    include <OpenGL/gl3ext.h>
 #  endif
-
-#  include <GLXW/glxw.h>     
+#  if defined(__linux)
+#    include <GLXW/glxw.h>       // @todo - test if this is necessary on linux, gives errors on mac
+#  endif
 #define GLFW_INCLUDE_NONE
 #  include <GL/glfw3.h>
 #elif defined(ROXLU_WITH_OPENFRAMEWORKS)

@@ -4,7 +4,6 @@ roxlu_addon_begin("audio")
   # --------------------------------------------------------------------------------------
   roxlu_addon_add_source_file(audio/Audio.cpp)
   roxlu_addon_add_source_file(audio/AudioFile.cpp)
-#  roxlu_addon_add_source_file(audio/AudioPlayer.cpp)
   roxlu_addon_add_source_file(audio/AudioOutput.cpp)
   roxlu_addon_add_source_file(audio/AudioStream.cpp)
   roxlu_addon_add_source_file(audio/PCMWriter.cpp)
@@ -22,9 +21,11 @@ roxlu_addon_begin("audio")
   if(UNIX)
     roxlu_add_extern_lib(libportaudio.a)
     roxlu_add_extern_lib(libsndfile.a)
-   # roxlu_add_extern_lib(libid3.a)
-    roxlu_add_extern_lib(libiconv.a)  # iconv
+    roxlu_add_extern_lib(libiconv.a)  
     roxlu_add_extern_lib(libmp3lame.a)
+  endif()
+
+  if(UNIX AND NOT APPLE)
     roxlu_add_lib(asound) 
   endif()
 
