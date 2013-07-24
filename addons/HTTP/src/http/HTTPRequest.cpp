@@ -1,6 +1,9 @@
 #include <roxlu/core/Log.h>
 #include <http/HTTPRequest.h>
 
+#include <roxlu/core/Utils.h> // tmp
+#include <fstream> // tmp
+
 HTTPRequest::HTTPRequest() 
   :form_encoding(HTTP_FORM_ENCODING_NONE)
   ,method(HTTP_METHOD_GET)
@@ -38,6 +41,9 @@ std::string HTTPRequest::getHTTPString() {
   else if(method == HTTP_METHOD_POST) {
     req = "POST";
   }
+  else if(method == HTTP_METHOD_PUT) {
+    req = "PUT";
+  }
   else {
     RX_ERROR("Unhandled HTTPMethod!");
   }
@@ -53,28 +59,38 @@ std::string HTTPRequest::getHTTPString() {
 void HTTPRequest::addDefaultHTTPHeaders() {
   addHeader(HTTPHeader("Host", url.getHost()));
 
-  if(getFormEncoding() == HTTP_FORM_MULTIPART) {
-    addHeader(HTTPHeader("Content-Type", "multipart/form-data; boundary=\"" +getBoundary() +"\""));
+  if(method != HTTP_METHOD_POST) {
+    return;
   }
-  else if(getFormEncoding() == HTTP_FORM_URL_ENCODED) {
-    addHeader(HTTPHeader("Content-Type", "application/x-www-form-urlencoded"));
+
+  if(!headers.contains("content-type")) {
+    if(getFormEncoding() == HTTP_FORM_MULTIPART) {
+      addHeader(HTTPHeader("Content-Type", "multipart/form-data; boundary=\"" +getBoundary() +"\""));
+    }
+    else if(getFormEncoding() == HTTP_FORM_URL_ENCODED) {
+      addHeader(HTTPHeader("Content-Type", "application/x-www-form-urlencoded"));
+    }
   }
 }
 
 bool HTTPRequest::createBody(std::string& result) {
- if(content_parameters.size()) {
-    if(isPost() && content_parameters.hasFileParameter()) {
-      return content_parameters.toBoundaryString(getBoundary(), result);
-    }
-    else {
-      if(content_parameters.size()) {
-        content_parameters.percentEncode();
-        result = content_parameters.getQueryString();
+  if(body.size()) {
+    result = body;
+  }
+  else {
+    if(content_parameters.size()) {
+      if(isPost() && content_parameters.hasFileParameter()) {
+        return content_parameters.toBoundaryString(getBoundary(), result);
+      }
+      else {
+        if(content_parameters.size()) {
+          content_parameters.percentEncode();
+          result = content_parameters.getQueryString();
+        }
       }
     }
   }
-
- return true;
+  return true;
 }
 
 
@@ -82,22 +98,52 @@ bool HTTPRequest::createBody(std::string& result) {
 bool HTTPRequest::toString(std::string& result) {
 
   // create the content string
-  std::string body;
-  if(!createBody(body)) {
+  std::string http_body;
+  if(!createBody(http_body)) {
     RX_ERROR("Cannot create request body");
     return false;
   }
 
   // create the headers.
   addDefaultHTTPHeaders();
-  addHeader(HTTPHeader("Content-Length", body.size()));
+  addHeader(HTTPHeader("Content-Length", http_body.size()));
 
   // construct the request
   result = getHTTPString() +"\r\n";
+
   result += headers.join();
   result += "\r\n";
-  result += body;
 
+#if 1
+  printf("%s", result.c_str());
+  for(size_t i = 0; i < http_body.size(); ++i) {
+    if(i > 40) {
+      break;
+    }
+    printf("%c", http_body[i]);
+  }
+  printf("\n");
+  for(size_t i = 0; i < http_body.size(); ++i) {
+    if(i > 40) {
+      break;
+    }
+    printf("%02X ", (unsigned char)http_body[i]);
+  }
+  printf("\n");
+#endif
+
+  result += http_body;
+
+#if 1 
+  std::ofstream ofs(rx_to_data_path("out.raw").c_str(), std::ios::binary | std::ios::out);
+  if(!ofs.is_open()) {
+    RX_ERROR("Cannot open output file");
+  }
+  else {
+    ofs.write(result.c_str(), result.size());
+    ofs.close();
+  }
+#endif
   return true;
 }
 

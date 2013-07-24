@@ -1,8 +1,7 @@
-#ifndef ROXLU_ERRORH
-#define ROXLU_ERRORH
+#ifndef ROXLU_GL_ERRORH
+#define ROXLU_GL_ERRORH
 
 #if defined(ROXLU_WITH_OPENGL)
-
 #  if defined(ROXLU_DEBUG)
 #    include <stdlib.h>
 #    include <assert.h>

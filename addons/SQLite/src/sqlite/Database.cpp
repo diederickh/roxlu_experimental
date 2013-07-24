@@ -1,5 +1,6 @@
 #include <sqlite/Database.h>
 #include <roxlu/core/Log.h>
+#include <roxlu/core/Utils.h>
 
 int roxlu_database_busy_handler(void* v, int r) {
 #if !defined(NDEBUG)
@@ -26,8 +27,13 @@ namespace roxlu  {
   }
 
   //http://icculus.org/~chunky/stuff/sqlite3_example/sqlite3_example_bind.c
-  bool Database::open(const string& fileName) {
+  bool Database::open(const string& fileName, bool datapath) {
+
     file = fileName;
+    if(datapath) {
+      file = rx_to_data_path(fileName);
+    }
+
     if(SQLITE_OK != sqlite3_open(file.c_str(), &db)) {
       RX_ERROR("Error: %s", sqlite3_errmsg(db));
       sqlite3_close(db);
@@ -64,6 +70,11 @@ namespace roxlu  {
   QueryInsert Database::insert(const string& table) {
     QueryInsert insert(*this, table);
     return insert;
+  }
+
+  QueryUpdate Database::update(const string& table) {
+    QueryUpdate update(*this, table);
+    return update;
   }
 
   QuerySelect Database::select(const string& selectFields) {
@@ -115,11 +126,9 @@ namespace roxlu  {
         ||
       */
 		
-      if( queryType == QUERY_DELETE 
-          )
-        {
-          parameter_index += 1; 
-        }
+      if(queryType == QUERY_DELETE) {
+        parameter_index += 1; 
+      }
 		
       switch(qp->getType()) {
 		
@@ -139,6 +148,7 @@ namespace roxlu  {
             RX_ERROR("Error: cannot bind: %s(%d) =  %s", qp->getField().c_str(),parameter_index, sqlite3_errmsg(db));
             return false;
           }
+
           break;
         }
 				

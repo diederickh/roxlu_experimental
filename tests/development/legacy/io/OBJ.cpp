@@ -1,183 +1,106 @@
-//#include "OBJ.h"
-
 #include <roxlu/io/OBJ.h>
 
 namespace roxlu {
 
-bool OBJ::import(const string& filepath) {
-	ifstream ifs;
-	ifs.open(filepath.c_str());
-	if(!ifs.is_open()) {
-		printf("Cannot open: %s\n", filepath.c_str());
-		return false;
-	}	
-	
-	Triangle tri;
-	Vec3 v;
-	Vec2 t;
-	OBJ::Object object;
-	string line;
-	bool object_added = false;
-	bool found_object = false;
-	string vertex_group = "none";
-	size_t tri_index = 0;
-	
-	while(getline(ifs, line)) {
-		if(line.at(0) == '#') {
-			continue;
-		}
-		
-		int space = line.find(" ");
-		if(space == string::npos) {
-			continue;
-		}
-		
-		string cmd = line.substr(0, space);
-		
-		// object
-		if(cmd == "o") {
-			if(found_object) {
-				object_added = true;
-				objects[object.name] = object;
-			}
-			found_object = true;
-			object.name = line.substr(space+1, line.size()-1);
-		}
-		// vertex
-		else if(found_object && cmd == "v") {
-			stringstream ss;
-			ss << line.substr(space+1, line.size()-1);
-			ss >> v.x >> v.y >> v.z;
-			object.vd.addVertex(v);
-		}
-		// normal
-		else if(found_object && cmd == "vn") {
-			stringstream ss;
-			ss << line.substr(space+1, line.size()-1);
-			ss >> v.x >> v.y >> v.z;
-			object.vd.addNormal(v);
-		}
-		// texcoord
-		else if(found_object && cmd == "vt") {
-			stringstream ss;
-			ss << line.substr(space+1, line.size()-1);
-			ss >> t.x >> t.y;
-			object.vd.addTexCoord(t);
-		}
-		// vertex group
-		else if(found_object && cmd == "g") {
-			stringstream ss;
-			ss << line.substr(space+1, line.size()-1);
-			vertex_group = ss.str();
-		}
-		// face
-		else if(found_object && cmd == "f") {
-			stringstream ss;
-			ss << line.substr(space+1, line.size()-1);
-			string face;
-			
-			ss >> face;
-			extractFace(face, tri.va, tri.na, tri.tc_a);
-		
-			
-			ss >> face;			
-			extractFace(face, tri.vb, tri.nb, tri.tc_b);
-			
-			ss >> face;			
-			extractFace(face, tri.vc, tri.nc, tri.tc_c);
-			
-			object.vd.addTriangle(tri);
-			
-			object.vd.addToVertexGroup(vertex_group, tri_index);
-		}
+  bool OBJ::load(const std::string& filepath) {
+    std::ifstream ifs;
+    ifs.open(filepath.c_str());
+    if(!ifs.is_open()) {
+      printf("ERROR: Cannot open: %s\n", filepath.c_str());
+      return false;
+    }	
+    char c;
+    std::string line;
+    while(std::getline(ifs, line)) {
+      std::stringstream ss(line);
+      ss >> c;
+      if(c == 'v') {
+        if(line[1] == ' ') {
+          XYZ p;
+          ss >> p.x >> p.y >> p.z;
+          vertices.push_back(p);
+        }
+        else if(line[1] == 'n') {
+          XYZ p;
+          ss >> c;
+          ss >> p.x >> p.y >> p.z;
+          normals.push_back(p);
+        }
+      }
+      else if(c == 'f') {
+        std::string part;
+        std::vector<OBJ::TRI> tris;
+        while(ss >> part) {
+          std::stringstream fss;
+          std::string indices[3];
+          int dx = 0;
+          for(int i = 0; i < part.size(); ++i) {
+            if(part[i] == '/') {
+              dx++;
+              continue;
+            }
+            indices[dx].push_back(part[i]);
+          }
+          TRI tri;
+          tri.v = atoi(indices[0].c_str()) - 1;
+          tri.t = atoi(indices[1].c_str()) - 1;
+          tri.n = atoi(indices[2].c_str()) - 1;
+          tris.push_back(tri);
+        }
+        if(tris.size() == 3) {
+          OBJ::FACE face;
+          face.a = tris[0];
+          face.b = tris[1];
+          face.c = tris[2];
+          faces.push_back(face);
+        }
+        else {
+          printf("ERROR: incorrect number of indices in face.\n");
+        }
+      }
+    }
+    return true;
+  }
 
-	}
-	if(!object_added) {
-		objects[object.name] = object;
-	}
-	
-	return true;
-	
-	// Calculate binormal + tangent;
-	/*
-	map<string, Object>::iterator it = objects.begin();
-	while(it != objects.end()) {
-		Object& obj = it->second;
-		for(int i = 0; i < obj.vd.triangles.size(); ++i) {
-			Triangle& tri = obj.vd.triangles[i];
-			
-			if(obj.vd.normals.size() <= 0) {
-				continue;
-			}
-			
-			Vec3 a_b = (obj.vd.vertices[tri.vb] - obj.vd.vertices[tri.va]).normalize();
-			Vec3 b_c = (obj.vd.vertices[tri.vc] - obj.vd.vertices[tri.vb]).normalize();
-			Vec3 c_a = (obj.vd.vertices[tri.va] - obj.vd.vertices[tri.vc]).normalize();
-			
-			Vec3 ba = cross(a_b,obj.vd.normals[tri.na]).normalize();
-			Vec3 bb = cross(b_c,obj.vd.normals[tri.nb]).normalize();
-			Vec3 bc = cross(c_a,obj.vd.normals[tri.nc]).normalize();
-			
-			tri.ta = obj.vd.addTangent(a_b);
-			tri.tb = obj.vd.addTangent(b_c);
-			tri.tc = obj.vd.addTangent(c_a);
-			
-			tri.ba = obj.vd.addBinormal(ba);
-			tri.bb = obj.vd.addBinormal(bb);
-			tri.bc = obj.vd.addBinormal(bc);
-		}
-		++it;
-	}
-	*/
-}
+#define OBJ_VERTEX_NORMAL(tri) {                                        \
+    memcpy(ptr+dx, (char*)&vertices[tri.v].x, sizeof(XYZ));  dx += 3;   \
+    memcpy(ptr+dx, (char*)&normals[tri.n].x, sizeof(XYZ));  dx += 3;    \
+  }
 
-bool OBJ::extractFace(string info, int& vertexIndex, int& normalIndex, int& texcoordIndex) {
-	stringstream fss;
-	fss << info;
-	string fv;
-	
-	// get vertex index
-	if(getline(fss, fv, '/')) {
-		if(fv.size()) {
-			stringstream ofss;
-			ofss << fv;
-			ofss >> vertexIndex;
-			--vertexIndex;
-		}
-	}
-	else {
-		return false;
-	}
-	
-	// get texcoord index
-	if(getline(fss, fv, '/')) {
-		if(fv.size()) {
-			stringstream ofss;
-			ofss << fv;
-			ofss >> texcoordIndex;
-			--texcoordIndex;
-		}
-	}
-	
-	// get normal index
-	if(getline(fss, fv, '/')) {
-		if(fv.size()) {
-			stringstream ofss;
-			ofss << fv;
-			ofss >> normalIndex;
-			--normalIndex;
-		}
-	}
-	
-	return true;
-}
+#define OBJ_VERTEX(tri) {                                               \
+    memcpy(ptr+dx, (char*)&vertices[tri.v].x, sizeof(XYZ));  dx += 3;   \
+  }
 
-void OBJ::print() {
-	std::map<string, Object>::iterator it = objects.begin();
-	while(it != objects.end()) {
-		printf("- '%s'\n", it->first.c_str());
-		++it;
-	}
-}
-
+  // returns number of vertices
+  size_t OBJ::getVertices(float** result, bool useNormals) {
+    int num_xyz = 1; // only vertices;
+    if(useNormals) {  // also normals
+      num_xyz++;
+    }
+    size_t num_floats_per_vertex = num_xyz * 3;
+    size_t num_vertices = faces.size() * 3;
+    size_t num_floats = num_vertices * num_floats_per_vertex;
+    float* ptr = new float[num_floats];
+    size_t dx = 0;
+    OBJ::TRI tri;
+    OBJ::XYZ vertex;
+    OBJ::XYZ normal;
+    for(std::vector<FACE>::iterator it = faces.begin(); it != faces.end(); ++it) {
+      FACE& f = *it;
+      if(useNormals) {
+        OBJ_VERTEX_NORMAL(f.a);
+        OBJ_VERTEX_NORMAL(f.b);
+        OBJ_VERTEX_NORMAL(f.c);
+      }
+      else {
+        OBJ_VERTEX(f.a);
+        OBJ_VERTEX(f.b);
+        OBJ_VERTEX(f.c);
+      }
+    }
+    *result = ptr;
+    return num_vertices;
+  }
 };
+
+

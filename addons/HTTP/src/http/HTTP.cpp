@@ -50,7 +50,7 @@ bool HTTP::update() {
 
 HTTPConnection* HTTP::sendRequest(HTTPRequest& r,                           /* the request that we will sent */
                                   httpconnection_event_callback eventCB,    /* this function gets called when we receive data, see HTTPConnection.h */
-                                  void* user,                               /* the user pointer that gets passed into `dataCB` */
+                                  void* user,                               /* the user pointer that gets passed into `eventCB` */
                                   SSL* ssl)                                 /* pass a SSL* when you want to make a secure connection */
 {
 
@@ -66,10 +66,10 @@ HTTPConnection* HTTP::sendRequest(HTTPRequest& r,                           /* t
   c->cb_close = http_on_connection_event;
   c->cb_close_user = this;
   c->addToOutputBuffer(request_str);
-  c->connect(eventCB, this);
+  c->connect(eventCB, user);
 
   connections.push_back(c);
-  return NULL;
+  return c;
 }
 
 bool HTTP::removeConnection(HTTPConnection* c) {

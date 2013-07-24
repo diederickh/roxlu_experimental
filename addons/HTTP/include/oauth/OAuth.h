@@ -41,6 +41,8 @@ class OAuth {
   void setToken(std::string token, std::string tokenSecret);                      /* the token represents the authorization information of the user for which the consumer (client) will make requests */
   void addAuthorizationHeadersToRequest(HTTPRequest& r);                          /* calculates the signature with basestring and add the authorization header for oauth to the request so you can make authorized requests */
   void reset();
+  std::string getConsumerKey();                                                   /* returns the consumer key you passed into `setConsumer()` */
+  std::string getConsumerSecret();                                                /* returns the consumer secret you passed into `setConsumer()` */
  private:
   void updateNonceAndTimestamp();                                                 /* Number used ONCE, this is used by the server to make sure one request can be made only once (when the request gets comprimised it can't be used forever by the other party). This functions update the epoch value + nonce value */
   std::string generateNonce();                                                    /* Generates a nonce value */
@@ -93,6 +95,15 @@ inline u64 oauth_timestamp() {
   ftime(&t);
   return t.time;
 #endif
+}
+
+
+inline std::string OAuth::getConsumerKey() {
+  return consumer_key;
+}
+
+inline std::string OAuth::getConsumerSecret() {
+  return consumer_secret;
 }
 
 #endif

@@ -96,7 +96,7 @@ HTTP h;
 SSLContext ssl_ctx;
 HTTPURL url("test.localhost", "/info.php", HTTP_PROTO_HTTPS);
 HTTPRequest r(url, HTTP_METHOD_GET, HTTP_VERSION_1_1);
-SSL* ssl = ssl_ctx.allocateSSL();
+SSL* ssl = ssl_ctx.allocateSSL(); // the ssl ownership is taken by the HTTPConnection
 h.sendRequest(r, request_cb, NULL, ssl);
 
 // call HTTP::update() regularly (this is just an example)

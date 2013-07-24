@@ -15,14 +15,17 @@ class HTTPRequest {
   HTTPRequest(HTTPURL url, HTTPMethod m = HTTP_METHOD_GET, HTTPVersion v = HTTP_VERSION_1_0);
   ~HTTPRequest();
   void addHeader(HTTPHeader h);                                      /* add a http header */
+  void addHeaders(const HTTPHeaders& h);                            /* append the given headers to the headers member */
   void addContentParameter(HTTPParameter p);                         /* add a parameter that will be added into the content of the request (multipart/form-data, or url encoded) */
   void addContentParameters(HTTPParameters& p);                      /* "" */
+  void setBody(std::string data);                                /* set the contents of the request body */
   void setURL(HTTPURL url);                                          /* set the url object */
   void setMethod(HTTPMethod method);                                 /* POST, GET, .. */
   void setVersion(HTTPVersion version);                              /* what proto version 1.1 or 1.0 */
   bool toString(std::string& result);                                /* converts the request into a string that can be sent to a http server */
   bool createBody(std::string& result);                              /* generates the contents of the request (which is put after the headers) */
   void addDefaultHTTPHeaders();                                      /* adds the GET or POST header and the form encoding type if necessary */
+
   std::string getHTTPString();                                       /* returns the first line for the request */
   bool isPost();                                                     /* helper which returns true when the current request will use POST */
   bool hasFileParameter();                                           /* helper which returns true when there are content parameters that are files */
@@ -43,6 +46,7 @@ class HTTPRequest {
   HTTPParameters content_parameters;
   HTTPFormEncoding form_encoding;                                   /* the form encoding in case of an post; if not set we detect it ourself */
   std::string boundary;                                             /* used as boundary string in multipart/form-data */
+  std::string body;                                                 /* the body of the request */
 };
 
 inline void HTTPRequest::setURL(HTTPURL u) {
@@ -55,6 +59,10 @@ inline void HTTPRequest::setMethod(HTTPMethod m) {
 
 inline void HTTPRequest::setVersion(HTTPVersion v) {
   version = v;
+}
+
+inline void HTTPRequest::setBody(std::string data) {
+  body = data;
 }
 
 inline HTTPURL& HTTPRequest::getURL() {
@@ -83,6 +91,10 @@ inline HTTPParameters& HTTPRequest::getContentParameters() {
 
 inline void HTTPRequest::addContentParameters(HTTPParameters& p) {
   content_parameters.copy(p);
+}
+
+inline void HTTPRequest::addHeaders(const HTTPHeaders& h) {
+  headers.copy(h);
 }
 
 #endif

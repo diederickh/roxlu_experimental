@@ -42,6 +42,7 @@ namespace osc {
     struct timeval tv;
     fd_set rfds;
     int lo_fd;
+    int lo_proto;
     int retval;
   };
 };

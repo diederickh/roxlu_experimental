@@ -20,14 +20,25 @@ int httpconnection_on_url(http_parser* p, const char* at, size_t len) {
 }
 
 int httpconnection_on_header_field(http_parser* p, const char* at, size_t len) {
+  HTTPConnection* c = static_cast<HTTPConnection*>(p->data);
+  c->last_header.assign(at, len);
   return 0;
 }
 
 int httpconnection_on_header_value(http_parser* p, const char* at, size_t len) {
+  HTTPConnection* c = static_cast<HTTPConnection*>(p->data);
+  std::string header_value(at, len);
+  c->headers.add(HTTPHeader(c->last_header, header_value));
   return 0;
 }
 
 int httpconnection_on_headers_complete(http_parser* p) {
+
+  HTTPConnection* c = static_cast<HTTPConnection*>(p->data);
+  if(c->cb_event) {
+    c->cb_event(c, HTTP_ON_HEADERS, NULL, 0, c->cb_event_user);
+  }
+  
   return 0;
 }
 
@@ -42,6 +53,11 @@ int httpconnection_on_body(http_parser* p, const char* at, size_t len) {
 }
 
 int httpconnection_on_message_complete(http_parser* p) {
+  HTTPConnection* c = static_cast<HTTPConnection*>(p->data);
+  if(c->cb_event) {
+    c->cb_event(c, HTTP_ON_COMPLETE, NULL, 0, c->cb_event_user);
+  }
+  
   return 0;
 }
 
@@ -49,6 +65,12 @@ int httpconnection_on_message_complete(http_parser* p) {
 //-------------------------------------------------------------------------------
 
 void httpconnection_on_flush_input_buffer(const char* data, size_t len, void* user) {
+#if 1
+  for(size_t i = 0; i < len; ++i) {
+    printf("%c", data[i]);
+  }
+#endif
+
   HTTPConnection* c = static_cast<HTTPConnection*>(user);
   http_parser_execute(&c->parser, &c->parser_settings, data, len);
 }
@@ -120,7 +142,7 @@ void httpconnection_on_read(uv_stream_t* handle, ssize_t nread, uv_buf_t buf) {
 
     uv_err_t err = uv_last_error(handle->loop);
     if(err.code != UV_EOF) {
-      RX_ERROR("> disconnected from server but not correctly");
+      RX_ERROR("> disconnected from server but not correctly: %s",uv_strerror(uv_last_error(handle->loop))) ;
     }
 
     r = uv_shutdown(&c->shutdown_req, handle, httpconnection_on_shutdown);
@@ -255,6 +277,7 @@ bool HTTPConnection::connect(httpconnection_event_callback eventCB,  /* gets cal
   hints.ai_protocol = IPPROTO_TCP;
   hints.ai_flags = 0;
  
+  RX_VERBOSE("Connecting to: %s", host.c_str());
   r = uv_getaddrinfo(loop, &resolver_req, httpconnection_on_resolved, 
                      host.c_str(), port.c_str(), &hints);
 
@@ -293,5 +316,14 @@ bool HTTPConnection::send(char* data, size_t len) {
     return false;
   }
   
+  return true;
+}
+
+bool HTTPConnection::close() {
+  if(!sock) {
+    RX_ERROR("Cannot close a socket which haven't been opened yet");
+    return false;
+  }
+  uv_shutdown(&shutdown_req, (uv_stream_t*)sock, httpconnection_on_shutdown);
   return true;
 }

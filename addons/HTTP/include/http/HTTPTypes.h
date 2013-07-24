@@ -5,7 +5,8 @@
 
 enum HTTPMethod {
   HTTP_METHOD_GET,
-  HTTP_METHOD_POST
+  HTTP_METHOD_POST,
+  HTTP_METHOD_PUT
 };
 
 enum HTTPVersion {
@@ -39,6 +40,8 @@ enum HTTPConnectionEvent {
   HTTP_ON_CLOSED,
   HTTP_ON_BODY,                                                   /* notifies when new response data has been parsed, data is passed into the handler */
   HTTP_ON_STATUS,                                                 /* we got a http status code, see HTTPConnection->parser.status_code, data = NULL, len = 0 */
+  HTTP_ON_HEADERS,                                                /* when we parsed all the response headers, data =  NULL, len = 0 */
+  HTTP_ON_COMPLETE,                                               /* when parsing has completed */
 };
 
 // Used by the HTTPParameter 

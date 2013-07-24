@@ -38,7 +38,7 @@ SSLContext::SSLContext()
 
   SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_SSLv2);
   SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, sslcontext_verify);
-  //SSL_CTX_set_info_callback(ssl_ctx, sslcontext_info);
+  SSL_CTX_set_info_callback(ssl_ctx, sslcontext_info);
 }
 
 SSLContext::~SSLContext() {

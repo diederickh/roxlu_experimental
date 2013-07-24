@@ -5,6 +5,7 @@
 #include <string>
 #include <sqlite3.h>
 #include <sqlite/QueryInsert.h>
+#include <sqlite/QueryUpdate.h>
 #include <sqlite/QuerySelect.h>
 #include <sqlite/QueryDelete.h>
 #include <sqlite/QueryParam.h>
@@ -23,18 +24,20 @@ namespace roxlu {
   public:
     enum QueryTypes {
       QUERY_INSERT
+      ,QUERY_UPDATE
       ,QUERY_SELECT
       ,QUERY_DELETE
     };
 	
     Database();
     ~Database();
-    bool open(const string& fileName);
+    bool open(const string& fileName, bool datapath = false);
     Query query(const string& sql);
     int lastInsertID();
     bool beginTransaction();
     bool endTransaction();
     QueryInsert insert(const string& table);
+    QueryUpdate update(const string& table);
     QuerySelect	select(const string& selectFields);
     QuerySelect select();
     QueryDelete remove();

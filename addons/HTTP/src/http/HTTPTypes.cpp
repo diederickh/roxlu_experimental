@@ -11,7 +11,7 @@ HTTPFile::HTTPFile(std::string fname, bool datapath) {
 }
 
 bool HTTPFile::setFile(std::string fname, bool datapath) {
- filepath = fname;
+  filepath = fname;
   filename = fname;
   if(datapath) {
     filepath = rx_to_data_path(fname);

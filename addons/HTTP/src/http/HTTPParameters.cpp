@@ -50,6 +50,7 @@ bool HTTPParameters::toBoundaryString(HTTPParameter& p, std::string boundary, st
     }
 
     case HTTP_PARAMETER_FILE: {
+
       for(std::vector<HTTPFile>::iterator fit = p.files.begin(); fit != p.files.end(); ++fit) {
         HTTPFile& file = *fit;
         std::string file_contents = rx_get_file_contents(file.filepath, false);

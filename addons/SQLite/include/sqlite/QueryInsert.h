@@ -1,3 +1,25 @@
+/* 
+
+   # QueryInsert
+
+   Used to generate insert queries; can also be used to UPSERT kind of queries (make sure
+   to make your field unique).
+
+
+   ````c++
+
+    QueryResult qr(db);
+    db.query("CREATE TABLE IF NOT EXISTS state("
+             "   name TEXT UNIQUE, "
+             "   value TEXT)").execute(qr);
+    qr.finish();
+
+    db.insert("state").use("name","refresh_token").use("value", 122).orReplace().execute();
+
+   ````
+
+
+ */
 #ifndef ROXLU_DATABASE_QUERY_INSERTH
 #define ROXLU_DATABASE_QUERY_INSERTH
 
@@ -33,7 +55,7 @@ namespace roxlu {
       return *this;
     }
 	
-    // what on dupblicate?
+    // what on duplicate?
     QueryInsert& orRollback();
     QueryInsert& orAbort();
     QueryInsert& orReplace();

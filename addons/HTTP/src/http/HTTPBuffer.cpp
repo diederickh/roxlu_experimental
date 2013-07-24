@@ -99,6 +99,11 @@ void HTTPBufferSSL::flushInputBuffer() {
     RX_ERROR("No input flush callback set");
     return;
   }
+  printf("-------------------------------------------\n");
+  for(size_t i = 0; i < decrypted_data.size(); ++i) {
+    printf("%c", decrypted_data[i]);
+  }
+  printf("=============================================\n");
   cb_flush_input(&decrypted_data[0], decrypted_data.size(), cb_user);
   decrypted_data.clear();
 }

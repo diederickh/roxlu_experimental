@@ -3,6 +3,7 @@
 
 #include <http/HTTPTypes.h>
 #include <string>
+#include <algorithm>
 #include <sstream>
 
 //-------------------------------------------------------------------------------
@@ -27,6 +28,7 @@ class HTTPHeader {
   void setName(const std::string n);
   void setType(HTTPHeaderType t);
   void print();
+  bool icompare(const std::string n); /* case insensitive check on the name */
 
  public:
   std::string name;
@@ -42,6 +44,16 @@ inline void HTTPHeader::setName(const std::string n) {
 
 inline void HTTPHeader::setType(HTTPHeaderType t) {
   type = t;
+}
+
+inline bool HTTPHeader::icompare(const std::string n) {
+  std::string n_lower = n;
+  std::string name_lower = name;
+  
+  std::transform(n_lower.begin(), n_lower.end(), n_lower.begin(), ::tolower);
+  std::transform(name_lower.begin(), name_lower.end(), name_lower.begin(), ::tolower);
+
+  return n_lower == name_lower;
 }
 
 #endif

@@ -1,3 +1,4 @@
+#include <roxlu/core/Log.h>
 #include <sqlite/QueryInsert.h>
 #include <sqlite/Database.h>
 
@@ -86,7 +87,7 @@ namespace roxlu {
     }
 		
     if(sqlite3_step(stmt) != SQLITE_DONE) {
-      printf("error: %s\n", sqlite3_errmsg(getSQLite()));
+      RX_ERROR("Error: %s\n", sqlite3_errmsg(getSQLite()));
       sqlite3_finalize(stmt);
       return false;
     }

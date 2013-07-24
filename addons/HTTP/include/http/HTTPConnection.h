@@ -68,10 +68,13 @@ class HTTPConnection {
   void addToInputBuffer(const char* data, size_t len);                                                                              /* whenever we receive data on the socket it will be added to this output buffer (this might be SSL encrypted data) */
   void addToInputBuffer(const std::string str);                                                                                     /* whenever we receive data on the socket it will be added to this output buffer (this might be SSL encrypted data) */
   bool send(char* data, size_t len);                                                                                                /* write data to the socket */
+  bool close();                                                                                                                     /* close the connection */
                                                                                                                                    
  public:                                                                                                                           
   SSL* ssl;                                                                                                                         /* SLL object, might be NULL */
   HTTPBufferBase* buffer;                                                                                                           /* the standard of SSL buffer that we use as I/O wrapper when sending or receiving data. */
+  HTTPHeaders headers;                                                                                                              /* received headers */
+  std::string last_header;                                                                                                          /* used when parsing headers */
   std::string host;                                                                                                                 /* host to which we connect */
   std::string port;                                                                                                                 /* port on which we connect */
                                                                                                                                     
@@ -84,7 +87,7 @@ class HTTPConnection {
   http_parser parser;                                                                                                               /* joyents excellent http parser */
   http_parser_settings parser_settings;                                                                                             /* struct with info/callback data for the http_parser */
   httpconnection_event_callback cb_event;                                                                                           /* gets called when something happens with the connection (e.g. disconnected) */
-  httpconnection_event_callback cb_close;                                                                                        /* gets called when the connection closes (cb_event is called too) */          
+  httpconnection_event_callback cb_close;                                                                                           /* gets called when the connection closes (cb_event is called too) */          
   void* cb_event_user;                                                                                                              /* is passed into the event handler */       
   void* cb_close_user;                                                                                                              /* is passed into the close handler */
 };
