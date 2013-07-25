@@ -36,16 +36,18 @@ uv_buf_t client_ipc_on_alloc(uv_handle_t* handle, size_t nbytes);
 
 class ClientIPC {
  public:
-  ClientIPC();
+  ClientIPC(std::string sockfile, bool datapath);
   ~ClientIPC();
-  bool setup(std::string sockfile, bool datapath,
-             client_ipc_on_connected_cb conCB = NULL,  
-             client_ipc_on_read_cb readCB = NULL, 
-             void* user = NULL);
+  bool setup(client_ipc_on_connected_cb conCB,  
+             client_ipc_on_read_cb readCB, 
+             void* user);
+  bool connect();
+  bool isConnected();
   void update();
   void write(char* data, size_t nbytes);
   void write(const char* data, size_t nbytes);
  public:
+  std::string sockpath;
   uv_loop_t* loop;
   uv_pipe_t pipe;
   uv_connect_t connect_req;
@@ -57,6 +59,10 @@ class ClientIPC {
 
 inline void ClientIPC::write(const char* data, size_t nbytes) {
   write((char*)data, nbytes);
+}
+
+inline bool ClientIPC::isConnected() {
+  return !uv_is_closing((uv_handle_t*)&pipe);
 }
 
 #endif

@@ -1,8 +1,6 @@
 #include <uv/ClientIPC.h>
 
 void client_ipc_on_connect(uv_connect_t* req, int status) {
-  RX_VERBOSE("CLIENT IPC CONNECTED");
-
   ClientIPC* ipc = static_cast<ClientIPC*>(req->data);
 
   if(status == -1) {
@@ -68,18 +66,17 @@ void client_ipc_on_shutdown(uv_shutdown_t* req, int status) {
 }
 
 void client_ipc_on_close(uv_handle_t* handle) {
-  RX_VERBOSE("CLOSED!!!!");
+
 }
 
 void client_ipc_on_write(uv_write_t* req, int status) {
-  RX_VERBOSE("WRITTEN!");
   delete req;
   req = NULL;
 }
 
 // -----------------------------------------------
 
-ClientIPC::ClientIPC()
+ClientIPC::ClientIPC(std::string sockfile, bool datapath)
   :loop(NULL)
   ,cb_con(NULL)
   ,cb_read(NULL)
@@ -91,40 +88,41 @@ ClientIPC::ClientIPC()
     RX_ERROR("Cannot create a new loop");
     ::exit(EXIT_FAILURE);
   }
+
+  sockpath = sockfile;
+  if(datapath) {
+    sockpath = rx_to_data_path(sockfile);
+  }
   
   connect_req.data = this;
   shutdown_req.data = this;
+  pipe.data = this;
 }
 
 ClientIPC::~ClientIPC() {
   cb_user = NULL;
   cb_read = NULL;
   cb_con = NULL;
-  RX_ERROR("@TODO - cleanup");
 }
 
-bool ClientIPC::setup(std::string sockfile, bool datapath,
-                      client_ipc_on_connected_cb conCB,  client_ipc_on_read_cb readCB, 
+bool ClientIPC::setup(client_ipc_on_connected_cb conCB,  
+                      client_ipc_on_read_cb readCB, 
                       void* user)
 {
+  cb_con = conCB;
+  cb_read = readCB;
+  cb_user = user;
+  return true;
+}
 
-  int r = uv_pipe_init(loop, &pipe, 0);
+bool ClientIPC::connect() {
+
+ int r = uv_pipe_init(loop, &pipe, 0);
   if(r) {
     RX_ERROR("Error setting up pipe: %s", uv_strerror(uv_last_error(loop)));
     return false;
   }
-
-  if(datapath) {
-    sockfile = rx_to_data_path(sockfile);
-  }
-
-  cb_con = conCB;
-  cb_read = readCB;
-  cb_user = user;
-
-  pipe.data = this;
-  uv_pipe_connect(&connect_req, &pipe, sockfile.c_str(), client_ipc_on_connect);
-
+  uv_pipe_connect(&connect_req, &pipe, sockpath.c_str(), client_ipc_on_connect);
   return true;
 }
 
