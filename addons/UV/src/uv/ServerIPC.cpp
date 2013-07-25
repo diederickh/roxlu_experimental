@@ -204,6 +204,11 @@ bool ServerIPC::start() {
   if(!loop) {
     return false;
   }
+
+  if(sockpath.size() >= 127) {
+    RX_ERROR("Unix socket path should have a length < 127 characters");
+    return false;
+  }
   
   r = uv_pipe_init(loop, &server, 0);
   if(r < 0) {

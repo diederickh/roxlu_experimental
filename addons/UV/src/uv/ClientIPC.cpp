@@ -1,7 +1,6 @@
 #include <uv/ClientIPC.h>
 
 void client_ipc_on_connect(uv_connect_t* req, int status) {
-  RX_VERBOSE("uv_connect_t: %p, uv_connect_t.data: %p", req, req->data);
   ClientIPC* ipc = static_cast<ClientIPC*>(req->data);
 
   if(status < 0) {
@@ -120,14 +119,24 @@ bool ClientIPC::setup(client_ipc_on_connected_cb conCB,
 
 bool ClientIPC::connect() {
 
- int r = uv_pipe_init(loop, &pipe, 0);
+  if(!rx_file_exists(sockpath)) {
+    RX_ERROR("Cannot connect through ipc; the pipe is not found: `%s`", sockpath.c_str());
+    return false;
+  }
+
+  if(sockpath.size() >= 127) {
+    RX_ERROR("Unix socket paths should have a length < 127");
+    return false;
+  }
+
+  int r = uv_pipe_init(loop, &pipe, 0);
   if(r < 0) {
     RX_ERROR("Error setting up pipe: %s", uv_strerror(r));
     return false;
   }
-  RX_VERBOSE("connect, connect_req: %p" , &connect_req);
+  
   pipe.data = this;
-
+  
   uv_pipe_connect(&connect_req, &pipe, sockpath.c_str(), client_ipc_on_connect);
   return true;
 }
@@ -137,7 +146,7 @@ void ClientIPC::update() {
 }
 
 void ClientIPC::write(char* data, size_t nbytes) {
-
+  // @todo -> add a check if we're connected; else this results in a segfault
 #if 0  
   ClientWrite* cw = new ClientWrite;
   cw->buf = uv_buf_init(data, nbytes);
