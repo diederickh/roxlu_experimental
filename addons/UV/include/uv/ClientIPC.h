@@ -25,7 +25,7 @@ extern "C" {
 
 class ClientIPC;
 typedef void(*client_ipc_on_connected_cb)(ClientIPC* ipc, void* user);
-typedef void(*client_ipc_on_read_cb)(ClientIPC* ipc, char* buf, size_t nbytes, void* user);
+typedef void(*client_ipc_on_read_cb)(ClientIPC* ipc, void* user);
 
 void client_ipc_on_connect(uv_connect_t* req, int status);
 void client_ipc_on_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf);
@@ -33,6 +33,11 @@ void client_ipc_on_write(uv_write_t* req, int status);
 void client_ipc_on_shutdown(uv_shutdown_t* req, int status);
 void client_ipc_on_close(uv_handle_t* handle);
 uv_buf_t client_ipc_on_alloc(uv_handle_t* handle, size_t nbytes);
+
+struct ClientWrite {
+  uv_buf_t buf;
+  uv_write_t req;
+};
 
 class ClientIPC {
  public:
@@ -55,6 +60,7 @@ class ClientIPC {
   client_ipc_on_connected_cb cb_con;
   client_ipc_on_read_cb cb_read;
   void* cb_user;
+  std::vector<char> buffer;                                            /* buffer that contains the received data; will on be used when a read callback is set; the read callback should flush the buffer when necessary */
 };
 
 inline void ClientIPC::write(const char* data, size_t nbytes) {

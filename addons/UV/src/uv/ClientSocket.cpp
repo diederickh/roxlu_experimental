@@ -58,7 +58,7 @@ bool ClientSocket::connect() {
   is_connecting = true;
 
   int r = uv_tcp_init(loop, sock);
-  if(r) {
+  if(r < 0) {
     RX_ERROR("uv_tcp_init failed");
   }
 
@@ -71,8 +71,8 @@ bool ClientSocket::connect() {
   r = uv_getaddrinfo(loop, &resolver_req,client_socket_on_resolved, 
                      host.c_str(), port.c_str(), &hints);
  
-  if(r) {
-    RX_ERROR("cannot uv_tcp_init(): %s", uv_strerror(uv_last_error(loop)));
+  if(r < 0) {
+    RX_ERROR("cannot uv_tcp_init(): %s", uv_strerror(r));
     return false;
   }
     
@@ -86,7 +86,7 @@ void ClientSocket::disconnect() {
   }
 
   int r = uv_shutdown(&shutdown_req, (uv_stream_t*)sock, client_socket_on_shutdown);
-  if(r) {
+  if(r < 0) {
     RX_ERROR(CS_ERR_CANT_SHUTDOWN);
   }
 
@@ -98,7 +98,7 @@ void ClientSocket::reconnect() {
   }
 
   int r = uv_timer_init(loop, &timer_req);
-  if(r) {
+  if(r < 0) {
     RX_ERROR("uv_time_init() failed. cannot reconnect");
     return;
   }
@@ -121,7 +121,7 @@ void ClientSocket::write(char* data, size_t nbytes) {
   wreq->data = this;
 
   int r = uv_write(wreq, (uv_stream_t*)sock, &buf, 1, client_socket_on_write);
-  if(r) {
+  if(r < 0) {
     RX_ERROR("uv_write() to server failed.");
   }
 }
@@ -135,8 +135,8 @@ void ClientSocket::close() {
 void client_socket_on_resolved(uv_getaddrinfo_t* req, int status, struct addrinfo* res) {
   RX_VERBOSE("resolved with status: %d", status);
   ClientSocket* c = static_cast<ClientSocket*>(req->data);
-  if(status == -1) {
-    RX_ERROR("cannot resolve(): %s", uv_strerror(uv_last_error(c->loop)));
+  if(status < 0) {
+    RX_ERROR("cannot resolve(): %s", uv_strerror(status));
     c->reconnect();
     return;
   }
@@ -154,8 +154,8 @@ void client_socket_on_resolved(uv_getaddrinfo_t* req, int status, struct addrinf
 
 void client_socket_on_connect(uv_connect_t* req, int status) {
   ClientSocket* c = static_cast<ClientSocket*>(req->data);
-  if(status == -1) {
-    RX_ERROR("cannot connect: %s", uv_strerror(uv_last_error(c->loop)));
+  if(status < 0) {
+    RX_ERROR("cannot connect: %s", uv_strerror(status));
     c->is_connecting = false;
     c->reconnect();
     return;
@@ -164,8 +164,8 @@ void client_socket_on_connect(uv_connect_t* req, int status) {
   RX_VERBOSE("ClietSocket::sock: %p, type: %d, UV_TCP: %d", c->sock, c->sock->type, UV_TCP);
 
   int r = uv_read_start((uv_stream_t*)c->sock, client_socket_on_alloc, client_socket_on_read);
-  if(r) {
-    RX_ERROR("uv_read_start() failed %s", uv_strerror(uv_last_error(c->loop)));
+  if(r < 0) {
+    RX_ERROR("uv_read_start() failed %s", uv_strerror(r));
     return;
   }
 
@@ -181,11 +181,10 @@ void client_socket_on_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
 
   ClientSocket* c = static_cast<ClientSocket*>(handle->data);
 
-
   if(nbytes < 0) {
     int r = uv_read_stop(handle);
     if(r) {
-      RX_ERROR("error uv_read_stop on client. %s", uv_strerror(uv_last_error(handle->loop)));
+      RX_ERROR("error uv_read_stop on client. %s", uv_strerror(r));
     }
 
     if(buf.base) {
@@ -193,17 +192,19 @@ void client_socket_on_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
       buf.base = NULL;
     }
 
+#if 0
     uv_err_t err = uv_last_error(handle->loop);
     if(err.code != UV_EOF) {
       RX_ERROR("disconnected from server, but not correctly!");
       return;
     }
+#endif
 
     c->is_connected = false;
 
     r = uv_shutdown(&c->shutdown_req, handle, client_socket_on_shutdown_reconnect);
-    if(r) {
-      RX_ERROR("error shutting down client. %s", uv_strerror(uv_last_error(handle->loop)));
+    if(r < 0) {
+      RX_ERROR("error shutting down client. %s", uv_strerror(r));
       delete c;
       c = NULL;
       return;
@@ -262,8 +263,8 @@ void client_socket_on_close_delete(uv_handle_t* handle) {
 
 void client_socket_on_reconnect_timer(uv_timer_t* handle, int status) {
   ClientSocket* c = static_cast<ClientSocket*>(handle->data);
-  if(status == -1) {
-    RX_ERROR("error shutting down client. %s", uv_strerror(uv_last_error(handle->loop)));
+  if(status < 0) {
+    RX_ERROR("error shutting down client. %s", uv_strerror(status));
     return;
   }
 

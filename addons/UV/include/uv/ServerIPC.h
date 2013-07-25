@@ -23,7 +23,7 @@ extern "C" {
 #include <algorithm>
 #include <iterator>
 
-#define SERVER_IPC_ERR(r) { if (r != 0) { RX_ERROR("%s", uv_strerror(uv_last_error(loop))); } }
+#define SERVER_IPC_ERR(r) { if (r <  0) { RX_ERROR("%s", uv_strerror(r)); } }
 
 class ConnectionIPC;
 typedef void(*server_ipc_on_read_callback)(ConnectionIPC* con, void* user);                               /* user callback; gets called when we receive data from the client; data will be stored in the `buffer` member */
