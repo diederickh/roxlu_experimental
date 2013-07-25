@@ -20,8 +20,10 @@ so you can do: `RX_VERBOSE("Number of items: %d", 10)`.
 _Example_
 
 ````C++
+#include <log/Log.h>
+
 roxlu::Log log;
-log.setup("logs");
+log.setup("logs", "");
 
 RX_VERBOSE("Log something to a file and console");
 

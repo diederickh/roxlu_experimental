@@ -53,8 +53,6 @@ void YouTube::checkAccessTokenTimeout() {
   uint64_t token_timeout = model.getTokenTimeout();
 
   if(now >= token_timeout) {
-    RX_VERBOSE(">> %ld <<>> %ld", now, token_timeout);
-
     if(!refreshAccessToken()) {
       RX_ERROR("Error while trying to refresh the access token");
     }
@@ -89,7 +87,6 @@ void YouTube::checkUploadQueue() {
 
   uint64_t now = rx_time();
   if(now > upload_check_timeout) {
-    RX_VERBOSE("LETS CHECK THE UPLOAD QUEUE");
 
     upload_check_timeout = now + upload_check_delay;
 
@@ -119,9 +116,11 @@ void YouTube::checkUploadQueue() {
       RX_VERBOSE("Uploading a video with id: %ld, file: %s", video.id, video.filename.c_str());
     }
     else if((start_id = model.hasVideoInUploadQueue(YT_VIDEO_STATE_UPLOAD))) {
-      RX_VERBOSE("YES THERE IS A VIDEO IN THE QUEUE WHICH CAN BE UPLOADED!");
-      YouTubeVideo video = model.getVideo(upload_id);
       YouTubeUpload upload;
+      YouTubeVideo video = model.getVideo(upload_id);
+
+      RX_VERBOSE("Start uploading a new video from the upload queue, with id: %ld.", video.id);
+
       if(!upload.upload(video)) {
         RX_ERROR("Something went wrong while trying to upload the video, with id: %d", video.id);
         // @todo -> change status so we will retry 
@@ -135,13 +134,11 @@ void YouTube::checkUploadQueue() {
 
 void YouTube::print() {
   int64_t ttl = model.getTokenTimeout() - (rx_time());
-  RX_VERBOSE("tx_time(): %ld", rx_time());
-
-  RX_VERBOSE("---------------- youtube -------------------");
+  RX_VERBOSE("-----------------------------------------------");
   RX_VERBOSE("refresh_token: %s", model.getRefreshToken().c_str());
   RX_VERBOSE("access_token: %s", model.getAccessToken().c_str());
   RX_VERBOSE("token_timeout: %ld, ttl: %ld", model.getTokenTimeout(), ttl);
   RX_VERBOSE("is_setup: %c", (is_setup) ? 'Y' : 'N');
-  RX_VERBOSE("");
+  RX_VERBOSE("-----------------------------------------------");
 }
 

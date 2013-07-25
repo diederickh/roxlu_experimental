@@ -8,7 +8,6 @@ roxlu_add_addon(Curl)
 roxlu_addon_begin("youtube")
 
   # --------------------------------------------------------------------------------------
-  roxlu_addon_add_source_file(youtube/ClientSocket.cpp)
   roxlu_addon_add_source_file(youtube/YouTube.cpp)
   roxlu_addon_add_source_file(youtube/YouTubeServerIPC.cpp)
   roxlu_addon_add_source_file(youtube/YouTubeClientIPC.cpp)
