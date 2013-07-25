@@ -28,7 +28,7 @@ class WorkQueue {
  public:
   WorkQueue();
   ~WorkQueue();
-  void addWorker(work_queue_callback workerCB, work_queue_callback readCB, void* user);
+  void addWorker(work_queue_callback workerCB, work_queue_callback readyCB, void* user);
   void update();
   size_t count();
   bool isCancelled();

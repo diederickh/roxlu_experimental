@@ -5,7 +5,7 @@
 // SERVER CALLBACKS
 // ---------------------------------------------------
 void server_socket_on_new_connection(uv_stream_t* sock, int status) {
-  if(status == -1) {
+  if(status < 0) {
     RX_ERROR(S_ERR_NEW_CONNECTION);
     return;
   }
@@ -14,7 +14,7 @@ void server_socket_on_new_connection(uv_stream_t* sock, int status) {
   ServerConnection* con = new ServerConnection(server);
  
   int r = uv_tcp_init(server->loop, &con->sock);
-  if(r) {
+  if(r < 0) {
     RX_ERROR(S_ERR_INIT_CLIENT);
     delete con;
     con = NULL;
@@ -22,7 +22,7 @@ void server_socket_on_new_connection(uv_stream_t* sock, int status) {
   }
 
   r = uv_accept(sock, (uv_stream_t*)&con->sock);
-  if(r) {
+  if(r < 0) {
     RX_ERROR(S_ERR_ACCEPT_CLIENT);
     delete con;
     con = NULL;
@@ -30,7 +30,7 @@ void server_socket_on_new_connection(uv_stream_t* sock, int status) {
   }
 
   r = uv_read_start((uv_stream_t*)&con->sock, server_socket_on_alloc, server_socket_on_read);
-  if(r) {
+  if(r < 0) {
     RX_ERROR(S_ERR_READ_START);
     delete con;
     con = NULL;
@@ -55,7 +55,7 @@ void server_socket_on_read(uv_stream_t* sock, ssize_t nbytes, uv_buf_t buf) {
   if(nbytes < 0) {
 
     int r = uv_read_stop(sock);
-    if(r) {
+    if(r < 0) {
       RX_ERROR(S_ERR_READ_STOP);
     }
     
@@ -64,8 +64,7 @@ void server_socket_on_read(uv_stream_t* sock, ssize_t nbytes, uv_buf_t buf) {
       buf.base = NULL;
     }
     
-    uv_err_t err = uv_last_error(sock->loop);
-    if(err.code != UV_EOF) {
+    if(nbytes != UV_EOF) {
 
       if(con->server->cb_close) {
         con->server->cb_close(con, con->server->cb_user);
@@ -78,7 +77,7 @@ void server_socket_on_read(uv_stream_t* sock, ssize_t nbytes, uv_buf_t buf) {
     }
 
     r = uv_shutdown(&con->shutdown_req, sock, server_socket_on_shutdown);
-    if(r) {
+    if(r <  0) {
       RX_ERROR(S_ERR_SHUTDOWN);
 
       if(con->server->cb_close) {
@@ -139,8 +138,8 @@ void server_connection_on_write(uv_write_t* req, int status) {
 
   ServerConnection* con = static_cast<ServerConnection*>(req->data);
 
-  if(status == -1) {
-    RX_ERROR(S_ERR_WRITE_FAILED, uv_strerror(uv_last_error(con->sock.loop)));
+  if(status) {
+    RX_ERROR(S_ERR_WRITE_FAILED, status);
   }
 
   delete req;
@@ -162,7 +161,7 @@ void ServerConnection::write(const char* data, size_t nbytes) {
   req->data = this;
   
   int r = uv_write(req, (uv_stream_t*)&sock, &buf, 1, server_connection_on_write);
-  if(r) {
+  if(r < 0) {
     RX_ERROR(S_ERR_CANNOT_WRITE);
   }
 }

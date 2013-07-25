@@ -39,13 +39,12 @@ typedef intptr_t ssize_t;
 #include <sys/stat.h>
 
 #if defined(_MSC_VER) && _MSC_VER < 1600
-# include "uv-private/stdint-msvc2008.h"
+# include "stdint-msvc2008.h"
 #else
 # include <stdint.h>
 #endif
 
 #include "tree.h"
-#include "ngx-queue.h"
 
 #define MAX_PIPENAME_LEN 256
 
@@ -207,8 +206,6 @@ typedef struct uv_buf_t {
 
 typedef int uv_file;
 
-typedef struct _stati64 uv_statbuf_t;
-
 typedef SOCKET uv_os_sock_t;
 
 typedef HANDLE uv_thread_t;
@@ -277,7 +274,9 @@ RB_HEAD(uv_timer_tree_s, uv_timer_s);
     /* The loop's I/O completion port */                                      \
   HANDLE iocp;                                                                \
   /* The current time according to the event loop. in msecs. */               \
-  int64_t time;                                                               \
+  uint64_t time;                                                              \
+  /* GetTickCount() result when the event loop time was last updated. */      \
+  DWORD last_tick_count;                                                      \
   /* Tail of a single-linked circular queue of pending reqs. If the queue */  \
   /* is empty, tail_ is NULL. If there is only one item, */                   \
   /* tail_->next_req == tail_ */                                              \
@@ -302,7 +301,9 @@ RB_HEAD(uv_timer_tree_s, uv_timer_s);
   /* Counter to keep track of active tcp streams */                           \
   unsigned int active_tcp_streams;                                            \
   /* Counter to keep track of active udp streams */                           \
-  unsigned int active_udp_streams;
+  unsigned int active_udp_streams;                                            \
+  /* Counter to started timer */                                              \
+  uint64_t timer_counter;
 
 #define UV_REQ_TYPE_PRIVATE                                                   \
   /* TODO: remove the req suffix */                                           \
@@ -444,7 +445,6 @@ RB_HEAD(uv_timer_tree_s, uv_timer_s);
       HANDLE read_line_handle;                                                \
       uv_buf_t read_line_buffer;                                              \
       HANDLE read_raw_wait;                                                   \
-      DWORD original_console_mode;                                            \
       /* Fields used for translating win keystrokes into vt100 characters */  \
       char last_key[8];                                                       \
       unsigned char last_key_offset;                                          \
@@ -485,8 +485,9 @@ RB_HEAD(uv_timer_tree_s, uv_timer_s);
 
 #define UV_TIMER_PRIVATE_FIELDS                                               \
   RB_ENTRY(uv_timer_s) tree_entry;                                            \
-  int64_t due;                                                                \
-  int64_t repeat;                                                             \
+  uint64_t due;                                                               \
+  uint64_t repeat;                                                            \
+  uint64_t start_id;                                                          \
   uv_timer_cb timer_cb;
 
 #define UV_ASYNC_PRIVATE_FIELDS                                               \
@@ -528,7 +529,7 @@ RB_HEAD(uv_timer_tree_s, uv_timer_s);
     UV_REQ_FIELDS                                                             \
   } exit_req;                                                                 \
   BYTE* child_stdio_buffer;                                                   \
-  uv_err_t spawn_error;                                                       \
+  int spawn_error;                                                            \
   int exit_signal;                                                            \
   HANDLE wait_handle;                                                         \
   HANDLE process_handle;                                                      \
@@ -552,7 +553,6 @@ RB_HEAD(uv_timer_tree_s, uv_timer_s);
       size_t length;                                                          \
       int64_t offset;                                                         \
     };                                                                        \
-    struct _stati64 stat;                                                     \
     struct {                                                                  \
       double atime;                                                           \
       double mtime;                                                           \
@@ -582,3 +582,5 @@ int uv_utf16_to_utf8(const WCHAR* utf16Buffer, size_t utf16Size,
     char* utf8Buffer, size_t utf8Size);
 int uv_utf8_to_utf16(const char* utf8Buffer, WCHAR* utf16Buffer,
     size_t utf16Size);
+
+#define UV_PLATFORM_HAS_IP6_LINK_LOCAL_ADDRESS

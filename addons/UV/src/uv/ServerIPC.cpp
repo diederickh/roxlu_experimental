@@ -5,8 +5,8 @@ void server_ipc_on_connection_write(uv_write_t* req, int status) {
 
   ConnectionIPC* ipc = static_cast<ConnectionIPC*>(req->data);
 
-  if(status == -1) {
-    RX_ERROR("Error with writing to client: %s", uv_strerror(uv_last_error(ipc->pipe.loop)));
+  if(status < 0) {
+    RX_ERROR("Error with writing to client: %s", uv_strerror(status));
   }
 
   delete req;
@@ -27,17 +27,17 @@ void ConnectionIPC::write(char* data, size_t nbytes) {
   uv_buf_t buf = uv_buf_init((char*)data, nbytes);
   uv_write_t* req = new uv_write_t();
   req->data = this;
-  
+ 
   int r = uv_write(req, (uv_stream_t*)&pipe, &buf, 1, server_ipc_on_connection_write);
-  if(r) {
-    RX_ERROR("Error cannot write to client: %s", uv_strerror(uv_last_error(pipe.loop)));
+  if(r < 0) {
+    RX_ERROR("Error cannot write to client: %s", uv_strerror(r));
   }
 }
 
 bool ConnectionIPC::close() {
   int r = uv_shutdown(&shutdown_req, (uv_stream_t*)&pipe, server_ipc_on_connection_shutdown);
-  if(r) {
-    RX_ERROR("Error closing the client: %s", uv_strerror(uv_last_error(pipe.loop)));
+  if(r < 0) {
+    RX_ERROR("Error closing the client: %s", uv_strerror(r));
     return false;
   }
   return true;
@@ -51,7 +51,7 @@ void server_ipc_on_connection_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t
   if(nbytes < 0) {
 
     int r = uv_read_stop(handle);
-    if(r) {
+    if(r < 0) {
       RX_ERROR("Error while trying to stop reading from client");
     }
 
@@ -61,7 +61,7 @@ void server_ipc_on_connection_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t
     }
 
     r = uv_shutdown(&ipc->shutdown_req, handle, server_ipc_on_connection_shutdown);
-    if(r) {
+    if(r < 0) {
       RX_ERROR("@todo - Error while trying to shutdown the pipe (when would we arrive here?)");
     }
 
@@ -69,6 +69,7 @@ void server_ipc_on_connection_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t
   }
 
   if(buf.base) {
+
     std::copy(buf.base, buf.base + nbytes, std::back_inserter(ipc->buffer));
 
     if(ipc->server->cb_read) {
@@ -106,7 +107,7 @@ void server_ipc_on_connection_shutdown(uv_shutdown_t* req, int status) {
 }
 
 void server_ipc_on_connection_new(uv_stream_t* sock, int status) {
-  if(status == -1) {
+  if(status < 0) {
     RX_ERROR("Error with new connection");
     return;
   }
@@ -115,24 +116,24 @@ void server_ipc_on_connection_new(uv_stream_t* sock, int status) {
   ConnectionIPC* con = new ConnectionIPC(server);
 
   int r = uv_pipe_init(server->loop, &con->pipe, 0);
-  if(r) {
-    RX_ERROR("Cannot initialize the connection: %s", uv_strerror(uv_last_error(server->loop)));
+  if(r < 0) {
+    RX_ERROR("Cannot initialize the connection: %s", uv_strerror(r));
     delete con;
     con = NULL;
     return;
   }
 
   r = uv_accept(sock, (uv_stream_t*)&con->pipe);
-  if(r) {
-    RX_ERROR("Cannot accept client connection: %s", uv_strerror(uv_last_error(server->loop)));
+  if(r < 0) {
+    RX_ERROR("Cannot accept client connection: %s", uv_strerror(r));
     delete con;
     con = NULL;
     return;
   }
 
   r = uv_read_start((uv_stream_t*)&con->pipe, server_ipc_on_alloc, server_ipc_on_connection_read);
-  if(r) {
-    RX_ERROR("Cannot start reading: %s", uv_strerror(uv_last_error(server->loop)));
+  if(r < 0) {
+    RX_ERROR("Cannot start reading: %s", uv_strerror(r));
     delete con;
     con = NULL;
     return;
@@ -205,7 +206,7 @@ bool ServerIPC::start() {
   }
   
   r = uv_pipe_init(loop, &server, 0);
-  if(r != 0) {
+  if(r < 0) {
     SERVER_IPC_ERR(r);
     return false;
   }
@@ -219,13 +220,13 @@ bool ServerIPC::start() {
   }
 
   r = uv_pipe_bind(&server, sockpath.c_str());
-  if(r != 0) {
+  if(r < 0) {
     SERVER_IPC_ERR(r);
     return false;
   }
 
   r = uv_listen((uv_stream_t*)&server, 128, server_ipc_on_connection_new);
-  if(r != 0) {
+  if(r < 0) {
     SERVER_IPC_ERR(r);
     return false;
   }
@@ -256,7 +257,6 @@ void ServerIPC::removeConnection(ConnectionIPC* con) {
   }
 
   connections.erase(it);
-  RX_VERBOSE("REMOVED CONNECTION, NOW: %ld cons", connections.size());
 }
 
 void ServerIPC::writeToAllConnections(char* buf, size_t nbytes) {
@@ -269,5 +269,4 @@ void ServerIPC::removeAllConnections() {
   for(std::vector<ConnectionIPC*>::iterator it = connections.begin(); it != connections.end(); ++it) {
     (*it)->close();
   }
-  
 }

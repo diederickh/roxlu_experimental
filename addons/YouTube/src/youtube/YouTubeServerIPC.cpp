@@ -6,13 +6,13 @@ void youtube_server_ipc_on_read(ConnectionIPC* con, void* user) {
   RX_VERBOSE("Received some info from a client...: %ld bytes in buffer", con->buffer.size());
 
   int cmd;
-  size_t nbytes;
+  uint32_t nbytes;
   size_t offset = sizeof(cmd) + sizeof(nbytes);
 
-  while(con->buffer.size() > 8) {
+  while(con->buffer.size() > offset) {
 
     memcpy((char*)&cmd, &con->buffer[0], sizeof(cmd));
-    memcpy((char*)&nbytes, &con->buffer[4], sizeof(nbytes));
+    memcpy((char*)&nbytes, &con->buffer[sizeof(cmd)], sizeof(nbytes)); 
 
     if(con->buffer.size() - offset >= nbytes) {
       msgpack::unpacked unp;
@@ -28,6 +28,8 @@ void youtube_server_ipc_on_read(ConnectionIPC* con, void* user) {
         }
         catch(std::exception& ex) {
           RX_ERROR("Error while trying to decode: %s", ex.what());
+          con->buffer.clear(); // @todo - check if we do right by removing the buffer here... we shouldn't come to this point anyway
+          break;
         }
       }
       else {

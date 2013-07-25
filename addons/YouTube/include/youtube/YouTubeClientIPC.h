@@ -14,6 +14,10 @@
 #ifndef ROXLU_YOUTUBE_CLIENT_IPC_H
 #define ROXLU_YOUTUBE_CLIENT_IPC_H
 
+extern "C" {
+#  include <uv.h> 
+}
+
 #include <string>
 #include <uv/ClientIPC.h>
 #include <youtube/YouTubeTypes.h>
@@ -27,7 +31,7 @@ class YouTubeClientIPC {
   void update();
   void addVideoToUploadQueue(YouTubeVideo video);
  private:
-  void writeCommand(int command, char* data, size_t nbytes);
+  void writeCommand(int command, char* data, uint32_t nbytes);
  private:
   ClientIPC client;
 };

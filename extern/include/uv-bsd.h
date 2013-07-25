@@ -19,16 +19,16 @@
  * IN THE SOFTWARE.
  */
 
-#ifndef UV_LINUX_H
-#define UV_LINUX_H
-
-#define UV_PLATFORM_LOOP_FIELDS                                               \
-  uv__io_t inotify_read_watcher;                                              \
-  void* inotify_watchers;                                                     \
-  int inotify_fd;                                                             \
+#ifndef UV_BSD_H
+#define UV_BSD_H
 
 #define UV_PLATFORM_FS_EVENT_FIELDS                                           \
-  ngx_queue_t watchers;                                                       \
-  int wd;                                                                     \
+  uv__io_t event_watcher;                                                     \
 
-#endif /* UV_LINUX_H */
+#define UV_IO_PRIVATE_PLATFORM_FIELDS                                         \
+  int rcount;                                                                 \
+  int wcount;                                                                 \
+
+#define UV_HAVE_KQUEUE 1
+
+#endif /* UV_BSD_H */
