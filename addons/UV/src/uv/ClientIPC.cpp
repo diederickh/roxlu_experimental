@@ -13,6 +13,9 @@ void client_ipc_on_connect(uv_connect_t* req, int status) {
     RX_ERROR("Cannot start reading: %s", uv_strerror(r));
     return;
   }
+
+  ipc->state = CIPS_ST_CONNECTED;
+  RX_VERBOSE("Connected!");
 }
 
 void client_ipc_on_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
@@ -40,9 +43,7 @@ void client_ipc_on_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
 
     return;
   }
-  
-  
-
+    
   if(buf.base) {
 
     if(ipc->cb_read) {
@@ -66,7 +67,10 @@ void client_ipc_on_shutdown(uv_shutdown_t* req, int status) {
 }
 
 void client_ipc_on_close(uv_handle_t* handle) {
-
+  ClientIPC* ipc = static_cast<ClientIPC*>(handle->data);
+  ipc->state = CIPS_ST_RECONNECTING;
+  ipc->reconnect_timeout = (uv_hrtime() / 1000000) + ipc->reconnect_delay;
+  RX_VERBOSE("CLOSED!");
 }
 
 void client_ipc_on_write(uv_write_t* req, int status) {
@@ -83,6 +87,8 @@ ClientIPC::ClientIPC(std::string sockfile, bool datapath)
   ,cb_con(NULL)
   ,cb_read(NULL)
   ,cb_user(NULL)
+  ,reconnect_delay(5000)
+  ,state(CIPS_ST_NONE)
 {
 
   loop = uv_loop_new();
@@ -98,7 +104,6 @@ ClientIPC::ClientIPC(std::string sockfile, bool datapath)
   
   connect_req.data = this;
   shutdown_req.data = this;
-  RX_VERBOSE("Connect_req.data: %p" , connect_req.data);
 }
 
 ClientIPC::~ClientIPC() {
@@ -136,12 +141,21 @@ bool ClientIPC::connect() {
   }
   
   pipe.data = this;
+  state = CIPS_ST_CONNECTING;
   
   uv_pipe_connect(&connect_req, &pipe, sockpath.c_str(), client_ipc_on_connect);
   return true;
 }
 
 void ClientIPC::update() {
+  if(state == CIPS_ST_RECONNECTING) {
+    uint64_t now = uv_hrtime() / 1000000;
+    if(reconnect_timeout <= now) {
+      RX_VERBOSE("Reconnecting");
+      reconnect_timeout = now + reconnect_delay;
+      connect();
+    }
+  }
   uv_run(loop, UV_RUN_NOWAIT);
 }
 
