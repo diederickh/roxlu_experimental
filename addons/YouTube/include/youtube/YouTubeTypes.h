@@ -3,11 +3,8 @@
 
 #include <iostream>
 #include <string>
-#undef nil
-#include <msgpack.hpp>
 
 #define YT_CURL_ERR(code)  if(code != CURLE_OK) { RX_VERBOSE("Curl error: %s", curl_easy_strerror(code)); goto error; }  
-
 
 enum YouTubeCommandsIPC  {                            /* command codes that are used by the YouTubeClientIPC and YouTubeServerIPC */
   YT_CMD_VIDEO = 1
@@ -29,8 +26,6 @@ struct YouTubeVideo {
   bool datapath;                                    /* ipc/db: set this to true when the filename is stored in the datapath */
   int id;                                           /* the auto generated id from the model (sqlite in this case) */
   int category;                                     /* the category id for youtube (defaults to 22) */
-
-  MSGPACK_DEFINE(filename, description, title, tags, datapath);
 };
 
 

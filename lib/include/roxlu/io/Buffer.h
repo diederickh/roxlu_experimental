@@ -172,6 +172,17 @@ public:
 	
 	rx_uint8 operator[](unsigned int dx);
 
+<<<<<<< HEAD
+=======
+  // Stream operators
+  Buffer& operator<<(std::string str);
+  Buffer& operator<<(int i);
+  Buffer& operator>>(std::string& str);
+  Buffer& operator>>(int& i);
+  Buffer& operator<<(bool b);
+  Buffer& operator>>(bool& b);
+
+>>>>>>> e40244e... Removed msgpack; adding buffer serialization
 	// Debug
 	void print();
 	void print(int dx);
@@ -225,4 +236,41 @@ inline void Buffer::getBytes(char* result, rx_uint32 num) {
 inline void Buffer::putBytes(char* data, int num) {
 	putBytes((rx_uint8*)data, num);
 }
+<<<<<<< HEAD
+=======
+
+inline Buffer& Buffer::operator<<(std::string str) {
+  putBigEndianU32(str.size());
+  putBytes((char*)str.c_str(), str.size());
+  return *this;
+}
+
+inline Buffer& Buffer::operator>>(std::string& str) {
+  rx_uint32 size = getBigEndianU32();
+  str.assign((char*)getReadPtr(), size);
+  drain(size);
+  return *this;
+}
+
+inline Buffer& Buffer::operator<<(int i) {
+  putBigEndianS32(i);
+  return *this;
+}
+
+inline Buffer& Buffer::operator>>(int& i) {
+  i = getBigEndianS32();
+  return *this;
+}
+
+inline Buffer& Buffer::operator>>(bool& b) {
+  putByte((rx_uint8)(b) ? 1 : 0);
+  return *this;
+}
+
+inline Buffer& Buffer::operator<<(bool b) {
+  b = getU8();
+  return *this;
+}
+
+>>>>>>> e40244e... Removed msgpack; adding buffer serialization
 #endif
