@@ -32,6 +32,7 @@ namespace roxlu {
   }
 
   QueryUpdate::~QueryUpdate() {
+    where_clause = "";
   }
 
   std::string QueryUpdate::toString() {
@@ -59,6 +60,13 @@ namespace roxlu {
         }
       }
     }
+
+    if(where_clause.size()) {
+      sql.append(" where ");
+      sql.append(where_clause);
+    }
+    
+    //RX_VERBOSE("SQL: %s", sql.c_str());
 
     return sql;
   }

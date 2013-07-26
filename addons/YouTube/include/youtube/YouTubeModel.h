@@ -16,7 +16,7 @@ class YouTubeModel {
  public:
   YouTubeModel();
   ~YouTubeModel();
-  bool addVideoToUploadQueue(std::string filename, bool datapath);                /* adds the given video to the upload queue, the state will be set to `0`, YT_VIDEO_STATE_NONE */
+  bool addVideoToUploadQueue(YouTubeVideo video);                                 /* adds the given video to the upload queue, the state will be set to `0`, YT_VIDEO_STATE_NONE; make sure that these fields are set in the video struct: filename, datapath, title */
   int hasVideoInUploadQueue(int state);                                           /* returns the ID of the video that is in the queue with the given state; returns 0 when nothing is found */
   bool setVideoState(int id, int state);                                          /* changes the state of the video in the upload queue */
   bool setVideoUploadURL(int id, std::string url);                                /* set the video upload url for a resumable upload */

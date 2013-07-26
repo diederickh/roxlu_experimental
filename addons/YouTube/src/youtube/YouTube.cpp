@@ -73,10 +73,12 @@ bool YouTube::refreshAccessToken() {
   return true;
 }
 
-bool YouTube::addVideoToUploadQueue(std::string filename, bool datapath) {
+//bool YouTube::addVideoToUploadQueue(std::string filename, bool datapath) {
+bool YouTube::addVideoToUploadQueue(YouTubeVideo video) {
 
-  if(!model.addVideoToUploadQueue(filename, datapath)) {
-    RX_ERROR("Cannot add the video to the upload queue. %s", filename.c_str());
+  //  if(!model.addVideoToUploadQueue(filename, datapath)) {
+  if(!model.addVideoToUploadQueue(video)) {
+    RX_ERROR("Cannot add the video to the upload queue. %s", video.filename.c_str());
     return false;
   }
 
@@ -94,7 +96,9 @@ void YouTube::checkUploadQueue() {
     
     // Check if there is a new video
     if((upload_id = model.hasVideoInUploadQueue(YT_VIDEO_STATE_NONE))) {
+
       YouTubeVideo video = model.getVideo(upload_id);
+      RX_VERBOSE("UPLOAD_ID: %d, VIDEO.id: %d", upload_id, video.id);
       YouTubeUploadStart start;
       if(!start.start(video, model.getAccessToken())) {
         RX_ERROR("Error while trying to get an upload url for video id: %id, filename: %s", video.id, video.filename.c_str());
@@ -110,15 +114,16 @@ void YouTube::checkUploadQueue() {
           // @todo -> change the status to e.g. ERR_SET_UPLOAD_URL
         }
         else {
+          RX_VERBOSE("SET VIDEO STATE TO UPLOAD!");
           model.setVideoState(video.id, YT_VIDEO_STATE_UPLOAD);
         }
       }
-      RX_VERBOSE("Uploading a video with id: %ld, file: %s", video.id, video.filename.c_str());
+
     }
     else if((start_id = model.hasVideoInUploadQueue(YT_VIDEO_STATE_UPLOAD))) {
       YouTubeUpload upload;
-      YouTubeVideo video = model.getVideo(upload_id);
-
+      YouTubeVideo video = model.getVideo(start_id);
+      RX_VERBOSE("Uploading a video with id: %ld, file: %s", video.id, video.filename.c_str());
       RX_VERBOSE("Start uploading a new video from the upload queue, with id: %ld.", video.id);
 
       if(!upload.upload(video)) {

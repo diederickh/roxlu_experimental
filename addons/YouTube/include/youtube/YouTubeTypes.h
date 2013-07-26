@@ -17,19 +17,20 @@ struct YouTubeVideo {
   YouTubeVideo();
   void print();
 
-  /* database info */
-  std::string filename;
-  std::string video_resource_json;
-  std::string upload_url;
-  size_t bytes_uploaded;
-  size_t bytes_total;
-  int id;
+  std::string filename;                             /* ipc/db: the name of the video file or or the full path to the video file when datapath=true  */
+  std::string video_resource_json;                  /* db:     when you retrieve a video this will contain the json that you need to sent in the request to youtube, it contains the video resource json as described by: https://developers.google.com/youtube/v3/docs/videos*/
+  std::string upload_url;                           /* db:     we're using resumable uploads; this will be set when you retrieve an initialized video form the db; this means that the YouTubeUploadStart executed successfully for this video */
+  std::string description;                          /* ipc/db: a description for the video; will be shown on youtube */
+  std::string title;                                /* ipc/db: the title for the video */
+  std::string tags;                                 /* ipc/db: comma separate list with tags for youtube */
+  std::string privacy_status;                       /* ipc/db: public, private, unlisted; defaults to private */
+  size_t bytes_uploaded;                            /* - not used atm - */
+  size_t bytes_total;                               /* the total filesize of the video; is set when calling `YouTubeModel::addVideoToUploadQueue` */
+  bool datapath;                                    /* ipc/db: set this to true when the filename is stored in the datapath */
+  int id;                                           /* the auto generated id from the model (sqlite in this case) */
+  int category;                                     /* the category id for youtube (defaults to 22) */
 
-  /* ipc */
-  std::string title;                                /* the title for the video */
-  bool datapath;                                    /* set this to true when the filename is stored in the datapath */
-
-  MSGPACK_DEFINE(filename, title, datapath);
+  MSGPACK_DEFINE(filename, description, title, tags, datapath);
 };
 
 
