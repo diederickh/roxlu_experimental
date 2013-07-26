@@ -141,6 +141,7 @@ void server_ipc_on_connection_new(uv_stream_t* sock, int status) {
   
   con->pipe.data = con;
   server->connections.push_back(con);
+  RX_VERBOSE("New connection!");
 }
 
 // -----------------------------------------------------------------------------

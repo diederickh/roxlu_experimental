@@ -47,6 +47,7 @@ bool YouTubeUploadStart::start(YouTubeVideo video, std::string accessToken) {
   std::string length_header;
   std::string auth_header;
   std::stringstream ss_length;
+  long http_code = 0;
 
   if(!video.bytes_total) {
     RX_ERROR("The bytes_total of the given video is invalid");
@@ -70,7 +71,7 @@ bool YouTubeUploadStart::start(YouTubeVideo video, std::string accessToken) {
   }
   
   res = curl_easy_setopt(curl, CURLOPT_URL, "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet%2Cstatus");
-    YT_CURL_ERR(res);
+  YT_CURL_ERR(res);
 
   res = curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);                               
   YT_CURL_ERR(res);
@@ -109,6 +110,14 @@ bool YouTubeUploadStart::start(YouTubeVideo video, std::string accessToken) {
   // request!
   res = curl_easy_perform(curl);
   YT_CURL_ERR(res);
+
+  // check result status
+  res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+  YT_CURL_ERR(res);
+  if(http_code != 200) {
+    RX_ERROR("Invalid http status: %ld", http_code);
+    goto error;
+  }
   
   // cleanup
   curl_easy_cleanup(curl);
