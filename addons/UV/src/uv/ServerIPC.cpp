@@ -141,6 +141,7 @@ void server_ipc_on_connection_new(uv_stream_t* sock, int status) {
   
   con->pipe.data = con;
   server->connections.push_back(con);
+  RX_VERBOSE("New connection!");
 }
 
 // -----------------------------------------------------------------------------
@@ -202,6 +203,11 @@ bool ServerIPC::start() {
   int r = 0; 
 
   if(!loop) {
+    return false;
+  }
+
+  if(sockpath.size() >= 127) {
+    RX_ERROR("Unix socket path should have a length < 127 characters");
     return false;
   }
   

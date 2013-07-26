@@ -25,7 +25,7 @@ namespace roxlu {
     bool execute(QueryResult& result);
     string toString();
 
-    template<typename T>
+    template<class T>
       QuerySelect& use(const string& fieldName, const T& fieldValue) {
       field_values.use(fieldName, fieldValue);
       return *this;
@@ -36,9 +36,17 @@ namespace roxlu {
     QuerySelect& order(const string& orderClause);
 
 
+    template<class T>
+      QuerySelect& where(const string& field, T value) {
+      std::stringstream ss; 
+      ss << " " << field << " = \"" << value << "\"";
+      where_clause = ss.str();
+      return *this;
+    }
+
     // Use: db.select("tag_id").from("tags").where("tag_name in (%s) ",tweet.tags).execute(tag_result);
-    template<typename T>
-      QuerySelect& where(const string& whereClause, const T& values) {
+    template<class T>
+      QuerySelect& whereIn(const string& whereClause, const T& values) {
       // create the value string
       typename T::const_iterator it = values.begin();
       string in_value;

@@ -17,10 +17,16 @@ YouTubeModel::YouTubeModel() {
     db.query("CREATE TABLE IF NOT EXISTS videos ("
              "    id INTEGER PRIMARY KEY AUTOINCREMENT,"
              "    filename TEXT, "
-             "    bytes_uploaded INTEGER DEFAULT 0,"
-             "    bytes_total INTEGER DEFAULT 0,"
-             "    state INTEGER DEFAULT 0,"
-             "    video_resource_json TEXT,"
+             "    title TEXT, "                              // title for the video as it appears on youtube
+             "    description TEXT, "                        // description for the video as it appears on youtube 
+             "    tags TEXT, "                               // tags for the youtube video
+             "    privacy_status TEXT DEFAULT \"private\", " // private status for youtube 
+             "    bytes_uploaded INTEGER DEFAULT 0,"         // - not used atm -
+             "    bytes_total INTEGER DEFAULT 0,"            // total bytes of the file 
+             "    state INTEGER DEFAULT 0,"                  // used to upload only videos which haven't been uploaded yet
+             "    datapath INTEGER DEFAULT 0,"               // is the filename relative to the datapase of the runtime, 0 = no, 1 = yes
+             "    video_resource_json TEXT,"                 // the json that we post as body when uploading 
+             "    category INTEGER DEFAULT 22,"              // the category for the video on youtube
              "    upload_url TEXT )").execute(qr);
     qr.finish();
   }
@@ -38,11 +44,17 @@ YouTubeModel::YouTubeModel() {
 YouTubeModel::~YouTubeModel() {
 }
 
-bool YouTubeModel::addVideoToUploadQueue(std::string filename, bool datapath) {
+// @todo - we need to construct the correct video resource json
+bool YouTubeModel::addVideoToUploadQueue(YouTubeVideo video) {
 
-  std::string filepath = filename;
-  if(datapath) {
-    filepath = rx_to_data_path(filename);
+  if(!video.filename.size()) {
+    RX_ERROR("Cannot add a video which has no filename set");
+    return false;
+  }
+
+  std::string filepath = video.filename;
+  if(video.datapath) {
+    filepath = rx_to_data_path(video.filename);
   }
 
   size_t fsize = rx_get_file_size(filepath);
@@ -51,12 +63,31 @@ bool YouTubeModel::addVideoToUploadQueue(std::string filename, bool datapath) {
     return false;
   }
   
+  // { status: { privacyStatus: # }, snippet: { tags: #, categoryId: #, description: #, title: # } }
+  json_t* body = json_pack("{ s: {s:s}, s: { s:s, s:i, s:s, s:s } }",
+                           "status", "privacyStatus", "private", 
+                           "snippet", "tags", video.tags.c_str(), 
+                                      "categoryId", video.category,  
+                                      "description", video.description.c_str(), 
+                                      "title", video.title.c_str());
+ 
+  char* video_resource = json_dumps(body, JSON_INDENT(0));
+  json_decref(body);
+
+  if(!video_resource) {
+    RX_ERROR("Cannot create JSON video resource string");
+    return false;
+  }
+
+
+  //  sprintf(video_resource, "{\"status\": {\"privacyStatus\": \"private\"}, \"snippet\": {\"tags\": null, \"categoryId\": \"%d\", \"description\": \"Test Description\", \"title\": \"%s\"}}",
+
   //json_t* body = json_pack("{s:{s:s}, s:{s:s}}", "snippet", "title", "test", "status", "privacyStatus", "private");
   //char* video_resource = json_dumps(body, JSON_INDENT(0));
-  char video_resource[1024 * 10];
-  sprintf(video_resource, "{\"status\": {\"privacyStatus\": \"private\"}, \"snippet\": {\"tags\": null, \"categoryId\": \"%d\", \"description\": \"Test Description\", \"title\": \"%s\"}}",
-          22
-          ,"test2");
+  // char video_resource[1024 * 10];
+  //  sprintf(video_resource, "{\"status\": {\"privacyStatus\": \"private\"}, \"snippet\": {\"tags\": null, \"categoryId\": \"%d\", \"description\": \"Test Description\", \"title\": \"%s\"}}",
+  //          22
+  //          ,"test2");
   /*
   if(!video_resource) {
     RX_ERROR("Cannot create JSON video resource string");
@@ -65,14 +96,22 @@ bool YouTubeModel::addVideoToUploadQueue(std::string filename, bool datapath) {
   }
   */
 
-
   bool r = db.insert("videos")
-    .use("filename", filename)
+    .use("filename", video.filename)
     .use("state", YT_VIDEO_STATE_NONE)
     .use("bytes_total", fsize)
     .use("video_resource_json", video_resource)
+    .use("datapath", (video.datapath) ? 1 : 0)
+    .use("title", video.title)
+    .use("description", video.description)
+    .use("tags", video.tags)
+    .use("privacy_status", video.privacy_status)
+    .use("category", video.category)
     .execute();
-  
+
+  free(video_resource);  
+  video_resource = NULL;
+
   return r;
 }
 void YouTubeModel::setRefreshToken(std::string rtoken) {
@@ -94,6 +133,7 @@ void YouTubeModel::setAccessToken(std::string atoken, uint64_t timeout) {
 int YouTubeModel::hasVideoInUploadQueue(int state) {
   std::stringstream ss;
   ss << "state = " << state;
+  std::string tmp = ss.str();
 
   QueryResult qr(db);
 
@@ -105,6 +145,7 @@ int YouTubeModel::hasVideoInUploadQueue(int state) {
 
   qr.next();
   int64_t id = qr.getInt(0);
+
   return id;
 }
 
@@ -120,7 +161,7 @@ YouTubeVideo YouTubeModel::getVideo(int id) {
   YouTubeVideo video;
   QueryResult qr(db);
 
-  bool r = db.select("id, filename, upload_url, bytes_uploaded, bytes_total, video_resource_json").from("videos").execute(qr);
+  bool r = db.select("id, filename, upload_url, bytes_uploaded, bytes_total, video_resource_json").from("videos").where("id", id).execute(qr);
   if(!r) {
     RX_ERROR("Error while trying to get a video from the upload queue: %d", id);
     return video;

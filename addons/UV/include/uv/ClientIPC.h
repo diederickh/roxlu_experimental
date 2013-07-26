@@ -23,6 +23,11 @@ extern "C" {
 #include <algorithm>
 #include <iterator>
 
+#define CIPS_ST_NONE 0                                 /* default state */
+#define CIPS_ST_CONNECTING 1                           /* when we're currently connecting */
+#define CIPS_ST_CONNECTED 2                            /* connected */
+#define CIPS_ST_RECONNECTING 3                         /* we will automatically reconnect when we get disconnected */
+
 class ClientIPC;
 typedef void(*client_ipc_on_connected_cb)(ClientIPC* ipc, void* user);
 typedef void(*client_ipc_on_read_cb)(ClientIPC* ipc, void* user);
@@ -33,11 +38,6 @@ void client_ipc_on_write(uv_write_t* req, int status);
 void client_ipc_on_shutdown(uv_shutdown_t* req, int status);
 void client_ipc_on_close(uv_handle_t* handle);
 uv_buf_t client_ipc_on_alloc(uv_handle_t* handle, size_t nbytes);
-
-struct ClientWrite {
-  uv_buf_t buf;
-  uv_write_t req;
-};
 
 class ClientIPC {
  public:
@@ -61,6 +61,9 @@ class ClientIPC {
   client_ipc_on_read_cb cb_read;
   void* cb_user;
   std::vector<char> buffer;                                            /* buffer that contains the received data; will on be used when a read callback is set; the read callback should flush the buffer when necessary */
+  int state;
+  uint64_t reconnect_delay;                                            /* try to reconnect after X-millis */
+  uint64_t reconnect_timeout;
 };
 
 inline void ClientIPC::write(const char* data, size_t nbytes) {

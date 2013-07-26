@@ -24,6 +24,7 @@
 #include <sqlite/Query.h>
 #include <sqlite/QueryResult.h>
 #include <sqlite/QueryParams.h>
+#include <sstream>
 #include <string>
 
 namespace roxlu {
@@ -57,6 +58,9 @@ namespace roxlu {
 
   template<class T>
    QueryUpdate&  QueryUpdate::where(std::string field, T value) {
+    std::stringstream ss;
+    ss << " " << field << " = \"" << value << "\" ";
+    where_clause = ss.str();
     return *this;
   }
 

@@ -8,6 +8,7 @@ void youtube_server_ipc_on_read(ConnectionIPC* con, void* user) {
   int cmd;
   uint32_t nbytes;
   size_t offset = sizeof(cmd) + sizeof(nbytes);
+  YouTubeServerIPC* ipc = static_cast<YouTubeServerIPC*>(user);
 
   while(con->buffer.size() > offset) {
 
@@ -31,6 +32,10 @@ void youtube_server_ipc_on_read(ConnectionIPC* con, void* user) {
           con->buffer.clear(); // @todo - check if we do right by removing the buffer here... we shouldn't come to this point anyway
           break;
         }
+
+        // we received a video command; lets upload
+        ipc->youtube.addVideoToUploadQueue(video);
+        
       }
       else {
         RX_ERROR("Unhandled command: %ld, flushing the buffer!", cmd);
