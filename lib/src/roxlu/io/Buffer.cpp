@@ -490,3 +490,4 @@ void Buffer::compareWith(Buffer& other, int start, int stop) {
 		printf("%d) %02X - %02X %s\n", i, a, b, a == b ? " Y " : " NO ");
 	}
 }
+

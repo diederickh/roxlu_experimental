@@ -1,5 +1,7 @@
+
 #ifndef ROXLU_BUFFERH
 #define ROXLU_BUFFERH
+
 #include <bitset>
 #include <vector>
 #include <iostream>
@@ -7,46 +9,45 @@
 #include <iterator>
 #include <algorithm>
 
-
 #include <roxlu/Roxlu.h>
 
 /* When on a little endian machine swap bytes */
 #define USE_LITTLE_ENDIAN
 #ifdef USE_LITTLE_ENDIAN
 
-#define SWAP_UINT16(x) \
-	((rx_uint16)((((x) & 0x00FFU) << 8) | \
-					(((x) & 0xFF00U) >> 8) )) 
+#define SWAP_UINT16(x)                          \
+	((rx_uint16)((((x) & 0x00FFU) << 8) |         \
+               (((x) & 0xFF00U) >> 8) )) 
 
 // swap 3 big endian stored bytes
-#define SWAP_UINT24(x) \
-	((rx_uint32)((((x) & 0x00FF0000U) >> 16 ) | \
-					(((x) & 0x000000FFU) << 16 ) | \
-					(((x) & 0x0000FF00)) ))
+#define SWAP_UINT24(x)                          \
+	((rx_uint32)((((x) & 0x00FF0000U) >> 16 ) |   \
+               (((x) & 0x000000FFU) << 16 ) |   \
+               (((x) & 0x0000FF00)) ))
 
 
 /*
-#define SWAP_UINT24(x) \
+  #define SWAP_UINT24(x) \
 	((rx_uint32)((((x) & 0xFF000000U) >> 24 ) | \
-					(((x) & 0x00FF0000U) >> 8  ) | \
-					(((x) & 0x0000FF00U) << 8  )  ))
+  (((x) & 0x00FF0000U) >> 8  ) | \
+  (((x) & 0x0000FF00U) << 8  )  ))
 */
-#define SWAP_UINT32(x) \
-	((rx_uint32)((((x) & 0x000000FFU) << 24) | \
-					(((x) & 0x0000FF00U) << 8)   | \
-					(((x) & 0x00FF0000U) >> 8)   | \
-					(((x) & 0xFF000000U) >> 24)))
+#define SWAP_UINT32(x)                          \
+	((rx_uint32)((((x) & 0x000000FFU) << 24) |    \
+               (((x) & 0x0000FF00U) << 8)   |   \
+               (((x) & 0x00FF0000U) >> 8)   |   \
+               (((x) & 0xFF000000U) >> 24)))
 
-#define SWAP_UINT64(x) \
-	((rx_uint64)( \
-					((((rx_uint64)(x)) & 0xFF00000000000000LL) >> 56) | \
-					((((rx_uint64)(x)) & 0x00FF000000000000LL) >> 40) | \
-					((((rx_uint64)(x)) & 0x0000FF0000000000LL) >> 24) | \
-					((((rx_uint64)(x)) & 0x000000FF00000000LL) >> 8)  | \
-					((((rx_uint64)(x)) & 0x00000000FF000000LL) << 8)  | \
-					((((rx_uint64)(x)) & 0x0000000000FF0000LL) << 24) | \
-					((((rx_uint64)(x)) & 0x000000000000FF00LL) << 40) | \
-					((((rx_uint64)(x)) & 0x00000000000000FFLL) << 56)  ))
+#define SWAP_UINT64(x)                                    \
+	((rx_uint64)(                                           \
+    ((((rx_uint64)(x)) & 0xFF00000000000000LL) >> 56) |   \
+    ((((rx_uint64)(x)) & 0x00FF000000000000LL) >> 40) |   \
+    ((((rx_uint64)(x)) & 0x0000FF0000000000LL) >> 24) |   \
+    ((((rx_uint64)(x)) & 0x000000FF00000000LL) >> 8)  |   \
+    ((((rx_uint64)(x)) & 0x00000000FF000000LL) << 8)  |   \
+    ((((rx_uint64)(x)) & 0x0000000000FF0000LL) << 24) |   \
+    ((((rx_uint64)(x)) & 0x000000000000FF00LL) << 40) |   \
+    ((((rx_uint64)(x)) & 0x00000000000000FFLL) << 56)  ))
 
 #define CONVERT_TO_LE_U16(x) (x)
 #define CONVERT_TO_LE_U32(x) (x)
@@ -73,9 +74,9 @@
 
 
 class Buffer {
-public:
+ public:
 	Buffer();
-  	~Buffer();
+  ~Buffer();
 
 	bool loadFile(const char* file);
 	bool saveFile(const char* file);
@@ -83,6 +84,7 @@ public:
 	void clear();
 	rx_uint32 getReadIndex();
 	size_t size();
+  char* ptr(); // returns a char* to the beginning of the buffer 
 	rx_uint8* getPtr(); // get pointer to beginning of buffer
 	rx_uint8* getReadPtr(); // get pointer to current read position.
 	rx_uint32 getNumBytesLeftToRead();
@@ -160,7 +162,7 @@ public:
 	rx_uint32 getBigEndianU24(); // for flash
 	rx_uint32 getBigEndianU32();
 	rx_uint64 getBigEndianU64();
-   double getBigEndianDouble();
+  double getBigEndianDouble();
 
 	rx_int16 getBigEndianS16();
 	rx_int32 getBigEndianS24(); // for flash
@@ -172,8 +174,6 @@ public:
 	
 	rx_uint8 operator[](unsigned int dx);
 
-<<<<<<< HEAD
-=======
   // Stream operators
   Buffer& operator<<(std::string str);
   Buffer& operator<<(int i);
@@ -182,7 +182,6 @@ public:
   Buffer& operator<<(bool b);
   Buffer& operator>>(bool& b);
 
->>>>>>> e40244e... Removed msgpack; adding buffer serialization
 	// Debug
 	void print();
 	void print(int dx);
@@ -198,7 +197,7 @@ public:
 	void printBits(rx_uint8 byte);
 	void compareWith(Buffer& other, int start, int stop);
 
-private:
+ private:
 	rx_uint32 read_dx;
 	std::vector<rx_uint8> data;
 };
@@ -219,6 +218,10 @@ inline rx_uint8* Buffer::getPtr() {
 	return &data[0];
 }
 
+inline char* Buffer::ptr() {
+	return (char*)&data[0];
+}
+
 inline rx_uint8* Buffer::getReadPtr() {
 	return &data[read_dx];
 }
@@ -236,8 +239,6 @@ inline void Buffer::getBytes(char* result, rx_uint32 num) {
 inline void Buffer::putBytes(char* data, int num) {
 	putBytes((rx_uint8*)data, num);
 }
-<<<<<<< HEAD
-=======
 
 inline Buffer& Buffer::operator<<(std::string str) {
   putBigEndianU32(str.size());
@@ -271,14 +272,6 @@ inline Buffer& Buffer::operator<<(bool b) {
   b = getU8();
   return *this;
 }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> e40244e... Removed msgpack; adding buffer serialization
 
 #endif
->>>>>>> e40244e... Removed msgpack; adding buffer serialization
 
->>>>>>> e40244e... Removed msgpack; adding buffer serialization
-#endif

@@ -5,5 +5,9 @@
     roxlu_add_extern_lib(libmsgpack.a)
   endif()
 
+  if(WIN32)
+    roxlu_add_extern_lib(msgpack.lib)
+  endif()
+
   # --------------------------------------------------------------------------------------
 

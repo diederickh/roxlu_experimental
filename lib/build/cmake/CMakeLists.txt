@@ -292,18 +292,29 @@ macro(roxlu_install_app)
     set_target_properties(${roxlu_app_name} PROPERTIES OUTPUT_NAME_DEBUG ${roxlu_app_name})
 
     # copy command, copy all DLLs we need
-    list(LENGTH roxlu_install_files roxlu_install_files_count)
-    math(EXPR roxlu_install_files_iter ${roxlu_install_files_count}-1)
-
-    foreach(i RANGE ${roxlu_install_files_iter})
-      list(GET roxlu_install_files ${i} roxlu_file_to_copy)
+    foreach(install_item ${roxlu_install_files})
+      list(GET roxlu_install_files ${install_item} roxlu_file_to_copy)
       file(TO_NATIVE_PATH ${roxlu_file_to_copy} fcopy_from)
       file(TO_NATIVE_PATH ${roxlu_app_install_dir} fcopy_to)
       ADD_CUSTOM_COMMAND( TARGET ${roxlu_app_name} POST_BUILD
         COMMAND xcopy "${fcopy_from}" "${fcopy_to}" /y /c
         COMMENT "copying dlls ."
-      )
-    endforeach(i)
+        )
+    endforeach()
+
+#    list(LENGTH roxlu_install_files roxlu_install_files_count)
+#    math(EXPR roxlu_install_files_iter ${roxlu_install_files_count}-1)
+#    foreach(i RANGE ${roxlu_install_files_iter})
+#      list(GET roxlu_install_files ${i} roxlu_file_to_copy)
+#      
+#      file(TO_NATIVE_PATH ${roxlu_file_to_copy} fcopy_from)
+#      file(TO_NATIVE_PATH ${roxlu_app_install_dir} fcopy_to)
+#      ADD_CUSTOM_COMMAND( TARGET ${roxlu_app_name} POST_BUILD
+#        COMMAND xcopy "${fcopy_from}" "${fcopy_to}" /y /c
+#        COMMENT "copying dlls ."
+#        )
+#    endforeach(i)
+
 
 
   endif()

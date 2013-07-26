@@ -62,9 +62,7 @@ extern uint32_t string_id(const char * data, int len);
 #define IS_ZERO(f) 	(fabs(f) < EPSILON)	
 
 
-
 static std::string rx_get_file_ext(std::string filepath);
-
 
 // as suggested: http://stackoverflow.com/questions/4100657/problem-with-my-clamp-macro
 template <typename T> 
@@ -123,6 +121,14 @@ inline std::string rx_strftime(const char* timestr) {
   std::string result(buf);
   return result;
 }
+
+inline std::string rx_get_date_time_string() {
+#if defined(WIN32)  
+  return rx_strftime("%Y.%d.%m.%H.%M.%S");
+#elif defined(__APPLE__) || defined(__linux)
+  return rx_strftime("%F.%H.%M.%S");
+#endif
+};
 
 template<class T>
 static std::string rx_join(const std::vector<T>& entries, std::string sep) {
