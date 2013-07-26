@@ -272,7 +272,10 @@ inline Buffer& Buffer::operator<<(bool b) {
   return *this;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> e40244e... Removed msgpack; adding buffer serialization
 
 #endif
 >>>>>>> e40244e... Removed msgpack; adding buffer serialization
