@@ -106,8 +106,14 @@ namespace roxlu {
     if(last_result != SQLITE_ROW) {
       return "";
     }
+
+    const unsigned char* txt =  sqlite3_column_text(stmt, index);;
+    if(txt == NULL) {
+      return "";
+    }
+
     std::stringstream ss;
-    ss << sqlite3_column_text(stmt, index);
+    ss << txt;
     return ss.str();
   }
 

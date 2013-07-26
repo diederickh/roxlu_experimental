@@ -11,6 +11,10 @@
 #ifndef ROXLU_YOUTUBE_EXCHANGE_KEY_H
 #define ROXLU_YOUTUBE_EXCHANGE_KEY_H
 
+extern "C" {
+#  include <uv.h>
+}
+
 #include <string>
 #include <youtube/YouTubeTypes.h>
 #include <curl/curl.h>
