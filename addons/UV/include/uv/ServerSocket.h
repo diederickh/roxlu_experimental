@@ -7,6 +7,7 @@ extern "C" {
 }
 
 #include <vector>
+#include <iterator>
 
 #define S_VERB_NEW_CONNECTION "Got a new connection: %p"
 #define S_VERB_REMOVED_CONNECTION "Removed connection: %p"
