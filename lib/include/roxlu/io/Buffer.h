@@ -271,6 +271,11 @@ inline Buffer& Buffer::operator<<(bool b) {
   b = getU8();
   return *this;
 }
+<<<<<<< HEAD
+=======
+
+#endif
+>>>>>>> e40244e... Removed msgpack; adding buffer serialization
 
 >>>>>>> e40244e... Removed msgpack; adding buffer serialization
 #endif
