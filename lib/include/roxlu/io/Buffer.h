@@ -1,3 +1,4 @@
+
 #ifndef ROXLU_BUFFERH
 #define ROXLU_BUFFERH
 #include <bitset>

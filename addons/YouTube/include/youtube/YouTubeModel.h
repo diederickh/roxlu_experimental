@@ -2,7 +2,9 @@
 #define ROXLU_YOUTUBE_MODEL_H
 
 #include <sstream>
-#include <inttypes.h>
+#if !defined(WIN32)
+#  include <inttypes.h>
+#endif
 #include <sqlite/Database.h>
 #include <youtube/YouTubeTypes.h>
 

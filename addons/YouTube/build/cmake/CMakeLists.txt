@@ -22,6 +22,11 @@ roxlu_addon_begin("youtube")
     roxlu_add_extern_lib(libjansson.a)
   endif()
 
+  if(WIN32)
+    roxlu_add_extern_lib(jansson.lib)
+    roxlu_add_dll(jansson.dll)
+  endif()
+
   # --------------------------------------------------------------------------------------
 
 roxlu_addon_end()

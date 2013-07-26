@@ -14,6 +14,7 @@
 #include <youtube/YouTubeTypes.h>
 #include <curl/curl.h>
 #include <string>
+#include <iterator>
 
 size_t youtube_upload_start_header_cb(void* ptr, size_t size, size_t nmemb, void* user);
 
