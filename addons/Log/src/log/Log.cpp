@@ -222,6 +222,7 @@ namespace roxlu {
 
       if(write_to_file && ofs.is_open()) {
         ofs << msg.file_message;
+        ofs.flush();
       }
 
     }

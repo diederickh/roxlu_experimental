@@ -29,7 +29,6 @@ void youtube_server_ipc_on_read(ConnectionIPC* con, void* user) {
 
         // we received a video command; lets upload
         ipc->youtube.addVideoToUploadQueue(video);
-        
       }
       else {
         RX_ERROR("Unhandled command: %ld, flushing the buffer!", cmd);
