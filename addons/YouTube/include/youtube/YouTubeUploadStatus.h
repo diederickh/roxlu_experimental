@@ -1,3 +1,11 @@
+/*
+
+  # YouTubeUploadStatus
+
+  This class will retrieve the current status of an upload in case uploading a
+  video failed at some point.
+
+ */
 #ifndef ROXLU_YOUTUBE_UPLOAD_STATUS_H
 #define ROXLU_YOUTUBE_UPLOAD_STATUS_H
 
@@ -14,7 +22,7 @@ class YouTubeUploadStatus {
   ~YouTubeUploadStatus();
   bool checkStatus(YouTubeVideo video, std::string accessToken);                    /* queries youtube and asks how many bytes have been uploaded already */
   bool isPartiallyUploaded();                                                       /* returns true if some bytes were already uploaded */
-  size_t getNumBytesUploaded();                                                        /* get the number of bytes which have been uploaded already; returns 0 when no bytes have been uploaded yet */
+  size_t getNumBytesUploaded();                                                     /* get the number of bytes which have been uploaded already; returns 0 when no bytes have been uploaded yet */
  public:
   CURL* curl;
   long status;                                                                      /* the http status code; 308 means that something has been uploaded already */
