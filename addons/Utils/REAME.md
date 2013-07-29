@@ -55,7 +55,19 @@ C:\>sc create "YouTubeUploader" binPath= "C:\projects\youtubeuploader\youtubeupl
 #### Removing a service
 
 ````sh
-C\> sc delete "YouTubeUploader"
+C:\> sc delete "YouTubeUploader"
+````
+
+#### Starting a service from command line
+
+````sh
+C:\>net start "YouTubeUploader"
+````
+
+#### Stopping a service from command line
+
+````sh
+C:\>net stop "YouTubeUploader"
 ````
 
 ## SignalHandler
