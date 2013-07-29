@@ -15,10 +15,22 @@ size_t youtube_upload_read_cb(void* ptr, size_t size, size_t nmemb, void* user) 
   return retcode;
 }
 
+
+int youtube_upload_progress_cb(void* ptr, double dltotal, double dlnow, double ultotal, double ulnow) {
+  YouTubeUpload* up = static_cast<YouTubeUpload*>(ptr);
+  if(up->cb_progress) {
+    return up->cb_progress(ultotal, ulnow, up->cb_user);
+  }
+  return 0; 
+}
+
+
 // -----------------------------------------------------------------------------------
 
 YouTubeUpload::YouTubeUpload()
   :curl(NULL)
+  ,cb_progress(NULL)
+  ,cb_user(NULL)
 {
   curl_global_init(CURL_GLOBAL_DEFAULT);
 }
@@ -26,17 +38,24 @@ YouTubeUpload::YouTubeUpload()
 YouTubeUpload::~YouTubeUpload() {
 }
 
-bool YouTubeUpload::upload(YouTubeVideo video) {
+bool YouTubeUpload::upload(YouTubeVideo video, std::string accessToken, 
+                           youtube_upload_progress_callback progressCB, void* user) 
+{
+  YouTubeUploadStatus upload_status;
   CURLcode res;
   struct curl_slist* headers = NULL;
   size_t fsize;
 
+  cb_progress = progressCB;
+  cb_user = user;
+
+  // validate
+  // ------------------
   if(curl) {
     RX_ERROR("Cannot upload twice w/o shutting down first.");
     return false;
   }
-  
-  //fp = fopen(rx_to_data_path(video.filename).c_str(), "rb");
+
   std::string filepath = video.filename;
   if(video.datapath) {
     filepath = rx_to_data_path(filepath);
@@ -58,10 +77,31 @@ bool YouTubeUpload::upload(YouTubeVideo video) {
     return false;
   }
 
+  // resumable upload
+  // ------------------------
+  if(video.bytes_uploaded > 0) {
+    if(!upload_status.checkStatus(video, accessToken)) {
+      RX_ERROR("Cannot retrieve status information for video which is necessary to check how many bytes have been uploaded already. This will fail.");
+      return false;
+    }
+    else {
+      fsize = fsize - upload_status.getNumBytesUploaded();
+    }
+  }
+
+  // upload
+  // ------------------------
   fp = fopen(filepath.c_str(), "rb");
   if(!fp) {
     RX_ERROR("Cannot open file: `%s`", video.filename.c_str());
     return false;
+  }
+
+  if(upload_status.isPartiallyUploaded()) {
+    RX_VERBOSE("Skip some bytes from FP");
+    if(fseek(fp, upload_status.getNumBytesUploaded(), SEEK_SET) != 0) {
+      RX_ERROR("Error skipping some bytes for the upload");
+    }
   }
 
   curl = curl_easy_init();
@@ -70,7 +110,7 @@ bool YouTubeUpload::upload(YouTubeVideo video) {
     goto error;
   }
 
-  RX_VERBOSE("Uploading to: %s", video.upload_url.c_str());
+  RX_VERBOSE("Uploading to: %s, filesize: %ld", video.upload_url.c_str(), fsize);
 
   // default options
   res = curl_easy_setopt(curl, CURLOPT_URL, video.upload_url.c_str());                    
@@ -94,12 +134,33 @@ bool YouTubeUpload::upload(YouTubeVideo video) {
   res = curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);                                      
   YT_CURL_ERR(res);
 
-  //  res = curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)rx_get_file_size(rx_to_data_path(video.filename))); 
   res = curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)fsize);
   YT_CURL_ERR(res);
 
+  if(cb_progress) {
+    res = curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, youtube_upload_progress_cb);
+    YT_CURL_ERR(res);
+
+    res = curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, this);
+    YT_CURL_ERR(res);
+
+    res = curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+    YT_CURL_ERR(res);
+  }  
+
   // add headers
   headers = curl_slist_append(headers, "Content-Type: video/*");
+
+  // when we have a partial upload; we need to add some more headers
+  if(upload_status.isPartiallyUploaded()) {
+    RX_VERBOSE("ADDED PARTIAL UPLOAD HEADERS");
+    std::stringstream ss; 
+    ss << "Content-Range: bytes " << upload_status.range_end + 1 << "-" << (video.bytes_total - 1) << "/" << video.bytes_total;
+    std::string ss_str = ss.str();
+    headers = curl_slist_append(headers, ss_str.c_str());
+    
+  }
+
   res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);                              
   YT_CURL_ERR(res);
   

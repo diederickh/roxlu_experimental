@@ -62,7 +62,8 @@ bool YouTubeModel::addVideoToUploadQueue(YouTubeVideo video) {
     RX_ERROR("Filesize of %s returned %ld", filepath.c_str(), fsize);
     return false;
   }
-  
+
+  std::string video_json;
   char* video_resource = NULL;
   json_t* body = NULL;
   if(!video.video_resource_json.size()) {
@@ -76,17 +77,22 @@ bool YouTubeModel::addVideoToUploadQueue(YouTubeVideo video) {
     video_resource = json_dumps(body, JSON_INDENT(0));
     json_decref(body);
 
+    video_json.assign(video_resource, strlen(video_resource));
+
     if(!video_resource) {
       RX_ERROR("Cannot create JSON video resource string");
       return false;
     }
+  }
+  else {
+    video_json = video.video_resource_json;
   }
 
   bool r = db.insert("videos")
     .use("filename", video.filename)
     .use("state", YT_VIDEO_STATE_NONE)
     .use("bytes_total", fsize)
-    .use("video_resource_json", video_resource)
+    .use("video_resource_json", video_json)
     .use("datapath", (video.datapath) ? 1 : 0)
     .use("title", video.title)
     .use("description", video.description)
@@ -125,7 +131,7 @@ int YouTubeModel::hasVideoInUploadQueue(int state) {
 
   QueryResult qr(db);
 
-  bool r = db.select("id").from("videos").where(ss.str()).limit(1).execute(qr);
+  bool r = db.select("id").from("videos").where(ss.str()).order("id DESC").limit(1).execute(qr);
   if(!r) {
     RX_ERROR("Cannot check if there are videos in the upload queue.");
     return false;
@@ -145,11 +151,27 @@ bool YouTubeModel::setVideoUploadURL(int id, std::string url) {
   return db.update("videos").use("upload_url", url).where("id", id).execute();
 }
 
+bool YouTubeModel::setVideoBytesUploaded(int id, size_t nbytes) {
+  return db.update("videos").use("bytes_uploaded", nbytes).where("id", id).execute();
+}
+
+bool YouTubeModel::incrementVideoBytesUploaded(int id, size_t nbytes) {
+  std::stringstream ss;
+  ss << "update videos set bytes_uploaded += " << nbytes << " where id = \"" << id << "\"";
+  QueryResult qr(db);
+  db.query(ss.str()).execute(qr);
+  return qr.finish();
+}
+
 YouTubeVideo YouTubeModel::getVideo(int id) {
   YouTubeVideo video;
   QueryResult qr(db);
 
-  bool r = db.select("id, filename, upload_url, bytes_uploaded, bytes_total, video_resource_json").from("videos").where("id", id).execute(qr);
+  bool r = db.select("id, filename, upload_url, bytes_uploaded, bytes_total, video_resource_json")
+    .from("videos")
+    .where("id", id)
+    .execute(qr);
+
   if(!r) {
     RX_ERROR("Error while trying to get a video from the upload queue: %d", id);
     return video;

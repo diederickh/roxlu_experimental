@@ -1,14 +1,36 @@
 #include <youtube/YouTube.h>
 #include <fstream>
 
+int youtube_on_upload_progress(double ultotal, double ulnow, void* user) {
+  YouTubeUploadInfo* ui = static_cast<YouTubeUploadInfo*>(user);
+  ui->yt->model.setVideoBytesUploaded(ui->video_id, ulnow);
+  
+  if(ui->yt->cb_upload_progress) {
+    return ui->yt->cb_upload_progress(ultotal, ulnow, ui->yt->cb_user);
+  }
+  else {     
+    RX_VERBOSE(">>> %f / %f (id = %d)", ulnow, ultotal, ui->video_id);
+    return 0;
+  }
+}
+
+// ----------------------------------------------------------------------
+
 YouTube::YouTube() 
   :is_setup(false)
   ,upload_check_timeout(0)
   ,upload_check_delay(4) 
+  ,cb_upload_progress(NULL)
+  ,cb_user(NULL)
 {
 }
 
 YouTube::~YouTube() {
+  cb_user = NULL;
+  cb_upload_progress = NULL;
+  is_setup = false;
+  upload_check_timeout = 0;
+  upload_check_delay = 0;
 }
 
 bool YouTube::setup(std::string clientID, std::string clientSecret) {
@@ -17,6 +39,14 @@ bool YouTube::setup(std::string clientID, std::string clientSecret) {
   is_setup = true;
   print();
   return true;
+}
+
+void YouTube::setUploadProgressCallback(youtube_upload_progress_callback progressCB) {
+  cb_upload_progress = progressCB;
+}
+
+void YouTube::setCallbackData(void* user) {
+  cb_user = user;
 }
 
 bool YouTube::hasAccessToken() {
@@ -99,7 +129,7 @@ void YouTube::checkUploadQueue() {
       RX_VERBOSE("UPLOAD_ID: %d, VIDEO.id: %d", upload_id, video.id);
       YouTubeUploadStart start;
       if(!start.start(video, model.getAccessToken())) {
-        RX_ERROR("Error while trying to get an upload url for video id: %id, filename: %s", video.id, video.filename.c_str());
+        RX_ERROR("Error while trying to get an upload url for video id: %d, filename: %s", video.id, video.filename.c_str());
         // @todo -> change status to FAILED ? 
       }
       else {
@@ -121,16 +151,24 @@ void YouTube::checkUploadQueue() {
     else if((start_id = model.hasVideoInUploadQueue(YT_VIDEO_STATE_UPLOAD))) {
       YouTubeUpload upload;
       YouTubeVideo video = model.getVideo(start_id);
+
+      YouTubeUploadInfo* upload_info = new YouTubeUploadInfo;
+      upload_info->video_id = video.id;
+      upload_info->yt = this;
+
       RX_VERBOSE("Uploading a video with id: %ld, file: %s", video.id, video.filename.c_str());
       RX_VERBOSE("Start uploading a new video from the upload queue, with id: %ld.", video.id);
 
-      if(!upload.upload(video)) {
+      if(!upload.upload(video, model.getAccessToken(), youtube_on_upload_progress, upload_info)) {
         RX_ERROR("Something went wrong while trying to upload the video, with id: %d", video.id);
         // @todo -> change status so we will retry 
       }
       else {
         model.setVideoState(video.id, YT_VIDEO_STATE_READY);
       }
+
+      delete upload_info;
+      upload_info = NULL;
     }
   }
 }

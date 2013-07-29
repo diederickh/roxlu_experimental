@@ -16,7 +16,7 @@ size_t youtube_upload_start_header_cb(void* ptr, size_t size, size_t nmemb, void
   if(header_line_lc.find(to_find) != std::string::npos) {
     header_line_lc = rx_string_replace(header_line, "Location: ", "");
     YouTubeUploadStart* ys = static_cast<YouTubeUploadStart*>(user);
-    ys->location = header_line_lc;
+    ys->location = header_line_lc.substr(0, header_line_lc.size()-2); // strip 0x0d,0x0a
   }
 
 #if 0
@@ -55,7 +55,7 @@ bool YouTubeUploadStart::start(YouTubeVideo video, std::string accessToken) {
   }
 
   if(!video.video_resource_json.size()) {
-    RX_ERROR("Invalid json for upload start.");
+    RX_ERROR("Invalid json for upload start, length is 0");
     return false;
   }
 

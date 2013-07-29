@@ -6,6 +6,8 @@
 
 #define YT_CURL_ERR(code)  if(code != CURLE_OK) { RX_VERBOSE("Curl error: %s", curl_easy_strerror(code)); goto error; }  
 
+class YouTube; 
+
 enum YouTubeCommandsIPC  {                            /* command codes that are used by the YouTubeClientIPC and YouTubeServerIPC */
   YT_CMD_VIDEO = 1
 };
@@ -28,5 +30,8 @@ struct YouTubeVideo {
   int category;                                     /* the category id for youtube (defaults to 22) */
 };
 
-
+struct YouTubeUploadInfo {                           /* when uploading an upload progress callback will be called that is used to update the model; this is passed to the callback */
+  int video_id;
+  YouTube* yt;
+};
 #endif

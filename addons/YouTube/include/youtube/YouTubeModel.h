@@ -22,6 +22,8 @@ class YouTubeModel {
   int hasVideoInUploadQueue(int state);                                           /* returns the ID of the video that is in the queue with the given state; returns 0 when nothing is found */
   bool setVideoState(int id, int state);                                          /* changes the state of the video in the upload queue */
   bool setVideoUploadURL(int id, std::string url);                                /* set the video upload url for a resumable upload */
+  bool setVideoBytesUploaded(int id, size_t nbytes);                              /* update the number of bytes that have been uploaded for the video */
+  bool incrementVideoBytesUploaded(int id, size_t nbytes);                        /* increment the number of bytes which have been uploaded so far */
   YouTubeVideo getVideo(int id);                                                  /* get a video from the upload queue */
   void setRefreshToken(std::string rtoken);                                       /* stores the given refresh token (must be reloadable, when application restarts) */
   void setAccessToken(std::string atoken, uint64_t timeout);                      /* stores the given access token + timout (must be reloadable, when application restarts) */
@@ -29,7 +31,7 @@ class YouTubeModel {
   std::string getAccessToken();                                                   /* returns the last stored access token */
   uint64_t getTokenTimeout();                                                     /* returns the last stored token timeout, which indicates when we need to refresh the tokenn */
  private:
-  Database db;                                                                     /* we use SQLite to store the state and video upload queue */
+  Database db;                                                                    /* we use SQLite to store the state and video upload queue */
 };
 
 inline std::string YouTubeModel::getRefreshToken() {
