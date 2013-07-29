@@ -179,6 +179,8 @@ class Buffer {
   Buffer& operator<<(int i);
   Buffer& operator>>(std::string& str);
   Buffer& operator>>(int& i);
+  Buffer& operator<<(bool b);
+  Buffer& operator>>(bool& b);
 
 	// Debug
 	void print();
@@ -258,6 +260,16 @@ inline Buffer& Buffer::operator<<(int i) {
 
 inline Buffer& Buffer::operator>>(int& i) {
   i = getBigEndianS32();
+  return *this;
+}
+
+inline Buffer& Buffer::operator>>(bool& b) {
+  putByte((rx_uint8)(b) ? 1 : 0);
+  return *this;
+}
+
+inline Buffer& Buffer::operator<<(bool b) {
+  b = getU8();
   return *this;
 }
 

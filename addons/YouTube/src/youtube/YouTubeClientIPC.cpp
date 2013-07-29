@@ -1,4 +1,5 @@
 #include <youtube/YouTubeClientIPC.h>
+#include <roxlu/io/Buffer.h>
 
 YouTubeClientIPC::YouTubeClientIPC(std::string sockfile, bool datapath) 
   :client(sockfile, datapath)
@@ -17,9 +18,9 @@ void YouTubeClientIPC::update() {
 }
 
 void YouTubeClientIPC::addVideoToUploadQueue(YouTubeVideo video) {
-  msgpack::sbuffer sbuf;
-  msgpack::pack(sbuf, video);
-  writeCommand(YT_CMD_VIDEO, sbuf.data(), sbuf.size());
+  Buffer buf;
+  buf << video.filename << video.description << video.title << video.tags << video.datapath;
+  writeCommand(YT_CMD_VIDEO, buf.ptr(), buf.size());
 }
 
 void YouTubeClientIPC::writeCommand(int command, char* data, uint32_t nbytes) {

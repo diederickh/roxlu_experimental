@@ -26,8 +26,7 @@ class YouTube {
   void print();                                                       /* print some debug info */
   bool hasAccessToken();                                              /* checks if there is a stored access token */
   bool exchangeAuthCode(std::string code);                            /* call this function with the auth-code you get when you granted the application access using the popup you get when clicking on the "GO" button form the html/indx.html page */
-  //  bool addVideoToUploadQueue(std::string filename, bool datapath);    /* add a new video to the upload queue; you need to call `update()` regurlarly which will make sure the queue will be processed */
-  bool addVideoToUploadQueue(YouTubeVideo video);
+  bool addVideoToUploadQueue(YouTubeVideo video);                     /* add a new video to the upload queue; you need to call `update()` regurlarly which will make sure the queue will be processed. Make sure that you've set these fields: filename, datapath and title. You can also set the `video_resource_json`, if not set we will generate one */
  public:                                                              /* these are actually privates but are used by callbacks so they must be public */
   void checkUploadQueue();                                            /* check if there are videos in the upload queue */
   void checkAccessTokenTimeout();                                     /* checks if the access token timed out, and if so it will retrieve a new one */

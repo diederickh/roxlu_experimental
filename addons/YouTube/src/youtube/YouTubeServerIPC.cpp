@@ -1,3 +1,4 @@
+#include <roxlu/io/Buffer.h>
 #include <youtube/YouTube.h>
 #include <youtube/YouTubeServerIPC.h>
 
@@ -16,26 +17,18 @@ void youtube_server_ipc_on_read(ConnectionIPC* con, void* user) {
     memcpy((char*)&nbytes, &con->buffer[sizeof(cmd)], sizeof(nbytes)); 
 
     if(con->buffer.size() - offset >= nbytes) {
-      msgpack::unpacked unp;
-      msgpack::unpack(&unp, &con->buffer[offset], nbytes);
+      Buffer in;
+      in.putBytes(&con->buffer[offset], nbytes);
 
       if(cmd == YT_CMD_VIDEO) {
         YouTubeVideo video;
-        msgpack::object obj = unp.get();
-        try {
-          obj.convert(&video);
-          video.print();
-          con->buffer.erase(con->buffer.begin(), con->buffer.begin() + offset + nbytes);
-        }
-        catch(std::exception& ex) {
-          RX_ERROR("Error while trying to decode: %s", ex.what());
-          con->buffer.clear(); // @todo - check if we do right by removing the buffer here... we shouldn't come to this point anyway
-          break;
-        }
+        in >> video.filename >> video.description >> video.title >> video.tags >> video.datapath;
+
+        video.print();
+        con->buffer.erase(con->buffer.begin(), con->buffer.begin() + offset + nbytes);
 
         // we received a video command; lets upload
         ipc->youtube.addVideoToUploadQueue(video);
-        
       }
       else {
         RX_ERROR("Unhandled command: %ld, flushing the buffer!", cmd);

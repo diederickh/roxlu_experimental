@@ -122,12 +122,8 @@ inline std::string rx_strftime(const char* timestr) {
   return result;
 }
 
-inline std::string rx_get_date_time_string() {
-#if defined(WIN32)  
+inline std::string rx_get_date_time_string() { 
   return rx_strftime("%Y.%d.%m.%H.%M.%S");
-#elif defined(__APPLE__) || defined(__linux)
-  return rx_strftime("%F.%H.%M.%S");
-#endif
 };
 
 template<class T>
