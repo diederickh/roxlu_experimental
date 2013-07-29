@@ -73,10 +73,8 @@ bool YouTube::refreshAccessToken() {
   return true;
 }
 
-//bool YouTube::addVideoToUploadQueue(std::string filename, bool datapath) {
 bool YouTube::addVideoToUploadQueue(YouTubeVideo video) {
 
-  //  if(!model.addVideoToUploadQueue(filename, datapath)) {
   if(!model.addVideoToUploadQueue(video)) {
     RX_ERROR("Cannot add the video to the upload queue. %s", video.filename.c_str());
     return false;

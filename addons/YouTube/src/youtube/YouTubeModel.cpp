@@ -63,38 +63,24 @@ bool YouTubeModel::addVideoToUploadQueue(YouTubeVideo video) {
     return false;
   }
   
-  // { status: { privacyStatus: # }, snippet: { tags: #, categoryId: #, description: #, title: # } }
-  json_t* body = json_pack("{ s: {s:s}, s: { s:s, s:i, s:s, s:s } }",
-                           "status", "privacyStatus", "private", 
-                           "snippet", "tags", video.tags.c_str(), 
-                                      "categoryId", video.category,  
-                                      "description", video.description.c_str(), 
-                                      "title", video.title.c_str());
+  char* video_resource = NULL;
+  json_t* body = NULL;
+  if(!video.video_resource_json.size()) {
+    body = json_pack("{ s: {s:s}, s: { s:s, s:i, s:s, s:s } }",
+                             "status", "privacyStatus", "private", 
+                             "snippet", "tags", video.tags.c_str(), 
+                             "categoryId", video.category,  
+                             "description", video.description.c_str(), 
+                             "title", video.title.c_str());
  
-  char* video_resource = json_dumps(body, JSON_INDENT(0));
-  json_decref(body);
-
-  if(!video_resource) {
-    RX_ERROR("Cannot create JSON video resource string");
-    return false;
-  }
-
-
-  //  sprintf(video_resource, "{\"status\": {\"privacyStatus\": \"private\"}, \"snippet\": {\"tags\": null, \"categoryId\": \"%d\", \"description\": \"Test Description\", \"title\": \"%s\"}}",
-
-  //json_t* body = json_pack("{s:{s:s}, s:{s:s}}", "snippet", "title", "test", "status", "privacyStatus", "private");
-  //char* video_resource = json_dumps(body, JSON_INDENT(0));
-  // char video_resource[1024 * 10];
-  //  sprintf(video_resource, "{\"status\": {\"privacyStatus\": \"private\"}, \"snippet\": {\"tags\": null, \"categoryId\": \"%d\", \"description\": \"Test Description\", \"title\": \"%s\"}}",
-  //          22
-  //          ,"test2");
-  /*
-  if(!video_resource) {
-    RX_ERROR("Cannot create JSON video resource string");
+    video_resource = json_dumps(body, JSON_INDENT(0));
     json_decref(body);
-    return false;
+
+    if(!video_resource) {
+      RX_ERROR("Cannot create JSON video resource string");
+      return false;
+    }
   }
-  */
 
   bool r = db.insert("videos")
     .use("filename", video.filename)
@@ -109,8 +95,10 @@ bool YouTubeModel::addVideoToUploadQueue(YouTubeVideo video) {
     .use("category", video.category)
     .execute();
 
-  free(video_resource);  
-  video_resource = NULL;
+  if(video_resource) {
+    free(video_resource);  
+    video_resource = NULL;
+  }
 
   return r;
 }

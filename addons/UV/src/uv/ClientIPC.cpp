@@ -160,6 +160,12 @@ void ClientIPC::update() {
 }
 
 void ClientIPC::write(char* data, size_t nbytes) {
+
+  if(!uv_is_writable((uv_stream_t*)&pipe)) {
+    RX_ERROR("Cannot write to server IPC; probably you didn't connect to a service yet.");
+    return;
+  }
+
   // @todo -> add a check if we're connected; else this results in a segfault
 #if 0  
   ClientWrite* cw = new ClientWrite;
