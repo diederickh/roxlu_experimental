@@ -5,6 +5,11 @@ Buffer::Buffer()
 {
 }
 
+Buffer::Buffer(char* raw, size_t nbytes) {
+  read_dx = 0;
+  putBytes(raw, nbytes);
+}
+
 Buffer::~Buffer() {
 	//	printf("~Buffer()\n");
 }
@@ -118,6 +123,9 @@ void Buffer::putS64(rx_int64 b) {
 	putBytes((rx_uint8*)&b, 8);
 }
 
+void Buffer::putFloat(float f) {
+  putBytes((rx_uint8*)&f, sizeof(f));
+}
 
 // Store in big endian byte order (convert if necessary)
 void Buffer::putBigEndianU16(rx_uint16 b) {
@@ -271,6 +279,12 @@ rx_int64 Buffer::getS64() {
 	getBytes((rx_uint8*)&c, 8);
 	memcpy((char*)&r, (char*)&c, 8);
 	return r;
+}
+
+float Buffer::getFloat() {
+  float r = 0.0;
+  getBytes((rx_uint8*)&r, sizeof(float));
+  return r;
 }
 
 // Get in little endian byte order (convert if necessary)

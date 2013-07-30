@@ -22,6 +22,7 @@ extern "C" {
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include <uv/ipc/TypesIPC.h>
 
 #define CIPS_ST_NONE 0                                 /* default state */
 #define CIPS_ST_CONNECTING 1                           /* when we're currently connecting */
@@ -51,6 +52,10 @@ class ClientIPC {
   void update();
   void write(char* data, size_t nbytes);
   void write(const char* data, size_t nbytes);
+  void call(std::string path, const char* data, size_t nbytes);
+  void addMethod(std::string path, ipc_callback cb, void* user);
+  void callMethodHandlers(std::string path, char* buf, size_t nbytes);
+  void parse();                                                           /* parses the incoming buffer and calls the necessary callbacks which have been added */
  public:
   std::string sockpath;
   uv_loop_t* loop;
@@ -64,6 +69,7 @@ class ClientIPC {
   int state;
   uint64_t reconnect_delay;                                            /* try to reconnect after X-millis */
   uint64_t reconnect_timeout;
+  std::vector<MethodIPC*> methods;                                     /* method handlers; see `addMethod()` */
 };
 
 inline void ClientIPC::write(const char* data, size_t nbytes) {
@@ -71,7 +77,7 @@ inline void ClientIPC::write(const char* data, size_t nbytes) {
 }
 
 inline bool ClientIPC::isConnected() {
-  return !uv_is_closing((uv_handle_t*)&pipe);
+  return !uv_is_closing((uv_handle_t*)&pipe) && uv_is_writable((uv_stream_t*)&pipe);
 }
 
 #endif

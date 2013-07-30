@@ -6,8 +6,10 @@ roxlu_addon_begin("uv")
   roxlu_addon_add_source_file(uv/ClientSocket.cpp)
   roxlu_addon_add_source_file(uv/ServerSocket.cpp)
   roxlu_addon_add_source_file(uv/WorkQueue.cpp)
-  roxlu_addon_add_source_file(uv/ServerIPC.cpp)
-  roxlu_addon_add_source_file(uv/ClientIPC.cpp)
+  roxlu_addon_add_source_file(uv/ipc/ServerIPC.cpp)
+  roxlu_addon_add_source_file(uv/ipc/ClientIPC.cpp)
+  roxlu_addon_add_source_file(uv/ipc/TypesIPC.cpp)
+
 
   if(UNIX) 
     roxlu_add_extern_lib(libuv.a)

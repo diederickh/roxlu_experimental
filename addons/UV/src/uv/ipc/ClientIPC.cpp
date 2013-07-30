@@ -1,4 +1,4 @@
-#include <uv/ClientIPC.h>
+#include <uv/ipc/ClientIPC.h>
 
 void client_ipc_on_connect(uv_connect_t* req, int status) {
   ClientIPC* ipc = static_cast<ClientIPC*>(req->data);
@@ -45,9 +45,12 @@ void client_ipc_on_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
   }
     
   if(buf.base) {
+    RX_VERBOSE("PARSE CLIENT BUFFER");
+    std::copy(buf.base, buf.base + nbytes, std::back_inserter(ipc->buffer));
+    ipc->parse();
 
     if(ipc->cb_read) {
-      std::copy(buf.base, buf.base + nbytes, std::back_inserter(ipc->buffer));
+
       ipc->cb_read(ipc, ipc->cb_user);
     }
 
@@ -70,14 +73,11 @@ void client_ipc_on_close(uv_handle_t* handle) {
   ClientIPC* ipc = static_cast<ClientIPC*>(handle->data);
   ipc->state = CIPS_ST_RECONNECTING;
   ipc->reconnect_timeout = (uv_hrtime() / 1000000) + ipc->reconnect_delay;
-  RX_VERBOSE("CLOSED!");
 }
 
 void client_ipc_on_write(uv_write_t* req, int status) {
-  
   delete req;
   req = NULL;
-  
 }
 
 // -----------------------------------------------
@@ -183,5 +183,76 @@ void ClientIPC::write(char* data, size_t nbytes) {
 
   if(r < 0) {
     RX_ERROR("Error writing: %s", uv_strerror(r));
+  }
+}
+
+void ClientIPC::call(std::string path, const char* data, size_t nbytes) {
+  uint32_t cmd = METHOD_IPC_COMMAND;
+  size_t path_len = path.size();
+
+  write((char*)&cmd, sizeof(cmd));
+
+  write((char*)&path_len, sizeof(path_len));
+  write((char*)path.c_str(), path_len);
+  
+  write((char*)&nbytes, sizeof(nbytes));
+
+  if(nbytes > 0) {
+    write((char*)data, nbytes);
+  }
+}
+
+void ClientIPC::addMethod(std::string path, ipc_callback cb, void* user) {
+  MethodIPC* me = new MethodIPC();
+  me->cb_user = user;
+  me->cb_path = cb;
+  me->path = path;
+  me->id = rx_string_id(path);
+  methods.push_back(me);
+}
+
+void ClientIPC::callMethodHandlers(std::string path, char* data, size_t nbytes) {
+  uint32_t id = rx_string_id(path);
+
+  for(std::vector<MethodIPC*>::iterator it = methods.begin(); it != methods.end(); ++it) {
+
+    MethodIPC* me = *it;
+    if(me->id == id && me->cb_path) {
+      me->cb_path(path, data, nbytes, me->cb_user);
+    }
+  }
+}
+
+void ClientIPC::parse() {
+  uint32_t cmd;
+  size_t cmd_offset = sizeof(cmd) + sizeof(size_t);
+  size_t cmd_nbytes = 0;
+  
+  size_t data_offset = 0;
+  size_t data_nbytes = 0;;
+
+  while(buffer.size() > cmd_offset) {
+    memcpy((char*)&cmd, &buffer[0], sizeof(cmd));
+    memcpy((char*)&cmd_nbytes, &buffer[sizeof(cmd)], sizeof(size_t)); 
+
+    if(buffer.size() - cmd_offset >= cmd_nbytes) {
+      if(cmd == METHOD_IPC_COMMAND) {
+        std::string path(&buffer[cmd_offset], cmd_nbytes);
+        
+        // do we have a complete comand?
+        data_offset = sizeof(cmd) + sizeof(size_t) + cmd_nbytes;
+        if(buffer.size() >= data_offset) {
+
+          memcpy((char*)&data_nbytes, &buffer[data_offset], sizeof(size_t));
+          if(buffer.size() >= (data_offset + data_nbytes)) {
+            callMethodHandlers(path, data_nbytes ? &buffer[data_offset + sizeof(size_t)] : NULL, data_nbytes);
+          }
+
+          // remove the data
+          buffer.erase(buffer.begin(), buffer.begin() + data_offset + sizeof(size_t) + data_nbytes);
+        }
+
+      }
+    }
   }
 }

@@ -8,6 +8,8 @@
 
   Make sure to call `ServerIPC::update()` often.
 
+  - @todo - check if we really need to write to all separate clients instead of just to the named pipe
+
  */
 #ifndef ROXLU_SERVER_IPC_H
 #define ROXLU_SERVER_IPC_H
@@ -22,6 +24,7 @@ extern "C" {
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include <uv/ipc/TypesIPC.h>
 
 #define SERVER_IPC_ERR(r) { if (r <  0) { RX_ERROR("%s", uv_strerror(r)); } }
 
@@ -44,6 +47,7 @@ class ConnectionIPC {                                                           
   ~ConnectionIPC();
   void write(char* data, size_t nbytes);
   bool close();
+  void parse();                                                                                     /* parses the bufer and calls the appropriate method handlers */
  public:
   ServerIPC* server;
   uv_pipe_t pipe;
@@ -63,6 +67,9 @@ class ServerIPC {
   void removeAllConnections();
   void writeToAllConnections(const char* buf, size_t nbytes);
   void writeToAllConnections(char* buf, size_t nbytes);
+  void addMethod(std::string path, ipc_callback cb, void* user);
+  void call(std::string path, const char* buf, size_t nbytes);
+  void callMethodHandlers(std::string path, char* buf, size_t nbytes);
  public:
   std::string sockpath;
   uv_loop_t* loop;
@@ -71,7 +78,9 @@ class ServerIPC {
   std::vector<ConnectionIPC*> connections;
   server_ipc_on_read_callback cb_read;
   void* cb_user;
+  std::vector<MethodIPC*> methods;
 };
+
 
 inline void ServerIPC::writeToAllConnections(const char* buf, size_t nbytes) {
   writeToAllConnections((char*)buf, nbytes);

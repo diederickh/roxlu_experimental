@@ -58,6 +58,10 @@
 
 extern uint32_t string_id(const char * data, int len);
 
+inline uint32_t rx_string_id(std::string str) {
+  return string_id(str.c_str(), str.size());
+}
+
 #define EPSILON 0.000001
 #define IS_ZERO(f) 	(fabs(f) < EPSILON)	
 
