@@ -48,7 +48,6 @@ video.datapath = false;
 video.title = "automated";
 yt_client.addVideoToUploadQueue(video);
 
-
 // and perform all actions (async)
 while(true) {
    yt.update();

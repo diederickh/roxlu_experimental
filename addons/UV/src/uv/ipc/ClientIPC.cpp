@@ -5,12 +5,14 @@ void client_ipc_on_connect(uv_connect_t* req, int status) {
 
   if(status < 0) {
     RX_ERROR("Something went wrong when trying to connect to ipc server: %s", uv_strerror(status));
+    ipc->state = CIPS_ST_RECONNECTING;;
     return;
   }
 
   int r = uv_read_start((uv_stream_t*)&ipc->pipe, client_ipc_on_alloc, client_ipc_on_read);
   if(r < 0) {
     RX_ERROR("Cannot start reading: %s", uv_strerror(r));
+    ipc->state = CIPS_ST_RECONNECTING;
     return;
   }
 
@@ -19,6 +21,7 @@ void client_ipc_on_connect(uv_connect_t* req, int status) {
 }
 
 void client_ipc_on_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
+
   ClientIPC* ipc = static_cast<ClientIPC*>(handle->data);
   if(nbytes < 0) {
 
@@ -50,7 +53,6 @@ void client_ipc_on_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
     ipc->parse();
 
     if(ipc->cb_read) {
-
       ipc->cb_read(ipc, ipc->cb_user);
     }
 
@@ -76,6 +78,11 @@ void client_ipc_on_close(uv_handle_t* handle) {
 }
 
 void client_ipc_on_write(uv_write_t* req, int status) {
+
+  if(status < 0) {
+    RX_ERROR("%s", uv_strerror(status));
+  }
+
   delete req;
   req = NULL;
 }
@@ -186,9 +193,9 @@ void ClientIPC::write(char* data, size_t nbytes) {
   }
 }
 
-void ClientIPC::call(std::string path, const char* data, size_t nbytes) {
+void ClientIPC::call(std::string path, const char* data, uint32_t nbytes) {
   uint32_t cmd = METHOD_IPC_COMMAND;
-  size_t path_len = path.size();
+  uint32_t path_len = path.size();
 
   write((char*)&cmd, sizeof(cmd));
 
@@ -225,7 +232,7 @@ void ClientIPC::callMethodHandlers(std::string path, char* data, size_t nbytes) 
 
 void ClientIPC::parse() {
   uint32_t cmd;
-  size_t cmd_offset = sizeof(cmd) + sizeof(size_t);
+  size_t cmd_offset = sizeof(cmd) + sizeof(uint32_t);
   size_t cmd_nbytes = 0;
   
   size_t data_offset = 0;
@@ -233,26 +240,31 @@ void ClientIPC::parse() {
 
   while(buffer.size() > cmd_offset) {
     memcpy((char*)&cmd, &buffer[0], sizeof(cmd));
-    memcpy((char*)&cmd_nbytes, &buffer[sizeof(cmd)], sizeof(size_t)); 
+    memcpy((char*)&cmd_nbytes, &buffer[sizeof(cmd)], sizeof(uint32_t)); 
 
-    if(buffer.size() - cmd_offset >= cmd_nbytes) {
-      if(cmd == METHOD_IPC_COMMAND) {
-        std::string path(&buffer[cmd_offset], cmd_nbytes);
-        
-        // do we have a complete comand?
-        data_offset = sizeof(cmd) + sizeof(size_t) + cmd_nbytes;
-        if(buffer.size() >= data_offset) {
-
-          memcpy((char*)&data_nbytes, &buffer[data_offset], sizeof(size_t));
-          if(buffer.size() >= (data_offset + data_nbytes)) {
-            callMethodHandlers(path, data_nbytes ? &buffer[data_offset + sizeof(size_t)] : NULL, data_nbytes);
-          }
-
-          // remove the data
-          buffer.erase(buffer.begin(), buffer.begin() + data_offset + sizeof(size_t) + data_nbytes);
-        }
-
-      }
+    if(cmd != METHOD_IPC_COMMAND) {
+      return;
     }
+
+    if(buffer.size() < cmd_nbytes + cmd_offset) {
+      return;
+    }
+        
+    // do we have a complete comand?
+    std::string path(&buffer[cmd_offset], cmd_nbytes);
+    data_offset = sizeof(cmd) + sizeof(uint32_t) + cmd_nbytes;
+    if(buffer.size() < data_offset) {
+      return;
+    }
+
+    memcpy((char*)&data_nbytes, &buffer[data_offset], sizeof(uint32_t));
+    if(buffer.size() < (data_offset + data_nbytes)) {
+      return;
+    }
+
+    callMethodHandlers(path, data_nbytes ? &buffer[data_offset + sizeof(uint32_t)] : NULL, data_nbytes);
+      
+    // remove the data
+    buffer.erase(buffer.begin(), buffer.begin() + data_offset + sizeof(uint32_t) + data_nbytes);
   }
 }

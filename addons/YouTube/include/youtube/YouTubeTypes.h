@@ -1,6 +1,7 @@
 #ifndef ROXLU_YOUTUBE_TYPES_H
 #define ROXLU_YOUTUBE_TYPES_H
 
+#include <roxlu/io/Buffer.h>
 #include <iostream>
 #include <string>
 
@@ -8,9 +9,11 @@
 
 class YouTube; 
 
+#if 0
 enum YouTubeCommandsIPC  {                            /* command codes that are used by the YouTubeClientIPC and YouTubeServerIPC */
   YT_CMD_VIDEO = 1
 };
+#endif
 
 struct YouTubeVideo {
   YouTubeVideo();
@@ -28,6 +31,8 @@ struct YouTubeVideo {
   bool datapath;                                    /* ipc/db: set this to true when the filename is stored in the datapath */
   int id;                                           /* the auto generated id from the model (sqlite in this case) */
   int category;                                     /* the category id for youtube (defaults to 22) */
+
+  BUFFERIZE(filename, description, title, tags, datapath);
 };
 
 struct YouTubeUploadInfo {                           /* when uploading an upload progress callback will be called that is used to update the model; this is passed to the callback */

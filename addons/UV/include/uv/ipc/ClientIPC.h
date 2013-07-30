@@ -52,7 +52,7 @@ class ClientIPC {
   void update();
   void write(char* data, size_t nbytes);
   void write(const char* data, size_t nbytes);
-  void call(std::string path, const char* data, size_t nbytes);
+  void call(std::string path, const char* data, uint32_t nbytes);
   void addMethod(std::string path, ipc_callback cb, void* user);
   void callMethodHandlers(std::string path, char* buf, size_t nbytes);
   void parse();                                                           /* parses the incoming buffer and calls the necessary callbacks which have been added */

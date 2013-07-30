@@ -68,7 +68,7 @@ class ServerIPC {
   void writeToAllConnections(const char* buf, size_t nbytes);
   void writeToAllConnections(char* buf, size_t nbytes);
   void addMethod(std::string path, ipc_callback cb, void* user);
-  void call(std::string path, const char* buf, size_t nbytes);
+  void call(std::string path, const char* buf, uint32_t nbytes);
   void callMethodHandlers(std::string path, char* buf, size_t nbytes);
  public:
   std::string sockpath;

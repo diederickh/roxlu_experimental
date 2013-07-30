@@ -19,7 +19,8 @@ extern "C" {
 }
 
 #include <string>
-#include <uv/ClientIPC.h>
+
+#include <uv/IPC.h>
 #include <youtube/YouTubeTypes.h>
 
 class YouTubeClientIPC {

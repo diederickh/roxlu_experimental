@@ -27,7 +27,7 @@ void ConnectionIPC::write(char* data, size_t nbytes) {
   uv_buf_t buf = uv_buf_init((char*)data, nbytes);
   uv_write_t* req = new uv_write_t();
   req->data = this;
-  RX_VERBOSE("WRITE: %ld", nbytes);
+
   int r = uv_write(req, (uv_stream_t*)&pipe, &buf, 1, server_ipc_on_connection_write);
   if(r < 0) {
     RX_ERROR("Error cannot write to client: %s", uv_strerror(r));
@@ -45,35 +45,39 @@ bool ConnectionIPC::close() {
 
 void ConnectionIPC::parse() {
   uint32_t cmd;
-  size_t cmd_offset = sizeof(cmd) + sizeof(size_t);
-  size_t cmd_nbytes = 0;
+  uint32_t cmd_offset = sizeof(cmd) + sizeof(uint32_t);
+  uint32_t cmd_nbytes = 0;
   
-  size_t data_offset = 0;
-  size_t data_nbytes = 0;;
+  uint32_t data_offset = 0;
+  uint32_t data_nbytes = 0;;
 
   while(buffer.size() > cmd_offset) {
     memcpy((char*)&cmd, &buffer[0], sizeof(cmd));
-    memcpy((char*)&cmd_nbytes, &buffer[sizeof(cmd)], sizeof(size_t)); 
+    memcpy((char*)&cmd_nbytes, &buffer[sizeof(cmd)], sizeof(uint32_t)); 
 
-    if(buffer.size() - cmd_offset >= cmd_nbytes) {
-      if(cmd == METHOD_IPC_COMMAND) {
-        std::string path(&buffer[cmd_offset], cmd_nbytes);
-        
-        // do we have a complete comand?
-        data_offset = sizeof(cmd) + sizeof(size_t) + cmd_nbytes;
-        if(buffer.size() >= data_offset) {
-
-          memcpy((char*)&data_nbytes, &buffer[data_offset], sizeof(size_t));
-          if(buffer.size() >= (data_offset + data_nbytes)) {
-            server->callMethodHandlers(path, data_nbytes ? &buffer[data_offset + sizeof(size_t)] : NULL, data_nbytes);
-          }
-
-          // remove the data
-          buffer.erase(buffer.begin(), buffer.begin() + data_offset + sizeof(size_t) + data_nbytes);
-        }
-
-      }
+    if(cmd != METHOD_IPC_COMMAND) {
+      return;
     }
+
+    if(buffer.size() < cmd_nbytes + cmd_offset) {
+      return;
+    }
+        
+    // do we have a complete comand?
+    std::string path(&buffer[cmd_offset], cmd_nbytes);
+    data_offset = sizeof(cmd) + sizeof(uint32_t) + cmd_nbytes;
+    if(buffer.size() < data_offset) {
+      return;
+    }
+
+    memcpy((char*)&data_nbytes, &buffer[data_offset], sizeof(uint32_t));
+    if(buffer.size() < (data_offset + data_nbytes)) {
+      return;
+    }
+
+    server->callMethodHandlers(path, data_nbytes ? &buffer[data_offset + sizeof(uint32_t)] : NULL, data_nbytes);
+      
+    buffer.erase(buffer.begin(), buffer.begin() + data_offset + sizeof(uint32_t) + data_nbytes);
   }
 }
 
@@ -81,10 +85,10 @@ void ConnectionIPC::parse() {
 
 void server_ipc_on_connection_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
 
-  RX_VERBOSE("READ!");
-
   ConnectionIPC* ipc = static_cast<ConnectionIPC*>(handle->data);
   if(nbytes < 0) {
+
+    RX_VERBOSE("%s", uv_strerror(nbytes));
 
     int r = uv_read_stop(handle);
     if(r < 0) {
@@ -107,7 +111,6 @@ void server_ipc_on_connection_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t
   if(buf.base) {
 
     std::copy(buf.base, buf.base + nbytes, std::back_inserter(ipc->buffer));
-
     ipc->parse();
 
     if(ipc->server->cb_read) {
@@ -321,10 +324,10 @@ void ServerIPC::removeAllConnections() {
   }
 }
 
-void ServerIPC::call(std::string path, const char* data, size_t nbytes) {
+void ServerIPC::call(std::string path, const char* data, uint32_t nbytes) {
 
   uint32_t cmd = METHOD_IPC_COMMAND;
-  size_t path_len = path.size();
+  uint32_t path_len = path.size();
 
   writeToAllConnections((char*)&cmd, sizeof(cmd));
 
@@ -336,7 +339,7 @@ void ServerIPC::call(std::string path, const char* data, size_t nbytes) {
   if(nbytes > 0) {
     writeToAllConnections((char*)data, nbytes);
   }
-  RX_VERBOSE("CALLED!!!!!!!!!!!!!!!!!!!!");
+
 }
 
 
