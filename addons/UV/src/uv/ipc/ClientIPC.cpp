@@ -80,7 +80,7 @@ void client_ipc_on_close(uv_handle_t* handle) {
 }
 
 void client_ipc_on_write(uv_write_t* req, int status) {
-  RX_VERBOSE("WRITE READY: %d", status);
+
   if(status < 0) {
     ClientIPC* ipc = static_cast<ClientIPC*>(req->data);
     ipc->reconnect();
@@ -214,7 +214,7 @@ void ClientIPC::write(char* data, size_t nbytes) {
   req->data = this;
   uv_buf_t buf = uv_buf_init(data, nbytes);
   int r = uv_write(req, (uv_stream_t*)&pipe, &buf, 1, client_ipc_on_write);
-  RX_VERBOSE("WRITTTEN: %d", r);
+
 #endif
   
   if(r < 0) {

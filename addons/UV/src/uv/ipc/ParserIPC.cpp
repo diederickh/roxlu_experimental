@@ -77,7 +77,7 @@ void ParserIPC::parse(std::vector<char>& buffer) {
           break;
         }
         else {
-          RX_VERBOSE("HALAAAA-----------------------------");
+
         }
         return;
       }
