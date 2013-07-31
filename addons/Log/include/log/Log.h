@@ -10,6 +10,16 @@ extern "C" {
 #include <fstream>
 #include <vector>
 
+#if defined(_WIN32)
+#  define ANSI_VERBOSE "\x1b[32;1m"
+#  define ANSI_WARNING "\x1b[35;1m"
+#  define ANSI_ERROR "\x1b[31;1m"
+#else 
+#  define ANSI_VERBOSE "\x1b[32m"
+#  define ANSI_WARNING "\x1b[35m"
+#  define ANSI_ERROR "\x1b[31m"
+#endif
+
 namespace roxlu {
 
   struct LogMessage {

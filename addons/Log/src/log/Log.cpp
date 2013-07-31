@@ -34,7 +34,7 @@ namespace roxlu {
       if(level == RX_LOG_LEVEL_VERBOSE) {
 
         if(l->use_colors) {
-          ss_tty << "\x1b[36m";
+          ss_tty << ANSI_VERBOSE;
         }
 
         ss_tty << "[verbose] ";
@@ -43,7 +43,7 @@ namespace roxlu {
       }
       else if(level == RX_LOG_LEVEL_WARNING) {
         if(l->use_colors) {
-          ss_tty << "\x1b[36m"; // 35 - magenta
+          ss_tty << ANSI_WARNING;
         }
 
         ss_tty << "[warning] ";
@@ -51,7 +51,7 @@ namespace roxlu {
       }
       else if(level == RX_LOG_LEVEL_ERROR) {
         if(l->use_colors) {
-          ss_tty << "\x1b[36m"; // 31 - red
+          ss_tty << ANSI_ERROR;
         }
                 
         ss_tty << "[error] ";
@@ -91,13 +91,13 @@ namespace roxlu {
       if(l->use_colors) {
 
         if(level == RX_LOG_LEVEL_VERBOSE) {
-          ss_tty << "\x1b[32m";
+          ss_tty << ANSI_VERBOSE;
         }
         else if(level == RX_LOG_LEVEL_WARNING) {
-          ss_tty << "\x1b[35m";
+          ss_tty << ANSI_WARNING;
         }
         else if(level == RX_LOG_LEVEL_ERROR) {
-          ss_tty << "\x1b[31m";
+          ss_tty << ANSI_ERROR;
         }
 
       }
