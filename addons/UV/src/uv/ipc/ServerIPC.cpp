@@ -13,16 +13,22 @@ void server_ipc_on_connection_write(uv_write_t* req, int status) {
   req = NULL;
 }
 
+void connection_ipc_on_command(std::string path, char* data, size_t nbytes, void* user) {
+  ConnectionIPC* ipc = static_cast<ConnectionIPC*>(user);
+  ipc->server->callMethodHandlers(path, data, nbytes); 
+}
+
 // -----------------------------------------------------------------------------
 ConnectionIPC::ConnectionIPC(ServerIPC* server)
   :server(server)
-  ,parse_state(CIPC_PARSE_STATE_COMMAND_SIZE)
-  ,data_size(0)
 {
   shutdown_req.data = this;
+  parser.cb_parser = connection_ipc_on_command;
+  parser.cb_user = this;
 }
 
 ConnectionIPC::~ConnectionIPC() {
+  
 }
 
 void ConnectionIPC::write(char* data, size_t nbytes) {
@@ -46,103 +52,9 @@ bool ConnectionIPC::close() {
 }
 
 
-// [ {4} cmd ] [ {4} path_len ] [ {path_len} path ] [ {4} data_len ] [ {data_len} data ]
 
-// data_len_offset = {4} + {4} + {path_len} + {4}
-// command_size = {data_len_offset} + {data_len}
 void ConnectionIPC::parse() {
-
-  while(buffer.size()) {
-    switch(parse_state) {
-
-      case CIPC_PARSE_STATE_COMMAND_SIZE: {
-        if(buffer.size() > 8)  {
-          uint32_t cmd = 0;
-          memcpy((char*)&cmd, &buffer[0], sizeof(cmd));
-
-          if(cmd != METHOD_IPC_COMMAND) {
-            RX_ERROR("Parsing command, but the received data is not a command - this shouldnt happen");
-            return;
-          }
-
-          memcpy((char*)&data_size, &buffer[sizeof(cmd)], 4);
-          parse_state = CIPC_PARSE_STATE_COMMAND_READ;
-          buffer.erase(buffer.begin(), buffer.begin() + 8);
-          break;
-        }
-        return;
-      }
-
-      case CIPC_PARSE_STATE_COMMAND_READ: {
-        if(buffer.size() >= data_size) {
-          parsed_method.clear();
-          parsed_method.assign(&buffer[0], data_size);
-          buffer.erase(buffer.begin(), buffer.begin() + data_size);
-          parse_state = CIPC_PARSE_STATE_DATA_SIZE;
-          break;
-        }
-        return;
-      }
-
-      case CIPC_PARSE_STATE_DATA_SIZE: {
-        if(buffer.size() > 4) {
-          memcpy((char*)&data_size, &buffer[0], 4);
-          buffer.erase(buffer.begin(), buffer.begin() + 4);
-          parse_state = CIPC_PARSE_STATE_DATA_READ;
-          break;
-        }
-        return;
-      }
-
-      case CIPC_PARSE_STATE_DATA_READ: {
-        if(buffer.size() >= data_size) {
-          server->callMethodHandlers(parsed_method, data_size ? &buffer[0] : NULL, data_size);
-          buffer.erase(buffer.begin(), buffer.begin() + data_size);
-          parse_state = CIPC_PARSE_STATE_COMMAND_SIZE;
-          break;
-        }
-        return;
-      }
-      default: {
-        RX_VERBOSE("Unhandled parse_state.");
-        return;
-      }
-    }
-  }
-
-  /*
-  uint32_t cmd;
-  uint32_t data_len_offset = 0;
-  uint32_t data_offset = 0;
-
-  uint32_t path_len = 0;
-  uint32_t data_len = 0;
-
-  while(buffer.size() > 8) {
-    
-    memcpy((char*)&cmd, &buffer[0], 4);
-    if(cmd != METHOD_IPC_COMMAND) {
-      return;
-    }
-
-    memcpy((char*)&path_len, &buffer[4], 4); 
-    data_len_offset = 8 + path_len; 
-    if(buffer.size() < (data_len_offset + 4)) {
-      return;
-    }      
-    
-    memcpy((char*)&data_len, &buffer[data_len_offset], 4);
-    data_offset = 8 + path_len + 4; 
-    if(buffer.size() < (data_offset + data_len)) {
-      return;
-    }
-
-    std::string path(&buffer[8], path_len);
-    server->callMethodHandlers(path, data_len ? &buffer[data_offset] : NULL, data_len);
-      
-    buffer.erase(buffer.begin(), buffer.begin() + command_size);
-  }
-  */
+  parser.parse(buffer);
 }
 
 // -----------------------------------------------------------------------------

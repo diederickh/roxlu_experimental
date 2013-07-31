@@ -25,14 +25,9 @@ extern "C" {
 #include <algorithm>
 #include <iterator>
 #include <uv/ipc/TypesIPC.h>
+#include <uv/ipc/ParserIPC.h>
 
 #define SERVER_IPC_ERR(r) { if (r <  0) { RX_ERROR("%s", uv_strerror(r)); } }
-
-#define CIPC_PARSE_STATE_COMMAND_SIZE 0
-#define CIPC_PARSE_STATE_COMMAND_READ 1
-#define CIPC_PARSE_STATE_DATA_SIZE 2
-#define CIPC_PARSE_STATE_DATA_READ 3
-
 
 class ConnectionIPC;
 typedef void(*server_ipc_on_read_callback)(ConnectionIPC* con, void* user);                               /* user callback; gets called when we receive data from the client; data will be stored in the `buffer` member */
@@ -45,6 +40,8 @@ void server_ipc_on_connection_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t
 void server_ipc_on_server_close(uv_handle_t* handle);                                                     /* gets called when the server is closed */
 uv_buf_t server_ipc_on_alloc(uv_handle_t* handle, size_t nbytes);                                         /* will allocate a uv_buf_t when necessary; called by libuv */
 
+void connection_ipc_on_command(std::string path, char* data, size_t nbytes, void* user);                  /* gets called when the ParserIPC finds a valid command */
+
 class ServerIPC;
 
 class ConnectionIPC {                                                                                     /* represents a client connection */
@@ -53,17 +50,13 @@ class ConnectionIPC {                                                           
   ~ConnectionIPC();
   void write(char* data, size_t nbytes);
   bool close();
-  void parse();                                                                                     /* parses the bufer and calls the appropriate method handlers */
+  void parse();                                                                                          /* parses the bufer and calls the appropriate method handlers */
  public:
   ServerIPC* server;
   uv_pipe_t pipe;
   uv_shutdown_t shutdown_req;
   std::vector<char> buffer;
-
-  uint32_t parse_state;
-  uint32_t data_size;
-  std::string parsed_method;
-
+  ParserIPC parser;
 };
 
 class ServerIPC {

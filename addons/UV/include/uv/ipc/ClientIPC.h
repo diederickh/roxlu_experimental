@@ -23,6 +23,7 @@ extern "C" {
 #include <algorithm>
 #include <iterator>
 #include <uv/ipc/TypesIPC.h>
+#include <uv/ipc/ParserIPC.h>
 
 #define CIPS_ST_NONE 0                                 /* default state */
 #define CIPS_ST_CONNECTING 1                           /* when we're currently connecting */
@@ -39,6 +40,8 @@ void client_ipc_on_write(uv_write_t* req, int status);
 void client_ipc_on_shutdown(uv_shutdown_t* req, int status);
 void client_ipc_on_close(uv_handle_t* handle);
 uv_buf_t client_ipc_on_alloc(uv_handle_t* handle, size_t nbytes);
+
+void client_ipc_on_command(std::string path, char* data, size_t nbytes, void* user);  /* gets called when ParserIPC finds a valid command */
 
 class ClientIPC {
  public:
@@ -71,6 +74,7 @@ class ClientIPC {
   uint64_t reconnect_delay;                                            /* try to reconnect after X-millis */
   uint64_t reconnect_timeout;
   std::vector<MethodIPC*> methods;                                     /* method handlers; see `addMethod()` */
+  ParserIPC parser;
 };
 
 inline void ClientIPC::write(const char* data, size_t nbytes) {

@@ -91,6 +91,13 @@ void client_ipc_on_write(uv_write_t* req, int status) {
 
 // -----------------------------------------------
 
+void client_ipc_on_command(std::string path, char* data, size_t nbytes, void* user) {
+  ClientIPC* ipc = static_cast<ClientIPC*>(user);
+  ipc->callMethodHandlers(path, data, nbytes);
+}
+
+// -----------------------------------------------
+
 ClientIPC::ClientIPC(std::string sockfile, bool datapath)
   :loop(NULL)
   ,cb_con(NULL)
@@ -113,6 +120,9 @@ ClientIPC::ClientIPC(std::string sockfile, bool datapath)
   
   connect_req.data = this;
   shutdown_req.data = this;
+
+  parser.cb_parser = client_ipc_on_command;
+  parser.cb_user = this;
 }
 
 ClientIPC::~ClientIPC() {
@@ -252,6 +262,10 @@ void ClientIPC::callMethodHandlers(std::string path, char* data, size_t nbytes) 
 }
 
 void ClientIPC::parse() {
+
+  parser.parse(buffer);
+
+#if 0
   uint32_t cmd;
   size_t cmd_offset = sizeof(cmd) + sizeof(uint32_t);
   size_t cmd_nbytes = 0;
@@ -288,4 +302,5 @@ void ClientIPC::parse() {
     // remove the data
     buffer.erase(buffer.begin(), buffer.begin() + data_offset + sizeof(uint32_t) + data_nbytes);
   }
+#endif
 }

@@ -24,6 +24,7 @@ void ParserIPC::parse(std::vector<char>& buffer) {
     switch(parse_state) {
 
       case PIPC_STATE_COMMAND_SIZE: {
+
         if(buffer.size() > 8)  {
           uint32_t cmd = 0;
           memcpy((char*)&cmd, &buffer[0], sizeof(cmd));
@@ -38,10 +39,12 @@ void ParserIPC::parse(std::vector<char>& buffer) {
           buffer.erase(buffer.begin(), buffer.begin() + 8);
           break;
         }
+
         return;
       }
 
       case PIPC_STATE_COMMAND_READ: {
+
         if(buffer.size() >= data_size) {
           parsed_method.clear();
           parsed_method.assign(&buffer[0], data_size);
@@ -49,11 +52,12 @@ void ParserIPC::parse(std::vector<char>& buffer) {
           parse_state = PIPC_STATE_DATA_SIZE;
           break;
         }
+
         return;
       }
 
       case PIPC_STATE_DATA_SIZE: {
-        if(buffer.size() > 4) {
+        if(buffer.size() >= 4) {
           parse_state = PIPC_STATE_DATA_READ;
           break;
         }
@@ -66,13 +70,18 @@ void ParserIPC::parse(std::vector<char>& buffer) {
         buffer.erase(buffer.begin(), buffer.begin() + 4);
 
         if(buffer.size() >= data_size) {
-          server->callMethodHandlers(parsed_method, data_size ? &buffer[0] : NULL, data_size);
+          if(cb_parser) {
+            cb_parser(parsed_method, data_size ? &buffer[0] : NULL, data_size, cb_user);
+          }
+
+          //          server->callMethodHandlers(parsed_method, data_size ? &buffer[0] : NULL, data_size);
           buffer.erase(buffer.begin(), buffer.begin() + data_size);
           parse_state = PIPC_STATE_COMMAND_SIZE;
           break;
         }
         return;
       }
+
       default: {
         RX_VERBOSE("Unhandled parse_state.");
         return;
