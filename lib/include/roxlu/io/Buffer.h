@@ -251,14 +251,18 @@ inline Buffer& Buffer::operator<<(const char* cstr) {
 
 inline Buffer& Buffer::operator<<(std::string str) {
   putBigEndianU32(str.size());
-  putBytes((char*)str.c_str(), str.size());
+  if(str.size()) {
+    putBytes((char*)str.c_str(), str.size());
+  }
   return *this;
 }
 
 inline Buffer& Buffer::operator>>(std::string& str) {
   rx_uint32 size = getBigEndianU32();
-  str.assign((char*)getReadPtr(), size);
-  drain(size);
+  if(size) { 
+    str.assign((char*)getReadPtr(), size);
+    drain(size);
+  }
   return *this;
 }
 

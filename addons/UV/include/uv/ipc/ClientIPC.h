@@ -49,6 +49,7 @@ class ClientIPC {
              void* user);
   bool connect();
   bool isConnected();
+  bool reconnect();
   void update();
   void write(char* data, size_t nbytes);
   void write(const char* data, size_t nbytes);

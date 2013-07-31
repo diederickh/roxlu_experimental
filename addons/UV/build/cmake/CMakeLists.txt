@@ -9,6 +9,7 @@ roxlu_addon_begin("uv")
   roxlu_addon_add_source_file(uv/ipc/ServerIPC.cpp)
   roxlu_addon_add_source_file(uv/ipc/ClientIPC.cpp)
   roxlu_addon_add_source_file(uv/ipc/TypesIPC.cpp)
+  roxlu_addon_add_source_file(uv/ipc/ParserIPC.cpp)
 
 
   if(UNIX) 

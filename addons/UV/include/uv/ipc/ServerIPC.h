@@ -28,6 +28,12 @@ extern "C" {
 
 #define SERVER_IPC_ERR(r) { if (r <  0) { RX_ERROR("%s", uv_strerror(r)); } }
 
+#define CIPC_PARSE_STATE_COMMAND_SIZE 0
+#define CIPC_PARSE_STATE_COMMAND_READ 1
+#define CIPC_PARSE_STATE_DATA_SIZE 2
+#define CIPC_PARSE_STATE_DATA_READ 3
+
+
 class ConnectionIPC;
 typedef void(*server_ipc_on_read_callback)(ConnectionIPC* con, void* user);                               /* user callback; gets called when we receive data from the client; data will be stored in the `buffer` member */
 
@@ -53,6 +59,11 @@ class ConnectionIPC {                                                           
   uv_pipe_t pipe;
   uv_shutdown_t shutdown_req;
   std::vector<char> buffer;
+
+  uint32_t parse_state;
+  uint32_t data_size;
+  std::string parsed_method;
+
 };
 
 class ServerIPC {

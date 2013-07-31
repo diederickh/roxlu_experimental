@@ -80,6 +80,8 @@ void client_ipc_on_close(uv_handle_t* handle) {
 void client_ipc_on_write(uv_write_t* req, int status) {
 
   if(status < 0) {
+    ClientIPC* ipc = static_cast<ClientIPC*>(req->data);
+    ipc->reconnect();
     RX_ERROR("%s", uv_strerror(status));
   }
 
@@ -166,6 +168,21 @@ void ClientIPC::update() {
   uv_run(loop, UV_RUN_NOWAIT);
 }
 
+bool ClientIPC::reconnect() {
+
+  if(state == CIPS_ST_RECONNECTING) {
+    RX_VERBOSE("Cannot reconnect; already trying");
+    return false;
+  }
+
+  if(state != CIPS_ST_RECONNECTING) {
+    state = CIPS_ST_RECONNECTING;
+    reconnect_timeout = (uv_hrtime()/1000000) + reconnect_delay;
+  }
+  RX_WARNING(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> RECONNECTING <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+  return true;
+}
+
 void ClientIPC::write(char* data, size_t nbytes) {
 
   if(!uv_is_writable((uv_stream_t*)&pipe)) {
@@ -187,9 +204,11 @@ void ClientIPC::write(char* data, size_t nbytes) {
   int r = uv_write(req, (uv_stream_t*)&pipe, &buf, 1, client_ipc_on_write);
 #endif
   
-
   if(r < 0) {
     RX_ERROR("Error writing: %s", uv_strerror(r));
+    if(state != CIPS_ST_CONNECTED && state != CIPS_ST_CONNECTING) {
+      reconnect();
+    }
   }
 }
 
@@ -203,6 +222,8 @@ void ClientIPC::call(std::string path, const char* data, uint32_t nbytes) {
   write((char*)path.c_str(), path_len);
   
   write((char*)&nbytes, sizeof(nbytes));
+
+  RX_VERBOSE("Writing command: %s with %ld bytes of data.", path.c_str(), nbytes);
 
   if(nbytes > 0) {
     write((char*)data, nbytes);
@@ -250,15 +271,15 @@ void ClientIPC::parse() {
       return;
     }
         
-    // do we have a complete comand?
+    // do we have a complete conmand?
     std::string path(&buffer[cmd_offset], cmd_nbytes);
     data_offset = sizeof(cmd) + sizeof(uint32_t) + cmd_nbytes;
-    if(buffer.size() < data_offset) {
+    if(buffer.size() <= data_offset) {
       return;
     }
 
     memcpy((char*)&data_nbytes, &buffer[data_offset], sizeof(uint32_t));
-    if(buffer.size() < (data_offset + data_nbytes)) {
+    if(buffer.size() <= (data_offset + data_nbytes)) {
       return;
     }
 
