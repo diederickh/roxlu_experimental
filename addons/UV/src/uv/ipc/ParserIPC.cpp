@@ -57,7 +57,9 @@ void ParserIPC::parse(std::vector<char>& buffer) {
       }
 
       case PIPC_STATE_DATA_SIZE: {
-        if(buffer.size() >= 4) {
+        if(buffer.size() >= 4) {        
+          memcpy((char*)&data_size, &buffer[0], 4);
+          buffer.erase(buffer.begin(), buffer.begin() + 4);
           parse_state = PIPC_STATE_DATA_READ;
           break;
         }
@@ -65,19 +67,17 @@ void ParserIPC::parse(std::vector<char>& buffer) {
       }
 
       case PIPC_STATE_DATA_READ: {
-
-        memcpy((char*)&data_size, &buffer[0], 4);
-        buffer.erase(buffer.begin(), buffer.begin() + 4);
-
         if(buffer.size() >= data_size) {
           if(cb_parser) {
             cb_parser(parsed_method, data_size ? &buffer[0] : NULL, data_size, cb_user);
           }
 
-          //          server->callMethodHandlers(parsed_method, data_size ? &buffer[0] : NULL, data_size);
           buffer.erase(buffer.begin(), buffer.begin() + data_size);
           parse_state = PIPC_STATE_COMMAND_SIZE;
           break;
+        }
+        else {
+          RX_VERBOSE("HALAAAA-----------------------------");
         }
         return;
       }
@@ -90,3 +90,4 @@ void ParserIPC::parse(std::vector<char>& buffer) {
   }
 
 }
+

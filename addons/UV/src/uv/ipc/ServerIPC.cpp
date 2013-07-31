@@ -60,7 +60,7 @@ void ConnectionIPC::parse() {
 // -----------------------------------------------------------------------------
 
 void server_ipc_on_connection_read(uv_stream_t* handle, ssize_t nbytes, uv_buf_t buf) {
-
+  RX_VERBOSE(">> read: %ld bytes", nbytes);
   ConnectionIPC* ipc = static_cast<ConnectionIPC*>(handle->data);
   if(nbytes < 0) {
 
@@ -286,6 +286,8 @@ void ServerIPC::removeConnection(ConnectionIPC* con) {
   }
 
   connections.erase(it);
+
+  RX_VERBOSE("Removing connection from server. (%ld left)", connections.size());
 }
 
 void ServerIPC::writeToAllConnections(char* buf, size_t nbytes) {

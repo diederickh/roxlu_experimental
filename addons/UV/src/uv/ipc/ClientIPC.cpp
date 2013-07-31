@@ -16,7 +16,9 @@ void client_ipc_on_connect(uv_connect_t* req, int status) {
     return;
   }
 
+  ipc->buffer.clear(); 
   ipc->state = CIPS_ST_CONNECTED;
+
   RX_VERBOSE("Connected!");
 }
 
@@ -78,7 +80,7 @@ void client_ipc_on_close(uv_handle_t* handle) {
 }
 
 void client_ipc_on_write(uv_write_t* req, int status) {
-
+  RX_VERBOSE("WRITE READY: %d", status);
   if(status < 0) {
     ClientIPC* ipc = static_cast<ClientIPC*>(req->data);
     ipc->reconnect();
@@ -212,6 +214,7 @@ void ClientIPC::write(char* data, size_t nbytes) {
   req->data = this;
   uv_buf_t buf = uv_buf_init(data, nbytes);
   int r = uv_write(req, (uv_stream_t*)&pipe, &buf, 1, client_ipc_on_write);
+  RX_VERBOSE("WRITTTEN: %d", r);
 #endif
   
   if(r < 0) {
@@ -233,7 +236,7 @@ void ClientIPC::call(std::string path, const char* data, uint32_t nbytes) {
   
   write((char*)&nbytes, sizeof(nbytes));
 
-  RX_VERBOSE("Writing command: %s with %ld bytes of data.", path.c_str(), nbytes);
+  RX_VERBOSE("+++++++++++++++++++++++ Writing command: %s with %ld bytes of data.", path.c_str(), nbytes);
 
   if(nbytes > 0) {
     write((char*)data, nbytes);
