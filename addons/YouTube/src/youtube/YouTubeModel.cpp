@@ -2,6 +2,7 @@
 #include <roxlu/core/Utils.h>
 #include <roxlu/core/Log.h>
 #include <jansson.h>
+#include <sstream>
 
 
 // ----------------------------------------------------------------------------------
@@ -63,9 +64,15 @@ bool YouTubeModel::addVideoToUploadQueue(YouTubeVideo video) {
     return false;
   }
 
+#if USE_JSON_PACK
+  // @todo - libjansson is used as DLL, and json_dumps
+  // is supposed to free() the memory; this is icky and 
+  // libjansson should free() any allocated mem as it's used
+  // as a dll
   std::string video_json;
   char* video_resource = NULL;
   json_t* body = NULL;
+  
   if(!video.video_resource_json.size()) {
     body = json_pack("{ s: {s:s}, s: { s:s, s:i, s:s, s:s } }",
                              "status", "privacyStatus", "private", 
@@ -87,6 +94,28 @@ bool YouTubeModel::addVideoToUploadQueue(YouTubeVideo video) {
   else {
     video_json = video.video_resource_json;
   }
+#else
+  std::string video_json;
+
+  if(!video.video_resource_json.size()) {
+    std::stringstream ss;
+
+    ss << "{ \"status\": { \"privacyStatus\" : \"private\" }, "
+       <<   "\"snippet\": {"
+       <<       "\"title\":\"" << video.title << "\", "
+       <<       "\"tags\":\"" << video.tags << "\", "
+       <<       "\"categoryId\":" << video.category << ", "
+       <<       "\"description\":\"" << video.description << "\""
+       <<    "}"
+       << "}";
+
+    video_json = ss.str();
+  }
+  else {
+    video_json = video.video_resource_json;
+  }
+
+#endif
 
   bool r = db.insert("videos")
     .use("filename", video.filename)
@@ -101,10 +130,12 @@ bool YouTubeModel::addVideoToUploadQueue(YouTubeVideo video) {
     .use("category", video.category)
     .execute();
 
+#if USE_JSON_PACK
   if(video_resource) {
     free(video_resource);  
     video_resource = NULL;
   }
+#endif
 
   return r;
 }

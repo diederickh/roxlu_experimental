@@ -127,7 +127,7 @@ inline std::string rx_strftime(const char* timestr) {
 }
 
 inline std::string rx_get_date_time_string() { 
-  return rx_strftime("%Y.%d.%m.%H.%M.%S");
+  return rx_strftime("%Y.%m.%d.%H.%M.%S");
 };
 
 template<class T>
@@ -366,6 +366,35 @@ static std::string rx_get_file_contents(std::string filepath, bool datapath = fa
   return result;
 }
 
+static bool rx_put_file_contents(std::string filename, std::string data, bool datapath = false, bool isBinary = false) {
+
+  if(datapath) {
+    filename = rx_to_exe_path(filename);
+  }
+
+  std::ofstream ofs;
+  if(isBinary) {
+    ofs.open(filename.c_str(), std::ios::out | std::ios::binary);
+  }
+  else {
+    ofs.open(filename.c_str(), std::ios::out);
+  }
+
+  if(!ofs.is_open()) {
+    RX_ERROR("Cannot open file for output: %s", filename.c_str());
+    return false;
+  }
+
+  if(!ofs.write(data.c_str(), data.size())) {
+    RX_ERROR("Error while writing data to: %s", filename.c_str());
+    return false;
+  }
+
+  ofs.close();
+
+  return true;
+}
+
 static bool rx_file_exists(std::string filepath) {
 #if defined(_WIN32)
   char* lptr = (char*)filepath.c_str();
@@ -528,6 +557,22 @@ static bool rx_create_dir(std::string path) {
 #endif
 }
 
+// changes forward slashes (the standard used in roxlu lib), to backward on windows
+// e.g.: rx_norm_path("data/frames/2015/"), becomes: "data\frames\2015" on win, on unices it stays "data/frames/2015"
+static std::string rx_norm_path(std::string path) {
+#if defined(_WIN32)
+  std::string from = "/";
+  std::string to = "\\";
+  size_t start_pos = 0;
+  while((start_pos = path.find(from, start_pos)) != std::string::npos) {
+    path.replace(start_pos, from.length(), to);
+    start_pos += to.length();
+  }
+  return path;
+#else
+  return path;
+#endif
+}
 
 // e.g.: rx_create_path(/home/roxlu/data/images/2012/12/05/")
 static bool rx_create_path(std::string path) {
