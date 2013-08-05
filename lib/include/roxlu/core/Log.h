@@ -20,6 +20,8 @@
 
 #define RX_LOG_LEVEL_NONE 0 
 
+extern "C" {
+
 typedef void(*roxlu_log_callback)(int level, void* user, int line, const char* function, const char* fmt, va_list args);
 
 extern roxlu_log_callback roxlu_log_cb;
@@ -75,6 +77,6 @@ void rx_error(int line, const char* function, const char* fmt, ...);
 #if !defined(RX_ERROR)
   #define RX_ERROR(fmt, ...) {}
 #endif
-
+} // extern C
 #endif // ROXLU_LOG_H
 
