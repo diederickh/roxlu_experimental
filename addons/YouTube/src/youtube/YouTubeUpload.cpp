@@ -24,6 +24,12 @@ int youtube_upload_progress_cb(void* ptr, double dltotal, double dlnow, double u
   return 0; 
 }
 
+size_t youtube_upload_write_cb(char* ptr, size_t size, size_t nmemb, void* user) {
+  size_t num_bytes = size * nmemb;
+  std::string str(ptr, num_bytes);
+  RX_VERBOSE("%s", str.c_str());
+  return num_bytes;
+}
 
 // -----------------------------------------------------------------------------------
 
@@ -145,6 +151,12 @@ bool YouTubeUpload::upload(YouTubeVideo video, std::string accessToken,
   res = curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)fsize);
   YT_CURL_ERR(res);
 
+  res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, youtube_upload_write_cb);
+  YT_CURL_ERR(res);
+
+  res = curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+  YT_CURL_ERR(res);
+
   if(cb_progress) {
     res = curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, youtube_upload_progress_cb);
     YT_CURL_ERR(res);
@@ -176,7 +188,6 @@ bool YouTubeUpload::upload(YouTubeVideo video, std::string accessToken,
   res = curl_easy_perform(curl);
   YT_CURL_ERR(res);
 
-<<<<<<< HEAD
   // check result
   res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
   YT_CURL_ERR(res);
@@ -185,8 +196,6 @@ bool YouTubeUpload::upload(YouTubeVideo video, std::string accessToken,
     goto error;
   }
 
-=======
->>>>>>> 3d09b5a5ad9de3062c2453c3336ba8392b5103f2
   // ready callback
   if(cb_ready) {
     cb_ready(video, cb_user);
