@@ -50,6 +50,7 @@ bool YouTubeRefreshToken::refresh(std::string clientID, std::string clientSecret
     return false;
   }
 
+
   // add options
   res = curl_easy_setopt(curl, CURLOPT_URL, "https://accounts.google.com/o/oauth2/token");
   YT_CURL_ERR(res);

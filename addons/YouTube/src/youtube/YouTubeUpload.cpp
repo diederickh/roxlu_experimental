@@ -44,7 +44,8 @@ bool YouTubeUpload::upload(YouTubeVideo video, std::string accessToken,
   YouTubeUploadStatus upload_status;
   CURLcode res;
   struct curl_slist* headers = NULL;
-  size_t fsize;
+  size_t fsize = 0;
+  long http_code = 0;
 
   cb_progress = progressCB;
   cb_user = user;
@@ -168,6 +169,22 @@ bool YouTubeUpload::upload(YouTubeVideo video, std::string accessToken,
   res = curl_easy_perform(curl);
   YT_CURL_ERR(res);
 
+<<<<<<< HEAD
+=======
+  // check result
+  res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+  YT_CURL_ERR(res);
+  if(http_code != 200) {
+    RX_ERROR("Could not upload video; got a http status of: %ld", http_code);
+    goto error;
+  }
+
+  // ready callback
+  if(cb_ready) {
+    cb_ready(video, cb_user);
+  }
+
+>>>>>>> 7f4071b... Handling more response codes from the YouTube API
   curl_easy_cleanup(curl);
   fclose(fp);
   curl_slist_free_all(headers);

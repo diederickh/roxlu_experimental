@@ -46,6 +46,7 @@ bool YouTubeExchangeKey::exchange(std::string code, std::string clientID, std::s
   CURLcode res;
   struct curl_httppost* form_post = NULL;
   struct curl_httppost* last_ptr = NULL;
+  long http_code = 0;
 
   if(curl) {
     RX_ERROR("Already exchanging a key...");
@@ -82,6 +83,9 @@ bool YouTubeExchangeKey::exchange(std::string code, std::string clientID, std::s
   res = curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);                                      
   YT_CURL_ERR(res);
 
+  RX_VERBOSE("CODE: %s", code.c_str());
+  RX_VERBOSE("CLIENT_ID: %s", clientID.c_str());
+  RX_VERBOSE("CLIENT_SECRET: %s", clientSecret.c_str());
   // form 
   // @todo error check
   curl_formadd(&form_post, &last_ptr, CURLFORM_COPYNAME, "code", CURLFORM_COPYCONTENTS, code.c_str(), CURLFORM_END);
@@ -96,6 +100,20 @@ bool YouTubeExchangeKey::exchange(std::string code, std::string clientID, std::s
   // request
   res = curl_easy_perform(curl);
   YT_CURL_ERR(res);
+
+  // check result
+  res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+  YT_CURL_ERR(res);
+  if(http_code != 200) {
+    RX_ERROR("HTTP result was not successfull while trying to exchange the auth key, got: %ld", http_code);
+    if(http_code == 400) {
+      RX_ERROR("This means that the authorization key you provided is not valid anymore; renew it using the youtube/html/index.html, see addon documentation");
+    }
+    else if(http_code == 401) {
+      RX_ERROR("The given authorization key has expired. Open the youtube/html/index.html, and get a new one. Remove the database too;");
+    }
+    goto error;
+  }
 
   // cleanup
   curl_easy_cleanup(curl);
