@@ -170,7 +170,10 @@ bool YouTubeUpload::upload(YouTubeVideo video, std::string accessToken,
   YT_CURL_ERR(res);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 7f4071b... Handling more response codes from the YouTube API
   // check result
   res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
   YT_CURL_ERR(res);
