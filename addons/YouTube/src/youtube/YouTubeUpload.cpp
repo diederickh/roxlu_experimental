@@ -169,11 +169,6 @@ bool YouTubeUpload::upload(YouTubeVideo video, std::string accessToken,
   res = curl_easy_perform(curl);
   YT_CURL_ERR(res);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 7f4071b... Handling more response codes from the YouTube API
   // check result
   res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
   YT_CURL_ERR(res);
@@ -187,7 +182,6 @@ bool YouTubeUpload::upload(YouTubeVideo video, std::string accessToken,
     cb_ready(video, cb_user);
   }
 
->>>>>>> 7f4071b... Handling more response codes from the YouTube API
   curl_easy_cleanup(curl);
   fclose(fp);
   curl_slist_free_all(headers);
