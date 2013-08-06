@@ -3,19 +3,22 @@
  // #if defined(_WIN32)
  // #include <windows.h>
  // #endif
-#if defined(_WIN32)
-#  define XMD_H
-#  include <jpeglib.h>
-#  undef XMD_H
-#else 
-#  include <jpeglib.h>
-#endif
+
 #include <image/JPG.h>
 #include <roxlu/core/Log.h>
 #include <roxlu/core/Utils.h>        
 
 JPG::JPG() 
   :pixels(NULL)
+  ,width(0)
+  ,height(0)
+  ,stride(0)
+  ,bit_depth(0)
+  ,num_channels(0)
+  ,color_space(JCS_UNKNOWN)
+  ,dct_method(JDCT_DEFAULT) 
+  ,dither_mode(JDITHER_NONE)
+  ,quality(80)
 {
   clear();
 }
@@ -44,6 +47,10 @@ JPG& JPG::clone(const JPG& other) {
   height = other.height;
   bit_depth = other.bit_depth;
   num_channels = other.num_channels;
+
+  color_space = other.color_space;
+  dct_method = other.dct_method;
+  dither_mode = other.dither_mode;
   
   return *this;
 }
@@ -164,6 +171,128 @@ bool JPG::load(unsigned char* compressed, size_t nbytes) {
   return true;
 }
 
+bool JPG::setPixels(unsigned char* pix, int w, int h, J_COLOR_SPACE type) {
+
+  if(!pix) {
+    RX_ERROR("Invalid pixels given");
+    return false;
+  }
+
+  if(!w) {
+    RX_ERROR("Invalid width given");
+    return false;
+  }
+
+  if(!h) {
+    RX_ERROR("invalid height given");
+    return false;
+  }
+
+  if(pixels) {
+    delete[] pixels;
+    pixels = NULL;
+  }
+
+  color_space = type;
+  width = w;
+  height = h;
+  
+  switch(color_space) {
+    case JCS_RGB: {
+      num_bytes = width * height * 3;
+      num_channels = 3;
+      stride = width * 3;
+      bit_depth = 8; 
+      break;
+    }
+    default: {
+      RX_ERROR("Unhandled color space: %d", type);
+      return false;
+    }
+  }
+
+  pixels = new unsigned char[num_bytes];
+  if(!pixels) {
+    RX_ERROR("Cannot allocate %ld bytes for the jpg", num_bytes);
+    return false;
+  }
+
+  memcpy((char*)pixels, (char*)pix, num_bytes);
+
+  return true;
+}
+
+bool JPG::save(std::string filename, bool datapath) {
+
+  if(!width || !height) {
+    RX_ERROR("Invalid width or height: %d x %d", width, height);
+    return false;
+  }
+  
+  if(!stride) {
+    RX_ERROR("Invalid stride: %d", stride);
+    return false;
+  }
+  
+  if(!pixels) {
+    RX_ERROR("No pixels set to save");
+    return false;
+  }
+
+  if(!bit_depth) {
+    RX_ERROR("Invalid bit_depth: %d", bit_depth);
+    return false;
+  }
+
+  if(datapath) {
+    filename = rx_to_data_path(filename);
+  }
+
+  FILE* fp = fopen(filename.c_str(), "wb");
+  if(!fp) {
+    RX_ERROR("Cannot open the file: `%s`", filename.c_str());
+    fp = NULL;
+    return false;
+  }
+
+  struct jpeg_compress_struct cinfo;
+  struct jpeg_error_mgr jerr;
+  JSAMPROW row_pointer[1];
+
+  cinfo.err = jpeg_std_error(&jerr);
+  jpeg_create_compress(&cinfo);
+  
+  jpeg_stdio_dest(&cinfo, fp);
+
+  // compression parameters
+  cinfo.image_width = width;
+  cinfo.image_height = height;
+  cinfo.input_components = num_channels;
+  cinfo.in_color_space = color_space;
+  
+  jpeg_set_defaults(&cinfo); // after setting the default we can set our custom settings
+  
+  // @todo > set compression level, dither, dct
+
+  jpeg_set_quality(&cinfo, quality, TRUE /* limit to jpeg baseline values */);
+
+  jpeg_start_compress(&cinfo, TRUE /* write complete data stream */); 
+
+  while(cinfo.next_scanline < cinfo.image_height) {
+    row_pointer[0] = &pixels[cinfo.next_scanline * stride];
+    jpeg_write_scanlines(&cinfo, row_pointer, 1);
+  }
+
+  jpeg_finish_compress(&cinfo);
+
+  fclose(fp);
+  fp = NULL;
+
+  jpeg_destroy_compress(&cinfo);
+    
+  return true;
+}
+
 void JPG::print() {
   RX_VERBOSE("JPG.width: %d", width);
   RX_VERBOSE("JPG.height: %d", height);
@@ -183,4 +312,9 @@ void JPG::clear() {
   height = 0;
   bit_depth = 0;
   num_channels = 0;
+
+  color_space = JCS_UNKNOWN;
+  dct_method = JDCT_DEFAULT;
+  dither_mode = JDITHER_NONE;
+    
 }

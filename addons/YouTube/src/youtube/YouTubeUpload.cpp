@@ -31,15 +31,21 @@ YouTubeUpload::YouTubeUpload()
   :curl(NULL)
   ,cb_progress(NULL)
   ,cb_user(NULL)
+  ,cb_ready(NULL)
 {
   curl_global_init(CURL_GLOBAL_DEFAULT);
 }
 
 YouTubeUpload::~YouTubeUpload() {
+  cb_progress = NULL;
+  cb_user = NULL;
+  cb_ready = NULL;
 }
 
 bool YouTubeUpload::upload(YouTubeVideo video, std::string accessToken, 
-                           youtube_upload_progress_callback progressCB, void* user) 
+                           youtube_upload_progress_callback progressCB, 
+                           youtube_upload_ready_callback readyCB,
+                           void* user) 
 {
   YouTubeUploadStatus upload_status;
   CURLcode res;
@@ -48,6 +54,7 @@ bool YouTubeUpload::upload(YouTubeVideo video, std::string accessToken,
   long http_code = 0;
 
   cb_progress = progressCB;
+  cb_ready = readyCB;
   cb_user = user;
 
   // validate
@@ -154,7 +161,7 @@ bool YouTubeUpload::upload(YouTubeVideo video, std::string accessToken,
 
   // when we have a partial upload; we need to add some more headers
   if(upload_status.isPartiallyUploaded()) {
-    RX_VERBOSE("ADDED PARTIAL UPLOAD HEADERS");
+    RX_VERBOSE("Added headers for partial upload");
     std::stringstream ss; 
     ss << "Content-Range: bytes " << upload_status.range_end + 1 << "-" << (video.bytes_total - 1) << "/" << video.bytes_total;
     std::string ss_str = ss.str();
@@ -169,6 +176,7 @@ bool YouTubeUpload::upload(YouTubeVideo video, std::string accessToken,
   res = curl_easy_perform(curl);
   YT_CURL_ERR(res);
 
+<<<<<<< HEAD
   // check result
   res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
   YT_CURL_ERR(res);
@@ -177,6 +185,8 @@ bool YouTubeUpload::upload(YouTubeVideo video, std::string accessToken,
     goto error;
   }
 
+=======
+>>>>>>> 3d09b5a5ad9de3062c2453c3336ba8392b5103f2
   // ready callback
   if(cb_ready) {
     cb_ready(video, cb_user);

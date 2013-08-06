@@ -90,7 +90,8 @@ Code Conventions
 ================
 - all saving and loading use load and save functions with a parameter to  
   load/save from the data path `load(std::string filepath, bool datapath = false)` and `save(std::string filepath, bool datapath = false)`
-
+- when you use paths, make sure to use forward slashes; with rx_norm_path(), you can convert from<>to forward
+  slashes to backward slashes win; we only convert when necessary 
 
 Tips & Tricks
 -------------
