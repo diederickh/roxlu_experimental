@@ -36,6 +36,7 @@
 #include <youtube/YouTubeTypes.h>
 
 void youtube_server_ipc_on_add_to_queue(std::string path, char* data, size_t nbytes, void* user);        /* gets called by `ServerIPC` when a client wants to add a new video to the upload queue */
+void youtube_server_ipc_on_upload_ready(YouTubeVideo video, void* user);                                 /* gets triggerd by the YouTube member when a video from the upload que has been uploaded */
 
 class YouTube;
 

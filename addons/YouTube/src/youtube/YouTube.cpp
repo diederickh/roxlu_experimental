@@ -6,12 +6,24 @@ int youtube_on_upload_progress(double ultotal, double ulnow, void* user) {
   ui->yt->model.setVideoBytesUploaded(ui->video_id, ulnow);
   
   if(ui->yt->cb_upload_progress) {
-    return ui->yt->cb_upload_progress(ultotal, ulnow, ui->yt->cb_user);
+    return ui->yt->cb_upload_progress(ultotal, ulnow, ui->yt->cb_upload_progress_user);
   }
   else {     
     RX_VERBOSE(">>> %f / %f (id = %d)", ulnow, ultotal, ui->video_id);
     return 0;
   }
+}
+
+void youtube_on_upload_ready(YouTubeVideo video, void* user) {
+  RX_VERBOSE("On upload ready cb.");
+
+  YouTubeUploadInfo* ui = static_cast<YouTubeUploadInfo*>(user);
+  YouTube* yt = ui->yt; 
+
+  if(yt->cb_upload_ready) {
+    yt->cb_upload_ready(video, yt->cb_upload_ready_user);
+  }
+
 }
 
 // ----------------------------------------------------------------------
@@ -21,13 +33,17 @@ YouTube::YouTube()
   ,upload_check_timeout(0)
   ,upload_check_delay(4) 
   ,cb_upload_progress(NULL)
-  ,cb_user(NULL)
+  ,cb_upload_progress_user(NULL)
+  ,cb_upload_ready(NULL)
+  ,cb_upload_ready_user(NULL)
 {
 }
 
 YouTube::~YouTube() {
-  cb_user = NULL;
   cb_upload_progress = NULL;
+  cb_upload_progress_user = NULL;
+  cb_upload_ready = NULL;
+  cb_upload_ready_user = NULL;
   is_setup = false;
   upload_check_timeout = 0;
   upload_check_delay = 0;
@@ -41,12 +57,14 @@ bool YouTube::setup(std::string clientID, std::string clientSecret) {
   return true;
 }
 
-void YouTube::setUploadProgressCallback(youtube_upload_progress_callback progressCB) {
+void YouTube::setUploadProgressCallback(youtube_upload_progress_callback progressCB, void* user) {
   cb_upload_progress = progressCB;
+  cb_upload_progress_user = user;
 }
 
-void YouTube::setCallbackData(void* user) {
-  cb_user = user;
+void YouTube::setUploadReadyCallback(youtube_upload_ready_callback readyCB, void* user) {
+  cb_upload_ready = readyCB;
+  cb_upload_ready_user = user;
 }
 
 bool YouTube::hasAccessToken() {
@@ -142,7 +160,6 @@ void YouTube::checkUploadQueue() {
           // @todo -> change the status to e.g. ERR_SET_UPLOAD_URL
         }
         else {
-          RX_VERBOSE("SET VIDEO STATE TO UPLOAD!");
           model.setVideoState(video.id, YT_VIDEO_STATE_UPLOAD);
         }
       }
@@ -159,7 +176,11 @@ void YouTube::checkUploadQueue() {
       RX_VERBOSE("Uploading a video with id: %ld, file: %s", video.id, video.filename.c_str());
       RX_VERBOSE("Start uploading a new video from the upload queue, with id: %ld.", video.id);
 
-      if(!upload.upload(video, model.getAccessToken(), youtube_on_upload_progress, upload_info)) {
+      bool r = upload.upload(video, model.getAccessToken(), 
+                             youtube_on_upload_progress, 
+                             youtube_on_upload_ready,
+                             upload_info);
+      if(!r) {
         RX_ERROR("Something went wrong while trying to upload the video, with id: %d", video.id);
         // @todo -> change status so we will retry 
       }

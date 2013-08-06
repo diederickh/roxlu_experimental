@@ -16,11 +16,19 @@ void youtube_server_ipc_on_add_to_queue(std::string path, char* data, size_t nby
   ipc->youtube.addVideoToUploadQueue(video);
 }
 
+void youtube_server_ipc_on_upload_ready(YouTubeVideo video, void* user) {
+  YouTubeServerIPC* ipc = static_cast<YouTubeServerIPC*>(user);
+  Buffer buf;
+  video.pack(buf);
+  ipc->server.call("/uploaded", buf.ptr(), buf.size());
+}
+
 YouTubeServerIPC::YouTubeServerIPC(YouTube& youtube, std::string sockfile, bool datapath) 
   :server(sockfile, datapath)
   ,youtube(youtube)
 {
   server.addMethod("/add_to_queue", youtube_server_ipc_on_add_to_queue, this);
+  youtube.setUploadReadyCallback(youtube_server_ipc_on_upload_ready, this);
 }
 
 YouTubeServerIPC::~YouTubeServerIPC() {
@@ -37,3 +45,4 @@ bool YouTubeServerIPC::stop() {
 void YouTubeServerIPC::update() {
   server.update();
 }
+
