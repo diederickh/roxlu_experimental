@@ -30,15 +30,25 @@ size_t youtube_upload_start_header_cb(void* ptr, size_t size, size_t nmemb, void
   return nbytes;
 }
 
+size_t youtube_upload_start_write_cb(char* ptr, size_t size, size_t nmemb, void* user) {
+  YouTubeUploadStart* ys = static_cast<YouTubeUploadStart*>(user);
+  size_t nbytes = size * nmemb;
+  std::copy(ptr, ptr+size, std::back_inserter(ys->http_body));
+  return nbytes;
+}
+
 // -----------------------------------------------------------------------------------
 
 YouTubeUploadStart::YouTubeUploadStart() 
   :curl(NULL)
+  ,http_code(0)
 {
 }
 
 YouTubeUploadStart::~YouTubeUploadStart() {
   curl = NULL;
+  http_code = 0;
+  http_body.clear();
 }
 
 bool YouTubeUploadStart::start(YouTubeVideo video, std::string accessToken) {
@@ -47,7 +57,8 @@ bool YouTubeUploadStart::start(YouTubeVideo video, std::string accessToken) {
   std::string length_header;
   std::string auth_header;
   std::stringstream ss_length;
-  long http_code = 0;
+  http_code = 0;
+  http_body.clear();
 
   if(!video.bytes_total) {
     RX_ERROR("The bytes_total of the given video is invalid");
@@ -94,6 +105,12 @@ bool YouTubeUploadStart::start(YouTubeVideo video, std::string accessToken) {
   res = curl_easy_setopt(curl, CURLOPT_WRITEHEADER, this);
   YT_CURL_ERR(res);
 
+  res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, youtube_upload_start_write_cb);
+  YT_CURL_ERR(res);
+
+  res = curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+  YT_CURL_ERR(res);
+
   // add headers
   ss_length << "x-upload-content-length: " << video.bytes_total;
   length_header = ss_length.str();
@@ -114,6 +131,12 @@ bool YouTubeUploadStart::start(YouTubeVideo video, std::string accessToken) {
   // check result status
   res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
   YT_CURL_ERR(res);
+
+  // the start task shouldn't receive an body when everything is fine.
+  if(http_body.size()) {
+    parse();
+  }
+
   if(http_code != 200) {
     RX_ERROR("Invalid http status: %ld", http_code);
     goto error;
@@ -136,4 +159,34 @@ bool YouTubeUploadStart::start(YouTubeVideo video, std::string accessToken) {
     headers = NULL;
   }
   return false;
+}
+
+
+bool YouTubeUploadStart::parse() {
+
+  if(!http_body.size()) {
+    RX_ERROR("The received response is empty; cannot parse result of upload start action");
+    return false;
+  }
+  
+  if(http_code == 0) {
+    RX_ERROR("We can only start parsing the http result when we got a valid http status code. make sure that you called start() before trying to parse the result");
+    return false;
+  }
+  else if(http_code == 200) {
+    RX_VERBOSE("Need to parse/handle 200 in upload start");
+  }
+  else if(http_code >= 400) {
+    std::vector<YouTubeError> errors;
+    if(!youtube_parse_errors(http_body, errors)) {
+      RX_ERROR("Cannot parse the error json in the upload start");
+      return false;
+    }
+
+    for(std::vector<YouTubeError>::iterator it = errors.begin(); it != errors.end(); ++it) {
+      (*it).print();
+    }
+  }
+  
+  return true;
 }

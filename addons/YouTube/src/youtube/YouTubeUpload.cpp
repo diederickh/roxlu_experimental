@@ -3,6 +3,7 @@
 #include <roxlu/core/Log.h>
 #include <roxlu/core/Utils.h>
 
+
 size_t youtube_upload_read_cb(void* ptr, size_t size, size_t nmemb, void* user) {
   YouTubeUpload* up = static_cast<YouTubeUpload*>(user);
   size_t retcode;
@@ -25,9 +26,13 @@ int youtube_upload_progress_cb(void* ptr, double dltotal, double dlnow, double u
 }
 
 size_t youtube_upload_write_cb(char* ptr, size_t size, size_t nmemb, void* user) {
+  YouTubeUpload* up = static_cast<YouTubeUpload*>(user);
   size_t num_bytes = size * nmemb;
+  std::copy(ptr, ptr+num_bytes, std::back_inserter(up->http_body));
+
   std::string str(ptr, num_bytes);
   RX_VERBOSE("%s", str.c_str());
+  RX_VERBOSE("Body contains; %ld chars", up->http_body.size());
   return num_bytes;
 }
 
@@ -38,6 +43,7 @@ YouTubeUpload::YouTubeUpload()
   ,cb_progress(NULL)
   ,cb_user(NULL)
   ,cb_ready(NULL)
+  ,http_code(0)
 {
   curl_global_init(CURL_GLOBAL_DEFAULT);
 }
@@ -46,6 +52,9 @@ YouTubeUpload::~YouTubeUpload() {
   cb_progress = NULL;
   cb_user = NULL;
   cb_ready = NULL;
+  http_code = 0;
+  http_body = "";
+  errors.clear();
 }
 
 bool YouTubeUpload::upload(YouTubeVideo video, std::string accessToken, 
@@ -57,7 +66,8 @@ bool YouTubeUpload::upload(YouTubeVideo video, std::string accessToken,
   CURLcode res;
   struct curl_slist* headers = NULL;
   size_t fsize = 0;
-  long http_code = 0;
+  http_code = 0;
+  http_body = "";
 
   cb_progress = progressCB;
   cb_ready = readyCB;
@@ -178,7 +188,6 @@ bool YouTubeUpload::upload(YouTubeVideo video, std::string accessToken,
     ss << "Content-Range: bytes " << upload_status.range_end + 1 << "-" << (video.bytes_total - 1) << "/" << video.bytes_total;
     std::string ss_str = ss.str();
     headers = curl_slist_append(headers, ss_str.c_str());
-    
   }
 
   res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);                              
@@ -191,6 +200,11 @@ bool YouTubeUpload::upload(YouTubeVideo video, std::string accessToken,
   // check result
   res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
   YT_CURL_ERR(res);
+
+  if(!parse()) {
+    RX_ERROR("Cannot parse the response of the received json.");
+  }
+
   if(http_code != 200) {
     RX_ERROR("Could not upload video; got a http status of: %ld", http_code);
     goto error;
@@ -225,3 +239,33 @@ bool YouTubeUpload::upload(YouTubeVideo video, std::string accessToken,
   return false;
 }
 
+bool YouTubeUpload::parse() {
+
+  if(!http_body.size()) {
+    RX_ERROR("The body of the http response is empty.");
+    return false;
+  }
+
+  if(http_code == 0) {
+    RX_ERROR("Cannot parse the request, because we need the http_code; make sure to set it before calling parse()");
+    return false;
+  }
+
+  if(http_code == 200) {
+    
+  }
+  else if(http_code >= 400) {
+    std::vector<YouTubeError> errors;
+    if(!youtube_parse_errors(http_body, errors)) {
+      RX_ERROR("Cannot parse the error json in the upload start");
+      return false;
+    }
+
+    for(std::vector<YouTubeError>::iterator it = errors.begin(); it != errors.end(); ++it) {
+      (*it).print();
+    }
+
+  }
+
+  return true;
+}

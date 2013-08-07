@@ -18,6 +18,7 @@ roxlu_addon_begin("youtube")
   roxlu_addon_add_source_file(youtube/YouTubeRefreshToken.cpp)
   roxlu_addon_add_source_file(youtube/YouTubeExchangeKey.cpp)
   roxlu_addon_add_source_file(youtube/YouTubeTypes.cpp)
+  roxlu_addon_add_source_file(youtube/YouTubeParser.cpp)
 
   if(UNIX) 
     roxlu_add_extern_lib(libjansson.a)

@@ -101,6 +101,7 @@ void YouTube::checkAccessTokenTimeout() {
   uint64_t token_timeout = model.getTokenTimeout();
 
   if(now >= token_timeout) {
+    RX_VERBOSE("token has timed out");
     if(!refreshAccessToken()) {
       RX_ERROR("Error while trying to refresh the access token");
     }
@@ -180,9 +181,24 @@ void YouTube::checkUploadQueue() {
                              youtube_on_upload_progress, 
                              youtube_on_upload_ready,
                              upload_info);
+
+      // keep track of the number of times we tried to upload this video.
+      model.incrementNumberOfRetries(video.id);
+      
       if(!r) {
+
+        // Check if we should fall back after we reached the max number of retries.
+        int total_retries = model.getNumberOfRetries(video.id);
+        if(total_retries < 0) {
+          RX_ERROR("Error while trying to retrieve the total number of retries.");
+        }
+        else if(total_retries > YT_MAX_UPLOAD_RETRIES) {
+          RX_ERROR("Number of retries reached the limit; we're not trying anymore.");
+          model.setVideoState(video.id, YT_VIDEO_STATE_FAILED);
+        }
+
         RX_ERROR("Something went wrong while trying to upload the video, with id: %d", video.id);
-        // @todo -> change status so we will retry 
+
       }
       else {
         model.setVideoState(video.id, YT_VIDEO_STATE_READY);
@@ -199,7 +215,7 @@ void YouTube::print() {
   RX_VERBOSE("-----------------------------------------------");
   RX_VERBOSE("refresh_token: %s", model.getRefreshToken().c_str());
   RX_VERBOSE("access_token: %s", model.getAccessToken().c_str());
-  RX_VERBOSE("token_timeout: %ld, ttl: %ld", model.getTokenTimeout(), ttl);
+  RX_VERBOSE("token_timeout: %lld, ttl: %lld", model.getTokenTimeout(), ttl);
   RX_VERBOSE("is_setup: %c", (is_setup) ? 'Y' : 'N');
   RX_VERBOSE("-----------------------------------------------");
 }

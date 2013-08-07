@@ -14,8 +14,12 @@
 #include <youtube/YouTubeModel.h>
 #include <youtube/YouTubeTypes.h>
 #include <youtube/YouTubeUploadStatus.h>
+#include <youtube/YouTubeParser.h>
 #include <curl/curl.h>
 #include <string>
+#include <vector>
+#include <algorithm>
+#include <iterator>
   
 size_t youtube_upload_write_cb(char* ptr, size_t size, size_t nmemb, void* user);
 size_t youtube_upload_read_cb(void* ptr, size_t size, size_t nmemb, void* stream);
@@ -32,12 +36,32 @@ class YouTubeUpload {
               youtube_upload_progress_callback progressCB, 
               youtube_upload_ready_callback readyCB,
               void* user);
+  long long getHTTPCode();                                                    /* returns the HTTP status code; is used to e.g. handle 4xx errors */
+  std::vector<YouTubeError> getErrors();                                      /* returns the errors when they are found in the json response */
+  YouTubeVideo getUploadedVideo();                                            /* returns the video object where all yt_* fields are set that describe the video on youtube (like id, etag, etc..); */
+ private:
+  bool parse();
  public:
   CURL* curl;
   FILE* fp;
   void* cb_user;
   youtube_upload_progress_callback cb_progress;                               /* gets called repeadetly during upload */
   youtube_upload_ready_callback cb_ready;                                     /* gets called when the upload is ready */
+  long long http_code;
+  std::string http_body;                                                      /* the received json that we parse in parse() */
+  std::vector<YouTubeError> errors;                                           /* parse() will fill this vector with errors when they are found in the response */
+  YouTubeVideo uploaded_video;                                                /* after a successfull upload we parse the received json and store the parsed information is this member, use getUploadedVideo() to access this member. */
 };
 
+inline long long YouTubeUpload::getHTTPCode() {
+  return http_code;
+}
+
+inline std::vector<YouTubeError> YouTubeUpload::getErrors() {
+  return errors;
+}
+
+inline YouTubeVideo YouTubeUpload::getUploadedVideo() {
+  return uploaded_video;
+}
 #endif

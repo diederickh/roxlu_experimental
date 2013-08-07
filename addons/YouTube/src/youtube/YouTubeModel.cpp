@@ -4,6 +4,9 @@
 #include <jansson.h>
 #include <sstream>
 
+/*
+alter table videos add column retries INTEGER DEFAULT 0
+ */
 
 // ----------------------------------------------------------------------------------
 
@@ -28,6 +31,7 @@ YouTubeModel::YouTubeModel() {
              "    datapath INTEGER DEFAULT 0,"               // is the filename relative to the datapase of the runtime, 0 = no, 1 = yes
              "    video_resource_json TEXT,"                 // the json that we post as body when uploading 
              "    category INTEGER DEFAULT 22,"              // the category for the video on youtube
+             "    retries INTEGER DEFAULT 0,"                // number of times we retried to upload the video after receiving an upload error
              "    upload_url TEXT )").execute(qr);
     qr.finish();
   }
@@ -137,6 +141,13 @@ bool YouTubeModel::addVideoToUploadQueue(YouTubeVideo video) {
   }
 #endif
 
+  if(r) {
+    RX_VERBOSE("Added video to the queue: %s", video.filename.c_str());
+  }
+  else {
+    RX_ERROR("Error while trying to add: %s to the video upload queue", video.filename.c_str());
+  }
+
   return r;
 }
 void YouTubeModel::setRefreshToken(std::string rtoken) {
@@ -192,6 +203,34 @@ bool YouTubeModel::incrementVideoBytesUploaded(int id, size_t nbytes) {
   QueryResult qr(db);
   db.query(ss.str()).execute(qr);
   return qr.finish();
+}
+
+int YouTubeModel::getNumberOfRetries(int id) {
+  QueryResult qr(db);
+  bool r = db.select("retries").from("videos").where("id", id).execute(qr);
+  if(!r) {
+    RX_ERROR("Cannot retrieve the number of retries for video: %d", id);
+    return -1;
+  }
+  qr.next();
+  return qr.getInt(0);
+}
+
+bool YouTubeModel::incrementNumberOfRetries(int id) {
+
+  std::stringstream ss;
+  ss << "update videos set retries = retries + 1 where id = \"" << id << "\"";
+  std::string sql = ss.str();
+
+  QueryResult qr(db);
+  db.query(sql).execute(qr);
+
+  if(!qr.finish()) {
+    RX_ERROR("Incrementing the number of retries for video: %d failed", id);
+    return false;
+  }
+
+  return true;
 }
 
 YouTubeVideo YouTubeModel::getVideo(int id) {

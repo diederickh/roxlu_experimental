@@ -11,6 +11,7 @@
 #define YT_VIDEO_STATE_NONE 0
 #define YT_VIDEO_STATE_UPLOAD 1
 #define YT_VIDEO_STATE_READY 2
+#define YT_VIDEO_STATE_FAILED 99   /* we set the state to FAILED when the number of retries for a video reaches YT_MAX_UPLOAD_RETRIES */
 
 using namespace roxlu;
 
@@ -24,12 +25,14 @@ class YouTubeModel {
   bool setVideoUploadURL(int id, std::string url);                                /* set the video upload url for a resumable upload */
   bool setVideoBytesUploaded(int id, size_t nbytes);                              /* update the number of bytes that have been uploaded for the video */
   bool incrementVideoBytesUploaded(int id, size_t nbytes);                        /* increment the number of bytes which have been uploaded so far */
+  bool incrementNumberOfRetries(int id);                                          /* increment the number of times we tried to upload the video by one */
   YouTubeVideo getVideo(int id);                                                  /* get a video from the upload queue */
   void setRefreshToken(std::string rtoken);                                       /* stores the given refresh token (must be reloadable, when application restarts) */
   void setAccessToken(std::string atoken, uint64_t timeout);                      /* stores the given access token + timout (must be reloadable, when application restarts) */
   std::string getRefreshToken();                                                  /* returns the last stored refresh token */
   std::string getAccessToken();                                                   /* returns the last stored access token */
   uint64_t getTokenTimeout();                                                     /* returns the last stored token timeout, which indicates when we need to refresh the tokenn */
+  int getNumberOfRetries(int id);                                                 /* get the number of times we retried to upload the video for the given id, when the result is < 0 it mean we encountered a problem when querying. */
  private:
   Database db;                                                                    /* we use SQLite to store the state and video upload queue */
 };
