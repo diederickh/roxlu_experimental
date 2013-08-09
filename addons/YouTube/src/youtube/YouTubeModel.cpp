@@ -30,7 +30,7 @@ YouTubeModel::YouTubeModel() {
              "    state INTEGER DEFAULT 0,"                  // used to upload only videos which haven't been uploaded yet
              "    datapath INTEGER DEFAULT 0,"               // is the filename relative to the datapase of the runtime, 0 = no, 1 = yes
              "    video_resource_json TEXT,"                 // the json that we post as body when uploading 
-             "    category INTEGER DEFAULT 22,"              // the category for the video on youtube
+             "    category INTEGER DEFAULT 2,"              // the category for the video on youtube
              "    retries INTEGER DEFAULT 0,"                // number of times we retried to upload the video after receiving an upload error
              "    upload_url TEXT )").execute(qr);
     qr.finish();

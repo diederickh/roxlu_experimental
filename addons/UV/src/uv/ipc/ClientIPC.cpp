@@ -5,14 +5,16 @@ void client_ipc_on_connect(uv_connect_t* req, int status) {
 
   if(status < 0) {
     RX_ERROR("Something went wrong when trying to connect to ipc server: %s", uv_strerror(status));
-    ipc->state = CIPS_ST_RECONNECTING;;
+    //ipc->state = CIPS_ST_RECONNECTING;;
+    ipc->reconnect();
     return;
   }
 
   int r = uv_read_start((uv_stream_t*)&ipc->pipe, client_ipc_on_alloc, client_ipc_on_read);
   if(r < 0) {
     RX_ERROR("Cannot start reading: %s", uv_strerror(r));
-    ipc->state = CIPS_ST_RECONNECTING;
+    //ipc->state = CIPS_ST_RECONNECTING;
+    ipc->reconnect();
     return;
   }
 
@@ -107,6 +109,7 @@ ClientIPC::ClientIPC(std::string sockfile, bool datapath)
   ,cb_user(NULL)
   ,reconnect_delay(5000)
   ,state(CIPS_ST_NONE)
+  ,reconnect_timeout(0)
 {
 
   loop = uv_loop_new();
@@ -145,10 +148,14 @@ bool ClientIPC::setup(client_ipc_on_connected_cb conCB,
 
 bool ClientIPC::connect() {
 
+#if 0
+  // We don't need to check if the file exist, uv_pipe_connect() will give an error
+  // @todo we should remove this after a while 
   if(!rx_file_exists(sockpath)) {
     RX_ERROR("Cannot connect through ipc; the pipe is not found: `%s`", sockpath.c_str());
     return false;
   }
+#endif
 
   if(sockpath.size() >= 127) {
     RX_ERROR("Unix socket paths should have a length < 127");
@@ -171,6 +178,7 @@ bool ClientIPC::connect() {
 void ClientIPC::update() {
   if(state == CIPS_ST_RECONNECTING) {
     uint64_t now = uv_hrtime() / 1000000;
+    //RX_VERBOSE("NOW: %lld, TIMEOUT: %lld", reconnect_timeout);
     if(reconnect_timeout <= now) {
       RX_VERBOSE("Reconnecting");
       reconnect_timeout = now + reconnect_delay;
@@ -198,7 +206,7 @@ bool ClientIPC::reconnect() {
 void ClientIPC::write(char* data, size_t nbytes) {
 
   if(!uv_is_writable((uv_stream_t*)&pipe)) {
-    RX_ERROR("Cannot write to server IPC; probably you didn't connect to a service yet.");
+    RX_ERROR("Cannot write to server IPC; probably you didn't connect to a service yet, current state: %d", state);
     return;
   }
 
