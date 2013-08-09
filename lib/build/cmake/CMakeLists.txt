@@ -128,15 +128,35 @@ macro(roxlu_add_lib lib)
   list(APPEND roxlu_libs ${lib})
 endmacro(roxlu_add_lib)
 
+# add a dylib which is found in the extern directory 
 macro(roxlu_add_extern_dylib lib)
   list(APPEND roxlu_dylibs ${roxlu_extern_dylib_dir}/${lib})
   list(APPEND roxlu_install_files ${roxlu_extern_dylib_dir}/${lib})
+endmacro()
+
+# add a specific dylib, lib is a full path to this dylib (this will be installed too)
+macro(roxlu_add_dylib lib)
+  list(APPEND roxlu_dylibs ${lib})
+  list(APPEND roxlu_install_files ${lib})
+endmacro()
+
+# install_name_tool change [old_path] @executable_path/${lib} yourapp
+macro(roxlu_fix_dylib executable dylib)
+  list(APPEND roxlu_dylibs_to_fix_libs ${dylib})
+  list(APPEND roxlu_dylibs_to_fix_executables ${executable})
 endmacro()
 
 # add a framework from the extern/lib/mac/frameworks directory (when installing we set all the correct linker settings)
 macro(roxlu_add_extern_framework name)
   list(APPEND roxlu_frameworks ${name}) 
 endmacro()
+
+# pass a list of source files; make sure to wrap quotes around the list, roxlu_add_source_files("${myfiles}")
+macro(roxlu_add_source_files files)
+  foreach(entry ${files})
+    roxlu_add_source_file(${entry})
+  endforeach()
+endmacro(roxlu_add_source_files)
 
 macro(roxlu_add_source_file src_file)
   list(APPEND roxlu_source_files ${src_file})
@@ -220,6 +240,7 @@ macro(roxlu_install_app)
 
       add_executable(${roxlu_app_name} ${roxlu_source_files} ${roxlu_lib_source_files})
     endif()
+
 
     # EXPERIMENTAL: Copy frameworks from extern/lib/mac/frameworks, to the install dir and set the @executable paths
     # frameworks from the extern/lib/mac/frameworks dir
@@ -319,8 +340,45 @@ macro(roxlu_install_app)
 
   endif()
 
+
+
 endmacro(roxlu_install_app)
 
+
+# EXPERIMENTAL: Change the dylibs dirs to the @executable_path in the executable
+# you can use `roxlu_add_dylib(path_to_dylib)` to add a dylib file to your project
+# sometimes you want to store the dylibs in the same directory as your executable; 
+# but because of how the way dylibs work this isn't garantueed to work all the 
+# time. Therefore you can use `roxlu_fix_dylib(your_executable name_of_dylib_file)` to
+# change the dylib loader path to `@executable_path:name_of_dylib_file` so your 
+# app will search in the executable path for the dylib.
+
+# When you want to use this feature, make sure that you call roxlu_fix_dylibs() as
+# last thing in your cmake file.
+# This file contains an example of all this: https://gist.github.com/roxlu/ad84b72409416db16109
+macro(roxlu_fix_dylibs)
+
+    list(LENGTH roxlu_dylibs_to_fix_libs len1)
+    math(EXPR len2 "${len1} - 1")
+
+    foreach(dx range ${len2})
+      list(GET roxlu_dylibs_to_fix_libs ${dx} dylib_to_fix)
+      list(GET roxlu_dylibs_to_fix_executables ${dx} dylib_exec)
+
+
+       add_custom_command(TARGET ${roxlu_app_name} POST_BUILD
+         COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change ${dylib_to_fix} @executable_path/${dylib_to_fix} ${roxlu_app_install_dir}/${dylib_exec}
+         COMMENT "Changing install name"
+         )
+
+#       add_custom_target("DYLIB_FIXES_${dylib_to_fix}_${dylib_exec}" ALL
+#         COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change ${dylib_to_fix} @executable_path/${dylib_to_fix} ${roxlu_app_install_dir}/${dylib_exec}
+#         COMMENT "Changing install name"
+#         )
+
+    endforeach()
+
+endmacro()
 
 # --------------------------------------------------------------------------------
 # A D D O N 

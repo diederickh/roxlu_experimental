@@ -9,9 +9,11 @@
   
  */
 
+#if BMFONT_WITH_UV
 extern "C" {
 #include <uv.h>
 }
+#endif
 
 #ifndef ROXLU_BMFONT_RENDERER_H
 #define ROXLU_BMFONT_RENDERER_H
@@ -164,6 +166,7 @@ void BMFRenderer<T>::reset() {
 
 template<class T>
 void BMFRenderer<T>::setup(int windowW, int windowH, size_t pageSize, BMFShader* useShader) {
+
   page_size = pageSize;
   rx_ortho(0, windowW, windowH, 0.0, -500.0, 500.0, projection_matrix);
 
@@ -201,6 +204,7 @@ void BMFRenderer<T>::setup(int windowW, int windowH, size_t pageSize, BMFShader*
   }
 
   shader->setup(vbo, tex);
+
 }
 
 template<class T>
@@ -282,7 +286,9 @@ void BMFRenderer<T>::update() {
 
   size_t bytes_needed = vertices.size() * sizeof(T);
 
+#if BMFONT_WITH_UV
   uint64_t start = uv_hrtime();
+#endif
 
   if(bytes_needed > bytes_allocated) {
     while(bytes_allocated < bytes_needed) {
@@ -290,17 +296,16 @@ void BMFRenderer<T>::update() {
     }
     glBufferData(GL_ARRAY_BUFFER, bytes_allocated, NULL, GL_STREAM_DRAW);
     glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_needed, vertices[0].getPtr());
-    RX_ERROR("UPLOADED - allocated: %ld", bytes_allocated );
   }
   else if(vertices.size() != prev_num_vertices) {
     size_t new_bytes = (vertices.size() - prev_num_vertices) * sizeof(T);
     size_t prev_offset = prev_num_vertices * sizeof(T);
     glBufferSubData(GL_ARRAY_BUFFER, prev_offset, new_bytes, vertices[prev_num_vertices].getPtr());
-    //RX_ERROR("UPLOADED!");
+    //RX_ERROR("UPLOADED!, prev_num_vertices: %ld, %ld, %ld", prev_num_vertices, prev_offset, new_bytes);
   }
 
   if(must_replace) {
-    //RX_ERROR("MUST REPLACE!: %ld", to_be_replaced.size());
+    RX_ERROR("MUST REPLACE!: %ld", to_be_replaced.size());
     for(std::vector<size_t>::iterator it = to_be_replaced.begin(); it != to_be_replaced.end(); ++it) {
       size_t dx = *it;
       size_t start = multi_firsts[dx];
@@ -311,7 +316,7 @@ void BMFRenderer<T>::update() {
     
   }
   //glBufferSubData(GL_ARRAY_BUFFER, 0, bytes_needed, vertices[0].getPtr());
-#if 0
+#if BMFONT_WITH_UV
   uint64_t d = uv_hrtime() - start;
   uint64_t md = d / 1000000;
   std::stringstream ss;
@@ -332,10 +337,12 @@ inline bool BMFRenderer<T>::bind() {
     RX_ERROR(BMF_ERR_NOT_SETUP);
     return false;
   }
+
   if(!bytes_allocated) { 
     RX_ERROR(BMF_ERR_BIND_NOT_ALLOCATED);
     return false;
   }
+
   if(!vertices.size()) {
     RX_ERROR(BMF_ERR_BIND_SIZE);
     return false;

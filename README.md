@@ -110,6 +110,32 @@ inline GLuint rx_create_shader(const char* vs, const char* fs)
 Creates a shader with given vertex and fragment sources. You need
 to call `glLinkPogram(prog)`;
 
+
+## Compiling multiple (customer) targets
+
+If you want to add some e.g. tests you can add the following to your
+application cmake files. Note that we use the ${roxlu_lib_source_files}
+and link with ${roxlu_libs}
+
+````cmake
+
+# Add some tests
+# ---------------------------------------------------
+set(sd ${CMAKE_CURRENT_LIST_DIR}/../../src/tests/)
+set(bd ${CMAKE_CURRENT_LIST_DIR}/../../src/)
+
+set(video_encoder_sources 
+  ${bd}videoencoder/src/VideoEncoder.cpp
+  ${bd}videoencoder/src/VideoEncoderTypes.cpp
+  ${bd}videoencoder/src/VideoEncoderServerIPC.cpp
+  ${bd}videoencoder/src/VideoEncoderClientIPC.cpp
+  ${bd}videoencoder/src/VideoEncoderService.cpp
+)
+
+add_executable(test_client ${sd}/test_client.cpp ${video_encoder_sources} ${roxlu_lib_source_files})
+target_link_libraries(test_client ${roxlu_libs})
+````
+
 TODO
 ----
 - [ ] Remove all unused #defines and use compiler preprocessor flag if possible:

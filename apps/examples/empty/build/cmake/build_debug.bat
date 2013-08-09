@@ -11,8 +11,8 @@ if not exist "%d%\..\..\bin\data" (
 )
 
 cd %d%\build.debug
-cmake -DCMAKE_BUILD_TYPE=Debug -G "Visual Studio 10" ..\
-cmake --build . --target install -- /p:Configuration=Debug
+cmake -DCMAKE_BUILD_TYPE=Debug ..
+cmake --build . --target install --config Debug
 
 :: -- /p:Configuration=Release /v:q
 :: %d%\bin\011_windows.exe

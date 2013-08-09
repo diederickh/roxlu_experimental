@@ -105,6 +105,8 @@ class BMFShader {
   static GLint u_model_matrix;
   static GLint u_tex;
   static GLint u_alpha;
+  static GLuint u_vert_shader;
+  static GLuint u_frag_shader;
   GLuint vao;
   GLuint tex;
 };
@@ -122,7 +124,13 @@ inline void BMFShader::setAlpha(float a) {
 }
 
 inline void BMFShader::bind() {
+
+#if defined(ROXLU_GL_CORE3)
   glBindVertexArray(vao);
+#else  
+  glBindVertexArrayAPPLE(vao);
+#endif
+
   glUseProgram(prog);
 
   glActiveTexture(GL_TEXTURE0);

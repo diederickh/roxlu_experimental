@@ -8,15 +8,14 @@ class Simulation : public SimulationBase {
   void setup();
   void update();
   void draw();
-  void onMouseDown(int x, int y, int buton);
-  void onMouseUp(int x, int y, int button);
-  void onMouseDrag(int x, int y, int dx, int dy, int button);
-  void onMouseMove(int x, int y);
-  void onChar(int ch); 
-  void onKeyDown(int key);
-  void onKeyUp(int key);
+  void onMouseDown(double x, double y, int buton, int mods);
+  void onMouseUp(double x, double y, int button, int mods);
+  void onMouseDrag(double x, double y, double dx, double dy, int button);
+  void onMouseMove(double x, double y);
+  void onChar(unsigned int ch); 
+  void onKeyDown(int key, int scancode, int mods);
+  void onKeyUp(int key, int scancode, int mods);
   void onWindowClose();
  public:
-  FPS fps;
   BMFFont<> font;
 };

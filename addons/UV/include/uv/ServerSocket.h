@@ -62,8 +62,8 @@ struct ServerConnection {                                     /* represents a cl
   std::vector<char> buffer;
 };
 
-  class ServerSocket {                                         /* the server socket, which manages tcp connections */
- public:
+class ServerSocket {                                         /* the server socket, which manages tcp connections */
+  public:
   ServerSocket(int port);                                      /* create a server which listens on the given port; for simplicity we start listening on all eth-devices */
   ~ServerSocket();                                             /* d'tor; cleans up all memory; closes clients */
 

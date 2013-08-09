@@ -8,6 +8,31 @@ we use the `BMFVertex` which has a couple of standard attributes like `color`, `
 and `texcoord`. 
 
 
+BMFont Settings
+---------------
+Getting to know BMFont to get high quality bitmap fonts which appeal to you might take
+some time. These are some hints which suits my need (I'll add some more settings in the
+future).
+
+In general:
+- Enabling [x] ClearType, results in smooth, thin readable characters
+- Supersampling, makes the font smooth but also kindof smudgy/blurry.
+
+_Nice share text_
+![](http://farm8.staticflickr.com/7321/9476045298_4b7db071ba_o.png)
+
+````
+Size px: 14               [x] Match char height
+Height: 100%
+[ ] Output invalid char glyph
+[ ] Do not include kerning pairs
+
+[ ] Render from TrueType outline
+[.] TrueType Hinting (disabled)
+[x] Font smoothing        [x] Clear type
+[ ] SuperSampling         level [..] (disabled)
+````
+
 BMFShader
 ---------
 
@@ -61,3 +86,5 @@ Using BMFont with XCode
 - Source files
   - `addons/BMFont/include/bmfont/*.h`
   - `addons/BMFont/src/bmfont/*.cpp`
+
+
