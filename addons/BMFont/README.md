@@ -18,8 +18,10 @@ In general:
 - Enabling [x] ClearType, results in smooth, thin readable characters
 - Supersampling, makes the font smooth but also kindof smudgy/blurry.
 
-_Nice share text_
+_Nice sharp text_
+
 ![](http://farm8.staticflickr.com/7321/9476045298_4b7db071ba_o.png)
+
 
 ````
 Size px: 14               [x] Match char height
