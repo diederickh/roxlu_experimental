@@ -90,3 +90,7 @@ Using BMFont with XCode
   - `addons/BMFont/src/bmfont/*.cpp`
 
 
+TODO
+-----
+- The projection matrix is uploaded every draw; we could simple set it once and then reuse it.
+

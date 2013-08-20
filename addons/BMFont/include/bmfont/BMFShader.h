@@ -134,7 +134,11 @@ inline void BMFShader::bind() {
   glUseProgram(prog);
 
   glActiveTexture(GL_TEXTURE0);
+#if defined(ROXLU_GL_CORE3)
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
+#else
+  glBindTexture(GL_TEXTURE_RECTANGLE_ARB, tex);
+#endif
   glUniform1i(u_tex, 0);
 }
 

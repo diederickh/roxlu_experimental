@@ -1,3 +1,4 @@
+
 /*
 
   BMFRenderer
@@ -66,6 +67,7 @@ class BMFRenderer {
   size_t size();                                                          /* number of vertices */
   bool bind();                                                            /* bind the specific GL objects we use to render the text. only call this when you are using drawText(). Call bind() once per frame. */
   void flagChanged();                                                     /* when called we make sure that the generated vertices will be updated the next time you call update(); when vertices change this will be set for you. */
+  void onResize(int w, int h);                                            /* whenever the viewport changes make sure to call this function so we can recalculate the orth matrix */
  protected:
   void clear();                                                           /* deallocates everything and resets the complete state; */
 
@@ -110,11 +112,19 @@ BMFRenderer<T>::BMFRenderer(BMFLoader<T>& font)
   clear();
 
   glGenTextures(1, &tex);
+#if defined(ROXLU_GL_CORE3)
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
   glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+#else
+  glBindTexture(GL_TEXTURE_RECTANGLE_ARB, tex);
+  glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+#endif
   
   float* mm = model_matrix;
   memset(mm, 0x00, sizeof(float) * 16);
@@ -192,8 +202,13 @@ void BMFRenderer<T>::setup(int windowW, int windowH, size_t pageSize, BMFShader*
   }
 
   glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+#if defined(ROXLU_GL_CORE3)
   glBindTexture(GL_TEXTURE_RECTANGLE, tex);
   glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_R8, img.getWidth(), img.getHeight(), 0, GL_RED, GL_UNSIGNED_BYTE, img.getPixels());
+#else
+  glBindTexture(GL_TEXTURE_RECTANGLE_ARB, tex);
+  glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_R8, img.getWidth(), img.getHeight(), 0, GL_RED, GL_UNSIGNED_BYTE, img.getPixels());
+#endif
   is_setup = true;
 
   glGenBuffers(1, &vbo);
@@ -206,6 +221,12 @@ void BMFRenderer<T>::setup(int windowW, int windowH, size_t pageSize, BMFShader*
   shader->setup(vbo, tex);
 
 }
+
+template<class T>
+void BMFRenderer<T>::onResize(int winW, int winH) {
+  rx_ortho(0, winW, winH, 0.0, -500.0, 500.0, projection_matrix);
+}
+
 
 template<class T>
 size_t BMFRenderer<T>::allocate(int numPages) {

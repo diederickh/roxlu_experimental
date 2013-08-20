@@ -74,6 +74,7 @@ class BMFFont {
   void print();
   void getStringSize(std::string str, int& w, int& h);                                  /* get the width and max height for the given string */
   size_t getNumVertices();                                                              /* get the number of vertices used to render the text*/
+  void onResize(int w, int h);                                                         /* whenever the viewport resizes call this so we can update our projection matrix */
  
  public:
   BMFLoader<T> loader;
@@ -206,6 +207,10 @@ inline void BMFFont<T>::flagChanged() {
   return renderer.flagChanged();
 }
 
+template<class T>
+inline void BMFFont<T>::onResize(int winW, int winH) {
+  renderer.onResize(winW, winH);
+}
 
 
 #endif

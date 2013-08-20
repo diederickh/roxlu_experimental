@@ -527,7 +527,11 @@ static std::string rx_strip_dir(std::string path) {
   std::string filename;;
   path = rx_string_replace(path, '\\', '/');
   path = rx_string_replace(path, "//", "/");
+
   const size_t last_slash_idx = path.rfind('/');
+  if(last_slash_idx == std::string::npos) {
+    return path;
+  }
 
   if(std::string::npos != last_slash_idx) {
     filename = path.substr(last_slash_idx + 1, path.size());
